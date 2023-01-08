@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh_cn">
+  <head>
+    <meta charset="UTF-8" />
+    <title>game</title>
+    <link rel="stylesheet" href="./style/game.css" />
+  </head>
+  <body>
+    <main>
+        <div class="grid"></div>
+    </main>
+    <div class="right">
+        <div class="time">
+            <p class="timeTitle">Time</p>
+            <p class="timeCon">0h0min0s</p>
+        </div>
+        <button class="new">New Game</button>
+        <button class="back">Back</button>
+    </div>
+    <div class="mask">
+      <p class="content">You win!</p>
+      <div class="enterName">
+        <input type="text" placeholder="Please enter your name" />
+        <button class="confirm">Confirm</button>
+      </div>
+      <div class="maskBtn">
+        <button class="new">New Game</button>
+        <button class="back">Back</button>
+      </div>
+    </div>
+    <script src="./scripts/game/leaderBoard.js"></script>
+    <script src="./scripts/game/time.js"></script>
+    <script src="./scripts/game/tile.js"></script>
+    <script src="./scripts/game/grid.js"></script>
+    <script src="./scripts/game/listener.js"></script>
+    <script src="./scripts/game/language.js"></script>
+    <script src="./scripts/game/manager.js"></script>
+  </body>
+</html>

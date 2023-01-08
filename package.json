@@ -1,0 +1,24 @@
+{
+    "main": "index.html",
+    "name": "minesweeper",
+    "description": "A web game which is similar to the Minesweeper made by Microsoft.",
+    "version": "2.0.0",
+    "keywords": ["admin"],
+    "window": {
+      "title": "Minesweeper", 
+      "icon": "icon.ico",
+      "toolbar": false,
+      "frame": true,
+      "width": 1280,
+      "height": 760, 
+      "position": "center", 
+      "min_width": 900,
+      "min_height": 600,
+      "resizable":true
+  },
+    "webkit": {
+      "plugin": true,
+      "java":false, 
+      "page-cache":true 
+      }
+  }

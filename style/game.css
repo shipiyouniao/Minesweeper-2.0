@@ -1,0 +1,266 @@
+@charset "UTF-8";
+ul, li{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+body {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    font-family: "雅黑", "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+    background-color: #eeca98;
+}
+
+.right {
+    position: fixed;
+    width: 300px;
+    height: 100vh;
+    right: 0;
+    border-left: 2px solid black;
+    background-color: rgb(135, 133, 132, 0.4);
+}
+
+main {
+    height: 100vh;
+    width: calc(100vw - 300px);
+    margin: 0;
+    padding: 0;
+}
+
+.grid {
+    /* 简单9*9模式下方块宽度54px*9+间隔18px*8 = 630px */
+    /* 困难16*16模式下方块宽度30px*16+间隔10px*15 = 630px */
+    /* Extra30*16模式下高度同困难，宽度由js改为单个方块宽度30px*30+间隔10px*15 = 1050px */
+    width: 630px;
+    height: 630px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin: calc((100vh - 630px)/2);
+    margin-left: calc((100vw - 930px)/2);
+    position: relative;
+}
+
+.grid .tileLine {
+    display: flex;
+    justify-content: space-between;
+    width: 630px;
+    height: auto;
+}
+
+.grid .tileLine .tile {
+    display: flex;
+    width: 54px;
+    height: 54px;
+    border-radius: 8px;
+    background-color: #8f7a67;
+}
+
+.grid .tileLine .nonTriggered:active {
+    background: #6f5c4b;
+    color: black;
+}
+
+.grid .tileLine .marked:active {
+    background: #6f5c4b;
+    color: black;
+}
+
+.grid .tileLine .triggered {
+    background-color: #bca794;
+}
+
+.grid .tileLine .tile p{
+    display: none;
+    position: relative;
+    text-align: center;
+    font-family: Arial-Black;
+    font-weight: 700;
+    width: 54px;
+    height: 54px;
+    line-height: 54px;
+    font-size: 25px;
+    bottom: 27px;
+}
+
+.grid .tileLine .triggered.value-1 p{
+    display: block;
+    color: aqua;
+}
+
+.grid .tileLine .triggered.value-2 p{
+    display: block;
+    color: #bee952;
+}
+
+.grid .tileLine .triggered.value-3 p{
+    display: block;
+    color: chartreuse;
+}
+
+.grid .tileLine .triggered.value-4 p{
+    display: block;
+    color: rgb(233, 24, 233);
+}
+
+.grid .tileLine .triggered.value-5 p{
+    display: block;
+    color: red;
+}
+
+.grid .tileLine .triggered.value-6 p{
+    display: block;
+    color: purple;
+}
+
+.grid .tileLine .triggered.value-7 p{
+    display: block;
+    color: purple;
+}
+
+.grid .tileLine .triggered.value-8 p{
+    display: block;
+    color: purple;
+}
+
+.grid .tileLine .tile img{
+    display: none;
+    width: 54px;
+    height: 54px;
+}
+
+.grid .tileLine .triggered.mine p{
+    display: none;
+}
+
+.grid .tileLine .triggered.mine img{
+    display: block;
+}
+
+.grid .tileLine .marked img{
+    display: block;
+}
+
+button {
+    width: 120px;
+    height: 50px;
+    background: #8f7a67;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #ffffff;
+    text-align: center;
+    font-family: "雅黑", Arial-Black;
+    font-weight: 700;
+    line-height: 44px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #6f5c4b;
+}
+
+button:active {
+    background: #6f5c4b;
+    color: black;
+}
+
+.right .back {
+    margin-left: 90px;
+    position: fixed;
+    bottom: 100px;
+}
+
+.right .new {
+    margin-left: 90px;
+    position: fixed;
+    bottom: 200px;
+}
+
+.time {
+    margin-top: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    height: 200px;
+    font-family: "雅黑", Arial-Black;
+    font-weight: 700;
+}
+
+.time .timeTitle {
+    font-size: 40px;
+    display: block;
+    text-align: center;
+    line-height: 40px;
+    height: 40px;
+}
+
+.time .timeCon {
+    display: block;
+    font-size: 25px;
+    text-align: center;
+    line-height: 50px;
+    height: 50px;
+    width: 160px;
+    border: 1px solid black;
+    background-color: #ebe84d;
+    border-radius: 5px;
+}
+
+.mask {
+    display: none;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgb(118, 115, 115, 0.6);
+    z-index: 100;
+}
+
+.mask .content {
+    text-align: center;
+    display: block;
+    font-size: 98px;
+    line-height: 98px;
+    height: 98px;
+    top: 300px;
+    font-family: Arial-Black;
+    font-weight: 700;
+}
+
+.mask .enterName {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 600px;
+    margin-top: 100px;
+    margin-left: calc((100vw - 600px)/2);
+}
+
+.mask .enterName input {
+    width: 400px;
+    height: 50px;
+    padding-left: 20px;
+    font-size: 18px;
+    border: 2px solid black;
+    border-radius: 8px;
+    background-color: #bca794;
+    color: white;
+    font-weight: 700;
+    line-height: 50px;
+}
+
+.mask .enterName input:focus {
+    outline: none;
+}
+
+.mask .maskBtn {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 260px;
+    bottom: 200px;
+    margin-left: calc((100vw - 260px)/2);
+}

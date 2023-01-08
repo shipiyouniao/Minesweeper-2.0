@@ -1,0 +1,20 @@
+@charset "UTF-8";
+.hello {
+  position: absolute;
+  font-size: 98px;
+  display: block;
+  margin: -59px -300px;
+  text-align: center;
+  line-height: 98px;
+  height: 98px;
+  width: 600px;
+  top: 50%;
+  left: 50%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "雅黑", "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+  background-color: #eeca98;
+}

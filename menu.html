@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh_cn">
+  <head>
+    <meta charset="UTF-8" />
+    <title>menu</title>
+    <link rel="stylesheet" href="./style/menu.css" />
+  </head>
+  <body>
+    <p class="menu">Minesweeper</p>
+    <div class="selection menuList">
+      <button class="start">Start Game</button>
+      <button class="tutorial">Tutorial</button>
+      <button class="leaderBoard">LeaderBoard</button>
+      <button class="exit">Exit</button>
+    </div>
+    <div class="difficulty">
+      <p class="diffCon">Difficulty</p>
+      <div class="selection">
+        <button class="easy">Easy</button>
+        <button class="hard">Hard</button>
+      </div>
+      <button class="extra">Extra</button>
+      <button class="back">Back</button>
+    </div>
+    <div class="tutorialBlk">
+      <p class="tutoCon">Tutorial</p>
+      <div class="tutor">
+        <P>Click the left mouse button to crack open the square</P>
+        <p>If a mine is triggered, the game is over</p>
+        <p>If a number appears, it means that the number of mines with the corresponding number is around</p>
+        <p>If blank, there are no mines around</p>
+        <p>Right mouse click on the square that marks what you suspect is a mine</p>
+        <p>Right click again to unmark</p>
+        <p>Knock out all the non-mine squares to win the final victory</p>
+      </div>
+      <button class="back">Back</button>
+    </div>
+    <div class="leaderBlk">
+      <p class="leaderCon">LeaderBoard</p>
+      <p class="leaderDif">Easy</p>
+      <ul class="leadList"></ul>
+      <button class="next">Hard</button>
+      <button class="back">Back</button>
+    </div>
+    <footer>
+      <ul class="language"></ul>
+      <div class="langSltBtn">Lang</div>
+    </footer>
+    <script src="./scripts/menu/language.js"></script>
+    <script src="./scripts/menu/listener.js"></script>
+    <script src="./scripts/menu/leaderBoard.js"></script>
+    <script src="./scripts/menu/menu.js"></script>
+  </body>
+</html>
