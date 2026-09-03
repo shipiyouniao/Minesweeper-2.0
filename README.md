@@ -93,6 +93,8 @@ The [build A/B experiment](docs/build-ab.md) compares TypeScript 6 checking plus
 
 Use `npm run build:legacy`, `npm run build:native`, and `npm run bench:build -- --runs 6`. The default `npm run build` remains the native workflow. The experiment branch does not deploy to Pages.
 
+In the recorded six-run comparison, total build medians were **8.923 s → 3.980 s on Windows** and **2.859 s → 1.000 s in Ubuntu CI** (A → B). Both variants produced the same measured artifact sizes and passed the same 30 behavior tests. See the [full results and limitations](docs/build-ab.md#recorded-results--september-3-2026) for phase timings, raw data, and the exact measured commit.
+
 ## Exploring the compiler's limits
 
 The benchmark script starts with this application's actual type-checking workload, then generates modules containing object types, mapped types, discriminated event unions, and indexed accesses. A global aggregator combines the events into a large union and maps their discriminants into another type. A companion scenario checks the same modules without the global aggregator.

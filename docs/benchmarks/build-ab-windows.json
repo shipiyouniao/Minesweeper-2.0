@@ -1,0 +1,909 @@
+{
+  "generatedAt": "2026-09-03T09:38:43.870Z",
+  "commit": "74623c8c0cc0924107a3c44ece118e4a82a50436",
+  "dirty": false,
+  "inputs": {
+    "sha256": "ba2ff54fc96247488c41cfc14b707aa045a6a07675ad4b781620cbee0ba459e2",
+    "files": [
+      ".github/workflows/ab.yml",
+      ".github/workflows/pages.yml",
+      ".prettierignore",
+      ".prettierrc.json",
+      "index.html",
+      "package-lock.json",
+      "package.json",
+      "public/assets/quiet-board.png",
+      "public/favicon.svg",
+      "public/game.html",
+      "public/menu.html",
+      "scripts/bench-build.mjs",
+      "scripts/bench-types.mjs",
+      "scripts/build-variant.mjs",
+      "scripts/dev.mjs",
+      "scripts/lib/build-pipeline.mjs",
+      "scripts/verify-build.mjs",
+      "src/application/game-clock.ts",
+      "src/application/game-session.ts",
+      "src/game/engine.ts",
+      "src/i18n.ts",
+      "src/icons.ts",
+      "src/main.ts",
+      "src/platform/browser.ts",
+      "src/storage.ts",
+      "src/style.css",
+      "src/tokens.css",
+      "src/ui/app-view.ts",
+      "src/ui/board-view.ts",
+      "src/ui/input-controller.ts",
+      "src/ui/minesweeper-app.ts",
+      "src/ui/presentation.ts",
+      "src/ui/templates.ts",
+      "tests/engine.test.ts",
+      "tests/helpers.ts",
+      "tests/presentation.test.ts",
+      "tests/session.test.ts",
+      "tests/storage.test.ts",
+      "tsconfig.app.json",
+      "tsconfig.base.json",
+      "tsconfig.json",
+      "tsconfig.test.json",
+      "vite.config.ts"
+    ]
+  },
+  "runs": 6,
+  "environment": {
+    "platform": "win32",
+    "arch": "x64",
+    "release": "10.0.19045",
+    "node": "v22.18.0",
+    "cpu": "Intel(R) Core(TM)2 Duo CPU     T7700  @ 2.40GHz",
+    "logicalCpus": 4,
+    "memoryBytes": 25769197568,
+    "githubActions": false,
+    "runnerImage": null,
+    "runnerImageVersion": null
+  },
+  "versions": {
+    "legacy": "6.0.3",
+    "native": "7.0.2",
+    "vite": "8.2.2"
+  },
+  "samples": {
+    "legacy": [
+      {
+        "round": 1,
+        "position": 1,
+        "variant": "legacy",
+        "check": {
+          "milliseconds": 8047.790100000002,
+          "diagnostics": "Files:                         239\r\nLines of Library:            56773\r\nLines of Definitions:        84335\r\nLines of TypeScript:          3108\r\nLines of JavaScript:             0\r\nLines of JSON:                   0\r\nLines of Other:                  0\r\nIdentifiers:                116014\r\nSymbols:                    142290\r\nTypes:                       66922\r\nInstantiations:              67580\r\nMemory used:               229091K\r\nAssignability cache size:    24336\r\nIdentity cache size:           158\r\nSubtype cache size:            206\r\nStrict subtype cache size:      41\r\nI/O Read time:               0.14s\r\nParse time:                  1.13s\r\nResolveModule time:          0.19s\r\nResolveTypeReference time:   0.02s\r\nProgram time:                1.61s\r\nBind time:                   0.87s\r\nCheck time:                  5.17s\r\nprintTime time:              0.00s\r\nEmit time:                   0.00s\r\nTotal time:                  7.64s\r\n"
+        },
+        "emit": null,
+        "bundle": {
+          "milliseconds": 1072.3273000000008,
+          "diagnostics": "vite v8.2.2 building client environment for ab-legacy...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/legacy/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/legacy/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/legacy/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 477ms\n"
+        },
+        "totalMs": 9120.153199999999,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 2,
+        "position": 2,
+        "variant": "legacy",
+        "check": {
+          "milliseconds": 8475.432599999996,
+          "diagnostics": "Files:                         239\r\nLines of Library:            56773\r\nLines of Definitions:        84335\r\nLines of TypeScript:          3108\r\nLines of JavaScript:             0\r\nLines of JSON:                   0\r\nLines of Other:                  0\r\nIdentifiers:                116014\r\nSymbols:                    142290\r\nTypes:                       66922\r\nInstantiations:              67580\r\nMemory used:               220984K\r\nAssignability cache size:    24336\r\nIdentity cache size:           158\r\nSubtype cache size:            206\r\nStrict subtype cache size:      41\r\nI/O Read time:               0.12s\r\nParse time:                  1.03s\r\nResolveModule time:          0.13s\r\nResolveTypeReference time:   0.02s\r\nProgram time:                1.46s\r\nBind time:                   0.43s\r\nCheck time:                  6.27s\r\nprintTime time:              0.00s\r\nEmit time:                   0.00s\r\nTotal time:                  8.16s\r\n"
+        },
+        "emit": null,
+        "bundle": {
+          "milliseconds": 1067.4165999999968,
+          "diagnostics": "vite v8.2.2 building client environment for ab-legacy...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/legacy/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/legacy/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/legacy/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 363ms\n"
+        },
+        "totalMs": 9542.8727,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 3,
+        "position": 1,
+        "variant": "legacy",
+        "check": {
+          "milliseconds": 11298.1627,
+          "diagnostics": "Files:                         239\r\nLines of Library:            56773\r\nLines of Definitions:        84335\r\nLines of TypeScript:          3108\r\nLines of JavaScript:             0\r\nLines of JSON:                   0\r\nLines of Other:                  0\r\nIdentifiers:                116014\r\nSymbols:                    142290\r\nTypes:                       66922\r\nInstantiations:              67580\r\nMemory used:               219165K\r\nAssignability cache size:    24336\r\nIdentity cache size:           158\r\nSubtype cache size:            206\r\nStrict subtype cache size:      41\r\nI/O Read time:               0.14s\r\nParse time:                  0.99s\r\nResolveModule time:          0.16s\r\nResolveTypeReference time:   0.02s\r\nProgram time:                1.43s\r\nBind time:                   0.91s\r\nCheck time:                  8.51s\r\nprintTime time:              0.00s\r\nEmit time:                   0.00s\r\nTotal time:                 10.85s\r\n"
+        },
+        "emit": null,
+        "bundle": {
+          "milliseconds": 1599.8542000000016,
+          "diagnostics": "vite v8.2.2 building client environment for ab-legacy...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/legacy/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/legacy/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/legacy/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 463ms\n"
+        },
+        "totalMs": 12898.039000000004,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 4,
+        "position": 2,
+        "variant": "legacy",
+        "check": {
+          "milliseconds": 7743.593699999998,
+          "diagnostics": "Files:                         239\r\nLines of Library:            56773\r\nLines of Definitions:        84335\r\nLines of TypeScript:          3108\r\nLines of JavaScript:             0\r\nLines of JSON:                   0\r\nLines of Other:                  0\r\nIdentifiers:                116014\r\nSymbols:                    142290\r\nTypes:                       66922\r\nInstantiations:              67580\r\nMemory used:               225761K\r\nAssignability cache size:    24336\r\nIdentity cache size:           158\r\nSubtype cache size:            206\r\nStrict subtype cache size:      41\r\nI/O Read time:               0.14s\r\nParse time:                  0.94s\r\nResolveModule time:          0.16s\r\nResolveTypeReference time:   0.01s\r\nProgram time:                1.33s\r\nBind time:                   0.59s\r\nCheck time:                  5.47s\r\nprintTime time:              0.00s\r\nEmit time:                   0.00s\r\nTotal time:                  7.40s\r\n"
+        },
+        "emit": null,
+        "bundle": {
+          "milliseconds": 717.5973999999987,
+          "diagnostics": "vite v8.2.2 building client environment for ab-legacy...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/legacy/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/legacy/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/legacy/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 251ms\n"
+        },
+        "totalMs": 8461.297699999996,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 5,
+        "position": 1,
+        "variant": "legacy",
+        "check": {
+          "milliseconds": 6264.181000000011,
+          "diagnostics": "Files:                         239\r\nLines of Library:            56773\r\nLines of Definitions:        84335\r\nLines of TypeScript:          3108\r\nLines of JavaScript:             0\r\nLines of JSON:                   0\r\nLines of Other:                  0\r\nIdentifiers:                116014\r\nSymbols:                    142290\r\nTypes:                       66922\r\nInstantiations:              67580\r\nMemory used:               226161K\r\nAssignability cache size:    24336\r\nIdentity cache size:           158\r\nSubtype cache size:            206\r\nStrict subtype cache size:      41\r\nI/O Read time:               0.10s\r\nParse time:                  0.76s\r\nResolveModule time:          0.12s\r\nResolveTypeReference time:   0.01s\r\nProgram time:                1.07s\r\nBind time:                   0.45s\r\nCheck time:                  4.47s\r\nprintTime time:              0.00s\r\nEmit time:                   0.00s\r\nTotal time:                  5.99s\r\n"
+        },
+        "emit": null,
+        "bundle": {
+          "milliseconds": 629.4155000000028,
+          "diagnostics": "vite v8.2.2 building client environment for ab-legacy...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/legacy/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/legacy/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/legacy/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 225ms\n"
+        },
+        "totalMs": 6893.606699999989,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 6,
+        "position": 2,
+        "variant": "legacy",
+        "check": {
+          "milliseconds": 7829.986600000004,
+          "diagnostics": "Files:                         239\r\nLines of Library:            56773\r\nLines of Definitions:        84335\r\nLines of TypeScript:          3108\r\nLines of JavaScript:             0\r\nLines of JSON:                   0\r\nLines of Other:                  0\r\nIdentifiers:                116014\r\nSymbols:                    142290\r\nTypes:                       66922\r\nInstantiations:              67580\r\nMemory used:               227675K\r\nAssignability cache size:    24336\r\nIdentity cache size:           158\r\nSubtype cache size:            206\r\nStrict subtype cache size:      41\r\nI/O Read time:               0.11s\r\nParse time:                  0.87s\r\nResolveModule time:          0.13s\r\nResolveTypeReference time:   0.01s\r\nProgram time:                1.22s\r\nBind time:                   0.56s\r\nCheck time:                  5.74s\r\nprintTime time:              0.00s\r\nEmit time:                   0.00s\r\nTotal time:                  7.53s\r\n"
+        },
+        "emit": null,
+        "bundle": {
+          "milliseconds": 895.3420000000042,
+          "diagnostics": "vite v8.2.2 building client environment for ab-legacy...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/legacy/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/legacy/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/legacy/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 361ms\n"
+        },
+        "totalMs": 8725.36619999999,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      }
+    ],
+    "native": [
+      {
+        "round": 1,
+        "position": 2,
+        "variant": "native",
+        "check": {
+          "milliseconds": 1736.9926000000014,
+          "diagnostics": "Files:              239\nLines:           144229\nIdentifiers:     115975\nSymbols:         156948\nTypes:            87849\nInstantiations:   79397\nMemory used:    156327K\nMemory allocs:   783639\nConfig time:     0.002s\nParse time:      0.294s\nBind time:       0.092s\nCheck time:      0.918s\nTotal time:      1.326s\n"
+        },
+        "emit": {
+          "milliseconds": 964.5655000000006,
+          "diagnostics": "Files:              83\nLines:           59947\nIdentifiers:     52471\nSymbols:         62432\nTypes:           38851\nInstantiations:  31200\nMemory used:    69071K\nMemory allocs:  383648\nConfig time:    0.002s\nParse time:     0.068s\nBind time:      0.020s\nCheck time:     0.557s\nEmit time:      0.063s\nTotal time:     0.721s\n"
+        },
+        "bundle": {
+          "milliseconds": 718.4002,
+          "diagnostics": "vite v8.2.2 building client environment for ab-native...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/native/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/native/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/native/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 253ms\n"
+        },
+        "totalMs": 3420.0086999999985,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 2,
+        "position": 1,
+        "variant": "native",
+        "check": {
+          "milliseconds": 1908.8013000000028,
+          "diagnostics": "Files:              239\nLines:           144229\nIdentifiers:     115975\nSymbols:         156948\nTypes:            87849\nInstantiations:   79397\nMemory used:    156360K\nMemory allocs:   783843\nConfig time:     0.002s\nParse time:      0.133s\nBind time:       0.031s\nCheck time:      1.237s\nTotal time:      1.408s\n"
+        },
+        "emit": {
+          "milliseconds": 3873.1329000000005,
+          "diagnostics": "Files:              83\nLines:           59947\nIdentifiers:     52471\nSymbols:         62432\nTypes:           38851\nInstantiations:  31200\nMemory used:    69048K\nMemory allocs:  383586\nConfig time:    0.004s\nParse time:     0.176s\nBind time:      0.039s\nCheck time:     1.292s\nEmit time:      1.642s\nTotal time:     3.175s\n"
+        },
+        "bundle": {
+          "milliseconds": 1196.848399999999,
+          "diagnostics": "vite v8.2.2 building client environment for ab-native...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/native/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/native/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/native/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 523ms\n"
+        },
+        "totalMs": 6978.8433,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 3,
+        "position": 2,
+        "variant": "native",
+        "check": {
+          "milliseconds": 3357.2572,
+          "diagnostics": "Files:              239\nLines:           144229\nIdentifiers:     115975\nSymbols:         156948\nTypes:            87849\nInstantiations:   79397\nMemory used:    156326K\nMemory allocs:   783855\nConfig time:     0.002s\nParse time:      0.375s\nBind time:       0.051s\nCheck time:      2.450s\nTotal time:      2.890s\n"
+        },
+        "emit": {
+          "milliseconds": 1428.5574000000051,
+          "diagnostics": "Files:              83\nLines:           59947\nIdentifiers:     52471\nSymbols:         62432\nTypes:           38851\nInstantiations:  31200\nMemory used:    69030K\nMemory allocs:  383584\nConfig time:    0.003s\nParse time:     0.117s\nBind time:      0.026s\nCheck time:     0.680s\nEmit time:      0.179s\nTotal time:     1.009s\n"
+        },
+        "bundle": {
+          "milliseconds": 1756.0626000000047,
+          "diagnostics": "vite v8.2.2 building client environment for ab-native...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/native/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/native/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/native/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 598ms\n"
+        },
+        "totalMs": 6541.911499999995,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 4,
+        "position": 1,
+        "variant": "native",
+        "check": {
+          "milliseconds": 2456.9631999999983,
+          "diagnostics": "Files:              239\nLines:           144229\nIdentifiers:     115975\nSymbols:         156948\nTypes:            87849\nInstantiations:   79397\nMemory used:    156450K\nMemory allocs:   784705\nConfig time:     0.002s\nParse time:      0.326s\nBind time:       0.053s\nCheck time:      1.467s\nTotal time:      1.891s\n"
+        },
+        "emit": {
+          "milliseconds": 1130.9248999999982,
+          "diagnostics": "Files:              83\nLines:           59947\nIdentifiers:     52471\nSymbols:         62432\nTypes:           38851\nInstantiations:  31200\nMemory used:    69119K\nMemory allocs:  383974\nConfig time:    0.003s\nParse time:     0.112s\nBind time:      0.064s\nCheck time:     0.631s\nEmit time:      0.051s\nTotal time:     0.865s\n"
+        },
+        "bundle": {
+          "milliseconds": 951.3315999999977,
+          "diagnostics": "vite v8.2.2 building client environment for ab-native...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/native/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/native/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/native/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 464ms\n"
+        },
+        "totalMs": 4539.255800000006,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 5,
+        "position": 2,
+        "variant": "native",
+        "check": {
+          "milliseconds": 1196.9485000000132,
+          "diagnostics": "Files:              239\nLines:           144229\nIdentifiers:     115975\nSymbols:         156948\nTypes:            87849\nInstantiations:   79397\nMemory used:    156388K\nMemory allocs:   783985\nConfig time:     0.002s\nParse time:      0.138s\nBind time:       0.055s\nCheck time:      0.645s\nEmit time:       0.001s\nTotal time:      0.843s\n"
+        },
+        "emit": {
+          "milliseconds": 978.2718000000023,
+          "diagnostics": "Files:              83\nLines:           59947\nIdentifiers:     52471\nSymbols:         62432\nTypes:           38851\nInstantiations:  31200\nMemory used:    68982K\nMemory allocs:  383517\nConfig time:    0.006s\nParse time:     0.064s\nBind time:      0.022s\nCheck time:     0.619s\nEmit time:      0.052s\nTotal time:     0.770s\n"
+        },
+        "bundle": {
+          "milliseconds": 624.5371999999916,
+          "diagnostics": "vite v8.2.2 building client environment for ab-native...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/native/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/native/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/native/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 219ms\n"
+        },
+        "totalMs": 2799.794299999994,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      },
+      {
+        "round": 6,
+        "position": 1,
+        "variant": "native",
+        "check": {
+          "milliseconds": 1270.144100000005,
+          "diagnostics": "Files:              239\nLines:           144229\nIdentifiers:     115975\nSymbols:         156948\nTypes:            87849\nInstantiations:   79397\nMemory used:    156351K\nMemory allocs:   784067\nConfig time:     0.002s\nParse time:      0.103s\nBind time:       0.051s\nCheck time:      0.818s\nTotal time:      0.980s\n"
+        },
+        "emit": {
+          "milliseconds": 773.9323999999906,
+          "diagnostics": "Files:              83\nLines:           59947\nIdentifiers:     52471\nSymbols:         62432\nTypes:           38851\nInstantiations:  31200\nMemory used:    69040K\nMemory allocs:  383651\nConfig time:    0.002s\nParse time:     0.061s\nBind time:      0.022s\nCheck time:     0.407s\nEmit time:      0.032s\nTotal time:     0.532s\n"
+        },
+        "bundle": {
+          "milliseconds": 689.1921000000002,
+          "diagnostics": "vite v8.2.2 building client environment for ab-native...\ntransforming...\n✓ 18 modules transformed.\nrendering chunks...\ncomputing gzip size...\n.bench/ab/native/dist/index.html                  0.93 kB │ gzip:  0.56 kB\n.bench/ab/native/dist/assets/index-ip6fe7ZW.css  15.57 kB │ gzip:  4.41 kB\n.bench/ab/native/dist/assets/index-LYSjkdWZ.js   40.85 kB │ gzip: 14.94 kB\n\n✓ built in 266ms\n"
+        },
+        "totalMs": 2733.2837,
+        "artifacts": {
+          "files": [
+            {
+              "path": "assets/index-LYSjkdWZ.js",
+              "bytes": 40856,
+              "gzipBytes": 14899
+            },
+            {
+              "path": "assets/index-ip6fe7ZW.css",
+              "bytes": 15575,
+              "gzipBytes": 4371
+            },
+            {
+              "path": "assets/quiet-board.png",
+              "bytes": 1049341,
+              "gzipBytes": null
+            },
+            {
+              "path": "favicon.svg",
+              "bytes": 402,
+              "gzipBytes": null
+            },
+            {
+              "path": "game.html",
+              "bytes": 241,
+              "gzipBytes": null
+            },
+            {
+              "path": "index.html",
+              "bytes": 933,
+              "gzipBytes": null
+            },
+            {
+              "path": "menu.html",
+              "bytes": 241,
+              "gzipBytes": null
+            }
+          ],
+          "totalBytes": 1107589,
+          "javascriptBytes": 40856,
+          "javascriptGzipBytes": 14899,
+          "cssBytes": 15575,
+          "cssGzipBytes": 4371
+        }
+      }
+    ]
+  },
+  "summary": {
+    "legacy": {
+      "checkMs": 7938.888350000003,
+      "emitMs": 0,
+      "bundleMs": 981.3793000000005,
+      "totalMs": 8922.759699999995,
+      "totalMinMs": 6893.606699999989,
+      "totalMaxMs": 12898.039000000004,
+      "artifacts": {
+        "files": [
+          {
+            "path": "assets/index-LYSjkdWZ.js",
+            "bytes": 40856,
+            "gzipBytes": 14899
+          },
+          {
+            "path": "assets/index-ip6fe7ZW.css",
+            "bytes": 15575,
+            "gzipBytes": 4371
+          },
+          {
+            "path": "assets/quiet-board.png",
+            "bytes": 1049341,
+            "gzipBytes": null
+          },
+          {
+            "path": "favicon.svg",
+            "bytes": 402,
+            "gzipBytes": null
+          },
+          {
+            "path": "game.html",
+            "bytes": 241,
+            "gzipBytes": null
+          },
+          {
+            "path": "index.html",
+            "bytes": 933,
+            "gzipBytes": null
+          },
+          {
+            "path": "menu.html",
+            "bytes": 241,
+            "gzipBytes": null
+          }
+        ],
+        "totalBytes": 1107589,
+        "javascriptBytes": 40856,
+        "javascriptGzipBytes": 14899,
+        "cssBytes": 15575,
+        "cssGzipBytes": 4371
+      }
+    },
+    "native": {
+      "checkMs": 1822.896950000002,
+      "emitMs": 1054.5983500000002,
+      "bundleMs": 834.8658999999989,
+      "totalMs": 3979.6322500000024,
+      "totalMinMs": 2733.2837,
+      "totalMaxMs": 6978.8433,
+      "artifacts": {
+        "files": [
+          {
+            "path": "assets/index-LYSjkdWZ.js",
+            "bytes": 40856,
+            "gzipBytes": 14899
+          },
+          {
+            "path": "assets/index-ip6fe7ZW.css",
+            "bytes": 15575,
+            "gzipBytes": 4371
+          },
+          {
+            "path": "assets/quiet-board.png",
+            "bytes": 1049341,
+            "gzipBytes": null
+          },
+          {
+            "path": "favicon.svg",
+            "bytes": 402,
+            "gzipBytes": null
+          },
+          {
+            "path": "game.html",
+            "bytes": 241,
+            "gzipBytes": null
+          },
+          {
+            "path": "index.html",
+            "bytes": 933,
+            "gzipBytes": null
+          },
+          {
+            "path": "menu.html",
+            "bytes": 241,
+            "gzipBytes": null
+          }
+        ],
+        "totalBytes": 1107589,
+        "javascriptBytes": 40856,
+        "javascriptGzipBytes": 14899,
+        "cssBytes": 15575,
+        "cssGzipBytes": 4371
+      }
+    }
+  }
+}

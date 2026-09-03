@@ -55,7 +55,47 @@ Phase medians need not sum to the median of total times. Artifact gzip sizes use
 
 The Pages workflow only deploys `refs/heads/main`, including for manual dispatch. The experiment workflow has read-only repository permissions and no deployment job.
 
-Measured local and CI results will be recorded here after the branch workflow completes, together with the exact measured commit and build-input fingerprint.
+## Recorded results — September 3, 2026
+
+Both measurements used commit [`74623c8`](https://github.com/shipiyouniao/Minesweeper-2.0/commit/74623c8c0cc0924107a3c44ece118e4a82a50436) with a clean worktree. Their normalized build-input fingerprint is identical:
+
+```text
+ba2ff54fc96247488c41cfc14b707aa045a6a07675ad4b781620cbee0ba459e2
+```
+
+The records below remain pinned to that measured commit. Later documentation-only commits do not change the measured workload. Node.js 22.18.0, TS6 6.0.3, TS7 7.0.2, and Vite 8.2.2 were used in both environments.
+
+| Environment                          | Variant               | Check median | Emit median | Vite median | Total median |  Total min–max |
+| ------------------------------------ | --------------------- | -----------: | ----------: | ----------: | -----------: | -------------: |
+| Windows x64, interactive workstation | A: TS6 + Vite source  |      7.939 s |           — |     0.981 s |  **8.923 s** | 6.894–12.898 s |
+| Windows x64, interactive workstation | B: TS7 emit + Vite JS |      1.823 s |     1.055 s |     0.835 s |  **3.980 s** |  2.733–6.979 s |
+| Ubuntu x64, GitHub Actions           | A: TS6 + Vite source  |      2.640 s |           — |     0.206 s |  **2.859 s** |  2.828–2.970 s |
+| Ubuntu x64, GitHub Actions           | B: TS7 emit + Vite JS |      0.495 s |     0.301 s |     0.204 s |  **1.000 s** |  0.991–1.024 s |
+
+There are six samples per row. The local machine had its development/preview servers stopped but remained an interactive workstation, and its results show substantial variability. The CI job measured both variants serially on one four-vCPU runner. Its reported processor model and runner image are preserved in the JSON; these are machine-reported metadata, not a promise of dedicated physical hardware.
+
+For this workload, B used **55.4% less total time locally** and **65.0% less total time in CI**, calculated from the ratios of total medians. In CI, Vite's own median bundle time was essentially unchanged (0.206 versus 0.204 seconds). The reduction came from the checking/emission stages: native checking saved more time than the additional native emission cost. This is an observation about these workflows and this source tree, not a general speedup guarantee.
+
+### Output size and behavior
+
+Both variants produced the same measured sizes in both environments:
+
+| Artifact measure                                      |               A |               B |
+| ----------------------------------------------------- | --------------: | --------------: |
+| JavaScript                                            |    40,856 bytes |    40,856 bytes |
+| JavaScript, gzip                                      |    14,899 bytes |    14,899 bytes |
+| CSS                                                   |    15,575 bytes |    15,575 bytes |
+| Complete site, including artwork and legacy redirects | 1,107,589 bytes | 1,107,589 bytes |
+
+All 30 behavior tests passed when compiled with each compiler, locally and in CI. Both local production artifacts were exercised in a browser through first reveal, pause, custom-board creation, and a completed win. The native artifact also restored paused progress after reload. No browser errors were observed during these checks. These checks establish the exercised behavior; they do not constitute a browser-runtime speed benchmark.
+
+### Evidence and reproduction records
+
+- Windows: [readable report](benchmarks/build-ab-windows.md), [all raw samples and diagnostics](benchmarks/build-ab-windows.json).
+- Ubuntu CI: [readable report](benchmarks/build-ab-linux-ci.md), [all raw samples and diagnostics](benchmarks/build-ab-linux-ci.json).
+- [Successful measured CI run](https://github.com/shipiyouniao/Minesweeper-2.0/actions/runs/33740190189), including its downloadable reports and both production sites.
+
+The JSON contains every phase sample, so the medians and ranges can be recalculated without rerunning the experiment.
 
 ## Interpretation limits
 
