@@ -96,15 +96,46 @@ test('old language and difficulty links map to the new edition', () => {
 test('preferences expose normalized fields and preserve the existing serialized keys', () => {
   const storage = new MemoryStorage()
   const repo = new Repository(storage)
-  assert.deepEqual(repo.preferences(), { language: null, difficulty: null, name: 'Player' })
+  assert.deepEqual(repo.preferences(), {
+    language: null,
+    difficulty: null,
+    name: 'Player',
+    sound: true,
+  })
   repo.setPreference({ key: 'language', value: 'ja' })
   repo.setPreference({ key: 'difficulty', value: 'expert' })
   repo.setPreference({ key: 'name', value: '  Player Two  ' })
-  assert.deepEqual(repo.preferences(), { language: 'ja', difficulty: 'expert', name: 'Player Two' })
+  assert.deepEqual(repo.preferences(), {
+    language: 'ja',
+    difficulty: 'expert',
+    name: 'Player Two',
+    sound: true,
+  })
   assert.equal(storage.getItem('minesweeper.v3.preference.language'), '"ja"')
 
   storage.setItem('minesweeper.v3.preference.language', '{"language":"en"}')
   storage.setItem('minesweeper.v3.preference.difficulty', '"invalid"')
   storage.setItem('minesweeper.v3.preference.name', 'false')
-  assert.deepEqual(repo.preferences(), { language: null, difficulty: null, name: 'Player' })
+  assert.deepEqual(repo.preferences(), {
+    language: null,
+    difficulty: null,
+    name: 'Player',
+    sound: true,
+  })
+})
+
+test('muting persists as a boolean, while missing or corrupt audio preferences use the default', () => {
+  const storage = new MemoryStorage()
+  const repo = new Repository(storage)
+  repo.setPreference({ key: 'sound', value: false })
+  assert.equal(new Repository(storage).preferences().sound, false)
+  assert.equal(storage.getItem('minesweeper.v3.preference.sound'), 'false')
+
+  for (const invalid of ['"false"', '0', '{}', 'null', '{invalid']) {
+    storage.setItem('minesweeper.v3.preference.sound', invalid)
+    assert.equal(repo.preferences().sound, true)
+  }
+
+  repo.setPreference({ key: 'sound', value: true })
+  assert.equal(repo.preferences().sound, true)
 })

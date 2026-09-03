@@ -16,6 +16,10 @@ flowchart LR
     App --> View[AppView + BoardView]
     View --> Templates[Pure templates and presentation helpers]
     View --> DOM[Browser DOM]
+    View --> Menu[LanguageMenu]
+    App --> Cues[Pure cue selection]
+    App --> Sound[SoundEffects port]
+    Sound --> Audio[BrowserSoundEffects]
 ```
 
 | Module                            | Ownership and boundary                                                                                                                                                                                |
@@ -51,6 +55,10 @@ UI input follows the same direction: `input-parser.ts` decodes strings and `Form
 The engine receives its seed as data. It never reads browser randomness, clocks, the DOM, or storage. Local mutation inside a shuffle or flood-fill queue does not escape the function; previously returned game values remain unchanged.
 
 ## Lifecycle rules
+
+`LanguageMenu` owns the flyout's radio selection, roving focus, Escape handling, and outside-pointer/focus dismissal. Its abortable listeners are released before the shell is replaced. Locale resolution is a pure function: supported URL override, saved explicit preference, primary browser locale, then English. Selecting a locale updates the URL and storage before rebuilding the labels and restoring focus to the new trigger.
+
+Audio contracts live in `src/types/audio.d.ts`. `cueForMove` and `notesForCue` are pure functions; game rules do not know about audio. `BrowserSoundEffects` implements the injected `SoundEffects` port and owns lazy activation, bounded polyphony, pending-resume cancellation, and context teardown. `scheduleTone` owns each oscillator/gain envelope and also accepts an offline context for rendering verification. Touch input unlocks audio on pointer-down so the delayed long-press action can produce a cue. A rejected move is silent; a successful action produces one cue regardless of its flood-fill size, and final outcomes take priority.
 
 - Flags before the first reveal do not generate the board or start time.
 - Restored games begin paused so loading a page cannot add time before the player resumes.

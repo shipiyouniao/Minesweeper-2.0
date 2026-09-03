@@ -147,6 +147,7 @@ The repository is a starting point for further TS7 experiments. Any broader comp
 - A safe first click and safe neighboring cells, automatic blank-region expansion, flags, and number chording.
 - Pause, automatic pause when leaving the page, saved progress per difficulty, and local top-10 records.
 - A static website that runs without an account, application server, or NW.js installation.
+- A compact, keyboard-accessible language flyout and optional, original synthesized interaction sounds.
 
 | Action                  | Mouse                   | Touch / keyboard                      |
 | ----------------------- | ----------------------- | ------------------------------------- |
@@ -160,6 +161,14 @@ The repository is a starting point for further TS7 experiments. Any broader comp
 Chording opens neighboring cells when the adjacent flag count matches the number. Incorrect flags can still cause a loss. Wide boards scroll horizontally on small screens. Custom boards are for practice and do not enter the preset-difficulty rankings.
 
 Progress and records are stored in the current browser for the current site origin; they do not synchronize across devices. The game remains playable when storage is unavailable. Legacy `MinesweeperRank` records can migrate on the same origin, but unfinished legacy boards cannot. Old `game.html` and `menu.html` URLs, including supported language and difficulty parameters, redirect to the new application.
+
+### Language and sound
+
+On first visit, the primary browser language selects Chinese (`zh-*`) or Japanese (`ja-*`); every other language falls back to English. A saved manual choice takes precedence over the browser, and a supported `?lang=zh`, `?lang=en`, or `?lang=ja` link overrides both. Choosing a language updates that link parameter and saves the preference, so an old URL cannot undo the new choice on reload. Unsupported link values fall through to the saved choice or browser language.
+
+The language flyout takes visual inspiration from [VitePress's translation control](https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/components/VPNavBarTranslations.vue), implemented here without Vue or another dependency. Click or press Enter/Space to open it, use arrows or Home/End to choose an option, and press Enter/Space to select. Escape returns focus to the trigger; Tab and outside clicks dismiss the menu.
+
+The speaker button beside the game title toggles sound and remembers the setting. Short Web Audio sine envelopes provide reveal, flag, unflag, button, win, and loss cues. These are original procedural sounds, not recordings or AI-generated audio files, and require no downloads. Sound is enabled by default but the audio context is created only after a user gesture; loading the page is silent. Muting, backgrounding, and hot-reload teardown cancel pending playback. A flood reveal produces one cue, and unsupported or blocked audio does not prevent play.
 
 ## Mine placement: shuffle positions, then select
 

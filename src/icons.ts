@@ -1,6 +1,9 @@
 import type { Icon, IconPaths } from './types/icons.js'
 
 const paths: IconPaths = {
+  chevron: '<path d="m8 10 4 4 4-4"/>',
+  volume: '<path d="M11 4 6 8H3v8h3l5 4V4Zm4 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
+  volumeOff: '<path d="M11 4 6 8H3v8h3l5 4V4Zm5 5 6 6m0-6-6 6"/>',
   flag: '<path d="M6 21V4m0 0c4-4 8 4 13 0v10c-5 4-9-4-13 0"/><path d="M3 21h7"/>',
   mine: '<circle cx="12" cy="12" r="5"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/>',
   reset: '<path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/>',

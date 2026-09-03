@@ -1,5 +1,6 @@
 import { GameSession } from './application/game-session.js'
-import { languageOf } from './i18n.js'
+import { resolveLanguage } from './i18n.js'
+import { BrowserSoundEffects } from './platform/browser-sound-effects.js'
 import { BrowserStorage, browserRuntime } from './platform/browser.js'
 import { Repository } from './storage.js'
 import { difficultyOf } from './game/difficulty.js'
@@ -18,11 +19,21 @@ function bootstrap(): MinesweeperApp {
 
   const params = new URLSearchParams(location.search)
   const preferences = repository.preferences()
-  const language = languageOf(params.get('lang') ?? preferences.language ?? navigator.language)
+  const language = resolveLanguage(
+    params.get('lang'),
+    preferences.language,
+    navigator.languages[0] ?? navigator.language,
+  )
   const mode = difficultyOf(params.get('mode') ?? preferences.difficulty)
   const session = new GameSession(repository, browserRuntime, mode)
 
-  return new MinesweeperApp(root, session, repository, language)
+  return new MinesweeperApp(
+    root,
+    session,
+    repository,
+    language,
+    new BrowserSoundEffects(preferences.sound),
+  )
 }
 
 const app = bootstrap()

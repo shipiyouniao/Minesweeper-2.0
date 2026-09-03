@@ -6,6 +6,7 @@ import { stats } from '../game/engine.js'
 import { translations } from '../i18n.js'
 import { icon } from '../icons.js'
 import { BoardView } from './board-view.js'
+import { LanguageMenu } from './language-menu.js'
 import { formatTime, statusText } from './presentation.js'
 import { appTemplate } from './templates.js'
 
@@ -14,11 +15,18 @@ export class AppView {
   private readonly root: HTMLElement
   private readonly onDialogClose: () => void
   private board: BoardView | null = null
+  private menu: LanguageMenu | null = null
+  private readonly onLanguageChange: (language: Language) => void
 
   /** Receive the mount point and notify the controller when a native dialog closes. */
-  constructor(root: HTMLElement, onDialogClose: () => void) {
+  constructor(
+    root: HTMLElement,
+    onDialogClose: () => void,
+    onLanguageChange: (language: Language) => void,
+  ) {
     this.root = root
     this.onDialogClose = onDialogClose
+    this.onLanguageChange = onLanguageChange
   }
 
   /** Expose the browser's actual dialog state for keyboard input routing. */
@@ -33,7 +41,9 @@ export class AppView {
 
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
     document.title = `${messages.title} · Minesweeper 2.0`
+    this.menu?.dispose()
     this.root.innerHTML = appTemplate(state, language, flagMode)
+    this.menu = new LanguageMenu(this.element('.language-picker'), this.onLanguageChange)
     this.board = new BoardView(this.element('#board'), state.game.config, focusIndex)
 
     this.element<HTMLDialogElement>('#dialog').addEventListener('close', this.onDialogClose)
@@ -82,8 +92,28 @@ export class AppView {
     this.element('#storage-note').hidden = storageAvailable
   }
 
+  /** Keep the toggle's stable accessible name separate from its localized status. */
+  renderSound(enabled: boolean, language: Language): void {
+    const button = this.element<HTMLButtonElement>('#sound-button')
+    const messages = translations[language]
+    button.innerHTML = icon(enabled ? 'volume' : 'volumeOff')
+    button.setAttribute('aria-pressed', String(enabled))
+    button.title = enabled ? messages.soundOn : messages.soundOff
+  }
+
+  /** Return focus after a language choice rebuilds the translated shell. */
+  focusLanguage(): void {
+    this.menu?.focus()
+  }
+
+  /** Dismiss transient navigation when backgrounding or opening a modal. */
+  closeLanguage(): void {
+    this.menu?.close()
+  }
+
   /** Replace modal content, preserving an already-open dialog and its focus scope. */
   showDialog(content: string): void {
+    this.closeLanguage()
     const dialog = this.element<HTMLDialogElement>('#dialog')
     this.element('#dialog-content').innerHTML = content
 
@@ -114,6 +144,8 @@ export class AppView {
 
   /** Release the mounted DOM when the application is disposed or hot-reloaded. */
   dispose(): void {
+    this.menu?.dispose()
+    this.menu = null
     this.board = null
     this.root.replaceChildren()
   }

@@ -2,7 +2,7 @@ import { PRESETS, restore, snapshot } from './game/engine.js'
 import { RANKED_DIFFICULTIES, parseDifficulty } from './game/difficulty.js'
 import { parseLanguage } from './i18n.js'
 import { decodeLegacyScores, decodeScores, decodeSession } from './persistence/decoders.js'
-import { decodeString } from './persistence/json-reader.js'
+import { decodeBoolean, decodeString } from './persistence/json-reader.js'
 import type { Difficulty, Game } from './types/game.js'
 import type {
   GameRepository,
@@ -43,6 +43,7 @@ export class Repository implements GameRepository {
       language: parseLanguage(decodeString(this.read('preference.language'))),
       difficulty: parseDifficulty(decodeString(this.read('preference.difficulty'))),
       name: name?.trim().slice(0, 32) || 'Player',
+      sound: decodeBoolean(this.read('preference.sound')) ?? true,
     }
   }
 

@@ -11,6 +11,9 @@ export interface Messages {
   readonly how: string
   readonly records: string
   readonly language: string
+  readonly sound: string
+  readonly soundOn: string
+  readonly soundOff: string
   readonly easy: string
   readonly medium: string
   readonly expert: string

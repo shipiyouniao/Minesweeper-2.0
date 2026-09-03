@@ -39,6 +39,7 @@ export interface Preferences {
   readonly language: Language | null
   readonly difficulty: Difficulty | null
   readonly name: string
+  readonly sound: boolean
 }
 
 /** Each setting's key determines its allowed value at the call site. */
@@ -46,9 +47,10 @@ export type Preference =
   | { readonly key: 'language'; readonly value: Language }
   | { readonly key: 'difficulty'; readonly value: Difficulty }
   | { readonly key: 'name'; readonly value: string }
+  | { readonly key: 'sound'; readonly value: boolean }
 
 /** The complete set of values written by this repository. */
-export type StoredValue = string | StoredSession | readonly Score[] | null
+export type StoredValue = string | boolean | StoredSession | readonly Score[] | null
 
 /** Legacy records after decoding into today's numeric-time model. */
 export interface LegacyScores {

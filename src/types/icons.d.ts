@@ -14,6 +14,9 @@ export type Icon =
   | 'help'
   | 'leaf'
   | 'globe'
+  | 'chevron'
+  | 'volume'
+  | 'volumeOff'
 
 /** Each icon has one authored SVG fragment. */
 export interface IconPaths {
@@ -31,4 +34,7 @@ export interface IconPaths {
   readonly help: string
   readonly leaf: string
   readonly globe: string
+  readonly chevron: string
+  readonly volume: string
+  readonly volumeOff: string
 }

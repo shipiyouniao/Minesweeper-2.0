@@ -22,6 +22,12 @@ export function decodeString(text: string | null): string | null {
   return typeof value === 'string' ? value : null
 }
 
+/** Read an actual JSON boolean, preserving false instead of treating it as missing. */
+export function decodeBoolean(text: string | null): boolean | null {
+  const value = parseJson(text)
+  return typeof value === 'boolean' ? value : null
+}
+
 /** Narrow a JSON value to a property object without accepting arrays. */
 function isObject(value: JsonValue | undefined): value is JsonObject {
   return typeof value === 'object' && value !== null && !Array.isArray(value)

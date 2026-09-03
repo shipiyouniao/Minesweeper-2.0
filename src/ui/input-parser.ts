@@ -11,6 +11,7 @@ export function parseCommand(value: string): UiCommand | null {
     case 'reveal-mode':
     case 'restart-confirmed':
     case 'new':
+    case 'toggle-sound':
       return value
     default:
       return null

@@ -1,4 +1,6 @@
 import type { Difficulty, RankedDifficulty } from '../types/game.js'
+import type { SoundEffects } from '../types/audio.js'
+import { cueForMove } from '../audio/cues.js'
 import type { Language } from '../types/localization.js'
 import type { GameRepository } from '../types/storage.js'
 import type { InputActions, UiCommand, NavigationKey, FormSubmission } from '../types/ui.js'
@@ -18,6 +20,7 @@ import {
 /** Coordinates application services and views; browser event mechanics live in InputController. */
 export class MinesweeperApp implements InputActions {
   private readonly session: GameSession
+  private readonly sounds: SoundEffects
   private readonly repository: GameRepository
   private readonly view: AppView
   private readonly input: InputController
@@ -32,12 +35,14 @@ export class MinesweeperApp implements InputActions {
     session: GameSession,
     repository: GameRepository,
     language: Language,
+    sounds: SoundEffects,
   ) {
     this.session = session
     this.repository = repository
     this.language = language
+    this.sounds = sounds
     this.recordMode = session.state.mode === 'custom' ? 'easy' : session.state.mode
-    this.view = new AppView(root, this.handleDialogClose)
+    this.view = new AppView(root, this.handleDialogClose, this.handleLanguageChange)
     this.input = new InputController(root, this)
 
     this.mount(true)
@@ -51,12 +56,15 @@ export class MinesweeperApp implements InputActions {
 
   /** Send a player action through the session and present any resulting outcome. */
   play(index: number, flag = this.flagMode): void {
+    const before = this.session.state.game
     if (!this.session.play({ type: flag ? 'flag' : 'reveal', index })) {
       return
     }
 
     this.render()
     const state = this.session.state
+    const cue = cueForMove(before, state.game, index)
+    if (cue) this.sounds.play(cue)
 
     if (state.game.phase === 'won' || state.game.phase === 'lost') {
       this.showDialog(resultTemplate(this.language, state))
@@ -65,7 +73,15 @@ export class MinesweeperApp implements InputActions {
 
   /** Route named UI commands to a focused application operation. */
   command(action: UiCommand): void {
+    if (action !== 'toggle-sound') this.sounds.play('tap')
+
     switch (action) {
+      case 'toggle-sound':
+        this.sounds.setEnabled(!this.sounds.enabled)
+        this.repository.setPreference({ key: 'sound', value: this.sounds.enabled })
+        this.sounds.play('tap')
+        this.render()
+        break
       case 'help':
         this.showDialog(helpTemplate(this.language))
         break
@@ -118,7 +134,19 @@ export class MinesweeperApp implements InputActions {
   selectLanguage(value: Language): void {
     this.language = value
     this.repository.setPreference({ key: 'language', value: this.language })
+
+    // A manual choice replaces an old link override, including when storage is unavailable.
+    const url = new URL(location.href)
+    url.searchParams.set('lang', value)
+    history.replaceState(null, '', url)
+    this.sounds.play('tap')
     this.mount(false)
+    this.view.focusLanguage()
+  }
+
+  /** Warm the audio adapter during the original gesture, before long-press timers run. */
+  prepareAudio(): void {
+    this.sounds.unlock()
   }
 
   /** Validate user-entered values before passing them into session operations. */
@@ -151,6 +179,8 @@ export class MinesweeperApp implements InputActions {
 
   /** Pause and save on backgrounding, then show the privacy cover on return. */
   suspend(): void {
+    this.sounds.stop()
+    this.view.closeLanguage()
     this.session.suspend()
     this.render()
   }
@@ -159,6 +189,7 @@ export class MinesweeperApp implements InputActions {
   dispose(): void {
     clearInterval(this.ticker)
     this.input.dispose()
+    this.sounds.dispose()
     this.session.suspend()
     this.view.dispose()
   }
@@ -177,6 +208,7 @@ export class MinesweeperApp implements InputActions {
     const best = state.mode === 'custom' ? undefined : this.repository.scores(state.mode)[0]
 
     this.view.render(state, this.language, this.flagMode, best, this.repository.available)
+    this.view.renderSound(this.sounds.enabled, this.language)
   }
 
   /** Stop gameplay before showing content so modal time never contributes to a score. */
@@ -212,6 +244,11 @@ export class MinesweeperApp implements InputActions {
   private readonly handleDialogClose = (): void => {
     this.session.closeDialog()
     this.render()
+  }
+
+  /** Preserve controller ownership when the flyout emits its typed selection. */
+  private readonly handleLanguageChange = (language: Language): void => {
+    this.selectLanguage(language)
   }
 
   /** Refresh elapsed time and checkpoint only while the clock is running. */

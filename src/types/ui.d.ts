@@ -3,7 +3,15 @@ import type { Language } from './localization.js'
 
 /** Commands accepted by toolbar and dialog controls. */
 export type UiCommand =
-  'help' | 'records' | 'close' | 'pause' | 'flag-mode' | 'reveal-mode' | 'restart-confirmed' | 'new'
+  | 'help'
+  | 'records'
+  | 'close'
+  | 'pause'
+  | 'flag-mode'
+  | 'reveal-mode'
+  | 'restart-confirmed'
+  | 'new'
+  | 'toggle-sound'
 
 /** Only these keys can request a board-focus movement. */
 export type NavigationKey = 'arrowleft' | 'arrowright' | 'arrowup' | 'arrowdown' | 'home' | 'end'
@@ -34,6 +42,9 @@ export interface HelpStep {
 /** Browser events are decoded into these typed application operations. */
 export interface InputActions {
   readonly dialogOpen: boolean
+
+  /** Activate audio within the pointer gesture before a delayed touch action. */
+  prepareAudio(): void
 
   /** Apply a cell action using the selected input mode when omitted. */
   play(index: number, flag?: boolean): void

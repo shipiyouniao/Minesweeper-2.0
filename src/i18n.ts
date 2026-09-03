@@ -9,6 +9,9 @@ const zh: Messages = {
   how: '怎么玩',
   records: '我的纪录',
   language: '语言',
+  sound: '交互音效',
+  soundOn: '音效已开启 · 点击静音',
+  soundOff: '音效已关闭 · 点击开启',
   easy: '初级',
   medium: '中级',
   expert: '高级',
@@ -91,6 +94,9 @@ const en: Messages = {
   how: 'How to play',
   records: 'My records',
   language: 'Language',
+  sound: 'Sound effects',
+  soundOn: 'Sound on · Mute',
+  soundOff: 'Sound off · Enable',
   easy: 'Beginner',
   medium: 'Intermediate',
   expert: 'Expert',
@@ -178,6 +184,9 @@ const ja: Messages = {
   how: '遊び方',
   records: 'マイ記録',
   language: '言語',
+  sound: '効果音',
+  soundOn: '効果音オン · ミュートする',
+  soundOff: '効果音オフ · 有効にする',
   easy: '初級',
   medium: '中級',
   expert: '上級',
@@ -263,7 +272,7 @@ export function parseLanguage(value: string | null): Language | null {
     return null
   }
 
-  const locale = value.toLowerCase().split(/[-_]/)[0]
+  const locale = value.trim().toLowerCase().split(/[-_]/)[0]
 
   switch (locale) {
     case 'zh':
@@ -280,5 +289,14 @@ export function parseLanguage(value: string | null): Language | null {
 
 /** Apply the default language only after boundary normalization. */
 export function languageOf(value: string | null): Language {
-  return parseLanguage(value) ?? 'zh'
+  return parseLanguage(value) ?? 'en'
+}
+
+/** Prefer a supported link override, then an explicit saved choice, then the browser locale. */
+export function resolveLanguage(
+  link: string | null,
+  saved: Language | null,
+  browser: string | null,
+): Language {
+  return parseLanguage(link) ?? saved ?? languageOf(browser)
 }

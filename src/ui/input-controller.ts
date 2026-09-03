@@ -1,6 +1,5 @@
 import type { InputActions, TouchPoint } from '../types/ui.js'
 import { parseDifficulty } from '../game/difficulty.js'
-import { parseLanguage } from '../i18n.js'
 import { parseCommand, parseNavigation, parseSubmission } from './input-parser.js'
 
 /**
@@ -21,7 +20,6 @@ export class InputController {
 
     root.addEventListener('click', this.handleClick, options)
     root.addEventListener('contextmenu', this.handleContextMenu, options)
-    root.addEventListener('change', this.handleChange, options)
     root.addEventListener('submit', this.handleSubmit, options)
     root.addEventListener('focusin', this.handleFocus, options)
     root.addEventListener('keydown', this.handleKey, options)
@@ -98,17 +96,6 @@ export class InputController {
     }
   }
 
-  /** Read language selection without rebuilding or mutating business state here. */
-  private readonly handleChange = (event: Event): void => {
-    if (event.target instanceof HTMLSelectElement && event.target.id === 'language') {
-      const language = parseLanguage(event.target.value)
-
-      if (language) {
-        this.actions.selectLanguage(language)
-      }
-    }
-  }
-
   /** Convert a form submission into values before the controller may replace its DOM. */
   private readonly handleSubmit = (event: SubmitEvent): void => {
     if (event.target instanceof HTMLFormElement) {
@@ -133,6 +120,8 @@ export class InputController {
   /** Handle shortcuts outside form controls and keep movement inside board bounds. */
   private readonly handleKey = (event: KeyboardEvent): void => {
     if (
+      event.defaultPrevented ||
+      (event.target instanceof Element && event.target.closest('.language-picker')) ||
       this.actions.dialogOpen ||
       event.target instanceof HTMLInputElement ||
       event.target instanceof HTMLSelectElement
@@ -170,15 +159,15 @@ export class InputController {
 
   /** Begin a touch/pen hold; scrolling or release cancels it before the deadline. */
   private readonly handlePointerDown = (event: PointerEvent): void => {
-    if (event.pointerType === 'mouse') {
-      return
-    }
-
     const cell = this.cellTarget(event.target)
 
     if (!cell) {
       return
     }
+
+    // Touch holds run later; unlock now while browser user activation is still available.
+    this.actions.prepareAudio()
+    if (event.pointerType === 'mouse') return
 
     this.cancelGesture()
     this.touchStart = { x: event.clientX, y: event.clientY }

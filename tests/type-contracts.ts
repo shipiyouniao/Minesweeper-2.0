@@ -7,6 +7,8 @@ export function rejectInvalidCommands(repository: GameRepository, input: InputAc
   repository.setPreference({ key: 'language', value: 'expert' })
   // @ts-expect-error Raw JSON values cannot enter the setting API.
   repository.setPreference({ key: 'name', value: { name: 'Player' } })
+  // @ts-expect-error Audio preferences use booleans rather than truthy strings.
+  repository.setPreference({ key: 'sound', value: 'false' })
   // @ts-expect-error UI commands have a finite vocabulary.
   input.command('delete-all')
   // @ts-expect-error Custom games do not have a ranked leaderboard tab.

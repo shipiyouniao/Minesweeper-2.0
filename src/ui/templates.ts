@@ -9,6 +9,61 @@ import { translations } from '../i18n.js'
 import { icon } from '../icons.js'
 import { escapeHtml, formatTime } from './presentation.js'
 
+/** Display each language in its own script so the picker remains recognizable. */
+function languageName(language: Language): string {
+  switch (language) {
+    case 'zh':
+      return '中文'
+    case 'en':
+      return 'English'
+    case 'ja':
+      return '日本語'
+  }
+}
+
+/** Render one radio-style menu option with a visible selected indicator. */
+function languageOption(language: Language, selected: Language): string {
+  return /* HTML */ `
+    <button
+      type="button"
+      class="language-option"
+      role="menuitemradio"
+      lang="${language === 'zh' ? 'zh-CN' : language}"
+      data-language="${language}"
+      aria-checked="${language === selected}"
+      tabindex="-1"
+    >
+      <span>${languageName(language)}</span>
+      ${icon('check')}
+    </button>
+  `
+}
+
+/** Render an original flyout inspired by VitePress's compact translation control. */
+function languageMenuTemplate(language: Language): string {
+  const label = translations[language].language
+
+  return /* HTML */ `
+    <div class="language-picker">
+      <button
+        type="button"
+        class="language-trigger"
+        aria-label="${label}"
+        aria-haspopup="menu"
+        aria-expanded="false"
+        aria-controls="language-menu"
+      >
+        ${icon('globe')}
+        <span class="language-current">${languageName(language)}</span>
+        ${icon('chevron')}
+      </button>
+      <div id="language-menu" class="language-menu" role="menu" aria-label="${label}" hidden>
+        ${languageOption('zh', language)}${languageOption('en', language)}${languageOption('ja', language)}
+      </div>
+    </div>
+  `
+}
+
 /** Render the static application shell from state; event binding belongs to the view. */
 export function appTemplate(state: SessionState, language: Language, flagMode: boolean): string {
   const t = translations[language]
@@ -26,14 +81,7 @@ export function appTemplate(state: SessionState, language: Language, flagMode: b
       <nav aria-label="${t.play}">
         <button class="text-button" data-action="help">${t.how}</button>
         <button class="text-button" data-action="records">${t.records}</button>
-        <label class="language-picker">
-          ${icon('globe')}
-          <select id="language" aria-label="${t.language}">
-            <option value="zh" ${language === 'zh' ? 'selected' : ''}>中文</option>
-            <option value="en" ${language === 'en' ? 'selected' : ''}>English</option>
-            <option value="ja" ${language === 'ja' ? 'selected' : ''}>日本語</option>
-          </select>
-        </label>
+        ${languageMenuTemplate(language)}
       </nav>
     </header>
     <main class="layout">
@@ -60,9 +108,20 @@ export function appTemplate(state: SessionState, language: Language, flagMode: b
       <section class="game-section" aria-label="${t.title}">
         <div class="game-heading">
           <h2>${t.title}</h2>
-          <button class="icon-button" data-action="help" aria-label="${t.how}">
-            ${icon('help')}
-          </button>
+          <div class="game-heading-actions">
+            <button
+              id="sound-button"
+              class="icon-button"
+              data-action="toggle-sound"
+              aria-label="${t.sound}"
+              aria-pressed="true"
+            >
+              ${icon('volume')}
+            </button>
+            <button class="icon-button" data-action="help" aria-label="${t.how}">
+              ${icon('help')}
+            </button>
+          </div>
         </div>
         <div class="difficulty-tabs" role="group" aria-label="${t.difficulty}">
           ${DIFFICULTIES.map((key) => difficultyButton(key, mode, t)).join('')}
