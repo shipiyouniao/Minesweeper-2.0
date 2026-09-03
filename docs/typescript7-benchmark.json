@@ -1,0 +1,50 @@
+{
+  "compiler": "Version 7.0.2",
+  "platform": "win32",
+  "arch": "x64",
+  "node": "v22.18.0",
+  "generatedAt": "2026-09-03T08:31:55.206Z",
+  "results": [
+    {
+      "label": "Real application, tests and Vite config",
+      "samplesMs": [
+        1530,
+        1372,
+        1317
+      ],
+      "medianMs": 1372,
+      "diagnostics": "Files:              227\nLines:           142083\nIdentifiers:     114472\nSymbols:         154873\nTypes:            86673\nInstantiations:   78608\nMemory used:    154722K\nMemory allocs:   770879\nConfig time:     0.002s\nParse time:      0.129s\nBind time:       0.076s\nCheck time:      0.710s\nTotal time:      0.920s\n"
+    },
+    {
+      "label": "250 generated modules, 10000 mapped event variants",
+      "samplesMs": [
+        1877,
+        1440,
+        1615
+      ],
+      "medianMs": 1615,
+      "diagnostics": "Files:              318\nLines:            68675\nIdentifiers:     103813\nSymbols:         157335\nTypes:            81664\nInstantiations:   56977\nMemory used:    139504K\nMemory allocs:   557957\nConfig time:     0.002s\nParse time:      0.168s\nBind time:       0.039s\nCheck time:      1.116s\nEmit time:       0.001s\nTotal time:      1.330s\n"
+    },
+    {
+      "label": "1000 generated modules, 40000 mapped event variants",
+      "samplesMs": [
+        24372,
+        20971,
+        20095
+      ],
+      "medianMs": 20971,
+      "diagnostics": "Files:             1068\nLines:           103175\nIdentifiers:     268813\nSymbols:         460315\nTypes:           228059\nInstantiations:  142457\nMemory used:    371074K\nMemory allocs:  1456391\nConfig time:     0.005s\nParse time:      0.344s\nBind time:       0.138s\nCheck time:     19.106s\nEmit time:       0.002s\nTotal time:     19.609s\n"
+    },
+    {
+      "label": "1000 modules without the cross-module mega-union",
+      "samplesMs": [
+        1872,
+        3101,
+        3172
+      ],
+      "medianMs": 3101,
+      "diagnostics": "Files:             1067\nLines:           102171\nIdentifiers:     265805\nSymbols:         349305\nTypes:           162796\nInstantiations:   72457\nMemory used:    316390K\nMemory allocs:  1013529\nConfig time:     0.006s\nParse time:      0.920s\nBind time:       0.103s\nCheck time:      1.353s\nEmit time:       0.008s\nTotal time:      2.394s\n"
+    }
+  ],
+  "negativeProbe": "TS2322 correctly rejected"
+}

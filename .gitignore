@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.native/
+.bench/
+*.log
+.DS_Store

@@ -1,24 +1,23 @@
 {
-    "main": "index.html",
-    "name": "minesweeper",
-    "description": "A web game which is similar to the Minesweeper made by Microsoft.",
-    "version": "2.0.0",
-    "keywords": ["admin"],
-    "window": {
-      "title": "Minesweeper", 
-      "icon": "icon.ico",
-      "toolbar": false,
-      "frame": true,
-      "width": 1280,
-      "height": 760, 
-      "position": "center", 
-      "min_width": 900,
-      "min_height": 600,
-      "resizable":true
+  "name": "minesweeper",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A quiet game of logic. Minesweeper rebuilt with native TypeScript 7.",
+  "engines": { "node": "^22.12.0 || >=24.0.0" },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "compile": "tsc -p tsconfig.app.json",
+    "build": "npm run compile && vite build",
+    "preview": "vite preview",
+    "test": "tsc -p tsconfig.test.json && node --test .native/tests/tests/*.test.js",
+    "check": "npm run typecheck && npm test && npm run build",
+    "bench:types": "node scripts/bench-types.mjs"
   },
-    "webkit": {
-      "plugin": true,
-      "java":false, 
-      "page-cache":true 
-      }
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "typescript": "7.0.2",
+    "vite": "^8.2.2"
   }
+}

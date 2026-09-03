@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": ".",
+    "outDir": ".native/tests",
+    "types": ["node"],
+    "noEmitOnError": true
+  },
+  "include": ["tests/**/*.ts", "src/game/**/*.ts", "src/storage.ts", "src/i18n.ts"]
+}

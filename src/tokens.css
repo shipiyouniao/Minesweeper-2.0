@@ -1,0 +1,13 @@
+:root {
+  color-scheme: light;
+  --paper: #f5f4ef;
+  --surface: #fffefa;
+  --surface-alt: #eeeee7;
+  --ink: #2d3432;
+  --muted: #697165;
+  --line: #e3e5dc;
+  --blue: #3457db;
+  --blue-tint: #edf0fb;
+  --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', 'Microsoft YaHei', sans-serif;
+  --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+}

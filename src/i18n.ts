@@ -1,0 +1,94 @@
+export type Language = 'zh' | 'en' | 'ja'
+
+const zh = {
+  title: '扫雷', tagline: '给大脑，\n留一块空地。', intro: '翻开未知，标记可能。用一点耐心，把每一块小小的确定找出来。',
+  edition: '一个老游戏，一点新模样。', play: '游戏', how: '怎么玩', records: '我的纪录', language: '语言',
+  easy: '初级', medium: '中级', expert: '高级', custom: '自定义', difficulty: '难度',
+  mines: '剩余地雷', time: '用时', best: '最佳纪录', restart: '新一局', pause: '暂停', resume: '继续游戏',
+  ready: '从任意一格开始', readyNote: '第一步和周围八格，始终安全。',
+  playing: '慢慢来，线索就在眼前。', paused: '休息一下', pausedNote: '棋盘已隐藏，计时已暂停。',
+  won: '漂亮，全部找到了。', wonNote: '所有安全的格子，都被你点亮了。',
+  lost: '差一点，再来一局？', lostNote: '这次遇到了地雷，下次换个思路。',
+  reveal: '翻开', flag: '插旗', flagMode: '插旗模式', revealMode: '翻开模式',
+  helpMouse: '左键翻开 · 右键插旗', helpTouch: '轻点翻开 · 长按插旗', helpChord: '再次点击数字，快速翻开周围',
+  firstSafe: '首击安全', autoSave: '自动保存进度', source: '源码', footer: '由 SPYN 制作 · 为片刻专注而生',
+  board: '扫雷棋盘', closed: '未翻开', flagged: '已插旗', empty: '空白', mine: '地雷', wrongFlag: '标错的旗帜',
+  row: '行', column: '列', around: '周围地雷', close: '关闭', cancel: '取消', start: '开始游戏',
+  width: '列数', height: '行数', mineCount: '地雷数', customHint: '5–40 列，5–30 行；至少保留 9 个安全格。自定义棋盘用于练习，不计入纪录。',
+  invalid: '请检查尺寸和雷数，至少保留 9 个安全格。',
+  howTitle: '小格子里的大线索', howIntro: '找到所有没有地雷的格子，就算获胜。',
+  stepOne: '翻开一格', stepOneNote: '数字表示周围八格中的地雷数量。空白区域会自动展开。',
+  stepTwo: '标记一颗雷', stepTwoNote: '右键或长按插旗，也可以切换下方的插旗模式。再操作一次即可取消。',
+  stepThree: '连接线索', stepThreeNote: '当周围旗帜数等于数字，再点击该数字即可翻开剩余邻格。旗子插错也会踩雷。',
+  stepFour: '按自己的节奏', stepFourNote: '方向键移动，空格翻开，F 插旗，P 暂停，N 开新局。离开页面会自动暂停。',
+  recordsNote: '只保存在这个浏览器里。每个难度保留最快的 10 次，不是在线排名。',
+  noRecords: '第一条纪录，等你来写。', player: '玩家', date: '日期', name: '留下你的名字', save: '保存名字',
+  recordSaved: '本次成绩已保存', storageOff: '浏览器未允许保存，仍可正常游玩。',
+  progress: '已翻开', confirmTitle: '开始一张新棋盘？', confirmNote: '当前难度未完成的进度会被替换。',
+  scrollHint: '棋盘较宽时，可横向滑动查看。',
+} as const
+type Messages = { [Key in keyof typeof zh]: string }
+
+const en: Messages = {
+  title: 'Minesweeper', tagline: 'A little room\nto think.', intro: 'Uncover the unknown. Mark the possibilities. Find a small moment of clarity, one square at a time.',
+  edition: 'An old favorite. A fresh start.', play: 'Play', how: 'How to play', records: 'My records', language: 'Language',
+  easy: 'Beginner', medium: 'Intermediate', expert: 'Expert', custom: 'Custom', difficulty: 'Difficulty',
+  mines: 'Mines left', time: 'Time', best: 'Personal best', restart: 'New game', pause: 'Pause', resume: 'Keep playing',
+  ready: 'Start with any square', readyNote: 'Your first square and its neighbors are always safe.',
+  playing: 'Take your time. Follow the clues.', paused: 'Take a breath', pausedNote: 'The board is hidden and the clock is paused.',
+  won: 'A beautifully clear board.', wonNote: 'You found every safe square. Nicely done.',
+  lost: 'One more little adventure?', lostNote: 'A mine this time. A new perspective next time.',
+  reveal: 'Reveal', flag: 'Flag', flagMode: 'Flag mode', revealMode: 'Reveal mode',
+  helpMouse: 'Left click to reveal · Right click to flag', helpTouch: 'Tap to reveal · Hold to flag', helpChord: 'Click a number again to open its neighbors',
+  firstSafe: 'Safe first move', autoSave: 'Progress saved', source: 'Source', footer: 'Made by SPYN · A moment of focus',
+  board: 'Minesweeper board', closed: 'Covered', flagged: 'Flagged', empty: 'Empty', mine: 'Mine', wrongFlag: 'Incorrect flag',
+  row: 'Row', column: 'Column', around: 'Adjacent mines', close: 'Close', cancel: 'Cancel', start: 'Start playing',
+  width: 'Columns', height: 'Rows', mineCount: 'Mines', customHint: '5–40 columns, 5–30 rows. Leave at least 9 safe squares. Custom boards are unranked practice games.',
+  invalid: 'Check the size and mine count. Leave at least 9 safe squares.',
+  howTitle: 'Small squares. Good clues.', howIntro: 'Reveal every square without a mine to win.',
+  stepOne: 'Open a square', stepOneNote: 'A number tells you how many mines are in the eight surrounding squares. Empty areas open together.',
+  stepTwo: 'Mark a mine', stepTwoNote: 'Right click or hold to place a flag. You can also use flag mode. Repeat to remove it.',
+  stepThree: 'Connect the clues', stepThreeNote: 'When the flag count matches a number, click that number to reveal its remaining neighbors. Wrong flags can still lead to a mine.',
+  stepFour: 'Find your rhythm', stepFourNote: 'Arrows to move, Space to reveal, F to flag, P to pause, N for a new game. Leaving the page pauses the clock.',
+  recordsNote: 'Saved only in this browser. The fastest 10 games per difficulty; no online ranking.',
+  noRecords: 'Your first record is waiting.', player: 'Player', date: 'Date', name: 'Leave your name', save: 'Save name',
+  recordSaved: 'Your time has been saved', storageOff: 'Browser storage is unavailable. You can still play.',
+  progress: 'Revealed', confirmTitle: 'Start a fresh board?', confirmNote: 'This will replace your unfinished game at this difficulty.',
+  scrollHint: 'On wider boards, scroll sideways to explore.',
+}
+
+const ja: Messages = {
+  title: 'マインスイーパー', tagline: '考えるための、\n小さな余白。', intro: '未知を開き、可能性に旗を。ひとマスずつ、確かな答えを見つけよう。',
+  edition: '懐かしい遊びを、新しいかたちに。', play: 'ゲーム', how: '遊び方', records: 'マイ記録', language: '言語',
+  easy: '初級', medium: '中級', expert: '上級', custom: 'カスタム', difficulty: '難易度',
+  mines: '残りの地雷', time: 'タイム', best: 'ベスト', restart: '新しいゲーム', pause: '一時停止', resume: 'ゲームを続ける',
+  ready: '好きなマスから始めよう', readyNote: '最初のマスとその周囲には、地雷はありません。',
+  playing: 'ゆっくり、手がかりをつなごう。', paused: 'ひと休み', pausedNote: '盤面を隠し、タイマーを停止しています。',
+  won: 'すべて、見つかりました。', wonNote: '安全なマスをすべて開きました。お見事！',
+  lost: 'もう一度、挑戦しよう。', lostNote: '今回は地雷。次は違う視点で。',
+  reveal: '開く', flag: '旗', flagMode: '旗モード', revealMode: '開くモード',
+  helpMouse: '左クリックで開く · 右クリックで旗', helpTouch: 'タップで開く · 長押しで旗', helpChord: '数字をもう一度押すと、周りを開けます',
+  firstSafe: '最初の一手は安全', autoSave: '進行を自動保存', source: 'ソース', footer: 'SPYN 制作 · ちょっと集中する時間',
+  board: 'マインスイーパーの盤面', closed: '未開封', flagged: '旗あり', empty: '空白', mine: '地雷', wrongFlag: '間違った旗',
+  row: '行', column: '列', around: '周囲の地雷', close: '閉じる', cancel: 'キャンセル', start: 'ゲームを始める',
+  width: '列数', height: '行数', mineCount: '地雷の数', customHint: '5〜40 列、5〜30 行。安全なマスを 9 個以上残してください。カスタム盤面は練習用で、記録には含まれません。',
+  invalid: 'サイズと地雷数を確認し、安全なマスを 9 個以上残してください。',
+  howTitle: '小さなマス、大きな手がかり', howIntro: '地雷のないマスをすべて開くとクリアです。',
+  stepOne: 'マスを開く', stepOneNote: '数字は周囲 8 マスにある地雷の数。空白のエリアは自動で開きます。',
+  stepTwo: '地雷に旗を', stepTwoNote: '右クリックか長押しで旗を立てます。旗モードも使えます。もう一度操作すると解除します。',
+  stepThree: '手がかりをつなぐ', stepThreeNote: '周囲の旗の数が数字と同じなら、数字を押すと残りの隣接マスが開きます。旗が間違っていると地雷を踏むことも。',
+  stepFour: '自分のペースで', stepFourNote: '矢印キーで移動、スペースで開く、F で旗、P で一時停止、N で新しいゲーム。ページを離れると自動で一時停止します。',
+  recordsNote: 'このブラウザーだけに保存されます。難易度ごとに上位 10 件。オンラインランキングではありません。',
+  noRecords: '最初の記録をつくろう。', player: 'プレイヤー', date: '日付', name: '名前を残そう', save: '名前を保存',
+  recordSaved: 'タイムを保存しました', storageOff: '保存機能を利用できませんが、そのまま遊べます。',
+  progress: '開いたマス', confirmTitle: '新しい盤面を始めますか？', confirmNote: 'この難易度で進行中のゲームは置き換えられます。',
+  scrollHint: '広い盤面は横にスクロールできます。',
+}
+
+export const translations = { zh, en, ja } satisfies Record<Language, Messages>
+export function languageOf(value: unknown): Language {
+  if (typeof value !== 'string') return 'zh'
+  if (value.startsWith('en')) return 'en'
+  if (value.startsWith('ja') || value === 'jp') return 'ja'
+  return 'zh'
+}

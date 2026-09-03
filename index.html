@@ -1,12 +1,18 @@
-<!DOCTYPE html>
-<html lang="zh_cn">
+<!doctype html>
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>hello</title>
-    <link rel="stylesheet" href="./style/index.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f4ef" />
+    <meta name="description" content="A quiet game of logic. Play Minesweeper in your browser — free, no account, safe first moves. 中文 · English · 日本語。" />
+    <title>扫雷 · Minesweeper 2.0</title>
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <div class="hello">石皮幼鸟制作</div>
-    <script src="./scripts/index.js"></script>
+    <div id="app"></div>
+    <noscript>This game needs JavaScript. 请启用 JavaScript 后游玩。</noscript>
+    <!-- TypeScript 7 emits this JavaScript. Vite only bundles the emitted code. -->
+    <script type="module" src="/.native/app/main.js"></script>
   </body>
 </html>

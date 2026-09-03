@@ -1,0 +1,4 @@
+{
+  "js/ts.experimental.useTsgo": true,
+  "files.exclude": { "**/.native": true, "**/.bench": true }
+}
