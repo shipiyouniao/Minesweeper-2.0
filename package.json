@@ -2,6 +2,7 @@
   "name": "minesweeper",
   "version": "2.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "A quiet game of logic. Minesweeper rebuilt with native TypeScript 7.",
   "engines": {

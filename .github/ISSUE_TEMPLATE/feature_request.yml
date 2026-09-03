@@ -1,0 +1,22 @@
+name: Feature or experiment proposal
+description: Suggest an improvement or a reproducible TypeScript experiment.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Explain who benefits and how the current behavior falls short.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the intended behavior or experiment, including how to assess it.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and tradeoffs
+      description: Consider complexity, accessibility, dependencies, or measurement limitations.

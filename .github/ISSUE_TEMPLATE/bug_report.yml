@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible game, interface, or tooling problem.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For suspected vulnerabilities, use [private reporting](https://github.com/shipiyouniao/Minesweeper-2.0/security/advisories/new) instead of this public form.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include difficulty, relevant controls, and whether a saved game was restored.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and version, operating system, deployed URL or commit; Node.js version for tooling bugs.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or logs
+      description: Optional supporting evidence. Remove credentials and personal information.

@@ -1,8 +1,12 @@
+![Minesweeper 2.0 — A TypeScript 7 experiment, with ivory ceramic tiles and a cobalt flag](docs/assets/readme-banner.png)
+
 # Minesweeper 2.0 — A TypeScript 7 Experiment
 
 A playable Minesweeper game and a practical testbed for the **TypeScript 7 native compiler**. This repository revisits a first-year university project with a minimal interface, original artwork, a deterministic game engine, and a native TypeScript development workflow.
 
 **[Play in your browser →](https://shipiyouniao.github.io/Minesweeper-2.0/)** · [Compiler experiment notes](docs/typescript7.md) · [Captured benchmark results](docs/typescript7-benchmark.json)
+
+[Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [License](LICENSE)
 
 ## Why this project exists
 
@@ -221,6 +225,14 @@ For a fork, set **Settings → Pages → Source** to **GitHub Actions**. The cur
 
 ## Artwork and project history
 
-The ceramic-board illustration and SVG icons were created for this renovation. [Artwork notes](docs/artwork.md) document the assets and the complete image-generation prompt. The original application's source and images remain available in Git history.
+The README cover, ceramic-board illustration, and SVG icons were created for this renovation. [Artwork notes](docs/artwork.md) document the assets and the complete image-generation prompts. The original application's source and images remain available in Git history.
 
-The original project was created by **SPYN** as an engineering practice assignment. The original usage notice is retained: **for learning and reference, non-commercial use only**.
+The original project was created by **SPYN** as an engineering practice assignment.
+
+## Contributing and community
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, architecture and type conventions, validation, and pull request guidance. Use the repository's issue forms for bugs and proposals, follow the [code of conduct](CODE_OF_CONDUCT.md), and report suspected vulnerabilities through the [security policy](SECURITY.md).
+
+## License
+
+The project is licensed under the [MIT License](LICENSE). This covers the current project's code, documentation, and original artwork; third-party dependencies retain their own licenses and notices. The MIT license replaces the original edition's non-commercial usage notice for this version of the project.
