@@ -1,5 +1,4 @@
-/** Supplies monotonic milliseconds; tests can advance time without waiting. */
-export type MonotonicNow = () => number
+import type { MonotonicNow } from '../types/session.js'
 
 /** Owns elapsed time across running, paused, and restored game sessions. */
 export class GameClock {

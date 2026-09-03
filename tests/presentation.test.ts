@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
+import { parseNavigation } from '../src/ui/input-parser.js'
 import { PRESETS } from '../src/game/engine.js'
 import { translations } from '../src/i18n.js'
 import { cellContent, escapeHtml, formatTime, moveFocus } from '../src/ui/presentation.js'
@@ -42,5 +43,5 @@ test('keyboard movement respects edges and row-local Home/End', () => {
   assert.equal(moveFocus(PRESETS.easy, 40, 'home'), 36)
   assert.equal(moveFocus(PRESETS.easy, 40, 'end'), 44)
   assert.equal(moveFocus(PRESETS.easy, 40, 'arrowup'), 31)
-  assert.equal(moveFocus(PRESETS.easy, 40, 'f'), null)
+  assert.equal(parseNavigation('f'), null)
 })

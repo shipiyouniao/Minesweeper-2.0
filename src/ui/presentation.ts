@@ -1,18 +1,17 @@
-import type { Cell, Config, Game } from '../game/engine.js'
-import type { Messages } from '../i18n.js'
+import type { CellContent, NavigationKey } from '../types/ui.js'
+import type { Cell, Config, Game } from '../types/game.js'
+import type { Messages } from '../types/localization.js'
 import { icon } from '../icons.js'
 
 /** Escape text at the HTML boundary, including persisted player-controlled names. */
 export function escapeHtml(value: string): string {
-  const entities: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  }
-
-  return value.replace(/[&<>"']/g, (character) => entities[character] ?? character)
+  // Escape ampersands first so the entities introduced below are not escaped twice.
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
 }
 
 /** Format elapsed milliseconds, adding hours and optional tenths when needed. */
@@ -32,11 +31,7 @@ export function formatTime(milliseconds: number, precise = false): string {
 }
 
 /** Describe only information the player is allowed to see at this game phase. */
-export function cellContent(
-  cell: Cell,
-  ended: boolean,
-  messages: Messages,
-): { html: string; label: string } {
+export function cellContent(cell: Cell, ended: boolean, messages: Messages): CellContent {
   if (ended && !cell.mine && cell.visibility === 'flagged') {
     return { html: icon('close'), label: messages.wrongFlag }
   }
@@ -65,8 +60,8 @@ export function statusText(game: Game, paused: boolean, messages: Messages): str
   return paused ? messages.paused : messages[game.phase]
 }
 
-/** Move within board boundaries; return null for keys that are not navigation. */
-export function moveFocus(config: Config, index: number, key: string): number | null {
+/** Move an already decoded navigation command within board boundaries. */
+export function moveFocus(config: Config, index: number, key: NavigationKey): number {
   const { width, height } = config
   const column = index % width
 
@@ -83,7 +78,5 @@ export function moveFocus(config: Config, index: number, key: string): number | 
       return index - column
     case 'end':
       return index - column + width - 1
-    default:
-      return null
   }
 }

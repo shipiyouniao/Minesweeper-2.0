@@ -1,8 +1,10 @@
-import type { SessionState } from '../application/game-session.js'
+import type { NavigationKey } from '../types/ui.js'
+import type { SessionState } from '../types/session.js'
+import type { Language } from '../types/localization.js'
+import type { Score } from '../types/storage.js'
 import { stats } from '../game/engine.js'
-import { translations, type Language } from '../i18n.js'
+import { translations } from '../i18n.js'
 import { icon } from '../icons.js'
-import type { Score } from '../storage.js'
 import { BoardView } from './board-view.js'
 import { formatTime, statusText } from './presentation.js'
 import { appTemplate } from './templates.js'
@@ -106,7 +108,7 @@ export class AppView {
   }
 
   /** Delegate arrow/Home/End navigation and report whether the key was consumed. */
-  navigate(index: number, key: string): boolean {
+  navigate(index: number, key: NavigationKey): boolean {
     return this.board?.navigate(index, key) ?? false
   }
 

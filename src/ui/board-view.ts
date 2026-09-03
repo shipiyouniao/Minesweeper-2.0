@@ -1,5 +1,6 @@
-import type { Config, Game } from '../game/engine.js'
-import type { Messages } from '../i18n.js'
+import type { NavigationKey } from '../types/ui.js'
+import type { Config, Game } from '../types/game.js'
+import type { Messages } from '../types/localization.js'
 import { cellContent, moveFocus } from './presentation.js'
 
 /** Owns the board DOM and its roving keyboard focus, never the game rules. */
@@ -66,14 +67,15 @@ export class BoardView {
   }
 
   /** Apply a recognized navigation key and let the browser scroll the cell into view. */
-  navigate(index: number, key: string): boolean {
+  navigate(index: number, key: NavigationKey): boolean {
     const next = moveFocus(this.config, index, key)
+    const cell = this.cells[next]
 
-    if (next === null) {
+    if (!cell) {
       return false
     }
 
-    this.cells[next]?.focus({ preventScroll: false })
+    cell.focus({ preventScroll: false })
     return true
   }
 

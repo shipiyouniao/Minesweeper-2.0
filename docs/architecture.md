@@ -18,22 +18,28 @@ flowchart LR
     View --> DOM[Browser DOM]
 ```
 
-| Module                            | Ownership and boundary                                                                                                                                        |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/main.ts`                     | Composition only: find the mount point, create browser adapters, restore preferences, and construct the application.                                          |
-| `src/game/engine.ts`              | Immutable `Game` values and pure transitions. Placement, reveal targets, flood fill, win detection, and snapshot validation are separate functions.           |
-| `src/application/game-session.ts` | The current game and difficulty, pause/dialog lifecycle, persistence ordering, and result creation. It calls the engine rather than implementing board rules. |
-| `src/application/game-clock.ts`   | Accumulated time and active intervals. Its injected monotonic clock makes pause/resume behavior testable without sleeping.                                    |
-| `src/storage.ts`                  | A `GameRepository` interface and its string-storage implementation. Parsing, validation, score ordering, migration, and storage failures stay here.           |
-| `src/platform/browser.ts`         | Browser time, randomness, identifiers, dates, and deferred access to `localStorage`.                                                                          |
-| `src/ui/minesweeper-app.ts`       | Application commands and presentation coordination. It chooses which dialog to show and when to redraw.                                                       |
-| `src/ui/input-controller.ts`      | Delegated input listeners, keyboard routing, long-press recognition, and gesture cancellation. An `AbortController` owns listener teardown.                   |
-| `src/ui/app-view.ts`              | The application DOM and native dialog presentation. It receives a session snapshot instead of changing business state.                                        |
-| `src/ui/board-view.ts`            | Cell elements, visible-cell rendering, and roving keyboard focus.                                                                                             |
-| `src/ui/templates.ts`             | Pure HTML-producing functions, including small helpers for tabs, help steps, records, and player-name forms.                                                  |
-| `src/ui/presentation.ts`          | Pure time formatting, escaping, cell descriptions, status labels, and keyboard geometry.                                                                      |
+| Module                            | Ownership and boundary                                                                                                                                                                                |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/main.ts`                     | Composition only: find the mount point, create browser adapters, restore preferences, and construct the application.                                                                                  |
+| `src/game/engine.ts`              | Immutable `Game` values and pure transitions. Placement, reveal targets, flood fill, win detection, and snapshot validation are separate functions.                                                   |
+| `src/application/game-session.ts` | The current game and difficulty, pause/dialog lifecycle, persistence ordering, and result creation. It calls the engine rather than implementing board rules.                                         |
+| `src/application/game-clock.ts`   | Accumulated time and active intervals. Its injected monotonic clock makes pause/resume behavior testable without sleeping.                                                                            |
+| `src/storage.ts`                  | The `GameRepository` implementation: typed preferences, score ordering, migration, and storage failures. JSON decoding lives in `src/persistence/`; the port is declared in `src/types/storage.d.ts`. |
+| `src/platform/browser.ts`         | Browser time, randomness, identifiers, dates, and deferred access to `localStorage`.                                                                                                                  |
+| `src/ui/minesweeper-app.ts`       | Application commands and presentation coordination. It chooses which dialog to show and when to redraw.                                                                                               |
+| `src/ui/input-controller.ts`      | Delegated input listeners, keyboard routing, long-press recognition, and gesture cancellation. An `AbortController` owns listener teardown.                                                           |
+| `src/ui/app-view.ts`              | The application DOM and native dialog presentation. It receives a session snapshot instead of changing business state.                                                                                |
+| `src/ui/board-view.ts`            | Cell elements, visible-cell rendering, and roving keyboard focus.                                                                                                                                     |
+| `src/ui/templates.ts`             | Pure HTML-producing functions, including small helpers for tabs, help steps, records, and player-name forms.                                                                                          |
+| `src/ui/presentation.ts`          | Pure time formatting, escaping, cell descriptions, status labels, and keyboard geometry.                                                                                                              |
 
 ## A reveal, from input to saved state
+
+Named contracts live in `src/types/*.d.ts`: `game.d.ts` describes engine values, `session.d.ts` describes injected services and snapshots, and `storage.d.ts` declares the repository port and persisted formats. Localization, icon, and UI contracts have their own modules. Use `import type` when consuming them; do not introduce global ambient application declarations.
+
+Persistence flows through `src/persistence/json-reader.ts` and `decoders.ts`. The reader contains primitive JSON shape checks. Decoders construct specific contracts before `Repository` passes them to the application or engine. The engine's `restore(GameSnapshot)` still checks gameplay invariants and regenerates mines and clues. It does not parse arbitrary input.
+
+UI input follows the same direction: `input-parser.ts` decodes strings and `FormData` into `UiCommand`, `NavigationKey`, and `FormSubmission`. The controller can switch on a form's discriminant without probing a dynamic property bag. Numeric domain bounds remain checked before a custom board replaces the active game.
 
 1. `InputController` converts a mouse, touch, or keyboard action into a cell command.
 2. `MinesweeperApp` asks `GameSession` to apply that command.
@@ -70,3 +76,7 @@ npm run format:check
 ```
 
 Formatting is automatic; meaningful boundaries and comments remain an implementation responsibility.
+
+Keep types explicit: small unions for finite alternatives, named interfaces for object shapes, and discriminated unions when fields depend on a command kind. Avoid application `any`, `unknown`, mapped types, and conditional types. `npm run check:contracts` enforces these rules in `src/`; the synthetic stress generator intentionally exercises more complex types outside application code.
+
+Authored `.d.ts` files are checked inputs, not emitted output. `scripts/compile.mjs` copies them into the native application output after successful compilation, and the development watcher synchronizes edits. `scripts/verify-build.mjs` checks exact copies and resolves all emitted declarations without using source modules. The same copy operation is included in the native A/B emission timing.

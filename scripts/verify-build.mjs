@@ -1,4 +1,5 @@
-import { readFile, stat } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
+import { spawnSync } from 'node:child_process'
 import assert from 'node:assert/strict'
 
 const html = await readFile('dist/index.html', 'utf8')
@@ -22,6 +23,45 @@ for (const file of [
 ])
   await stat(file)
 assert.ok(!html.includes('/src/main.ts'), 'The site must consume native-emitted JavaScript')
+
+// Check the emitted declaration graph independently of src, catching missing copied contracts.
+const declarations = (await readdir('.native/app', { recursive: true }))
+  .filter((file) => file.endsWith('.d.ts'))
+  .map((file) => `.native/app/${file}`)
+
+for (const file of await readdir('src/types')) {
+  assert.equal(
+    await readFile(`.native/app/types/${file}`, 'utf8'),
+    await readFile(`src/types/${file}`, 'utf8'),
+    `Outdated or missing declaration: ${file}`,
+  )
+}
+
+const checked = spawnSync(
+  process.execPath,
+  [
+    'node_modules/typescript/bin/tsc',
+    '--ignoreConfig',
+    '--noEmit',
+    '--strict',
+    '--target',
+    'es2023',
+    '--module',
+    'esnext',
+    '--moduleResolution',
+    'bundler',
+    '--types',
+    'vite/client',
+    ...declarations,
+  ],
+  { stdio: 'inherit' },
+)
+
+assert.equal(
+  checked.status,
+  0,
+  'Generated declarations must resolve without importing source files',
+)
 console.log(
   'GitHub Pages asset paths, generated artwork, native JavaScript and declarations verified.',
 )

@@ -1,51 +1,18 @@
-/** Preset names are also the persistence keys; custom boards remain unranked. */
-export type Difficulty = 'easy' | 'medium' | 'expert' | 'custom'
-export type Phase = 'ready' | 'playing' | 'won' | 'lost'
-export type Visibility = 'hidden' | 'revealed' | 'flagged'
+import type {
+  Action,
+  Cell,
+  Config,
+  Game,
+  GameSnapshot,
+  GameStats,
+  PresetBoards,
+} from '../types/game.js'
 
-/** Immutable dimensions and the exact number of mines to place. */
-export interface Config {
-  readonly width: number
-  readonly height: number
-  readonly mines: number
-}
-
-/** Logical cell data; covered clues are never sent to the rendered DOM. */
-export interface Cell {
-  readonly mine: boolean
-  readonly adjacent: number
-  readonly visibility: Visibility
-}
-
-/** A complete value representing one point in a game's history. */
-export interface Game {
-  readonly config: Config
-  readonly seed: number
-  readonly firstClick: number | null
-  readonly phase: Phase
-  readonly cells: readonly Cell[]
-  readonly exploded: number | null
-}
-
-/** Player intent contains no browser event, clock, or storage dependency. */
-export interface Action {
-  readonly type: 'reveal' | 'flag' | 'chord'
-  readonly index: number
-}
-
-/** Only the seed, opening move, and player-visible state need to be persisted. */
-export interface GameSnapshot {
-  readonly config: Config
-  readonly seed: number
-  readonly firstClick: number | null
-  readonly visible: readonly Visibility[]
-}
-
-export const PRESETS = {
+export const PRESETS: PresetBoards = {
   easy: { width: 9, height: 9, mines: 10 },
   medium: { width: 16, height: 16, mines: 40 },
   expert: { width: 30, height: 16, mines: 99 },
-} as const satisfies Record<Exclude<Difficulty, 'custom'>, Config>
+}
 
 /** Validate dimensions while reserving room for a safe 3 × 3 opening anywhere. */
 export function validConfig(config: Config): boolean {
@@ -172,7 +139,7 @@ export function createGame(config: Config, seed: number): Game {
 }
 
 /** Derive counters instead of storing totals that could drift apart during a move. */
-export function stats(game: Game): { flags: number; revealed: number; remaining: number } {
+export function stats(game: Game): GameStats {
   const flags = game.cells.filter((cell) => cell.visibility === 'flagged').length
   const revealed = game.cells.filter((cell) => !cell.mine && cell.visibility === 'revealed').length
 
@@ -309,50 +276,15 @@ export function snapshot(game: Game): GameSnapshot {
   }
 }
 
-/** Narrow unknown JSON to a property bag without accepting arrays or null. */
-export function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-/** Validate a snapshot's primitive fields before attempting deterministic reconstruction. */
-function isSnapshot(value: unknown): value is GameSnapshot {
-  if (!isRecord(value) || !isRecord(value['config'])) {
-    return false
-  }
-
-  const { width, height, mines } = value['config']
-  const seed = value['seed']
-  const first = value['firstClick']
-  const visible: unknown = value['visible']
-
-  if (
-    typeof width !== 'number' ||
-    typeof height !== 'number' ||
-    typeof mines !== 'number' ||
-    typeof seed !== 'number' ||
-    !Number.isInteger(seed) ||
-    seed < 0 ||
-    seed > 0xffffffff
-  ) {
-    return false
-  }
-
-  return (
-    validConfig({ width, height, mines }) &&
-    (first === null ||
-      (typeof first === 'number' &&
-        Number.isInteger(first) &&
-        first >= 0 &&
-        first < width * height)) &&
-    Array.isArray(visible) &&
-    visible.length === width * height &&
-    visible.every((item) => item === 'hidden' || item === 'revealed' || item === 'flagged')
-  )
-}
-
 /** Recompute mines and clues from validated input; reject completed or inconsistent saves. */
-export function restore(value: unknown): Game | null {
-  if (!isSnapshot(value)) {
+export function restore(value: GameSnapshot): Game | null {
+  if (
+    !validConfig(value.config) ||
+    !Number.isInteger(value.seed) ||
+    value.seed < 0 ||
+    value.seed > 0xffffffff ||
+    value.visible.length !== value.config.width * value.config.height
+  ) {
     return null
   }
 
@@ -371,7 +303,12 @@ export function restore(value: unknown): Game | null {
     }
   }
 
-  if (visible[firstClick] !== 'revealed') {
+  if (
+    !Number.isInteger(firstClick) ||
+    firstClick < 0 ||
+    firstClick >= config.width * config.height ||
+    visible[firstClick] !== 'revealed'
+  ) {
     return null
   }
 

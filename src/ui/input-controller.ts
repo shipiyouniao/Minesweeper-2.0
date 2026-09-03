@@ -1,26 +1,7 @@
-/** UI commands consumed by the application controller, separated from raw events. */
-export interface InputActions {
-  /** Report modal state before handling board shortcuts. */
-  readonly dialogOpen: boolean
-  /** Reveal/flag a board cell, using the selected mode when flag is omitted. */
-  play(index: number, flag?: boolean): void
-  /** Handle a toolbar, menu, or modal command. */
-  command(action: string): void
-  /** Select a preset or open the custom-board form. */
-  selectDifficulty(value: string): void
-  /** Show records for a preset difficulty. */
-  selectRecords(value: string): void
-  /** Change the active translation. */
-  selectLanguage(value: string): void
-  /** Validate and consume a named form's fields. */
-  submit(form: string, data: FormData): void
-  /** Maintain the board's roving tab stop. */
-  rememberFocus(index: number): void
-  /** Move board focus and report whether a navigation key was consumed. */
-  navigate(index: number, key: string): boolean
-  /** Pause and save when the page loses visibility or leaves the browser. */
-  suspend(): void
-}
+import type { InputActions, TouchPoint } from '../types/ui.js'
+import { parseDifficulty } from '../game/difficulty.js'
+import { parseLanguage } from '../i18n.js'
+import { parseCommand, parseNavigation, parseSubmission } from './input-parser.js'
 
 /**
  * Translates browser events into application commands.
@@ -29,8 +10,8 @@ export interface InputActions {
 export class InputController {
   private readonly actions: InputActions
   private readonly listeners = new AbortController()
-  private longPress: ReturnType<typeof setTimeout> | undefined
-  private touchStart: { x: number; y: number } | null = null
+  private longPress: number | undefined
+  private touchStart: TouchPoint | null = null
   private lastTouchFlag = -Infinity
 
   /** Attach delegated listeners once, so replacing the board cannot duplicate them. */
@@ -82,11 +63,23 @@ export class InputController {
         this.actions.play(Number(cell))
       }
     } else if (mode) {
-      this.actions.selectDifficulty(mode)
+      const difficulty = parseDifficulty(mode)
+
+      if (difficulty) {
+        this.actions.selectDifficulty(difficulty)
+      }
     } else if (recordMode) {
-      this.actions.selectRecords(recordMode)
+      const difficulty = parseDifficulty(recordMode)
+
+      if (difficulty && difficulty !== 'custom') {
+        this.actions.selectRecords(difficulty)
+      }
     } else if (action) {
-      this.actions.command(action)
+      const command = parseCommand(action)
+
+      if (command) {
+        this.actions.command(command)
+      }
     }
   }
 
@@ -108,7 +101,11 @@ export class InputController {
   /** Read language selection without rebuilding or mutating business state here. */
   private readonly handleChange = (event: Event): void => {
     if (event.target instanceof HTMLSelectElement && event.target.id === 'language') {
-      this.actions.selectLanguage(event.target.value)
+      const language = parseLanguage(event.target.value)
+
+      if (language) {
+        this.actions.selectLanguage(language)
+      }
     }
   }
 
@@ -116,7 +113,11 @@ export class InputController {
   private readonly handleSubmit = (event: SubmitEvent): void => {
     if (event.target instanceof HTMLFormElement) {
       event.preventDefault()
-      this.actions.submit(event.target.id, new FormData(event.target))
+      const submission = parseSubmission(event.target.id, new FormData(event.target))
+
+      if (submission) {
+        this.actions.submit(submission)
+      }
     }
   }
 
@@ -158,8 +159,12 @@ export class InputController {
     if (key === 'f' || key === ' ' || key === 'enter') {
       event.preventDefault()
       this.actions.play(index, key === 'f')
-    } else if (this.actions.navigate(index, key)) {
-      event.preventDefault()
+    } else {
+      const navigation = parseNavigation(key)
+
+      if (navigation && this.actions.navigate(index, navigation)) {
+        event.preventDefault()
+      }
     }
   }
 
@@ -179,7 +184,7 @@ export class InputController {
     this.touchStart = { x: event.clientX, y: event.clientY }
 
     // A hold produces a flag, then suppresses the browser's synthetic click/menu.
-    this.longPress = setTimeout(() => {
+    this.longPress = window.setTimeout(() => {
       this.lastTouchFlag = performance.now()
       this.actions.play(Number(cell.dataset['cell']), true)
       this.touchStart = null

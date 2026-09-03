@@ -1,6 +1,5 @@
-import type { SessionRuntime } from '../src/application/game-session.js'
-import type { StorageLike } from '../src/storage.js'
-
+import type { SessionRuntime } from '../src/types/session.js'
+import type { StorageLike } from '../src/types/storage.js'
 /** In-memory storage shared by repository and session tests. */
 export class MemoryStorage implements StorageLike {
   readonly data = new Map<string, string>()

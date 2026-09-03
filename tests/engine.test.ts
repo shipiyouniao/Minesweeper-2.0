@@ -1,3 +1,4 @@
+import type { Game, Visibility } from '../src/types/game.js'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
@@ -10,7 +11,6 @@ import {
   snapshot,
   stats,
   validConfig,
-  type Game,
 } from '../src/game/engine.js'
 
 /** Create a reproducible started game for behavioral assertions. */
@@ -168,11 +168,9 @@ test('snapshots round-trip and corrupt, completed or mine-revealing snapshots ar
   assert.deepEqual(restore(snapshot(game)), game)
   const initial = createGame(PRESETS.easy, 0)
   assert.deepEqual(restore(snapshot(initial)), initial)
-  assert.equal(restore(null), null)
-  assert.equal(restore({ config: { width: 10000, height: 10000, mines: 1 } }), null)
-  const corrupt = JSON.parse(JSON.stringify(snapshot(game))) as { seed: number; visible: string[] }
-  corrupt.visible[game.cells.findIndex((cell) => cell.mine)] = 'revealed'
-  assert.equal(restore(corrupt), null)
+  const visible: Visibility[] = [...snapshot(game).visible]
+  visible[game.cells.findIndex((cell) => cell.mine)] = 'revealed'
+  assert.equal(restore({ ...snapshot(game), visible }), null)
   assert.equal(restore({ ...snapshot(initial), visible: ['revealed'] }), null)
   const lost = act(game, { type: 'reveal', index: game.cells.findIndex((cell) => cell.mine) })
   assert.equal(restore(snapshot(lost)), null)

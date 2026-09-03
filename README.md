@@ -21,7 +21,7 @@ The questions behind the experiment are:
 
 The native TypeScript compiler originated as the Go port commonly called **`tsgo`**. For TypeScript 7 RC and later, the official command is **`tsc`**; `tsgo` was the command supplied by the earlier native-preview package. See [Microsoft's native compiler repository notice](https://github.com/microsoft/typescript-go).
 
-Here, `typescript@7.0.2` is pinned in `package.json` and the lockfile. Its `tsc` launcher resolves and executes a platform-native compiler binary. The default workflow explicitly invokes this compiler. A separately named TypeScript 6 package is installed only for the A/B experiment, never as a fallback.
+Here, `typescript@7.0.2` is pinned in `package.json` and the lockfile. Its `tsc` launcher resolves and executes a platform-native compiler binary. The default workflow explicitly invokes this compiler. A separately named TypeScript 6 package supports the A/B experiment and a syntax-only contract-style check; it is never a compiler fallback.
 
 The native compiler does more than run a separate type-check command:
 
@@ -43,6 +43,8 @@ Tests
 ```
 
 `index.html` imports `.native/app/main.js`. Vite therefore bundles the JavaScript emitted by TypeScript 7 instead of independently transpiling the application's TypeScript source. Vite remains responsible for the development server, asset processing, and production bundling; it does not replace the native compiler's role.
+
+Authored contracts live in module-scoped `src/types/*.d.ts` files and are imported with `import type`. The compile script copies them beside the native-emitted declarations, because TypeScript does not re-emit declaration inputs. Build verification checks that this complete declaration graph resolves independently of `src/`.
 
 | Area                   | How this repository exercises it                                                                                        |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -94,6 +96,8 @@ The [build A/B experiment](docs/build-ab.md) compares TypeScript 6 checking plus
 Use `npm run build:legacy`, `npm run build:native`, and `npm run bench:build -- --runs 6`. The default `npm run build` remains the native workflow. The experiment branch does not deploy to Pages.
 
 In the recorded six-run comparison, total build medians were **8.923 s → 3.980 s on Windows** and **2.859 s → 1.000 s in Ubuntu CI** (A → B). Both variants produced the same measured artifact sizes and passed the same 30 behavior tests. See the [full results and limitations](docs/build-ab.md#recorded-results--september-3-2026) for phase timings, raw data, and the exact measured commit.
+
+Those measurements describe commit `74623c8`, before the explicit declaration-contract refactor. The current code has additional boundary tests and includes declaration copying in the native emission phase; the historical numbers are not measurements of the current tree.
 
 ## Exploring the compiler's limits
 
@@ -171,6 +175,17 @@ Placement takes O(number of cells) time and needs no repeated attempts to place 
 The application uses a functional core for game rules and derived presentation, with objects owning session state, timing, persistence, DOM elements, and input lifetimes. `GameSession` coordinates the pure engine and injected services; `MinesweeperApp`, `AppView`, `BoardView`, and `InputController` own distinct UI responsibilities. Read the [architecture guide](docs/architecture.md) for the dependency diagram, move lifecycle, pause rules, and commenting conventions.
 
 Run `npm run format` to apply the pinned formatter. `npm run format:check` is included in local checks and CI.
+
+### Explicit type contracts
+
+This project declares named interfaces and type aliases in `src/types/*.d.ts`, grouped by domain: game, session, storage, localization, icons, and UI. Implementation modules contain behavior and import these contracts explicitly. The files are modules, so they do not add application types to the global namespace.
+
+- Business APIs use concrete models and small unions. For example, a `Preference` pairs a language key with a `Language` value, while `FormSubmission` pairs each form kind with its own payload.
+- Message tables implement an explicit `Messages` interface. Types are not inferred from a particular translation or assembled with mapped/conditional types.
+- Persistence decoders turn serialized JSON into `GameSnapshot`, `StoredSession`, and `Score` values. A recursive JSON value union stays inside the parsing boundary; it never becomes a business API parameter. Domain values are constructed after validation instead of asserted onto parsed objects.
+- `InputController` decodes DOM attributes, key names, and form data before calling typed application operations. Runtime validation remains necessary for browser input and stored data.
+
+`npm run check:contracts` enforces module-scoped declaration files and rejects application `any`, `unknown`, mapped types, and conditional types. It uses the legacy package's syntax parser only for this style check; TypeScript 7 remains the default checker and emitter. Compile-only negative probes also ensure both compilers reject invalid preference, form, and UI-command combinations. Synthetic compiler stress workloads remain separate under `scripts/` and `.bench/`.
 
 ### Source layout and verification
 

@@ -38,13 +38,7 @@ export async function buildPipeline(variant) {
   const check = timedCommand(COMPILERS[variant], ['-p', 'tsconfig.json', '--extendedDiagnostics'])
   const emit =
     variant === 'native'
-      ? timedCommand(COMPILERS.native, [
-          '-p',
-          'tsconfig.app.json',
-          '--outDir',
-          '.bench/ab/native/app',
-          '--extendedDiagnostics',
-        ])
+      ? timedCommand('scripts/compile.mjs', ['.bench/ab/native/app', '--extendedDiagnostics'])
       : null
   const bundle = timedCommand('node_modules/vite/bin/vite.js', ['build', '--mode', `ab-${variant}`])
   const totalMs = performance.now() - start
@@ -55,6 +49,7 @@ export async function buildPipeline(variant) {
   if (variant === 'native') {
     await stat('.bench/ab/native/app/game/engine.js')
     await stat('.bench/ab/native/app/game/engine.d.ts')
+    await stat('.bench/ab/native/app/types/game.d.ts')
   }
 
   return { variant, check, emit, bundle, totalMs, artifacts }

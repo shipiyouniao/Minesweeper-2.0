@@ -1,7 +1,8 @@
 import { GameSession } from './application/game-session.js'
 import { languageOf } from './i18n.js'
 import { BrowserStorage, browserRuntime } from './platform/browser.js'
-import { Repository, difficultyOf } from './storage.js'
+import { Repository } from './storage.js'
+import { difficultyOf } from './game/difficulty.js'
 import { MinesweeperApp } from './ui/minesweeper-app.js'
 
 /** Compose browser adapters, application state, and UI at the only startup boundary. */
@@ -16,10 +17,9 @@ function bootstrap(): MinesweeperApp {
   repository.migrateLegacy()
 
   const params = new URLSearchParams(location.search)
-  const language = languageOf(
-    params.get('lang') ?? repository.preference('language') ?? navigator.language,
-  )
-  const mode = difficultyOf(params.get('mode') ?? repository.preference('difficulty'))
+  const preferences = repository.preferences()
+  const language = languageOf(params.get('lang') ?? preferences.language ?? navigator.language)
+  const mode = difficultyOf(params.get('mode') ?? preferences.difficulty)
   const session = new GameSession(repository, browserRuntime, mode)
 
   return new MinesweeperApp(root, session, repository, language)

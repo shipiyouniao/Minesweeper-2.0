@@ -1,35 +1,8 @@
-import {
-  act,
-  createGame,
-  PRESETS,
-  validConfig,
-  type Action,
-  type Config,
-  type Difficulty,
-  type Game,
-} from '../game/engine.js'
-import type { GameRepository, Score } from '../storage.js'
-import { GameClock, type MonotonicNow } from './game-clock.js'
-
-/** The nondeterministic services required by a session, supplied at its boundary. */
-export interface SessionRuntime {
-  readonly now: MonotonicNow
-  /** Generate a fresh board seed without putting randomness in the game rules. */
-  randomSeed(): number
-  /** Identify a result so saving a new nickname updates the same record. */
-  createId(): string
-  /** Supply a calendar timestamp for the leaderboard, separately from game time. */
-  date(): string
-}
-
-/** Read-only application state consumed by the view. */
-export interface SessionState {
-  readonly game: Game
-  readonly mode: Difficulty
-  readonly elapsed: number
-  readonly paused: boolean
-  readonly currentScore: Score | null
-}
+import type { Action, Config, Difficulty, Game } from '../types/game.js'
+import type { GameRepository, Score } from '../types/storage.js'
+import type { SessionRuntime, SessionState } from '../types/session.js'
+import { act, createGame, PRESETS, validConfig } from '../game/engine.js'
+import { GameClock } from './game-clock.js'
 
 const DEFAULT_CUSTOM: Config = { width: 12, height: 12, mines: 20 }
 
@@ -124,7 +97,7 @@ export class GameSession {
 
     this.mode = mode
     this.install(next, saved?.elapsed ?? 0)
-    this.repository.setPreference('difficulty', mode)
+    this.repository.setPreference({ key: 'difficulty', value: mode })
   }
 
   /** Replace the current board with a new seed while retaining its dimensions. */
@@ -204,7 +177,7 @@ export class GameSession {
     this.currentScore = { ...this.currentScore, name }
 
     this.repository.record(this.mode, this.currentScore)
-    this.repository.setPreference('name', name)
+    this.repository.setPreference({ key: 'name', value: name })
   }
 
   /** Resolve a preset or the initial custom-practice dimensions. */
@@ -229,11 +202,11 @@ export class GameSession {
 
   /** Capture a preset win once; the engine rejects later actions on a finished game. */
   private recordWin(): void {
-    const nickname = this.repository.preference('name')
+    const nickname = this.repository.preferences().name
 
     this.currentScore = {
       id: this.runtime.createId(),
-      name: typeof nickname === 'string' ? nickname : 'Player',
+      name: nickname,
       milliseconds: this.clock.elapsed,
       date: this.runtime.date(),
     }

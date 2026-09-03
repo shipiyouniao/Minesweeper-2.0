@@ -1,9 +1,12 @@
+import type { Difficulty, RankedDifficulty } from '../types/game.js'
+import type { Language } from '../types/localization.js'
+import type { GameRepository } from '../types/storage.js'
+import type { InputActions, UiCommand, NavigationKey, FormSubmission } from '../types/ui.js'
 import { GameSession } from '../application/game-session.js'
-import { validConfig, type Difficulty } from '../game/engine.js'
-import { languageOf, translations, type Language } from '../i18n.js'
-import { difficultyOf, type GameRepository } from '../storage.js'
+import { validConfig } from '../game/engine.js'
+import { translations } from '../i18n.js'
 import { AppView } from './app-view.js'
-import { InputController, type InputActions } from './input-controller.js'
+import { InputController } from './input-controller.js'
 import {
   customTemplate,
   helpTemplate,
@@ -18,10 +21,10 @@ export class MinesweeperApp implements InputActions {
   private readonly repository: GameRepository
   private readonly view: AppView
   private readonly input: InputController
-  private readonly ticker: ReturnType<typeof setInterval>
+  private readonly ticker: number
   private language: Language
   private flagMode = false
-  private recordMode: Exclude<Difficulty, 'custom'>
+  private recordMode: RankedDifficulty
 
   /** Mount a complete app with explicit session, repository, and locale dependencies. */
   constructor(
@@ -38,7 +41,7 @@ export class MinesweeperApp implements InputActions {
     this.input = new InputController(root, this)
 
     this.mount(true)
-    this.ticker = setInterval(this.tick, 1000)
+    this.ticker = window.setInterval(this.tick, 1000)
   }
 
   /** Expose native modal state to the input adapter's shortcut guard. */
@@ -61,7 +64,7 @@ export class MinesweeperApp implements InputActions {
   }
 
   /** Route named UI commands to a focused application operation. */
-  command(action: string): void {
+  command(action: UiCommand): void {
     switch (action) {
       case 'help':
         this.showDialog(helpTemplate(this.language))
@@ -91,13 +94,13 @@ export class MinesweeperApp implements InputActions {
   }
 
   /** Open custom configuration or switch to another difficulty's saved session. */
-  selectDifficulty(value: string): void {
+  selectDifficulty(value: Difficulty): void {
     if (value === 'custom') {
       this.showDialog(customTemplate(this.language, this.session.state.game.config))
       return
     }
 
-    const next = difficultyOf(value)
+    const next = value
 
     if (next !== this.session.state.mode) {
       this.session.changeDifficulty(next)
@@ -106,28 +109,22 @@ export class MinesweeperApp implements InputActions {
   }
 
   /** Change the records tab without replacing the current game or dialog pause. */
-  selectRecords(value: string): void {
-    if (value === 'easy' || value === 'medium' || value === 'expert') {
-      this.recordMode = value
-      this.showRecords()
-    }
+  selectRecords(value: RankedDifficulty): void {
+    this.recordMode = value
+    this.showRecords()
   }
 
   /** Rebuild translated labels while preserving the active game and board focus. */
-  selectLanguage(value: string): void {
-    this.language = languageOf(value)
-    this.repository.setPreference('language', this.language)
+  selectLanguage(value: Language): void {
+    this.language = value
+    this.repository.setPreference({ key: 'language', value: this.language })
     this.mount(false)
   }
 
   /** Validate user-entered values before passing them into session operations. */
-  submit(form: string, data: FormData): void {
-    if (form === 'custom-form') {
-      const config = {
-        width: Number(data.get('width')),
-        height: Number(data.get('height')),
-        mines: Number(data.get('mines')),
-      }
+  submit(submission: FormSubmission): void {
+    if (submission.kind === 'custom') {
+      const config = submission.config
 
       if (!validConfig(config)) {
         this.view.showCustomError(translations[this.language].invalid)
@@ -136,8 +133,8 @@ export class MinesweeperApp implements InputActions {
 
       this.session.changeDifficulty('custom', config)
       this.mount(true)
-    } else if (form === 'name-form') {
-      this.session.renameRecord(String(data.get('name') ?? ''))
+    } else {
+      this.session.renameRecord(submission.name)
       this.view.closeDialog()
     }
   }
@@ -148,7 +145,7 @@ export class MinesweeperApp implements InputActions {
   }
 
   /** Forward navigation while keeping keyboard geometry independent of game rules. */
-  navigate(index: number, key: string): boolean {
+  navigate(index: number, key: NavigationKey): boolean {
     return this.view.navigate(index, key)
   }
 

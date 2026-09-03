@@ -1,4 +1,6 @@
-const paths = {
+import type { Icon, IconPaths } from './types/icons.js'
+
+const paths: IconPaths = {
   flag: '<path d="M6 21V4m0 0c4-4 8 4 13 0v10c-5 4-9-4-13 0"/><path d="M3 21h7"/>',
   mine: '<circle cx="12" cy="12" r="5"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M5 5l2 2m10 10 2 2M5 19l2-2M17 7l2-2"/>',
   reset: '<path d="M4 10a8 8 0 1 1 1 8M4 4v6h6"/>',
@@ -15,8 +17,7 @@ const paths = {
   leaf: '<path d="M20 3C9 2 3 7 5 14c2 7 15 5 15-11ZM4 21 15 10"/>',
   globe:
     '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>',
-} as const
-export type Icon = keyof typeof paths
+}
 /** Render an original decorative SVG; accessible text belongs to its parent control. */
 export function icon(name: Icon): string {
   return `<svg class="icon icon-${name}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`

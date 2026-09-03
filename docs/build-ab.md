@@ -17,7 +17,9 @@ Vite performs TypeScript transpilation with its own transformer; it does not inv
 
 B exercises the project's native-emission architecture, including declarations and source maps. That extra emission performs application checking again. Its measured total includes this cost; the experiment does not disguise it as a pure compiler comparison or subtract it from the result.
 
-`typescript-legacy` is an npm alias pinned to `typescript@6.0.3`, used only for the A/B baseline and legacy test run. The default development/build/test commands still explicitly invoke `node_modules/typescript/bin/tsc` from TypeScript 7. Explicit paths avoid ambiguity from two packages exposing a command named `tsc`.
+`typescript-legacy` is an npm alias pinned to `typescript@6.0.3`, used for the A/B baseline, legacy test run, and syntax-only contract-style checker. The default development/build/test commands still explicitly invoke `node_modules/typescript/bin/tsc` from TypeScript 7. Explicit paths avoid ambiguity from two packages exposing a command named `tsc`.
+
+The current native emission phase invokes `scripts/compile.mjs`, including wrapper startup and copying authored `src/types/*.d.ts` contracts beside the emitted declarations. The captured results below predate this contract refactor and measure the original direct compiler invocation. Rerun both variants to measure the current source and pipeline; do not treat the historical results as current timings.
 
 ## Reproduce
 

@@ -1,5 +1,5 @@
-import type { SessionRuntime } from '../application/game-session.js'
-import type { StorageLike } from '../storage.js'
+import type { SessionRuntime } from '../types/session.js'
+import type { StorageLike } from '../types/storage.js'
 
 /** Defers localStorage access until an operation that Repository can safely catch. */
 export class BrowserStorage implements StorageLike {

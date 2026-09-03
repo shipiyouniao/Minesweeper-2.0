@@ -1,7 +1,9 @@
+import type { StorageLike } from '../src/types/storage.js'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { act, createGame, PRESETS } from '../src/game/engine.js'
-import { Repository, difficultyOf, type Score, type StorageLike } from '../src/storage.js'
+import { Repository } from '../src/storage.js'
+import { difficultyOf } from '../src/game/difficulty.js'
 import { languageOf, translations } from '../src/i18n.js'
 import { MemoryStorage } from './helpers.js'
 
@@ -52,7 +54,8 @@ test('leaderboard is numeric, bounded, deduplicated and supports renaming', () =
   const scores = repo.scores('easy')
   assert.equal(scores.length, 10)
   assert.equal(scores[0]?.milliseconds, 1000)
-  const first = scores[0] as Score
+  const first = scores[0]
+  assert.ok(first)
   repo.record('easy', { ...first, name: 'Renamed' })
   assert.equal(repo.scores('easy').length, 10)
   assert.equal(repo.scores('easy')[0]?.name, 'Renamed')
@@ -88,4 +91,20 @@ test('old language and difficulty links map to the new edition', () => {
       Object.keys(translations[language]).sort(),
       Object.keys(translations.zh).sort(),
     )
+})
+
+test('preferences expose normalized fields and preserve the existing serialized keys', () => {
+  const storage = new MemoryStorage()
+  const repo = new Repository(storage)
+  assert.deepEqual(repo.preferences(), { language: null, difficulty: null, name: 'Player' })
+  repo.setPreference({ key: 'language', value: 'ja' })
+  repo.setPreference({ key: 'difficulty', value: 'expert' })
+  repo.setPreference({ key: 'name', value: '  Player Two  ' })
+  assert.deepEqual(repo.preferences(), { language: 'ja', difficulty: 'expert', name: 'Player Two' })
+  assert.equal(storage.getItem('minesweeper.v3.preference.language'), '"ja"')
+
+  storage.setItem('minesweeper.v3.preference.language', '{"language":"en"}')
+  storage.setItem('minesweeper.v3.preference.difficulty', '"invalid"')
+  storage.setItem('minesweeper.v3.preference.name', 'false')
+  assert.deepEqual(repo.preferences(), { language: null, difficulty: null, name: 'Player' })
 })

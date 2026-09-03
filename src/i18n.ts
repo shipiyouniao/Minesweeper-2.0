@@ -1,6 +1,6 @@
-export type Language = 'zh' | 'en' | 'ja'
+import type { Language, Messages, Translations } from './types/localization.js'
 
-const zh = {
+const zh: Messages = {
   title: '扫雷',
   tagline: '给大脑，\n留一块空地。',
   intro: '翻开未知，标记可能。用一点耐心，把每一块小小的确定找出来。',
@@ -79,8 +79,7 @@ const zh = {
   confirmTitle: '开始一张新棋盘？',
   confirmNote: '当前难度未完成的进度会被替换。',
   scrollHint: '棋盘较宽时，可横向滑动查看。',
-} as const
-export type Messages = { [Key in keyof typeof zh]: string }
+}
 
 const en: Messages = {
   title: 'Minesweeper',
@@ -256,20 +255,30 @@ const ja: Messages = {
   scrollHint: '広い盤面は横にスクロールできます。',
 }
 
-export const translations = { zh, en, ja } satisfies Record<Language, Messages>
-/** Normalize browser language tags and the original edition's Japanese alias. */
-export function languageOf(value: unknown): Language {
-  if (typeof value !== 'string') {
-    return 'zh'
+export const translations: Translations = { zh, en, ja }
+
+/** Recognize supported locale tags and the original Japanese URL alias. */
+export function parseLanguage(value: string | null): Language | null {
+  if (value === null) {
+    return null
   }
 
-  if (value.startsWith('en')) {
-    return 'en'
-  }
+  const locale = value.toLowerCase().split(/[-_]/)[0]
 
-  if (value.startsWith('ja') || value === 'jp') {
-    return 'ja'
+  switch (locale) {
+    case 'zh':
+      return 'zh'
+    case 'en':
+      return 'en'
+    case 'ja':
+    case 'jp':
+      return 'ja'
+    default:
+      return null
   }
+}
 
-  return 'zh'
+/** Apply the default language only after boundary normalization. */
+export function languageOf(value: string | null): Language {
+  return parseLanguage(value) ?? 'zh'
 }

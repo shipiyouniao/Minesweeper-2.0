@@ -1,8 +1,12 @@
-import { PRESETS, type Config, type Difficulty } from '../game/engine.js'
-import { translations, type Language, type Messages } from '../i18n.js'
+import { DIFFICULTIES, RANKED_DIFFICULTIES } from '../game/difficulty.js'
+import type { HelpStep } from '../types/ui.js'
+import type { Config, Difficulty, RankedDifficulty } from '../types/game.js'
+import type { Language, Messages } from '../types/localization.js'
+import type { Score } from '../types/storage.js'
+import type { SessionState } from '../types/session.js'
+import { PRESETS } from '../game/engine.js'
+import { translations } from '../i18n.js'
 import { icon } from '../icons.js'
-import type { Score } from '../storage.js'
-import type { SessionState } from '../application/game-session.js'
 import { escapeHtml, formatTime } from './presentation.js'
 
 /** Render the static application shell from state; event binding belongs to the view. */
@@ -61,7 +65,7 @@ export function appTemplate(state: SessionState, language: Language, flagMode: b
           </button>
         </div>
         <div class="difficulty-tabs" role="group" aria-label="${t.difficulty}">
-          ${(['easy', 'medium', 'expert', 'custom'] as const).map((key) => difficultyButton(key, mode, t)).join('')}
+          ${DIFFICULTIES.map((key) => difficultyButton(key, mode, t)).join('')}
         </div>
         <div class="game-card">
           <div class="score-strip">
@@ -163,13 +167,19 @@ export function appTemplate(state: SessionState, language: Language, flagMode: b
 /** Explain the rules using the currently selected translation. */
 export function helpTemplate(language: Language): string {
   const t = translations[language]
+  const steps: readonly HelpStep[] = [
+    { title: t.stepOne, note: t.stepOneNote },
+    { title: t.stepTwo, note: t.stepTwoNote },
+    { title: t.stepThree, note: t.stepThreeNote },
+    { title: t.stepFour, note: t.stepFourNote },
+  ]
 
   return /* HTML */ `
     <p class="eyebrow">HOW TO PLAY</p>
     <h2 id="dialog-title">${t.howTitle}</h2>
     <p class="dialog-intro">${t.howIntro}</p>
     <ol class="help-list">
-      ${(['One', 'Two', 'Three', 'Four'] as const).map((key, index) => helpStep(key, index, t)).join('')}
+      ${steps.map((step, index) => helpStep(step, index)).join('')}
     </ol>
     <p class="safe-note">${icon('check')}${t.readyNote}</p>
   `
@@ -178,7 +188,7 @@ export function helpTemplate(language: Language): string {
 /** Render local records with escaped player names and locale-aware dates. */
 export function recordsTemplate(
   language: Language,
-  recordMode: Exclude<Difficulty, 'custom'>,
+  recordMode: RankedDifficulty,
   records: readonly Score[],
 ): string {
   const t = translations[language]
@@ -188,7 +198,7 @@ export function recordsTemplate(
     <h2 id="dialog-title">${t.records}</h2>
     <p class="dialog-intro">${t.recordsNote}</p>
     <div class="record-tabs">
-      ${(['easy', 'medium', 'expert'] as const).map((key) => recordTab(key, recordMode, t)).join('')}
+      ${RANKED_DIFFICULTIES.map((key) => recordTab(key, recordMode, t)).join('')}
     </div>
     ${recordsTable(language, records, t)}
   `
@@ -298,29 +308,21 @@ function difficultyButton(key: Difficulty, selected: Difficulty, messages: Messa
   `
 }
 
-/** Render one numbered help item from a compile-checked translation key pair. */
-function helpStep(
-  key: 'One' | 'Two' | 'Three' | 'Four',
-  index: number,
-  messages: Messages,
-): string {
+/** Render one numbered help item from explicit translated content. */
+function helpStep(step: HelpStep, index: number): string {
   return /* HTML */ `
     <li>
       <span>${String(index + 1).padStart(2, '0')}</span>
       <div>
-        <h3>${messages[`step${key}`]}</h3>
-        <p>${messages[`step${key}Note`]}</p>
+        <h3>${step.title}</h3>
+        <p>${step.note}</p>
       </div>
     </li>
   `
 }
 
 /** Render one local-records tab without changing the active board's difficulty. */
-function recordTab(
-  key: Exclude<Difficulty, 'custom'>,
-  selected: Difficulty,
-  messages: Messages,
-): string {
+function recordTab(key: RankedDifficulty, selected: Difficulty, messages: Messages): string {
   return /* HTML */ `
     <button data-record-mode="${key}" aria-pressed="${selected === key}">${messages[key]}</button>
   `
