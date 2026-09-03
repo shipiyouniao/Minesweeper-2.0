@@ -4,20 +4,30 @@
   "private": true,
   "type": "module",
   "description": "A quiet game of logic. Minesweeper rebuilt with native TypeScript 7.",
-  "engines": { "node": "^22.12.0 || >=24.0.0" },
+  "engines": {
+    "node": "^22.12.0 || >=24.0.0"
+  },
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "typecheck": "tsc -p tsconfig.json",
-    "compile": "tsc -p tsconfig.app.json",
+    "typecheck": "node node_modules/typescript/bin/tsc -p tsconfig.json",
+    "compile": "node node_modules/typescript/bin/tsc -p tsconfig.app.json",
     "build": "npm run compile && vite build",
     "preview": "vite preview",
-    "test": "tsc -p tsconfig.test.json && node --test .native/tests/tests/*.test.js",
-    "check": "npm run typecheck && npm test && npm run build",
-    "bench:types": "node scripts/bench-types.mjs"
+    "test": "node node_modules/typescript/bin/tsc -p tsconfig.test.json && node --test .native/tests/tests/*.test.js",
+    "check": "npm run format:check && npm run typecheck && npm test && npm run build",
+    "bench:types": "node scripts/bench-types.mjs",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "test:legacy": "node node_modules/typescript-legacy/bin/tsc -p tsconfig.test.json --outDir .native/tests-legacy && node --test .native/tests-legacy/tests/*.test.js",
+    "build:legacy": "node scripts/build-variant.mjs legacy",
+    "build:native": "node scripts/build-variant.mjs native",
+    "bench:build": "node scripts/bench-build.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",
+    "prettier": "3.9.6",
     "typescript": "7.0.2",
+    "typescript-legacy": "npm:typescript@6.0.3",
     "vite": "^8.2.2"
   }
 }

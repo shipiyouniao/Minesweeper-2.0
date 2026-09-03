@@ -1,0 +1,42 @@
+name: TypeScript build A/B
+
+on:
+  push:
+    branches: [refactor/oop-fp-ts7-ab]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: typescript-ab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          cache: npm
+      - run: npm ci
+      - run: npm audit
+      - run: npm run check
+      - run: node scripts/verify-build.mjs
+      - name: Run the same behavior tests with the legacy compiler
+        run: npm run test:legacy
+      - name: Compare both complete pipelines on the same runner
+        run: npm run bench:build -- --runs 6
+      - uses: actions/upload-artifact@v4
+        with:
+          name: typescript-ab-${{ github.sha }}
+          path: |
+            .bench/ab/results.json
+            .bench/ab/report.md
+            .bench/ab/legacy/dist
+            .bench/ab/native/dist
+          include-hidden-files: true

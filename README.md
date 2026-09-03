@@ -21,7 +21,7 @@ The questions behind the experiment are:
 
 The native TypeScript compiler originated as the Go port commonly called **`tsgo`**. For TypeScript 7 RC and later, the official command is **`tsc`**; `tsgo` was the command supplied by the earlier native-preview package. See [Microsoft's native compiler repository notice](https://github.com/microsoft/typescript-go).
 
-Here, `typescript@7.0.2` is pinned in `package.json` and the lockfile. Its `tsc` launcher resolves and executes a platform-native compiler binary. The project does not install the old JavaScript compiler as a fallback.
+Here, `typescript@7.0.2` is pinned in `package.json` and the lockfile. Its `tsc` launcher resolves and executes a platform-native compiler binary. The default workflow explicitly invokes this compiler. A separately named TypeScript 6 package is installed only for the A/B experiment, never as a fallback.
 
 The native compiler does more than run a separate type-check command:
 
@@ -44,15 +44,15 @@ Tests
 
 `index.html` imports `.native/app/main.js`. Vite therefore bundles the JavaScript emitted by TypeScript 7 instead of independently transpiling the application's TypeScript source. Vite remains responsible for the development server, asset processing, and production bundling; it does not replace the native compiler's role.
 
-| Area | How this repository exercises it |
-| --- | --- |
-| Strict checking | Application code, tests, and Vite configuration are checked together with `tsconfig.json`. |
-| Application emission | `tsconfig.app.json` emits JavaScript, source maps, and declarations into `.native/app/`. |
-| Development watch | The development script completes an initial native compile, then runs the compiler in watch mode alongside Vite. |
-| Test compilation | `tsconfig.test.json` emits Node-compatible tests and their source dependencies before `node --test` executes them. |
-| Production integration | Vite bundles the native-emitted application; a separate script checks the output and Pages asset paths. |
-| Diagnostic correctness | The benchmark includes an invalid assignment that must be rejected with `TS2322`. |
-| Scaling behavior | Generated workloads compare large cross-module type aggregation with the same modules checked without that aggregation. |
+| Area                   | How this repository exercises it                                                                                        |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Strict checking        | Application code, tests, and Vite configuration are checked together with `tsconfig.json`.                              |
+| Application emission   | `tsconfig.app.json` emits JavaScript, source maps, and declarations into `.native/app/`.                                |
+| Development watch      | The development script completes an initial native compile, then runs the compiler in watch mode alongside Vite.        |
+| Test compilation       | `tsconfig.test.json` emits Node-compatible tests and their source dependencies before `node --test` executes them.      |
+| Production integration | Vite bundles the native-emitted application; a separate script checks the output and Pages asset paths.                 |
+| Diagnostic correctness | The benchmark includes an invalid assignment that must be rejected with `TS2322`.                                       |
+| Scaling behavior       | Generated workloads compare large cross-module type aggregation with the same modules checked without that aggregation. |
 
 ### Compiler settings and migration choices
 
@@ -73,19 +73,25 @@ npm run dev
 
 Open **http://127.0.0.1:5173/Minesweeper-2.0/**. The development command performs the first native compile before starting the server. Subsequent TypeScript edits are compiled by the native watcher and served through Vite.
 
-| Command | Purpose |
-| --- | --- |
-| `npm run typecheck` | Check application code, tests, and Vite configuration without emitting files. |
-| `npm run compile` | Emit application JavaScript, source maps, and declarations with TypeScript 7. |
-| `npm test` | Compile tests with TypeScript 7 and execute them with Node's built-in test runner. |
-| `npm run build` | Compile the application, then bundle it into `dist/` with Vite. |
-| `npm run preview` | Serve the production build locally after building. |
-| `npm run check` | Run type checking, tests, and the production build in sequence. |
-| `node scripts/verify-build.mjs` | Verify the built assets, native output, and GitHub Pages paths. |
-| `npm audit` | Check the installed dependency tree for known advisories. |
-| `npm run bench:types` | Run the real-project and synthetic type-checking experiments. |
+| Command                         | Purpose                                                                            |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| `npm run typecheck`             | Check application code, tests, and Vite configuration without emitting files.      |
+| `npm run compile`               | Emit application JavaScript, source maps, and declarations with TypeScript 7.      |
+| `npm test`                      | Compile tests with TypeScript 7 and execute them with Node's built-in test runner. |
+| `npm run build`                 | Compile the application, then bundle it into `dist/` with Vite.                    |
+| `npm run preview`               | Serve the production build locally after building.                                 |
+| `npm run check`                 | Run formatting checks, type checking, tests, and the production build.             |
+| `node scripts/verify-build.mjs` | Verify the built assets, native output, and GitHub Pages paths.                    |
+| `npm audit`                     | Check the installed dependency tree for known advisories.                          |
+| `npm run bench:types`           | Run the real-project and synthetic type-checking experiments.                      |
 
-There are no runtime npm dependencies. TypeScript, Vite, and Node type definitions are development dependencies.
+There are no runtime npm dependencies. The compilers, Vite, Node type definitions, and Prettier are development dependencies.
+
+## Comparing the old and native build workflows
+
+The [build A/B experiment](docs/build-ab.md) compares TypeScript 6 checking plus Vite source bundling against TypeScript 7 checking/emission plus Vite JavaScript bundling. Both use the same refactored application, strict settings, lockfile, assets, and bundler. It records check, emit, bundle, and total wall times plus artifact sizes, with repeated alternating runs locally and in branch CI.
+
+Use `npm run build:legacy`, `npm run build:native`, and `npm run bench:build -- --runs 6`. The default `npm run build` remains the native workflow. The experiment branch does not deploy to Pages.
 
 ## Exploring the compiler's limits
 
@@ -104,12 +110,12 @@ Each timing run has a 120-second timeout. Compilation failures and timeouts fail
 
 Captured on **September 3, 2026**, using Windows x64, Node.js 22.18.0, and TypeScript 7.0.2:
 
-| Workload | Median wall time across 3 runs |
-| --- | ---: |
-| Actual application, tests, Vite configuration, and library types | 1.372 s |
-| 250 generated modules / 10,000 mapped event variants | 1.615 s |
-| 1,000 generated modules / 40,000 mapped event variants | 20.971 s |
-| The same 1,000 modules without the cross-module mega-union | 3.101 s |
+| Workload                                                         | Median wall time across 3 runs |
+| ---------------------------------------------------------------- | -----------------------------: |
+| Actual application, tests, Vite configuration, and library types |                        1.372 s |
+| 250 generated modules / 10,000 mapped event variants             |                        1.615 s |
+| 1,000 generated modules / 40,000 mapped event variants           |                       20.971 s |
+| The same 1,000 modules without the cross-module mega-union       |                        3.101 s |
 
 The useful observation is the difference between the final two workloads: **type aggregation is a substantial source of checking work in this example**. File count alone does not explain the result. The full experiment, diagnostics, and memory observations are documented in [the experiment notes](docs/typescript7.md), with [the captured JSON report](docs/typescript7-benchmark.json) available for inspection.
 
@@ -132,14 +138,14 @@ The repository is a starting point for further TS7 experiments. Any broader comp
 - Pause, automatic pause when leaving the page, saved progress per difficulty, and local top-10 records.
 - A static website that runs without an account, application server, or NW.js installation.
 
-| Action | Mouse | Touch / keyboard |
-| --- | --- | --- |
-| Reveal a cell | Left-click | Tap; Space or Enter |
-| Toggle a flag | Right-click | Long press; flag mode; F |
+| Action                  | Mouse                   | Touch / keyboard                      |
+| ----------------------- | ----------------------- | ------------------------------------- |
+| Reveal a cell           | Left-click              | Tap; Space or Enter                   |
+| Toggle a flag           | Right-click             | Long press; flag mode; F              |
 | Chord neighboring cells | Click a revealed number | Tap a revealed number; Space or Enter |
-| Move board focus | — | Arrow keys, Home / End |
-| Pause or resume | Pause control | P |
-| Start a new game | New-game control | N |
+| Move board focus        | —                       | Arrow keys, Home / End                |
+| Pause or resume         | Pause control           | P                                     |
+| Start a new game        | New-game control        | N                                     |
 
 Chording opens neighboring cells when the adjacent flag count matches the number. Incorrect flags can still cause a loss. Wide boards scroll horizontally on small screens. Custom boards are for practice and do not enter the preset-difficulty rankings.
 
@@ -158,18 +164,24 @@ The game seed comes from browser `crypto.getRandomValues`. A seeded PRNG drives 
 
 Placement takes O(number of cells) time and needs no repeated attempts to place a mine in an unused position. Blank-region expansion uses an iterative queue to avoid recursive stack growth. A safe opening does **not** guarantee that every board can be solved without guessing.
 
-## Source layout and verification
+## OOP + FP architecture
 
-| Location | Responsibility |
-| --- | --- |
-| `src/game/engine.ts` | Pure, immutable game transitions, seeded placement, flood fill, chording, and snapshot validation. |
-| `src/storage.ts` | Local progress, records, legacy migration, and graceful handling of unavailable storage. |
-| `src/main.ts` | Browser interaction, rendering, timing, dialogs, keyboard and touch controls. |
-| `src/i18n.ts` | Translations with a shared, compile-checked message shape. |
-| `src/icons.ts`, `src/style.css`, `src/tokens.css` | Original SVG controls and the visual system. |
-| `tests/` | Game-engine and persistence tests compiled by TypeScript 7. |
-| `scripts/` | Native development orchestration, build verification, and compiler experiments. |
-| `docs/` | Experiment notes, captured measurements, and artwork provenance. |
+The application uses a functional core for game rules and derived presentation, with objects owning session state, timing, persistence, DOM elements, and input lifetimes. `GameSession` coordinates the pure engine and injected services; `MinesweeperApp`, `AppView`, `BoardView`, and `InputController` own distinct UI responsibilities. Read the [architecture guide](docs/architecture.md) for the dependency diagram, move lifecycle, pause rules, and commenting conventions.
+
+Run `npm run format` to apply the pinned formatter. `npm run format:check` is included in local checks and CI.
+
+### Source layout and verification
+
+| Location                                          | Responsibility                                                                                     |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `src/game/engine.ts`                              | Pure, immutable game transitions, seeded placement, flood fill, chording, and snapshot validation. |
+| `src/storage.ts`                                  | Local progress, records, legacy migration, and graceful handling of unavailable storage.           |
+| `src/main.ts`                                     | Composition root: connect the browser adapters, session, repository, and UI.                       |
+| `src/i18n.ts`                                     | Translations with a shared, compile-checked message shape.                                         |
+| `src/icons.ts`, `src/style.css`, `src/tokens.css` | Original SVG controls and the visual system.                                                       |
+| `tests/`                                          | Engine, session lifecycle, persistence, and presentation regression tests.                         |
+| `scripts/`                                        | Native development orchestration, build verification, and compiler experiments.                    |
+| `docs/`                                           | Experiment notes, captured measurements, and artwork provenance.                                   |
 
 The engine does not depend on the DOM, clock, or browser storage. That boundary lets tests check game behavior directly and lets saved games regenerate mine positions and clues instead of trusting stored cell data.
 
@@ -186,7 +198,7 @@ npm run check
 node scripts/verify-build.mjs
 ```
 
-Pull requests run validation. Pushes to `main` and manual runs also upload `dist/` and deploy it to GitHub Pages after validation succeeds. The public game is hosted at [shipiyouniao.github.io/Minesweeper-2.0](https://shipiyouniao.github.io/Minesweeper-2.0/).
+Pull requests run validation. Pushes to `main` and manual runs on `main` also upload `dist/` and deploy it to GitHub Pages after validation succeeds. The public game is hosted at [shipiyouniao.github.io/Minesweeper-2.0](https://shipiyouniao.github.io/Minesweeper-2.0/).
 
 For a fork, set **Settings → Pages → Source** to **GitHub Actions**. The current Vite `base` is `/Minesweeper-2.0/`; update `vite.config.ts` and the expected path in `scripts/verify-build.mjs` if the repository name or hosting path changes.
 

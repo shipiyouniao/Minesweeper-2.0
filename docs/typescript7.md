@@ -2,7 +2,7 @@
 
 ## What actually runs
 
-The project pins `typescript@7.0.2`. Its `tsc` launcher resolves and executes the platform-native compiler binary. The old JavaScript TypeScript compiler is not installed as a fallback.
+The project pins `typescript@7.0.2`. Its `tsc` launcher resolves and executes the platform-native compiler binary. Default commands use its explicit package path. TypeScript 6 is separately installed under the `typescript-legacy` alias for the [build A/B baseline](build-ab.md), never as a fallback.
 
 The native compiler owns strict checking, JavaScript emission, declaration emission, watch mode, and compilation of the tests. `index.html` imports `.native/app/main.js`, so Vite bundles the native compiler's output instead of transpiling the application TypeScript itself. Tests run with Node's built-in test runner after the same compiler emits them.
 
@@ -22,14 +22,16 @@ The benchmark generates files under ignored `.bench/`, runs three fresh compiler
 
 ## September 3, 2026 exploratory sample
 
+This captured sample predates the OOP/FP refactor. Its real-application timing describes that earlier source tree; see the [build A/B study](build-ab.md) for measurements of the refactored application.
+
 Windows x64, Node 22.18.0, TypeScript 7.0.2. This was an interactive development machine with a dev server and other activity, not an isolated benchmark host. The processes were fresh, but filesystem caches were not cleared between runs. Wall time includes the launcher and process startup.
 
-| Workload | Median wall time, 3 runs |
-| --- | ---: |
-| Actual application, tests, Vite config and their library types | 1.372 s |
-| 250 generated modules / 10,000 mapped event variants | 1.615 s |
-| 1,000 generated modules / 40,000 mapped event variants | 20.971 s |
-| Same 1,000 modules without the cross-module mega-union | 3.101 s |
+| Workload                                                       | Median wall time, 3 runs |
+| -------------------------------------------------------------- | -----------------------: |
+| Actual application, tests, Vite config and their library types |                  1.372 s |
+| 250 generated modules / 10,000 mapped event variants           |                  1.615 s |
+| 1,000 generated modules / 40,000 mapped event variants         |                 20.971 s |
+| Same 1,000 modules without the cross-module mega-union         |                  3.101 s |
 
 The 40,000-variant aggregation's final sample reported 19.106 seconds of checking and approximately 362 MiB of compiler memory. Without that aggregation, the final sample reported 1.353 seconds of checking. These are final-sample diagnostics, distinct from the three-run wall-clock medians.
 

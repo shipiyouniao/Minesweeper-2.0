@@ -1,0 +1,7 @@
+node_modules/
+.native/
+.bench/
+dist/
+package-lock.json
+docs/typescript7-benchmark.json
+docs/benchmarks/*.json

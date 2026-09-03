@@ -13,6 +13,7 @@
     "noImplicitOverride": true,
     "verbatimModuleSyntax": true,
     "erasableSyntaxOnly": true,
+    "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": false
   }
