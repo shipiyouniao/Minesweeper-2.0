@@ -1,82 +1,197 @@
-# Minesweeper 2.0
+# Minesweeper 2.0 — A TypeScript 7 Experiment
 
-一个老游戏，一点新模样。用米白、蓝色和一块小棋盘，重新打开当年的扫雷作业。
+A playable Minesweeper game and a practical testbed for the **TypeScript 7 native compiler**. This repository revisits a first-year university project with a minimal interface, original artwork, a deterministic game engine, and a native TypeScript development workflow.
 
-**[直接游玩 →](https://shipiyouniao.github.io/Minesweeper-2.0/)**
+**[Play in your browser →](https://shipiyouniao.github.io/Minesweeper-2.0/)** · [Compiler experiment notes](docs/typescript7.md) · [Captured benchmark results](docs/typescript7-benchmark.json)
 
-- 简约界面和原创素材，支持桌面与手机。
-- 中文、English、日本語；初级 9×9 / 10 雷、中级 16×16 / 40 雷、高级 30×16 / 99 雷，以及自定义练习棋盘。
-- 首次点击及周围八格始终安全；空白区域自动展开；支持插旗与数字连开。
-- 暂停、离开页面自动暂停、按难度恢复进度、浏览器本地前 10 名纪录。
-- 纯静态网页，不需要登录、服务器或 NW.js。
+## Why this project exists
 
-## 本地运行
+The renovation is an experiment in using TypeScript 7 for an entire small application: editing, strict type checking, JavaScript and declaration emission, watch mode, tests, production builds, and deployment. Minesweeper provides real state transitions, browser interaction, persistence, localization, and test cases to exercise that workflow.
 
-Node.js 22.12+（22 系列）或 24+。
+The questions behind the experiment are:
+
+- Can the native compiler own the application's compilation pipeline from development through CI?
+- What changes does a strict, native-compiled TypeScript codebase require in everyday development?
+- How does checking behave as the workload grows from the actual game to hundreds or thousands of generated modules?
+- How much does type structure, especially large mapped discriminated unions, affect that workload?
+
+**This repository is an experimental application, not a claim that TypeScript 7 itself is a preview release.** It pins `typescript@7.0.2`, the released native compiler package. The game is available to play, while the repository documents the compiler setup, reproducible experiments, and their limitations.
+
+## TypeScript 7, `tsgo`, and the actual build pipeline
+
+The native TypeScript compiler originated as the Go port commonly called **`tsgo`**. For TypeScript 7 RC and later, the official command is **`tsc`**; `tsgo` was the command supplied by the earlier native-preview package. See [Microsoft's native compiler repository notice](https://github.com/microsoft/typescript-go).
+
+Here, `typescript@7.0.2` is pinned in `package.json` and the lockfile. Its `tsc` launcher resolves and executes a platform-native compiler binary. The project does not install the old JavaScript compiler as a fallback.
+
+The native compiler does more than run a separate type-check command:
+
+```text
+Application
+  src/**/*.ts
+      │ TypeScript 7 native: check + emit
+      ▼
+  .native/app/**/*.js + .d.ts
+      │ Vite: bundle emitted JavaScript and process assets
+      ▼
+  dist/ → GitHub Pages
+
+Tests
+  tests/**/*.ts + tested source modules
+      │ TypeScript 7 native: check + emit
+      ▼
+  .native/tests/ → Node.js built-in test runner
+```
+
+`index.html` imports `.native/app/main.js`. Vite therefore bundles the JavaScript emitted by TypeScript 7 instead of independently transpiling the application's TypeScript source. Vite remains responsible for the development server, asset processing, and production bundling; it does not replace the native compiler's role.
+
+| Area | How this repository exercises it |
+| --- | --- |
+| Strict checking | Application code, tests, and Vite configuration are checked together with `tsconfig.json`. |
+| Application emission | `tsconfig.app.json` emits JavaScript, source maps, and declarations into `.native/app/`. |
+| Development watch | The development script completes an initial native compile, then runs the compiler in watch mode alongside Vite. |
+| Test compilation | `tsconfig.test.json` emits Node-compatible tests and their source dependencies before `node --test` executes them. |
+| Production integration | Vite bundles the native-emitted application; a separate script checks the output and Pages asset paths. |
+| Diagnostic correctness | The benchmark includes an invalid assignment that must be rejected with `TS2322`. |
+| Scaling behavior | Generated workloads compare large cross-module type aggregation with the same modules checked without that aggregation. |
+
+### Compiler settings and migration choices
+
+The shared configuration enables `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitOverride`, unused-variable and parameter checks, switch fallthrough checks, and full library checking (`skipLibCheck: false`). It also uses `verbatimModuleSyntax` and `erasableSyntaxOnly`.
+
+These settings make optional values, indexed access, and runtime/type import boundaries explicit. One concrete migration adjustment was replacing a constructor parameter property with an explicitly declared field and assignment, because the selected `erasableSyntaxOnly` setting rejects parameter properties. That is a consequence of the chosen configuration, not evidence that all TypeScript 7 projects must avoid them.
+
+The application targets ES2023 and modern browsers. Generated JavaScript, declarations, test output, and synthetic workloads stay in ignored directories; source files remain the inputs to the experiment.
+
+## Run locally
+
+Use **Node.js 22.12 or later in the 22.x series, or Node.js 24 or later**, with npm.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-打开 `http://127.0.0.1:5173/Minesweeper-2.0/`。开发命令先运行原生 TypeScript 编译器，再同时启动原生编译 watch 和 Vite。修改 TypeScript 后，浏览器消费的是 TS7 实际生成的 JavaScript。
+Open **http://127.0.0.1:5173/Minesweeper-2.0/**. The development command performs the first native compile before starting the server. Subsequent TypeScript edits are compiled by the native watcher and served through Vite.
+
+| Command | Purpose |
+| --- | --- |
+| `npm run typecheck` | Check application code, tests, and Vite configuration without emitting files. |
+| `npm run compile` | Emit application JavaScript, source maps, and declarations with TypeScript 7. |
+| `npm test` | Compile tests with TypeScript 7 and execute them with Node's built-in test runner. |
+| `npm run build` | Compile the application, then bundle it into `dist/` with Vite. |
+| `npm run preview` | Serve the production build locally after building. |
+| `npm run check` | Run type checking, tests, and the production build in sequence. |
+| `node scripts/verify-build.mjs` | Verify the built assets, native output, and GitHub Pages paths. |
+| `npm audit` | Check the installed dependency tree for known advisories. |
+| `npm run bench:types` | Run the real-project and synthetic type-checking experiments. |
+
+There are no runtime npm dependencies. TypeScript, Vite, and Node type definitions are development dependencies.
+
+## Exploring the compiler's limits
+
+The benchmark script starts with this application's actual type-checking workload, then generates modules containing object types, mapped types, discriminated event unions, and indexed accesses. A global aggregator combines the events into a large union and maps their discriminants into another type. A companion scenario checks the same modules without the global aggregator.
 
 ```sh
-npm run typecheck          # 严格检查应用、测试、Vite 配置
-npm test                   # TS7 编译测试，再由 Node 原生 test runner 执行
-npm run build              # TS7 生成 JS / .d.ts，再交给 Vite 打包
-npm run preview            # 预览生产构建
-npm run check              # typecheck + test + build
-node scripts/verify-build.mjs
-npm audit
-npm run bench:types        # 真实项目 + 合成类型负载 + 错误诊断探针
+npm run bench:types
 npm run bench:types -- --files 2000
 ```
 
-## 操作
+The default largest workload uses 1,000 generated modules. `--files` changes that size. Each timing scenario runs in three fresh compiler processes with native `--extendedDiagnostics`; the script records all wall-clock samples and the final run's diagnostic output in `.bench/results.json`. Generated sources also stay under `.bench/`.
 
-| 操作 | 桌面 | 手机 / 键盘 |
+Each timing run has a 120-second timeout. Compilation failures and timeouts fail the experiment rather than becoming successful timing samples. The separate negative probe must report `TS2322` for an intentionally invalid assignment.
+
+### Recorded exploratory sample
+
+Captured on **September 3, 2026**, using Windows x64, Node.js 22.18.0, and TypeScript 7.0.2:
+
+| Workload | Median wall time across 3 runs |
+| --- | ---: |
+| Actual application, tests, Vite configuration, and library types | 1.372 s |
+| 250 generated modules / 10,000 mapped event variants | 1.615 s |
+| 1,000 generated modules / 40,000 mapped event variants | 20.971 s |
+| The same 1,000 modules without the cross-module mega-union | 3.101 s |
+
+The useful observation is the difference between the final two workloads: **type aggregation is a substantial source of checking work in this example**. File count alone does not explain the result. The full experiment, diagnostics, and memory observations are documented in [the experiment notes](docs/typescript7.md), with [the captured JSON report](docs/typescript7-benchmark.json) available for inspection.
+
+These measurements came from an interactive development machine with other activity. Compiler processes were fresh, filesystem caches were not cleared, and wall time includes startup. They are exploratory measurements, not a controlled performance ranking.
+
+### What remains unproven
+
+- These workloads do not establish the compiler's maximum supported project size. Increasing `--files` explores one particular type shape, not every possible large application.
+- There is no TypeScript 6 baseline here, so the results do not establish a version-to-version speedup.
+- This project exercises CLI checking, emission, declarations, watch mode, and build integration. It does not validate every editor feature, language-service integration, compiler API consumer, framework plugin, or project-reference build.
+- The synthetic global union deliberately creates expensive aggregation. Its behavior should not be generalized to all projects with the same number of files.
+
+The repository is a starting point for further TS7 experiments. Any broader compatibility or performance claim should come with its own reproducible workload and measurements.
+
+## The game
+
+- Minimal ivory-and-blue interface with original artwork, responsive desktop and mobile layouts, and Chinese, English, and Japanese translations.
+- Beginner: 9 × 9 with 10 mines; intermediate: 16 × 16 with 40 mines; expert: 30 × 16 with 99 mines; custom practice boards.
+- A safe first click and safe neighboring cells, automatic blank-region expansion, flags, and number chording.
+- Pause, automatic pause when leaving the page, saved progress per difficulty, and local top-10 records.
+- A static website that runs without an account, application server, or NW.js installation.
+
+| Action | Mouse | Touch / keyboard |
 | --- | --- | --- |
-| 翻开 | 左键 | 轻点；空格或 Enter |
-| 插旗 / 取消 | 右键 | 长按；插旗模式；F |
-| 连开相邻格 | 再点已翻开的数字 | 同左 |
-| 移动焦点 | — | 方向键，Home / End |
-| 暂停 | 暂停按钮 | P |
-| 新一局 | 新一局按钮 | N |
+| Reveal a cell | Left-click | Tap; Space or Enter |
+| Toggle a flag | Right-click | Long press; flag mode; F |
+| Chord neighboring cells | Click a revealed number | Tap a revealed number; Space or Enter |
+| Move board focus | — | Arrow keys, Home / End |
+| Pause or resume | Pause control | P |
+| Start a new game | New-game control | N |
 
-连开要求周围旗帜数与数字相同，插错旗仍会踩雷。大棋盘在手机上可横向滚动。自定义棋盘用于练习，不参与预设难度的纪录排名。
+Chording opens neighboring cells when the adjacent flag count matches the number. Incorrect flags can still cause a loss. Wide boards scroll horizontally on small screens. Custom boards are for practice and do not enter the preset-difficulty rankings.
 
-进度和纪录仅保存在当前浏览器的当前网站来源下，不会跨设备同步。浏览器禁止存储时仍能游玩。旧版 `MinesweeperRank` 排行榜在同一来源下可自动迁移；旧版未完成棋盘不迁移。`game.html` / `menu.html` 旧链接及语言、难度参数仍可跳转到新版本。
+Progress and records are stored in the current browser for the current site origin; they do not synchronize across devices. The game remains playable when storage is unavailable. Legacy `MinesweeperRank` records can migrate on the same origin, but unfinished legacy boards cannot. Old `game.html` and `menu.html` URLs, including supported language and difficulty parameters, redirect to the new application.
 
-## 布雷算法
+## Mine placement: shuffle positions, then select
 
-在首次翻开时，排除该格及其邻格，构造其余位置列表；使用带种子的 Fisher–Yates 洗牌，取前 M 个不同位置布雷，再计算邻格数字。随机索引使用拒绝采样，避免取模偏差。每局种子来自浏览器 `crypto.getRandomValues`。
+The board is generated on the first reveal:
 
-这解决了旧版逐格概率扫描、重复放置及递归重试的问题。布雷复杂度为 O(格子数)，空白展开使用迭代队列。相同种子和首击位置可重现同一布局，便于测试和存档。首击安全不代表整局保证无猜解。
+1. Exclude the clicked cell and all of its neighbors from the candidate positions.
+2. Shuffle the remaining positions with seeded Fisher–Yates.
+3. Select the first M distinct positions for exactly M mines.
+4. Compute the neighboring mine counts.
 
-## TypeScript 7 实验
+The game seed comes from browser `crypto.getRandomValues`. A seeded PRNG drives the shuffle, and bounded random indices use rejection sampling to avoid modulo bias. Given the same configuration, seed, and first-click position, the layout is reproducible for tests and saved games.
 
-固定使用 **`typescript@7.0.2`**。它是 Go 原生编译器的正式发布包，命令名称为 `tsc`；`tsgo` 是原预览包的命令。没有把旧版编译器当成兜底。
+Placement takes O(number of cells) time and needs no repeated attempts to place a mine in an unused position. Blank-region expansion uses an iterative queue to avoid recursive stack growth. A safe opening does **not** guarantee that every board can be solved without guessing.
 
-```text
-src/*.ts → TypeScript 7 native → .native/app/*.js + *.d.ts → Vite → dist/
-tests/*.ts → TypeScript 7 native → .native/tests/ → node --test
+## Source layout and verification
+
+| Location | Responsibility |
+| --- | --- |
+| `src/game/engine.ts` | Pure, immutable game transitions, seeded placement, flood fill, chording, and snapshot validation. |
+| `src/storage.ts` | Local progress, records, legacy migration, and graceful handling of unavailable storage. |
+| `src/main.ts` | Browser interaction, rendering, timing, dialogs, keyboard and touch controls. |
+| `src/i18n.ts` | Translations with a shared, compile-checked message shape. |
+| `src/icons.ts`, `src/style.css`, `src/tokens.css` | Original SVG controls and the visual system. |
+| `tests/` | Game-engine and persistence tests compiled by TypeScript 7. |
+| `scripts/` | Native development orchestration, build verification, and compiler experiments. |
+| `docs/` | Experiment notes, captured measurements, and artwork provenance. |
+
+The engine does not depend on the DOM, clock, or browser storage. That boundary lets tests check game behavior directly and lets saved games regenerate mine positions and clues instead of trusting stored cell data.
+
+The test suite covers exact mine counts, uniqueness, safe openings across seeds and difficulty presets, deterministic layouts, independently calculated adjacency counts, flood fill, flags, winning and losing, correct and incorrect chording, dense and large boards, invalid snapshots, local records, and unavailable storage.
+
+## CI and GitHub Pages
+
+[The workflow](.github/workflows/pages.yml) runs on pull requests, pushes to `main`, and manual dispatch. Its validation job performs:
+
+```sh
+npm ci
+npm audit
+npm run check
+node scripts/verify-build.mjs
 ```
 
-开启 `strict`、`noUncheckedIndexedAccess`、`exactOptionalPropertyTypes`、`erasableSyntaxOnly`、未使用项检查和完整库类型检查。游戏逻辑不依赖 DOM、时钟或存储，界面和存储分别调用纯状态转换。
+Pull requests run validation. Pushes to `main` and manual runs also upload `dist/` and deploy it to GitHub Pages after validation succeeds. The public game is hosted at [shipiyouniao.github.io/Minesweeper-2.0](https://shipiyouniao.github.io/Minesweeper-2.0/).
 
-压测程序可调整模块数量，保存三次独立进程测量、原生 `--extendedDiagnostics` 和负向类型错误校验结果到 `.bench/results.json`。它还对比相同模块在有 / 无跨模块巨型联合类型时的负载。详见 [实验记录](docs/typescript7.md)。
+For a fork, set **Settings → Pages → Source** to **GitHub Actions**. The current Vite `base` is `/Minesweeper-2.0/`; update `vite.config.ts` and the expected path in `scripts/verify-build.mjs` if the repository name or hosting path changes.
 
-参考：[原生编译器官方说明](https://github.com/microsoft/typescript-go)。
+## Artwork and project history
 
-## CI 与 GitHub Pages
+The ceramic-board illustration and SVG icons were created for this renovation. [Artwork notes](docs/artwork.md) document the assets and the complete image-generation prompt. The original application's source and images remain available in Git history.
 
-`.github/workflows/pages.yml` 在 PR 和 main 推送时执行干净安装、依赖审计、类型检查、测试、构建和静态路径校验。只有 main 的检查通过后，才上传 `dist/` 并发布到 GitHub Pages。
-
-仓库 Pages 的来源应设置为 **GitHub Actions**。站点位于 `/Minesweeper-2.0/`，Vite 的 `base` 已匹配此路径。Fork 或改名后，需同步调整 `vite.config.ts` 的 base 和 `scripts/verify-build.mjs` 的校验路径。
-
-## 素材与原版
-
-原创插画、SVG 图标和完整生成提示词记录在 [素材说明](docs/artwork.md)。旧版本的源码与图片仍保存在 Git 历史中。
-
-原项目由 SPYN 制作，作为工程实践作业。延续原版说明：仅供学习参考，非商业用途。
+The original project was created by **SPYN** as an engineering practice assignment. The original usage notice is retained: **for learning and reference, non-commercial use only**.
