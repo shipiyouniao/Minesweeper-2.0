@@ -1,0 +1,150 @@
+import {
+  parseEquipment,
+  parseProfession,
+  parseRelic,
+  parseUpgrade,
+} from '../persistence/variant-decoders.js'
+import type { VariantCellTarget, VariantCommand, VariantInputActions } from '../types/variant-ui.js'
+import { parseNavigation } from './input-parser.js'
+
+/** Convert button data into a finite command and its validated catalog payload. */
+export function parseVariantCommand(value: string): VariantCommand | null {
+  const parts = value.split(':')
+  if (parts.length > 2) return null
+  const [type, id] = parts
+  switch (type) {
+    case 'start':
+    case 'camp':
+    case 'probe':
+    case 'scan':
+    case 'descend':
+    case 'retreat':
+    case 'restart':
+    case 'flag-mode':
+    case 'reveal-mode':
+    case 'sound':
+    case 'pause':
+    case 'confirm':
+    case 'cancel':
+      return id === undefined ? { type } : null
+    case 'profession': {
+      const parsed = parseProfession(id ?? null)
+      return parsed ? { type, value: parsed } : null
+    }
+    case 'equipment': {
+      const parsed = parseEquipment(id ?? null)
+      return parsed ? { type, value: parsed } : null
+    }
+    case 'upgrade': {
+      const parsed = parseUpgrade(id ?? null)
+      return parsed ? { type, value: parsed } : null
+    }
+    case 'relic': {
+      const parsed = parseRelic(id ?? null)
+      return parsed ? { type, value: parsed } : null
+    }
+    default:
+      return null
+  }
+}
+
+/** Decode a cell index and board side without coercing absent attributes into zero. */
+function cellTarget(target: EventTarget | null): VariantCellTarget | null {
+  const cell = target instanceof Element ? target.closest<HTMLElement>('[data-cell]') : null
+  const grid = cell?.closest<HTMLElement>('[data-side]')
+  const side = grid?.dataset['side']
+  const text = cell?.dataset['cell']
+  if ((side !== 'a' && side !== 'b') || text === undefined || !/^\d+$/.test(text)) return null
+  const index = Number(text)
+  return index >= 0 && index < 81 ? { side, index } : null
+}
+
+/** Owns special-mode browser listeners; touch uses the explicit reveal/flag toggle. */
+export class VariantInput {
+  private readonly actions: VariantInputActions
+  private readonly listeners = new AbortController()
+
+  /** Delegate input once so view updates cannot accumulate event handlers. */
+  constructor(root: HTMLElement, actions: VariantInputActions) {
+    this.actions = actions
+    const options = { signal: this.listeners.signal }
+    root.addEventListener('click', this.click, options)
+    root.addEventListener('contextmenu', this.context, options)
+    root.addEventListener('focusin', this.focus, options)
+    root.addEventListener('keydown', this.key, options)
+    root.addEventListener('pointerdown', this.unlock, options)
+    document.addEventListener('visibilitychange', this.visibility, options)
+    window.addEventListener('pagehide', this.suspend, options)
+  }
+
+  /** Release root, document and page lifecycle listeners together. */
+  dispose(): void {
+    this.listeners.abort()
+  }
+
+  /** Route native button clicks and touch taps through decoded application intents. */
+  private readonly click = (event: MouseEvent): void => {
+    const cell = cellTarget(event.target)
+    if (cell) {
+      this.actions.play(cell.side, cell.index)
+      return
+    }
+    const target =
+      event.target instanceof Element ? event.target.closest<HTMLElement>('[data-control]') : null
+    const command = parseVariantCommand(target?.dataset['control'] ?? '')
+    if (command) this.actions.command(command)
+    else if (event.target instanceof Element && event.target.closest('summary, a'))
+      this.actions.feedback('tap')
+  }
+
+  /** Replace the board context menu with a flag action. */
+  private readonly context = (event: MouseEvent): void => {
+    const cell = cellTarget(event.target)
+    if (!cell) return
+    event.preventDefault()
+    this.actions.play(cell.side, cell.index, true)
+  }
+
+  /** Update each grid's roving tab stop without emitting render-induced sounds. */
+  private readonly focus = (event: FocusEvent): void => {
+    const cell = cellTarget(event.target)
+    if (cell) this.actions.focus(cell.side, cell.index)
+  }
+
+  /** Keep native Enter/Space activation while adding arrows, F and Tab feedback. */
+  private readonly key = (event: KeyboardEvent): void => {
+    this.actions.unlock()
+    if (
+      event.key === 'Tab' &&
+      !(event.target instanceof Element && event.target.closest('.language-picker'))
+    )
+      this.actions.feedback('navigate')
+    const cell = cellTarget(event.target)
+    if (!cell || event.altKey || event.ctrlKey || event.metaKey) return
+    const key = event.key.toLowerCase()
+    const navigation = parseNavigation(key)
+
+    if (navigation) {
+      event.preventDefault()
+      this.actions.navigate(cell.side, cell.index, navigation)
+    } else if (key === 'f') {
+      event.preventDefault()
+      this.actions.play(cell.side, cell.index, true)
+    }
+  }
+
+  /** Warm audio inside a pointer gesture, before any later action needs it. */
+  private readonly unlock = (): void => {
+    this.actions.unlock()
+  }
+
+  /** Cover and checkpoint only when the document actually becomes hidden. */
+  private readonly visibility = (): void => {
+    if (document.hidden) this.actions.suspend()
+  }
+
+  /** Checkpoint on page navigation and back-forward cache entry. */
+  private readonly suspend = (): void => {
+    this.actions.suspend()
+  }
+}

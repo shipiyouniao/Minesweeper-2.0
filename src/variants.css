@@ -1,0 +1,332 @@
+.ruleset-tabs {
+  max-width: 1160px;
+  margin: 18px auto 0;
+  padding: 0 24px;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.ruleset-tabs > span {
+  color: var(--muted);
+  margin-right: 12px;
+}
+.ruleset-tabs button,
+.variant-input-mode button {
+  border-radius: 8px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+}
+.ruleset-tabs button[aria-pressed='true'],
+.variant-input-mode button[aria-pressed='true'] {
+  color: var(--blue);
+  background: var(--surface);
+  border-color: var(--line);
+}
+.variant-main {
+  max-width: 1160px;
+  padding: 32px 32px 72px;
+  margin: auto;
+}
+.variant-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.variant-heading h1,
+.camp-panel h1 {
+  font-size: clamp(28px, 5vw, 42px);
+  margin: 10px 0;
+  letter-spacing: -1.5px;
+}
+.variant-help,
+.variant-records {
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+}
+.variant-help summary,
+.variant-records summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 14px;
+}
+.variant-help p,
+.variant-intro {
+  max-width: 820px;
+  line-height: 1.85;
+  font-size: 14px;
+  color: var(--muted);
+}
+.variant-storage:empty {
+  display: none;
+}
+.variant-storage {
+  color: var(--blue);
+  font-size: 13px;
+}
+.camp-panel {
+  margin-top: 28px;
+}
+.camp-panel h2 {
+  margin: 32px 0 14px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.camp-panel h2 small {
+  font-size: 12px;
+  color: var(--muted);
+  margin-left: 12px;
+}
+.camp-panel > .primary-button {
+  margin-top: 24px;
+}
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+.choice-grid.facilities {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.choice-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  line-height: 1.6;
+}
+.choice-card strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+.choice-card span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.choice-card[aria-pressed='true'] {
+  border-color: var(--blue);
+  box-shadow: inset 0 0 0 1px var(--blue);
+}
+.choice-card:not(:disabled):hover {
+  border-color: var(--blue);
+}
+.choice-card:disabled {
+  opacity: 0.65;
+}
+.variant-metrics {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+.variant-metrics div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 64px;
+}
+.variant-metrics span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.variant-metrics strong {
+  font-size: 24px;
+  font-family: var(--mono);
+  font-weight: 500;
+}
+.variant-status {
+  color: var(--blue);
+  font-size: 15px;
+  margin: 22px 0;
+}
+.expedition-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.twin-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin: 24px 0;
+}
+.variant-board-panel {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  min-width: 0;
+  overflow: hidden;
+}
+.variant-board-panel h2 {
+  font-size: 14px;
+  padding: 18px 24px 0;
+  color: var(--muted);
+  margin: 0;
+}
+.variant-board-panel .board-viewport {
+  padding: 24px;
+}
+.variant-board-panel .board {
+  --cell-max: 44px;
+}
+.variant-board-panel .cell {
+  isolation: auto;
+}
+.variant-board-panel .cell.frontier {
+  border-color: var(--blue);
+}
+.variant-board-panel .cell.paired-focus {
+  box-shadow: inset 0 0 0 2px var(--blue);
+}
+.variant-board-panel .cell[data-landmark]::after {
+  content: attr(data-landmark);
+  position: absolute;
+  right: 1px;
+  bottom: 0;
+  line-height: 1;
+  font-size: 12px;
+  color: var(--blue);
+  pointer-events: none;
+}
+.variant-toolbar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+.variant-input-mode {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.twin-tools {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.run-sidebar {
+  padding: 8px 0;
+}
+.run-sidebar h3 {
+  font-size: 14px;
+  margin: 26px 0 12px;
+}
+.variant-note {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.relic-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.relic-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+}
+.relic-list span {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 12px;
+}
+.scan-results {
+  list-style: none;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.result-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  gap: 16px;
+}
+.variant-records {
+  margin-top: 32px;
+}
+.variant-records ol {
+  list-style: none;
+  padding: 0;
+}
+.variant-records li {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.variant-pause {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+@media (max-width: 760px) {
+  .variant-main {
+    padding: 24px 16px 48px;
+  }
+  .expedition-layout,
+  .twin-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .choice-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .choice-grid.facilities {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .choice-card {
+    padding: 16px;
+  }
+  .variant-metrics {
+    gap: 16px;
+  }
+  .variant-metrics strong {
+    font-size: 21px;
+  }
+  .variant-heading {
+    gap: 12px;
+  }
+  .ruleset-tabs {
+    padding: 0 16px;
+    gap: 4px;
+  }
+  .ruleset-tabs > span {
+    display: none;
+  }
+  .ruleset-tabs button {
+    padding: 10px 12px;
+  }
+  .variant-board-panel .board-viewport {
+    padding: 22px 12px;
+  }
+  .result-banner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

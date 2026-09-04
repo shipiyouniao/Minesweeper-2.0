@@ -19,6 +19,7 @@ import {
 
 /** Coordinates application services and views; browser event mechanics live in InputController. */
 export class MinesweeperApp implements InputActions {
+  private readonly onLanguage: (language: Language) => void
   private readonly session: GameSession
   private readonly sounds: SoundEffects
   private readonly repository: GameRepository
@@ -36,7 +37,9 @@ export class MinesweeperApp implements InputActions {
     repository: GameRepository,
     language: Language,
     sounds: SoundEffects,
+    onLanguage: (language: Language) => void = () => {},
   ) {
+    this.onLanguage = onLanguage
     this.session = session
     this.repository = repository
     this.language = language
@@ -147,6 +150,7 @@ export class MinesweeperApp implements InputActions {
     this.sounds.play('confirm')
     this.mount(false)
     this.view.focusLanguage()
+    this.onLanguage(value)
   }
 
   /** Warm the audio adapter during the original gesture, before long-press timers run. */

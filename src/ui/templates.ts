@@ -40,7 +40,7 @@ function languageOption(language: Language, selected: Language): string {
 }
 
 /** Render an original flyout inspired by VitePress's compact translation control. */
-function languageMenuTemplate(language: Language): string {
+export function languageMenuTemplate(language: Language): string {
   const label = translations[language].language
 
   return /* HTML */ `

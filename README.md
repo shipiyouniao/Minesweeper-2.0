@@ -2,6 +2,8 @@
 
 # Minesweeper 2.0 — A TypeScript 7 Experiment
 
+**New game modes:** play a five-floor **Expedition** with relic builds, permanent camp unlocks, professions and equipment, or solve **Twin boards**, where matching coordinates cannot both contain mines. Classic mode retains its own difficulties and records. Read the [mode design and roadmap](docs/game-modes.md) for complete rules and the approved Sonar, Survey and Tides plans.
+
 A playable Minesweeper game and a practical testbed for the **TypeScript 7 native compiler**. This repository revisits a first-year university project with a minimal interface, original artwork, a deterministic game engine, and a native TypeScript development workflow.
 
 **[Play in your browser →](https://shipiyouniao.github.io/Minesweeper-2.0/)** · [Compiler experiment notes](docs/typescript7.md) · [Captured benchmark results](docs/typescript7-benchmark.json)

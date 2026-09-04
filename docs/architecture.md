@@ -37,7 +37,19 @@ flowchart LR
 | `src/ui/templates.ts`             | Pure HTML-producing functions, including small helpers for tabs, help steps, records, and player-name forms.                                                                                          |
 | `src/ui/presentation.ts`          | Pure time formatting, escaping, cell descriptions, status labels, and keyboard geometry.                                                                                                              |
 
-## A reveal, from input to saved state
+## Special-mode boundaries
+
+The [mode design record](game-modes.md) specifies all approved rulesets and their delivery status. `GameRouter` owns exactly one mounted game, checkpoints it before switching, and keeps `ruleset` separate from classic difficulty. It shares browser preferences and audio conventions, not mutable game state.
+
+`game/expedition.ts` owns route connectivity, frontier legality, tools, relic offers and camp purchase rules. `game/twin.ts` partitions one shuffled candidate list into two disjoint mine layouts and resolves paired outcomes. `game/variant-board.ts` provides deterministic shuffling and construction from an explicit mine set; classic seed/layout behavior remains unchanged.
+
+`ExpeditionSession` and `TwinSession` own accepted-action journals and result settlement. `VariantRepository` stores independent versioned envelopes, while `variant-decoders.ts` constructs concrete values from the shared JSON reader. Restoring replays validated commands through pure rules, recomputing hidden cells and earned resources instead of trusting serialized game objects. Expedition settlement updates camp and removes the active run in one write. Journal replay is bounded and rejects illegal transitions.
+
+`VariantApp` coordinates the active special session. `VariantInput` decodes browser attributes into `VariantCommand` and manages abortable event listeners. `VariantView` owns its language menu, native confirmation dialog, shared `BoardView` instances, focus restoration, and coordinate/landmark decoration. `variant-templates.ts` and `variant-copy.ts` produce localized presentation without mutating sessions. `variants.d.ts` and `variant-ui.d.ts` declare the complete domain, persistence and input contracts.
+
+Special modes use move counts rather than clocks. They cover the board on backgrounding; classic timed games retain their existing pause and restored-game rules. Special-mode touch input uses an explicit reveal/flag selector. Route frontiers, safe treasure landmarks and purchased row scans are intentional public information. Twin partner highlights use coordinates only, never hidden mine truth.
+
+## A classic reveal, from input to saved state
 
 Named contracts live in `src/types/*.d.ts`: `game.d.ts` describes engine values, `session.d.ts` describes injected services and snapshots, and `storage.d.ts` declares the repository port and persisted formats. Localization, icon, and UI contracts have their own modules. Use `import type` when consuming them; do not introduce global ambient application declarations.
 

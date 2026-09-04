@@ -1,13 +1,11 @@
-import { GameSession } from './application/game-session.js'
 import { resolveLanguage } from './i18n.js'
-import { BrowserSoundEffects } from './platform/browser-sound-effects.js'
-import { BrowserStorage, browserRuntime } from './platform/browser.js'
+import { BrowserStorage } from './platform/browser.js'
 import { Repository } from './storage.js'
-import { difficultyOf } from './game/difficulty.js'
-import { MinesweeperApp } from './ui/minesweeper-app.js'
+import { GameRouter } from './ui/game-router.js'
+import { VariantRepository } from './persistence/variant-repository.js'
 
 /** Compose browser adapters, application state, and UI at the only startup boundary. */
-function bootstrap(): MinesweeperApp {
+function bootstrap(): GameRouter {
   const root = document.querySelector<HTMLDivElement>('#app')
 
   if (!root) {
@@ -24,16 +22,7 @@ function bootstrap(): MinesweeperApp {
     preferences.language,
     navigator.languages[0] ?? navigator.language,
   )
-  const mode = difficultyOf(params.get('mode') ?? preferences.difficulty)
-  const session = new GameSession(repository, browserRuntime, mode)
-
-  return new MinesweeperApp(
-    root,
-    session,
-    repository,
-    language,
-    new BrowserSoundEffects(preferences.sound),
-  )
+  return new GameRouter(root, repository, new VariantRepository(new BrowserStorage()), language)
 }
 
 const app = bootstrap()

@@ -1,4 +1,5 @@
 @import url('./tokens.css');
+@import url('./variants.css');
 
 * {
   box-sizing: border-box;

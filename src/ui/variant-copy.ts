@@ -1,0 +1,260 @@
+import type { Language } from '../types/localization.js'
+import type { Equipment, Profession, Relic, Upgrade } from '../types/variants.js'
+import type { VariantDescription, VariantMessages } from '../types/variant-ui.js'
+
+/** Require all three translations at each catalog entry, with no computed translation keys. */
+function localized(language: Language, en: string, zh: string, ja: string): string {
+  return language === 'zh' ? zh : language === 'ja' ? ja : en
+}
+
+/** Supply complete, explicit labels for the special-mode UI. */
+export function variantCopy(language: Language): VariantMessages {
+  /** Bind the current locale while retaining all three required source strings. */
+  const t = (en: string, zh: string, ja: string): string => localized(language, en, zh, ja)
+  return {
+    rowMines: t('mines total', '地雷总数', '地雷合計'),
+    controls: t(
+      'Arrows / Home / End: move focus. Enter / Space: reveal. F or right-click: flag. On touch, choose Reveal or Flag before tapping a cell.',
+      '方向键 / Home / End 移动光标；Enter / 空格翻开；F 或右键插旗。触屏先选择翻开或插旗，再点击格子。',
+      '矢印 / Home / End で移動、Enter / Space で開く、F または右クリックで旗。タッチでは開く・旗を選んでからマスをタップ。',
+    ),
+    modes: t('Game mode', '玩法模式', 'ゲームモード'),
+    classic: t('Classic', '标准扫雷', 'クラシック'),
+    expedition: t('Expedition', '远征', '遠征'),
+    twin: t('Twin boards', '双生棋盘', '双子盤'),
+    camp: t('Base camp', '营地', 'キャンプ'),
+    supplies: t('Supplies', '物资', '物資'),
+    departures: t('Completed expeditions', '远征通关', '遠征クリア'),
+    start: t('Begin expedition', '出发远征', '遠征開始'),
+    profession: t('Profession', '职业', '職業'),
+    equipment: t('Loadout · 3 points', '出发装备 · 3 点预算', '装備 · 3 ポイント'),
+    facilities: t('Camp facilities', '营地建设', 'キャンプ施設'),
+    owned: t('Unlocked', '已解锁', '解放済み'),
+    locked: t('Unlock at camp', '需要营地解锁', 'キャンプで解放'),
+    floor: t('Floor', '层数', '階層'),
+    loot: t('Run loot', '本局战利品', '戦利品'),
+    probes: t('Probes', '探针', '探針'),
+    scans: t('Scans', '扫描', '走査'),
+    shields: t('Shields', '护盾', 'シールド'),
+    probe: t('Probe frontier', '探测前沿', '境界を探査'),
+    scan: t('Scan selected row', '扫描光标所在行', '選択行を走査'),
+    descend: t('Take the exit', '前往出口', '出口へ進む'),
+    retreat: t('Extract to camp', '撤离回营地', 'キャンプへ帰還'),
+    retreatNote: t(
+      'End this expedition and bank all collected loot?',
+      '结束本次远征，带回全部已收集战利品？',
+      '遠征を終了し、集めた戦利品を持ち帰りますか？',
+    ),
+    reward: t(
+      'Choose one relic for the next floor',
+      '选择一件遗物，进入下一层',
+      '遺物を1つ選んで次の階へ',
+    ),
+    exit: t('Exit', '出口', '出口'),
+    entrance: t('Entrance', '入口', '入口'),
+    treasure: t('Treasure · safe', '宝箱 · 安全格', '宝箱 · 安全'),
+    collected: t('Collected', '已收集', '回収済み'),
+    frontier: t('Reachable frontier', '可探索前沿', '探索可能な境界'),
+    relics: t('Relic build', '遗物搭配', '遺物構成'),
+    noRelics: t(
+      'Find your first relic after floor one.',
+      '通过第一层后获得首件遗物。',
+      '第1階層を突破して遺物を入手。',
+    ),
+    earned: t('Banked supplies', '带回物资', '獲得物資'),
+    won: t('Expedition complete', '远征通关', '遠征クリア'),
+    lost: t('Expedition ended', '远征失败', '遠征失敗'),
+    retreated: t('Safely extracted', '成功撤离', '帰還成功'),
+    steps: t('Moves', '操作数', '手数'),
+    records: t('Recent results · this mode', '近期记录 · 当前模式', '最近の結果 · このモード'),
+    noRecords: t('Your story starts here.', '从这里写下第一段旅程。', 'ここから冒険が始まる。'),
+    expeditionHelp: t(
+      'Connect the entrance ○ to the exit ↗ through revealed safe cells, using orthogonal steps. Reveal only the highlighted frontier. Numbers count all eight neighbors. Safe treasures ◇ reward detours. Flags are hypotheses; revealing an open clue does not chord in this mode. Take the exit when ready; you may explore more first.',
+      '沿上下左右相连的已揭示安全格，从入口 ○ 连通出口 ↗。只能翻开高亮前沿；数字仍表示周围八格的雷数。安全宝箱 ◇ 奖励绕路探索。旗帜只是你的推测，本模式点击已开数字不会和弦翻开。出口连通后可继续探索，再选择离开。',
+      '上下左右につながる安全なマスで入口 ○ と出口 ↗ を結びます。強調された境界のみ開けられます。数字は周囲8マスの地雷数です。安全な宝箱 ◇ は寄り道の報酬。旗は仮説で、数字の再クリックでは周囲を開きません。出口接続後も探索できます。',
+    ),
+    twinHelp: t(
+      'At each coordinate, at most one board has a mine. A mine you deduce on A guarantees safety on B, but two safe cells are also possible. Flags never prove safety. Clear every safe cell on both boards; hitting a mine on either ends the pair. The first reveal opens a safe neighborhood on both.',
+      '同一坐标最多只有一张棋盘有雷。在 A 盘推理确认有雷，就能确定 B 盘对应格安全；两边都安全也可能。插旗不等于证明。翻开两盘所有安全格获胜，任一盘踩雷整局结束。首次翻开会同时打开两盘的安全邻域。',
+      '同じ座標に地雷があるのは最大で片方のみ。A の地雷を推理できれば B の同じマスは安全ですが、両方安全な場合もあります。旗は証明ではありません。両盤の安全マスを全て開けば勝利、片方で踏めば終了。初手は両盤で安全な領域が開きます。',
+    ),
+    campHelp: t(
+      'Five floors, one evolving relic build. Bank all loot on extraction, half on defeat, and a completion bonus on victory. Unlock careers and a three-point equipment loadout with supplies. Growth opens choices; mines remain dangerous.',
+      '五层远征，遗物逐层成型。撤离带回全部战利品，失败保留一半，通关另有奖励。用物资解锁职业与三点预算的初始装备。成长增加策略选择，地雷仍然危险。',
+      '全5階層で遺物構成を育てます。帰還で全戦利品、敗北で半分、クリアで追加報酬。物資で職業と3ポイントの初期装備を解放。成長は選択肢を増やし、地雷の危険は残ります。',
+    ),
+    ready: t(
+      'Choose the first opening on either board.',
+      '在任一棋盘选择首次翻开的位置。',
+      'どちらかの盤で初手を選びましょう。',
+    ),
+    exploring: t(
+      'Find a safe route to the exit.',
+      '推理出通往出口的安全路线。',
+      '出口への安全な道を探しましょう。',
+    ),
+    exitReady: t(
+      'Exit connected · explore more or leave.',
+      '已连通出口 · 可继续探索或离开',
+      '出口に接続 · 探索を続けるか出発',
+    ),
+    partner: t('Matching coordinate', '对应坐标', '対応する座標'),
+    safePartner: t(
+      'Partner cleared: flagged mines there are now confirmed.',
+      '另一盘已完成：其中的雷标记现已确认。',
+      '相手盤クリア済み：その地雷印は確定です。',
+    ),
+    recovered: t(
+      'An incompatible or damaged save was ignored. Valid camp history is kept when recoverable.',
+      '已忽略不兼容或损坏的存档；可恢复的营地历史会保留。',
+      '非互換または破損した保存を無視しました。復元可能なキャンプ履歴は保持します。',
+    ),
+    journalLimit: t(
+      'This run reached the move limit. Extract or start a new pair.',
+      '本局已达操作上限，请撤离或重新开始双盘。',
+      '手数上限です。帰還するか双子盤を再開してください。',
+    ),
+    scanHint: t(
+      'Select a cell, then scan its row. Revealed totals include flagged mines.',
+      '先选择一个格子，再扫描所在行；扫描总数包含已插旗的雷。',
+      'マスを選択してその行を走査。合計は旗の地雷も含みます。',
+    ),
+  }
+}
+
+/** Describe career tradeoffs with exact starting resources. */
+export function professionCopy(language: Language, profession: Profession): VariantDescription {
+  switch (profession) {
+    case 'explorer':
+      return {
+        name: localized(language, 'Explorer', '探险家', '探検家'),
+        note: localized(language, '2 probes · 1 scan', '2 探针 · 1 扫描', '探針2 · 走査1'),
+      }
+    case 'surveyor':
+      return {
+        name: localized(language, 'Surveyor', '测绘师', '測量士'),
+        note: localized(language, '1 probe · 2 scans', '1 探针 · 2 扫描', '探針1 · 走査2'),
+      }
+    case 'engineer':
+      return {
+        name: localized(language, 'Engineer', '工兵', '工兵'),
+        note: localized(
+          language,
+          '1 probe · 1 scan · 1 shield',
+          '1 探针 · 1 扫描 · 1 护盾',
+          '探針1 · 走査1 · シールド1',
+        ),
+      }
+  }
+}
+
+/** Explain each temporary relic's exact effect and resource cap. */
+export function relicCopy(language: Language, relic: Relic): VariantDescription {
+  switch (relic) {
+    case 'lantern':
+      return {
+        name: localized(language, 'Lantern', '提灯', 'ランタン'),
+        note: localized(
+          language,
+          '+1 probe on each new floor, up to 4.',
+          '每次进入新层 +1 探针，上限 4。',
+          '新階層ごとに探針+1、上限4。',
+        ),
+      }
+    case 'lens':
+      return {
+        name: localized(language, 'Survey lens', '测绘透镜', '測量レンズ'),
+        note: localized(
+          language,
+          '+1 scan on each new floor, up to 4.',
+          '每次进入新层 +1 扫描，上限 4。',
+          '新階層ごとに走査+1、上限4。',
+        ),
+      }
+    case 'aegis':
+      return {
+        name: localized(language, 'Aegis', '庇护', '加護'),
+        note: localized(
+          language,
+          'Gain 1 shield once, up to 2. A protected mine is flagged, never removed.',
+          '获得 1 次护盾，上限 2。护盾将踩中的雷标记，不会移除地雷。',
+          'シールドを1回獲得、上限2。踏んだ地雷に旗を立て、地雷は消しません。',
+        ),
+      }
+    case 'purse':
+      return {
+        name: localized(language, 'Treasure pouch', '藏宝袋', '宝袋'),
+        note: localized(
+          language,
+          'Future treasures give 9 supplies instead of 6.',
+          '此后每个宝箱收益从 6 提升至 9。',
+          '以後の宝箱報酬が6から9に。',
+        ),
+      }
+    case 'compass':
+      return {
+        name: localized(language, 'Exit compass', '出口罗盘', '出口の羅針盤'),
+        note: localized(
+          language,
+          'Reveal the safe exit on each new floor. You must still connect a route.',
+          '每层揭示安全出口，仍需连通路线。',
+          '各階の安全な出口を公開。道の接続は必要です。',
+        ),
+      }
+    case 'salvage':
+      return {
+        name: localized(language, 'Salvage seal', '回收印记', '回収の印'),
+        note: localized(
+          language,
+          'Keep 75% of collected loot on defeat instead of 50%.',
+          '失败保留收益从 50% 提升至 75%。',
+          '敗北時の回収率が50%から75%に。',
+        ),
+      }
+  }
+}
+
+/** Describe finite camp unlocks without hiding their actual gameplay consequence. */
+export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescription {
+  if (upgrade === 'surveyor' || upgrade === 'engineer') return professionCopy(language, upgrade)
+  return upgrade === 'workshop'
+    ? {
+        name: localized(language, 'Workshop', '工坊', '工房'),
+        note: localized(
+          language,
+          'Unlock departure equipment. Choose up to 3 points each run.',
+          '解锁初始装备，每局最多携带 3 点。',
+          '初期装備を解放。毎回3ポイントまで。',
+        ),
+      }
+    : {
+        name: localized(language, 'Relic archive', '遗物档案馆', '遺物資料館'),
+        note: localized(
+          language,
+          'Add Exit compass and Salvage seal to future relic offers.',
+          '将出口罗盘与回收印记加入后续遗物池。',
+          '出口の羅針盤と回収の印を遺物候補に追加。',
+        ),
+      }
+}
+
+/** Describe equipment costs and starting bonuses. */
+export function equipmentCopy(language: Language, equipment: Equipment): VariantDescription {
+  switch (equipment) {
+    case 'probe':
+      return {
+        name: localized(language, 'Probe kit · 1 pt', '探针包 · 1 点', '探針キット · 1 pt'),
+        note: localized(language, '+1 starting probe', '初始 +1 探针', '初期探針+1'),
+      }
+    case 'scanner':
+      return {
+        name: localized(language, 'Scanner · 1 pt', '扫描仪 · 1 点', '走査器 · 1 pt'),
+        note: localized(language, '+1 starting scan', '初始 +1 扫描', '初期走査+1'),
+      }
+    case 'guard':
+      return {
+        name: localized(language, 'Guard · 2 pts', '护盾 · 2 点', '防護 · 2 pt'),
+        note: localized(language, '+1 starting shield', '初始 +1 护盾', '初期シールド+1'),
+      }
+  }
+}

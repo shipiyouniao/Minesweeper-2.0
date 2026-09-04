@@ -54,7 +54,7 @@ export function neighbors(config: Config, index: number): number[] {
  * Create a seeded Mulberry32 stream with unbiased bounded indices.
  * Mutable PRNG state stays inside this call; identical seeds reproduce the stream.
  */
-function randomIndex(seed: number): (bound: number) => number {
+export function randomIndex(seed: number): (bound: number) => number {
   let state = seed >>> 0
 
   /** Reject the incomplete upper bucket before reducing a 32-bit value modulo bound. */
