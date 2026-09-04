@@ -107,7 +107,7 @@ export class ExpeditionSession {
   ): boolean {
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
     const departure: Departure = {
-      rules: 'difficulty-v1',
+      rules: 'health-v1',
       difficulty,
       seed: this.runtime.randomSeed(),
       profession,

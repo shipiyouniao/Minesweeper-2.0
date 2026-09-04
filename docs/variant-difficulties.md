@@ -20,7 +20,7 @@ The default view fits the full board to its panel. **Larger cells** switches to 
 
 ## Persistence and records
 
-New runs store a tier and the `difficulty-v1` rules revision. Rebalancing this catalog requires a new rules revision, not changing the meaning of an existing journal. Each mode has one active run, and its departure tier is restored after refresh. The last expedition choice is remembered at camp.
+New Twin pairs store a tier and the `difficulty-v1` rules revision. New expeditions use `health-v1`, retaining the same difficulty geometry while adding [health and exit recovery](expedition-health.md). Existing `difficulty-v1` expeditions retain their original damage rules. Rebalancing this catalog requires a new rules revision, not changing the meaning of an existing journal. Each mode has one active run, and its departure tier is restored after refresh. The last expedition choice is remembered at camp.
 
 Historical runs without difficulty metadata keep the original 9 × 9 geometry: Twin has 12 mines per board; Expedition has five floors with 15, 17, 19, 21 and 23 mines. The existing `original` / `scouting` opening and compass behavior remains unchanged. Old results appear under **Original rules**, rather than being assigned to a new tier.
 
@@ -30,7 +30,7 @@ Each mode retains the latest ten results **per tier**, plus up to ten historical
 
 The current relic pool is finite. Once every available relic is owned, the reward screen offers **Continue to next floor**, preserving the current build and floor-entry effects without adding duplicate relics. The final configured floor ends the expedition normally.
 
-Boss rooms, shared health, new professions, the larger relic catalog and economy rebalance are separate workstreams in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). This difficulty release does not add them or claim that the existing prices meet the planned twenty-run progression target. Current treasure, exit and completion rewards are unchanged; longer runs have more earning opportunities and still need economy balancing.
+Shared health is now available; see the [health rules](expedition-health.md). Boss rooms, new professions, the larger relic catalog and economy rebalance are separate workstreams in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). This difficulty release does not add them or claim that the existing prices meet the planned twenty-run progression target. Current treasure, exit and completion rewards are unchanged; longer runs have more earning opportunities and still need economy balancing.
 
 ## Verification
 

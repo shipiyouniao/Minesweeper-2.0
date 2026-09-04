@@ -1,3 +1,4 @@
+import { damageVitality, healVitality } from './vitality.js'
 import { generateDungeon } from './dungeon-generator.js'
 import { probeDungeon, scanDungeon, scoutExit } from './dungeon-discovery.js'
 import { act } from './engine.js'
@@ -77,6 +78,8 @@ function createFloor(departure: Departure, floor: number): Expedition {
     probeReport: null,
     probes: 0,
     scans: 0,
+    health: departure.rules === 'health-v1' ? 2 : 1,
+    maxHealth: departure.rules === 'health-v1' ? 2 : 1,
     shields: 0,
     loot: 0,
     steps: 0,
@@ -161,7 +164,7 @@ function relicOffers(run: Expedition): Relic[] {
   ).slice(0, 3)
 }
 
-/** Reveal a route frontier, consuming a shield on a mine without changing its clues. */
+/** Approach a frontier and resolve damage without changing the mine layout or safe route. */
 function revealFrontier(run: Expedition, index: number): Expedition {
   if (!frontierCells(run).has(index)) return run
   const path = approachPath(run, index)
@@ -170,13 +173,19 @@ function revealFrontier(run: Expedition, index: number): Expedition {
   if (!cell) return run
   const approached = collectTreasures({ ...run, player: path.at(-1) ?? run.player }, path)
 
-  if (cell.mine && run.shields > 0) {
-    // A protected mine stays a mine and is flagged. The safe route still needs discovery.
+  if (cell.mine) {
+    const vitality = damageVitality(approached, 1)
+    const survived = vitality.health > 0
+
+    // Survival confirms the hazard, never erases it or moves the player onto it.
+    // Historical departures have one HP, preserving their original lethal-hit behavior.
     return {
       ...approached,
-      game: act(run.game, { type: 'flag', index }),
-      shields: run.shields - 1,
-      confirmedMines: [...run.confirmedMines, index],
+      health: vitality.health,
+      shields: vitality.shields,
+      game: survived ? act(run.game, { type: 'flag', index }) : revealDungeon(run, index),
+      confirmedMines: survived ? [...run.confirmedMines, index] : run.confirmedMines,
+      phase: survived ? 'exploring' : 'lost',
       steps: run.steps + 1,
     }
   }
@@ -187,11 +196,11 @@ function revealFrontier(run: Expedition, index: number): Expedition {
       {
         ...approached,
         game,
-        player: cell.mine ? approached.player : index,
+        player: index,
         phase: game.phase === 'lost' ? 'lost' : 'exploring',
         steps: run.steps + 1,
       },
-      cell.mine ? [] : [index],
+      [index],
     ),
   )
 }
@@ -210,6 +219,8 @@ function finishAtExit(run: Expedition): Expedition {
 
   return {
     ...run,
+    // Leaving exploration makes this recovery a one-time reward, including the final exit.
+    health: run.departure.rules === 'health-v1' ? healVitality(run, 1).health : run.health,
     loot: run.loot + 12,
     phase: run.floor === expeditionFloors(run.departure) ? 'won' : 'reward',
     offers: relicOffers(run),
@@ -230,6 +241,8 @@ function advanceFloor(run: Expedition, relic?: Relic): Expedition {
   let result: Expedition = {
     ...next,
     relics,
+    health: run.health,
+    maxHealth: run.maxHealth,
     loot: run.loot,
     steps: run.steps,
     probes: Math.min(4, run.probes + Number(relics.includes('lantern'))),

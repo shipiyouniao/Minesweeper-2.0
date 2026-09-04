@@ -1,3 +1,4 @@
+import { cueForVitality } from '../audio/cues.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
@@ -88,7 +89,7 @@ export class VariantApp implements VariantInputActions {
     const before =
       this.session instanceof TwinSession ? this.session.state[side] : this.session.run?.game
     const flagged = before?.cells[index]?.visibility === 'flagged'
-    const shields = this.session instanceof ExpeditionSession ? (this.session.run?.shields ?? 0) : 0
+    const previousRun = this.session instanceof ExpeditionSession ? this.session.run : null
     const changed =
       this.session instanceof TwinSession
         ? this.session.dispatch({ side, type: flag ? 'flag' : 'reveal', index })
@@ -100,15 +101,15 @@ export class VariantApp implements VariantInputActions {
 
     const phase =
       this.session instanceof TwinSession ? this.session.state.phase : this.session.run?.phase
-    const protectedMine =
-      this.session instanceof ExpeditionSession && (this.session.run?.shields ?? 0) < shields
+    const currentRun = this.session instanceof ExpeditionSession ? this.session.run : null
+    const vitalityCue = previousRun && currentRun ? cueForVitality(previousRun, currentRun) : null
     this.sounds.play(
       phase === 'lost'
         ? 'loss'
         : phase === 'won'
           ? 'win'
-          : protectedMine
-            ? 'blocked'
+          : vitalityCue
+            ? vitalityCue
             : flag
               ? flagged
                 ? 'unflag'
@@ -189,7 +190,7 @@ export class VariantApp implements VariantInputActions {
         const t = variantCopy(this.language)
         this.view.showInformation(
           translations[this.language].how,
-          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
+          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${this.session.run && this.session.run.departure.rules !== 'health-v1' ? t.legacyHealth : t.healthHelp}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
         )
         return
       }
@@ -394,8 +395,12 @@ export class VariantApp implements VariantInputActions {
   /** Apply expedition-only commands and choose feedback from the resulting phase. */
   private expedition(action: ExpeditionAction): void {
     if (!(this.session instanceof ExpeditionSession)) return
+    const before = this.session.run
     const changed = this.session.dispatch(action)
-    this.sounds.play(!changed ? 'blocked' : this.session.run?.phase === 'won' ? 'win' : 'confirm')
+    const after = this.session.run
+    const cue = before && after ? cueForVitality(before, after) : null
+
+    this.sounds.play(!changed ? 'blocked' : after?.phase === 'won' ? 'win' : (cue ?? 'confirm'))
   }
 
   /** Give rejected purchases and accepted choices distinct audible feedback. */

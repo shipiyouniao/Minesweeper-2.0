@@ -29,6 +29,7 @@ import {
 } from './variant-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
 import type { DungeonSprite, DungeonTool } from '../types/dungeon-ui.js'
+import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
 
 /** Render one accessible choice card; its ID is a finite catalog value. */
@@ -83,7 +84,7 @@ export function campTemplate(
   const careers: readonly Profession[] = ['explorer', 'surveyor', 'engineer']
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
 
-  return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p>
+  return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${t.healthHint}</p>
     <div class="variant-metrics">${metric(t.supplies, camp.supplies)}${metric(t.departures, camp.completed)}</div>
     ${difficultyTemplate(language, difficulty, true)}
     <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career))).join('')}</div>
@@ -140,6 +141,7 @@ export function expeditionTemplate(
     .join('')
 
   return `<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
+    ${vitalityTemplate(language, run, run.departure.rules !== 'health-v1')}
     <p class="variant-status" role="status" tabindex="-1">${status}</p>
     ${terminal ? `<div class="result-banner"><strong>${t.earned} +${earned}</strong><button class="primary-button" data-control="camp">${t.camp}</button></div>` : ''}
     ${run.phase === 'reward' ? `<div class="choice-grid">${run.offers.map((relic) => choice(`relic:${relic}`, relicCopy(language, relic), false)).join('')}</div>${run.offers.length === 0 ? `<button class="primary-button" data-control="descend">${t.nextFloor}</button>` : ''}<button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
@@ -148,7 +150,7 @@ export function expeditionTemplate(
         run.phase === 'exploring'
           ? `<div class="variant-toolbar">${inputModeTemplate(language, flagMode)}
       <p class="variant-note tool-hint" role="status">${t.toolHint}</p>
-      <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}<div class="inventory-passive" title="${t.shields}">${spriteImage('shield')}<span class="tool-count">${run.shields}</span><span class="tool-label">${t.shields}</span></div></div>
+      <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}</div>
       ${run.probeReport ? `<p class="probe-result" role="status">${t.probeResult.replace('{count}', String(run.probeReport.mines))}</p>` : ''}
       <button class="text-button" data-control="retreat">${t.retreat}</button></div>`
           : ''

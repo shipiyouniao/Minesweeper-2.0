@@ -1,5 +1,15 @@
 import type { SoundCue, Tone } from '../types/audio.js'
 import type { Game } from '../types/game.js'
+import type { Vitality } from '../types/vitality.js'
+
+/** Describe visible resource changes only; audio must never inspect an unrevealed cell. */
+export function cueForVitality(before: Vitality, after: Vitality): SoundCue | null {
+  if (after.health < before.health) return after.health === 0 ? 'loss' : 'damage'
+  if (after.shields !== before.shields) return 'shield'
+  if (after.health > before.health) return 'heal'
+
+  return null
+}
 
 /** Choose one cue per accepted action; outcome cues take priority over cell changes. */
 export function cueForMove(before: Game, after: Game, index: number): SoundCue | null {
@@ -46,6 +56,12 @@ export function notesForCue(cue: SoundCue): readonly Tone[] {
       return [note(660), note(990, 0.055)]
     case 'unflag':
       return [note(660), note(440, 0.045)]
+    case 'damage':
+      return [{ ...note(300, 0, 0.14), endFrequency: 120, gain: 0.08 }]
+    case 'shield':
+      return [note(1100, 0, 0.06), note(740, 0.05, 0.12)]
+    case 'heal':
+      return [note(523, 0, 0.1), note(784, 0.08, 0.15)]
     case 'win':
       return [note(523.25), note(659.25, 0.08), note(783.99, 0.16), note(1046.5, 0.24, 0.2)]
     case 'loss':
@@ -63,6 +79,9 @@ export function cuePriority(cue: SoundCue): number {
     case 'tap':
     case 'blocked':
       return 1
+    case 'damage':
+    case 'shield':
+    case 'heal':
     case 'confirm':
     case 'reveal':
     case 'flag':

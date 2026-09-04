@@ -1,4 +1,5 @@
 import type { VariantDifficulty } from './variant-difficulty.js'
+import type { Vitality } from './vitality.js'
 import type { Game } from './game.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
@@ -29,8 +30,8 @@ export interface Camp {
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
   /** Persist generation and relic rules; omitted direct inputs retain the 9 × 9 scouting layout. */
-  readonly rules?: 'original' | 'scouting' | 'difficulty-v1'
-  /** New difficulty-v1 journals require this field; historical departures omit it. */
+  readonly rules?: 'original' | 'scouting' | 'difficulty-v1' | 'health-v1'
+  /** Difficulty and health journals require this field; historical departures omit it. */
   readonly difficulty?: VariantDifficulty
   readonly seed: number
   readonly profession: Profession
@@ -39,7 +40,7 @@ export interface Departure {
 }
 
 /** A complete floor state; reachability is derived from revealed safe cells. */
-export interface Expedition {
+export interface Expedition extends Vitality {
   readonly departure: Departure
   readonly floor: number
   readonly game: Game
@@ -57,7 +58,6 @@ export interface Expedition {
   readonly probeReport: ProbeReport | null
   readonly probes: number
   readonly scans: number
-  readonly shields: number
   readonly loot: number
   readonly steps: number
   readonly phase: 'exploring' | 'reward' | 'won' | 'lost' | 'retreated'
