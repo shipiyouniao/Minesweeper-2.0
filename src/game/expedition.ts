@@ -1,9 +1,9 @@
 import { generateDungeon } from './dungeon-generator.js'
-import { probeDungeon } from './dungeon-probe.js'
-import { act, neighbors } from './engine.js'
+import { probeDungeon, scanDungeon, scoutExit } from './dungeon-discovery.js'
+import { act } from './engine.js'
+import { revealDungeon } from './dungeon-reveal.js'
 import { adjacentSteps, shuffled } from './variant-board.js'
 import { approachPath, walkingPath } from './dungeon-path.js'
-import type { Game } from '../types/game.js'
 import type {
   Camp,
   Departure,
@@ -55,7 +55,11 @@ export function buyUpgrade(camp: Camp, upgrade: Upgrade): Camp {
 /** Build fresh terrain and reset floor-local discoveries without touching permanent resources. */
 function createFloor(departure: Departure, floor: number): Expedition {
   const seed = (departure.seed + Math.imul(floor, 0x9e3779b9)) >>> 0
-  const layout = generateDungeon(seed, 13 + floor * 2)
+  const layout = generateDungeon(
+    seed,
+    13 + floor * 2,
+    departure.rules === 'original' ? 'compact' : 'flood',
+  )
   return {
     ...layout,
     departure,
@@ -66,7 +70,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
     offers: [],
     scannedRows: [],
     confirmedMines: [],
-    probedCells: [],
+    surveyedCells: [],
     probeReport: null,
     probes: 0,
     scans: 0,
@@ -189,24 +193,6 @@ function revealFrontier(run: Expedition, index: number): Expedition {
   )
 }
 
-/** Reveal blank regions without ever revealing wall terrain or changing mine clues. */
-function revealDungeon(run: Expedition, index: number): Game {
-  const cells = [...run.game.cells]
-  const queue = [index]
-
-  for (let cursor = 0; cursor < queue.length; cursor++) {
-    const target = queue[cursor]
-    if (target === undefined || run.walls.includes(target)) continue
-    const cell = cells[target]
-    if (!cell || cell.visibility !== 'hidden') continue
-    cells[target] = { ...cell, visibility: 'revealed' }
-    if (cell.mine) return { ...run.game, cells, phase: 'lost', exploded: target }
-    if (cell.adjacent === 0) queue.push(...neighbors(run.game.config, target))
-  }
-
-  return { ...run.game, cells, phase: 'playing' }
-}
-
 /** Walk through known floor cells and enter the stairs only after physically arriving. */
 function movePlayer(run: Expedition, index: number): Expedition {
   const path = walkingPath(run, index)
@@ -242,9 +228,12 @@ function takeRelic(run: Expedition, relic: Relic): Expedition {
     shields: Math.min(2, run.shields + Number(relic === 'aegis')),
   }
 
-  // Compass exposes a fixed, advertised safe exit clue without connecting it to the entrance.
+  // Old journals keep their original visibility so later recorded flag/reveal actions remain valid.
   if (relics.includes('compass')) {
-    result = { ...result, game: revealDungeon(result, result.exit) }
+    result =
+      run.departure.rules === 'original'
+        ? { ...result, game: revealDungeon(result, result.exit) }
+        : scoutExit(result)
   }
 
   return result
@@ -267,6 +256,9 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
       const game = act(run.game, { type: 'flag', index: action.index })
       return game === run.game ? run : { ...run, game, steps: run.steps + 1 }
     }
+    case 'sweep':
+      return scanDungeon(run, action.row)
+    // Replay historical count-only scans exactly, so subsequent old flag actions stay valid.
     case 'scan':
       if (
         !Number.isInteger(action.row) ||

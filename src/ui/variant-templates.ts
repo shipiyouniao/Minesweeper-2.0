@@ -143,8 +143,8 @@ export function expeditionTemplate(
       ${
         run.phase === 'exploring'
           ? `<div class="variant-toolbar">${inputModeTemplate(language, flagMode)}
+      <p class="variant-note tool-hint" role="status">${t.toolHint}</p>
       <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}<div class="inventory-passive" title="${t.shields}">${spriteImage('shield')}<span class="tool-count">${run.shields}</span><span class="tool-label">${t.shields}</span></div></div>
-      <p class="variant-note tool-hint" role="status">${t.scanHint}</p>
       ${run.probeReport ? `<p class="probe-result" role="status">${t.probeResult.replace('{count}', String(run.probeReport.mines))}</p>` : ''}
       <button class="text-button" data-control="retreat">${t.retreat}</button></div>`
           : ''

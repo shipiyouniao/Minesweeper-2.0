@@ -77,11 +77,13 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
 function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (!reader) return null
   const seed = reader.number('seed')
+  const rules = reader.value('rules')
   const profession = parseProfession(reader.string('profession'))
   const archive = reader.value('archive')
   const values = reader.array('equipment')
   if (
     !integer(seed, 0xffffffff) ||
+    (rules !== undefined && rules !== 'original' && rules !== 'scouting') ||
     !profession ||
     typeof archive !== 'boolean' ||
     !values ||
@@ -96,7 +98,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     equipment.push(item)
   }
 
-  return { seed, profession, archive, equipment }
+  return { seed, profession, archive, equipment, rules: rules ?? 'original' }
 }
 
 /** Decode the payload selected by each expedition command discriminant. */
@@ -113,6 +115,7 @@ function decodeExpeditionAction(value: JsonValue): ExpeditionAction | null {
       const index = reader.number('index')
       return integer(index, 80) ? { type, index } : null
     }
+    case 'sweep':
     case 'scan': {
       const row = reader.number('row')
       return integer(row, 8) ? { type, row } : null

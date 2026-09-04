@@ -148,7 +148,7 @@ export class VariantApp implements VariantInputActions {
   useTool(tool: DungeonTool, index: number): void {
     if (this.paused || this.moving || this.view.dialogOpen) return
     this.expedition(
-      tool === 'probe' ? { type: 'probe', index } : { type: 'scan', row: Math.floor(index / 9) },
+      tool === 'probe' ? { type: 'probe', index } : { type: 'sweep', row: Math.floor(index / 9) },
     )
     this.render()
   }
@@ -182,7 +182,7 @@ export class VariantApp implements VariantInputActions {
         const t = variantCopy(this.language)
         this.view.showInformation(
           translations[this.language].how,
-          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${t.scanHint}</p>` : ''}`,
+          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
         )
         return
       }

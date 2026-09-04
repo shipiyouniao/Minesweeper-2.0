@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { actExpedition, createExpedition, frontierCells } from '../src/game/expedition.js'
 import { neighbors } from '../src/game/engine.js'
-import { probeArea } from '../src/game/dungeon-probe.js'
+import { probeArea } from '../src/game/dungeon-discovery.js'
 import { ExpeditionSession } from '../src/application/expedition-session.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
 import type { Expedition } from '../src/types/variants.js'
@@ -34,7 +34,7 @@ function deducibleMine(run: Expedition): boolean {
   return false
 }
 
-test('entrances and stairs vary, with compact nonrectangular openings and useful clue deductions', () => {
+test('entrances and stairs vary, with fully expanded blank openings and useful boundary clues', () => {
   const entrances = new Set<number>()
   const exits = new Set<number>()
   const directions = new Set<string>()
@@ -51,19 +51,21 @@ test('entrances and stairs vary, with compact nonrectangular openings and useful
     const opened = run.game.cells.flatMap((cell, index) =>
       cell.visibility === 'revealed' ? [index] : [],
     )
-    const width =
-      Math.max(...opened.map((index) => index % 9)) -
-      Math.min(...opened.map((index) => index % 9)) +
-      1
-    const height =
-      Math.max(...opened.map((index) => Math.floor(index / 9))) -
-      Math.min(...opened.map((index) => Math.floor(index / 9))) +
-      1
-    assert.equal(opened.length, 7)
-    assert.ok(opened.length < width * height)
+    assert.ok(opened.length >= 9)
+    for (const index of opened) {
+      if (run.game.cells[index]?.adjacent !== 0) continue
+      for (const other of neighbors(run.game.config, index)) {
+        if (run.walls.includes(other)) continue
+        assert.equal(
+          run.game.cells[other]?.visibility,
+          'revealed',
+          'blank regions cannot stop halfway',
+        )
+        assert.equal(run.game.cells[other]?.mine, false)
+      }
+    }
     assert.ok(opened.filter((index) => (run.game.cells[index]?.adjacent ?? 0) > 0).length >= 2)
     assert.ok(deducibleMine(run))
-    assert.equal(run.game.cells[run.exit]?.visibility, 'hidden')
     assert.deepEqual(createExpedition(run.departure), run)
   }
   assert.ok(entrances.size >= 40)
@@ -105,7 +107,7 @@ test('area probes clip correctly, mark every mine and safe tile, and never telep
     assert.equal(result.phase, 'exploring')
     for (const index of area) {
       if (run.walls.includes(index)) continue
-      assert.ok(result.probedCells.includes(index))
+      assert.ok(result.surveyedCells.includes(index))
       if (run.game.cells[index]?.mine) {
         assert.equal(result.game.cells[index]?.visibility, 'flagged')
         assert.equal(actExpedition(result, { type: 'flag', index }), result)
@@ -135,7 +137,7 @@ test('probe corrects false flags and upgrades true guesses; ordinary flags still
   run = actExpedition(flagged, { type: 'flag', index: mine })
   run = actExpedition(run, { type: 'probe', index: safe })
   assert.equal(run.game.cells[safe]?.visibility, 'hidden')
-  assert.ok(run.probedCells.includes(safe))
+  assert.ok(run.surveyedCells.includes(safe))
   run = actExpedition(run, { type: 'probe', index: mine })
   assert.ok(run.confirmedMines.includes(mine))
   assert.equal(actExpedition(run, { type: 'flag', index: mine }), run)

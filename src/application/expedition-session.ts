@@ -9,6 +9,7 @@ import {
 import { MAX_ACTIONS } from '../persistence/variant-decoders.js'
 import type {
   Camp,
+  Departure,
   Equipment,
   Expedition,
   ExpeditionAction,
@@ -86,7 +87,8 @@ export class ExpeditionSession {
   /** Begin only from camp, with a verified career and affordable equipment allocation. */
   start(profession: Profession, equipment: readonly Equipment[]): boolean {
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
-    const departure = {
+    const departure: Departure = {
+      rules: 'scouting',
       seed: this.runtime.randomSeed(),
       profession,
       equipment: [...equipment],

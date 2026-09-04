@@ -27,6 +27,8 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  /** Persist the relic rules for deterministic replay; omitted direct inputs use current rules. */
+  readonly rules?: 'original' | 'scouting'
   readonly seed: number
   readonly profession: Profession
   readonly equipment: readonly Equipment[]
@@ -48,7 +50,7 @@ export interface Expedition {
   readonly offers: readonly Relic[]
   readonly scannedRows: readonly number[]
   readonly confirmedMines: readonly number[]
-  readonly probedCells: readonly number[]
+  readonly surveyedCells: readonly number[]
   readonly probeReport: ProbeReport | null
   readonly probes: number
   readonly scans: number
@@ -61,6 +63,8 @@ export interface Expedition {
 /** Explicit run intents; all effects can be replayed without browser state. */
 export type ExpeditionAction =
   | { readonly type: 'reveal' | 'flag' | 'move' | 'probe'; readonly index: number }
+  | { readonly type: 'sweep'; readonly row: number }
+  /** Historical count-only intent retained for existing journals; the UI emits sweep. */
   | { readonly type: 'scan'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
   | { readonly type: 'retreat' }

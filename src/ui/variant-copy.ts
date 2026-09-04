@@ -17,11 +17,11 @@ export function variantCopy(language: Language): VariantMessages {
       '确认有雷 · 标记已锁定',
       '地雷確定 · 旗を固定',
     ),
-    confirmedSafe: t('Probe confirmed safe', '探测确认安全', '探査で安全確認済み'),
+    confirmedSafe: t('Confirmed safe', '已确认安全', '安全確認済み'),
     probeResult: t(
-      'Last 3×3 probe: {count} mines. Gold flags are confirmed; green dots are safe.',
-      '最近一次 3×3 探测：{count} 枚雷。金旗为确认雷，绿点为确认安全。',
-      '直近の3×3探査：地雷{count}個。金の旗は確定、緑の点は安全。',
+      'Probe found {count} mines.',
+      '探测发现 {count} 枚雷。',
+      '探査で地雷{count}個を発見。',
     ),
     rowMines: t('mines total', '地雷总数', '地雷合計'),
     controls: t(
@@ -86,9 +86,9 @@ export function variantCopy(language: Language): VariantMessages {
     records: t('Recent results · this mode', '近期记录 · 当前模式', '最近の結果 · このモード'),
     noRecords: t('Your story starts here.', '从这里写下第一段旅程。', 'ここから冒険が始まる。'),
     expeditionHelp: t(
-      'Click revealed floor to walk there along the shortest known safe route. Click a highlighted frontier cell to approach and reveal it. Visit treasure chests to collect them. Click the stairs to walk to the next floor entrance; reaching them opens the relic choice. All safe floor is connected; unreachable pockets become walls. Movement uses four directions, while clues count eight neighbors. Blue flags are guesses. Gold flags from probes or shields are confirmed mines and cannot be removed. Each floor chooses an interior entrance, with a small irregular opening and useful clues.',
-      '点击已揭示地板，角色沿已知安全路线自动寻路；点击高亮前沿，会先走近再探索。走到宝箱才能收取奖励。点击楼梯并抵达后，选择遗物进入下一层。所有安全地板上下左右连通，孤立区域会成为墙壁；数字仍统计周围八格。蓝旗是手动猜测，金旗是探测或护盾确认的雷，无法取消。每层从变化的内圈入口出发，开局是带有效线索的小型不规则区域。',
-      '開いた床をクリックすると既知の安全な最短経路を歩きます。境界をクリックすると近づいて探索します。宝箱は訪れて回収。階段へ歩いて到着すると遺物を選び次の階へ。安全な床は上下左右につながり、孤立した場所は壁になります。数字は周囲8マスを数え、青い旗は推測、探査やシールドの金の旗は確定地雷で解除不可。階ごとに内側の入口が変わり、小さな不規則な領域と有効な数字で始まります。',
+      'Click revealed floor to walk there along the shortest known safe route. Click a highlighted frontier cell to approach and reveal it. Visit treasure chests to collect them. Click the stairs to walk to the next floor entrance; reaching them opens the relic choice. All safe floor is connected; unreachable pockets become walls. Movement uses four directions, while clues count eight neighbors. Blue flags are guesses. Gold flags are confirmed mines and cannot be removed. Each floor chooses an interior entrance, with a small irregular opening and useful clues.',
+      '点击已揭示地板，角色沿已知安全路线自动寻路；点击高亮前沿，会先走近再探索。走到宝箱才能收取奖励。点击楼梯并抵达后，选择遗物进入下一层。所有安全地板上下左右连通，孤立区域会成为墙壁；数字仍统计周围八格。蓝旗是手动猜测，金旗是已确认的雷，无法取消。每层从变化的内圈入口出发，开局是带有效线索的小型不规则区域。',
+      '開いた床をクリックすると既知の安全な最短経路を歩きます。境界をクリックすると近づいて探索します。宝箱は訪れて回収。階段へ歩いて到着すると遺物を選び次の階へ。安全な床は上下左右につながり、孤立した場所は壁になります。数字は周囲8マスを数え、青い旗は推測、金の旗は確定地雷で解除不可。階ごとに内側の入口が変わり、小さな不規則な領域と有効な数字で始まります。',
     ),
     twinHelp: t(
       'At each coordinate, at most one board has a mine. A mine you deduce on A guarantees safety on B, but two safe cells are also possible. Flags never prove safety. Clear every safe cell on both boards; hitting a mine on either ends the pair. The first reveal opens a safe neighborhood on both.',
@@ -131,10 +131,20 @@ export function variantCopy(language: Language): VariantMessages {
       '本局已达操作上限，请撤离或重新开始双盘。',
       '手数上限です。帰還するか双子盤を再開してください。',
     ),
+    toolHint: t(
+      'Drag a tool onto the board, or select one and click a target.',
+      '将道具拖到棋盘，或选中后点击目标。',
+      '道具を盤面へドラッグ、または選んで対象をクリック。',
+    ),
+    probeHint: t(
+      'Inspect a 3×3 area: gold flags mark mines, green dots mark safe cells.',
+      '探测目标周围 3×3：金旗标记地雷，绿点标记安全格。',
+      '周囲3×3を探査：金の旗は地雷、緑の点は安全。',
+    ),
     scanHint: t(
-      'Drag the probe onto a cell to inspect its 3×3 neighborhood; gold flags are confirmed mines and cannot be removed. Green dots mark confirmed safe cells; false ordinary flags are cleared. The scanner still targets a whole row. You can also select a tool then click its target; Escape cancels. Repeated areas with no new information cost nothing.',
-      '把探针拖到指定格，探测以它为中心的 3×3 范围：金色旗是已确认的雷，不能取消；绿点是确认安全的格子，错误的普通旗会清除。扫描器仍针对整行。也可先点道具再点目标，Esc 取消；没有新信息的重复探测不消耗次数。',
-      '探針をマスへドラッグし、中心の3×3範囲を調査。金の旗は確定地雷で解除不可、緑の点は安全で誤った通常の旗は消えます。走査器は行全体が対象。道具を選んで対象をクリックする方法も使え、Escで取消。新情報のない再探査では消費しません。',
+      'Inspect a whole row: gold flags mark mines, green dots mark safe cells.',
+      '扫描整行：金旗标记地雷，绿点标记安全格。',
+      '行全体を走査：金の旗は地雷、緑の点は安全。',
     ),
   }
 }
@@ -213,9 +223,9 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
         name: localized(language, 'Exit compass', '出口罗盘', '出口の羅針盤'),
         note: localized(
           language,
-          'Reveal the safe exit on each new floor. You must still connect a route.',
-          '每层揭示安全出口，仍需连通路线。',
-          '各階の安全な出口を公開。道の接続は必要です。',
+          'Scout the exit’s 3×3 area each floor, revealing safe cells and marking mines.',
+          '每层侦察出口周围 3×3，揭开安全格并标记地雷。',
+          '各階の出口周囲3×3を偵察し、安全なマスを開き地雷をマーク。',
         ),
       }
     case 'salvage':

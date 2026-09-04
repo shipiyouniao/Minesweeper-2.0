@@ -107,6 +107,8 @@ export interface VariantMessages {
   readonly safePartner: string
   readonly recovered: string
   readonly journalLimit: string
+  readonly toolHint: string
+  readonly probeHint: string
   readonly scanHint: string
   readonly controls: string
   readonly rowMines: string

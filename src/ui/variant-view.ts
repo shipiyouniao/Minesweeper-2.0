@@ -1,5 +1,5 @@
 import { frontierCells } from '../game/expedition.js'
-import { probeArea } from '../game/dungeon-probe.js'
+import { probeArea } from '../game/dungeon-discovery.js'
 import { translations } from '../i18n.js'
 import type { Game } from '../types/game.js'
 import type { Language } from '../types/localization.js'
@@ -170,8 +170,14 @@ export class VariantView {
     const hint = this.content.querySelector<HTMLElement>('.tool-hint')
     if (!hint) return
     const copy = variantCopy(this.language)
-    if (!tool || index === null) {
-      hint.textContent = copy.scanHint
+    if (!tool) {
+      hint.textContent = copy.toolHint
+      return
+    }
+
+    const description = tool === 'probe' ? copy.probeHint : copy.scanHint
+    if (index === null) {
+      hint.textContent = description
       return
     }
 
@@ -179,7 +185,7 @@ export class VariantView {
     const row = `${common.row} ${Math.floor(index / 9) + 1}`
     const column = `${common.column} ${(index % 9) + 1}`
     hint.textContent =
-      tool === 'probe' ? `${copy.probes} · ${row} · ${column} · 3×3` : `${copy.scans} · ${row}`
+      tool === 'probe' ? `${description} · ${row} · ${column}` : `${description} · ${row}`
   }
 
   /** Animate a known safe path before committing the destination action. */
@@ -319,7 +325,7 @@ export class VariantView {
       }
       if (label) cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + label)
       const confirmed = run.confirmedMines.includes(index)
-      const surveyedSafe = run.probedCells.includes(index) && !confirmed && !wall
+      const surveyedSafe = run.surveyedCells.includes(index) && !confirmed && !wall
       cell.classList.toggle('confirmed-mine', confirmed)
       cell.classList.toggle(
         'surveyed-safe',
