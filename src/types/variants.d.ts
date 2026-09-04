@@ -1,3 +1,4 @@
+import type { VariantDifficulty } from './variant-difficulty.js'
 import type { Game } from './game.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
@@ -27,8 +28,10 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
-  /** Persist the relic rules for deterministic replay; omitted direct inputs use current rules. */
-  readonly rules?: 'original' | 'scouting'
+  /** Persist generation and relic rules; omitted direct inputs retain the 9 × 9 scouting layout. */
+  readonly rules?: 'original' | 'scouting' | 'difficulty-v1'
+  /** New difficulty-v1 journals require this field; historical departures omit it. */
+  readonly difficulty?: VariantDifficulty
   readonly seed: number
   readonly profession: Profession
   readonly equipment: readonly Equipment[]
@@ -67,10 +70,11 @@ export type ExpeditionAction =
   /** Historical count-only intent retained for existing journals; the UI emits sweep. */
   | { readonly type: 'scan'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
-  | { readonly type: 'retreat' }
+  | { readonly type: 'retreat' | 'descend' }
 
 /** Both layouts are generated together, excluding overlapping mines. */
 export interface Twin {
+  readonly difficulty?: VariantDifficulty
   readonly seed: number
   readonly firstClick: number | null
   readonly a: Game
@@ -88,6 +92,7 @@ export interface TwinAction {
 
 /** Results use moves/depth instead of mixing unlike modes into classic time records. */
 export interface VariantRecord {
+  readonly difficulty?: VariantDifficulty
   readonly date: string
   readonly outcome: 'won' | 'lost' | 'retreated'
   readonly steps: number
@@ -103,6 +108,7 @@ export interface ExpeditionJournal {
 
 /** One atomic value prevents refresh from awarding a settled run twice. */
 export interface ExpeditionSave {
+  readonly difficulty?: VariantDifficulty
   readonly version: 3
   readonly camp: Camp
   readonly journal: ExpeditionJournal | null
@@ -117,6 +123,8 @@ export interface ProbeReport {
 
 /** Twin games have their own schema, seed, action history and records. */
 export interface TwinSave {
+  readonly rules?: 'difficulty-v1'
+  readonly difficulty?: VariantDifficulty
   readonly version: 1
   readonly seed: number
   readonly actions: readonly TwinAction[]

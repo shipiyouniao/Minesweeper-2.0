@@ -1,3 +1,4 @@
+import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
 import { allowedDeparture, expeditionEarnings } from '../game/expedition.js'
@@ -37,6 +38,7 @@ export class VariantApp implements VariantInputActions {
   private flagMode = false
   private paused = false
   private pending: 'retreat' | 'restart' | null = null
+  private pendingDifficulty: VariantDifficulty | null = null
   private moving = false
   private walkGeneration = 0
 
@@ -146,9 +148,14 @@ export class VariantApp implements VariantInputActions {
 
   /** Consume a targeted tool through the replayable domain action. */
   useTool(tool: DungeonTool, index: number): void {
-    if (this.paused || this.moving || this.view.dialogOpen) return
+    if (!(this.session instanceof ExpeditionSession)) return
+    const run = this.session.run
+    if (!run || this.paused || this.moving || this.view.dialogOpen) return
+
     this.expedition(
-      tool === 'probe' ? { type: 'probe', index } : { type: 'sweep', row: Math.floor(index / 9) },
+      tool === 'probe'
+        ? { type: 'probe', index }
+        : { type: 'sweep', row: Math.floor(index / run.game.config.width) },
     )
     this.render()
   }
@@ -210,6 +217,28 @@ export class VariantApp implements VariantInputActions {
       case 'reveal-mode':
         this.flagMode = false
         break
+      case 'zoom':
+        this.view.toggleZoom()
+        return
+      case 'descend':
+        this.expedition({ type: 'descend' })
+        break
+      case 'difficulty':
+        if (this.session instanceof ExpeditionSession) {
+          this.session.selectDifficulty(command.value)
+        } else if (this.session.state.difficulty !== command.value) {
+          if (this.session.state.phase === 'playing') {
+            this.pending = 'restart'
+            this.pendingDifficulty = command.value
+            this.view.confirm(
+              translations[this.language].confirmNote,
+              translations[this.language].restart,
+            )
+            return
+          }
+          this.session.restart(command.value)
+        }
+        break
       case 'start':
         if (this.session instanceof ExpeditionSession)
           this.result(this.session.start(this.profession, this.equipment))
@@ -254,6 +283,7 @@ export class VariantApp implements VariantInputActions {
         )
         return
       case 'restart':
+        this.pendingDifficulty = null
         if (this.session instanceof TwinSession && this.session.state.phase === 'playing') {
           this.pending = 'restart'
           this.view.confirm(
@@ -265,6 +295,7 @@ export class VariantApp implements VariantInputActions {
         if (this.session instanceof TwinSession) this.session.restart()
         break
       case 'cancel':
+        this.pendingDifficulty = null
         this.pending = null
         this.view.closeDialog()
         return
@@ -273,7 +304,10 @@ export class VariantApp implements VariantInputActions {
         this.view.closeDialog()
         if (this.pending === 'retreat') this.expedition({ type: 'retreat' })
         else if (this.pending === 'restart' && this.session instanceof TwinSession)
-          this.session.restart()
+          this.session.restart(
+            this.pendingDifficulty ?? this.session.state.difficulty ?? 'standard',
+          )
+        this.pendingDifficulty = null
         this.pending = null
         break
     }
@@ -338,7 +372,13 @@ export class VariantApp implements VariantInputActions {
       this.view.render(
         run
           ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.flagMode)
-          : campTemplate(this.language, this.session.camp, this.profession, this.equipment),
+          : campTemplate(
+              this.language,
+              this.session.camp,
+              this.profession,
+              this.equipment,
+              this.session.difficulty,
+            ),
         run?.game ?? null,
         null,
         run,

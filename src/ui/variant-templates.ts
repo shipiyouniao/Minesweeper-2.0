@@ -4,8 +4,9 @@ import {
   equipmentCost,
   upgradeCost,
   reachableCells,
-  FLOOR_COUNT,
 } from '../game/expedition.js'
+import { VARIANT_TIERS, expeditionFloors } from '../game/variant-difficulty.js'
+import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { stats } from '../game/engine.js'
 import { translations } from '../i18n.js'
 import type { Language } from '../types/localization.js'
@@ -19,6 +20,7 @@ import type {
 } from '../types/variants.js'
 import type { VariantDescription } from '../types/variant-ui.js'
 import {
+  difficultyCopy,
   equipmentCopy,
   professionCopy,
   relicCopy,
@@ -47,7 +49,7 @@ function metric(label: string, value: number | string): string {
 }
 
 /** Render recent local results, preserving the separate ruleset's units. */
-export function variantRecords(
+function recordList(
   language: Language,
   records: readonly VariantRecord[],
   expedition: boolean,
@@ -75,6 +77,7 @@ export function campTemplate(
   camp: Camp,
   profession: Profession,
   equipment: readonly Equipment[],
+  difficulty: VariantDifficulty = 'standard',
 ): string {
   const t = variantCopy(language)
   const careers: readonly Profession[] = ['explorer', 'surveyor', 'engineer']
@@ -82,6 +85,7 @@ export function campTemplate(
 
   return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p>
     <div class="variant-metrics">${metric(t.supplies, camp.supplies)}${metric(t.departures, camp.completed)}</div>
+    ${difficultyTemplate(language, difficulty, true)}
     <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career))).join('')}</div>
     <h2>${t.equipment} <small>${spent} / 3</small></h2>
     ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && spent + equipmentCost(item) > 3, item === 'guard' ? 'shield' : item)).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
@@ -135,11 +139,11 @@ export function expeditionTemplate(
     )
     .join('')
 
-  return `<div class="variant-metrics">${metric(t.floor, `${run.floor} / ${FLOOR_COUNT}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
+  return `<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
     <p class="variant-status" role="status" tabindex="-1">${status}</p>
     ${terminal ? `<div class="result-banner"><strong>${t.earned} +${earned}</strong><button class="primary-button" data-control="camp">${t.camp}</button></div>` : ''}
-    ${run.phase === 'reward' ? `<div class="choice-grid">${run.offers.map((relic) => choice(`relic:${relic}`, relicCopy(language, relic), false)).join('')}</div><button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
-    <div class="expedition-layout">${boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
+    ${run.phase === 'reward' ? `<div class="choice-grid">${run.offers.map((relic) => choice(`relic:${relic}`, relicCopy(language, relic), false)).join('')}</div>${run.offers.length === 0 ? `<button class="primary-button" data-control="descend">${t.nextFloor}</button>` : ''}<button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
+    ${boardZoomTemplate(language)}<div class="expedition-layout">${boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${
         run.phase === 'exploring'
           ? `<div class="variant-toolbar">${inputModeTemplate(language, flagMode)}
@@ -151,7 +155,7 @@ export function expeditionTemplate(
       }
       <h3>${t.relics}</h3>${relics ? `<ul class="relic-list">${relics}</ul>` : `<p class="variant-note">${t.noRelics}</p>`}
       <div class="dungeon-legend"><span>${spriteImage('entrance')}${t.entrance}</span><span>${spriteImage('exit')}${t.exit}</span><span>${spriteImage('treasure')}${t.treasure}</span><span>${spriteImage('wall')}${t.wall}</span></div>
-      <ul class="scan-results">${run.scannedRows.map((row) => `<li>${common.row} ${row + 1}: <strong>${run.game.cells.slice(row * 9, row * 9 + 9).filter((cell) => cell.mine).length}</strong> ${t.rowMines}</li>`).join('')}</ul>
+      <ul class="scan-results">${run.scannedRows.map((row) => `<li>${common.row} ${row + 1}: <strong>${run.game.cells.slice(row * run.game.config.width, (row + 1) * run.game.config.width).filter((cell) => cell.mine).length}</strong> ${t.rowMines}</li>`).join('')}</ul>
     </aside></div>`
 }
 
@@ -174,14 +178,58 @@ export function twinTemplate(language: Language, state: Twin, flagMode: boolean)
           ? common.lost
           : common.playing
 
-  return `<div class="variant-metrics">${metric(t.steps, state.moves)}${metric('A · ' + common.progress, `${stats(state.a).revealed} / 69`)}${metric('B · ' + common.progress, `${stats(state.b).revealed} / 69`)}</div>
+  return `${difficultyTemplate(language, state.difficulty, false)}<div class="variant-metrics">${metric(t.steps, state.moves)}${metric('A · ' + common.progress, `${stats(state.a).revealed} / ${state.a.cells.length - state.a.config.mines}`)}${metric('B · ' + common.progress, `${stats(state.b).revealed} / ${state.a.cells.length - state.a.config.mines}`)}</div>
     <p class="variant-status" role="status" tabindex="-1">${status}</p>
     <div class="twin-tools">${inputModeTemplate(language, flagMode)}<button class="secondary-button" data-control="restart">${common.restart}</button></div>
     ${state.a.phase === 'won' || state.b.phase === 'won' ? `<p class="variant-note">${t.safePartner}</p>` : ''}
-    <div class="twin-layout">${boardFrame('a', 'A')}${boardFrame('b', 'B')}</div>`
+    ${boardZoomTemplate(language)}<div class="twin-layout">${boardFrame('a', 'A')}${boardFrame('b', 'B')}</div>`
 }
 
 /** Render a square, explicitly targeted inventory button with a persistent charge badge. */
 function toolButton(tool: DungeonTool, label: string, count: number): string {
   return `<button class="inventory-tool" data-control="${tool}" data-tool="${tool}" aria-label="${label}: ${count}" title="${label}" aria-pressed="false" ${count === 0 ? 'disabled' : ''}>${spriteImage(tool === 'scan' ? 'scanner' : 'probe')}<span class="tool-count">${count}</span><span class="tool-label">${label}</span></button>`
+}
+
+/** Keep results in distinct tier sections so unlike board sizes are never presented as peers. */
+export function variantRecords(
+  language: Language,
+  records: readonly VariantRecord[],
+  expedition: boolean,
+): string {
+  if (records.length === 0) return recordList(language, records, expedition)
+  const difficulties: readonly (VariantDifficulty | undefined)[] = [
+    ...VARIANT_TIERS.map((tier) => tier.id),
+    undefined,
+  ]
+
+  return difficulties
+    .map((difficulty) => {
+      const matching = records.filter((record) => record.difficulty === difficulty)
+      return matching.length
+        ? `<h3>${difficultyCopy(language, difficulty)}</h3>${recordList(language, matching, expedition)}`
+        : ''
+    })
+    .join('')
+}
+
+/** Expose dimensions before departure with wrapping buttons instead of a browser select. */
+function difficultyTemplate(
+  language: Language,
+  selected: VariantDifficulty | undefined,
+  expedition: boolean,
+): string {
+  const t = variantCopy(language)
+
+  return `<fieldset class="variant-difficulty"><legend>${t.difficulty}${selected ? '' : ` · ${t.legacyDifficulty}`}</legend><div>${VARIANT_TIERS.map(
+    (tier) => {
+      const size = expedition ? tier.size : tier.twin.width
+      return `<button data-control="difficulty:${tier.id}" aria-pressed="${selected === tier.id}"><strong>${difficultyCopy(language, tier.id)}</strong><span>${size} × ${size}${expedition ? ` · ${tier.floors} ${t.floor}` : ''}</span></button>`
+    },
+  ).join('')}</div></fieldset>`
+}
+
+/** Keep zoom outside the grid so touch and keyboard users can choose usable target sizes. */
+function boardZoomTemplate(language: Language): string {
+  const t = variantCopy(language)
+  return `<div class="board-zoom"><button class="text-button" data-control="zoom" aria-pressed="false">${t.zoom}</button><span class="variant-note zoom-hint" hidden>${t.zoomHint}</span></div>`
 }

@@ -1,3 +1,4 @@
+import { parseVariantDifficulty } from '../game/variant-difficulty.js'
 import {
   parseEquipment,
   parseProfession,
@@ -15,6 +16,8 @@ export function parseVariantCommand(value: string): VariantCommand | null {
   if (parts.length > 2) return null
   const [type, id] = parts
   switch (type) {
+    case 'descend':
+    case 'zoom':
     case 'start':
     case 'camp':
     case 'probe':
@@ -30,6 +33,10 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     case 'confirm':
     case 'cancel':
       return id === undefined ? { type } : null
+    case 'difficulty': {
+      const parsed = parseVariantDifficulty(id ?? null)
+      return parsed ? { type, value: parsed } : null
+    }
     case 'profession': {
       const parsed = parseProfession(id ?? null)
       return parsed ? { type, value: parsed } : null
@@ -59,7 +66,7 @@ function cellTarget(target: EventTarget | null): VariantCellTarget | null {
   const text = cell?.dataset['cell']
   if ((side !== 'a' && side !== 'b') || text === undefined || !/^\d+$/.test(text)) return null
   const index = Number(text)
-  return index >= 0 && index < 81 ? { side, index } : null
+  return index >= 0 && index < Number(grid?.dataset['cells']) ? { side, index } : null
 }
 
 /** Owns special-mode browser listeners; touch uses the explicit reveal/flag toggle. */

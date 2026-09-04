@@ -1,3 +1,5 @@
+import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
+import type { Config } from '../types/game.js'
 import { JsonObjectReader, parseJson } from './json-reader.js'
 import type { JsonValue } from '../types/json.js'
 import type {
@@ -78,12 +80,17 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (!reader) return null
   const seed = reader.number('seed')
   const rules = reader.value('rules')
+  const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const profession = parseProfession(reader.string('profession'))
   const archive = reader.value('archive')
   const values = reader.array('equipment')
   if (
     !integer(seed, 0xffffffff) ||
-    (rules !== undefined && rules !== 'original' && rules !== 'scouting') ||
+    (rules !== undefined &&
+      rules !== 'original' &&
+      rules !== 'scouting' &&
+      rules !== 'difficulty-v1') ||
+    (rules === 'difficulty-v1' ? !difficulty : reader.value('difficulty') !== undefined) ||
     !profession ||
     typeof archive !== 'boolean' ||
     !values ||
@@ -98,11 +105,18 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     equipment.push(item)
   }
 
-  return { seed, profession, archive, equipment, rules: rules ?? 'original' }
+  return {
+    seed,
+    profession,
+    archive,
+    equipment,
+    rules: rules ?? 'original',
+    ...(difficulty ? { difficulty } : {}),
+  }
 }
 
 /** Decode the payload selected by each expedition command discriminant. */
-function decodeExpeditionAction(value: JsonValue): ExpeditionAction | null {
+function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAction | null {
   const reader = JsonObjectReader.from(value)
   if (!reader) return null
   const type = reader.string('type')
@@ -113,13 +127,14 @@ function decodeExpeditionAction(value: JsonValue): ExpeditionAction | null {
     case 'probe':
     case 'flag': {
       const index = reader.number('index')
-      return integer(index, 80) ? { type, index } : null
+      return integer(index, config.width * config.height - 1) ? { type, index } : null
     }
     case 'sweep':
     case 'scan': {
       const row = reader.number('row')
-      return integer(row, 8) ? { type, row } : null
+      return integer(row, config.height - 1) ? { type, row } : null
     }
+    case 'descend':
     case 'retreat':
       return { type }
     case 'relic': {
@@ -140,7 +155,7 @@ function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | nul
   const actions: ExpeditionAction[] = []
 
   for (const value of values) {
-    const action = decodeExpeditionAction(value)
+    const action = decodeExpeditionAction(value, expeditionConfig(departure, 1))
     if (!action) return null
     actions.push(action)
   }
@@ -150,12 +165,14 @@ function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | nul
 
 /** Retain a bounded list of fully valid records; no player-provided HTML is stored. */
 function decodeRecords(values: readonly JsonValue[] | null): VariantRecord[] | null {
-  if (!values || values.length > 10) return null
+  if (!values || values.length > 60) return null
   const records: VariantRecord[] = []
 
   for (const value of values) {
     const reader = JsonObjectReader.from(value)
     if (!reader) return null
+    const difficulty = parseVariantDifficulty(reader.string('difficulty'))
+    if (reader.value('difficulty') !== undefined && !difficulty) return null
     const date = reader.string('date')
     const outcome = reader.string('outcome')
     const steps = reader.number('steps')
@@ -167,11 +184,11 @@ function decodeRecords(values: readonly JsonValue[] | null): VariantRecord[] | n
       !Number.isFinite(Date.parse(date)) ||
       (outcome !== 'won' && outcome !== 'lost' && outcome !== 'retreated') ||
       !integer(steps, MAX_ACTIONS) ||
-      !integer(depth, 5) ||
+      !integer(depth, 12) ||
       !integer(earned, 10000)
     )
       return null
-    records.push({ date, outcome, steps, depth, earned })
+    records.push({ date, outcome, steps, depth, earned, ...(difficulty ? { difficulty } : {}) })
   }
 
   return records
@@ -188,6 +205,8 @@ function envelope(text: string | null, version = 1): JsonObjectReader | null {
 export function decodeExpeditionSave(text: string | null): ExpeditionSave | null {
   const reader = envelope(text, 3) ?? envelope(text, 2) ?? envelope(text, 1)
   if (!reader) return null
+  const difficulty = parseVariantDifficulty(reader.string('difficulty'))
+  if (reader.value('difficulty') !== undefined && !difficulty) return null
   const camp = decodeCamp(reader.child('camp'))
   const records = decodeRecords(reader.array('records'))
   // Movement and terrain changed the generator. Keep camp and results, never replay an old route on a new layout.
@@ -196,11 +215,11 @@ export function decodeExpeditionSave(text: string | null): ExpeditionSave | null
   const journal = decodeJournal(reader.child('journal'))
   if (!camp || !records || (reader.value('journal') !== null && !journal)) return null
 
-  return { version: 3, camp, journal, records }
+  return { version: 3, camp, journal, records, ...(difficulty ? { difficulty } : {}) }
 }
 
 /** Decode paired board intents without accepting alternate board identifiers. */
-function decodeTwinAction(value: JsonValue): TwinAction | null {
+function decodeTwinAction(value: JsonValue, config: Config): TwinAction | null {
   const reader = JsonObjectReader.from(value)
   if (!reader) return null
   const side = reader.string('side')
@@ -209,7 +228,7 @@ function decodeTwinAction(value: JsonValue): TwinAction | null {
 
   return (side === 'a' || side === 'b') &&
     (type === 'reveal' || type === 'flag') &&
-    integer(index, 80)
+    integer(index, config.width * config.height - 1)
     ? { side, type, index }
     : null
 }
@@ -220,6 +239,14 @@ export function decodeTwinSave(text: string | null): TwinSave | null {
   if (!reader) return null
   const seed = reader.number('seed')
   const settled = reader.value('settled')
+  const rules = reader.value('rules')
+  const difficulty = parseVariantDifficulty(reader.string('difficulty'))
+  if (
+    rules === 'difficulty-v1'
+      ? !difficulty
+      : rules !== undefined || reader.value('difficulty') !== undefined
+  )
+    return null
   const records = decodeRecords(reader.array('records'))
   const values = reader.array('actions')
   if (
@@ -233,10 +260,17 @@ export function decodeTwinSave(text: string | null): TwinSave | null {
   const actions: TwinAction[] = []
 
   for (const value of values) {
-    const action = decodeTwinAction(value)
+    const action = decodeTwinAction(value, twinConfig(difficulty ?? undefined))
     if (!action) return null
     actions.push(action)
   }
 
-  return { version: 1, seed, actions, records, settled }
+  return {
+    version: 1,
+    seed,
+    actions,
+    records,
+    settled,
+    ...(difficulty ? { rules: 'difficulty-v1', difficulty } : {}),
+  }
 }

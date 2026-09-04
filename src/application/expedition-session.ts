@@ -1,3 +1,5 @@
+import { addVariantRecord } from '../game/variant-difficulty.js'
+import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import {
   actExpedition,
   allowedDeparture,
@@ -74,9 +76,22 @@ export class ExpeditionSession {
     return this.save.camp
   }
 
-  /** Return the latest ten expedition outcomes, separate from other rulesets. */
+  /** Return up to ten outcomes per difficulty, separate from other rulesets. */
   get records(): readonly VariantRecord[] {
     return this.save.records
+  }
+
+  /** Restore the last departure choice without changing an active run's rules. */
+  get difficulty(): VariantDifficulty {
+    return this.current?.departure.difficulty ?? this.save.difficulty ?? 'standard'
+  }
+
+  /** Persist a camp choice only when no expedition is active. */
+  selectDifficulty(difficulty: VariantDifficulty): void {
+    if (this.current) return
+
+    this.save = { ...this.save, difficulty }
+    this.persist()
   }
 
   /** Reserve the final journal slot for extraction when the recovery budget is exhausted. */
@@ -85,17 +100,22 @@ export class ExpeditionSession {
   }
 
   /** Begin only from camp, with a verified career and affordable equipment allocation. */
-  start(profession: Profession, equipment: readonly Equipment[]): boolean {
+  start(
+    profession: Profession,
+    equipment: readonly Equipment[],
+    difficulty: VariantDifficulty = this.difficulty,
+  ): boolean {
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
     const departure: Departure = {
-      rules: 'scouting',
+      rules: 'difficulty-v1',
+      difficulty,
       seed: this.runtime.randomSeed(),
       profession,
       equipment: [...equipment],
       archive: this.camp.upgrades.includes('archive'),
     }
     this.current = createExpedition(departure)
-    this.save = { ...this.save, journal: { departure, actions: [] } }
+    this.save = { ...this.save, difficulty, journal: { departure, actions: [] } }
     this.persist()
     return true
   }
@@ -118,6 +138,7 @@ export class ExpeditionSession {
     if (next.phase === 'lost' || next.phase === 'won' || next.phase === 'retreated') {
       const earned = expeditionEarnings(next)
       const record: VariantRecord = {
+        ...(next.departure.difficulty ? { difficulty: next.departure.difficulty } : {}),
         date: this.runtime.date(),
         outcome: next.phase,
         steps: next.steps,
@@ -126,13 +147,14 @@ export class ExpeditionSession {
       }
       this.save = {
         version: 3,
+        difficulty: this.difficulty,
         journal: null,
         camp: {
           ...this.camp,
           supplies: this.camp.supplies + earned,
           completed: this.camp.completed + Number(next.phase === 'won'),
         },
-        records: [record, ...this.save.records].slice(0, 10),
+        records: addVariantRecord(this.save.records, record),
       }
     }
 

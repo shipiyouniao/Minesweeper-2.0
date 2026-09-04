@@ -1,3 +1,5 @@
+import { addVariantRecord } from '../game/variant-difficulty.js'
+import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { actTwin, createTwin } from '../game/twin.js'
 import { MAX_ACTIONS } from '../persistence/variant-decoders.js'
 import type { Twin, TwinAction, TwinSave, VariantRecord } from '../types/variants.js'
@@ -18,12 +20,14 @@ export class TwinSession {
     const saved = repository.twin()
     this.save = saved ?? {
       version: 1,
+      rules: 'difficulty-v1',
+      difficulty: 'standard',
       seed: runtime.randomSeed(),
       actions: [],
       records: [],
       settled: false,
     }
-    this.current = createTwin(this.save.seed)
+    this.current = createTwin(this.save.seed, this.save.difficulty)
     let valid = true
 
     for (const action of this.save.actions) {
@@ -38,7 +42,7 @@ export class TwinSession {
     const terminal = this.current.phase === 'won' || this.current.phase === 'lost'
     if (!valid || terminal !== this.save.settled) {
       repository.recovered = true
-      this.current = createTwin(runtime.randomSeed())
+      this.current = createTwin(runtime.randomSeed(), this.save.difficulty)
       this.save = { ...this.save, seed: this.current.seed, actions: [], settled: false }
     }
   }
@@ -68,6 +72,7 @@ export class TwinSession {
 
     if ((next.phase === 'won' || next.phase === 'lost') && !this.save.settled) {
       const record: VariantRecord = {
+        ...(next.difficulty ? { difficulty: next.difficulty } : {}),
         date: this.runtime.date(),
         outcome: next.phase,
         steps: next.moves,
@@ -77,7 +82,7 @@ export class TwinSession {
       this.save = {
         ...this.save,
         settled: true,
-        records: [record, ...this.save.records].slice(0, 10),
+        records: addVariantRecord(this.save.records, record),
       }
     }
 
@@ -86,9 +91,16 @@ export class TwinSession {
   }
 
   /** Start a fresh pair after the view has confirmed replacement of an unfinished game. */
-  restart(): void {
-    this.current = createTwin(this.runtime.randomSeed())
-    this.save = { ...this.save, seed: this.current.seed, actions: [], settled: false }
+  restart(difficulty: VariantDifficulty = this.current.difficulty ?? 'standard'): void {
+    this.current = createTwin(this.runtime.randomSeed(), difficulty)
+    this.save = {
+      ...this.save,
+      rules: 'difficulty-v1',
+      difficulty,
+      seed: this.current.seed,
+      actions: [],
+      settled: false,
+    }
     this.persist()
   }
 

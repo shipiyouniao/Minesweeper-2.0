@@ -1,3 +1,4 @@
+import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import type { Language } from '../types/localization.js'
 import type { Equipment, Profession, Relic, Upgrade } from '../types/variants.js'
 import type { VariantDescription, VariantMessages } from '../types/variant-ui.js'
@@ -12,6 +13,16 @@ export function variantCopy(language: Language): VariantMessages {
   /** Bind the current locale while retaining all three required source strings. */
   const t = (en: string, zh: string, ja: string): string => localized(language, en, zh, ja)
   return {
+    difficulty: t('Difficulty', '难度', '難易度'),
+    legacyDifficulty: t('Original rules', '原版规则', '旧ルール'),
+    nextFloor: t('Continue to next floor', '进入下一层', '次の階へ'),
+    zoom: t('Larger cells', '放大格子', 'マスを拡大'),
+    fit: t('Fit board', '适应面板', '盤面を全体表示'),
+    zoomHint: t(
+      'Scroll or swipe to explore the enlarged board.',
+      '滚动或滑动查看放大的棋盘。',
+      'スクロールやスワイプで拡大した盤面を移動。',
+    ),
     confirmedMine: t(
       'Confirmed mine · locked flag',
       '确认有雷 · 标记已锁定',
@@ -96,9 +107,9 @@ export function variantCopy(language: Language): VariantMessages {
       '同じ座標に地雷があるのは最大で片方のみ。A の地雷を推理できれば B の同じマスは安全ですが、両方安全な場合もあります。旗は証明ではありません。両盤の安全マスを全て開けば勝利、片方で踏めば終了。初手は両盤で安全な領域が開きます。',
     ),
     campHelp: t(
-      'Five floors, one evolving relic build. Bank all loot on extraction, half on defeat, and a completion bonus on victory. Unlock careers and a three-point equipment loadout with supplies. Growth opens choices; mines remain dangerous.',
-      '五层远征，遗物逐层成型。撤离带回全部战利品，失败保留一半，通关另有奖励。用物资解锁职业与三点预算的初始装备。成长增加策略选择，地雷仍然危险。',
-      '全5階層で遺物構成を育てます。帰還で全戦利品、敗北で半分、クリアで追加報酬。物資で職業と3ポイントの初期装備を解放。成長は選択肢を増やし、地雷の危険は残ります。',
+      'Choose your difficulty and expedition length. Build a relic collection along the way. Bank all loot on extraction, half on defeat, and a completion bonus on victory. Unlock careers and a three-point equipment loadout with supplies. Growth opens choices; mines remain dangerous.',
+      '选择难度与远征层数，遗物逐层成型。撤离带回全部战利品，失败保留一半，通关另有奖励。用物资解锁职业与三点预算的初始装备。成长增加策略选择，地雷仍然危险。',
+      '難易度と階層数を選び、遺物構成を育てます。帰還で全戦利品、敗北で半分、クリアで追加報酬。物資で職業と3ポイントの初期装備を解放。成長は選択肢を増やし、地雷の危険は残ります。',
     ),
     ready: t(
       'Choose the first opening on either board.',
@@ -283,5 +294,23 @@ export function equipmentCopy(language: Language, equipment: Equipment): Variant
         name: localized(language, 'Guard · 2 pts', '护盾 · 2 点', '防護 · 2 pt'),
         note: localized(language, '+1 starting shield', '初始 +1 护盾', '初期シールド+1'),
       }
+  }
+}
+
+/** Name each finite tier in all supported locales, keeping old results explicitly separate. */
+export function difficultyCopy(language: Language, difficulty?: VariantDifficulty): string {
+  switch (difficulty) {
+    case 'relaxed':
+      return localized(language, 'Relaxed', '轻松', 'リラックス')
+    case 'standard':
+      return localized(language, 'Standard', '标准', 'スタンダード')
+    case 'advanced':
+      return localized(language, 'Advanced', '进阶', 'アドバンス')
+    case 'expert':
+      return localized(language, 'Expert', '专家', 'エキスパート')
+    case 'abyss':
+      return localized(language, 'Abyss', '深渊', 'アビス')
+    default:
+      return variantCopy(language).legacyDifficulty
   }
 }

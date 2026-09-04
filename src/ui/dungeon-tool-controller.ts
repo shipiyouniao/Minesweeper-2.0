@@ -121,6 +121,10 @@ export class DungeonToolController {
     )
       return null
     const index = Number(element.dataset['cell'])
-    return Number.isInteger(index) && index >= 0 && index < 81 ? index : null
+    return Number.isInteger(index) &&
+      index >= 0 &&
+      index < Number(element.closest<HTMLElement>('[data-side]')?.dataset['cells'])
+      ? index
+      : null
   }
 }
