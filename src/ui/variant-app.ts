@@ -191,9 +191,11 @@ export class VariantApp implements VariantInputActions {
   command(command: VariantCommand): void {
     const rewardAction =
       this.view.rewardOpen && (command.type === 'relic' || command.type === 'descend')
+    const resultAction = this.view.resultOpen && command.type === 'camp'
     if (
       this.view.dialogOpen &&
       !rewardAction &&
+      !resultAction &&
       command.type !== 'confirm' &&
       command.type !== 'cancel'
     )
@@ -221,7 +223,8 @@ export class VariantApp implements VariantInputActions {
 
     switch (command.type) {
       case 'rewards':
-        this.view.showRewards()
+      case 'result':
+        this.view.showExpeditionDialog()
         return
       case 'help': {
         const t = variantCopy(this.language)

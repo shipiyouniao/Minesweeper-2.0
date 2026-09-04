@@ -103,6 +103,7 @@ export function variantCopy(language: Language): VariantMessages {
     ),
     chooseRelic: t('Choose a relic', '选择遗物', '遺物を選ぶ'),
     floorCleared: t('Floor cleared', '本层已通关', 'フロアクリア'),
+    viewResult: t('View results', '查看结算', '結果を見る'),
     reward: t(
       'Choose one relic for the next floor',
       '选择一件遗物，进入下一层',

@@ -11,6 +11,7 @@ export type VariantCommand =
         | 'start'
         | 'descend'
         | 'rewards'
+        | 'result'
         | 'zoom'
         | 'camp'
         | 'probe'
@@ -113,6 +114,7 @@ export interface VariantMessages {
   readonly reward: string
   readonly chooseRelic: string
   readonly floorCleared: string
+  readonly viewResult: string
   readonly exit: string
   readonly entrance: string
   readonly treasure: string
@@ -158,3 +160,6 @@ export interface VariantDescription {
   readonly name: string
   readonly note: string
 }
+
+/** Presentation phases that can own an expedition modal without changing the journal. */
+export type ExpeditionDialogPhase = 'reward' | 'won' | 'lost' | 'retreated'

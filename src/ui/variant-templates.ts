@@ -150,7 +150,6 @@ export function expeditionTemplate(
   const t = variantCopy(language)
   const common = translations[language]
   const terminal = run.phase === 'lost' || run.phase === 'won' || run.phase === 'retreated'
-  const reward = expeditionReward(run)
   const rate = expeditionRewardPercent(run.departure) / 100
   const exitReady = reachableCells(run).has(run.exit)
   const status =
@@ -186,8 +185,7 @@ export function expeditionTemplate(
     ${vitalityTemplate(language, run, !hasExpeditionHealth(run.departure), !run.encounter)}
     ${tacticalTemplate(language, run)}
     ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
-    ${terminal ? `<div class="result-banner"><strong>${t.earned} +${earned}</strong><button class="primary-button" data-control="camp">${t.camp}</button></div>` : ''}
-    ${terminal ? `<p class="variant-note reward-breakdown">${t.rewardBase} ${reward.base} + ${t.rewardBonus} ${reward.bonus} = ${reward.total}</p>` : ''}
+    ${terminal ? `<button class="primary-button" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
     ${run.phase === 'reward' ? `<button class="primary-button" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
     ${boardZoomTemplate(language)}<div class="expedition-layout">${boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${
@@ -217,9 +215,24 @@ export function relicRewardTemplate(language: Language, run: Expedition): string
 
   return `<button class="dialog-close icon-button" data-control="cancel" aria-label="${translations[language].close}">${icon('close')}</button>
     <p class="eyebrow">${t.floor} ${run.floor} / ${expeditionFloors(run.departure)}</p>
-    <h2 id="relic-dialog-title" tabindex="-1" autofocus>${t.floorCleared}</h2>
+    <h2 id="expedition-dialog-title" tabindex="-1" autofocus>${t.floorCleared}</h2>
     <p class="dialog-intro">${run.offers.length ? t.reward : t.nextFloor}</p>
     ${choices ? `<div class="choice-grid">${choices}</div>` : `<button class="primary-button" data-control="descend">${t.nextFloor}</button>`}`
+}
+
+/** Display an already committed settlement; opening or closing this view never grants supplies. */
+export function expeditionResultTemplate(language: Language, run: Expedition): string {
+  const t = variantCopy(language)
+  const reward = expeditionReward(run)
+  const title = run.phase === 'won' ? t.won : run.phase === 'lost' ? t.lost : t.retreated
+  const number = new Intl.NumberFormat(language)
+
+  return `<button class="dialog-close icon-button" data-control="cancel" aria-label="${translations[language].close}">${icon('close')}</button>
+    <p class="eyebrow">${t.floor} ${run.floor} / ${expeditionFloors(run.departure)}</p>
+    <h2 id="expedition-dialog-title" tabindex="-1" autofocus>${title}</h2>
+    <div class="settlement-total">${spriteImage('treasure')}<span>${t.earned}</span><strong>+${number.format(reward.total)}</strong></div>
+    <p class="dialog-intro reward-breakdown">${t.rewardBase} ${number.format(reward.base)} + ${t.rewardBonus} ${number.format(reward.bonus)} = ${number.format(reward.total)}</p>
+    <button class="primary-button" data-control="camp">${t.camp}</button>`
 }
 
 /** Offer an explicit flag toggle for touch users alongside keyboard/right-click shortcuts. */

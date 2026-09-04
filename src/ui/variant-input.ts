@@ -18,6 +18,7 @@ export function parseVariantCommand(value: string): VariantCommand | null {
   switch (type) {
     case 'descend':
     case 'rewards':
+    case 'result':
     case 'zoom':
     case 'start':
     case 'camp':
