@@ -1,12 +1,14 @@
 import type { ExpeditionSave, TwinSave, VariantSave } from '../types/variants.js'
 import type { StorageLike } from '../types/storage.js'
 import { decodeExpeditionSave, decodeTwinSave } from './variant-decoders.js'
+import { JsonObjectReader, parseJson } from './json-reader.js'
 
 /** Owns mode-specific storage, containing browser quota/privacy failures at one boundary. */
 export class VariantRepository {
   private readonly storage: StorageLike
   available = true
   recovered = false
+  migrated = false
 
   /** Accept the same storage port used by classic mode and test adapters. */
   constructor(storage: StorageLike) {
@@ -17,6 +19,7 @@ export class VariantRepository {
   expedition(): ExpeditionSave | null {
     const text = this.read('expedition')
     const save = decodeExpeditionSave(text)
+    this.migrated = save !== null && JsonObjectReader.from(parseJson(text))?.number('version') === 1
     if (text !== null && !save) this.recovered = true
     return save
   }

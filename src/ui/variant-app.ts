@@ -1,6 +1,8 @@
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
 import { allowedDeparture, expeditionEarnings } from '../game/expedition.js'
+import { approachPath } from '../game/dungeon-path.js'
+import type { RowTool } from '../types/dungeon-ui.js'
 import { translations } from '../i18n.js'
 import type { SoundEffects, InteractionCue } from '../types/audio.js'
 import type { Language } from '../types/localization.js'
@@ -10,7 +12,12 @@ import type { VariantCommand, VariantInputActions } from '../types/variant-ui.js
 import type { NavigationKey } from '../types/ui.js'
 import { VariantRepository } from '../persistence/variant-repository.js'
 import { variantCopy } from './variant-copy.js'
-import { campTemplate, expeditionTemplate, twinTemplate } from './variant-templates.js'
+import {
+  campTemplate,
+  expeditionTemplate,
+  twinTemplate,
+  variantRecords,
+} from './variant-templates.js'
 import { VariantView } from './variant-view.js'
 import { VariantInput } from './variant-input.js'
 
@@ -30,6 +37,8 @@ export class VariantApp implements VariantInputActions {
   private flagMode = false
   private paused = false
   private pending: 'retreat' | 'restart' | null = null
+  private moving = false
+  private walkGeneration = 0
 
   /** Wire one active mode, sharing only browser preferences and the sound port. */
   constructor(
@@ -55,10 +64,25 @@ export class VariantApp implements VariantInputActions {
 
   /** Apply board input only while the board is visible and no modal owns interaction. */
   play(side: BoardSide, index: number, flag = this.flagMode): void {
-    if (this.paused || this.view.dialogOpen) {
+    if (this.paused || this.view.dialogOpen || this.moving) {
       this.sounds.play('blocked')
       return
     }
+    if (this.session instanceof ExpeditionSession && !flag) {
+      const run = this.session.run
+      const path = run ? approachPath(run, index) : null
+      if (!run || !path || (index === run.player && index !== run.exit)) {
+        this.sounds.play('blocked')
+        return
+      }
+      void this.walkAndPlay(index, path, run.game.cells[index]?.visibility === 'revealed')
+      return
+    }
+    this.commitPlay(side, index, flag)
+  }
+
+  /** Commit one board action after any visible movement has completed. */
+  private commitPlay(side: BoardSide, index: number, flag: boolean, move = false): void {
     const before =
       this.session instanceof TwinSession ? this.session.state[side] : this.session.run?.game
     const flagged = before?.cells[index]?.visibility === 'flagged'
@@ -66,7 +90,7 @@ export class VariantApp implements VariantInputActions {
     const changed =
       this.session instanceof TwinSession
         ? this.session.dispatch({ side, type: flag ? 'flag' : 'reveal', index })
-        : this.session.dispatch({ type: flag ? 'flag' : 'reveal', index })
+        : this.session.dispatch({ type: flag ? 'flag' : move ? 'move' : 'reveal', index })
     if (!changed) {
       this.sounds.play('blocked')
       return
@@ -87,8 +111,43 @@ export class VariantApp implements VariantInputActions {
               ? flagged
                 ? 'unflag'
                 : 'flag'
-              : 'reveal',
+              : move
+                ? 'navigate'
+                : 'reveal',
     )
+    this.render()
+  }
+
+  /** Keep the session atomic while an interruptible, visible path animation runs. */
+  private async walkAndPlay(index: number, path: readonly number[], move: boolean): Promise<void> {
+    this.input.cancelTools()
+    const generation = ++this.walkGeneration
+    this.moving = true
+    this.sounds.play('navigate')
+    const finished = await this.view.walk(path)
+    if (generation !== this.walkGeneration) return
+    this.moving = false
+    if (finished) this.commitPlay('a', index, false, move)
+  }
+
+  /** Discard pending movement before replacing or hiding its board. */
+  private cancelMovement(): void {
+    this.walkGeneration++
+    this.moving = false
+    this.view.cancelWalk()
+    this.input.cancelTools()
+  }
+
+  /** Preview only an interactive expedition's explicit target row. */
+  previewTool(tool: RowTool | null, row: number | null): void {
+    if (tool && (this.paused || this.moving || this.view.dialogOpen)) return
+    this.view.previewTool(tool, row)
+  }
+
+  /** Consume a targeted tool through the replayable domain action. */
+  useTool(tool: RowTool, row: number): void {
+    if (this.paused || this.moving || this.view.dialogOpen) return
+    this.expedition({ type: tool, row })
     this.render()
   }
 
@@ -99,13 +158,42 @@ export class VariantApp implements VariantInputActions {
       this.paused &&
       command.type !== 'pause' &&
       command.type !== 'sound' &&
+      command.type !== 'help' &&
+      command.type !== 'records' &&
       command.type !== 'cancel' &&
       command.type !== 'confirm'
     )
       return
     if (command.type !== 'sound') this.sounds.play(command.type === 'cancel' ? 'dismiss' : 'tap')
+    if (
+      this.moving &&
+      command.type !== 'sound' &&
+      command.type !== 'pause' &&
+      command.type !== 'help' &&
+      command.type !== 'records'
+    )
+      return
+    if (command.type !== 'probe' && command.type !== 'scan') this.cancelMovement()
 
     switch (command.type) {
+      case 'help': {
+        const t = variantCopy(this.language)
+        this.view.showInformation(
+          translations[this.language].how,
+          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${t.scanHint}</p>` : ''}`,
+        )
+        return
+      }
+      case 'records':
+        this.view.showInformation(
+          variantCopy(this.language).records,
+          variantRecords(
+            this.language,
+            this.session.records,
+            this.session instanceof ExpeditionSession,
+          ),
+        )
+        return
       case 'sound':
         this.sounds.setEnabled(!this.sounds.enabled)
         this.preferences.setPreference({ key: 'sound', value: this.sounds.enabled })
@@ -150,14 +238,9 @@ export class VariantApp implements VariantInputActions {
           this.result(this.session.purchase(command.value))
         break
       case 'probe':
-        this.expedition({ type: 'probe' })
-        break
       case 'scan':
-        this.expedition({ type: 'scan', row: this.view.selectedRow })
-        break
-      case 'descend':
-        this.expedition({ type: 'descend' })
-        break
+        this.input.selectTool(command.type)
+        return
       case 'relic':
         this.expedition({ type: 'relic', relic: command.value })
         break
@@ -219,6 +302,7 @@ export class VariantApp implements VariantInputActions {
 
   /** Hide the board on backgrounding and checkpoint its coherent session state. */
   suspend(): void {
+    this.cancelMovement()
     this.paused = true
     this.sounds.stop()
     this.view.closeMenu()
@@ -228,6 +312,7 @@ export class VariantApp implements VariantInputActions {
 
   /** Release all owned effects before routing to another game mode or hot reload. */
   dispose(): void {
+    this.cancelMovement()
     this.session.persist()
     this.input.dispose()
     this.view.dispose()
@@ -236,18 +321,22 @@ export class VariantApp implements VariantInputActions {
 
   /** Render one session snapshot, showing terminal twin layouts consistently on both sides. */
   private render(): void {
+    // Uncover before measuring cell geometry, so a resumed board never starts at zero width.
+    this.view.chrome(
+      this.repository.available,
+      this.repository.recovered,
+      this.sounds.enabled,
+      this.paused,
+      this.session.atMoveLimit,
+      this.repository.migrated,
+    )
+
     if (this.session instanceof ExpeditionSession) {
       const run = this.session.run
       this.view.render(
         run
           ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.flagMode)
-          : campTemplate(
-              this.language,
-              this.session.camp,
-              this.profession,
-              this.equipment,
-              this.session.records,
-            ),
+          : campTemplate(this.language, this.session.camp, this.profession, this.equipment),
         run?.game ?? null,
         null,
         run,
@@ -256,21 +345,8 @@ export class VariantApp implements VariantInputActions {
       const state = this.session.state
       const a = state.phase === 'lost' ? { ...state.a, phase: 'lost' as const } : state.a
       const b = state.phase === 'lost' ? { ...state.b, phase: 'lost' as const } : state.b
-      this.view.render(
-        twinTemplate(this.language, state, this.flagMode, this.session.records),
-        a,
-        b,
-        null,
-      )
+      this.view.render(twinTemplate(this.language, state, this.flagMode), a, b, null)
     }
-
-    this.view.chrome(
-      this.repository.available,
-      this.repository.recovered,
-      this.sounds.enabled,
-      this.paused,
-      this.session.atMoveLimit,
-    )
   }
 
   /** Apply expedition-only commands and choose feedback from the resulting phase. */
@@ -298,6 +374,7 @@ export class VariantApp implements VariantInputActions {
 
   /** Replace translated markup while preserving the same session and permanent preferences. */
   private readonly selectLanguage = (language: Language): void => {
+    this.cancelMovement()
     this.language = language
     this.preferences.setPreference({ key: 'language', value: language })
     const url = new URL(location.href)

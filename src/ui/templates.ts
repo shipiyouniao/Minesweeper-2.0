@@ -64,11 +64,12 @@ export function languageMenuTemplate(language: Language): string {
   `
 }
 
-/** Render the static application shell from state; event binding belongs to the view. */
-export function appTemplate(state: SessionState, language: Language, flagMode: boolean): string {
+/** Share the same header structure across classic and special-mode controllers. */
+export function siteHeaderTemplate(
+  language: Language,
+  attribute: 'data-action' | 'data-control' = 'data-action',
+): string {
   const t = translations[language]
-  const { game, mode } = state
-
   return /* HTML */ `
     <header class="site-header">
       <a class="brand" href="./" aria-label="Minesweeper 2.0">
@@ -79,11 +80,21 @@ export function appTemplate(state: SessionState, language: Language, flagMode: b
         </span>
       </a>
       <nav aria-label="${t.play}">
-        <button class="text-button" data-action="help">${t.how}</button>
-        <button class="text-button" data-action="records">${t.records}</button>
+        <button class="text-button" ${attribute}="help">${t.how}</button>
+        <button class="text-button" ${attribute}="records">${t.records}</button>
         ${languageMenuTemplate(language)}
       </nav>
     </header>
+  `
+}
+
+/** Render the static application shell from state; event binding belongs to the view. */
+export function appTemplate(state: SessionState, language: Language, flagMode: boolean): string {
+  const t = translations[language]
+  const { game, mode } = state
+
+  return /* HTML */ `
+    ${siteHeaderTemplate(language)}
     <main class="layout">
       <section class="introduction" aria-labelledby="intro-title">
         <p class="eyebrow">

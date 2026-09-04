@@ -39,6 +39,8 @@ export interface Expedition {
   readonly floor: number
   readonly game: Game
   readonly exit: number
+  readonly walls: readonly number[]
+  readonly player: number
   readonly treasures: readonly number[]
   readonly collected: readonly number[]
   readonly relics: readonly Relic[]
@@ -54,10 +56,8 @@ export interface Expedition {
 
 /** Explicit run intents; all effects can be replayed without browser state. */
 export type ExpeditionAction =
-  | { readonly type: 'reveal' | 'flag'; readonly index: number }
-  | { readonly type: 'scan'; readonly row: number }
-  | { readonly type: 'probe' }
-  | { readonly type: 'descend' }
+  | { readonly type: 'reveal' | 'flag' | 'move'; readonly index: number }
+  | { readonly type: 'scan' | 'probe'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
   | { readonly type: 'retreat' }
 
@@ -95,7 +95,7 @@ export interface ExpeditionJournal {
 
 /** One atomic value prevents refresh from awarding a settled run twice. */
 export interface ExpeditionSave {
-  readonly version: 1
+  readonly version: 2
   readonly camp: Camp
   readonly journal: ExpeditionJournal | null
   readonly records: readonly VariantRecord[]

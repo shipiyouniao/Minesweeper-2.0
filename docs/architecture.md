@@ -104,3 +104,11 @@ Formatting is automatic; meaningful boundaries and comments remain an implementa
 Keep types explicit: small unions for finite alternatives, named interfaces for object shapes, and discriminated unions when fields depend on a command kind. Avoid application `any`, `unknown`, mapped types, and conditional types. `npm run check:contracts` enforces these rules in `src/`; the synthetic stress generator intentionally exercises more complex types outside application code.
 
 Authored `.d.ts` files are checked inputs, not emitted output. `scripts/compile.mjs` copies them into the native application output after successful compilation, and the development watcher synchronizes edits. `scripts/verify-build.mjs` checks exact copies and resolves all emitted declarations without using source modules. The same copy operation is included in the native A/B emission timing.
+
+### Dungeon terrain, walking and row tools
+
+`dungeon-path.ts` owns pure four-direction connectivity and shortest-path searches. Generation reserves a safe entrance-to-exit route, shuffles the exact mine set, converts disconnected safe components into walls, then places treasures only in the retained component. The expedition transition owns physical position, visited-chest rewards and arrival at the stairs. Information tools reveal clues without moving or collecting.
+
+`VariantApp` waits for `VariantView`'s Web Animation before committing a movement intent. A generation counter invalidates stale completions on pause, backgrounding, remount or disposal. The view owns its resize observer and animations; `RowToolController` owns pointer capture gestures, whole-row targeting, tap/keyboard selection and synthetic-click suppression. Both adapters clean up with their mounted mode. Motion preferences change presentation only.
+
+Expedition envelope version 2 journals explicit `move` coordinates and `probe`/`scan` rows. Its decoder migrates version 1 by retaining valid camp/results and retiring the incompatible active run. Hidden layouts and player position are recomputed by deterministic replay, never trusted from serialized board objects.

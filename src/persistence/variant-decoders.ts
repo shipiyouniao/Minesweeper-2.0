@@ -107,16 +107,16 @@ function decodeExpeditionAction(value: JsonValue): ExpeditionAction | null {
 
   switch (type) {
     case 'reveal':
+    case 'move':
     case 'flag': {
       const index = reader.number('index')
       return integer(index, 80) ? { type, index } : null
     }
+    case 'probe':
     case 'scan': {
       const row = reader.number('row')
       return integer(row, 8) ? { type, row } : null
     }
-    case 'probe':
-    case 'descend':
     case 'retreat':
       return { type }
     case 'relic': {
@@ -175,22 +175,25 @@ function decodeRecords(values: readonly JsonValue[] | null): VariantRecord[] | n
 }
 
 /** Reject oversized or incompatible envelopes before allocating replay work. */
-function envelope(text: string | null): JsonObjectReader | null {
+function envelope(text: string | null, version = 1): JsonObjectReader | null {
   if (!text || text.length > 1500000) return null
   const reader = JsonObjectReader.from(parseJson(text))
-  return reader?.number('version') === 1 ? reader : null
+  return reader?.number('version') === version ? reader : null
 }
 
 /** Decode camp and active run together because their settlement is one atomic transaction. */
 export function decodeExpeditionSave(text: string | null): ExpeditionSave | null {
-  const reader = envelope(text)
+  const reader = envelope(text, 2) ?? envelope(text, 1)
   if (!reader) return null
   const camp = decodeCamp(reader.child('camp'))
   const records = decodeRecords(reader.array('records'))
+  // Movement and terrain changed the generator. Keep camp and results, never replay an old route on a new layout.
+  if (reader.number('version') === 1)
+    return camp && records ? { version: 2, camp, records, journal: null } : null
   const journal = decodeJournal(reader.child('journal'))
   if (!camp || !records || (reader.value('journal') !== null && !journal)) return null
 
-  return { version: 1, camp, journal, records }
+  return { version: 2, camp, journal, records }
 }
 
 /** Decode paired board intents without accepting alternate board identifiers. */

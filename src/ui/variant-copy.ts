@@ -37,8 +37,14 @@ export function variantCopy(language: Language): VariantMessages {
     scans: t('Scans', '扫描', '走査'),
     shields: t('Shields', '护盾', 'シールド'),
     probe: t('Probe frontier', '探测前沿', '境界を探査'),
-    scan: t('Scan selected row', '扫描光标所在行', '選択行を走査'),
-    descend: t('Take the exit', '前往出口', '出口へ進む'),
+    scan: t('Scan a row', '扫描一行', '行を走査'),
+    wall: t('Wall · impassable', '墙壁 · 无法通行', '壁 · 通行不可'),
+    player: t('Explorer', '探险者', '探検家'),
+    migrated: t(
+      'Camp and results preserved. The previous dungeon run was retired after the map update.',
+      '营地成长与成绩已保留；地图更新后，旧版未完成远征已返回营地。',
+      'キャンプと記録は保持しました。マップ更新により旧遠征は終了しました。',
+    ),
     retreat: t('Extract to camp', '撤离回营地', 'キャンプへ帰還'),
     retreatNote: t(
       'End this expedition and bank all collected loot?',
@@ -69,9 +75,9 @@ export function variantCopy(language: Language): VariantMessages {
     records: t('Recent results · this mode', '近期记录 · 当前模式', '最近の結果 · このモード'),
     noRecords: t('Your story starts here.', '从这里写下第一段旅程。', 'ここから冒険が始まる。'),
     expeditionHelp: t(
-      'Connect the entrance ○ to the exit ↗ through revealed safe cells, using orthogonal steps. Reveal only the highlighted frontier. Numbers count all eight neighbors. Safe treasures ◇ reward detours. Flags are hypotheses; revealing an open clue does not chord in this mode. Take the exit when ready; you may explore more first.',
-      '沿上下左右相连的已揭示安全格，从入口 ○ 连通出口 ↗。只能翻开高亮前沿；数字仍表示周围八格的雷数。安全宝箱 ◇ 奖励绕路探索。旗帜只是你的推测，本模式点击已开数字不会和弦翻开。出口连通后可继续探索，再选择离开。',
-      '上下左右につながる安全なマスで入口 ○ と出口 ↗ を結びます。強調された境界のみ開けられます。数字は周囲8マスの地雷数です。安全な宝箱 ◇ は寄り道の報酬。旗は仮説で、数字の再クリックでは周囲を開きません。出口接続後も探索できます。',
+      'Click revealed floor to walk there along the shortest known safe route. Click a highlighted frontier cell to approach and reveal it. Visit treasure chests to collect them. Click the stairs to walk to the next floor entrance; reaching them opens the relic choice. All safe floor is connected; unreachable pockets become walls. Movement uses four directions, while clues count eight neighbors. Flags block movement and never prove safety.',
+      '点击已揭示地板，角色沿已知安全路线自动寻路；点击高亮前沿，会先走近再探索。走到宝箱才能收取奖励。点击楼梯并抵达后，选择遗物进入下一层。所有安全地板上下左右连通，孤立区域会成为墙壁；数字仍统计周围八格。旗帜阻止通行，但不等于证明有雷。',
+      '開いた床をクリックすると既知の安全な最短経路を歩きます。境界をクリックすると近づいて探索します。宝箱は訪れて回収。階段へ歩いて到着すると遺物を選び次の階へ。安全な床は上下左右につながり、孤立した場所は壁になります。数字は周囲8マスを数え、旗は通行を止めますが地雷の証明ではありません。',
     ),
     twinHelp: t(
       'At each coordinate, at most one board has a mine. A mine you deduce on A guarantees safety on B, but two safe cells are also possible. Flags never prove safety. Clear every safe cell on both boards; hitting a mine on either ends the pair. The first reveal opens a safe neighborhood on both.',
@@ -94,9 +100,9 @@ export function variantCopy(language: Language): VariantMessages {
       '出口への安全な道を探しましょう。',
     ),
     exitReady: t(
-      'Exit connected · explore more or leave.',
-      '已连通出口 · 可继续探索或离开',
-      '出口に接続 · 探索を続けるか出発',
+      'Stairs reachable · click them when ready to leave.',
+      '楼梯已连通 · 准备好后点击楼梯前往下一层。',
+      '階段へ到達可能 · 出発するときにクリック。',
     ),
     partner: t('Matching coordinate', '对应坐标', '対応する座標'),
     safePartner: t(
@@ -115,9 +121,9 @@ export function variantCopy(language: Language): VariantMessages {
       '手数上限です。帰還するか双子盤を再開してください。',
     ),
     scanHint: t(
-      'Select a cell, then scan its row. Revealed totals include flagged mines.',
-      '先选择一个格子，再扫描所在行；扫描总数包含已插旗的雷。',
-      'マスを選択してその行を走査。合計は旗の地雷も含みます。',
+      'Drag a tool onto a row, or select it and click a row. Escape cancels. A probe opens one safe frontier cell in that row; a scan counts all its mines, including flags. Invalid targets cost no charge.',
+      '将道具拖到目标行，或先点道具再点目标行；Esc 取消。探针揭示该行一个安全前沿格，扫描显示整行雷数（含插旗格）；无效投放不消耗次数。',
+      '道具を行へドラッグ、または選んで行をクリック。Escで取消。探針はその行の安全な境界を1つ開き、走査は旗を含む地雷総数を表示。無効な対象では消費しません。',
     ),
   }
 }

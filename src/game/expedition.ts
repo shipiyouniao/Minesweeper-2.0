@@ -1,5 +1,7 @@
 import { act, neighbors, randomIndex } from './engine.js'
 import { adjacentSteps, placedBoard, shuffled } from './variant-board.js'
+import { approachPath, connectedFloor, walkingPath } from './dungeon-path.js'
+import type { Config, Game } from '../types/game.js'
 import type {
   Camp,
   Departure,
@@ -65,23 +67,27 @@ function createFloor(departure: Departure, floor: number): Expedition {
   }
 
   const indices = Array.from({ length: 81 }, (_, index) => index)
-  const mines = new Set(
-    shuffled(
-      indices.filter((index) => !safe.has(index)),
-      seed ^ 0x51ed,
-    ).slice(0, config.mines),
-  )
-  const game = placedBoard(config, mines, seed, 0)
+  const game = connectedPlacement(config, indices, safe, seed)
+  const connected = connectedFloor(game)
+  const walls = indices.filter((index) => !game.cells[index]?.mine && !connected.has(index))
   const treasures = shuffled(
-    indices.filter((index) => index > 10 && index < 80 && !mines.has(index)),
+    indices.filter((index) => index > 10 && index < 80 && connected.has(index)),
     seed ^ 0xa710,
   ).slice(0, 3)
 
   return {
     departure,
     floor,
-    game: { ...game, phase: 'playing' },
+    game: {
+      ...game,
+      phase: 'playing',
+      cells: game.cells.map((cell, index) =>
+        walls.includes(index) ? { ...cell, visibility: 'hidden' } : cell,
+      ),
+    },
     exit: 80,
+    walls,
+    player: 0,
     treasures,
     collected: [],
     relics: [],
@@ -96,11 +102,40 @@ function createFloor(departure: Departure, floor: number): Expedition {
   }
 }
 
+/** Shuffle exact mine sets until every hazard borders the reachable floor, with a finite fallback. */
+function connectedPlacement(
+  config: Config,
+  indices: readonly number[],
+  safe: ReadonlySet<number>,
+  seed: number,
+): Game {
+  const eligible = indices.filter((index) => !safe.has(index))
+  for (let attempt = 0; attempt < 128; attempt++) {
+    const mines = new Set(
+      shuffled(eligible, (seed ^ 0x51ed) + Math.imul(attempt, 0x45d9f3b)).slice(0, config.mines),
+    )
+    const game = placedBoard(config, mines, seed, 0)
+    const floor = connectedFloor(game)
+    if (
+      [...mines].every((index) =>
+        adjacentSteps(game, index).some((neighbor) => floor.has(neighbor)),
+      )
+    )
+      return game
+  }
+
+  // Even rows remain safe corridors. The reserved monotone route joins them;
+  // every odd-row mine has a safe vertical neighbor. At least 24 slots remain.
+  const candidates = eligible.filter((index) => Math.floor(index / config.width) % 2 === 1)
+  const mines = new Set(shuffled(candidates, seed ^ 0xc011).slice(0, config.mines))
+  return placedBoard(config, mines, seed, 0)
+}
+
 /** Start a run with bounded career tools and the selected equipment allocation. */
 export function createExpedition(departure: Departure): Expedition {
   const run = createFloor(departure, 1)
 
-  return collectTreasures({
+  return {
     ...run,
     probes:
       (departure.profession === 'explorer' ? 2 : 1) + Number(departure.equipment.includes('probe')),
@@ -109,7 +144,7 @@ export function createExpedition(departure: Departure): Expedition {
       Number(departure.equipment.includes('scanner')),
     shields:
       Number(departure.profession === 'engineer') + Number(departure.equipment.includes('guard')),
-  })
+  }
 }
 
 /** Find every revealed safe cell connected to the entrance by orthogonal steps. */
@@ -123,7 +158,13 @@ export function reachableCells(run: Expedition): Set<number> {
 
     for (const other of adjacentSteps(run.game, index)) {
       const cell = run.game.cells[other]
-      if (!found.has(other) && cell && !cell.mine && cell.visibility === 'revealed') {
+      if (
+        !found.has(other) &&
+        !run.walls.includes(other) &&
+        cell &&
+        !cell.mine &&
+        cell.visibility === 'revealed'
+      ) {
         found.add(other)
         queue.push(other)
       }
@@ -138,16 +179,18 @@ export function frontierCells(run: Expedition): Set<number> {
   const frontier = new Set<number>()
   for (const index of reachableCells(run)) {
     for (const other of adjacentSteps(run.game, index)) {
-      if (run.game.cells[other]?.visibility === 'hidden') frontier.add(other)
+      if (!run.walls.includes(other) && run.game.cells[other]?.visibility === 'hidden')
+        frontier.add(other)
     }
   }
   return frontier
 }
 
-/** Award each connected treasure once, including those reached by a blank-cell flood. */
-function collectTreasures(run: Expedition): Expedition {
-  const reachable = reachableCells(run)
-  const collected = run.treasures.filter((index) => reachable.has(index))
+/** Award treasures physically visited along this walk; revealing one does not collect it. */
+function collectTreasures(run: Expedition, path: readonly number[]): Expedition {
+  const collected = run.treasures.filter(
+    (index) => run.collected.includes(index) || path.includes(index),
+  )
   const fresh = collected.filter((index) => !run.collected.includes(index)).length
 
   return { ...run, collected, loot: run.loot + fresh * (run.relics.includes('purse') ? 9 : 6) }
@@ -168,26 +211,73 @@ function relicOffers(run: Expedition): Relic[] {
 /** Reveal a route frontier, consuming a shield on a mine without changing its clues. */
 function revealFrontier(run: Expedition, index: number): Expedition {
   if (!frontierCells(run).has(index)) return run
+  const path = approachPath(run, index)
+  if (!path) return run
   const cell = run.game.cells[index]
   if (!cell) return run
+  const approached = collectTreasures({ ...run, player: path.at(-1) ?? run.player }, path)
 
   if (cell.mine && run.shields > 0) {
     // A protected mine stays a mine and is flagged. The safe route still needs discovery.
     return {
-      ...run,
+      ...approached,
       game: act(run.game, { type: 'flag', index }),
       shields: run.shields - 1,
       steps: run.steps + 1,
     }
   }
 
-  const game = act(run.game, { type: 'reveal', index })
-  return collectTreasures({
+  const game = revealDungeon(run, index)
+  return finishAtExit(
+    collectTreasures(
+      {
+        ...approached,
+        game,
+        player: cell.mine ? approached.player : index,
+        phase: game.phase === 'lost' ? 'lost' : 'exploring',
+        steps: run.steps + 1,
+      },
+      cell.mine ? [] : [index],
+    ),
+  )
+}
+
+/** Reveal blank regions without ever revealing wall terrain or changing mine clues. */
+function revealDungeon(run: Expedition, index: number): Game {
+  const cells = [...run.game.cells]
+  const queue = [index]
+
+  for (let cursor = 0; cursor < queue.length; cursor++) {
+    const target = queue[cursor]
+    if (target === undefined || run.walls.includes(target)) continue
+    const cell = cells[target]
+    if (!cell || cell.visibility !== 'hidden') continue
+    cells[target] = { ...cell, visibility: 'revealed' }
+    if (cell.mine) return { ...run.game, cells, phase: 'lost', exploded: target }
+    if (cell.adjacent === 0) queue.push(...neighbors(run.game.config, target))
+  }
+
+  return { ...run.game, cells, phase: 'playing' }
+}
+
+/** Walk through known floor cells and enter the stairs only after physically arriving. */
+function movePlayer(run: Expedition, index: number): Expedition {
+  const path = walkingPath(run, index)
+  if (!path || (path.length === 1 && index !== run.exit)) return run
+  const moved = collectTreasures({ ...run, player: index, steps: run.steps + 1 }, path)
+  return finishAtExit(moved)
+}
+
+/** Commit an exit reward only for a living explorer that actually reached the stairs. */
+function finishAtExit(run: Expedition): Expedition {
+  if (run.phase !== 'exploring' || run.player !== run.exit) return run
+
+  return {
     ...run,
-    game: game.phase === 'won' ? { ...game, phase: 'playing' } : game,
-    phase: game.phase === 'lost' ? 'lost' : 'exploring',
-    steps: run.steps + 1,
-  })
+    loot: run.loot + 12,
+    phase: run.floor === FLOOR_COUNT ? 'won' : 'reward',
+    offers: relicOffers(run),
+  }
 }
 
 /** Carry the build between floors while resetting local clues, treasures and route geometry. */
@@ -207,11 +297,10 @@ function takeRelic(run: Expedition, relic: Relic): Expedition {
 
   // Compass exposes a fixed, advertised safe exit clue without connecting it to the entrance.
   if (relics.includes('compass')) {
-    const game = act(result.game, { type: 'reveal', index: result.exit })
-    result = { ...result, game: { ...game, phase: 'playing' } }
+    result = { ...result, game: revealDungeon(result, result.exit) }
   }
 
-  return collectTreasures(result)
+  return result
 }
 
 /** Pure expedition transition, including explicit extraction and inter-floor reward selection. */
@@ -224,7 +313,10 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
   switch (action.type) {
     case 'reveal':
       return revealFrontier(run, action.index)
+    case 'move':
+      return movePlayer(run, action.index)
     case 'flag': {
+      if (run.walls.includes(action.index)) return run
       const game = act(run.game, { type: 'flag', index: action.index })
       return game === run.game ? run : { ...run, game, steps: run.steps + 1 }
     }
@@ -244,19 +336,20 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
         steps: run.steps + 1,
       }
     case 'probe': {
-      if (run.probes === 0) return run
-      const index = [...frontierCells(run)].find((candidate) => !run.game.cells[candidate]?.mine)
+      if (run.probes === 0 || !Number.isInteger(action.row) || action.row < 0 || action.row >= 9)
+        return run
+      const index = [...frontierCells(run)].find(
+        (candidate) => Math.floor(candidate / 9) === action.row && !run.game.cells[candidate]?.mine,
+      )
       if (index === undefined) return run
-      return { ...revealFrontier(run, index), probes: run.probes - 1 }
-    }
-    case 'descend':
-      if (!reachableCells(run).has(run.exit)) return run
+      // Tools reveal information at a distance; they never teleport the character.
       return {
         ...run,
-        loot: run.loot + 12,
-        phase: run.floor === FLOOR_COUNT ? 'won' : 'reward',
-        offers: relicOffers(run),
+        game: revealDungeon(run, index),
+        probes: run.probes - 1,
+        steps: run.steps + 1,
       }
+    }
   }
 }
 

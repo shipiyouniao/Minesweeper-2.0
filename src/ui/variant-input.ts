@@ -6,6 +6,8 @@ import {
 } from '../persistence/variant-decoders.js'
 import type { VariantCellTarget, VariantCommand, VariantInputActions } from '../types/variant-ui.js'
 import { parseNavigation } from './input-parser.js'
+import { RowToolController } from './row-tool-controller.js'
+import type { RowTool } from '../types/dungeon-ui.js'
 
 /** Convert button data into a finite command and its validated catalog payload. */
 export function parseVariantCommand(value: string): VariantCommand | null {
@@ -17,7 +19,8 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     case 'camp':
     case 'probe':
     case 'scan':
-    case 'descend':
+    case 'help':
+    case 'records':
     case 'retreat':
     case 'restart':
     case 'flag-mode':
@@ -61,12 +64,14 @@ function cellTarget(target: EventTarget | null): VariantCellTarget | null {
 
 /** Owns special-mode browser listeners; touch uses the explicit reveal/flag toggle. */
 export class VariantInput {
+  private readonly tools: RowToolController
   private readonly actions: VariantInputActions
   private readonly listeners = new AbortController()
 
   /** Delegate input once so view updates cannot accumulate event handlers. */
   constructor(root: HTMLElement, actions: VariantInputActions) {
     this.actions = actions
+    this.tools = new RowToolController(root, actions)
     const options = { signal: this.listeners.signal }
     root.addEventListener('click', this.click, options)
     root.addEventListener('contextmenu', this.context, options)
@@ -79,13 +84,16 @@ export class VariantInput {
 
   /** Release root, document and page lifecycle listeners together. */
   dispose(): void {
+    this.tools.dispose()
     this.listeners.abort()
   }
 
   /** Route native button clicks and touch taps through decoded application intents. */
   private readonly click = (event: MouseEvent): void => {
+    if (this.tools.suppressClick) return
     const cell = cellTarget(event.target)
     if (cell) {
+      if (cell.side === 'a' && this.tools.activate(Math.floor(cell.index / 9))) return
       this.actions.play(cell.side, cell.index)
       return
     }
@@ -108,11 +116,18 @@ export class VariantInput {
   /** Update each grid's roving tab stop without emitting render-induced sounds. */
   private readonly focus = (event: FocusEvent): void => {
     const cell = cellTarget(event.target)
-    if (cell) this.actions.focus(cell.side, cell.index)
+    if (cell) {
+      this.actions.focus(cell.side, cell.index)
+      if (cell.side === 'a') this.tools.preview(Math.floor(cell.index / 9))
+    }
   }
 
   /** Keep native Enter/Space activation while adding arrows, F and Tab feedback. */
   private readonly key = (event: KeyboardEvent): void => {
+    if (event.key === 'Escape') {
+      this.tools.cancel()
+      this.actions.feedback('dismiss')
+    }
     this.actions.unlock()
     if (
       event.key === 'Tab' &&
@@ -131,6 +146,16 @@ export class VariantInput {
       event.preventDefault()
       this.actions.play(cell.side, cell.index, true)
     }
+  }
+
+  /** Arm an explicitly chosen inventory tool without applying it to a hidden focus position. */
+  selectTool(tool: RowTool): void {
+    this.tools.select(tool)
+  }
+
+  /** Cancel stale gestures before replacing a floor or changing page state. */
+  cancelTools(): void {
+    this.tools.cancel()
   }
 
   /** Warm audio inside a pointer gesture, before any later action needs it. */

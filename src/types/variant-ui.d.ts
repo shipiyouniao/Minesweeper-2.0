@@ -1,6 +1,7 @@
 import type { BoardSide, Equipment, Profession, Relic, Upgrade } from './variants.js'
 import type { NavigationKey } from './ui.js'
 import type { InteractionCue } from './audio.js'
+import type { RowTool } from './dungeon-ui.js'
 
 /** Commands decoded from finite button attributes at the UI boundary. */
 export type VariantCommand =
@@ -10,7 +11,8 @@ export type VariantCommand =
         | 'camp'
         | 'probe'
         | 'scan'
-        | 'descend'
+        | 'help'
+        | 'records'
         | 'retreat'
         | 'restart'
         | 'flag-mode'
@@ -27,6 +29,10 @@ export type VariantCommand =
 
 /** Browser input consumes this application port without knowing a session implementation. */
 export interface VariantInputActions {
+  /** Preview a visible row target during drag or tool selection. */
+  previewTool(tool: RowTool | null, row: number | null): void
+  /** Consume a tool only after dropping or explicitly activating a row. */
+  useTool(tool: RowTool, row: number): void
   /** Decode-independent application command routing. */
   command(command: VariantCommand): void
   /** Apply a reveal or explicit flag action on one board. */
@@ -71,7 +77,9 @@ export interface VariantMessages {
   readonly shields: string
   readonly probe: string
   readonly scan: string
-  readonly descend: string
+  readonly wall: string
+  readonly player: string
+  readonly migrated: string
   readonly retreat: string
   readonly retreatNote: string
   readonly reward: string

@@ -7,8 +7,11 @@ import type { InteractionCue } from '../types/audio.js'
 import type { NavigationKey, NavigationResult } from '../types/ui.js'
 import { BoardView } from './board-view.js'
 import { LanguageMenu } from './language-menu.js'
-import { languageMenuTemplate } from './templates.js'
+import { siteHeaderTemplate } from './templates.js'
 import { variantCopy } from './variant-copy.js'
+import { icon } from '../icons.js'
+import { spriteImage } from './dungeon-sprites.js'
+import type { RowTool } from '../types/dungeon-ui.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -22,6 +25,8 @@ export class VariantView {
   private b: BoardView | null = null
   private focusA = 0
   private focusB = 0
+  private walking: Animation | null = null
+  private resize: ResizeObserver | null = null
   private readonly listeners = new AbortController()
 
   /** Mount the stable shell once; only its mode content changes after an action. */
@@ -37,10 +42,8 @@ export class VariantView {
     const t = variantCopy(language)
     const common = translations[language]
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
-    root.innerHTML = `<header class="site-header"><a class="brand" href="./">Minesweeper <span class="brand-version">2.0</span></a>
-      <nav><button class="text-button" data-control="sound" aria-pressed="true">${common.sound}</button>${languageMenuTemplate(language)}</nav></header>
-      <main class="variant-main ${mode}"><div class="variant-heading"><div><p class="eyebrow">A DIFFERENT KIND OF LOGIC</p><h1>${mode === 'expedition' ? t.expedition : t.twin}</h1></div><button class="secondary-button" data-control="pause">${common.pause}</button></div>
-      <details class="variant-help"><summary>${common.how}</summary><p>${mode === 'expedition' ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p></details>
+    root.innerHTML = `${siteHeaderTemplate(language, 'data-control')}
+      <main class="variant-main ${mode}"><div class="game-heading variant-heading"><h2>${mode === 'expedition' ? t.expedition : t.twin}</h2><div class="game-heading-actions"><button class="icon-button" data-control="sound" aria-label="${common.sound}" aria-pressed="true">${icon('volume')}</button><button class="icon-button" data-control="pause" aria-label="${common.pause}">${icon('pause')}</button></div></div>
       <p class="variant-storage" role="status"></p><div class="variant-pause" hidden><p>${common.paused}</p><button class="primary-button" data-control="pause">${common.resume}</button></div><div class="variant-content"></div></main>
       <dialog aria-labelledby="variant-dialog-title"><h2 id="variant-dialog-title">${common.confirmTitle}</h2><p></p><div class="dialog-actions"><button class="secondary-button" data-control="cancel">${common.cancel}</button><button class="primary-button" data-control="confirm">${common.start}</button></div></dialog>`
     const content = root.querySelector<HTMLElement>('.variant-content')
@@ -60,13 +63,9 @@ export class VariantView {
     return this.dialog.open
   }
 
-  /** Preserve the selected expedition row even when a toolbar button receives focus. */
-  get selectedRow(): number {
-    return Math.floor(this.focusA / 9)
-  }
-
   /** Replace content and restore a still-existing control or cell focus after repaint. */
   render(html: string, a: Game | null, b: Game | null, expedition: Expedition | null): void {
+    this.resize?.disconnect()
     const active =
       document.activeElement instanceof HTMLElement && this.content.contains(document.activeElement)
         ? document.activeElement
@@ -98,6 +97,7 @@ export class VariantView {
     sound: boolean,
     paused: boolean,
     atMoveLimit: boolean,
+    migrated = false,
   ): void {
     const common = translations[this.language]
     this.status.textContent = atMoveLimit
@@ -106,10 +106,14 @@ export class VariantView {
         ? common.storageOff
         : recovered
           ? variantCopy(this.language).recovered
-          : ''
+          : migrated
+            ? variantCopy(this.language).migrated
+            : ''
     const button = this.root.querySelector<HTMLButtonElement>('[data-control="sound"]')
     if (button) {
-      button.textContent = sound ? common.soundOn : common.soundOff
+      button.innerHTML = icon(sound ? 'volume' : 'volumeOff')
+      button.setAttribute('aria-label', sound ? common.soundOn : common.soundOff)
+      button.title = sound ? common.soundOn : common.soundOff
       button.setAttribute('aria-pressed', String(sound))
     }
     const cover = this.root.querySelector<HTMLElement>('.variant-pause')
@@ -120,18 +124,78 @@ export class VariantView {
       '.variant-heading [data-control="pause"]',
     )
     if (pause) {
-      pause.textContent = paused ? common.resume : common.pause
+      pause.innerHTML = icon(paused ? 'play' : 'pause')
+      pause.setAttribute('aria-label', paused ? common.resume : common.pause)
       pause.setAttribute('aria-pressed', String(paused))
     }
   }
 
   /** Show an application-owned confirmation using the browser's focus-trapping dialog. */
   confirm(message: string, label: string): void {
+    this.dialog.innerHTML = `<h2 id="variant-dialog-title">${translations[this.language].confirmTitle}</h2><p></p><div class="dialog-actions"><button class="secondary-button" data-control="cancel">${translations[this.language].cancel}</button><button class="primary-button" data-control="confirm"></button></div>`
     const paragraph = this.dialog.querySelector('p')
     if (paragraph) paragraph.textContent = message
     const button = this.dialog.querySelector<HTMLButtonElement>('[data-control="confirm"]')
     if (button) button.textContent = label
     this.dialog.showModal()
+  }
+
+  /** Open help or records in the same native modal presentation used by classic mode. */
+  showInformation(title: string, content: string): void {
+    this.dialog.innerHTML = `<button class="dialog-close icon-button" data-control="cancel" aria-label="${translations[this.language].close}">${icon('close')}</button><h2 id="variant-dialog-title">${title}</h2>${content}`
+    this.dialog.showModal()
+  }
+
+  /** Show an explicit whole-row target for pointer drag, tap selection and keyboard activation. */
+  previewTool(tool: RowTool | null, row: number | null): void {
+    for (const button of this.content.querySelectorAll<HTMLElement>('[data-tool]'))
+      button.setAttribute('aria-pressed', String(button.dataset['tool'] === tool))
+    for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
+      cell.classList.toggle(
+        'tool-target',
+        tool !== null && Math.floor(Number(cell.dataset['cell']) / 9) === row,
+      )
+    const hint = this.content.querySelector<HTMLElement>('.tool-hint')
+    if (hint)
+      hint.textContent = tool
+        ? `${tool === 'scan' ? variantCopy(this.language).scans : variantCopy(this.language).probes} · ${row === null ? variantCopy(this.language).scanHint : translations[this.language].row + ' ' + (row + 1)}`
+        : variantCopy(this.language).scanHint
+  }
+
+  /** Animate a known safe path before committing the destination action. */
+  async walk(path: readonly number[]): Promise<boolean> {
+    const player = this.content.querySelector<HTMLElement>('.dungeon-player')
+    if (!player || path.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches)
+      return true
+    const frames: Keyframe[] = []
+    for (const index of path) {
+      const cell = this.content.querySelector<HTMLElement>(`[data-side="a"] [data-cell="${index}"]`)
+      if (!cell) return false
+      frames.push({ transform: `translate(${cell.offsetLeft}px, ${cell.offsetTop}px)` })
+      cell.classList.add('walk-route')
+    }
+    this.walking = player.animate(frames, {
+      duration: Math.min(1800, (path.length - 1) * 100),
+      fill: 'forwards',
+      easing: 'linear',
+    })
+    player.classList.add('walking')
+    try {
+      await this.walking.finished
+      return true
+    } catch {
+      return false
+    } finally {
+      player.classList.remove('walking')
+      this.walking = null
+      for (const cell of this.content.querySelectorAll('.walk-route'))
+        cell.classList.remove('walk-route')
+    }
+  }
+
+  /** Cancel a walk when paused, backgrounded, remounted or disposed. */
+  cancelWalk(): void {
+    this.walking?.cancel()
   }
 
   /** Close a pending confirmation without replacing its trigger or board. */
@@ -174,6 +238,8 @@ export class VariantView {
 
   /** Release native dialog and language listeners before removing the shell. */
   dispose(): void {
+    this.cancelWalk()
+    this.resize?.disconnect()
     this.listeners.abort()
     this.menu.dispose()
     this.dialog.close()
@@ -197,18 +263,21 @@ export class VariantView {
       const index = Number(cell.dataset['cell'])
       const treasure = run.treasures.includes(index)
       cell.classList.toggle('frontier', run.phase === 'exploring' && frontier.has(index))
-      const mark =
-        index === 0
-          ? '○'
+      const wall = run.walls.includes(index)
+      const mark = wall
+        ? 'wall'
+        : index === 0
+          ? 'entrance'
           : index === run.exit
-            ? '↗'
-            : treasure
-              ? run.collected.includes(index)
-                ? '◆'
-                : '◇'
-              : ''
-      const label =
-        index === 0
+            ? 'exit'
+            : treasure && !run.collected.includes(index)
+              ? 'treasure'
+              : run.game.phase === 'lost' && run.game.cells[index]?.mine
+                ? 'mine'
+                : null
+      const label = wall
+        ? t.wall
+        : index === 0
           ? t.entrance
           : index === run.exit
             ? t.exit
@@ -218,11 +287,44 @@ export class VariantView {
                 : t.treasure
               : ''
       if (mark) {
-        cell.dataset['landmark'] = mark
-        cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + label)
+        cell.classList.add('landmark-cell')
+        if (wall) {
+          cell.classList.add('wall-cell')
+          cell.innerHTML = ''
+          cell.setAttribute('aria-disabled', 'true')
+        } else if (mark === 'mine') cell.innerHTML = ''
+        else if (run.game.cells[index]?.visibility === 'revealed' && !run.game.cells[index]?.mine)
+          cell.innerHTML = `<span class="landmark-clue">${run.game.cells[index]?.adjacent || ''}</span>`
+        cell.insertAdjacentHTML('afterbegin', spriteImage(mark))
       }
+      if (label) cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + label)
       if (frontier.has(index))
         cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + t.frontier)
+    }
+    const grid = this.content.querySelector<HTMLElement>('[data-side="a"]')
+    const current = grid?.querySelector<HTMLElement>(`[data-cell="${run.player}"]`)
+    if (grid && current) {
+      current.classList.add('player-cell')
+      current.setAttribute('aria-label', current.getAttribute('aria-label') + ', ' + t.player)
+      const player = document.createElement('div')
+      player.className = 'dungeon-player'
+      const clue = run.game.cells[run.player]?.adjacent ?? 0
+      player.innerHTML = `${spriteImage('player')}${clue ? `<span class="landmark-clue">${clue}</span>` : ''}`
+      player.style.width = `${current.offsetWidth}px`
+      player.style.height = `${current.offsetHeight}px`
+      player.style.transform = `translate(${current.offsetLeft}px, ${current.offsetTop}px)`
+      player.setAttribute('aria-hidden', 'true')
+      grid.append(player)
+      let width = current.offsetWidth
+      /** Reanchor the sprite after responsive cell geometry changes. */
+      this.resize = new ResizeObserver(() => {
+        if (width !== current.offsetWidth) this.cancelWalk()
+        width = current.offsetWidth
+        player.style.width = `${width}px`
+        player.style.height = `${current.offsetHeight}px`
+        player.style.transform = `translate(${current.offsetLeft}px, ${current.offsetTop}px)`
+      })
+      this.resize.observe(grid)
     }
   }
 }

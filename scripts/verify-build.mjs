@@ -22,6 +22,24 @@ for (const file of [
   '.native/app/game/engine.d.ts',
 ])
   await stat(file)
+for (const sprite of [
+  'player',
+  'entrance',
+  'exit',
+  'treasure',
+  'wall',
+  'probe',
+  'scanner',
+  'shield',
+  'mine',
+]) {
+  const source = await readFile(`public/assets/dungeon/${sprite}.png`)
+  assert.deepEqual(
+    await readFile(`dist/assets/dungeon/${sprite}.png`),
+    source,
+    `Missing or altered dungeon sprite: ${sprite}`,
+  )
+}
 assert.ok(!html.includes('/src/main.ts'), 'The site must consume native-emitted JavaScript')
 
 // Check the emitted declaration graph independently of src, catching missing copied contracts.
