@@ -51,6 +51,8 @@ Special modes use move counts rather than clocks. They cover the board on backgr
 
 ## A classic reveal, from input to saved state
 
+Inter-floor expedition choices use a dedicated `RelicDialog`, which owns modal visibility and focus independently of confirmation dialogs. The view automatically opens pending rewards after a floor transition or journal recovery; the application routes selections through the existing session. See [reward dialogs and board scrolling](reward-dialog.md) for lifecycle rules and browser regression checks.
+
 Named contracts live in `src/types/*.d.ts`: `game.d.ts` describes engine values, `session.d.ts` describes injected services and snapshots, and `storage.d.ts` declares the repository port and persisted formats. Localization, icon, and UI contracts have their own modules. Use `import type` when consuming them; do not introduce global ambient application declarations.
 
 Persistence flows through `src/persistence/json-reader.ts` and `decoders.ts`. The reader contains primitive JSON shape checks. Decoders construct specific contracts before `Repository` passes them to the application or engine. The engine's `restore(GameSnapshot)` still checks gameplay invariants and regenerates mines and clues. It does not parse arbitrary input.

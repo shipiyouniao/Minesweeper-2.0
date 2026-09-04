@@ -89,6 +89,53 @@
 .choice-grid.facilities {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+/* Keep rewards in the top layer and let long descriptions scroll inside a short window. */
+html:has(.relic-dialog[open]) {
+  overflow: hidden;
+}
+.relic-dialog {
+  width: min(820px, calc(100vw - 28px));
+  overscroll-behavior: contain;
+}
+.relic-dialog .choice-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+  margin-bottom: 0;
+}
+.relic-dialog .choice-grid:has(> :nth-child(4)) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.relic-dialog h2:focus {
+  /* Initial focus announces the title; it is not an actionable choice. */
+  outline: none;
+}
+.relic-dialog .choice-card {
+  align-items: center;
+  text-align: center;
+}
+.relic-dialog .choice-card .dungeon-sprite {
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 8px;
+}
+@media (max-width: 520px) {
+  .relic-dialog .choice-grid,
+  .relic-dialog .choice-grid:has(> :nth-child(4)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .relic-dialog .choice-card {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    text-align: left;
+    gap: 6px 12px;
+    padding: 16px;
+  }
+  .relic-dialog .choice-card .dungeon-sprite {
+    width: 56px;
+    height: 56px;
+    grid-row: span 2;
+    margin: 0;
+  }
+}
 .choice-card {
   border: 1px solid var(--line);
   border-radius: 12px;

@@ -17,6 +17,7 @@ export function parseVariantCommand(value: string): VariantCommand | null {
   const [type, id] = parts
   switch (type) {
     case 'descend':
+    case 'rewards':
     case 'zoom':
     case 'start':
     case 'camp':

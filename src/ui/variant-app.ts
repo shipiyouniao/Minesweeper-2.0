@@ -189,7 +189,15 @@ export class VariantApp implements VariantInputActions {
 
   /** Route finite UI commands, preserving confirmation before destructive run replacement. */
   command(command: VariantCommand): void {
-    if (this.view.dialogOpen && command.type !== 'confirm' && command.type !== 'cancel') return
+    const rewardAction =
+      this.view.rewardOpen && (command.type === 'relic' || command.type === 'descend')
+    if (
+      this.view.dialogOpen &&
+      !rewardAction &&
+      command.type !== 'confirm' &&
+      command.type !== 'cancel'
+    )
+      return
     if (
       this.paused &&
       command.type !== 'pause' &&
@@ -212,6 +220,9 @@ export class VariantApp implements VariantInputActions {
     if (command.type !== 'probe' && command.type !== 'scan') this.cancelMovement()
 
     switch (command.type) {
+      case 'rewards':
+        this.view.showRewards()
+        return
       case 'help': {
         const t = variantCopy(this.language)
         if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
