@@ -57,6 +57,22 @@ export function variantCopy(language: Language): VariantMessages {
     loot: t('Run loot', '本局战利品', '戦利品'),
     probes: t('Probes', '探针', '探針'),
     scans: t('Scans', '扫描', '走査'),
+    health: t('Health', '生命', '体力'),
+    healthHint: t(
+      'Mines cost 1 HP. Shields absorb first. Reach the exit to recover 1 HP.',
+      '踩雷扣 1 点生命，护盾优先抵挡；抵达出口恢复 1 点生命。',
+      '地雷で体力−1。シールドが優先して防御。出口で体力+1。',
+    ),
+    healthHelp: t(
+      'Start with 2 HP. Mines deal 1 damage, consuming a shield first. At zero HP the expedition ends. Reaching each exit restores 1 HP, up to your maximum. Survived mines receive locked gold flags and remain impassable. Health and up to 2 shields carry between floors.',
+      '初始 2 点生命。踩雷受到 1 点伤害，优先消耗护盾；生命归零则远征结束。每层抵达出口恢复 1 点生命，不超过上限。存活后踩中的雷会标上锁定金旗，无法通行。生命与护盾跨层保留，护盾上限 2。',
+      '初期体力は2。地雷で1ダメージ、シールドを先に消費し、体力0で遠征終了。各階の出口で体力が1回復し、上限は超えません。生き残ると地雷は固定の金の旗になり通行不可。体力とシールドは次の階へ引き継ぎ、シールド上限は2。',
+    ),
+    legacyHealth: t(
+      'Saved run: one unshielded mine ends the expedition. No exit healing.',
+      '此存档沿用旧规则：无护盾踩雷即结束，出口不回血。',
+      '旧保存ルール：シールドなしで地雷を踏むと終了。出口での回復なし。',
+    ),
     shields: t('Shields', '护盾', 'シールド'),
     probe: t('Probe 3×3 area', '探测 3×3 区域', '3×3範囲を探査'),
     scan: t('Scan a row', '扫描一行', '行を走査'),

@@ -84,6 +84,10 @@ export interface VariantMessages {
   readonly loot: string
   readonly probes: string
   readonly scans: string
+  readonly health: string
+  readonly healthHint: string
+  readonly healthHelp: string
+  readonly legacyHealth: string
   readonly shields: string
   readonly probe: string
   readonly scan: string

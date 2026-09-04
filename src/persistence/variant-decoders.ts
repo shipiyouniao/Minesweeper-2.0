@@ -89,8 +89,11 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     (rules !== undefined &&
       rules !== 'original' &&
       rules !== 'scouting' &&
-      rules !== 'difficulty-v1') ||
-    (rules === 'difficulty-v1' ? !difficulty : reader.value('difficulty') !== undefined) ||
+      rules !== 'difficulty-v1' &&
+      rules !== 'health-v1') ||
+    (rules === 'difficulty-v1' || rules === 'health-v1'
+      ? !difficulty
+      : reader.value('difficulty') !== undefined) ||
     !profession ||
     typeof archive !== 'boolean' ||
     !values ||
