@@ -183,7 +183,7 @@ test('journal replay restores damage and locks, then settles death exactly once'
   const runtime = new FakeRuntime()
   let session = new ExpeditionSession(new VariantRepository(storage), runtime)
   assert.ok(session.start('explorer', []))
-  assert.equal(session.run?.departure.rules, 'health-v1')
+  assert.equal(session.run?.departure.rules, 'relics-v1')
   for (let step = 0; step < 121 && session.run?.health === 2; step++)
     assert.ok(session.dispatch(hazardAction(session.run)))
   assert.equal(session.run?.health, 1)

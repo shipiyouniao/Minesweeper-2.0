@@ -15,7 +15,7 @@ The first two professions cost **100 supplies together**. A successful three-flo
 
 The workshop adds a medium-term loadout goal. The archive retains the at-least-twenty-run saving target for a late unlock. Early roles deliberately do not share that requirement. Future professions and relic packs should extend this curve with meaningful intermediate choices rather than put every new choice behind the same long wait.
 
-The per-item bounds below start from zero savings. Prior purchases spend currency too: unlocking the entire current catalog costs 11,300, so its minimum total is 24 maximally profitable Abyss runs or 53 Standard runs. Existing savings can shorten any remaining goal.
+The per-item bounds below start from zero savings. The four original facilities cost 11,300 together. Four [relic themes](relic-packs.md), priced at 100, 250, 500 and 900, now fill the gaps between early roles and larger goals. All eight purchases cost 13,050: at least 27 maximally profitable Abyss runs or 61 Standard runs. Existing savings can shorten any remaining goal.
 
 A floor has three chests. Normal chests pay 6 each; the Treasure pouch raises subsequent chests to 9. Every exit pays 12, and victory adds 30. The pouch can first be acquired **after floor one**. Therefore, for `F` floors:
 
@@ -46,6 +46,6 @@ The progress bar is derived from existing supplies. It does not introduce a seco
 
 Existing money, purchased facilities, completed-run counts and active journals are preserved. A player who already saved enough currency can purchase immediately; the minimum-run calculation applies to saving a new item's full price from zero. Previously purchased facilities are not charged again or revoked.
 
-Only future camp purchases use the new prices. Expedition rewards, departure rules and replay outcomes are unchanged, so no new rules revision or save-envelope version is needed. Purchases remain camp-only and persist through the existing atomic repository write.
+Only future camp purchases use the new prices. The pricing change itself leaves rewards and replay outcomes unchanged. The separate theme expansion uses `relics-v1` departures to capture licensed packs while preserving historical journals; see [its persistence rules](relic-packs.md). Purchases remain camp-only and persist through the existing atomic repository write.
 
 `src/game/camp-progression.ts` owns reward constants, prices, payout bounds and derived funding state. Its concrete `CampFunding` contract lives in `src/types/camp-progression.d.ts`. The expedition engine consumes the unchanged reward amounts, while the UI renders funding without duplicating the arithmetic. Behavioral tests cover the bounds, legal full expeditions, purchase thresholds, replay after an old save's purchase, all-unlocked state and translations.

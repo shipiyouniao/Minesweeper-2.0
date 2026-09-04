@@ -1,4 +1,5 @@
 import { cueForVitality } from '../audio/cues.js'
+import { hasExpeditionHealth } from '../game/expedition-rules.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
@@ -190,7 +191,7 @@ export class VariantApp implements VariantInputActions {
         const t = variantCopy(this.language)
         this.view.showInformation(
           translations[this.language].how,
-          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${this.session.run && this.session.run.departure.rules !== 'health-v1' ? t.legacyHealth : t.healthHelp}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
+          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${this.session.run && !hasExpeditionHealth(this.session.run.departure) ? t.legacyHealth : t.healthHelp}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
         )
         return
       }

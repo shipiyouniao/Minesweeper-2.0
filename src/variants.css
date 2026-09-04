@@ -145,6 +145,20 @@
   border-radius: 14px;
   background: var(--surface);
 }
+.relic-trigger {
+  display: inline-block;
+  width: fit-content;
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: var(--blue);
+  background: #eef2ff;
+}
+.relic-list .dungeon-sprite {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 6px;
+}
 .camp-funding h3 {
   margin: 10px 0 16px;
   font-size: 17px;

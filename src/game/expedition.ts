@@ -6,6 +6,9 @@ import {
   VICTORY_SUPPLIES,
 } from './camp-progression.js'
 import { damageVitality, healVitality } from './vitality.js'
+import { hasExpeditionHealth } from './expedition-rules.js'
+import { relicPool } from './relic-packs.js'
+import { applyDiscoveryRelics, applyMineRelics, applyTreasureRelics } from './relic-effects.js'
 import { generateDungeon } from './dungeon-generator.js'
 import { probeDungeon, scanDungeon, scoutExit } from './dungeon-discovery.js'
 import { act } from './engine.js'
@@ -74,6 +77,8 @@ function createFloor(departure: Departure, floor: number): Expedition {
     player: layout.entrance,
     collected: [],
     relics: [],
+    floorTriggers: [],
+    runTriggers: [],
     offers: [],
     scannedRows: [],
     confirmedMines: [],
@@ -81,8 +86,8 @@ function createFloor(departure: Departure, floor: number): Expedition {
     probeReport: null,
     probes: 0,
     scans: 0,
-    health: departure.rules === 'health-v1' ? 2 : 1,
-    maxHealth: departure.rules === 'health-v1' ? 2 : 1,
+    health: hasExpeditionHealth(departure) ? 2 : 1,
+    maxHealth: hasExpeditionHealth(departure) ? 2 : 1,
     shields: 0,
     loot: 0,
     steps: 0,
@@ -152,18 +157,16 @@ function collectTreasures(run: Expedition, path: readonly number[]): Expedition 
   )
   const fresh = collected.filter((index) => !run.collected.includes(index)).length
 
-  return {
+  return applyTreasureRelics(run, {
     ...run,
     collected,
     loot: run.loot + fresh * (run.relics.includes('purse') ? PURSE_SUPPLIES : TREASURE_SUPPLIES),
-  }
+  })
 }
 
 /** Offer up to three distinct unowned relics, deterministically for this floor. */
 function relicOffers(run: Expedition): Relic[] {
-  const pool: readonly Relic[] = run.departure.archive
-    ? ['lantern', 'lens', 'aegis', 'purse', 'compass', 'salvage']
-    : ['lantern', 'lens', 'aegis', 'purse']
+  const pool = relicPool(run.departure)
 
   return shuffled(
     pool.filter((relic) => !run.relics.includes(relic)),
@@ -182,16 +185,21 @@ function revealFrontier(run: Expedition, index: number): Expedition {
 
   if (cell.mine) {
     const vitality = damageVitality(approached, 1)
-    const survived = vitality.health > 0
+    const reacted = applyMineRelics(approached, { ...approached, ...vitality }, index)
+    const survived = reacted.health > 0
 
     // Survival confirms the hazard, never erases it or moves the player onto it.
     // Historical departures have one HP, preserving their original lethal-hit behavior.
     return {
-      ...approached,
-      health: vitality.health,
-      shields: vitality.shields,
-      game: survived ? act(run.game, { type: 'flag', index }) : revealDungeon(run, index),
-      confirmedMines: survived ? [...run.confirmedMines, index] : run.confirmedMines,
+      ...reacted,
+      game: survived
+        ? reacted.game.cells[index]?.visibility === 'flagged'
+          ? reacted.game
+          : act(reacted.game, { type: 'flag', index })
+        : revealDungeon(reacted, index),
+      confirmedMines: survived
+        ? [...new Set([...reacted.confirmedMines, index])]
+        : reacted.confirmedMines,
       phase: survived ? 'exploring' : 'lost',
       steps: run.steps + 1,
     }
@@ -227,7 +235,7 @@ function finishAtExit(run: Expedition): Expedition {
   return {
     ...run,
     // Leaving exploration makes this recovery a one-time reward, including the final exit.
-    health: run.departure.rules === 'health-v1' ? healVitality(run, 1).health : run.health,
+    health: hasExpeditionHealth(run.departure) ? healVitality(run, 1).health : run.health,
     loot: run.loot + EXIT_SUPPLIES,
     phase: run.floor === expeditionFloors(run.departure) ? 'won' : 'reward',
     offers: relicOffers(run),
@@ -248,6 +256,7 @@ function advanceFloor(run: Expedition, relic?: Relic): Expedition {
   let result: Expedition = {
     ...next,
     relics,
+    runTriggers: run.runTriggers,
     health: run.health,
     maxHealth: run.maxHealth,
     loot: run.loot,
@@ -269,7 +278,7 @@ function advanceFloor(run: Expedition, relic?: Relic): Expedition {
 }
 
 /** Pure expedition transition, including explicit extraction and inter-floor reward selection. */
-export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
+function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedition {
   if (run.phase === 'lost' || run.phase === 'won' || run.phase === 'retreated') return run
   if (action.type === 'retreat') return { ...run, phase: 'retreated' }
   if (action.type === 'descend')
@@ -308,6 +317,11 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
     case 'probe':
       return probeDungeon(run, action.index)
   }
+}
+
+/** Apply the accepted intent, then process each newly earned discovery reaction once. */
+export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
+  return applyDiscoveryRelics(run, transitionExpedition(run, action), action)
 }
 
 /** Settle secured loot: success/extraction retain everything, defeat retains a bounded fraction. */

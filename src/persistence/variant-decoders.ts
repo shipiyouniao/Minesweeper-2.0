@@ -1,4 +1,7 @@
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
+import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
+import { UPGRADES } from '../game/camp-progression.js'
+import type { RelicPack } from '../types/relic-packs.js'
 import type { Config } from '../types/game.js'
 import { JsonObjectReader, parseJson } from './json-reader.js'
 import type { JsonValue } from '../types/json.js'
@@ -33,7 +36,7 @@ export function parseEquipment(value: string | null): Equipment | null {
 export function parseUpgrade(value: string | null): Upgrade | null {
   return value === 'surveyor' || value === 'engineer' || value === 'workshop' || value === 'archive'
     ? value
-    : null
+    : parseRelicPack(value)
 }
 
 /** Decode relic IDs without allowing arbitrary catalog keys. */
@@ -45,6 +48,14 @@ export function parseRelic(value: string | null): Relic | null {
     case 'purse':
     case 'compass':
     case 'salvage':
+    case 'field-notes':
+    case 'rangefinder':
+    case 'reactive-shell':
+    case 'rescue-ribbon':
+    case 'field-dressing':
+    case 'second-wind':
+    case 'supply-cache':
+    case 'cache-guard':
       return value
     default:
       return null
@@ -62,7 +73,12 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
   const supplies = reader.number('supplies')
   const completed = reader.number('completed')
   const values = reader.array('upgrades')
-  if (!integer(supplies, 1e9) || !integer(completed, 1e6) || !values || values.length > 4)
+  if (
+    !integer(supplies, 1e9) ||
+    !integer(completed, 1e6) ||
+    !values ||
+    values.length > UPGRADES.length
+  )
     return null
   const upgrades: Upgrade[] = []
 
@@ -90,8 +106,9 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
       rules !== 'original' &&
       rules !== 'scouting' &&
       rules !== 'difficulty-v1' &&
-      rules !== 'health-v1') ||
-    (rules === 'difficulty-v1' || rules === 'health-v1'
+      rules !== 'health-v1' &&
+      rules !== 'relics-v1') ||
+    (rules === 'difficulty-v1' || rules === 'health-v1' || rules === 'relics-v1'
       ? !difficulty
       : reader.value('difficulty') !== undefined) ||
     !profession ||
@@ -101,6 +118,16 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   )
     return null
   const equipment: Equipment[] = []
+  const packs: RelicPack[] = []
+  if (rules === 'relics-v1') {
+    const packValues = reader.array('packs')
+    if (!packValues || packValues.length > RELIC_PACKS.length) return null
+    for (const value of packValues) {
+      const pack = parseRelicPack(typeof value === 'string' ? value : null)
+      if (!pack || packs.includes(pack)) return null
+      packs.push(pack)
+    }
+  } else if (reader.value('packs') !== undefined) return null
 
   for (const value of values) {
     const item = parseEquipment(typeof value === 'string' ? value : null)
@@ -114,6 +141,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     archive,
     equipment,
     rules: rules ?? 'original',
+    ...(rules === 'relics-v1' ? { packs } : {}),
     ...(difficulty ? { difficulty } : {}),
   }
 }

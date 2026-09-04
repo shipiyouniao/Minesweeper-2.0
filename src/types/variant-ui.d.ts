@@ -112,6 +112,8 @@ export interface VariantMessages {
   readonly frontier: string
   readonly relics: string
   readonly noRelics: string
+  readonly relicUsedFloor: string
+  readonly relicUsedRun: string
   readonly earned: string
   readonly won: string
   readonly lost: string

@@ -1,4 +1,5 @@
 import type { Config } from '../types/game.js'
+import { hasExpeditionHealth } from './expedition-rules.js'
 import type { Departure, VariantRecord } from '../types/variants.js'
 import type { VariantDifficulty, VariantTier } from '../types/variant-difficulty.js'
 
@@ -75,7 +76,7 @@ export function twinConfig(difficulty?: VariantDifficulty): Config {
 
 /** Old expedition rules always keep five floors, even if a caller supplies a tier. */
 export function expeditionFloors(departure: Departure): number {
-  return (departure.rules === 'difficulty-v1' || departure.rules === 'health-v1') &&
+  return (departure.rules === 'difficulty-v1' || hasExpeditionHealth(departure)) &&
     departure.difficulty
     ? variantTier(departure.difficulty).floors
     : 5
@@ -84,7 +85,7 @@ export function expeditionFloors(departure: Departure): number {
 /** Interpolate mine density across the selected run while preserving old exact layouts. */
 export function expeditionConfig(departure: Departure, floor: number): Config {
   if (
-    (departure.rules !== 'difficulty-v1' && departure.rules !== 'health-v1') ||
+    (departure.rules !== 'difficulty-v1' && !hasExpeditionHealth(departure)) ||
     !departure.difficulty
   )
     return { width: 9, height: 9, mines: 13 + floor * 2 }

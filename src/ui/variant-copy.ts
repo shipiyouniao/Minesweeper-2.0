@@ -1,4 +1,5 @@
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
+import { expansionRelicCopy, relicPackCopy } from './relic-expansion-copy.js'
 import type { Language } from '../types/localization.js'
 import type { Equipment, Profession, Relic, Upgrade } from '../types/variants.js'
 import type { VariantDescription, VariantMessages } from '../types/variant-ui.js'
@@ -116,6 +117,8 @@ export function variantCopy(language: Language): VariantMessages {
     collected: t('Collected', '已收集', '回収済み'),
     frontier: t('Reachable frontier', '可探索前沿', '探索可能な境界'),
     relics: t('Relic build', '遗物搭配', '遺物構成'),
+    relicUsedFloor: t('Used this floor', '本层已触发', 'この階で発動済み'),
+    relicUsedRun: t('Used this expedition', '本局已触发', 'この遠征で発動済み'),
     noRelics: t(
       'Find your first relic after floor one.',
       '通过第一层后获得首件遗物。',
@@ -281,12 +284,15 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
           '敗北時の回収率が50%から75%に。',
         ),
       }
+    default:
+      return expansionRelicCopy(language, relic)
   }
 }
 
 /** Describe finite camp unlocks without hiding their actual gameplay consequence. */
 export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescription {
   if (upgrade === 'surveyor' || upgrade === 'engineer') return professionCopy(language, upgrade)
+  if (upgrade !== 'workshop' && upgrade !== 'archive') return relicPackCopy(language, upgrade)
   return upgrade === 'workshop'
     ? {
         name: localized(language, 'Workshop', '工坊', '工房'),

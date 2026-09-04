@@ -6,7 +6,16 @@ export const TREASURE_SUPPLIES = 6
 export const PURSE_SUPPLIES = 9
 export const EXIT_SUPPLIES = 12
 export const VICTORY_SUPPLIES = 30
-export const UPGRADES: readonly Upgrade[] = ['surveyor', 'engineer', 'workshop', 'archive']
+export const UPGRADES: readonly Upgrade[] = [
+  'surveyor',
+  'engineer',
+  'survey-notes',
+  'guardian-crests',
+  'survival-charms',
+  'prospector-seals',
+  'workshop',
+  'archive',
+]
 
 /** Offer early role variety, then a loadout milestone and a long-term relic-pool goal. */
 export function upgradeCost(upgrade: Upgrade): number {
@@ -15,6 +24,14 @@ export function upgradeCost(upgrade: Upgrade): number {
       return 40
     case 'engineer':
       return 60
+    case 'survey-notes':
+      return 100
+    case 'guardian-crests':
+      return 250
+    case 'survival-charms':
+      return 500
+    case 'prospector-seals':
+      return 900
     case 'workshop':
       return 1200
     case 'archive':
@@ -27,7 +44,11 @@ function upgradeStage(upgrade: Upgrade): CampStage {
   switch (upgrade) {
     case 'surveyor':
     case 'engineer':
+    case 'survey-notes':
       return 'early'
+    case 'guardian-crests':
+    case 'survival-charms':
+    case 'prospector-seals':
     case 'workshop':
       return 'middle'
     case 'archive':

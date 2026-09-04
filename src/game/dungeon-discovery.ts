@@ -59,7 +59,7 @@ export function scoutExit(run: Expedition): Expedition {
 }
 
 /** Record shared area knowledge without moving, revealing clues, or changing mine positions. */
-function inspectArea(run: Expedition, area: readonly number[]): Expedition {
+export function inspectArea(run: Expedition, area: readonly number[]): Expedition {
   const fresh = area.some(
     (other) =>
       !run.walls.includes(other) &&
