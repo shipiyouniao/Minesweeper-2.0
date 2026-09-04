@@ -4,12 +4,14 @@ import { hasProfessionSkills } from './professions.js'
 import type { Expedition } from '../types/variants.js'
 import type { SkillAvailability } from '../types/profession.js'
 
-/** Select the nearest uncollected chest, breaking equal distances by cell index for replay. */
+/** Select a remaining chest or combat mechanism, breaking equal distances by index for replay. */
 function excavationTarget(run: Expedition): number | null {
   const width = run.game.config.width
   const row = Math.floor(run.player / width)
   const column = run.player % width
-  const remaining = run.treasures.filter((index) => !run.collected.includes(index))
+  const remaining = run.encounter
+    ? run.encounter.pylons.filter((pylon) => pylon.active).map((pylon) => pylon.index)
+    : run.treasures.filter((index) => !run.collected.includes(index))
 
   remaining.sort((a, b) => {
     const first = Math.abs(Math.floor(a / width) - row) + Math.abs((a % width) - column)
@@ -58,7 +60,7 @@ function hasSkillInformation(run: Expedition): boolean {
 /** Explain the same eligibility checks to both the rules and the localized control. */
 export function professionSkillAvailability(run: Expedition): SkillAvailability {
   if (!hasProfessionSkills(run.departure)) return 'legacy'
-  if (run.phase !== 'exploring') return 'inactive'
+  if (run.phase !== 'exploring' && run.phase !== 'boss') return 'inactive'
   if (run.skillUsed) return 'used'
 
   switch (run.departure.profession) {

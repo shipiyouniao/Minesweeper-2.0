@@ -27,6 +27,12 @@
   padding: 32px 32px 72px;
   margin: auto;
 }
+.variant-main:has(.expedition-layout),
+.variant-main:has(.twin-layout) {
+  max-width: none;
+  width: 100%;
+  padding-inline: clamp(16px, 3vw, 80px);
+}
 .variant-heading {
   display: flex;
   align-items: center;
@@ -243,7 +249,7 @@
 }
 .expedition-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr);
+  grid-template-columns: minmax(0, 1fr) clamp(260px, 23vw, 380px);
   gap: 24px;
   align-items: start;
 }
@@ -269,12 +275,21 @@
 .variant-board-panel .board-viewport {
   padding: 24px;
 }
-.variant-board-panel .board {
-  --cell-max: 56px;
+.variant-board-panel .board,
+.variant-board-panel .board.dense {
+  --cell-max: clamp(56px, 5vw, 112px);
   position: relative;
 }
 .variant-board-panel .cell {
   isolation: auto;
+  font-size: clamp(11px, calc(var(--cell) * 0.38), 30px);
+}
+.variant-board-panel .cell .icon {
+  width: min(36px, calc(var(--cell) * 0.65));
+  height: min(36px, calc(var(--cell) * 0.65));
+}
+.variant-board-panel .landmark-clue {
+  font-size: clamp(10px, calc(var(--cell) * 0.3), 24px);
 }
 .variant-board-panel .cell.frontier {
   border-color: var(--blue);
@@ -344,6 +359,9 @@
   gap: 12px;
 }
 .profession-skill .skill-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 64px;
   width: 64px;
   height: 64px;
   min-width: 64px;
@@ -705,4 +723,125 @@ dialog > p {
 }
 .enlarged-boards .board {
   --cell: 44px;
+}
+
+.tactical-panel {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  margin: 18px 0;
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px 24px;
+}
+.tactical-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.tactical-heading > img {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+}
+.tactical-heading h3,
+.tactical-heading p {
+  margin: 4px 0;
+}
+.tactical-heading p,
+.tactical-event,
+.tactical-plan {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.tactical-counters {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.tactical-counters span {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+.tactical-counters strong {
+  font-size: 22px;
+}
+.tactical-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.tactical-controls button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 12px;
+}
+.tactical-controls img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+.tactical-event,
+.tactical-plan {
+  margin: 0;
+}
+.tactical-plan {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+.tactical-victory {
+  padding: 14px;
+  background: #eaf4ef;
+  border-radius: 10px;
+}
+.board .cell.tactical-danger {
+  background-image: repeating-linear-gradient(
+    135deg,
+    #ce7c2538 0,
+    #ce7c2538 3px,
+    transparent 3px,
+    transparent 8px
+  );
+}
+.board .cell.tactical-route {
+  outline: 2px solid #3e8c87;
+  outline-offset: -3px;
+}
+.board .cell.tactical-unaffordable {
+  outline-style: dashed;
+  outline-color: #b36336;
+}
+.board .cell.bastion-cell {
+  background-color: #dce7ee;
+}
+.board .cell.pylon-cell {
+  background-color: #f1ead9;
+}
+.board .cell.bastion-cell img,
+.board .cell.pylon-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+@media (max-width: 650px) {
+  .tactical-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+  .tactical-counters {
+    justify-content: flex-start;
+  }
+  .tactical-controls button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
 }

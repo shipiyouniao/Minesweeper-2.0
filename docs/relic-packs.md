@@ -24,7 +24,7 @@ With the [six-profession expansion](profession-skills.md), all eleven purchases 
 | Reactive shell | A shield absorbs a mine hit                                             | Inspect the hit mine's clipped 3×3 neighborhood | Once per floor                       |
 | Rescue ribbon  | Health damage is survived without revival                               | +1 shield                                       | Once per expedition; cap 2           |
 | Field dressing | Collect the first chest on a floor                                      | Heal 1 HP                                       | Once per floor; maximum HP unchanged |
-| Second wind    | A mine hit would reduce HP to zero                                      | Remain at 1 HP                                  | Once per expedition                  |
+| Second wind    | A hit would reduce HP to zero                                           | Remain at 1 HP                                  | Once per expedition                  |
 | Supply cache   | Collect the first chest on a floor                                      | +1 scan                                         | Once per floor; cap 4                |
 | Cache guard    | Collect all three chests on a floor                                     | +1 shield                                       | Once per floor; cap 2                |
 
@@ -43,3 +43,5 @@ Decoders accept finite IDs, reject duplicate/oversized theme lists, require a di
 `src/types/relic-packs.d.ts` owns the contracts. `relic-packs.ts` owns catalog membership and versioned pools; `relic-effects.ts` owns pure, bounded reactions; the expedition engine places them at mine, chest and discovery transitions. `ExpeditionSession` handles authorization and atomic persistence. UI modules present the resulting state and localized explanations.
 
 Tests cover purchases, migration, authorization, seeded offers, replay, caps, repeated discoveries, shield inspection, chest benefits and one-time survival. Browser acceptance covers buying a theme, selecting its relic, triggering a probe refund, locked flags, reload and all three locales at 320px. See [the artwork record](relic-pack-artwork.md) for images and exact prompts.
+
+[Bastion encounters](bastion-encounters.md) share Second wind and Rescue ribbon with exploration. Reactive shell remains mine-specific. Entering combat preserves once-per-floor and once-per-run claims.

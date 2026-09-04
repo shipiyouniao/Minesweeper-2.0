@@ -1,3 +1,4 @@
+import { defeatBastion } from './bastion-helpers.js'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { actTwin, createTwin } from '../src/game/twin.js'
@@ -40,12 +41,14 @@ function clearSessionFloor(session: ExpeditionSession): void {
   for (let step = 0; step < 81; step++) {
     const run = session.run
     assert.ok(run)
-    if (reachableCells(run).has(run.exit)) break
+    if (run.phase !== 'exploring' || reachableCells(run).has(run.exit)) break
     const index = [...frontierCells(run)].find((candidate) => !run.game.cells[candidate]?.mine)
     assert.ok(session.dispatch({ type: 'reveal', index: index ?? -1 }))
   }
   if (session.run?.phase === 'exploring')
     assert.ok(session.dispatch({ type: 'move', index: session.run.exit }))
+  if (session.run?.phase === 'boss')
+    for (const action of defeatBastion(session.run)) assert.ok(session.dispatch(action))
 }
 
 test('twin placement has exact disjoint mine counts, safe openings and truthful clues across seeds', () => {

@@ -30,7 +30,7 @@ All eleven purchases cost **13,700**. That is ten reference Abyss clears or 37 r
 
 ## Presentation and persistence
 
-The camp shows the next unowned purchase in price order, saved supplies, remaining cost, percentage and an optimistic minimum additional run count at the **2,200-supply theoretical maximum**. This lower bound is labeled separately from the reference scenario used for balance. Players may buy any available item; the funding goal imposes no mandatory order.
+The camp shows the next unowned purchase in price order, saved supplies, remaining cost and percentage. It does not predict how many runs the player must complete. The workshop and archive each have a dedicated generated icon. Players may buy any available item; the funding goal imposes no mandatory order.
 
 Existing savings, purchased facilities, completed-run counts and active journals are preserved. Owned items are never charged again. Purchases remain camp-only and atomic. New departures capture their reward revision; historical runs keep their original settlement amounts. See [reward compatibility](expedition-rewards.md).
 

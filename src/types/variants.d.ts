@@ -1,4 +1,5 @@
 import type { VariantDifficulty } from './variant-difficulty.js'
+import type { TacticalEncounter } from './tactical.js'
 import type { Vitality } from './vitality.js'
 import type { Game } from './game.js'
 import type { RelicPack, ExpansionRelic } from './relic-packs.js'
@@ -39,6 +40,8 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  /** Encounter rules are opt-in snapshots; historical journals keep exploration-only exits. */
+  readonly encounters?: 'bastion-v1'
   /** Missing career revision preserves historical tools, offers and action availability. */
   readonly professions?: 'skills-v1'
   /** Missing reward revision preserves historical settlement amounts. */
@@ -57,6 +60,7 @@ export interface Departure {
 
 /** A complete floor state; reachability is derived from revealed safe cells. */
 export interface Expedition extends Vitality {
+  readonly encounter: TacticalEncounter | null
   /** Rebuilt from accepted skill intents; reset only on entering another floor. */
   readonly skillUsed: boolean
   readonly departure: Departure
@@ -81,17 +85,17 @@ export interface Expedition extends Vitality {
   readonly scans: number
   readonly loot: number
   readonly steps: number
-  readonly phase: 'exploring' | 'reward' | 'won' | 'lost' | 'retreated'
+  readonly phase: 'exploring' | 'boss' | 'reward' | 'won' | 'lost' | 'retreated'
 }
 
 /** Explicit run intents; all effects can be replayed without browser state. */
 export type ExpeditionAction =
-  | { readonly type: 'reveal' | 'flag' | 'move' | 'probe'; readonly index: number }
+  | { readonly type: 'reveal' | 'flag' | 'move' | 'probe' | 'interact'; readonly index: number }
   | { readonly type: 'sweep'; readonly row: number }
   /** Historical count-only intent retained for existing journals; the UI emits sweep. */
   | { readonly type: 'scan'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
-  | { readonly type: 'retreat' | 'descend' | 'skill' }
+  | { readonly type: 'retreat' | 'descend' | 'skill' | 'attack' | 'brace' | 'end-turn' }
 
 /** Both layouts are generated together, excluding overlapping mines. */
 export interface Twin {

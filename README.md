@@ -12,6 +12,8 @@ A playable Minesweeper game and a practical testbed for the **TypeScript 7 nativ
 
 [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [License](LICENSE)
 
+**New encounter:** [Bastion Guardian](docs/bastion-encounters.md) guards selected expedition exits. Deduce the pylon mines, disable its armor and attack the exposed core while managing three action points and visible attack forecasts. Victory restores health and grants a shield. Ordinary floors keep free exploration; existing saves keep their original rules.
+
 ## Why this project exists
 
 The renovation is an experiment in using TypeScript 7 for an entire small application: editing, strict type checking, JavaScript and declaration emission, watch mode, tests, production builds, and deployment. Minesweeper provides real state transitions, browser interaction, persistence, localization, and test cases to exercise that workflow.

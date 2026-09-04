@@ -1,6 +1,7 @@
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
 import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
 import { UPGRADES } from '../game/camp-progression.js'
+import { bastionTier, hasBastionEncounters } from '../game/bastion-arena.js'
 import type { RelicPack } from '../types/relic-packs.js'
 import type { Config } from '../types/game.js'
 import { JsonObjectReader, parseJson } from './json-reader.js'
@@ -114,12 +115,15 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   const rules = reader.value('rules')
   const rewards = reader.value('rewards')
   const professions = reader.value('professions')
+  const encounters = reader.value('encounters')
   const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const profession = parseProfession(reader.string('profession'))
   const archive = reader.value('archive')
   const values = reader.array('equipment')
   if (
     !integer(seed, 0xffffffff) ||
+    (encounters !== undefined &&
+      (encounters !== 'bastion-v1' || professions !== 'skills-v1' || rules !== 'relics-v1')) ||
     (professions !== undefined && (professions !== 'skills-v1' || rules !== 'relics-v1')) ||
     (profession !== 'explorer' &&
       profession !== 'surveyor' &&
@@ -167,6 +171,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     rules: rules ?? 'original',
     ...(rewards === 'difficulty-v1' ? { rewards } : {}),
     ...(professions === 'skills-v1' ? { professions } : {}),
+    ...(encounters === 'bastion-v1' ? { encounters } : {}),
     ...(rules === 'relics-v1' ? { packs } : {}),
     ...(difficulty ? { difficulty } : {}),
   }
@@ -182,6 +187,7 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
     case 'reveal':
     case 'move':
     case 'probe':
+    case 'interact':
     case 'flag': {
       const index = reader.number('index')
       return integer(index, config.width * config.height - 1) ? { type, index } : null
@@ -193,6 +199,9 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
     }
     case 'descend':
     case 'skill':
+    case 'attack':
+    case 'brace':
+    case 'end-turn':
     case 'retreat':
       return { type }
     case 'relic': {
@@ -211,9 +220,19 @@ function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | nul
   const values = reader.array('actions')
   if (!departure || !values || values.length > MAX_ACTIONS) return null
   const actions: ExpeditionAction[] = []
+  const ordinary = expeditionConfig(departure, 1)
+  const arena = hasBastionEncounters(departure)
+    ? bastionTier(departure.difficulty).config
+    : ordinary
+  // Decode the broad dimension envelope; replay still validates each action against its actual room.
+  const bounds = {
+    ...ordinary,
+    width: Math.max(ordinary.width, arena.width),
+    height: Math.max(ordinary.height, arena.height),
+  }
 
   for (const value of values) {
-    const action = decodeExpeditionAction(value, expeditionConfig(departure, 1))
+    const action = decodeExpeditionAction(value, bounds)
     if (!action) return null
     actions.push(action)
   }

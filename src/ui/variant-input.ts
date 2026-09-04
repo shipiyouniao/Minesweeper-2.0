@@ -23,6 +23,9 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     case 'probe':
     case 'scan':
     case 'skill':
+    case 'attack':
+    case 'brace':
+    case 'end-turn':
     case 'help':
     case 'records':
     case 'retreat':
@@ -86,6 +89,8 @@ export class VariantInput {
     root.addEventListener('focusin', this.focus, options)
     root.addEventListener('keydown', this.key, options)
     root.addEventListener('pointerdown', this.unlock, options)
+    root.addEventListener('pointermove', this.hover, options)
+    root.addEventListener('pointerleave', () => actions.previewRoute(null), options)
     document.addEventListener('visibilitychange', this.visibility, options)
     window.addEventListener('pagehide', this.suspend, options)
   }
@@ -127,7 +132,15 @@ export class VariantInput {
     if (cell) {
       this.actions.focus(cell.side, cell.index)
       if (cell.side === 'a') this.tools.preview(cell.index)
+      this.actions.previewRoute(cell.side === 'a' ? cell.index : null)
     }
+  }
+
+  /** Let mouse users inspect the same route and cost shown by keyboard focus. */
+  private readonly hover = (event: PointerEvent): void => {
+    if (event.pointerType !== 'mouse') return
+    const cell = cellTarget(event.target)
+    this.actions.previewRoute(cell?.side === 'a' ? cell.index : null)
   }
 
   /** Keep native Enter/Space activation while adding arrows, F and Tab feedback. */

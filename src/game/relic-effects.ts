@@ -18,11 +18,11 @@ function claim(run: Expedition, relic: Relic, wholeRun = false): Expedition {
     : { ...run, floorTriggers: [...run.floorTriggers, relic] }
 }
 
-/** Resolve mine reactions before the engine decides whether to expose a lost board. */
-export function applyMineRelics(
+/** Resolve survival reactions; a concrete mine index additionally enables shield reconnaissance. */
+export function applyDamageRelics(
   before: Expedition,
   damaged: Expedition,
-  index: number,
+  index: number | null,
 ): Expedition {
   let result = damaged
   if (result.health === 0 && available(result, 'second-wind', true)) {
@@ -30,7 +30,7 @@ export function applyMineRelics(
   }
   if (result.health === 0) return result
 
-  if (before.shields > damaged.shields && available(result, 'reactive-shell')) {
+  if (index !== null && before.shields > damaged.shields && available(result, 'reactive-shell')) {
     result = inspectArea(claim(result, 'reactive-shell'), probeArea(result.game.config, index))
   }
   // A revival is its own reaction, not another surviving damage event for the ribbon.
@@ -66,11 +66,18 @@ export function applyDiscoveryRelics(
   after: Expedition,
   action: ExpeditionAction,
 ): Expedition {
-  if (after === before || after.floor !== before.floor || after.phase !== 'exploring') return after
+  if (
+    after === before ||
+    after.floor !== before.floor ||
+    Boolean(after.encounter) !== Boolean(before.encounter) ||
+    (after.phase !== 'exploring' && after.phase !== 'boss')
+  )
+    return after
   const discoveries = after.confirmedMines.length - before.confirmedMines.length
   if (discoveries <= 0) return after
   let result = after
-  if (result.confirmedMines.length >= 3 && available(result, 'field-notes')) {
+  const floorDiscoveries = result.confirmedMines.length + (result.encounter?.priorDiscoveries ?? 0)
+  if (floorDiscoveries >= 3 && available(result, 'field-notes')) {
     result = { ...claim(result, 'field-notes'), probes: Math.min(4, result.probes + 1) }
   }
   if (action.type === 'probe' && discoveries >= 2 && available(result, 'rangefinder')) {

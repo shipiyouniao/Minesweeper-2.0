@@ -59,7 +59,8 @@ export class ExpeditionSession {
         }
         run = next
       }
-      if (valid && (run.phase === 'exploring' || run.phase === 'reward')) this.current = run
+      if (valid && (run.phase === 'exploring' || run.phase === 'boss' || run.phase === 'reward'))
+        this.current = run
     }
 
     if (!this.current) {
@@ -111,6 +112,7 @@ export class ExpeditionSession {
     const departure: Departure = {
       rules: 'relics-v1',
       professions: 'skills-v1',
+      encounters: 'bastion-v1',
       rewards: 'difficulty-v1',
       packs: ownedRelicPacks(this.camp),
       difficulty,

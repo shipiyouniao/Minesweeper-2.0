@@ -76,9 +76,9 @@ export function expansionRelicCopy(language: Language, relic: ExpansionRelic): V
         'Second wind',
         '余烬护符',
         '再起のお守り',
-        'Survive one lethal mine hit with 1 HP. Once per expedition.',
-        '受到致命地雷伤害时保留 1 点生命。每局一次。',
-        '致命的な地雷ダメージをHP1で耐える。遠征中1回。',
+        'Survive one lethal hit with 1 HP. Once per expedition.',
+        '受到致命伤害时保留 1 点生命。每局一次。',
+        '致命的なダメージをHP1で耐える。遠征中1回。',
       )
     case 'supply-cache':
       return description(

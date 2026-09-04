@@ -1,3 +1,4 @@
+import { defeatBastion } from './bastion-helpers.js'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import test from 'node:test'
@@ -111,7 +112,7 @@ test('all configured floors are completable and replayable after the relic pool 
       for (let step = 0; step < tier.size * tier.size; step++) {
         const run = session.run
         assert.ok(run)
-        if (reachableCells(run).has(run.exit)) break
+        if (run.phase !== 'exploring' || reachableCells(run).has(run.exit)) break
         const index = [...frontierCells(run)].find((candidate) => !run.game.cells[candidate]?.mine)
         assert.notEqual(index, undefined)
         assert.ok(session.dispatch({ type: 'reveal', index: index ?? -1 }))
@@ -119,6 +120,8 @@ test('all configured floors are completable and replayable after the relic pool 
       assert.ok(session.run)
       if (session.run.phase === 'exploring')
         assert.ok(session.dispatch({ type: 'move', index: session.run.exit }))
+      if (session.run?.phase === 'boss')
+        for (const action of defeatBastion(session.run)) assert.ok(session.dispatch(action))
       if (floor < tier.floors) {
         const before = session.run
         session = new ExpeditionSession(new VariantRepository(storage), runtime)
