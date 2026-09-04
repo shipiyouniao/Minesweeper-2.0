@@ -19,12 +19,12 @@ Relic Dungeon is part of Expedition, not a separate mode: it describes the multi
 
 ### Complete player loop
 
-Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → choose one relic → continue through five floors → extract, win, or lose → spend banked supplies on permanent unlocks.
+Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
 
 ### Floor rules
 
-- Five 9 × 9 floors, with exactly 15, 17, 19, 21, and 23 mines respectively.
-- Choose the entrance from the 49 interior coordinates using the floor seed. Pick stairs from the farthest reachable cells (within two steps of the maximum distance, and at least six steps away), using actual four-direction floor distance. Neither landmark has a fixed corner or direction.
+- Five difficulty tiers determine board size, density and expedition length; see the [difficulty catalog and replay rules](variant-difficulties.md). Historical runs retain five 9 × 9 floors with 15, 17, 19, 21 and 23 mines.
+- Choose the entrance from the interior coordinates using the floor seed. Pick stairs from the farthest reachable cells (within two steps of the maximum distance, and at least six steps away), using actual four-direction floor distance. Neither landmark has a fixed corner or direction.
 - The entrance has a safe neighborhood. Reveal its whole connected blank region and the surrounding numbered boundary, following normal eight-neighbor flood fill. At least two exposed cells have positive clues, and elementary deductions must lead to a provable mine. This opening check does not promise a guess-free complete floor.
 - Flood the complete safe terrain from the entrance using four directions. Convert every disconnected safe pocket into an impassable wall before placing treasure. Every retained safe floor cell, chest and exit belongs to the entrance component. Mine counts and eight-neighbor clues remain unchanged.
 - Every mine must border this component, so no covered hazard is stranded behind walls. Placement tests up to 128 deterministic shuffled candidates against reachability and opening-clue requirements. A finite fallback joins alternating safe rows with a clear spine and supplies a provable opening clue. Exact mine counts remain unchanged; no independent per-cell rolls or fixed diagonal corridor are used.
@@ -32,7 +32,7 @@ Prepare at camp → choose profession/equipment → explore a floor → walk to 
 - Numbers count all eight neighbors. Ordinary blank-region expansion applies. Diagonally revealed areas do not count as connected until there is an orthogonal route.
 - Ordinary blue flags are hypotheses and block walking. Confirmed gold flags from a probe or shield are facts; right-click, F and touch flag mode cannot remove them. Clicking an open number moves the explorer there; it does not chord in Expedition.
 - Three advertised safe treasure landmarks encourage detours. Each grants 6 loot when physically visited, once per floor. Revealing a treasure, connecting it, or opening it with a flood/probe does not collect it. A walk collects chests along its path.
-- Connecting or remotely revealing the stairs does not leave automatically. Click the stairs and physically arrive to end the floor; there is no sidebar departure button. A frontier reveal that steps onto the stairs also counts as arrival. Each exit grants 12 loot; completing the fifth floor also grants a 30-supply victory bonus.
+- Connecting or remotely revealing the stairs does not leave automatically. Click the stairs and physically arrive to end the floor; there is no sidebar departure button. A frontier reveal that steps onto the stairs also counts as arrival. Each exit grants 12 loot; completing the final configured floor also grants a 30-supply victory bonus.
 - Extraction during exploration or relic selection banks all collected loot after confirmation. Defeat retains half, rounded down. A floor not actually exited grants no exit bonus.
 
 ### Professions and tools
@@ -55,7 +55,7 @@ The probe previews a 3×3 square; the scanner previews its entire target row. Ke
 
 ### Relic build
 
-After each of floors 1–4, offer up to three distinct unowned relics. Choose one and enter the next floor. Offers are deterministic for seed/floor; reload cannot reroll. The initial pool contains four relics, so late choices may have fewer than three options. The archive expands it to six.
+After each non-final floor, offer up to three distinct unowned relics. Choose one and enter the next floor. Offers are deterministic for seed/floor; reload cannot reroll. The initial pool contains four relics, so late choices may have fewer than three options. The archive expands it to six. Once the pool is exhausted, continue to the next floor without adding another relic.
 
 | Relic          | Effect                                                                                                            |
 | -------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -83,9 +83,9 @@ This first progression set is finite. Surplus supplies remain visible after all 
 
 ### Persistence and acceptance
 
-One expedition envelope contains camp, active departure/action journal, and ten recent results. Settlement updates camp and clears the journal in **one storage write**, preventing a refresh from awarding the same run twice. Illegal journals are discarded while a separately valid camp in the decoded envelope is retained. Structurally incompatible envelopes trigger a visible recovery notice. Expedition schema version 3 introduces varied generation and area-probe discoveries. Loading version 1 or 2 preserves validated camp upgrades, supplies and results, retires its incompatible active run, and displays a migration notice. The storage key remains stable so existing progression is discoverable. Twin saves remain version 1.
+One expedition envelope contains camp, active departure/action journal, and up to ten recent results per difficulty. Settlement updates camp and clears the journal in **one storage write**, preventing a refresh from awarding the same run twice. Illegal journals are discarded while a separately valid camp in the decoded envelope is retained. Structurally incompatible envelopes trigger a visible recovery notice. Expedition schema version 3 introduces varied generation and area-probe discoveries. Loading version 1 or 2 preserves validated camp upgrades, supplies and results, retires its incompatible active run, and displays a migration notice. The storage key remains stable so existing progression is discoverable. Twin saves remain version 1.
 
-Current departures record the scouting rules. Existing version-3 journals without that marker retain their original generation and compass behavior, and historical count-only scans replay exactly. New scanner uses record a distinct `sweep` intent, so existing runs can use confirming scans without invalidating earlier flag actions. No version-3 camp or active run needs to be reset.
+Current departures record a difficulty and the `difficulty-v1` rules. Earlier `scouting` journals keep their historical dimensions and behavior. Existing version-3 journals without that marker retain their original generation and compass behavior, and historical count-only scans replay exactly. New scanner uses record a distinct `sweep` intent, so existing runs can use confirming scans without invalidating earlier flag actions. No version-3 camp or active run needs to be reset.
 
 The inventory begins with one short usage prompt. Selecting a tool replaces it with that tool's description and target coordinates; cancellation or use restores the prompt. Detailed rules belong in help and this document.
 
@@ -101,11 +101,11 @@ Classic, Expedition and Twin boards share the same header template, language fly
 
 ### Core rule
 
-Two 9 × 9 boards each contain 12 mines. At a matching coordinate, **at most one** board contains a mine. A logically confirmed mine at A(r,c) guarantees B(r,c) is safe. Both cells can also be safe. Neither a safe cell nor a player flag proves the opposite board contains a mine.
+Two equally sized boards use the selected [difficulty preset](variant-difficulties.md). Historical runs retain 9 × 9 boards with 12 mines each. At a matching coordinate, **at most one** board contains a mine. A logically confirmed mine at A(r,c) guarantees B(r,c) is safe. Both cells can also be safe. Neither a safe cell nor a player flag proves the opposite board contains a mine.
 
 ### Generation and interaction
 
-- First reveal on either side selects a shared opening. Exclude its neighborhood from both layouts, shuffle remaining coordinates once, assign the first 12 positions to A and the next 12 to B. Open the safe region on both boards together.
+- First reveal on either side selects a shared opening. Exclude its neighborhood from both layouts, shuffle remaining coordinates once, assign the preset mine count to A and the next equally sized slice to B. Open the safe region on both boards together.
 - Desktop shows both boards; narrow screens stack them. Focus highlights the partner coordinate without calling it safe or mined.
 - Each board uses its own adjacent counts, flags, and ordinary chord behavior. Flags never automatically reveal a partner cell. Players apply cross-board deductions themselves.
 - Clear all safe cells on both boards to win. Completing one side exposes its confirmed mines and leaves the other playable. Hitting a mine on either side loses the pair.
@@ -113,7 +113,7 @@ Two 9 × 9 boards each contain 12 mines. At a matching coordinate, **at most one
 
 ### Persistence and acceptance
 
-A separate twin envelope stores the seed, validated actions, settled state, and ten recent results. Replay reconstructs both boards together. Test exact disjoint mine sets, correct clues, symmetric opening safety, false flag semantics, play after one side completes, paired defeat/full victory, and exactly-once records across reload.
+A separate twin envelope stores the seed, validated actions, settled state, and up to ten recent results per difficulty. Replay reconstructs both boards together. Test exact disjoint mine sets, correct clues, symmetric opening safety, false flag semantics, play after one side completes, paired defeat/full victory, and exactly-once records across reload.
 
 ## Sonar — approved, planned
 
@@ -153,8 +153,8 @@ Tides is the highest-risk design because its generator preserves a system of con
 
 ## Delivery order and limits
 
-1. **Delivered:** ruleset routing, separate saves, five-floor Expedition/camp progression, Twin boards, localization and regression coverage.
-2. **Next:** Sonar and Survey with accessible information overlays and independent records.
+1. **Delivered:** ruleset routing, separate saves, configurable Expedition/camp progression, Twin boards, localization and regression coverage.
+2. **Next:** the [tracked expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1), followed by Sonar and Survey with accessible information overlays and independent records.
 3. **Then:** Tides constraint solver/worker, replay compatibility and transition feedback.
 
 Saves are local and disappear when browser storage is cleared. They are not an anti-cheat system. One active run per special ruleset is supported; simultaneous edits to one ruleset in multiple tabs use last-write-wins browser storage. Journals are bounded at 20,000 accepted actions to limit recovery work; Expedition can still extract at its limit and Twin can restart. Storage failures are shown while in-memory play continues.

@@ -4,6 +4,7 @@ import { act } from './engine.js'
 import { revealDungeon } from './dungeon-reveal.js'
 import { adjacentSteps, shuffled } from './variant-board.js'
 import { approachPath, walkingPath } from './dungeon-path.js'
+import { expeditionConfig, expeditionFloors } from './variant-difficulty.js'
 import type {
   Camp,
   Departure,
@@ -15,7 +16,6 @@ import type {
   Upgrade,
 } from '../types/variants.js'
 
-export const FLOOR_COUNT = 5
 export const EMPTY_CAMP: Camp = { supplies: 0, upgrades: [], completed: 0 }
 export const UPGRADES: readonly Upgrade[] = ['surveyor', 'engineer', 'workshop', 'archive']
 export const EQUIPMENT: readonly Equipment[] = ['probe', 'scanner', 'guard']
@@ -55,10 +55,13 @@ export function buyUpgrade(camp: Camp, upgrade: Upgrade): Camp {
 /** Build fresh terrain and reset floor-local discoveries without touching permanent resources. */
 function createFloor(departure: Departure, floor: number): Expedition {
   const seed = (departure.seed + Math.imul(floor, 0x9e3779b9)) >>> 0
+  const config = expeditionConfig(departure, floor)
   const layout = generateDungeon(
     seed,
-    13 + floor * 2,
+    config.mines,
     departure.rules === 'original' ? 'compact' : 'flood',
+    config.width,
+    config.height,
   )
   return {
     ...layout,
@@ -208,7 +211,7 @@ function finishAtExit(run: Expedition): Expedition {
   return {
     ...run,
     loot: run.loot + 12,
-    phase: run.floor === FLOOR_COUNT ? 'won' : 'reward',
+    phase: run.floor === expeditionFloors(run.departure) ? 'won' : 'reward',
     offers: relicOffers(run),
   }
 }
@@ -216,7 +219,13 @@ function finishAtExit(run: Expedition): Expedition {
 /** Carry the build between floors while resetting local clues, treasures and route geometry. */
 function takeRelic(run: Expedition, relic: Relic): Expedition {
   if (run.phase !== 'reward' || !run.offers.includes(relic)) return run
-  const relics = [...run.relics, relic]
+
+  return advanceFloor(run, relic)
+}
+
+/** Continue an exhausted catalog without granting a duplicate relic or getting stuck. */
+function advanceFloor(run: Expedition, relic?: Relic): Expedition {
+  const relics = relic ? [...run.relics, relic] : run.relics
   const next = createFloor(run.departure, run.floor + 1)
   let result: Expedition = {
     ...next,
@@ -243,6 +252,8 @@ function takeRelic(run: Expedition, relic: Relic): Expedition {
 export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
   if (run.phase === 'lost' || run.phase === 'won' || run.phase === 'retreated') return run
   if (action.type === 'retreat') return { ...run, phase: 'retreated' }
+  if (action.type === 'descend')
+    return run.phase === 'reward' && run.offers.length === 0 ? advanceFloor(run) : run
   if (action.type === 'relic') return takeRelic(run, action.relic)
   if (run.phase !== 'exploring') return run
 
@@ -263,7 +274,7 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
       if (
         !Number.isInteger(action.row) ||
         action.row < 0 ||
-        action.row >= 9 ||
+        action.row >= run.game.config.height ||
         run.scans === 0 ||
         run.scannedRows.includes(action.row)
       )

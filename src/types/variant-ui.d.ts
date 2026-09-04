@@ -1,3 +1,4 @@
+import type { VariantDifficulty } from './variant-difficulty.js'
 import type { BoardSide, Equipment, Profession, Relic, Upgrade } from './variants.js'
 import type { NavigationKey } from './ui.js'
 import type { InteractionCue } from './audio.js'
@@ -8,6 +9,8 @@ export type VariantCommand =
   | {
       readonly type:
         | 'start'
+        | 'descend'
+        | 'zoom'
         | 'camp'
         | 'probe'
         | 'scan'
@@ -22,6 +25,7 @@ export type VariantCommand =
         | 'confirm'
         | 'cancel'
     }
+  | { readonly type: 'difficulty'; readonly value: VariantDifficulty }
   | { readonly type: 'profession'; readonly value: Profession }
   | { readonly type: 'equipment'; readonly value: Equipment }
   | { readonly type: 'upgrade'; readonly value: Upgrade }
@@ -57,6 +61,12 @@ export interface VariantCellTarget {
 
 /** Localized labels shared by the two special-mode screens. */
 export interface VariantMessages {
+  readonly difficulty: string
+  readonly legacyDifficulty: string
+  readonly nextFloor: string
+  readonly zoom: string
+  readonly fit: string
+  readonly zoomHint: string
   readonly modes: string
   readonly classic: string
   readonly expedition: string

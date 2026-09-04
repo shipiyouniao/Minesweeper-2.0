@@ -9,17 +9,19 @@ export function generateDungeon(
   seed: number,
   mines: number,
   mode: DungeonOpening = 'flood',
+  width = 9,
+  height = 9,
 ): DungeonLayout {
-  const config: Config = { width: 9, height: 9, mines }
+  const config: Config = { width, height, mines }
   const next = randomIndex(seed ^ 0x37a1)
-  const entrance = (1 + next(7)) * 9 + 1 + next(7)
-  const indices = Array.from({ length: 81 }, (_, index) => index)
+  const entrance = (1 + next(height - 2)) * width + 1 + next(width - 2)
+  const indices = Array.from({ length: config.width * config.height }, (_, index) => index)
   const safe = new Set([entrance, ...neighbors(config, entrance)])
-  const diagonal = next(2) === 0 ? [-10, 10] : [-8, 8]
+  const diagonal = next(2) === 0 ? [-width - 1, width + 1] : [-width + 1, width - 1]
   const opening = new Set([
     entrance,
-    entrance - 9,
-    entrance + 9,
+    entrance - width,
+    entrance + width,
     entrance - 1,
     entrance + 1,
     ...diagonal.map((offset) => entrance + offset),
@@ -150,15 +152,16 @@ function fallbackLayout(
   safe: ReadonlySet<number>,
   mode: DungeonOpening,
 ): DungeonLayout {
-  const x = entrance % 9
-  const y = Math.floor(entrance / 9)
-  const mineRow = y <= 4 ? y + 2 : y - 2
-  const guaranteed = [mineRow * 9 + x - 1, mineRow * 9 + x, mineRow * 9 + x + 1]
-  const spine = x <= 4 ? 8 : 0
-  const eligible = Array.from({ length: 81 }, (_, index) => index).filter(
+  const { width, height } = config
+  const x = entrance % width
+  const y = Math.floor(entrance / width)
+  const mineRow = y <= Math.floor(height / 2) ? y + 2 : y - 2
+  const guaranteed = [mineRow * width + x - 1, mineRow * width + x, mineRow * width + x + 1]
+  const spine = x <= Math.floor(width / 2) ? width - 1 : 0
+  const eligible = Array.from({ length: config.width * config.height }, (_, index) => index).filter(
     (index) =>
-      Math.floor(index / 9) % 2 === y % 2 &&
-      index % 9 !== spine &&
+      Math.floor(index / width) % 2 === y % 2 &&
+      index % width !== spine &&
       !safe.has(index) &&
       !guaranteed.includes(index),
   )

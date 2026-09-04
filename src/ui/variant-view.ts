@@ -1,7 +1,7 @@
 import { frontierCells } from '../game/expedition.js'
 import { probeArea } from '../game/dungeon-discovery.js'
 import { translations } from '../i18n.js'
-import type { Game } from '../types/game.js'
+import type { Config, Game } from '../types/game.js'
 import type { Language } from '../types/localization.js'
 import type { BoardSide, Expedition } from '../types/variants.js'
 import type { InteractionCue } from '../types/audio.js'
@@ -28,6 +28,8 @@ export class VariantView {
   private focusB = 0
   private walking: Animation | null = null
   private resize: ResizeObserver | null = null
+  private config: Config | null = null
+  private enlarged = false
   private floorIdentity: string | null = null
   private readonly listeners = new AbortController()
 
@@ -68,10 +70,21 @@ export class VariantView {
   /** Replace content and restore a still-existing control or cell focus after repaint. */
   render(html: string, a: Game | null, b: Game | null, expedition: Expedition | null): void {
     this.resize?.disconnect()
-    const identity = expedition ? `${expedition.departure.seed}:${expedition.floor}` : null
+    this.config = a?.config ?? null
+    const oldA = this.content.querySelector<HTMLElement>('[data-side="a"]')?.parentElement
+    const oldB = this.content.querySelector<HTMLElement>('[data-side="b"]')?.parentElement
+    const scrollA = [oldA?.scrollLeft ?? 0, oldA?.scrollTop ?? 0]
+    const scrollB = [oldB?.scrollLeft ?? 0, oldB?.scrollTop ?? 0]
+    const identity = expedition
+      ? `${expedition.departure.seed}:${expedition.floor}:${expedition.game.config.width}`
+      : a
+        ? `twin:${a.seed}:${a.config.width}`
+        : null
+    const sameBoard = identity === this.floorIdentity
     if (identity !== this.floorIdentity) {
       this.floorIdentity = identity
       this.focusA = expedition?.player ?? 0
+      this.focusB = 0
     }
     const active =
       document.activeElement instanceof HTMLElement && this.content.contains(document.activeElement)
@@ -83,7 +96,16 @@ export class VariantView {
     this.content.innerHTML = html
     this.a = this.board('a', a, this.focusA)
     this.b = this.board('b', b, this.focusB)
+    this.applyZoom()
     if (expedition) this.markExpedition(expedition)
+    if (sameBoard) {
+      this.content
+        .querySelector('[data-side="a"]')
+        ?.parentElement?.scrollTo(scrollA[0] ?? 0, scrollA[1] ?? 0)
+      this.content
+        .querySelector('[data-side="b"]')
+        ?.parentElement?.scrollTo(scrollB[0] ?? 0, scrollB[1] ?? 0)
+    }
 
     const selector =
       cell !== undefined && (side === 'a' || side === 'b')
@@ -155,7 +177,9 @@ export class VariantView {
 
   /** Preview either the probe's clipped 3×3 area or the scanner's complete row. */
   previewTool(tool: DungeonTool | null, index: number | null): void {
-    const area = index === null ? [] : probeArea({ width: 9, height: 9, mines: 0 }, index)
+    const config = this.config
+    if (!config) return
+    const area = index === null ? [] : probeArea(config, index)
     for (const button of this.content.querySelectorAll<HTMLElement>('[data-tool]'))
       button.setAttribute('aria-pressed', String(button.dataset['tool'] === tool))
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
@@ -165,7 +189,8 @@ export class VariantView {
           ? area.includes(Number(cell.dataset['cell']))
           : tool === 'scan' &&
               index !== null &&
-              Math.floor(Number(cell.dataset['cell']) / 9) === Math.floor(index / 9),
+              Math.floor(Number(cell.dataset['cell']) / config.width) ===
+                Math.floor(index / config.width),
       )
     const hint = this.content.querySelector<HTMLElement>('.tool-hint')
     if (!hint) return
@@ -182,10 +207,29 @@ export class VariantView {
     }
 
     const common = translations[this.language]
-    const row = `${common.row} ${Math.floor(index / 9) + 1}`
-    const column = `${common.column} ${(index % 9) + 1}`
+    const row = `${common.row} ${Math.floor(index / config.width) + 1}`
+    const column = `${common.column} ${(index % config.width) + 1}`
     hint.textContent =
       tool === 'probe' ? `${description} · ${row} · ${column}` : `${description} · ${row}`
+  }
+
+  /** Toggle larger touch targets without replacing the board or resetting its focus. */
+  toggleZoom(): void {
+    this.enlarged = !this.enlarged
+    this.applyZoom()
+  }
+
+  /** Restore the chosen zoom after every content repaint. */
+  private applyZoom(): void {
+    this.content.classList.toggle('enlarged-boards', this.enlarged)
+    const button = this.content.querySelector<HTMLElement>('[data-control="zoom"]')
+    const hint = this.content.querySelector<HTMLElement>('.zoom-hint')
+    const t = variantCopy(this.language)
+    if (button) {
+      button.textContent = this.enlarged ? t.fit : t.zoom
+      button.setAttribute('aria-pressed', String(this.enlarged))
+    }
+    if (hint) hint.hidden = !this.enlarged
   }
 
   /** Animate a known safe path before committing the destination action. */
@@ -276,7 +320,8 @@ export class VariantView {
   private board(side: BoardSide, game: Game | null, index: number): BoardView | null {
     const element = this.content.querySelector<HTMLElement>(`[data-side="${side}"]`)
     if (!element || !game) return null
-    const view = new BoardView(element, game.config, index)
+    element.dataset['cells'] = String(game.cells.length)
+    const view = new BoardView(element, game.config, Math.min(index, game.cells.length - 1))
     view.render(game, false, translations[this.language])
     return view
   }

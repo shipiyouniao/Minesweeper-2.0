@@ -1,16 +1,19 @@
 import { act, createGame, neighbors, stats } from './engine.js'
 import { placedBoard, shuffled } from './variant-board.js'
+import { twinConfig } from './variant-difficulty.js'
 import type { Twin, TwinAction } from '../types/variants.js'
-
-const CONFIG = { width: 9, height: 9, mines: 12 }
+import type { VariantDifficulty } from '../types/variant-difficulty.js'
 
 /** Delay the paired layout until a shared safe opening is chosen on either board. */
-export function createTwin(seed: number): Twin {
+export function createTwin(seed: number, difficulty?: VariantDifficulty): Twin {
+  const config = twinConfig(difficulty)
+
   return {
     seed: seed >>> 0,
+    ...(difficulty ? { difficulty } : {}),
     firstClick: null,
-    a: createGame(CONFIG, seed),
-    b: createGame(CONFIG, seed),
+    a: createGame(config, seed),
+    b: createGame(config, seed),
     moves: 0,
     phase: 'ready',
   }
@@ -18,13 +21,21 @@ export function createTwin(seed: number): Twin {
 
 /** Partition one shuffled candidate list: each coordinate contains at most one mine. */
 function beginTwin(twin: Twin, index: number): Twin {
-  const safe = new Set([index, ...neighbors(CONFIG, index)])
+  const config = twin.a.config
+  const safe = new Set([index, ...neighbors(config, index)])
   const candidates = shuffled(
-    Array.from({ length: 81 }, (_, value) => value).filter((value) => !safe.has(value)),
+    Array.from({ length: config.width * config.height }, (_, value) => value).filter(
+      (value) => !safe.has(value),
+    ),
     twin.seed,
   )
-  const a = placedBoard(CONFIG, new Set(candidates.slice(0, 12)), twin.seed, index)
-  const b = placedBoard(CONFIG, new Set(candidates.slice(12, 24)), twin.seed, index)
+  const a = placedBoard(config, new Set(candidates.slice(0, config.mines)), twin.seed, index)
+  const b = placedBoard(
+    config,
+    new Set(candidates.slice(config.mines, config.mines * 2)),
+    twin.seed,
+    index,
+  )
 
   return { ...twin, firstClick: index, a, b, phase: 'playing' }
 }
@@ -36,7 +47,7 @@ export function actTwin(twin: Twin, action: TwinAction): Twin {
     twin.phase === 'lost' ||
     !Number.isInteger(action.index) ||
     action.index < 0 ||
-    action.index >= 81
+    action.index >= twin.a.cells.length
   )
     return twin
   if (twin.phase === 'ready' && action.type === 'flag') return twin

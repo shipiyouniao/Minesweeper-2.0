@@ -496,3 +496,61 @@ dialog > p {
     flex-direction: column;
   }
 }
+.variant-difficulty {
+  border: 0;
+  padding: 0;
+  margin: 24px 0;
+  min-width: 0;
+}
+.variant-difficulty legend {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.variant-difficulty > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.variant-difficulty button {
+  display: flex;
+  flex: 1 1 120px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.variant-difficulty button span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.variant-difficulty button strong {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+}
+.variant-difficulty button[aria-pressed='true'] {
+  border-color: var(--blue);
+  background: #eef2ff;
+}
+.board-zoom {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.variant-board-panel .board {
+  --cell: min(
+    var(--cell-max),
+    calc((100cqi - (var(--columns) - 1) * var(--gap) - 1px) / var(--columns))
+  );
+}
+.enlarged-boards .board-viewport {
+  max-height: 70vh;
+}
+.enlarged-boards .board {
+  --cell: 44px;
+}
