@@ -1,5 +1,14 @@
 /** Generated raster assets used by terrain, landmarks, character and tool controls. */
 export type DungeonSprite =
+  | 'workshop'
+  | 'archive'
+  | 'bastion'
+  | 'bastion-defeated'
+  | 'bastion-core'
+  | 'bastion-pylon'
+  | 'bastion-pylon-off'
+  | 'bastion-strike'
+  | 'bastion-intent'
   | 'player'
   | 'survey-notes'
   | 'guardian-crests'

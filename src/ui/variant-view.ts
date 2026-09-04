@@ -14,6 +14,8 @@ import { icon } from '../icons.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
+import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
+import { tacticalCopy, tacticalPlanCopy } from './tactical-copy.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -32,6 +34,8 @@ export class VariantView {
   private config: Config | null = null
   private enlarged = false
   private floorIdentity: string | null = null
+  private expedition: Expedition | null = null
+  private targetingTool = false
   private readonly listeners = new AbortController()
 
   /** Mount the stable shell once; only its mode content changes after an action. */
@@ -72,12 +76,14 @@ export class VariantView {
   render(html: string, a: Game | null, b: Game | null, expedition: Expedition | null): void {
     this.resize?.disconnect()
     this.config = a?.config ?? null
+    this.expedition = expedition
+    this.targetingTool = false
     const oldA = this.content.querySelector<HTMLElement>('[data-side="a"]')?.parentElement
     const oldB = this.content.querySelector<HTMLElement>('[data-side="b"]')?.parentElement
     const scrollA = [oldA?.scrollLeft ?? 0, oldA?.scrollTop ?? 0]
     const scrollB = [oldB?.scrollLeft ?? 0, oldB?.scrollTop ?? 0]
     const identity = expedition
-      ? `${expedition.departure.seed}:${expedition.floor}:${expedition.game.config.width}`
+      ? `${expedition.departure.seed}:${expedition.floor}:${expedition.game.config.width}:${Boolean(expedition.encounter)}`
       : a
         ? `twin:${a.seed}:${a.config.width}`
         : null
@@ -99,6 +105,7 @@ export class VariantView {
     this.b = this.board('b', b, this.focusB)
     this.applyZoom()
     if (expedition) this.markExpedition(expedition)
+    if (expedition?.encounter) this.markTactical(expedition)
     if (sameBoard) {
       this.content
         .querySelector('[data-side="a"]')
@@ -117,7 +124,9 @@ export class VariantView {
     const target = selector ? this.content.querySelector<HTMLElement>(selector) : null
     if (target && !target.hasAttribute('disabled')) target.focus({ preventScroll: true })
     else if (active)
-      this.content.querySelector<HTMLElement>('.variant-status, h1')?.focus({ preventScroll: true })
+      this.content
+        .querySelector<HTMLElement>('.variant-status, .tactical-event, h1')
+        ?.focus({ preventScroll: true })
   }
 
   /** Update availability warnings and accessible sound/pause state independently of the board. */
@@ -178,6 +187,8 @@ export class VariantView {
 
   /** Preview either the probe's clipped 3×3 area or the scanner's complete row. */
   previewTool(tool: DungeonTool | null, index: number | null): void {
+    this.targetingTool = tool !== null
+    if (tool) this.previewRoute(null)
     const config = this.config
     if (!config) return
     const area = index === null ? [] : probeArea(config, index)
@@ -212,6 +223,62 @@ export class VariantView {
     const column = `${common.column} ${(index % config.width) + 1}`
     hint.textContent =
       tool === 'probe' ? `${description} · ${row} · ${column}` : `${description} · ${row}`
+  }
+
+  /** Highlight only publicly walkable routes; tool targeting takes visual precedence. */
+  previewRoute(index: number | null): void {
+    const run = this.expedition
+    if (!run || run.phase !== 'boss') return
+    const plan =
+      index !== null && !this.targetingTool
+        ? tacticalPlan(run, tacticalCellAction(run, index))
+        : null
+    const route = new Set(plan?.path ?? [])
+    for (const cell of this.content.querySelectorAll<HTMLElement>('[data-cell]')) {
+      const onRoute = route.has(Number(cell.dataset['cell']))
+      cell.classList.toggle('tactical-route', onRoute)
+      cell.classList.toggle('tactical-unaffordable', Boolean(plan && !plan.allowed && onRoute))
+    }
+    const hint = this.content.querySelector<HTMLElement>('.tactical-plan')
+    if (hint)
+      hint.textContent = plan
+        ? tacticalPlanCopy(this.language, plan)
+        : tacticalCopy(this.language).hint
+  }
+
+  /** Overlay public mechanisms and frozen attack warnings without exposing covered clues. */
+  private markTactical(run: Expedition): void {
+    const encounter = run.encounter
+    if (!encounter) return
+    const t = tacticalCopy(this.language)
+    for (const cell of this.content.querySelectorAll<HTMLElement>('[data-cell]')) {
+      const index = Number(cell.dataset['cell'])
+      const pylon = encounter.pylons.find((entry) => entry.index === index)
+      if (index === encounter.boss) {
+        cell.classList.remove('wall-cell')
+        cell.classList.add('bastion-cell')
+        cell.removeAttribute('aria-disabled')
+        cell.innerHTML = spriteImage(
+          encounter.health === 0
+            ? 'bastion-defeated'
+            : encounter.pylons.some((entry) => entry.active)
+              ? 'bastion'
+              : 'bastion-core',
+        )
+        cell.setAttribute('aria-label', `${t.name}, ${encounter.health} / ${encounter.maxHealth}`)
+      } else if (pylon) {
+        cell.classList.add('landmark-cell', 'pylon-cell')
+        cell.innerHTML = `${spriteImage(pylon.active ? 'bastion-pylon' : 'bastion-pylon-off')}<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>`
+        cell.setAttribute(
+          'aria-label',
+          `${cell.getAttribute('aria-label')}, ${pylon.active ? t.pylon : t.disabled}`,
+        )
+      }
+      if (run.phase === 'boss' && encounter.intent.targets.includes(index)) {
+        cell.classList.add('tactical-danger')
+        cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${t.danger}`)
+      }
+    }
   }
 
   /** Toggle larger touch targets without replacing the board or resetting its focus. */

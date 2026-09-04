@@ -15,6 +15,9 @@ export type VariantCommand =
         | 'probe'
         | 'scan'
         | 'skill'
+        | 'attack'
+        | 'brace'
+        | 'end-turn'
         | 'help'
         | 'records'
         | 'retreat'
@@ -34,6 +37,8 @@ export type VariantCommand =
 
 /** Browser input consumes this application port without knowing a session implementation. */
 export interface VariantInputActions {
+  /** Preview a public combat route without spending an action. */
+  previewRoute(index: number | null): void
   /** Preview a visible area or row target during drag or tool selection. */
   previewTool(tool: DungeonTool | null, index: number | null): void
   /** Consume a tool only after dropping or explicitly activating a cell. */
@@ -83,7 +88,6 @@ export interface VariantMessages {
   readonly campMiddle: string
   readonly campLate: string
   readonly campRemaining: string
-  readonly campMinimumRuns: string
   readonly campAffordable: string
   readonly campComplete: string
   readonly facilities: string

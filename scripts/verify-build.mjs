@@ -23,6 +23,15 @@ for (const file of [
 ])
   await stat(file)
 for (const sprite of [
+  'bastion',
+  'bastion-defeated',
+  'bastion-core',
+  'bastion-pylon',
+  'bastion-pylon-off',
+  'bastion-strike',
+  'bastion-intent',
+  'workshop',
+  'archive',
   'player',
   'survey-notes',
   'guardian-crests',

@@ -63,7 +63,8 @@ export function walkingPath(run: Expedition, destination: number): number[] | nu
 
 /** Plan a direct walk or the shortest approach to a covered frontier cell. */
 export function approachPath(run: Expedition, destination: number): number[] | null {
-  if (run.phase !== 'exploring' || run.walls.includes(destination)) return null
+  if ((run.phase !== 'exploring' && run.phase !== 'boss') || run.walls.includes(destination))
+    return null
   const cell = run.game.cells[destination]
   if (!cell || cell.visibility === 'flagged') return null
   if (cell.visibility === 'revealed') return walkingPath(run, destination)

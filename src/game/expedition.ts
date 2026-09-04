@@ -1,4 +1,6 @@
 import { upgradeCost } from './camp-progression.js'
+import { enterBastion, isBastionFloor } from './bastion-arena.js'
+import { actTacticalEncounter } from './tactical-encounter.js'
 import { professionResources, professionOfferCount } from './professions.js'
 import { useProfessionSkill } from './profession-skills.js'
 import {
@@ -10,7 +12,7 @@ import {
 import { damageVitality, healVitality } from './vitality.js'
 import { hasExpeditionHealth } from './expedition-rules.js'
 import { relicPool } from './relic-packs.js'
-import { applyDiscoveryRelics, applyMineRelics, applyTreasureRelics } from './relic-effects.js'
+import { applyDiscoveryRelics, applyDamageRelics, applyTreasureRelics } from './relic-effects.js'
 import { generateDungeon } from './dungeon-generator.js'
 import { probeDungeon, scanDungeon, scoutExit } from './dungeon-discovery.js'
 import { act } from './engine.js'
@@ -76,6 +78,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
   )
   return {
     ...layout,
+    encounter: null,
     departure,
     floor,
     player: layout.entrance,
@@ -187,7 +190,7 @@ function revealFrontier(run: Expedition, index: number): Expedition {
 
   if (cell.mine) {
     const vitality = damageVitality(approached, 1)
-    const reacted = applyMineRelics(approached, { ...approached, ...vitality }, index)
+    const reacted = applyDamageRelics(approached, { ...approached, ...vitality }, index)
     const survived = reacted.health > 0
 
     // Survival confirms the hazard, never erases it or moves the player onto it.
@@ -233,7 +236,12 @@ function movePlayer(run: Expedition, index: number): Expedition {
 /** Commit an exit reward only for a living explorer that actually reached the stairs. */
 function finishAtExit(run: Expedition): Expedition {
   if (run.phase !== 'exploring' || run.player !== run.exit) return run
+  if (!run.encounter && isBastionFloor(run)) return enterBastion(run)
+  return completeFloor(run)
+}
 
+/** Grant one ordinary exit payment after an unguarded exit or a defeated guardian. */
+function completeFloor(run: Expedition): Expedition {
   return {
     ...run,
     // Leaving exploration makes this recovery a one-time reward, including the final exit.
@@ -320,12 +328,27 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
       }
     case 'probe':
       return probeDungeon(run, action.index)
+    default:
+      return run
   }
 }
 
 /** Apply the accepted intent, then process each newly earned discovery reaction once. */
 export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
-  return applyDiscoveryRelics(run, transitionExpedition(run, action), action)
+  let next =
+    run.phase === 'boss'
+      ? actTacticalEncounter(run, action, transitionExpedition)
+      : transitionExpedition(run, action)
+
+  // Combat completion is the only way to collect the guarded floor's ordinary exit reward.
+  if (next.phase === 'boss' && next.encounter?.health === 0) {
+    next = completeFloor({
+      ...next,
+      health: next.maxHealth,
+      shields: Math.min(2, next.shields + 1),
+    })
+  }
+  return applyDiscoveryRelics(run, next, action)
 }
 
 /** Settle secured loot: success/extraction retain everything, defeat retains a bounded fraction. */

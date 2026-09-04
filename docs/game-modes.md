@@ -19,7 +19,9 @@ Relic Dungeon is part of Expedition, not a separate mode: it describes the multi
 
 ### Complete player loop
 
-Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
+Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → defeat the guardian on guarded floors → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
+
+[Bastion Guardian](bastion-encounters.md) adds independent tactical rooms with three action points, frozen attack forecasts, two shield mechanisms and shared expedition health. Only End turn resolves enemy attacks. New departures snapshot the encounter revision; historical saves retain their ordinary exits.
 
 ### Floor rules
 
@@ -98,7 +100,7 @@ Charges/relics carry between floors and disappear when the run ends. Scanned row
 
 Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
 
-Prices form a stepped curve: both early professions cost 100 supplies together and can be bought after one rewarding expedition; the workshop is a middle milestone; the 7,500-supply archive is affordable within ten successful Abyss clears even without optional chests. New departures receive [difficulty-scaled settlement rewards](expedition-rewards.md), with roughly 200 supplies on the reference Relaxed route. The camp shows savings, remaining cost, percentage and an optimistic minimum-run estimate. Existing currency and purchased facilities are preserved. See [the pricing model and its limitations](camp-progression.md).
+Prices form a stepped curve: both early professions cost 100 supplies together and can be bought after one rewarding expedition; the workshop is a middle milestone; the 7,500-supply archive is affordable within ten successful Abyss clears even without optional chests. New departures receive [difficulty-scaled settlement rewards](expedition-rewards.md), with roughly 200 supplies on the reference Relaxed route. The camp shows savings, remaining cost and percentage. Existing currency and purchased facilities are preserved. See [the pricing model and its limitations](camp-progression.md).
 
 This first progression set is finite. Surplus supplies remain visible after all unlocks but have no additional spending sink yet. Biomes, branching events, and more professions can extend the system later; they are not implemented content. There is no uncapped permanent health upgrade or monetized currency.
 

@@ -56,11 +56,6 @@ export function variantCopy(language: Language): VariantMessages {
     campMiddle: t('Middle milestone', '中期建设', '中盤の目標'),
     campLate: t('Long-term goal', '长期目标', '長期目標'),
     campRemaining: t('{count} still needed', '还差 {count}', 'あと{count}'),
-    campMinimumRuns: t(
-      'At least {count} more runs · theoretical maximum {maximum} supplies per run.',
-      '至少还需 {count} 局 · 单局理论上限 {maximum} 物资。',
-      '最低あと{count}回 · 1回の理論上限は物資{maximum}。',
-    ),
     campAffordable: t('Ready to unlock below.', '已攒够，可在下方解锁。', '下から解放できます。'),
     campComplete: t(
       'All camp facilities unlocked.',

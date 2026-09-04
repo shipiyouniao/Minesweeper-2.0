@@ -44,6 +44,8 @@ import {
 } from '../game/expedition-rewards.js'
 import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
+import { tacticalTemplate } from './tactical-template.js'
+import { tacticalCopy } from './tactical-copy.js'
 
 /** Render one accessible choice card; its ID is a finite catalog value. */
 function choice(
@@ -124,7 +126,9 @@ export function campTemplate(
             upgrade === 'alchemist' ||
             upgrade === 'sentinel'
             ? professionSprite(upgrade)
-            : parseRelicPack(upgrade),
+            : upgrade === 'workshop' || upgrade === 'archive'
+              ? upgrade
+              : parseRelicPack(upgrade),
         )
       },
     ).join('')}</div></section>`
@@ -157,9 +161,11 @@ export function expeditionTemplate(
           ? t.retreated
           : run.phase === 'reward'
             ? t.reward
-            : exitReady
-              ? t.exitReady
-              : t.exploring
+            : run.phase === 'boss'
+              ? tacticalCopy(language).name
+              : exitReady
+                ? t.exitReady
+                : t.exploring
   const relics = run.relics
     .map((relic) => {
       const description = relicCopy(language, relic)
@@ -175,14 +181,15 @@ export function expeditionTemplate(
 
   return `<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
     <p class="variant-note reward-rate">${t.rewardRate} ×${rate}</p>
-    ${vitalityTemplate(language, run, !hasExpeditionHealth(run.departure))}
-    <p class="variant-status" role="status" tabindex="-1">${status}</p>
+    ${vitalityTemplate(language, run, !hasExpeditionHealth(run.departure), !run.encounter)}
+    ${tacticalTemplate(language, run)}
+    ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<div class="result-banner"><strong>${t.earned} +${earned}</strong><button class="primary-button" data-control="camp">${t.camp}</button></div>` : ''}
     ${terminal ? `<p class="variant-note reward-breakdown">${t.rewardBase} ${reward.base} + ${t.rewardBonus} ${reward.bonus} = ${reward.total}</p>` : ''}
     ${run.phase === 'reward' ? `<div class="choice-grid">${run.offers.map((relic) => choice(`relic:${relic}`, relicCopy(language, relic), false, false, relicSprite(relic))).join('')}</div>${run.offers.length === 0 ? `<button class="primary-button" data-control="descend">${t.nextFloor}</button>` : ''}<button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
     ${boardZoomTemplate(language)}<div class="expedition-layout">${boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${
-        run.phase === 'exploring'
+        run.phase === 'exploring' || run.phase === 'boss'
           ? `<div class="variant-toolbar">${inputModeTemplate(language, flagMode)}
       <p class="variant-note tool-hint" role="status">${t.toolHint}</p>
       <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}</div>
@@ -192,7 +199,7 @@ export function expeditionTemplate(
           : ''
       }
       <h3>${t.relics}</h3>${relics ? `<ul class="relic-list">${relics}</ul>` : `<p class="variant-note">${t.noRelics}</p>`}
-      <div class="dungeon-legend"><span>${spriteImage('entrance')}${t.entrance}</span><span>${spriteImage('exit')}${t.exit}</span><span>${spriteImage('treasure')}${t.treasure}</span><span>${spriteImage('wall')}${t.wall}</span></div>
+      ${run.encounter ? '' : `<div class="dungeon-legend"><span>${spriteImage('entrance')}${t.entrance}</span><span>${spriteImage('exit')}${t.exit}</span><span>${spriteImage('treasure')}${t.treasure}</span><span>${spriteImage('wall')}${t.wall}</span></div>`}
       <ul class="scan-results">${run.scannedRows.map((row) => `<li>${common.row} ${row + 1}: <strong>${run.game.cells.slice(row * run.game.config.width, (row + 1) * run.game.config.width).filter((cell) => cell.mine).length}</strong> ${t.rowMines}</li>`).join('')}</ul>
     </aside></div>`
 }

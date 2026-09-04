@@ -1,9 +1,9 @@
-import { campFunding, maximumRunSupplies } from '../game/camp-progression.js'
+import { campFunding } from '../game/camp-progression.js'
 import type { Camp } from '../types/variants.js'
 import type { Language } from '../types/localization.js'
 import { upgradeCopy, variantCopy } from './variant-copy.js'
 
-/** Render a funding goal with exact savings, remaining cost and an explicitly optimistic bound. */
+/** Show the next unlock's price and savings without estimating how many runs a player needs. */
 export function campProgressTemplate(language: Language, camp: Camp): string {
   const t = variantCopy(language)
   const funding = campFunding(camp)
@@ -16,18 +16,12 @@ export function campProgressTemplate(language: Language, camp: Camp): string {
   const remaining = number.format(funding.remaining)
   const stage =
     funding.stage === 'early' ? t.campEarly : funding.stage === 'middle' ? t.campMiddle : t.campLate
-  const outlook =
-    funding.remaining === 0
-      ? t.campAffordable
-      : t.campMinimumRuns
-          .replace('{count}', number.format(funding.minimumRuns))
-          .replace('{maximum}', number.format(maximumRunSupplies()))
 
   return `<section class="camp-funding" aria-label="${t.campGoal}">
     <p class="eyebrow">${t.campGoal} · ${stage}</p><h3>${title}</h3>
     <p class="funding-amount"><strong>${saved} / ${price}</strong><span>${t.supplies}</span></p>
     <progress max="${funding.price}" value="${funding.saved}" aria-label="${title}: ${saved} / ${price}">${funding.percent}%</progress>
     <p class="funding-summary"><span>${t.campRemaining.replace('{count}', remaining)}</span><strong>${funding.percent}%</strong></p>
-    <p class="variant-note">${outlook}</p>
+    ${funding.remaining === 0 ? `<p class="variant-note">${t.campAffordable}</p>` : ''}
   </section>`
 }

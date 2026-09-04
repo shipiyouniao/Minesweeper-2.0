@@ -5,6 +5,8 @@ import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
 import { allowedDeparture, expeditionEarnings } from '../game/expedition.js'
 import { approachPath } from '../game/dungeon-path.js'
+import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
+import { tacticalCopy } from './tactical-copy.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
 import { translations } from '../i18n.js'
 import type { SoundEffects, InteractionCue } from '../types/audio.js'
@@ -74,6 +76,23 @@ export class VariantApp implements VariantInputActions {
     }
     if (this.session instanceof ExpeditionSession && !flag) {
       const run = this.session.run
+      if (run?.phase === 'boss') {
+        const action = tacticalCellAction(run, index)
+        const plan = tacticalPlan(run, action)
+        this.view.previewRoute(index)
+        if (!plan.allowed) {
+          this.sounds.play('blocked')
+          return
+        }
+        if (action.type !== 'move' && action.type !== 'reveal') {
+          this.input.cancelTools()
+          this.expedition(action)
+          this.render()
+          return
+        }
+        void this.walkAndPlay(index, plan.path, action.type === 'move')
+        return
+      }
       const path = run ? approachPath(run, index) : null
       if (!run || !path || (index === run.player && index !== run.exit)) {
         this.sounds.play('blocked')
@@ -148,6 +167,12 @@ export class VariantApp implements VariantInputActions {
     this.view.previewTool(tool, index)
   }
 
+  /** Display a pointer or keyboard route only while interaction is available. */
+  previewRoute(index: number | null): void {
+    if (this.paused || this.moving || this.view.dialogOpen) return
+    this.view.previewRoute(index)
+  }
+
   /** Consume a targeted tool through the replayable domain action. */
   useTool(tool: DungeonTool, index: number): void {
     if (!(this.session instanceof ExpeditionSession)) return
@@ -189,6 +214,15 @@ export class VariantApp implements VariantInputActions {
     switch (command.type) {
       case 'help': {
         const t = variantCopy(this.language)
+        if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
+          this.view.showInformation(
+            translations[this.language].how,
+            tacticalCopy(this.language)
+              .help.map((paragraph) => `<p>${paragraph}</p>`)
+              .join(''),
+          )
+          return
+        }
         this.view.showInformation(
           translations[this.language].how,
           `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${this.session.run && !hasExpeditionHealth(this.session.run.departure) ? t.legacyHealth : t.healthHelp}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
@@ -227,6 +261,11 @@ export class VariantApp implements VariantInputActions {
         break
       case 'skill':
         this.expedition({ type: 'skill' })
+        break
+      case 'attack':
+      case 'brace':
+      case 'end-turn':
+        this.expedition({ type: command.type })
         break
       case 'difficulty':
         if (this.session instanceof ExpeditionSession) {
