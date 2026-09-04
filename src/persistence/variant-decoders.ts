@@ -96,12 +96,14 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (!reader) return null
   const seed = reader.number('seed')
   const rules = reader.value('rules')
+  const rewards = reader.value('rewards')
   const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const profession = parseProfession(reader.string('profession'))
   const archive = reader.value('archive')
   const values = reader.array('equipment')
   if (
     !integer(seed, 0xffffffff) ||
+    (rewards !== undefined && (rewards !== 'difficulty-v1' || rules !== 'relics-v1')) ||
     (rules !== undefined &&
       rules !== 'original' &&
       rules !== 'scouting' &&
@@ -141,6 +143,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     archive,
     equipment,
     rules: rules ?? 'original',
+    ...(rewards === 'difficulty-v1' ? { rewards } : {}),
     ...(rules === 'relics-v1' ? { packs } : {}),
     ...(difficulty ? { difficulty } : {}),
   }

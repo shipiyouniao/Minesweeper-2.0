@@ -1,51 +1,40 @@
 # Camp progression: pricing and funding goals
 
-This is the pricing foundation of the **Progression and content** workstream in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). The full workstream also requires additional professions, relics and intermediate progression content. This delivery does not mark that whole workstream complete.
+Camp progression is part of [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). The current eight purchases are an early batch toward at least 24 distinct gameplay unlocks. Long-term variety comes from professions, equipment, relic combinations and encounters.
 
-## A stepped unlock curve
+## Balance targets and purchase table
 
-| Stage            | Facility          | Previous price | Current price | Fastest theoretical purchase from zero |
-| ---------------- | ----------------- | -------------: | ------------: | -------------------------------------: |
-| Early variety    | Surveyor training |             20 |            40 |                                  1 run |
-| Early variety    | Engineer training |             20 |            60 |                                  1 run |
-| Middle milestone | Workshop          |             30 |         1,200 |                                 3 runs |
-| Long-term goal   | Relic archive     |             45 |        10,000 |                                21 runs |
+The opening should provide immediate choices, the middle should expand builds, and the most expensive single item should require **no more than ten successful Abyss expeditions from zero**, even when every optional chest is skipped. This is a maximum saving target for that item, not a minimum grind for every purchase. Defeats and early extraction are not full clears.
 
-The first two professions cost **100 supplies together**. A successful three-floor Relaxed expedition with all chests collected earns 120 supplies even without the Treasure pouch, enough to buy both and immediately try different roles. This is an achievable first-run opportunity, not a guaranteed reward for every outcome. Players can choose their purchase order.
+The reference column assumes two of three chests collected per floor, no Treasure pouch and a complete Standard expedition: **375 supplies**. It is a design scenario, not measured player behavior. Early players can instead earn around 200 on a reference Relaxed clear. See the [difficulty reward table](expedition-rewards.md) for guarantees and upper bounds.
 
-The workshop adds a medium-term loadout goal. The archive retains the at-least-twenty-run saving target for a late unlock. Early roles deliberately do not share that requirement. Future professions and relic packs should extend this curve with meaningful intermediate choices rather than put every new choice behind the same long wait.
+| Stage  | Purchase         | Price | Standard reference clears from zero | Purpose                                         |
+| ------ | ---------------- | ----: | ----------------------------------: | ----------------------------------------------- |
+| Early  | Surveyor         |    40 |                                   1 | Scanning-focused starting role                  |
+| Early  | Engineer         |    60 |                                   1 | Shield-focused starting role                    |
+| Early  | Surveyor notes   |   100 |                                   1 | Discovery-to-tool relic choices                 |
+| Middle | Guardian crests  |   250 |                                   1 | Shield reactions                                |
+| Middle | Survival charms  |   500 |                                   2 | Recovery and emergency survival                 |
+| Middle | Prospector seals |   900 |                                   3 | Treasure-oriented tools and protection          |
+| Middle | Workshop         | 1,200 |                                   4 | Bounded departure loadouts                      |
+| Late   | Relic archive    | 7,500 |                                  20 | Additional navigation and salvage relic choices |
 
-The per-item bounds below start from zero savings. The four original facilities cost 11,300 together. Four [relic themes](relic-packs.md), priced at 100, 250, 500 and 900, now fill the gaps between early roles and larger goals. All eight purchases cost 13,050: at least 27 maximally profitable Abyss runs or 61 Standard runs. Existing savings can shorten any remaining goal.
+The two early roles together cost 100. A reference Relaxed win pays 204, enough for both roles and the first theme. Purchases are optional and may be made in any order. Packs add choices to later reward pools rather than granting their relics immediately.
 
-A floor has three chests. Normal chests pay 6 each; the Treasure pouch raises subsequent chests to 9. Every exit pays 12, and victory adds 30. The pouch can first be acquired **after floor one**. Therefore, for `F` floors:
+Abyss completion guarantees at least 783 supplies from its exits and victory reward alone. Therefore the archive takes at most `ceil(7,500 / 783) = 10` successful Abyss clears. The reference two-chest route pays 1,431, giving a six-clear target; the mathematical maximum of 2,200 permits four clears. These calculations assume savings are reserved for that purchase. Spending on other items contributes to total collection time.
 
-```text
-maximum payout = (3 × 6 + 12) + (F − 1) × (3 × 9 + 12) + 30
-               = 60 + 39 × (F − 1)
-```
+All eight purchases cost **10,550**. That is eight reference Abyss clears or 29 reference Standard clears from zero, before considering failed runs or extra loot. Further catalog batches must fill distinct gameplay roles and be priced against the same income scenarios. Repeated stat levels and cosmetics do not count toward the 24-purchase target.
 
-| Tier     | Floors | Theoretical maximum payout | Runs for both early roles (100) | Runs for workshop (1,200) | Runs for archive (10,000) |
-| -------- | -----: | -------------------------: | ------------------------------: | ------------------------: | ------------------------: |
-| Relaxed  |      3 |                        138 |                               1 |                         9 |                        73 |
-| Standard |      5 |                        216 |                               1 |                         6 |                        47 |
-| Advanced |      7 |                        294 |                               1 |                         5 |                        35 |
-| Expert   |      9 |                        372 |                               1 |                         4 |                        27 |
-| Abyss    |     12 |                        489 |                               1 |                         3 |                        21 |
+## Presentation and persistence
 
-These are optimistic mathematical bounds, **not typical payouts or measured player completion times**. They assume every chest is reached, every floor is completed, and the pouch is offered and selected immediately. Actual saving can take longer. Extraction and defeat retain their existing rules; no payout is capped, scaled down or silently withheld. Difficulty choice still needs human playtesting for earnings per minute, particularly the shorter easy tier. Prices are an initial progression baseline, not a claim of finished balance.
+The camp shows the next unowned purchase in price order, saved supplies, remaining cost, percentage and an optimistic minimum additional run count at the **2,200-supply theoretical maximum**. This lower bound is labeled separately from the reference scenario used for balance. Players may buy any available item; the funding goal imposes no mandatory order.
 
-The regression suite checks legal seeded runs across every tier, sequential purchases of both early roles from 100 supplies, progression to the workshop and archive, and the late archive's twenty-run lower bound. Adding more floors or stronger resource-conversion effects must revisit these bounds and the price curve.
+Existing savings, purchased facilities, completed-run counts and active journals are preserved. Owned items are never charged again. Purchases remain camp-only and atomic. New departures capture their reward revision; historical runs keep their original settlement amounts. See [reward compatibility](expedition-rewards.md).
 
-## Camp presentation
+`camp-progression.ts` owns prices and funding bounds; `expedition-rewards.ts` owns reward constants, difficulty rates and the settlement breakdown. Their explicit contracts live in `.d.ts` modules. The UI consumes derived values instead of maintaining a second currency or duplicating arithmetic.
 
-The camp shows the next unowned facility in price order, saved supplies toward its price, remaining cost, percentage funded and the minimum additional runs at the theoretical 489-supply maximum. This estimate is a lower bound across the released tiers, not a promise for the selected difficulty. Fully funded goals say they are ready to purchase; purchasing remains an explicit button action. Other facility buttons remain available, so the displayed goal does not force a purchase order.
+## Acceptance and tuning
 
-The progress bar is derived from existing supplies. It does not introduce a second currency, reset cycle or fictitious mastery rewards. The complete catalogue state has a concise all-unlocked message. English, Chinese and Japanese have equivalent labels and accessible progress values.
+Tests cover actual legal clears in every tier, payout bounds, the ten-clear Abyss affordability guarantee, purchase thresholds, existing ownership, replay and exactly-once settlement. Browser acceptance covers difficulty rates, final base/bonus totals, funding states and all three languages on narrow screens.
 
-## Existing saves and architectural boundaries
-
-Existing money, purchased facilities, completed-run counts and active journals are preserved. A player who already saved enough currency can purchase immediately; the minimum-run calculation applies to saving a new item's full price from zero. Previously purchased facilities are not charged again or revoked.
-
-Only future camp purchases use the new prices. The pricing change itself leaves rewards and replay outcomes unchanged. The separate theme expansion uses `relics-v1` departures to capture licensed packs while preserving historical journals; see [its persistence rules](relic-packs.md). Purchases remain camp-only and persist through the existing atomic repository write.
-
-`src/game/camp-progression.ts` owns reward constants, prices, payout bounds and derived funding state. Its concrete `CampFunding` contract lives in `src/types/camp-progression.d.ts`. The expedition engine consumes the unchanged reward amounts, while the UI renders funding without duplicating the arithmetic. Behavioral tests cover the bounds, legal full expeditions, purchase thresholds, replay after an old save's purchase, all-unlocked state and translations.
+Next balance passes should measure completion rate, supplies per minute, chest collection, purchase order and use of each unlock. No playtime estimate is presented as measured data. Boss rewards, new professions or currency-producing relics require revisiting both income and price tables before release.

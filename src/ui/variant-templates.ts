@@ -34,6 +34,11 @@ import { campProgressTemplate } from './camp-progress-template.js'
 import { hasExpeditionHealth } from '../game/expedition-rules.js'
 import { parseRelicPack } from '../game/relic-packs.js'
 import { relicSprite } from './relic-presentation.js'
+import {
+  difficultyRewardPercent,
+  expeditionReward,
+  expeditionRewardPercent,
+} from '../game/expedition-rewards.js'
 import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
 
@@ -93,6 +98,7 @@ export function campTemplate(
   return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${t.healthHint}</p>
     <div class="variant-metrics">${metric(t.supplies, number.format(camp.supplies))}${metric(t.departures, camp.completed)}</div>
     ${difficultyTemplate(language, difficulty, true)}
+    <p class="variant-note reward-rate">${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p>
     <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career), professionSprite(career))).join('')}</div>
     <h2>${t.equipment} <small>${spent} / 3</small></h2>
     ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && spent + equipmentCost(item) > 3, item === 'guard' ? 'shield' : item)).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
@@ -129,6 +135,8 @@ export function expeditionTemplate(
   const t = variantCopy(language)
   const common = translations[language]
   const terminal = run.phase === 'lost' || run.phase === 'won' || run.phase === 'retreated'
+  const reward = expeditionReward(run)
+  const rate = expeditionRewardPercent(run.departure) / 100
   const exitReady = reachableCells(run).has(run.exit)
   const status =
     run.phase === 'won'
@@ -156,9 +164,11 @@ export function expeditionTemplate(
     .join('')
 
   return `<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
+    <p class="variant-note reward-rate">${t.rewardRate} ×${rate}</p>
     ${vitalityTemplate(language, run, !hasExpeditionHealth(run.departure))}
     <p class="variant-status" role="status" tabindex="-1">${status}</p>
     ${terminal ? `<div class="result-banner"><strong>${t.earned} +${earned}</strong><button class="primary-button" data-control="camp">${t.camp}</button></div>` : ''}
+    ${terminal ? `<p class="variant-note reward-breakdown">${t.rewardBase} ${reward.base} + ${t.rewardBonus} ${reward.bonus} = ${reward.total}</p>` : ''}
     ${run.phase === 'reward' ? `<div class="choice-grid">${run.offers.map((relic) => choice(`relic:${relic}`, relicCopy(language, relic), false, false, relicSprite(relic))).join('')}</div>${run.offers.length === 0 ? `<button class="primary-button" data-control="descend">${t.nextFloor}</button>` : ''}<button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
     ${boardZoomTemplate(language)}<div class="expedition-layout">${boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${

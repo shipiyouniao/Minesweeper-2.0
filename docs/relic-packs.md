@@ -13,7 +13,7 @@ Four theme licenses add eight effects to Expedition, bringing the camp to **8 pu
 
 Buying a theme permanently adds two choices to **future departures' reward pools**. It grants neither relic immediately and does not guarantee an offer. Between floors, players still select one of up to three distinct unowned relics. Themes do not require the workshop. The first rewarding expedition can buy both early roles for 100 supplies or choose the first theme instead.
 
-All eight purchases cost 13,050 supplies: at least 27 maximally profitable Abyss runs or 61 Standard runs from zero. Rewards and the 489-supply theoretical payout ceiling are unchanged. These are mathematical lower bounds, not measured playtimes. Prices and reward-pool dilution still need playtesting.
+All eight purchases cost 10,550 supplies. The current [difficulty reward table](expedition-rewards.md) gives eight reference Abyss clears or 29 reference Standard clears from zero. The most expensive item is affordable within ten successful Abyss clears even without optional treasure. These are authored scenarios and bounds, not measured playtimes; prices and reward-pool dilution still need playtesting.
 
 ## Effects
 
