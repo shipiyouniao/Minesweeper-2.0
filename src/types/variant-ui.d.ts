@@ -119,6 +119,7 @@ export interface VariantMessages {
   readonly noRelics: string
   readonly relicUsedFloor: string
   readonly relicUsedRun: string
+  readonly relicUsedTurn: string
   readonly earned: string
   readonly rewardRate: string
   readonly rewardBase: string

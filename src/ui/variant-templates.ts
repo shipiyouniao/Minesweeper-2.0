@@ -173,6 +173,7 @@ export function expeditionTemplate(
 
       if (run.runTriggers.includes(relic)) used = t.relicUsedRun
       else if (run.floorTriggers.includes(relic)) used = t.relicUsedFloor
+      else if (run.encounter?.turnTriggers.includes(relic)) used = t.relicUsedTurn
 
       const badge = used ? `<small class="relic-trigger">${used}</small>` : ''
       return `<li>${spriteImage(relicSprite(relic))}<strong>${description.name}</strong><span>${description.note}</span>${badge}</li>`

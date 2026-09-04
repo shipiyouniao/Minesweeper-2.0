@@ -1,6 +1,7 @@
 import { approachPath, walkingPath } from './dungeon-path.js'
 import { adjacentSteps } from './variant-board.js'
 import { neighbors } from './engine.js'
+import { walkingPointCost } from './combat-relics.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 
@@ -33,6 +34,7 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       else {
         path = route
         cost = route.length - 1 + Number(action.type === 'reveal')
+        if (action.type === 'move') cost = walkingPointCost(run, route.length - 1)
       }
       break
     }

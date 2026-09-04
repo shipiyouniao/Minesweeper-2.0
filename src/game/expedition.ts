@@ -13,6 +13,7 @@ import { damageVitality, healVitality } from './vitality.js'
 import { hasExpeditionHealth } from './expedition-rules.js'
 import { relicPool } from './relic-packs.js'
 import { applyDiscoveryRelics, applyDamageRelics, applyTreasureRelics } from './relic-effects.js'
+import { applyToolRelics, recordTravel } from './exploration-relics.js'
 import { generateDungeon } from './dungeon-generator.js'
 import { probeDungeon, scanDungeon, scoutExit } from './dungeon-discovery.js'
 import { act } from './engine.js'
@@ -82,6 +83,8 @@ function createFloor(departure: Departure, floor: number): Expedition {
     departure,
     floor,
     player: layout.entrance,
+    travelled: [layout.entrance],
+    priorTravel: 0,
     collected: [],
     relics: [],
     floorTriggers: [],
@@ -157,16 +160,24 @@ export function frontierCells(run: Expedition): Set<number> {
 
 /** Award treasures physically visited along this walk; revealing one does not collect it. */
 function collectTreasures(run: Expedition, path: readonly number[]): Expedition {
-  const collected = run.treasures.filter(
-    (index) => run.collected.includes(index) || path.includes(index),
-  )
+  // Append new chests in walking order so first-chest effects follow the actual route.
+  const collected = [
+    ...new Set([...run.collected, ...path.filter((index) => run.treasures.includes(index))]),
+  ]
   const fresh = collected.filter((index) => !run.collected.includes(index)).length
 
-  return applyTreasureRelics(run, {
-    ...run,
-    collected,
-    loot: run.loot + fresh * (run.relics.includes('purse') ? PURSE_SUPPLIES : TREASURE_SUPPLIES),
-  })
+  return applyTreasureRelics(
+    run,
+    recordTravel(
+      {
+        ...run,
+        collected,
+        loot:
+          run.loot + fresh * (run.relics.includes('purse') ? PURSE_SUPPLIES : TREASURE_SUPPLIES),
+      },
+      path,
+    ),
+  )
 }
 
 /** Offer distinct unowned relics within the career's limit, deterministically for this floor. */
@@ -210,7 +221,8 @@ function revealFrontier(run: Expedition, index: number): Expedition {
     }
   }
 
-  const game = revealDungeon(run, index)
+  // A chest reached on the approach may have surveyed clues; preserve those discoveries.
+  const game = revealDungeon(approached, index)
   return finishAtExit(
     collectTreasures(
       {
@@ -348,7 +360,7 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
       shields: Math.min(2, next.shields + 1),
     })
   }
-  return applyDiscoveryRelics(run, next, action)
+  return applyDiscoveryRelics(run, applyToolRelics(run, next, action), action)
 }
 
 /** Settle secured loot: success/extraction retain everything, defeat retains a bounded fraction. */

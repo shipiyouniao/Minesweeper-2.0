@@ -1,4 +1,4 @@
-import type { Expedition, ExpeditionAction } from './variants.js'
+import type { Expedition, ExpeditionAction, Relic } from './variants.js'
 import type { Config } from './game.js'
 
 /** A public control protects one armor section until its surrounding flags are calibrated. */
@@ -23,9 +23,12 @@ export interface TacticalEncounter {
   readonly pylons: readonly ShieldPylon[]
   readonly health: number
   readonly maxHealth: number
+  readonly lastDamage: number
   readonly turn: number
   readonly points: number
   readonly braced: boolean
+  /** Reset only at explicit end-turn; previews never spend a relic's use. */
+  readonly turnTriggers: readonly Relic[]
   readonly intent: TacticalIntent
   readonly event:
     | 'entered'

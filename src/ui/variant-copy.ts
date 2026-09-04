@@ -114,6 +114,7 @@ export function variantCopy(language: Language): VariantMessages {
     relics: t('Relic build', '遗物搭配', '遺物構成'),
     relicUsedFloor: t('Used this floor', '本层已触发', 'この階で発動済み'),
     relicUsedRun: t('Used this expedition', '本局已触发', 'この遠征で発動済み'),
+    relicUsedTurn: t('Used this turn', '本回合已触发', 'このターンで発動済み'),
     noRelics: t(
       'Find your first relic after floor one.',
       '通过第一层后获得首件遗物。',

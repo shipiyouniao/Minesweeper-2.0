@@ -4,6 +4,7 @@ import { damageVitality } from './vitality.js'
 import { applyDamageRelics } from './relic-effects.js'
 import { bastionIntent } from './tactical-intents.js'
 import { tacticalPlan } from './tactical-planning.js'
+import { applyCombatRelics, strikeDamage } from './combat-relics.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { ExploreTransition } from '../types/tactical.js'
 
@@ -29,6 +30,7 @@ function endTurn(run: Expedition): Expedition {
       turn: encounter.turn + 1,
       points: 3,
       braced: false,
+      turnTriggers: [],
       intent: bastionIntent(
         run.game.config,
         run.walls,
@@ -73,7 +75,7 @@ export function actTacticalEncounter(
   const encounter = run.encounter
   const plan = tacticalPlan(run, action)
   if (!encounter || !plan.allowed) return run
-  if (action.type === 'end-turn') return endTurn(run)
+  if (action.type === 'end-turn') return applyCombatRelics(run, endTurn(run), action)
   if (action.type === 'retreat') return { ...run, phase: 'retreated' }
   let next: Expedition
 
@@ -82,10 +84,15 @@ export function actTacticalEncounter(
       next = { ...run, encounter: { ...encounter, braced: true, event: 'braced' } }
       break
     case 'attack': {
-      const health = Math.max(0, encounter.health - 2)
+      const health = Math.max(0, encounter.health - strikeDamage(run))
       next = {
         ...run,
-        encounter: { ...encounter, health, event: health === 0 ? 'defeated' : 'struck' },
+        encounter: {
+          ...encounter,
+          health,
+          lastDamage: encounter.health - health,
+          event: health === 0 ? 'defeated' : 'struck',
+        },
       }
       break
     }
@@ -105,11 +112,15 @@ export function actTacticalEncounter(
     }
   }
 
-  return {
-    ...next,
-    steps: run.steps + 1,
-    // Revealing all safe cells does not defeat the guardian or disable further flagging.
-    game: next.game.phase === 'won' ? { ...next.game, phase: 'playing' } : next.game,
-    encounter: { ...(next.encounter ?? encounter), points: encounter.points - plan.cost },
-  }
+  return applyCombatRelics(
+    run,
+    {
+      ...next,
+      steps: run.steps + 1,
+      // Revealing all safe cells does not defeat the guardian or disable further flagging.
+      game: next.game.phase === 'won' ? { ...next.game, phase: 'playing' } : next.game,
+      encounter: { ...(next.encounter ?? encounter), points: encounter.points - plan.cost },
+    },
+    action,
+  )
 }

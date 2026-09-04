@@ -1,0 +1,148 @@
+/* Scale the complete play interface together; board symbols follow their own cell size. */
+.run-sidebar {
+  font-size: calc(14 * var(--play-unit));
+  padding-block: calc(8 * var(--play-unit));
+}
+.run-sidebar h3,
+.run-sidebar .profession-skill-heading strong {
+  font-size: calc(14 * var(--play-unit));
+}
+.run-sidebar .variant-note,
+.run-sidebar .profession-skill p,
+.run-sidebar .relic-list span,
+.run-sidebar .probe-result {
+  font-size: calc(12 * var(--play-unit));
+}
+.run-sidebar .relic-list li,
+.run-sidebar button,
+.run-sidebar .variant-input-mode {
+  font-size: calc(13 * var(--play-unit));
+}
+.run-sidebar .variant-toolbar,
+.run-sidebar .dungeon-inventory,
+.run-sidebar .relic-list {
+  gap: calc(12 * var(--play-unit));
+}
+.run-sidebar .relic-list li {
+  display: grid;
+  grid-template-columns: calc(36 * var(--play-unit)) minmax(0, 1fr);
+  gap: calc(6 * var(--play-unit)) calc(12 * var(--play-unit));
+}
+.run-sidebar .relic-list li > img {
+  grid-column: 1;
+  grid-row: 1 / 4;
+}
+.run-sidebar .relic-list li > strong,
+.run-sidebar .relic-list li > span,
+.run-sidebar .relic-list li > small {
+  grid-column: 2;
+}
+.run-sidebar .relic-list .dungeon-sprite {
+  width: calc(32 * var(--play-unit));
+  height: calc(32 * var(--play-unit));
+}
+.run-sidebar .variant-input-mode button {
+  padding: calc(10 * var(--play-unit)) calc(16 * var(--play-unit));
+}
+.run-sidebar .inventory-tool {
+  width: calc(82 * var(--play-unit));
+  height: calc(82 * var(--play-unit));
+  flex-basis: calc(82 * var(--play-unit));
+  border-radius: calc(14 * var(--play-unit));
+  padding: calc(6 * var(--play-unit)) calc(12 * var(--play-unit)) calc(23 * var(--play-unit));
+}
+.run-sidebar .tool-count,
+.run-sidebar .tool-label {
+  font-size: calc(12 * var(--play-unit));
+}
+.run-sidebar .tool-count {
+  top: calc(4 * var(--play-unit));
+  right: calc(6 * var(--play-unit));
+}
+.run-sidebar .tool-label {
+  bottom: calc(7 * var(--play-unit));
+}
+.run-sidebar #skill-status {
+  font-size: calc(11 * var(--play-unit));
+}
+.run-sidebar .dungeon-legend {
+  font-size: calc(11 * var(--play-unit));
+  gap: calc(12 * var(--play-unit)) calc(8 * var(--play-unit));
+}
+.run-sidebar .dungeon-legend img {
+  width: calc(32 * var(--play-unit));
+  height: calc(32 * var(--play-unit));
+}
+.run-sidebar .profession-skill {
+  padding: calc(14 * var(--play-unit));
+  border-radius: calc(14 * var(--play-unit));
+}
+.run-sidebar .profession-skill-heading {
+  gap: calc(12 * var(--play-unit));
+}
+.run-sidebar .profession-skill .skill-button {
+  width: calc(64 * var(--play-unit));
+  height: calc(64 * var(--play-unit));
+  flex-basis: calc(64 * var(--play-unit));
+  padding: 0;
+}
+.run-sidebar .profession-skill .skill-button img {
+  width: calc(48 * var(--play-unit));
+  height: calc(48 * var(--play-unit));
+}
+.variant-main:has(.expedition-layout) .vitality-panel {
+  max-width: calc(360 * var(--play-unit));
+}
+.variant-main:has(.expedition-layout) .vitality-heading {
+  font-size: calc(13 * var(--play-unit));
+}
+.variant-main:has(.expedition-layout) .vitality-heading strong {
+  font-size: calc(22 * var(--play-unit));
+}
+.variant-main:has(.expedition-layout) .vitality-bar {
+  height: calc(10 * var(--play-unit));
+}
+.tactical-panel {
+  padding: calc(18 * var(--play-unit));
+  gap: calc(12 * var(--play-unit)) calc(24 * var(--play-unit));
+}
+.tactical-heading > img {
+  width: calc(76 * var(--play-unit));
+  height: calc(76 * var(--play-unit));
+}
+.tactical-heading h3,
+.tactical-heading strong {
+  font-size: calc(17 * var(--play-unit));
+}
+.tactical-heading p,
+.tactical-event,
+.tactical-plan,
+.tactical-counters span,
+.tactical-controls button {
+  font-size: calc(13 * var(--play-unit));
+}
+.tactical-counters strong {
+  font-size: calc(22 * var(--play-unit));
+}
+.tactical-controls button {
+  padding: calc(10 * var(--play-unit)) calc(12 * var(--play-unit));
+  gap: calc(6 * var(--play-unit));
+}
+.tactical-controls img {
+  width: calc(28 * var(--play-unit));
+  height: calc(28 * var(--play-unit));
+}
+.variant-main:has(.expedition-layout) .variant-metrics span,
+.variant-main:has(.expedition-layout) > .variant-content > .variant-note {
+  font-size: calc(12 * var(--play-unit));
+}
+.variant-main:has(.expedition-layout) .variant-metrics strong {
+  font-size: calc(24 * var(--play-unit));
+}
+.variant-main:has(.expedition-layout) .variant-heading h1 {
+  font-size: calc(28 * var(--play-unit));
+}
+.variant-main:has(.expedition-layout) .board-zoom button,
+.variant-main:has(.expedition-layout) .variant-board-panel h2 {
+  font-size: calc(13 * var(--play-unit));
+}

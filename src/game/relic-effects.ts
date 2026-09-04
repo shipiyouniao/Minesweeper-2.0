@@ -3,7 +3,7 @@ import { healVitality } from './vitality.js'
 import type { Expedition, ExpeditionAction, Relic } from '../types/variants.js'
 
 /** Each charge belongs to a floor or run, and old journals never activate new effects. */
-function available(run: Expedition, relic: Relic, wholeRun = false): boolean {
+export function available(run: Expedition, relic: Relic, wholeRun = false): boolean {
   return (
     run.departure.rules === 'relics-v1' &&
     run.relics.includes(relic) &&
@@ -12,7 +12,7 @@ function available(run: Expedition, relic: Relic, wholeRun = false): boolean {
 }
 
 /** Claim before applying an effect so chained discoveries cannot activate it twice. */
-function claim(run: Expedition, relic: Relic, wholeRun = false): Expedition {
+export function claim(run: Expedition, relic: Relic, wholeRun = false): Expedition {
   return wholeRun
     ? { ...run, runTriggers: [...run.runTriggers, relic] }
     : { ...run, floorTriggers: [...run.floorTriggers, relic] }
@@ -56,6 +56,11 @@ export function applyTreasureRelics(before: Expedition, collected: Expedition): 
   }
   if (result.collected.length >= 3 && available(result, 'cache-guard')) {
     result = { ...claim(result, 'cache-guard'), shields: Math.min(2, result.shields + 1) }
+  }
+  if (available(result, 'landmark-lens')) {
+    const chest = result.collected.find((index) => !before.collected.includes(index))
+    if (chest !== undefined)
+      result = inspectArea(claim(result, 'landmark-lens'), probeArea(result.game.config, chest))
   }
   return result
 }

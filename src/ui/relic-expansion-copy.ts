@@ -1,6 +1,7 @@
 import type { Language } from '../types/localization.js'
 import type { ExpansionRelic, RelicPack } from '../types/relic-packs.js'
 import type { VariantDescription } from '../types/variant-ui.js'
+import { journeyPackCopy, journeyRelicCopy } from './journey-relic-copy.js'
 
 /** Require a complete name and effect in every supported language. */
 function description(
@@ -100,6 +101,8 @@ export function expansionRelicCopy(language: Language, relic: ExpansionRelic): V
         '收集本层全部 3 个宝箱后获得 1 层护盾。每层一次，上限 2。',
         '同じ階の宝箱3個を全て回収するとシールド+1。各階1回、上限2。',
       )
+    default:
+      return journeyRelicCopy(language, relic)
   }
 }
 
@@ -146,5 +149,7 @@ export function relicPackCopy(language: Language, pack: RelicPack): VariantDescr
         '将补给暗格、寻宝护印加入后续遗物池：收集宝箱补充扫描和护盾。',
         '補給の隠し箱と宝探しの護符を追加。宝箱の回収で走査と防護を獲得。',
       )
+    default:
+      return journeyPackCopy(language, pack)
   }
 }

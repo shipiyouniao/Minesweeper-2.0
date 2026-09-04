@@ -1,6 +1,6 @@
 # Purchasable relic themes
 
-Four theme licenses add eight effects to Expedition, bringing the camp to **8 purchases** and the possible reward pool to **14 relics**. This is the first content batch toward the **at-least-24 purchasable gameplay choices** in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). Sixteen purchases, further professions and tactical encounters remain future work.
+Ten theme licenses now provide twenty expansion effects, for seventeen camp purchases and a complete twenty-six-relic pool. This document records the original four themes; the remaining six are specified in [Journey and tactical relics](journey-relics.md). Seven gameplay purchases remain toward the minimum of twenty-four in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1).
 
 ## Purchases
 
@@ -13,7 +13,7 @@ Four theme licenses add eight effects to Expedition, bringing the camp to **8 pu
 
 Buying a theme permanently adds two choices to **future departures' reward pools**. It grants neither relic immediately and does not guarantee an offer. Between floors, players still select one of up to three distinct unowned relics. Themes do not require the workshop. The first rewarding expedition can buy both early roles for 100 supplies or choose the first theme instead.
 
-With the [six-profession expansion](profession-skills.md), all eleven purchases cost 13,700 supplies. The current [difficulty reward table](expedition-rewards.md) gives ten reference Abyss clears or 37 reference Standard clears from zero. The most expensive item is affordable within ten successful Abyss clears even without optional treasure. These are authored scenarios and bounds, not measured playtimes; prices and reward-pool dilution still need playtesting.
+The seventeen-item catalog costs 26,100 supplies. The current [difficulty reward table](expedition-rewards.md) gives nineteen reference Abyss clears or seventy reference Standard clears from zero. The most expensive item is affordable within ten successful Abyss clears even without optional treasure. These are authored scenarios and bounds, not measured playtimes; prices and reward-pool dilution still need playtesting.
 
 ## Effects
 
