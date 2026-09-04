@@ -29,6 +29,7 @@ import {
 } from './variant-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
 import type { DungeonSprite, DungeonTool } from '../types/dungeon-ui.js'
+import { campProgressTemplate } from './camp-progress-template.js'
 import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
 
@@ -81,28 +82,31 @@ export function campTemplate(
   difficulty: VariantDifficulty = 'standard',
 ): string {
   const t = variantCopy(language)
+  const number = new Intl.NumberFormat(language)
   const careers: readonly Profession[] = ['explorer', 'surveyor', 'engineer']
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
 
   return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${t.healthHint}</p>
-    <div class="variant-metrics">${metric(t.supplies, camp.supplies)}${metric(t.departures, camp.completed)}</div>
+    <div class="variant-metrics">${metric(t.supplies, number.format(camp.supplies))}${metric(t.departures, camp.completed)}</div>
     ${difficultyTemplate(language, difficulty, true)}
     <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career))).join('')}</div>
     <h2>${t.equipment} <small>${spent} / 3</small></h2>
     ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && spent + equipmentCost(item) > 3, item === 'guard' ? 'shield' : item)).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
     <button class="primary-button" data-control="start">${t.start} ↗</button>
-    <h2>${t.facilities}</h2><div class="choice-grid facilities">${UPGRADES.map((upgrade) => {
-      const description = upgradeCopy(language, upgrade)
-      return choice(
-        `upgrade:${upgrade}`,
-        {
-          name: `${description.name} · ${camp.upgrades.includes(upgrade) ? t.owned : upgradeCost(upgrade) + ' ' + t.supplies}`,
-          note: description.note,
-        },
-        camp.upgrades.includes(upgrade),
-        camp.upgrades.includes(upgrade) || camp.supplies < upgradeCost(upgrade),
-      )
-    }).join('')}</div></section>`
+    <h2>${t.facilities}</h2>${campProgressTemplate(language, camp)}<div class="choice-grid facilities">${UPGRADES.map(
+      (upgrade) => {
+        const description = upgradeCopy(language, upgrade)
+        return choice(
+          `upgrade:${upgrade}`,
+          {
+            name: `${description.name} · ${camp.upgrades.includes(upgrade) ? t.owned : number.format(upgradeCost(upgrade)) + ' ' + t.supplies}`,
+            note: description.note,
+          },
+          camp.upgrades.includes(upgrade),
+          camp.upgrades.includes(upgrade) || camp.supplies < upgradeCost(upgrade),
+        )
+      },
+    ).join('')}</div></section>`
 }
 
 /** Render the common board frame; BoardView owns the actual grid cells. */

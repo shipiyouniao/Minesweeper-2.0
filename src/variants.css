@@ -138,6 +138,50 @@
   font-size: 15px;
   margin: 22px 0;
 }
+.camp-funding {
+  padding: 20px;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.camp-funding h3 {
+  margin: 10px 0 16px;
+  font-size: 17px;
+}
+.funding-amount,
+.funding-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.funding-amount strong {
+  color: var(--ink);
+  font: 22px var(--mono);
+}
+.camp-funding progress {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  appearance: none;
+  background: var(--surface-alt);
+}
+.camp-funding progress::-webkit-progress-bar {
+  background: var(--surface-alt);
+}
+.camp-funding progress::-webkit-progress-value {
+  background: var(--blue);
+}
+.camp-funding progress::-moz-progress-bar {
+  background: var(--blue);
+}
 .vitality-panel {
   max-width: 360px;
   padding-top: 18px;

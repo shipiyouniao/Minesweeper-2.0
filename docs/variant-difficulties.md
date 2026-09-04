@@ -30,7 +30,7 @@ Each mode retains the latest ten results **per tier**, plus up to ten historical
 
 The current relic pool is finite. Once every available relic is owned, the reward screen offers **Continue to next floor**, preserving the current build and floor-entry effects without adding duplicate relics. The final configured floor ends the expedition normally.
 
-Shared health is now available; see the [health rules](expedition-health.md). Boss rooms, new professions, the larger relic catalog and economy rebalance are separate workstreams in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). This difficulty release does not add them or claim that the existing prices meet the planned twenty-run progression target. Current treasure, exit and completion rewards are unchanged; longer runs have more earning opportunities and still need economy balancing.
+Shared health is now available; see the [health rules](expedition-health.md). Boss rooms, new professions, and the larger relic catalog are separate workstreams in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). The [camp pricing foundation](camp-progression.md) combines affordable early choices with a late minimum-run target without reducing rewards; profession/content expansion and playtime balance remain pending. Current treasure, exit and completion rewards are unchanged; longer runs have more earning opportunities and still need economy balancing.
 
 ## Verification
 

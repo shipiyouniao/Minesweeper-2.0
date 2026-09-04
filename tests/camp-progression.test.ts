@@ -1,0 +1,172 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import {
+  campFunding,
+  maximumExpeditionSupplies,
+  maximumRunSupplies,
+  upgradeCost,
+  UPGRADES,
+} from '../src/game/camp-progression.js'
+import {
+  actExpedition,
+  createExpedition,
+  frontierCells,
+  expeditionEarnings,
+  EMPTY_CAMP,
+  buyUpgrade,
+} from '../src/game/expedition.js'
+import { walkingPath } from '../src/game/dungeon-path.js'
+import { VARIANT_TIERS } from '../src/game/variant-difficulty.js'
+import { ExpeditionSession } from '../src/application/expedition-session.js'
+import { VariantRepository } from '../src/persistence/variant-repository.js'
+import { campProgressTemplate } from '../src/ui/camp-progress-template.js'
+import type { Expedition } from '../src/types/variants.js'
+import { FakeRuntime, MemoryStorage } from './helpers.js'
+
+/** Collect reachable treasures through legal safe exploration, leaving the stairs for last. */
+function clearWithTreasures(initial: Expedition): Expedition {
+  let run = initial
+  for (let step = 0; step < run.game.cells.length; step++) {
+    const index = [...frontierCells(run)].find(
+      (candidate) => candidate !== run.exit && !run.game.cells[candidate]?.mine,
+    )
+    if (index === undefined) break
+    run = actExpedition(run, { type: 'reveal', index })
+  }
+
+  for (const index of run.treasures) {
+    if (!run.collected.includes(index) && walkingPath(run, index))
+      run = actExpedition(run, { type: 'move', index })
+  }
+
+  return actExpedition(run, {
+    type: walkingPath(run, run.exit) ? 'move' : 'reveal',
+    index: run.exit,
+  })
+}
+
+test('prices offer two early professions, a middle milestone and a long-term archive goal', () => {
+  assert.equal(maximumRunSupplies(), 489)
+  assert.deepEqual(
+    VARIANT_TIERS.map((tier) => maximumExpeditionSupplies(tier.floors)),
+    [138, 216, 294, 372, 489],
+  )
+  assert.deepEqual(UPGRADES.map(upgradeCost), [40, 60, 1200, 10000])
+  const earlyCost = upgradeCost('surveyor') + upgradeCost('engineer')
+  assert.equal(earlyCost, 100)
+  // Even a three-floor win without a purse can afford both roles after collecting its chests.
+  assert.ok(earlyCost <= 3 * (3 * 6 + 12) + 30)
+  for (const tier of VARIANT_TIERS)
+    assert.ok(upgradeCost('archive') >= 20 * maximumExpeditionSupplies(tier.floors))
+  assert.equal(Math.ceil(upgradeCost('workshop') / maximumRunSupplies()), 3)
+  assert.equal(Math.ceil(upgradeCost('archive') / maximumRunSupplies()), 21)
+})
+
+test('actual legal runs stay within the bound without capping or scaling earned loot', () => {
+  for (const tier of VARIANT_TIERS) {
+    for (let seed = 0; seed < 4; seed++) {
+      let run = createExpedition({
+        rules: 'health-v1',
+        difficulty: tier.id,
+        seed,
+        profession: 'explorer',
+        equipment: [],
+        archive: true,
+      })
+      for (let floor = 1; floor <= tier.floors; floor++) {
+        run = clearWithTreasures(run)
+        assert.ok(run.phase === 'reward' || run.phase === 'won')
+        assert.equal(expeditionEarnings({ ...run, phase: 'retreated' }), run.loot)
+        assert.equal(
+          expeditionEarnings({ ...run, phase: 'lost', relics: [] }),
+          Math.floor(run.loot / 2),
+        )
+        if (run.phase === 'won') break
+        const relic = run.offers.includes('purse') ? 'purse' : run.offers[0]
+        run = actExpedition(run, relic ? { type: 'relic', relic } : { type: 'descend' })
+      }
+      assert.equal(run.phase, 'won')
+      assert.equal(expeditionEarnings(run), run.loot + 30)
+      assert.ok(expeditionEarnings(run) <= maximumExpeditionSupplies(tier.floors))
+    }
+  }
+})
+
+test('funding goals advance after purchases and report exact remaining money and optimistic runs', () => {
+  assert.deepEqual(campFunding(EMPTY_CAMP), {
+    upgrade: 'surveyor',
+    stage: 'early',
+    price: 40,
+    saved: 0,
+    remaining: 40,
+    percent: 0,
+    minimumRuns: 1,
+  })
+  for (const percent of [25, 50, 75]) {
+    const funding = campFunding({ ...EMPTY_CAMP, supplies: (percent / 100) * 40 })
+    assert.equal(funding?.percent, percent)
+    assert.equal(funding?.remaining, 40 - (percent / 100) * 40)
+  }
+  const almost = { ...EMPTY_CAMP, supplies: 39 }
+  assert.equal(buyUpgrade(almost, 'surveyor'), almost)
+  assert.equal(campFunding(almost)?.minimumRuns, 1)
+  const ready = { ...EMPTY_CAMP, supplies: 100 }
+  assert.equal(campFunding(ready)?.percent, 100)
+  assert.equal(campFunding(ready)?.minimumRuns, 0)
+  const bought = buyUpgrade(ready, 'surveyor')
+  assert.equal(bought.supplies, 60)
+  assert.equal(campFunding(bought)?.upgrade, 'engineer')
+  assert.equal(buyUpgrade(bought, 'surveyor'), bought)
+  const both = buyUpgrade(bought, 'engineer')
+  assert.equal(both.supplies, 0)
+  assert.deepEqual(both.upgrades, ['surveyor', 'engineer'])
+  assert.equal(campFunding(both)?.upgrade, 'workshop')
+  assert.equal(campFunding(both)?.stage, 'middle')
+  const workshop = buyUpgrade({ ...both, supplies: 1200 }, 'workshop')
+  assert.equal(campFunding(workshop)?.upgrade, 'archive')
+  assert.equal(campFunding(workshop)?.stage, 'late')
+  assert.equal(campFunding(workshop)?.minimumRuns, 21)
+  assert.equal(campFunding({ ...EMPTY_CAMP, upgrades: UPGRADES }), null)
+})
+
+test('existing money and unlocks survive reload, with new purchases settled at the current price', () => {
+  const storage = new MemoryStorage()
+  storage.setItem(
+    'minesweeper.variants.v1.expedition',
+    JSON.stringify({
+      version: 3,
+      camp: { supplies: 1500, upgrades: ['engineer'], completed: 7 },
+      journal: null,
+      records: [],
+    }),
+  )
+  let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
+  assert.deepEqual(session.camp, { supplies: 1500, upgrades: ['engineer'], completed: 7 })
+  assert.equal(session.purchase('engineer'), false)
+  assert.equal(session.purchase('workshop'), true)
+  assert.equal(session.camp.supplies, 300)
+  session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
+  assert.deepEqual(session.camp, {
+    supplies: 300,
+    upgrades: ['engineer', 'workshop'],
+    completed: 7,
+  })
+  assert.ok(session.start('engineer', ['guard']))
+  assert.equal(session.purchase('surveyor'), false)
+  const restored = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
+  assert.deepEqual(restored.run, session.run)
+})
+
+test('funding UI distinguishes saving, ready and fully owned states in all locales', () => {
+  for (const language of ['en', 'zh', 'ja'] as const) {
+    const saving = campProgressTemplate(language, { ...EMPTY_CAMP, supplies: 10 })
+    assert.ok(saving.includes('max="40" value="10"'))
+    assert.ok(saving.includes('25%'))
+    const ready = campProgressTemplate(language, { ...EMPTY_CAMP, supplies: 40 })
+    assert.ok(ready.includes('max="40" value="40"'))
+    assert.ok(!ready.includes('undefined'))
+    const complete = campProgressTemplate(language, { ...EMPTY_CAMP, upgrades: UPGRADES })
+    assert.ok(!complete.includes('<progress'))
+    assert.ok(complete.length > 30)
+  }
+})
