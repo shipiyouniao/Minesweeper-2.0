@@ -38,6 +38,7 @@ export interface Expedition {
   readonly departure: Departure
   readonly floor: number
   readonly game: Game
+  readonly entrance: number
   readonly exit: number
   readonly walls: readonly number[]
   readonly player: number
@@ -46,6 +47,9 @@ export interface Expedition {
   readonly relics: readonly Relic[]
   readonly offers: readonly Relic[]
   readonly scannedRows: readonly number[]
+  readonly confirmedMines: readonly number[]
+  readonly probedCells: readonly number[]
+  readonly probeReport: ProbeReport | null
   readonly probes: number
   readonly scans: number
   readonly shields: number
@@ -56,8 +60,8 @@ export interface Expedition {
 
 /** Explicit run intents; all effects can be replayed without browser state. */
 export type ExpeditionAction =
-  | { readonly type: 'reveal' | 'flag' | 'move'; readonly index: number }
-  | { readonly type: 'scan' | 'probe'; readonly row: number }
+  | { readonly type: 'reveal' | 'flag' | 'move' | 'probe'; readonly index: number }
+  | { readonly type: 'scan'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
   | { readonly type: 'retreat' }
 
@@ -95,10 +99,16 @@ export interface ExpeditionJournal {
 
 /** One atomic value prevents refresh from awarding a settled run twice. */
 export interface ExpeditionSave {
-  readonly version: 2
+  readonly version: 3
   readonly camp: Camp
   readonly journal: ExpeditionJournal | null
   readonly records: readonly VariantRecord[]
+}
+
+/** The last area probe reports its center and total mines, including earlier confirmations. */
+export interface ProbeReport {
+  readonly center: number
+  readonly mines: number
 }
 
 /** Twin games have their own schema, seed, action history and records. */

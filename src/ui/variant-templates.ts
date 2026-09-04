@@ -26,7 +26,7 @@ import {
   variantCopy,
 } from './variant-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
-import type { DungeonSprite, RowTool } from '../types/dungeon-ui.js'
+import type { DungeonSprite, DungeonTool } from '../types/dungeon-ui.js'
 import { escapeHtml } from './presentation.js'
 
 /** Render one accessible choice card; its ID is a finite catalog value. */
@@ -145,6 +145,7 @@ export function expeditionTemplate(
           ? `<div class="variant-toolbar">${inputModeTemplate(language, flagMode)}
       <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}<div class="inventory-passive" title="${t.shields}">${spriteImage('shield')}<span class="tool-count">${run.shields}</span><span class="tool-label">${t.shields}</span></div></div>
       <p class="variant-note tool-hint" role="status">${t.scanHint}</p>
+      ${run.probeReport ? `<p class="probe-result" role="status">${t.probeResult.replace('{count}', String(run.probeReport.mines))}</p>` : ''}
       <button class="text-button" data-control="retreat">${t.retreat}</button></div>`
           : ''
       }
@@ -181,6 +182,6 @@ export function twinTemplate(language: Language, state: Twin, flagMode: boolean)
 }
 
 /** Render a square, explicitly targeted inventory button with a persistent charge badge. */
-function toolButton(tool: RowTool, label: string, count: number): string {
+function toolButton(tool: DungeonTool, label: string, count: number): string {
   return `<button class="inventory-tool" data-control="${tool}" data-tool="${tool}" aria-label="${label}: ${count}" title="${label}" aria-pressed="false" ${count === 0 ? 'disabled' : ''}>${spriteImage(tool === 'scan' ? 'scanner' : 'probe')}<span class="tool-count">${count}</span><span class="tool-label">${label}</span></button>`
 }

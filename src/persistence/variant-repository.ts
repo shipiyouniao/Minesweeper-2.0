@@ -19,7 +19,7 @@ export class VariantRepository {
   expedition(): ExpeditionSave | null {
     const text = this.read('expedition')
     const save = decodeExpeditionSave(text)
-    this.migrated = save !== null && JsonObjectReader.from(parseJson(text))?.number('version') === 1
+    this.migrated = save !== null && JsonObjectReader.from(parseJson(text))?.number('version') !== 3
     if (text !== null && !save) this.recovered = true
     return save
   }

@@ -108,11 +108,11 @@ function decodeExpeditionAction(value: JsonValue): ExpeditionAction | null {
   switch (type) {
     case 'reveal':
     case 'move':
+    case 'probe':
     case 'flag': {
       const index = reader.number('index')
       return integer(index, 80) ? { type, index } : null
     }
-    case 'probe':
     case 'scan': {
       const row = reader.number('row')
       return integer(row, 8) ? { type, row } : null
@@ -183,17 +183,17 @@ function envelope(text: string | null, version = 1): JsonObjectReader | null {
 
 /** Decode camp and active run together because their settlement is one atomic transaction. */
 export function decodeExpeditionSave(text: string | null): ExpeditionSave | null {
-  const reader = envelope(text, 2) ?? envelope(text, 1)
+  const reader = envelope(text, 3) ?? envelope(text, 2) ?? envelope(text, 1)
   if (!reader) return null
   const camp = decodeCamp(reader.child('camp'))
   const records = decodeRecords(reader.array('records'))
   // Movement and terrain changed the generator. Keep camp and results, never replay an old route on a new layout.
-  if (reader.number('version') === 1)
-    return camp && records ? { version: 2, camp, records, journal: null } : null
+  if (reader.number('version') !== 3)
+    return camp && records ? { version: 3, camp, records, journal: null } : null
   const journal = decodeJournal(reader.child('journal'))
   if (!camp || !records || (reader.value('journal') !== null && !journal)) return null
 
-  return { version: 2, camp, journal, records }
+  return { version: 3, camp, journal, records }
 }
 
 /** Decode paired board intents without accepting alternate board identifiers. */

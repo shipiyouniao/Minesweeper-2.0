@@ -44,7 +44,8 @@ function clearSessionFloor(session: ExpeditionSession): void {
     const index = [...frontierCells(run)].find((candidate) => !run.game.cells[candidate]?.mine)
     assert.ok(session.dispatch({ type: 'reveal', index: index ?? -1 }))
   }
-  if (session.run?.phase === 'exploring') assert.ok(session.dispatch({ type: 'move', index: 80 }))
+  if (session.run?.phase === 'exploring')
+    assert.ok(session.dispatch({ type: 'move', index: session.run.exit }))
 }
 
 test('twin placement has exact disjoint mine counts, safe openings and truthful clues across seeds', () => {
@@ -115,7 +116,7 @@ test('every expedition floor has an orthogonal safe route and exact shuffled min
       assert.ok(run.treasures.every((index) => !run.game.cells[index]?.mine))
       assert.equal(run.game.cells[run.exit]?.mine, false)
       run = reachExit(run)
-      run = actExpedition(run, { type: 'move', index: 80 })
+      run = actExpedition(run, { type: 'move', index: run.exit })
       if (floor < 5) {
         const relic = run.offers[0]
         assert.ok(relic)
@@ -130,9 +131,9 @@ test('every expedition floor has an orthogonal safe route and exact shuffled min
 
 test('expedition rejects remote reveals and premature exits; probes consume one charge', () => {
   const run = createExpedition(departure)
-  assert.equal(actExpedition(run, { type: 'reveal', index: 80 }), run)
-  assert.equal(actExpedition(run, { type: 'move', index: 80 }), run)
-  const probed = actExpedition(run, { type: 'probe', row: probeRow(run) })
+  assert.equal(actExpedition(run, { type: 'reveal', index: run.exit }), run)
+  assert.equal(actExpedition(run, { type: 'move', index: run.exit }), run)
+  const probed = actExpedition(run, { type: 'probe', index: probeTarget(run) })
   assert.equal(probed.probes, run.probes - 1)
   assert.equal(probed.steps, run.steps + 1)
   assert.equal(probed.phase, 'exploring')
@@ -165,8 +166,9 @@ test('shield flags a real frontier mine once without modifying clues or inventin
     protectedRun.game.cells.map((cell) => [cell.mine, cell.adjacent]),
     run.game.cells.map((cell) => [cell.mine, cell.adjacent]),
   )
-  const unflagged = actExpedition(protectedRun, { type: 'flag', index: mine ?? -1 })
-  const lost = actExpedition(unflagged, { type: 'reveal', index: mine ?? -1 })
+  assert.ok(protectedRun.confirmedMines.includes(mine ?? -1))
+  assert.equal(actExpedition(protectedRun, { type: 'flag', index: mine ?? -1 }), protectedRun)
+  const lost = actExpedition({ ...run, shields: 0 }, { type: 'reveal', index: mine ?? -1 })
   assert.equal(lost.phase, 'lost')
   assert.equal(expeditionEarnings(lost), Math.floor(lost.loot / 2))
 })
@@ -188,11 +190,11 @@ test('revealed treasure waits for a physical visit and cannot pay twice', () => 
   assert.equal(visited.loot, visited.collected.length * 6)
   assert.equal(actExpedition(visited, { type: 'move', index: target }), visited)
   assert.equal(run.phase, 'exploring', 'revealing stairs alone must not end a floor')
-  const reward = actExpedition(run, { type: 'move', index: 80 })
-  assert.equal(reward.player, 80)
+  const reward = actExpedition(run, { type: 'move', index: run.exit })
+  assert.equal(reward.player, run.exit)
   assert.equal(reward.phase, 'reward')
   assert.equal(reward.loot, 12 + reward.collected.length * 6)
-  assert.equal(actExpedition(reward, { type: 'move', index: 80 }), reward)
+  assert.equal(actExpedition(reward, { type: 'move', index: reward.exit }), reward)
 })
 
 test('camp purchases and departure loadouts enforce ownership, costs and three-point budget', () => {
@@ -209,7 +211,7 @@ test('camp purchases and departure loadouts enforce ownership, costs and three-p
 })
 
 test('relic choices are deterministic, unowned and limited to the unlocked catalog', () => {
-  const reward = actExpedition(reachExit(createExpedition(departure)), { type: 'move', index: 80 })
+  const reward = reachReward(createExpedition(departure))
   assert.equal(reward.offers.length, 3)
   assert.equal(new Set(reward.offers).size, 3)
   assert.ok(!reward.offers.includes('compass'))
@@ -297,10 +299,10 @@ test('decoders reject malformed shapes and replay rejects illegal histories whil
   storage.setItem(
     'minesweeper.variants.v1.expedition',
     JSON.stringify({
-      version: 2,
+      version: 3,
       camp: { ...EMPTY_CAMP, supplies: 25 },
       records: [],
-      journal: { departure, actions: [{ type: 'move', index: 80 }] },
+      journal: { departure, actions: [{ type: 'move', index: createExpedition(departure).exit }] },
     }),
   )
   const repository = new VariantRepository(storage)
@@ -328,7 +330,7 @@ test('storage failures keep both modes playable and observable without throwing'
   const repository = new VariantRepository(storage)
   const session = new ExpeditionSession(repository, new FakeRuntime())
   assert.ok(session.start('explorer', []))
-  assert.ok(session.dispatch({ type: 'probe', row: probeRow(session.run!) }))
+  assert.ok(session.dispatch({ type: 'probe', index: probeTarget(session.run!) }))
   assert.equal(repository.available, false)
   assert.ok(
     new TwinSession(repository, new FakeRuntime()).dispatch({
@@ -359,7 +361,7 @@ test('expedition replay reproduces tool charges and invalid extra actions cannot
   const session = new ExpeditionSession(new VariantRepository(storage), runtime)
   session.start('explorer', [])
   const actions: readonly ExpeditionAction[] = [
-    { type: 'probe', row: probeRow(session.run!) },
+    { type: 'probe', index: probeTarget(session.run!) },
     { type: 'scan', row: 3 },
   ]
   for (const action of actions) assert.ok(session.dispatch(action))
@@ -369,10 +371,7 @@ test('expedition replay reproduces tool charges and invalid extra actions cannot
 })
 
 test('each relic applies its advertised effect and charge caps on floor entry', () => {
-  const reward = actExpedition(reachExit(createExpedition({ ...departure, archive: true })), {
-    type: 'move',
-    index: 80,
-  })
+  const reward = reachReward(createExpedition({ ...departure, archive: true }))
   const relics: readonly Relic[] = ['lantern', 'lens', 'aegis', 'purse', 'compass', 'salvage']
 
   for (const relic of relics) {
@@ -416,9 +415,17 @@ test('command parser rejects extra payload fragments rather than accepting a pre
   assert.equal(parseVariantCommand('relic:lantern:extra'), null)
 })
 
-/** Select a row with a safe frontier for deterministic tool fixtures. */
-function probeRow(run: Expedition): number {
-  const target = [...frontierCells(run)].find((index) => !run.game.cells[index]?.mine)
+/** Select an undiscovered cell for deterministic tool fixtures. */
+function probeTarget(run: Expedition): number {
+  const target = run.game.cells.findIndex(
+    (cell, index) => cell.visibility === 'hidden' && !run.walls.includes(index),
+  )
   assert.notEqual(target, undefined)
-  return Math.floor((target ?? -1) / 9)
+  return target
+}
+
+/** Reach the current stairs without assuming either landmark has a fixed coordinate. */
+function reachReward(initial: Expedition): Expedition {
+  const run = reachExit(initial)
+  return actExpedition(run, { type: 'move', index: run.exit })
 }

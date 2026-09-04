@@ -32,7 +32,7 @@ export class ExpeditionSession {
     this.repository = repository
     this.runtime = runtime
     this.save = repository.expedition() ?? {
-      version: 2,
+      version: 3,
       camp: EMPTY_CAMP,
       journal: null,
       records: [],
@@ -123,7 +123,7 @@ export class ExpeditionSession {
         earned,
       }
       this.save = {
-        version: 2,
+        version: 3,
         journal: null,
         camp: {
           ...this.camp,

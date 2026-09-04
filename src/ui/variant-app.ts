@@ -2,7 +2,7 @@ import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
 import { allowedDeparture, expeditionEarnings } from '../game/expedition.js'
 import { approachPath } from '../game/dungeon-path.js'
-import type { RowTool } from '../types/dungeon-ui.js'
+import type { DungeonTool } from '../types/dungeon-ui.js'
 import { translations } from '../i18n.js'
 import type { SoundEffects, InteractionCue } from '../types/audio.js'
 import type { Language } from '../types/localization.js'
@@ -138,16 +138,18 @@ export class VariantApp implements VariantInputActions {
     this.input.cancelTools()
   }
 
-  /** Preview only an interactive expedition's explicit target row. */
-  previewTool(tool: RowTool | null, row: number | null): void {
+  /** Preview only an interactive expedition's explicit target area. */
+  previewTool(tool: DungeonTool | null, index: number | null): void {
     if (tool && (this.paused || this.moving || this.view.dialogOpen)) return
-    this.view.previewTool(tool, row)
+    this.view.previewTool(tool, index)
   }
 
   /** Consume a targeted tool through the replayable domain action. */
-  useTool(tool: RowTool, row: number): void {
+  useTool(tool: DungeonTool, index: number): void {
     if (this.paused || this.moving || this.view.dialogOpen) return
-    this.expedition({ type: tool, row })
+    this.expedition(
+      tool === 'probe' ? { type: 'probe', index } : { type: 'scan', row: Math.floor(index / 9) },
+    )
     this.render()
   }
 

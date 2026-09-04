@@ -1,18 +1,18 @@
-import type { RowTool, ToolDrag } from '../types/dungeon-ui.js'
+import type { DungeonTool, ToolDrag } from '../types/dungeon-ui.js'
 import type { VariantInputActions } from '../types/variant-ui.js'
 
-/** Decode only inventory controls that support explicit row targeting. */
-function toolOf(element: Element | null): RowTool | null {
+/** Decode only inventory controls that support explicit cell or row targeting. */
+function toolOf(element: Element | null): DungeonTool | null {
   const value = element?.closest<HTMLElement>('[data-tool]')?.dataset['tool']
   return value === 'probe' || value === 'scan' ? value : null
 }
 
 /** Own drag gestures and tap-to-target state for mouse, touch and keyboard alike. */
-export class RowToolController {
+export class DungeonToolController {
   private readonly actions: VariantInputActions
   private readonly root: HTMLElement
   private readonly listeners = new AbortController()
-  private selected: RowTool | null = null
+  private selected: DungeonTool | null = null
   private drag: ToolDrag | null = null
   private suppressUntil = 0
 
@@ -28,7 +28,7 @@ export class RowToolController {
   }
 
   /** Select an inventory item, or cancel it when activated a second time. */
-  select(tool: RowTool): void {
+  select(tool: DungeonTool): void {
     this.selected = this.selected === tool ? null : tool
     this.actions.previewTool(this.selected, null)
   }
@@ -38,18 +38,18 @@ export class RowToolController {
     return performance.now() < this.suppressUntil
   }
 
-  /** Consume a tap or native keyboard activation as an explicit row target. */
-  activate(row: number): boolean {
+  /** Consume a tap or native keyboard activation as an explicit cell target. */
+  activate(index: number): boolean {
     if (!this.selected) return false
     const tool = this.selected
     this.cancel()
-    this.actions.useTool(tool, row)
+    this.actions.useTool(tool, index)
     return true
   }
 
-  /** Preview the hovered or keyboard-focused row while a tool is armed. */
-  preview(row: number): void {
-    if (this.selected) this.actions.previewTool(this.selected, row)
+  /** Preview the hovered or keyboard-focused cell while a tool is armed. */
+  preview(index: number): void {
+    if (this.selected) this.actions.previewTool(this.selected, index)
   }
 
   /** Clear selection on Escape, pause, language changes, floor changes or teardown. */
@@ -84,17 +84,17 @@ export class RowToolController {
     target.setPointerCapture(event.pointerId)
   }
 
-  /** Highlight the entire row under the pointer without consuming a charge. */
+  /** Preview the target area under the pointer without consuming a charge. */
   private readonly move = (event: PointerEvent): void => {
-    const row = this.rowAt(event.clientX, event.clientY)
+    const index = this.cellAt(event.clientX, event.clientY)
     if (!this.drag) {
-      if (this.selected) this.actions.previewTool(this.selected, row)
+      if (this.selected) this.actions.previewTool(this.selected, index)
       return
     }
     if (event.pointerId !== this.drag.pointerId) return
     if (Math.hypot(event.clientX - this.drag.originX, event.clientY - this.drag.originY) > 6)
       this.drag.moved = true
-    if (this.drag.moved) this.actions.previewTool(this.drag.tool, row)
+    if (this.drag.moved) this.actions.previewTool(this.drag.tool, index)
   }
 
   /** Apply one drop, rejecting off-board targets without spending a tool. */
@@ -104,15 +104,15 @@ export class RowToolController {
     this.drag = null
     if (!drag.moved) return
     this.suppressUntil = performance.now() + 350
-    const row = this.rowAt(event.clientX, event.clientY)
+    const index = this.cellAt(event.clientX, event.clientY)
     this.selected = null
     this.actions.previewTool(null, null)
-    if (row !== null) this.actions.useTool(drag.tool, row)
+    if (index !== null) this.actions.useTool(drag.tool, index)
     else this.actions.feedback('blocked')
   }
 
   /** Hit-test only the expedition board owned by this input controller. */
-  private rowAt(x: number, y: number): number | null {
+  private cellAt(x: number, y: number): number | null {
     const element = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-cell]')
     if (
       !element ||
@@ -121,6 +121,6 @@ export class RowToolController {
     )
       return null
     const index = Number(element.dataset['cell'])
-    return Number.isInteger(index) && index >= 0 && index < 81 ? Math.floor(index / 9) : null
+    return Number.isInteger(index) && index >= 0 && index < 81 ? index : null
   }
 }

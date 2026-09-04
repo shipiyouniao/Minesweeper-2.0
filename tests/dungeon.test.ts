@@ -57,7 +57,7 @@ test('all retained safe cells and treasures are connected; isolated pockets are 
   for (let seed = 0; seed < 120; seed++) {
     let run = createExpedition({ seed, profession: 'explorer', equipment: [], archive: false })
     for (let floor = 1; floor <= 5; floor++) {
-      const connected = distances(run, 0, false)
+      const connected = distances(run, run.entrance, false)
       for (const [index, cell] of run.game.cells.entries()) {
         if (!cell.mine && !run.walls.includes(index)) assert.ok(connected.has(index))
         if (cell.mine)
@@ -72,6 +72,7 @@ test('all retained safe cells and treasures are connected; isolated pockets are 
           )
       }
       assert.ok(connected.has(run.exit))
+      assert.ok((connected.get(run.exit) ?? 0) >= 6, 'stairs require a meaningful walk')
       assert.ok(run.treasures.every((index) => connected.has(index)))
       wallsSeen += run.walls.length
       for (const index of run.walls) {
@@ -124,25 +125,6 @@ test('walking chooses shortest revealed routes and cannot cross unknown, flagged
   }
 })
 
-test('targeted probes reveal in the requested row without moving, collecting, or charging invalid targets', () => {
-  const run = createExpedition({ seed: 31, profession: 'explorer', equipment: [], archive: false })
-  for (let row = -1; row <= 9; row++) {
-    const eligible = [...frontierCells(run)].filter(
-      (index) => Math.floor(index / 9) === row && !run.game.cells[index]?.mine,
-    )
-    const next = actExpedition(run, { type: 'probe', row })
-    if (!eligible.length) assert.equal(next, run)
-    else {
-      assert.equal(next.probes, run.probes - 1)
-      assert.equal(next.player, run.player)
-      assert.equal(next.loot, run.loot)
-      assert.deepEqual(next.collected, run.collected)
-      assert.ok(eligible.some((index) => next.game.cells[index]?.visibility === 'revealed'))
-      assert.ok(next.walls.every((index) => next.game.cells[index]?.visibility === 'hidden'))
-    }
-  }
-})
-
 test('v1 migration preserves camp and results but never replays an obsolete dungeon layout', () => {
   const storage = new MemoryStorage()
   const camp = { ...EMPTY_CAMP, supplies: 123, upgrades: ['workshop'], completed: 2 }
@@ -171,14 +153,42 @@ test('v1 migration preserves camp and results but never replays an obsolete dung
   assert.equal(nextRepository.migrated, false)
 })
 
+test('v2 migration keeps permanent progress without reinterpreting old row probes as cell probes', () => {
+  const storage = new MemoryStorage()
+  const camp = { ...EMPTY_CAMP, supplies: 73, upgrades: ['engineer'], completed: 1 }
+  storage.setItem(
+    'minesweeper.variants.v1.expedition',
+    JSON.stringify({
+      version: 2,
+      camp,
+      records: [],
+      journal: {
+        departure: { seed: 31, profession: 'engineer', equipment: [], archive: false },
+        actions: [{ type: 'probe', row: 4 }],
+      },
+    }),
+  )
+  const repository = new VariantRepository(storage)
+  const session = new ExpeditionSession(repository, new FakeRuntime())
+  assert.equal(repository.migrated, true)
+  assert.equal(session.run, null)
+  assert.deepEqual(session.camp, camp)
+  session.persist()
+  const nextRepository = new VariantRepository(storage)
+  const restored = new ExpeditionSession(nextRepository, new FakeRuntime())
+  assert.equal(nextRepository.migrated, false)
+  assert.deepEqual(restored.camp, camp)
+  assert.ok(restored.start('engineer', []))
+})
+
 test('a saved physical movement restores the same position and terrain', () => {
   const storage = new MemoryStorage()
   const session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   session.start('explorer', [])
   const run = session.run
   assert.ok(run)
-  const target = [...distances(run, 0, true).keys()].at(-1)
-  assert.ok(target !== undefined && target !== 0)
+  const target = [...distances(run, run.entrance, true).keys()].at(-1)
+  assert.ok(target !== undefined && target !== run.entrance)
   assert.ok(session.dispatch({ type: 'move', index: target }))
   const restored = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.equal(restored.run?.player, target)

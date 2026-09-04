@@ -334,6 +334,39 @@
   box-shadow: inset 0 0 0 2px var(--blue);
   background-color: #dbe5ff;
 }
+.variant-board-panel .cell.confirmed-mine {
+  background: #fff0cb;
+  border-color: #a56505;
+  cursor: not-allowed;
+}
+.variant-board-panel .cell.confirmed-mine .icon {
+  color: #a56505;
+}
+.cell.confirmed-mine::after {
+  content: '✓';
+  position: absolute;
+  right: 1px;
+  bottom: 0;
+  color: #875100;
+  font-size: 10px;
+  line-height: 1;
+}
+.cell.surveyed-safe::after {
+  content: '';
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #238070;
+}
+.probe-result {
+  margin: 0;
+  color: #397366;
+  font-size: 12px;
+  line-height: 1.8;
+}
 .variant-board-panel .cell.walk-route {
   background-color: #e5ebfc;
 }

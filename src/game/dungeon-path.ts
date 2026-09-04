@@ -3,9 +3,9 @@ import type { Game } from '../types/game.js'
 import type { Expedition } from '../types/variants.js'
 
 /** Find the entrance's full safe component before any terrain or treasure is published. */
-export function connectedFloor(game: Game): Set<number> {
-  const connected = new Set<number>([0])
-  const queue = [0]
+export function connectedFloor(game: Game, entrance: number): Set<number> {
+  const connected = new Set<number>([entrance])
+  const queue = [entrance]
 
   for (let cursor = 0; cursor < queue.length; cursor++) {
     const index = queue[cursor]

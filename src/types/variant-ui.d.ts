@@ -1,7 +1,7 @@
 import type { BoardSide, Equipment, Profession, Relic, Upgrade } from './variants.js'
 import type { NavigationKey } from './ui.js'
 import type { InteractionCue } from './audio.js'
-import type { RowTool } from './dungeon-ui.js'
+import type { DungeonTool } from './dungeon-ui.js'
 
 /** Commands decoded from finite button attributes at the UI boundary. */
 export type VariantCommand =
@@ -29,10 +29,10 @@ export type VariantCommand =
 
 /** Browser input consumes this application port without knowing a session implementation. */
 export interface VariantInputActions {
-  /** Preview a visible row target during drag or tool selection. */
-  previewTool(tool: RowTool | null, row: number | null): void
-  /** Consume a tool only after dropping or explicitly activating a row. */
-  useTool(tool: RowTool, row: number): void
+  /** Preview a visible area or row target during drag or tool selection. */
+  previewTool(tool: DungeonTool | null, index: number | null): void
+  /** Consume a tool only after dropping or explicitly activating a cell. */
+  useTool(tool: DungeonTool, index: number): void
   /** Decode-independent application command routing. */
   command(command: VariantCommand): void
   /** Apply a reveal or explicit flag action on one board. */
@@ -110,6 +110,9 @@ export interface VariantMessages {
   readonly scanHint: string
   readonly controls: string
   readonly rowMines: string
+  readonly confirmedMine: string
+  readonly confirmedSafe: string
+  readonly probeResult: string
 }
 
 /** Every catalog entry has a name and a concrete gameplay explanation. */

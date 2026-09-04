@@ -6,8 +6,8 @@ import {
 } from '../persistence/variant-decoders.js'
 import type { VariantCellTarget, VariantCommand, VariantInputActions } from '../types/variant-ui.js'
 import { parseNavigation } from './input-parser.js'
-import { RowToolController } from './row-tool-controller.js'
-import type { RowTool } from '../types/dungeon-ui.js'
+import { DungeonToolController } from './dungeon-tool-controller.js'
+import type { DungeonTool } from '../types/dungeon-ui.js'
 
 /** Convert button data into a finite command and its validated catalog payload. */
 export function parseVariantCommand(value: string): VariantCommand | null {
@@ -64,14 +64,14 @@ function cellTarget(target: EventTarget | null): VariantCellTarget | null {
 
 /** Owns special-mode browser listeners; touch uses the explicit reveal/flag toggle. */
 export class VariantInput {
-  private readonly tools: RowToolController
+  private readonly tools: DungeonToolController
   private readonly actions: VariantInputActions
   private readonly listeners = new AbortController()
 
   /** Delegate input once so view updates cannot accumulate event handlers. */
   constructor(root: HTMLElement, actions: VariantInputActions) {
     this.actions = actions
-    this.tools = new RowToolController(root, actions)
+    this.tools = new DungeonToolController(root, actions)
     const options = { signal: this.listeners.signal }
     root.addEventListener('click', this.click, options)
     root.addEventListener('contextmenu', this.context, options)
@@ -93,7 +93,7 @@ export class VariantInput {
     if (this.tools.suppressClick) return
     const cell = cellTarget(event.target)
     if (cell) {
-      if (cell.side === 'a' && this.tools.activate(Math.floor(cell.index / 9))) return
+      if (cell.side === 'a' && this.tools.activate(cell.index)) return
       this.actions.play(cell.side, cell.index)
       return
     }
@@ -118,7 +118,7 @@ export class VariantInput {
     const cell = cellTarget(event.target)
     if (cell) {
       this.actions.focus(cell.side, cell.index)
-      if (cell.side === 'a') this.tools.preview(Math.floor(cell.index / 9))
+      if (cell.side === 'a') this.tools.preview(cell.index)
     }
   }
 
@@ -149,7 +149,7 @@ export class VariantInput {
   }
 
   /** Arm an explicitly chosen inventory tool without applying it to a hidden focus position. */
-  selectTool(tool: RowTool): void {
+  selectTool(tool: DungeonTool): void {
     this.tools.select(tool)
   }
 

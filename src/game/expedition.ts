@@ -1,7 +1,9 @@
-import { act, neighbors, randomIndex } from './engine.js'
-import { adjacentSteps, placedBoard, shuffled } from './variant-board.js'
-import { approachPath, connectedFloor, walkingPath } from './dungeon-path.js'
-import type { Config, Game } from '../types/game.js'
+import { generateDungeon } from './dungeon-generator.js'
+import { probeDungeon } from './dungeon-probe.js'
+import { act, neighbors } from './engine.js'
+import { adjacentSteps, shuffled } from './variant-board.js'
+import { approachPath, walkingPath } from './dungeon-path.js'
+import type { Game } from '../types/game.js'
 import type {
   Camp,
   Departure,
@@ -50,49 +52,22 @@ export function buyUpgrade(camp: Camp, upgrade: Upgrade): Camp {
     : { ...camp, supplies: camp.supplies - cost, upgrades: [...camp.upgrades, upgrade] }
 }
 
-/** Carve a hidden monotone route before shuffling all remaining eligible mine positions. */
+/** Build fresh terrain and reset floor-local discoveries without touching permanent resources. */
 function createFloor(departure: Departure, floor: number): Expedition {
-  const width = 9
-  const config = { width, height: 9, mines: 13 + floor * 2 }
   const seed = (departure.seed + Math.imul(floor, 0x9e3779b9)) >>> 0
-  const next = randomIndex(seed)
-  const safe = new Set([0, ...neighbors(config, 0)])
-  let x = 0
-  let y = 0
-
-  while (x < 8 || y < 8) {
-    if (x === 8 || (y < 8 && next(2) === 0)) y++
-    else x++
-    safe.add(y * width + x)
-  }
-
-  const indices = Array.from({ length: 81 }, (_, index) => index)
-  const game = connectedPlacement(config, indices, safe, seed)
-  const connected = connectedFloor(game)
-  const walls = indices.filter((index) => !game.cells[index]?.mine && !connected.has(index))
-  const treasures = shuffled(
-    indices.filter((index) => index > 10 && index < 80 && connected.has(index)),
-    seed ^ 0xa710,
-  ).slice(0, 3)
-
+  const layout = generateDungeon(seed, 13 + floor * 2)
   return {
+    ...layout,
     departure,
     floor,
-    game: {
-      ...game,
-      phase: 'playing',
-      cells: game.cells.map((cell, index) =>
-        walls.includes(index) ? { ...cell, visibility: 'hidden' } : cell,
-      ),
-    },
-    exit: 80,
-    walls,
-    player: 0,
-    treasures,
+    player: layout.entrance,
     collected: [],
     relics: [],
     offers: [],
     scannedRows: [],
+    confirmedMines: [],
+    probedCells: [],
+    probeReport: null,
     probes: 0,
     scans: 0,
     shields: 0,
@@ -100,35 +75,6 @@ function createFloor(departure: Departure, floor: number): Expedition {
     steps: 0,
     phase: 'exploring',
   }
-}
-
-/** Shuffle exact mine sets until every hazard borders the reachable floor, with a finite fallback. */
-function connectedPlacement(
-  config: Config,
-  indices: readonly number[],
-  safe: ReadonlySet<number>,
-  seed: number,
-): Game {
-  const eligible = indices.filter((index) => !safe.has(index))
-  for (let attempt = 0; attempt < 128; attempt++) {
-    const mines = new Set(
-      shuffled(eligible, (seed ^ 0x51ed) + Math.imul(attempt, 0x45d9f3b)).slice(0, config.mines),
-    )
-    const game = placedBoard(config, mines, seed, 0)
-    const floor = connectedFloor(game)
-    if (
-      [...mines].every((index) =>
-        adjacentSteps(game, index).some((neighbor) => floor.has(neighbor)),
-      )
-    )
-      return game
-  }
-
-  // Even rows remain safe corridors. The reserved monotone route joins them;
-  // every odd-row mine has a safe vertical neighbor. At least 24 slots remain.
-  const candidates = eligible.filter((index) => Math.floor(index / config.width) % 2 === 1)
-  const mines = new Set(shuffled(candidates, seed ^ 0xc011).slice(0, config.mines))
-  return placedBoard(config, mines, seed, 0)
 }
 
 /** Start a run with bounded career tools and the selected equipment allocation. */
@@ -149,8 +95,8 @@ export function createExpedition(departure: Departure): Expedition {
 
 /** Find every revealed safe cell connected to the entrance by orthogonal steps. */
 export function reachableCells(run: Expedition): Set<number> {
-  const found = new Set<number>([0])
-  const queue = [0]
+  const found = new Set<number>([run.entrance])
+  const queue = [run.entrance]
 
   for (let cursor = 0; cursor < queue.length; cursor++) {
     const index = queue[cursor]
@@ -223,6 +169,7 @@ function revealFrontier(run: Expedition, index: number): Expedition {
       ...approached,
       game: act(run.game, { type: 'flag', index }),
       shields: run.shields - 1,
+      confirmedMines: [...run.confirmedMines, index],
       steps: run.steps + 1,
     }
   }
@@ -316,7 +263,7 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
     case 'move':
       return movePlayer(run, action.index)
     case 'flag': {
-      if (run.walls.includes(action.index)) return run
+      if (run.walls.includes(action.index) || run.confirmedMines.includes(action.index)) return run
       const game = act(run.game, { type: 'flag', index: action.index })
       return game === run.game ? run : { ...run, game, steps: run.steps + 1 }
     }
@@ -335,21 +282,8 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
         scannedRows: [...run.scannedRows, action.row],
         steps: run.steps + 1,
       }
-    case 'probe': {
-      if (run.probes === 0 || !Number.isInteger(action.row) || action.row < 0 || action.row >= 9)
-        return run
-      const index = [...frontierCells(run)].find(
-        (candidate) => Math.floor(candidate / 9) === action.row && !run.game.cells[candidate]?.mine,
-      )
-      if (index === undefined) return run
-      // Tools reveal information at a distance; they never teleport the character.
-      return {
-        ...run,
-        game: revealDungeon(run, index),
-        probes: run.probes - 1,
-        steps: run.steps + 1,
-      }
-    }
+    case 'probe':
+      return probeDungeon(run, action.index)
   }
 }
 

@@ -1,4 +1,5 @@
 import { frontierCells } from '../game/expedition.js'
+import { probeArea } from '../game/dungeon-probe.js'
 import { translations } from '../i18n.js'
 import type { Game } from '../types/game.js'
 import type { Language } from '../types/localization.js'
@@ -11,7 +12,7 @@ import { siteHeaderTemplate } from './templates.js'
 import { variantCopy } from './variant-copy.js'
 import { icon } from '../icons.js'
 import { spriteImage } from './dungeon-sprites.js'
-import type { RowTool } from '../types/dungeon-ui.js'
+import type { DungeonTool } from '../types/dungeon-ui.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -27,6 +28,7 @@ export class VariantView {
   private focusB = 0
   private walking: Animation | null = null
   private resize: ResizeObserver | null = null
+  private floorIdentity: string | null = null
   private readonly listeners = new AbortController()
 
   /** Mount the stable shell once; only its mode content changes after an action. */
@@ -66,6 +68,11 @@ export class VariantView {
   /** Replace content and restore a still-existing control or cell focus after repaint. */
   render(html: string, a: Game | null, b: Game | null, expedition: Expedition | null): void {
     this.resize?.disconnect()
+    const identity = expedition ? `${expedition.departure.seed}:${expedition.floor}` : null
+    if (identity !== this.floorIdentity) {
+      this.floorIdentity = identity
+      this.focusA = expedition?.player ?? 0
+    }
     const active =
       document.activeElement instanceof HTMLElement && this.content.contains(document.activeElement)
         ? document.activeElement
@@ -146,20 +153,33 @@ export class VariantView {
     this.dialog.showModal()
   }
 
-  /** Show an explicit whole-row target for pointer drag, tap selection and keyboard activation. */
-  previewTool(tool: RowTool | null, row: number | null): void {
+  /** Preview either the probe's clipped 3×3 area or the scanner's complete row. */
+  previewTool(tool: DungeonTool | null, index: number | null): void {
+    const area = index === null ? [] : probeArea({ width: 9, height: 9, mines: 0 }, index)
     for (const button of this.content.querySelectorAll<HTMLElement>('[data-tool]'))
       button.setAttribute('aria-pressed', String(button.dataset['tool'] === tool))
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
       cell.classList.toggle(
         'tool-target',
-        tool !== null && Math.floor(Number(cell.dataset['cell']) / 9) === row,
+        tool === 'probe'
+          ? area.includes(Number(cell.dataset['cell']))
+          : tool === 'scan' &&
+              index !== null &&
+              Math.floor(Number(cell.dataset['cell']) / 9) === Math.floor(index / 9),
       )
     const hint = this.content.querySelector<HTMLElement>('.tool-hint')
-    if (hint)
-      hint.textContent = tool
-        ? `${tool === 'scan' ? variantCopy(this.language).scans : variantCopy(this.language).probes} · ${row === null ? variantCopy(this.language).scanHint : translations[this.language].row + ' ' + (row + 1)}`
-        : variantCopy(this.language).scanHint
+    if (!hint) return
+    const copy = variantCopy(this.language)
+    if (!tool || index === null) {
+      hint.textContent = copy.scanHint
+      return
+    }
+
+    const common = translations[this.language]
+    const row = `${common.row} ${Math.floor(index / 9) + 1}`
+    const column = `${common.column} ${(index % 9) + 1}`
+    hint.textContent =
+      tool === 'probe' ? `${copy.probes} · ${row} · ${column} · 3×3` : `${copy.scans} · ${row}`
   }
 
   /** Animate a known safe path before committing the destination action. */
@@ -266,7 +286,7 @@ export class VariantView {
       const wall = run.walls.includes(index)
       const mark = wall
         ? 'wall'
-        : index === 0
+        : index === run.entrance
           ? 'entrance'
           : index === run.exit
             ? 'exit'
@@ -277,7 +297,7 @@ export class VariantView {
                 : null
       const label = wall
         ? t.wall
-        : index === 0
+        : index === run.entrance
           ? t.entrance
           : index === run.exit
             ? t.exit
@@ -298,6 +318,18 @@ export class VariantView {
         cell.insertAdjacentHTML('afterbegin', spriteImage(mark))
       }
       if (label) cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + label)
+      const confirmed = run.confirmedMines.includes(index)
+      const surveyedSafe = run.probedCells.includes(index) && !confirmed && !wall
+      cell.classList.toggle('confirmed-mine', confirmed)
+      cell.classList.toggle(
+        'surveyed-safe',
+        surveyedSafe && run.game.cells[index]?.visibility === 'hidden',
+      )
+      if (confirmed || surveyedSafe) {
+        const knowledge = confirmed ? t.confirmedMine : t.confirmedSafe
+        cell.title = knowledge
+        cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + knowledge)
+      }
       if (frontier.has(index))
         cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + t.frontier)
     }

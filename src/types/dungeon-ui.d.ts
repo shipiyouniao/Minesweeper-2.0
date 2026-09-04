@@ -2,13 +2,13 @@
 export type DungeonSprite =
   'player' | 'entrance' | 'exit' | 'treasure' | 'wall' | 'probe' | 'scanner' | 'shield' | 'mine'
 
-/** Tools with an explicit row target; no implicit focus-derived target exists. */
-export type RowTool = 'probe' | 'scan'
+/** Tools with an explicit area or row target; no implicit focus-derived target exists. */
+export type DungeonTool = 'probe' | 'scan'
 
 /** One owned pointer drag, independent from a keyboard-selected tool. */
 export interface ToolDrag {
   readonly pointerId: number
-  readonly tool: RowTool
+  readonly tool: DungeonTool
   readonly originX: number
   readonly originY: number
   moved: boolean

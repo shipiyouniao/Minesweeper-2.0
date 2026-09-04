@@ -24,12 +24,13 @@ Prepare at camp → choose profession/equipment → explore a floor → walk to 
 ### Floor rules
 
 - Five 9 × 9 floors, with exactly 15, 17, 19, 21, and 23 mines respectively.
-- Entrance at top-left, exit at bottom-right; both safe. Reserve a hidden orthogonal route before shuffling remaining eligible positions for mines. The entrance has a safe opening neighborhood.
+- Choose the entrance from the 49 interior coordinates using the floor seed. Pick stairs from the farthest reachable cells (within two steps of the maximum distance, and at least six steps away), using actual four-direction floor distance. Neither landmark has a fixed corner or direction.
+- Start with seven connected safe cells in an irregular 3×3 room. At least two exposed cells have positive clues, and elementary zero/all-covered-neighbors deductions must lead to a provable mine. This opening check does not promise a guess-free complete floor. Initial reveal is deliberately bounded; later zero reveals use normal flood fill.
 - Flood the complete safe terrain from the entrance using four directions. Convert every disconnected safe pocket into an impassable wall before placing treasure. Every retained safe floor cell, chest and exit belongs to the entrance component. Mine counts and eight-neighbor clues remain unchanged.
-- Every mine must border this component, so no covered hazard is stranded behind walls. Placement tests up to 128 deterministic shuffled candidates. Its bounded fallback keeps even rows safe and places the exact mine set in eligible odd-row cells; the reserved route joins those corridors. This guarantees termination without independent per-cell rolls.
+- Every mine must border this component, so no covered hazard is stranded behind walls. Placement tests up to 128 deterministic shuffled candidates against reachability and opening-clue requirements. A finite fallback joins alternating safe rows with a clear spine and supplies a provable opening clue. Exact mine counts remain unchanged; no independent per-cell rolls or fixed diagonal corridor are used.
 - A visible explorer starts at the entrance. Clicking revealed floor uses breadth-first search to walk the shortest known safe route. Clicking a highlighted covered frontier first walks to its nearest reachable neighbor, then reveals the destination. Routes never cross walls, flags, mines, or unknown cells. A failed or shielded reveal leaves the explorer at the approach cell.
 - Numbers count all eight neighbors. Ordinary blank-region expansion applies. Diagonally revealed areas do not count as connected until there is an orthogonal route.
-- Flags are hypotheses and block walking. Clicking an open number moves the explorer there; it does not chord in Expedition.
+- Ordinary blue flags are hypotheses and block walking. Confirmed gold flags from a probe or shield are facts; right-click, F and touch flag mode cannot remove them. Clicking an open number moves the explorer there; it does not chord in Expedition.
 - Three advertised safe treasure landmarks encourage detours. Each grants 6 loot when physically visited, once per floor. Revealing a treasure, connecting it, or opening it with a flood/probe does not collect it. A walk collects chests along its path.
 - Connecting or remotely revealing the stairs does not leave automatically. Click the stairs and physically arrive to end the floor; there is no sidebar departure button. A frontier reveal that steps onto the stairs also counts as arrival. Each exit grants 12 loot; completing the fifth floor also grants a 30-supply victory bonus.
 - Extraction during exploration or relic selection banks all collected loot after confirmation. Defeat retains half, rounded down. A floor not actually exited grants no exit bonus.
@@ -42,13 +43,15 @@ Prepare at camp → choose profession/equipment → explore a floor → walk to 
 | Surveyor   | 1 probe, 2 scans          | 20 supplies         |
 | Engineer   | 1 probe, 1 scan, 1 shield | 20 supplies         |
 
-**Probe:** drag its square inventory button onto a row, or select it and click a cell in the target row. Reveal one safe, unflagged frontier cell in that row without moving the explorer. Consume a charge only when an eligible safe cell exists. This is explicitly an information aid, not a logical deduction claimed by the engine.
+**Probe:** drag its square inventory button to a cell. Inspect the centered 3×3 neighborhood, clipped at board edges. Every mine receives a locked gold flag, including mines previously flagged by the player. Non-mine cells receive a persistent green safe marker while their clue stays covered; an incorrect ordinary flag there is cleared. Walls are ignored. The player does not move and treasures are not collected. A visible report includes the total mine count, including zero and already confirmed mines.
+
+Repeating an area with no new information consumes no charge. Partially overlapping probes consume one charge when at least one previously unknown covered cell is inspected. Discoveries and confirmed flags reset on the next floor and are reconstructed by replay after a reload.
 
 **Scan:** drag onto an explicit target row, or select the scanner then click a row. Reveal that row's total mines, including flagged mines. Keep the row/result visible for this floor. Re-scanning a known row is rejected without charge consumption.
 
-Both tools highlight the entire target row before activation. Keyboard users can select a tool, focus a row with the board keys and activate with Enter/Space; Escape cancels. Off-board drops and invalid/repeated targets consume nothing. Tools never teleport the explorer or award treasure.
+The probe previews a 3×3 square; the scanner previews its entire target row. Keyboard users can select a tool, focus a target with the board keys and activate with Enter/Space; Escape cancels. Off-board drops and targets with no new information consume nothing. Tools never teleport the explorer or award treasure.
 
-**Shield:** intercept a mine reveal, flag it, and consume one charge. The mine remains; all clues stay correct. A shield cannot turn a mined square into a traversable route.
+**Shield:** intercept a mine reveal, place the same locked gold confirmation flag, and consume one charge. The mine remains; all clues stay correct. A shield cannot turn a mined square into a traversable route.
 
 ### Relic build
 
@@ -80,9 +83,9 @@ This first progression set is finite. Surplus supplies remain visible after all 
 
 ### Persistence and acceptance
 
-One expedition envelope contains camp, active departure/action journal, and ten recent results. Settlement updates camp and clears the journal in **one storage write**, preventing a refresh from awarding the same run twice. Illegal journals are discarded while a separately valid camp in the decoded envelope is retained. Structurally incompatible envelopes trigger a visible recovery notice. Expedition schema version 2 introduces terrain and movement actions. Loading version 1 preserves validated camp upgrades, supplies and results, retires its incompatible active run, and displays a migration notice. The storage key remains stable so existing progression is discoverable. Twin saves remain version 1.
+One expedition envelope contains camp, active departure/action journal, and ten recent results. Settlement updates camp and clears the journal in **one storage write**, preventing a refresh from awarding the same run twice. Illegal journals are discarded while a separately valid camp in the decoded envelope is retained. Structurally incompatible envelopes trigger a visible recovery notice. Expedition schema version 3 introduces varied generation and area-probe discoveries. Loading version 1 or 2 preserves validated camp upgrades, supplies and results, retires its incompatible active run, and displays a migration notice. The storage key remains stable so existing progression is discoverable. Twin saves remain version 1.
 
-Tests also compare shortest paths against an independent coordinate oracle and verify all retained safe cells across 600 generated floors, inert walls, explicit row targeting, movement replay and version-1 migration.
+Tests also compare shortest paths against an independent coordinate oracle and verify all retained safe cells across 600 generated floors, inert walls, area and row targeting, movement replay and older-version migration.
 
 Tests cover exact mines and connected routes across many seeds/all five floors; frontier restrictions; repeat scan/treasure/relic rejection; charge depletion; shield clue preservation; deterministic inter-floor replay; purchases/loadout budgets; extraction/defeat/victory settlement; and unavailable storage.
 
