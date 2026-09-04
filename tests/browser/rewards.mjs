@@ -150,12 +150,8 @@ try {
     await page.keyboard.press('Escape')
     await modal.waitFor({ state: 'hidden' })
     assert.deepEqual(await journal(), pending)
-    assert.equal(
-      await page
-        .locator('[data-control="rewards"]')
-        .evaluate((el) => el === document.activeElement),
-      true,
-    )
+    // The native close event restores focus after the open attribute has already disappeared.
+    await page.waitForFunction(() => document.activeElement?.matches('[data-control="rewards"]'))
     await page.locator('[data-control="rewards"]').click()
     const selected = await modal
       .locator('[data-control^="relic:"]')
