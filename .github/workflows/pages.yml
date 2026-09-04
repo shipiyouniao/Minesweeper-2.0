@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - run: npm ci
+      - run: npm ci --no-audit
       - run: npm audit
       - run: npm run check
       - run: node scripts/verify-build.mjs
