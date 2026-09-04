@@ -12,7 +12,8 @@ import { VariantRepository } from '../src/persistence/variant-repository.js'
 import { decodeExpeditionSave } from '../src/persistence/variant-decoders.js'
 import { campProgressTemplate } from '../src/ui/camp-progress-template.js'
 import { MemoryStorage, FakeRuntime } from './helpers.js'
-import { deduceBastionMines, defeatBastion } from './bastion-helpers.js'
+import { deduceBastionMines } from './bastion-helpers.js'
+import { defeatEncounter } from './encounter-helpers.js'
 import type { Expedition, ExpeditionAction } from '../src/types/variants.js'
 import type { VariantDifficulty } from '../src/types/variant-difficulty.js'
 
@@ -72,7 +73,7 @@ test('a free explorer can defeat every tier from public clues with no tools, ski
   for (const tier of VARIANT_TIERS)
     for (let seed = 0; seed < 8; seed++) {
       const run = arena(tier.id, seed)
-      const actions = defeatBastion({ ...run, probes: 0, scans: 0, shields: 0, health: 1 })
+      const actions = defeatEncounter({ ...run, probes: 0, scans: 0, shields: 0, health: 1 })
       const result = actions.reduce(actExpedition, {
         ...run,
         probes: 0,
@@ -131,6 +132,7 @@ test('end turn applies frozen warnings through shields, brace, health and one-ti
 
 test('wrong calibration costs AP and health; correct calibration locks mines without changing clues', () => {
   const base = arena()
+  assert.ok(base.encounter?.kind === 'bastion')
   const pylon = base.encounter!.pylons[0]!
   const player = pylon.index - base.game.config.width
   let run: Expedition = {
@@ -157,6 +159,7 @@ test('wrong calibration costs AP and health; correct calibration locks mines wit
   }
   for (const index of wrong) run = actExpedition(run, { type: 'flag', index })
   const failed = actExpedition(run, { type: 'interact', index: pylon.index })
+  assert.ok(failed.encounter?.kind === 'bastion')
   assert.equal(failed.health, 1)
   assert.equal(failed.encounter?.points, 2)
   assert.ok(failed.encounter?.pylons[0]?.active)
@@ -167,6 +170,7 @@ test('wrong calibration costs AP and health; correct calibration locks mines wit
   )
   for (const index of mines) run = actExpedition(run, { type: 'flag', index })
   const calibrated = actExpedition(run, { type: 'interact', index: pylon.index })
+  assert.ok(calibrated.encounter?.kind === 'bastion')
   assert.equal(calibrated.encounter?.pylons[0]?.active, false)
   assert.deepEqual(
     calibrated.game.cells.map((cell) => [cell.mine, cell.adjacent]),
@@ -221,7 +225,7 @@ test('new sessions replay arena coordinates, combat and settlement; old journals
     }
     assert.equal(session.run?.phase, 'boss')
     const before = session.run!
-    for (const action of defeatBastion(before)) {
+    for (const action of defeatEncounter(before)) {
       assert.ok(session.dispatch(action))
       if (session.run?.phase !== 'boss') continue
       const expected: Expedition = session.run
@@ -237,7 +241,7 @@ test('new sessions replay arena coordinates, combat and settlement; old journals
     assert.equal(session.run, null)
     assert.equal(session.camp.supplies, supplies)
     const { encounters, ...old } = before.departure
-    assert.equal(encounters, 'bastion-v1')
+    assert.equal(encounters, 'brood-v1')
     assert.equal(isBastionFloor({ ...before, departure: old }), false)
     const invalid = {
       version: 3,

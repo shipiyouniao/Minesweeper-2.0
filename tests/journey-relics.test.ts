@@ -49,6 +49,7 @@ function arena(relics: readonly Relic[] = []): Expedition {
 /** Position a rule fixture adjacent to a public mechanism and retain the original mine layout. */
 function calibratedArena(relics: readonly Relic[]): Expedition {
   const run = arena(relics)
+  assert.ok(run.encounter?.kind === 'bastion')
   const pylon = run.encounter!.pylons[0]!.index
   return { ...inspectArea(run, probeArea(run.game.config, pylon)), player: pylon - 1 }
 }
@@ -192,6 +193,7 @@ test('probe recycling requires a paid discovery with no fresh mine and pays only
 
 test('scanner conversion uses pre-action inventory, stacks once and respects caps', () => {
   const run = { ...arena(['spare-coil', 'emergency-gears']), probes: 0, scans: 2 }
+  assert.ok(run.encounter?.kind === 'bastion')
   const row = Math.floor(run.encounter!.pylons[0]!.index / run.game.config.width) - 1
   // Choose a seeded arena row with at least two fresh mines.
   const target =
@@ -267,6 +269,7 @@ test('shelter cloak requires ending outside the warning and grants one shield pe
 
 test('breach sigil refunds only a correct first calibration, including a last-point action', () => {
   const run = calibratedArena(['breach-sigil'])
+  assert.ok(run.encounter?.kind === 'bastion')
   const ready = { ...run, encounter: { ...run.encounter!, points: 1 } }
   const action: ExpeditionAction = { type: 'interact', index: run.encounter!.pylons[0]!.index }
   const result = actExpedition(ready, action)
@@ -279,6 +282,7 @@ test('breach sigil refunds only a correct first calibration, including a last-po
 
 test('duelist edge cannot bypass armor, improves the first strike and reports actual damage', () => {
   const run = arena(['duelist-edge'])
+  assert.ok(run.encounter?.kind === 'bastion')
   assert.equal(actExpedition(run, { type: 'attack' }), run)
   const ready = {
     ...run,

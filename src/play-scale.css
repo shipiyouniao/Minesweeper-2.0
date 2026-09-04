@@ -146,3 +146,36 @@
 .variant-main:has(.expedition-layout) .variant-board-panel h2 {
   font-size: calc(13 * var(--play-unit));
 }
+
+/* Occupants retain the underlying clue; egg timers occupy a separate corner. */
+.board .cell.brood-occupant > .dungeon-sprite {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+}
+.brood-countdown {
+  position: absolute;
+  top: 2%;
+  left: 4%;
+  min-width: 1.15em;
+  border-radius: 50%;
+  background: #efe8d6;
+  color: #76500d;
+  font-size: max(10px, calc(var(--cell) * 0.28));
+  line-height: 1.15;
+  font-weight: 700;
+  z-index: 2;
+}
+.board .cell .brood-next {
+  position: absolute;
+  top: 2%;
+  left: 2%;
+  width: 40%;
+  height: 40%;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.board .cell .brood-next .dungeon-sprite {
+  width: 100%;
+  height: 100%;
+}

@@ -5,6 +5,7 @@ import { applyDamageRelics } from './relic-effects.js'
 import { bastionIntent } from './tactical-intents.js'
 import { tacticalPlan } from './tactical-planning.js'
 import { applyCombatRelics, strikeDamage } from './combat-relics.js'
+import { advanceBrood, clearBrood } from './brood-turns.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { ExploreTransition } from '../types/tactical.js'
 
@@ -21,6 +22,15 @@ function endTurn(run: Expedition): Expedition {
   const hit = encounter.intent.targets.includes(run.player)
   const damage = Math.max(0, (hit ? encounter.intent.damage : 0) - Number(encounter.braced))
   const next = damage > 0 ? injure(run, damage) : run
+
+  if (encounter.kind === 'brood') {
+    const resolved: Expedition = {
+      ...next,
+      steps: run.steps + 1,
+      encounter: { ...encounter, event: damage > 0 ? 'hit' : 'evaded' },
+    }
+    return advanceBrood(resolved)
+  }
 
   return {
     ...next,
@@ -46,7 +56,7 @@ function endTurn(run: Expedition): Expedition {
 /** Commit a calibration: a wrong guess consumes its action and deals feedback damage. */
 function calibrate(run: Expedition, index: number): Expedition {
   const encounter = run.encounter
-  if (!encounter) return run
+  if (!encounter || encounter.kind !== 'bastion') return run
   const ring = neighbors(run.game.config, index)
   const correct = ring.every((other) => {
     const cell = run.game.cells[other]
@@ -97,7 +107,8 @@ export function actTacticalEncounter(
       break
     }
     case 'interact':
-      next = calibrate(run, action.index)
+      next =
+        encounter.kind === 'brood' ? clearBrood(run, action.index) : calibrate(run, action.index)
       break
     default: {
       // Reuse tool, skill and mine rules. The boss cell remains an impassable wall.

@@ -41,7 +41,7 @@ export interface Camp {
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
   /** Encounter rules are opt-in snapshots; historical journals keep exploration-only exits. */
-  readonly encounters?: 'bastion-v1'
+  readonly encounters?: 'bastion-v1' | 'brood-v1'
   /** Missing career revision preserves historical tools, offers and action availability. */
   readonly professions?: 'skills-v1'
   /** Missing reward revision preserves historical settlement amounts. */

@@ -1,7 +1,8 @@
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
 import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
 import { UPGRADES } from '../game/camp-progression.js'
-import { bastionTier, hasBastionEncounters } from '../game/bastion-arena.js'
+import { encounterTier } from '../game/encounter-tiers.js'
+import { hasEncounters } from '../game/encounter-roster.js'
 import type { RelicPack } from '../types/relic-packs.js'
 import type { Config } from '../types/game.js'
 import { JsonObjectReader, parseJson } from './json-reader.js'
@@ -135,7 +136,9 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (
     !integer(seed, 0xffffffff) ||
     (encounters !== undefined &&
-      (encounters !== 'bastion-v1' || professions !== 'skills-v1' || rules !== 'relics-v1')) ||
+      ((encounters !== 'bastion-v1' && encounters !== 'brood-v1') ||
+        professions !== 'skills-v1' ||
+        rules !== 'relics-v1')) ||
     (professions !== undefined && (professions !== 'skills-v1' || rules !== 'relics-v1')) ||
     (profession !== 'explorer' &&
       profession !== 'surveyor' &&
@@ -183,7 +186,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     rules: rules ?? 'original',
     ...(rewards === 'difficulty-v1' ? { rewards } : {}),
     ...(professions === 'skills-v1' ? { professions } : {}),
-    ...(encounters === 'bastion-v1' ? { encounters } : {}),
+    ...(encounters === 'bastion-v1' || encounters === 'brood-v1' ? { encounters } : {}),
     ...(rules === 'relics-v1' ? { packs } : {}),
     ...(difficulty ? { difficulty } : {}),
   }
@@ -233,9 +236,7 @@ function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | nul
   if (!departure || !values || values.length > MAX_ACTIONS) return null
   const actions: ExpeditionAction[] = []
   const ordinary = expeditionConfig(departure, 1)
-  const arena = hasBastionEncounters(departure)
-    ? bastionTier(departure.difficulty).config
-    : ordinary
+  const arena = hasEncounters(departure) ? encounterTier(departure.difficulty).config : ordinary
   // Decode the broad dimension envelope; replay still validates each action against its actual room.
   const bounds = {
     ...ordinary,

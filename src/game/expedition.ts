@@ -1,5 +1,6 @@
 import { upgradeCost } from './camp-progression.js'
-import { enterBastion, isBastionFloor } from './bastion-arena.js'
+import { enterEncounter, isEncounterFloor } from './encounter-roster.js'
+import { occupied } from './dungeon-occupancy.js'
 import { actTacticalEncounter } from './tactical-encounter.js'
 import { professionResources, professionOfferCount } from './professions.js'
 import { useProfessionSkill } from './profession-skills.js'
@@ -132,7 +133,7 @@ export function reachableCells(run: Expedition): Set<number> {
       const cell = run.game.cells[other]
       if (
         !found.has(other) &&
-        !run.walls.includes(other) &&
+        !occupied(run, other) &&
         cell &&
         !cell.mine &&
         cell.visibility === 'revealed'
@@ -151,7 +152,7 @@ export function frontierCells(run: Expedition): Set<number> {
   const frontier = new Set<number>()
   for (const index of reachableCells(run)) {
     for (const other of adjacentSteps(run.game, index)) {
-      if (!run.walls.includes(other) && run.game.cells[other]?.visibility === 'hidden')
+      if (!occupied(run, other) && run.game.cells[other]?.visibility === 'hidden')
         frontier.add(other)
     }
   }
@@ -248,7 +249,7 @@ function movePlayer(run: Expedition, index: number): Expedition {
 /** Commit an exit reward only for a living explorer that actually reached the stairs. */
 function finishAtExit(run: Expedition): Expedition {
   if (run.phase !== 'exploring' || run.player !== run.exit) return run
-  if (!run.encounter && isBastionFloor(run)) return enterBastion(run)
+  if (!run.encounter && isEncounterFloor(run)) return enterEncounter(run)
   return completeFloor(run)
 }
 

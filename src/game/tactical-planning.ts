@@ -2,6 +2,7 @@ import { approachPath, walkingPath } from './dungeon-path.js'
 import { adjacentSteps } from './variant-board.js'
 import { neighbors } from './engine.js'
 import { walkingPointCost } from './combat-relics.js'
+import { occupied } from './dungeon-occupancy.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 
@@ -9,7 +10,9 @@ import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 export function tacticalCellAction(run: Expedition, index: number): ExpeditionAction {
   if (run.encounter?.boss === index) return { type: 'attack' }
   if (
-    run.encounter?.pylons.some((pylon) => pylon.index === index && pylon.active) &&
+    ((run.encounter?.kind === 'bastion' &&
+      run.encounter.pylons.some((pylon) => pylon.index === index && pylon.active)) ||
+      (run.encounter?.kind === 'brood' && occupied(run, index) && !run.walls.includes(index))) &&
     adjacentSteps(run.game, run.player).includes(index)
   )
     return { type: 'interact', index }
@@ -40,10 +43,16 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
     }
     case 'attack':
       cost = 2
-      if (encounter.pylons.some((pylon) => pylon.active)) reason = 'armor'
+      if (encounter.kind === 'bastion' && encounter.pylons.some((pylon) => pylon.active))
+        reason = 'armor'
       else if (!adjacentSteps(run.game, run.player).includes(encounter.boss)) reason = 'adjacent'
       break
     case 'interact': {
+      if (encounter.kind === 'brood') {
+        if (!occupied(run, action.index) || run.walls.includes(action.index)) reason = 'used'
+        else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
+        break
+      }
       const pylon = encounter.pylons.find((entry) => entry.index === action.index && entry.active)
       if (!pylon) reason = 'used'
       else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'

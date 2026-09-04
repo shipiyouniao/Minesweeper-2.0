@@ -19,9 +19,9 @@ Relic Dungeon is part of Expedition, not a separate mode: it describes the multi
 
 ### Complete player loop
 
-Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → defeat the guardian on guarded floors → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
+Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → defeat the boss on guarded floors → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
 
-[Bastion Guardian](bastion-encounters.md) adds independent tactical rooms with three action points, frozen attack forecasts, two shield mechanisms and shared expedition health. Only End turn resolves enemy attacks. New departures snapshot the encounter revision; historical saves retain their ordinary exits.
+[Bastion Guardian](bastion-encounters.md) and [Brood Queen](brood-queen.md) provide separate tactical rooms with three action points, frozen attack forecasts and shared expedition health. The guardian uses shield mechanisms; the queen uses removable webs, hatching eggs and interceptable creatures. Only End turn resolves enemy attacks. New departures snapshot the alternating roster; historical saves retain their original exits or guardian-only encounters.
 
 ### Floor rules
 

@@ -12,7 +12,7 @@ A playable Minesweeper game and a practical testbed for the **TypeScript 7 nativ
 
 [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [License](LICENSE)
 
-**New encounter:** [Bastion Guardian](docs/bastion-encounters.md) guards selected expedition exits. Deduce the pylon mines, disable its armor and attack the exposed core while managing three action points and visible attack forecasts. Victory restores health and grants a shield. Ordinary floors keep free exploration; existing saves keep their original rules.
+**Tactical encounters:** new expeditions alternate between [Bastion Guardian](docs/bastion-encounters.md) and [Brood Queen](docs/brood-queen.md), starting from a seeded choice. Deduce pylon mines to break the guardian's armor, or clear webs, destroy eggs and intercept hatchlings to approach the queen. Both use three action points and visible attack forecasts; victory restores health and grants a shield. Ordinary floors keep free exploration and existing saves keep their original roster. Wide-screen play uses a more compact board and proportional sidebar.
 
 ## Why this project exists
 
