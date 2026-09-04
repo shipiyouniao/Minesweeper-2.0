@@ -61,6 +61,8 @@ The probe previews a 3×3 square; the scanner previews its entire target row. Ke
 
 ### Relic build
 
+Four [purchasable theme packs](relic-packs.md) add eight bounded effects to new `relics-v1` runs, for fourteen possible relics. They reward new discoveries, shield reactions, survival and physical chest collection. The sidebar marks consumed floor/run triggers. Historical journals retain the original pool described below: four base relics, or six with the archive.
+
 After each non-final floor, offer up to three distinct unowned relics. Choose one and enter the next floor. Offers are deterministic for seed/floor; reload cannot reroll. The initial pool contains four relics, so late choices may have fewer than three options. The archive expands it to six. Once the pool is exhausted, continue to the next floor without adding another relic.
 
 | Relic          | Effect                                                                                                            |
@@ -82,6 +84,10 @@ Charges/relics carry between floors and disappear when the run ends. Scanned row
 | Engineer training | 60     | Unlock Engineer                                  |
 | Workshop          | 1,200  | Unlock departure equipment                       |
 | Relic archive     | 10,000 | Add Exit compass and Salvage seal to future runs |
+| Surveyor notes    | 100    | Add Field notes and Rangefinder                  |
+| Guardian crests   | 250    | Add Reactive shell and Rescue ribbon             |
+| Survival charms   | 500    | Add Field dressing and Second wind               |
+| Prospector seals  | 900    | Add Supply cache and Cache guard                 |
 
 Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
 
@@ -93,7 +99,7 @@ This first progression set is finite. Surplus supplies remain visible after all 
 
 One expedition envelope contains camp, active departure/action journal, and up to ten recent results per difficulty. Settlement updates camp and clears the journal in **one storage write**, preventing a refresh from awarding the same run twice. Illegal journals are discarded while a separately valid camp in the decoded envelope is retained. Structurally incompatible envelopes trigger a visible recovery notice. Expedition schema version 3 introduces varied generation and area-probe discoveries. Loading version 1 or 2 preserves validated camp upgrades, supplies and results, retires its incompatible active run, and displays a migration notice. The storage key remains stable so existing progression is discoverable. Twin saves remain version 1.
 
-Current departures record a difficulty and the `health-v1` rules. Existing `difficulty-v1` journals keep their selected geometry and one-hit-death behavior, with no exit healing. Earlier `scouting` journals keep their historical dimensions and behavior. Existing version-3 journals without that marker retain their original generation and compass behavior, and historical count-only scans replay exactly. New scanner uses record a distinct `sweep` intent, so existing runs can use confirming scans without invalidating earlier flag actions. No version-3 camp or active run needs to be reset.
+Current departures record a difficulty, the `relics-v1` rules and an owned-theme snapshot. Existing `health-v1` journals keep shared health and their original reward pool. Existing `difficulty-v1` journals keep their selected geometry and one-hit-death behavior, with no exit healing. Earlier `scouting` journals keep their historical dimensions and behavior. Existing version-3 journals without that marker retain their original generation and compass behavior, and historical count-only scans replay exactly. New scanner uses record a distinct `sweep` intent, so existing runs can use confirming scans without invalidating earlier flag actions. No version-3 camp or active run needs to be reset.
 
 The inventory begins with one short usage prompt. Selecting a tool replaces it with that tool's description and target coordinates; cancellation or use restores the prompt. Detailed rules belong in help and this document.
 
@@ -103,7 +109,7 @@ Tests cover exact mines and connected routes across many seeds/all five floors; 
 
 ### Presentation and motion
 
-Classic, Expedition and Twin boards share the same header template, language flyout, help/records entries and icon controls. Help opens in a focus-trapping modal. Expedition uses nine generated transparent sprites for its explorer, landmarks and inventory; see [complete artwork prompts](dungeon-artwork.md). Clues, row results and accessible labels remain text. Movement animation is cancelled before pause, backgrounding, language remount or mode disposal; reduced-motion preferences skip animation while retaining identical rules. Resizing reanchors the player to its cell.
+Classic, Expedition and Twin boards share the same header template, language flyout, help/records entries and icon controls. Help opens in a focus-trapping modal. Expedition uses generated transparent artwork for professions, landmarks, inventory and relic themes; see the [dungeon artwork](dungeon-artwork.md) and [theme artwork](relic-pack-artwork.md) records for exact prompts. Clues, row results and accessible labels remain text. Movement animation is cancelled before pause, backgrounding, language remount or mode disposal; reduced-motion preferences skip animation while retaining identical rules. Resizing reanchors the player to its cell.
 
 ## Twin boards — implemented
 

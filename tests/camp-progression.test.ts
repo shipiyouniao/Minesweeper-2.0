@@ -51,7 +51,7 @@ test('prices offer two early professions, a middle milestone and a long-term arc
     VARIANT_TIERS.map((tier) => maximumExpeditionSupplies(tier.floors)),
     [138, 216, 294, 372, 489],
   )
-  assert.deepEqual(UPGRADES.map(upgradeCost), [40, 60, 1200, 10000])
+  assert.deepEqual(UPGRADES.map(upgradeCost), [40, 60, 100, 250, 500, 900, 1200, 10000])
   const earlyCost = upgradeCost('surveyor') + upgradeCost('engineer')
   assert.equal(earlyCost, 100)
   // Even a three-floor win without a purse can afford both roles after collecting its chests.
@@ -120,9 +120,20 @@ test('funding goals advance after purchases and report exact remaining money and
   const both = buyUpgrade(bought, 'engineer')
   assert.equal(both.supplies, 0)
   assert.deepEqual(both.upgrades, ['surveyor', 'engineer'])
-  assert.equal(campFunding(both)?.upgrade, 'workshop')
-  assert.equal(campFunding(both)?.stage, 'middle')
-  const workshop = buyUpgrade({ ...both, supplies: 1200 }, 'workshop')
+  assert.equal(campFunding(both)?.upgrade, 'survey-notes')
+  assert.equal(campFunding(both)?.stage, 'early')
+  let themed = { ...both, supplies: 1750 }
+  for (const pack of [
+    'survey-notes',
+    'guardian-crests',
+    'survival-charms',
+    'prospector-seals',
+  ] as const)
+    themed = buyUpgrade(themed, pack)
+  assert.equal(themed.supplies, 0)
+  assert.equal(campFunding(themed)?.upgrade, 'workshop')
+  assert.equal(campFunding(themed)?.stage, 'middle')
+  const workshop = buyUpgrade({ ...themed, supplies: 1200 }, 'workshop')
   assert.equal(campFunding(workshop)?.upgrade, 'archive')
   assert.equal(campFunding(workshop)?.stage, 'late')
   assert.equal(campFunding(workshop)?.minimumRuns, 21)

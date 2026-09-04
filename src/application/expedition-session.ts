@@ -1,4 +1,5 @@
 import { addVariantRecord } from '../game/variant-difficulty.js'
+import { ownedRelicPacks } from '../game/relic-packs.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import {
   actExpedition,
@@ -45,7 +46,8 @@ export class ExpeditionSession {
 
     if (
       allowedDeparture(this.save.camp, journal.departure.profession, journal.departure.equipment) &&
-      journal.departure.archive === this.save.camp.upgrades.includes('archive')
+      journal.departure.archive === this.save.camp.upgrades.includes('archive') &&
+      (journal.departure.packs ?? []).every((pack) => this.save.camp.upgrades.includes(pack))
     ) {
       let run = createExpedition(journal.departure)
       let valid = true
@@ -107,7 +109,8 @@ export class ExpeditionSession {
   ): boolean {
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
     const departure: Departure = {
-      rules: 'health-v1',
+      rules: 'relics-v1',
+      packs: ownedRelicPacks(this.camp),
       difficulty,
       seed: this.runtime.randomSeed(),
       profession,

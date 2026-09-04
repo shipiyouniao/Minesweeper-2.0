@@ -31,6 +31,9 @@ import { spriteImage } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
 import type { DungeonSprite, DungeonTool } from '../types/dungeon-ui.js'
 import { campProgressTemplate } from './camp-progress-template.js'
+import { hasExpeditionHealth } from '../game/expedition-rules.js'
+import { parseRelicPack } from '../game/relic-packs.js'
+import { relicSprite } from './relic-presentation.js'
 import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
 
@@ -105,6 +108,7 @@ export function campTemplate(
           },
           camp.upgrades.includes(upgrade),
           camp.upgrades.includes(upgrade) || camp.supplies < upgradeCost(upgrade),
+          parseRelicPack(upgrade),
         )
       },
     ).join('')}</div></section>`
@@ -139,17 +143,23 @@ export function expeditionTemplate(
               ? t.exitReady
               : t.exploring
   const relics = run.relics
-    .map(
-      (relic) =>
-        `<li><strong>${relicCopy(language, relic).name}</strong><span>${relicCopy(language, relic).note}</span></li>`,
-    )
+    .map((relic) => {
+      const description = relicCopy(language, relic)
+      let used = ''
+
+      if (run.runTriggers.includes(relic)) used = t.relicUsedRun
+      else if (run.floorTriggers.includes(relic)) used = t.relicUsedFloor
+
+      const badge = used ? `<small class="relic-trigger">${used}</small>` : ''
+      return `<li>${spriteImage(relicSprite(relic))}<strong>${description.name}</strong><span>${description.note}</span>${badge}</li>`
+    })
     .join('')
 
   return `<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
-    ${vitalityTemplate(language, run, run.departure.rules !== 'health-v1')}
+    ${vitalityTemplate(language, run, !hasExpeditionHealth(run.departure))}
     <p class="variant-status" role="status" tabindex="-1">${status}</p>
     ${terminal ? `<div class="result-banner"><strong>${t.earned} +${earned}</strong><button class="primary-button" data-control="camp">${t.camp}</button></div>` : ''}
-    ${run.phase === 'reward' ? `<div class="choice-grid">${run.offers.map((relic) => choice(`relic:${relic}`, relicCopy(language, relic), false)).join('')}</div>${run.offers.length === 0 ? `<button class="primary-button" data-control="descend">${t.nextFloor}</button>` : ''}<button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
+    ${run.phase === 'reward' ? `<div class="choice-grid">${run.offers.map((relic) => choice(`relic:${relic}`, relicCopy(language, relic), false, false, relicSprite(relic))).join('')}</div>${run.offers.length === 0 ? `<button class="primary-button" data-control="descend">${t.nextFloor}</button>` : ''}<button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
     ${boardZoomTemplate(language)}<div class="expedition-layout">${boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${
         run.phase === 'exploring'

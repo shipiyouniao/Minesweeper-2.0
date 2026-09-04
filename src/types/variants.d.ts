@@ -1,6 +1,7 @@
 import type { VariantDifficulty } from './variant-difficulty.js'
 import type { Vitality } from './vitality.js'
 import type { Game } from './game.js'
+import type { RelicPack, ExpansionRelic } from './relic-packs.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
 export type Ruleset = 'classic' | 'expedition' | 'twin'
@@ -15,10 +16,10 @@ export type Profession = 'explorer' | 'surveyor' | 'engineer'
 export type Equipment = 'probe' | 'scanner' | 'guard'
 
 /** Relics persist only within the current expedition. */
-export type Relic = 'lantern' | 'lens' | 'aegis' | 'purse' | 'compass' | 'salvage'
+export type Relic = 'lantern' | 'lens' | 'aegis' | 'purse' | 'compass' | 'salvage' | ExpansionRelic
 
 /** Progression purchases unlock options rather than unlimited stat increases. */
-export type Upgrade = 'surveyor' | 'engineer' | 'workshop' | 'archive'
+export type Upgrade = 'surveyor' | 'engineer' | 'workshop' | 'archive' | RelicPack
 
 /** Persistent camp progress, updated atomically with run settlement. */
 export interface Camp {
@@ -30,7 +31,9 @@ export interface Camp {
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
   /** Persist generation and relic rules; omitted direct inputs retain the 9 × 9 scouting layout. */
-  readonly rules?: 'original' | 'scouting' | 'difficulty-v1' | 'health-v1'
+  readonly rules?: 'original' | 'scouting' | 'difficulty-v1' | 'health-v1' | 'relics-v1'
+  /** Only relics-v1 snapshots contain purchased packs; older reward pools remain unchanged. */
+  readonly packs?: readonly RelicPack[]
   /** Difficulty and health journals require this field; historical departures omit it. */
   readonly difficulty?: VariantDifficulty
   readonly seed: number
@@ -51,6 +54,9 @@ export interface Expedition extends Vitality {
   readonly treasures: readonly number[]
   readonly collected: readonly number[]
   readonly relics: readonly Relic[]
+  /** Claimed effects cannot pay out again by walking, flagging or repeating a discovery. */
+  readonly floorTriggers: readonly Relic[]
+  readonly runTriggers: readonly Relic[]
   readonly offers: readonly Relic[]
   readonly scannedRows: readonly number[]
   readonly confirmedMines: readonly number[]

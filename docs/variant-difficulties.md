@@ -20,7 +20,7 @@ The default view fits the full board to its panel. **Larger cells** switches to 
 
 ## Persistence and records
 
-New Twin pairs store a tier and the `difficulty-v1` rules revision. New expeditions use `health-v1`, retaining the same difficulty geometry while adding [health and exit recovery](expedition-health.md). Existing `difficulty-v1` expeditions retain their original damage rules. Rebalancing this catalog requires a new rules revision, not changing the meaning of an existing journal. Each mode has one active run, and its departure tier is restored after refresh. The last expedition choice is remembered at camp.
+New Twin pairs store a tier and the `difficulty-v1` rules revision. New expeditions use `relics-v1`, retaining the same difficulty geometry and [health and exit recovery](expedition-health.md) while capturing owned [relic themes](relic-packs.md). Existing `health-v1` expeditions retain their original reward pool, and `difficulty-v1` expeditions retain their original damage rules. Rebalancing this catalog requires a new rules revision, not changing the meaning of an existing journal. Each mode has one active run, and its departure tier is restored after refresh. The last expedition choice is remembered at camp.
 
 Historical runs without difficulty metadata keep the original 9 × 9 geometry: Twin has 12 mines per board; Expedition has five floors with 15, 17, 19, 21 and 23 mines. The existing `original` / `scouting` opening and compass behavior remains unchanged. Old results appear under **Original rules**, rather than being assigned to a new tier.
 
