@@ -201,6 +201,36 @@ export function variantCopy(language: Language): VariantMessages {
 /** Describe career tradeoffs with exact starting resources. */
 export function professionCopy(language: Language, profession: Profession): VariantDescription {
   switch (profession) {
+    case 'archaeologist':
+      return {
+        name: localized(language, 'Archaeologist', '考古学家', '考古学者'),
+        note: localized(
+          language,
+          '1 probe · scout a chest each floor · up to 4 relic choices',
+          '1 探针 · 每层侦察一个宝箱 · 遗物最多四选一',
+          '探針1 · 各階で宝箱を偵察 · 遺物最大4択',
+        ),
+      }
+    case 'alchemist':
+      return {
+        name: localized(language, 'Alchemist', '炼金术师', '錬金術師'),
+        note: localized(
+          language,
+          '2 shields · each floor: 1 shield → 1 probe + 1 scan',
+          '2 护盾 · 每层：1 护盾 → 1 探针 + 1 扫描',
+          'シールド2 · 各階：シールド1 → 探針1 + 走査1',
+        ),
+      }
+    case 'sentinel':
+      return {
+        name: localized(language, 'Sentinel', '哨卫', '番人'),
+        note: localized(
+          language,
+          '1 probe · 1 shield · each floor: 1 shield → 5×5 scouting',
+          '1 探针 · 1 护盾 · 每层：1 护盾 → 5×5 侦察',
+          '探針1 · シールド1 · 各階：シールド1 → 5×5偵察',
+        ),
+      }
     case 'explorer':
       return {
         name: localized(language, 'Explorer', '探险家', '探検家'),
@@ -294,7 +324,14 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
 
 /** Describe finite camp unlocks without hiding their actual gameplay consequence. */
 export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescription {
-  if (upgrade === 'surveyor' || upgrade === 'engineer') return professionCopy(language, upgrade)
+  if (
+    upgrade === 'surveyor' ||
+    upgrade === 'engineer' ||
+    upgrade === 'archaeologist' ||
+    upgrade === 'alchemist' ||
+    upgrade === 'sentinel'
+  )
+    return professionCopy(language, upgrade)
   if (upgrade !== 'workshop' && upgrade !== 'archive') return relicPackCopy(language, upgrade)
   return upgrade === 'workshop'
     ? {

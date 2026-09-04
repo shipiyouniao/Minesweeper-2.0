@@ -1,4 +1,6 @@
 import { upgradeCost } from './camp-progression.js'
+import { professionResources, professionOfferCount } from './professions.js'
+import { useProfessionSkill } from './profession-skills.js'
 import {
   TREASURE_SUPPLIES,
   PURSE_SUPPLIES,
@@ -47,6 +49,8 @@ export function allowedDeparture(
     (profession === 'explorer' || camp.upgrades.includes(profession)) &&
     (equipment.length === 0 || camp.upgrades.includes('workshop')) &&
     new Set(equipment).size === equipment.length &&
+    // Do not spend loadout points on protection already at the departure cap.
+    (!equipment.includes('guard') || professionResources(profession).shields < 2) &&
     equipment.reduce((total, item) => total + equipmentCost(item), 0) <= 3
   )
 }
@@ -79,6 +83,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
     relics: [],
     floorTriggers: [],
     runTriggers: [],
+    skillUsed: false,
     offers: [],
     scannedRows: [],
     confirmedMines: [],
@@ -98,16 +103,13 @@ function createFloor(departure: Departure, floor: number): Expedition {
 /** Start a run with bounded career tools and the selected equipment allocation. */
 export function createExpedition(departure: Departure): Expedition {
   const run = createFloor(departure, 1)
+  const resources = professionResources(departure.profession)
 
   return {
     ...run,
-    probes:
-      (departure.profession === 'explorer' ? 2 : 1) + Number(departure.equipment.includes('probe')),
-    scans:
-      (departure.profession === 'surveyor' ? 2 : 1) +
-      Number(departure.equipment.includes('scanner')),
-    shields:
-      Number(departure.profession === 'engineer') + Number(departure.equipment.includes('guard')),
+    probes: resources.probes + Number(departure.equipment.includes('probe')),
+    scans: resources.scans + Number(departure.equipment.includes('scanner')),
+    shields: Math.min(2, resources.shields + Number(departure.equipment.includes('guard'))),
   }
 }
 
@@ -164,14 +166,14 @@ function collectTreasures(run: Expedition, path: readonly number[]): Expedition 
   })
 }
 
-/** Offer up to three distinct unowned relics, deterministically for this floor. */
+/** Offer distinct unowned relics within the career's limit, deterministically for this floor. */
 function relicOffers(run: Expedition): Relic[] {
   const pool = relicPool(run.departure)
 
   return shuffled(
     pool.filter((relic) => !run.relics.includes(relic)),
     run.departure.seed ^ run.floor,
-  ).slice(0, 3)
+  ).slice(0, professionOfferCount(run.departure))
 }
 
 /** Approach a frontier and resolve damage without changing the mine layout or safe route. */
@@ -287,6 +289,8 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
   if (run.phase !== 'exploring') return run
 
   switch (action.type) {
+    case 'skill':
+      return useProfessionSkill(run)
     case 'reveal':
       return revealFrontier(run, action.index)
     case 'move':

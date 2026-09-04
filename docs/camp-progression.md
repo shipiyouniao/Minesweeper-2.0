@@ -1,6 +1,6 @@
 # Camp progression: pricing and funding goals
 
-Camp progression is part of [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). The current eight purchases are an early batch toward at least 24 distinct gameplay unlocks. Long-term variety comes from professions, equipment, relic combinations and encounters.
+Camp progression is part of [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). The current eleven purchases are an early batch toward at least 24 distinct gameplay unlocks. Long-term variety comes from professions, equipment, relic combinations and encounters.
 
 ## Balance targets and purchase table
 
@@ -14,16 +14,19 @@ The reference column assumes two of three chests collected per floor, no Treasur
 | Early  | Engineer         |    60 |                                   1 | Shield-focused starting role                    |
 | Early  | Surveyor notes   |   100 |                                   1 | Discovery-to-tool relic choices                 |
 | Middle | Guardian crests  |   250 |                                   1 | Shield reactions                                |
+| Middle | Archaeologist    |   450 |                                   2 | Chest scouting and four-choice relic rewards    |
 | Middle | Survival charms  |   500 |                                   2 | Recovery and emergency survival                 |
+| Middle | Alchemist        |   900 |                                   3 | Convert protection into information             |
 | Middle | Prospector seals |   900 |                                   3 | Treasure-oriented tools and protection          |
 | Middle | Workshop         | 1,200 |                                   4 | Bounded departure loadouts                      |
+| Late   | Sentinel         | 1,800 |                                   5 | Spend protection on wide reconnaissance         |
 | Late   | Relic archive    | 7,500 |                                  20 | Additional navigation and salvage relic choices |
 
 The two early roles together cost 100. A reference Relaxed win pays 204, enough for both roles and the first theme. Purchases are optional and may be made in any order. Packs add choices to later reward pools rather than granting their relics immediately.
 
 Abyss completion guarantees at least 783 supplies from its exits and victory reward alone. Therefore the archive takes at most `ceil(7,500 / 783) = 10` successful Abyss clears. The reference two-chest route pays 1,431, giving a six-clear target; the mathematical maximum of 2,200 permits four clears. These calculations assume savings are reserved for that purchase. Spending on other items contributes to total collection time.
 
-All eight purchases cost **10,550**. That is eight reference Abyss clears or 29 reference Standard clears from zero, before considering failed runs or extra loot. Further catalog batches must fill distinct gameplay roles and be priced against the same income scenarios. Repeated stat levels and cosmetics do not count toward the 24-purchase target.
+All eleven purchases cost **13,700**. That is ten reference Abyss clears or 37 reference Standard clears from zero, before considering failed runs or extra loot. Further catalog batches must fill distinct gameplay roles and be priced against the same income scenarios. Repeated stat levels and cosmetics do not count toward the 24-purchase target.
 
 ## Presentation and persistence
 

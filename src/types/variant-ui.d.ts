@@ -14,6 +14,7 @@ export type VariantCommand =
         | 'camp'
         | 'probe'
         | 'scan'
+        | 'skill'
         | 'help'
         | 'records'
         | 'retreat'
