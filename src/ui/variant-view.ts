@@ -18,6 +18,7 @@ import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import { tacticalCopy, tacticalPlanCopy } from './tactical-copy.js'
 import { bossSprite } from './tactical-sprites.js'
 import { markBroodCell } from './brood-board.js'
+import { RelicDialog } from './relic-dialog.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -26,6 +27,7 @@ export class VariantView {
   private readonly content: HTMLElement
   private readonly status: HTMLElement
   private readonly dialog: HTMLDialogElement
+  private readonly rewards: RelicDialog
   private readonly menu: LanguageMenu
   private a: BoardView | null = null
   private b: BoardView | null = null
@@ -65,13 +67,24 @@ export class VariantView {
     this.content = content
     this.status = status
     this.dialog = dialog
+    this.rewards = new RelicDialog(root, language)
     this.menu = new LanguageMenu(picker, onLanguage, feedback)
     dialog.addEventListener('cancel', () => feedback('dismiss'), { signal: this.listeners.signal })
   }
 
   /** Expose modal state to application guards, including native Escape dismissal. */
   get dialogOpen(): boolean {
-    return this.dialog.open
+    return this.dialog.open || this.rewards.open
+  }
+
+  /** Distinguish reward selection from help and destructive-action confirmation. */
+  get rewardOpen(): boolean {
+    return this.rewards.open
+  }
+
+  /** Reopen a dismissed inter-floor reward without changing the session. */
+  showRewards(): void {
+    if (this.expedition) this.rewards.show(this.expedition)
   }
 
   /** Replace content and restore a still-existing control or cell focus after repaint. */
@@ -129,6 +142,8 @@ export class VariantView {
       this.content
         .querySelector<HTMLElement>('.variant-status, .tactical-event, h1')
         ?.focus({ preventScroll: true })
+
+    this.rewards.render(expedition, this.content.hidden !== false)
   }
 
   /** Update availability warnings and accessible sound/pause state independently of the board. */
@@ -339,6 +354,7 @@ export class VariantView {
   /** Close a pending confirmation without replacing its trigger or board. */
   closeDialog(): void {
     this.dialog.close()
+    this.rewards.close()
   }
 
   /** Dismiss transient menus when the page is backgrounded. */
@@ -380,6 +396,7 @@ export class VariantView {
     this.resize?.disconnect()
     this.listeners.abort()
     this.menu.dispose()
+    this.rewards.dispose()
     this.dialog.close()
     this.root.replaceChildren()
   }

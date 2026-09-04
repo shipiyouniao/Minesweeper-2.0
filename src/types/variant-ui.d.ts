@@ -10,6 +10,7 @@ export type VariantCommand =
       readonly type:
         | 'start'
         | 'descend'
+        | 'rewards'
         | 'zoom'
         | 'camp'
         | 'probe'
@@ -110,6 +111,8 @@ export interface VariantMessages {
   readonly retreat: string
   readonly retreatNote: string
   readonly reward: string
+  readonly chooseRelic: string
+  readonly floorCleared: string
   readonly exit: string
   readonly entrance: string
   readonly treasure: string

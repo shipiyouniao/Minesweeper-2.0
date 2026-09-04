@@ -101,6 +101,8 @@ export function variantCopy(language: Language): VariantMessages {
       '结束本次远征，带回全部已收集战利品？',
       '遠征を終了し、集めた戦利品を持ち帰りますか？',
     ),
+    chooseRelic: t('Choose a relic', '选择遗物', '遺物を選ぶ'),
+    floorCleared: t('Floor cleared', '本层已通关', 'フロアクリア'),
     reward: t(
       'Choose one relic for the next floor',
       '选择一件遗物，进入下一层',

@@ -394,7 +394,8 @@ h1 {
   /* Size cells against usable space, excluding the viewport's padding. */
   container-type: inline-size;
   overflow: auto;
-  overscroll-behavior: contain;
+  /* Keep horizontal panning local while allowing vertical scroll to reach the page. */
+  overscroll-behavior: contain auto;
   padding: 28px 20px;
   scrollbar-width: thin;
   scrollbar-color: #c9cdc8 transparent;
