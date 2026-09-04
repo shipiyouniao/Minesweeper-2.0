@@ -1,6 +1,16 @@
 /** Generated raster assets used by terrain, landmarks, character and tool controls. */
 export type DungeonSprite =
-  'player' | 'entrance' | 'exit' | 'treasure' | 'wall' | 'probe' | 'scanner' | 'shield' | 'mine'
+  | 'player'
+  | 'surveyor'
+  | 'engineer'
+  | 'entrance'
+  | 'exit'
+  | 'treasure'
+  | 'wall'
+  | 'probe'
+  | 'scanner'
+  | 'shield'
+  | 'mine'
 
 /** Tools with an explicit area or row target; no implicit focus-derived target exists. */
 export type DungeonTool = 'probe' | 'scan'
