@@ -1,3 +1,10 @@
+import {
+  upgradeCost,
+  TREASURE_SUPPLIES,
+  PURSE_SUPPLIES,
+  EXIT_SUPPLIES,
+  VICTORY_SUPPLIES,
+} from './camp-progression.js'
 import { damageVitality, healVitality } from './vitality.js'
 import { generateDungeon } from './dungeon-generator.js'
 import { probeDungeon, scanDungeon, scoutExit } from './dungeon-discovery.js'
@@ -17,14 +24,10 @@ import type {
   Upgrade,
 } from '../types/variants.js'
 
-export const EMPTY_CAMP: Camp = { supplies: 0, upgrades: [], completed: 0 }
-export const UPGRADES: readonly Upgrade[] = ['surveyor', 'engineer', 'workshop', 'archive']
-export const EQUIPMENT: readonly Equipment[] = ['probe', 'scanner', 'guard']
+export { upgradeCost, UPGRADES } from './camp-progression.js'
 
-/** Fixed one-time prices keep camp progression finite and predictable. */
-export function upgradeCost(upgrade: Upgrade): number {
-  return upgrade === 'archive' ? 45 : upgrade === 'workshop' ? 30 : 20
-}
+export const EMPTY_CAMP: Camp = { supplies: 0, upgrades: [], completed: 0 }
+export const EQUIPMENT: readonly Equipment[] = ['probe', 'scanner', 'guard']
 
 /** A shield costs two loadout points; information tools cost one each. */
 export function equipmentCost(equipment: Equipment): number {
@@ -149,7 +152,11 @@ function collectTreasures(run: Expedition, path: readonly number[]): Expedition 
   )
   const fresh = collected.filter((index) => !run.collected.includes(index)).length
 
-  return { ...run, collected, loot: run.loot + fresh * (run.relics.includes('purse') ? 9 : 6) }
+  return {
+    ...run,
+    collected,
+    loot: run.loot + fresh * (run.relics.includes('purse') ? PURSE_SUPPLIES : TREASURE_SUPPLIES),
+  }
 }
 
 /** Offer up to three distinct unowned relics, deterministically for this floor. */
@@ -221,7 +228,7 @@ function finishAtExit(run: Expedition): Expedition {
     ...run,
     // Leaving exploration makes this recovery a one-time reward, including the final exit.
     health: run.departure.rules === 'health-v1' ? healVitality(run, 1).health : run.health,
-    loot: run.loot + 12,
+    loot: run.loot + EXIT_SUPPLIES,
     phase: run.floor === expeditionFloors(run.departure) ? 'won' : 'reward',
     offers: relicOffers(run),
   }
@@ -305,7 +312,7 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
 
 /** Settle secured loot: success/extraction retain everything, defeat retains a bounded fraction. */
 export function expeditionEarnings(run: Expedition): number {
-  if (run.phase === 'won') return run.loot + 30
+  if (run.phase === 'won') return run.loot + VICTORY_SUPPLIES
   if (run.phase === 'retreated') return run.loot
   if (run.phase === 'lost')
     return Math.floor(run.loot * (run.relics.includes('salvage') ? 0.75 : 0.5))

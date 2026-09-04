@@ -198,11 +198,11 @@ test('revealed treasure waits for a physical visit and cannot pay twice', () => 
 })
 
 test('camp purchases and departure loadouts enforce ownership, costs and three-point budget', () => {
-  const camp = { ...EMPTY_CAMP, supplies: 100 }
+  const camp = { ...EMPTY_CAMP, supplies: 2000 }
   assert.equal(allowedDeparture(camp, 'surveyor', []), false)
   assert.equal(allowedDeparture(camp, 'explorer', ['probe']), false)
   const upgraded = buyUpgrade(buyUpgrade(camp, 'workshop'), 'surveyor')
-  assert.equal(upgraded.supplies, 50)
+  assert.equal(upgraded.supplies, 760)
   assert.equal(buyUpgrade(upgraded, 'workshop'), upgraded)
   assert.equal(allowedDeparture(upgraded, 'surveyor', ['probe', 'guard']), true)
   assert.equal(allowedDeparture(upgraded, 'surveyor', ['probe', 'guard', 'scanner']), false)

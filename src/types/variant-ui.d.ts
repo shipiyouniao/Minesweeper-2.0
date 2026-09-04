@@ -77,6 +77,14 @@ export interface VariantMessages {
   readonly start: string
   readonly profession: string
   readonly equipment: string
+  readonly campGoal: string
+  readonly campEarly: string
+  readonly campMiddle: string
+  readonly campLate: string
+  readonly campRemaining: string
+  readonly campMinimumRuns: string
+  readonly campAffordable: string
+  readonly campComplete: string
   readonly facilities: string
   readonly owned: string
   readonly locked: string

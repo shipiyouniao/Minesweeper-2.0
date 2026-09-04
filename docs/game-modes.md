@@ -46,8 +46,8 @@ The health bar includes protection in the same readout: **2/2 (+1)** means full 
 | Profession | Starting resources        | Unlock              |
 | ---------- | ------------------------- | ------------------- |
 | Explorer   | 2 probes, 1 scan          | Initially available |
-| Surveyor   | 1 probe, 2 scans          | 20 supplies         |
-| Engineer   | 1 probe, 1 scan, 1 shield | 20 supplies         |
+| Surveyor   | 1 probe, 2 scans          | 40 supplies         |
+| Engineer   | 1 probe, 1 scan, 1 shield | 60 supplies         |
 
 **Probe:** drag its square inventory button to a cell. Inspect the centered 3×3 neighborhood, clipped at board edges. Every mine receives a locked gold flag, including mines previously flagged by the player. Non-mine cells receive a persistent green safe marker while their clue stays covered; an incorrect ordinary flag there is cleared. Walls are ignored. The player does not move and treasures are not collected. A visible report includes the total mine count, including zero and already confirmed mines.
 
@@ -76,14 +76,16 @@ Charges/relics carry between floors and disappear when the run ends. Scanned row
 
 ### Permanent camp growth
 
-| Facility          | Cost | Effect                                           |
-| ----------------- | ---- | ------------------------------------------------ |
-| Surveyor training | 20   | Unlock Surveyor                                  |
-| Engineer training | 20   | Unlock Engineer                                  |
-| Workshop          | 30   | Unlock departure equipment                       |
-| Relic archive     | 45   | Add Exit compass and Salvage seal to future runs |
+| Facility          | Cost   | Effect                                           |
+| ----------------- | ------ | ------------------------------------------------ |
+| Surveyor training | 40     | Unlock Surveyor                                  |
+| Engineer training | 60     | Unlock Engineer                                  |
+| Workshop          | 1,200  | Unlock departure equipment                       |
+| Relic archive     | 10,000 | Add Exit compass and Salvage seal to future runs |
 
 Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
+
+Prices form a stepped curve: both early professions cost 100 supplies together and can be bought after one rewarding expedition; the workshop is a middle milestone; the 10,000-supply archive is a long-term goal requiring at least 21 maximally profitable runs from zero savings. Loot is not capped or reduced. The camp shows savings, remaining cost, percentage and an optimistic minimum-run estimate. Existing currency and purchased facilities are preserved. See [the pricing model and its limitations](camp-progression.md).
 
 This first progression set is finite. Surplus supplies remain visible after all unlocks but have no additional spending sink yet. Biomes, branching events, and more professions can extend the system later; they are not implemented content. There is no uncapped permanent health upgrade or monetized currency.
 
