@@ -28,6 +28,7 @@ import {
   variantCopy,
 } from './variant-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
+import { professionSprite } from './profession-presentation.js'
 import type { DungeonSprite, DungeonTool } from '../types/dungeon-ui.js'
 import { campProgressTemplate } from './camp-progress-template.js'
 import { vitalityTemplate } from './vitality-template.js'
@@ -89,7 +90,7 @@ export function campTemplate(
   return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${t.healthHint}</p>
     <div class="variant-metrics">${metric(t.supplies, number.format(camp.supplies))}${metric(t.departures, camp.completed)}</div>
     ${difficultyTemplate(language, difficulty, true)}
-    <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career))).join('')}</div>
+    <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career), professionSprite(career))).join('')}</div>
     <h2>${t.equipment} <small>${spent} / 3</small></h2>
     ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && spent + equipmentCost(item) > 3, item === 'guard' ? 'shield' : item)).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
     <button class="primary-button" data-control="start">${t.start} ↗</button>

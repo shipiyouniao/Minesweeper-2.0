@@ -24,6 +24,8 @@ for (const file of [
   await stat(file)
 for (const sprite of [
   'player',
+  'surveyor',
+  'engineer',
   'entrance',
   'exit',
   'treasure',

@@ -9,9 +9,10 @@ import type { NavigationKey, NavigationResult } from '../types/ui.js'
 import { BoardView } from './board-view.js'
 import { LanguageMenu } from './language-menu.js'
 import { siteHeaderTemplate } from './templates.js'
-import { variantCopy } from './variant-copy.js'
+import { professionCopy, variantCopy } from './variant-copy.js'
 import { icon } from '../icons.js'
 import { spriteImage } from './dungeon-sprites.js'
+import { professionSprite } from './profession-presentation.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
@@ -388,11 +389,15 @@ export class VariantView {
     const current = grid?.querySelector<HTMLElement>(`[data-cell="${run.player}"]`)
     if (grid && current) {
       current.classList.add('player-cell')
-      current.setAttribute('aria-label', current.getAttribute('aria-label') + ', ' + t.player)
+      const profession = professionCopy(this.language, run.departure.profession).name
+      current.setAttribute(
+        'aria-label',
+        [current.getAttribute('aria-label'), profession].filter(Boolean).join(', '),
+      )
       const player = document.createElement('div')
       player.className = 'dungeon-player'
       const clue = run.game.cells[run.player]?.adjacent ?? 0
-      player.innerHTML = `${spriteImage('player')}${clue ? `<span class="landmark-clue">${clue}</span>` : ''}`
+      player.innerHTML = `${spriteImage(professionSprite(run.departure.profession))}${clue ? `<span class="landmark-clue">${clue}</span>` : ''}`
       player.style.width = `${current.offsetWidth}px`
       player.style.height = `${current.offsetHeight}px`
       player.style.transform = `translate(${current.offsetLeft}px, ${current.offsetTop}px)`
