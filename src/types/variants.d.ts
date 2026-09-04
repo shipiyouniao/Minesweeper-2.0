@@ -10,7 +10,8 @@ export type Ruleset = 'classic' | 'expedition' | 'twin'
 export type BoardSide = 'a' | 'b'
 
 /** Career choices exchange information tools for limited protection. */
-export type Profession = 'explorer' | 'surveyor' | 'engineer'
+export type Profession =
+  'explorer' | 'surveyor' | 'engineer' | 'archaeologist' | 'alchemist' | 'sentinel'
 
 /** Camp equipment consumes a three-point departure budget. */
 export type Equipment = 'probe' | 'scanner' | 'guard'
@@ -19,7 +20,15 @@ export type Equipment = 'probe' | 'scanner' | 'guard'
 export type Relic = 'lantern' | 'lens' | 'aegis' | 'purse' | 'compass' | 'salvage' | ExpansionRelic
 
 /** Progression purchases unlock options rather than unlimited stat increases. */
-export type Upgrade = 'surveyor' | 'engineer' | 'workshop' | 'archive' | RelicPack
+export type Upgrade =
+  | 'surveyor'
+  | 'engineer'
+  | 'archaeologist'
+  | 'alchemist'
+  | 'sentinel'
+  | 'workshop'
+  | 'archive'
+  | RelicPack
 
 /** Persistent camp progress, updated atomically with run settlement. */
 export interface Camp {
@@ -30,6 +39,8 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  /** Missing career revision preserves historical tools, offers and action availability. */
+  readonly professions?: 'skills-v1'
   /** Missing reward revision preserves historical settlement amounts. */
   readonly rewards?: 'difficulty-v1'
   /** Persist generation and relic rules; omitted direct inputs retain the 9 × 9 scouting layout. */
@@ -46,6 +57,8 @@ export interface Departure {
 
 /** A complete floor state; reachability is derived from revealed safe cells. */
 export interface Expedition extends Vitality {
+  /** Rebuilt from accepted skill intents; reset only on entering another floor. */
+  readonly skillUsed: boolean
   readonly departure: Departure
   readonly floor: number
   readonly game: Game
@@ -78,7 +91,7 @@ export type ExpeditionAction =
   /** Historical count-only intent retained for existing journals; the UI emits sweep. */
   | { readonly type: 'scan'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
-  | { readonly type: 'retreat' | 'descend' }
+  | { readonly type: 'retreat' | 'descend' | 'skill' }
 
 /** Both layouts are generated together, excluding overlapping mines. */
 export interface Twin {

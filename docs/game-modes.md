@@ -63,7 +63,7 @@ The probe previews a 3×3 square; the scanner previews its entire target row. Ke
 
 Four [purchasable theme packs](relic-packs.md) add eight bounded effects to new `relics-v1` runs, for fourteen possible relics. They reward new discoveries, shield reactions, survival and physical chest collection. The sidebar marks consumed floor/run triggers. Historical journals retain the original pool described below: four base relics, or six with the archive.
 
-After each non-final floor, offer up to three distinct unowned relics. Choose one and enter the next floor. Offers are deterministic for seed/floor; reload cannot reroll. The initial pool contains four relics, so late choices may have fewer than three options. The archive expands it to six. Once the pool is exhausted, continue to the next floor without adding another relic.
+After each non-final floor, offer up to three distinct unowned relics (up to four for the new Archaeologist). Choose one and enter the next floor. Offers are deterministic for seed/floor; reload cannot reroll. The initial pool contains four relics, so late choices may have fewer than three options. The archive expands it to six. Once the pool is exhausted, continue to the next floor without adding another relic.
 
 | Relic          | Effect                                                                                                            |
 | -------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -76,18 +76,25 @@ After each non-final floor, offer up to three distinct unowned relics. Choose on
 
 Charges/relics carry between floors and disappear when the run ends. Scanned rows and treasure collection reset per floor. Aegis does not regenerate every floor. Exit compass scouting is free and does not move the explorer or collect treasure; stairs require physical arrival.
 
+### Profession skills
+
+[Six professions](profession-skills.md) now each have a once-per-floor active skill. Explorer scouts nearby, Surveyor scouts a column, Engineer repairs shields, Archaeologist scouts chests and expands relic choices, Alchemist converts protection into tools, and Sentinel performs a wide reconnaissance. Each has its own portrait and skill icon. Historical departures keep their original career rules.
+
 ### Permanent camp growth
 
-| Facility          | Cost  | Effect                                           |
-| ----------------- | ----- | ------------------------------------------------ |
-| Surveyor training | 40    | Unlock Surveyor                                  |
-| Engineer training | 60    | Unlock Engineer                                  |
-| Workshop          | 1,200 | Unlock departure equipment                       |
-| Relic archive     | 7,500 | Add Exit compass and Salvage seal to future runs |
-| Surveyor notes    | 100   | Add Field notes and Rangefinder                  |
-| Guardian crests   | 250   | Add Reactive shell and Rescue ribbon             |
-| Survival charms   | 500   | Add Field dressing and Second wind               |
-| Prospector seals  | 900   | Add Supply cache and Cache guard                 |
+| Facility          | Cost  | Effect                                             |
+| ----------------- | ----- | -------------------------------------------------- |
+| Surveyor training | 40    | Unlock Surveyor                                    |
+| Engineer training | 60    | Unlock Engineer                                    |
+| Workshop          | 1,200 | Unlock departure equipment                         |
+| Relic archive     | 7,500 | Add Exit compass and Salvage seal to future runs   |
+| Archaeologist     | 450   | Unlock chest scouting and up to four relic choices |
+| Alchemist         | 900   | Unlock shield-to-tool conversion                   |
+| Sentinel          | 1,800 | Unlock shield-funded wide reconnaissance           |
+| Surveyor notes    | 100   | Add Field notes and Rangefinder                    |
+| Guardian crests   | 250   | Add Reactive shell and Rescue ribbon               |
+| Survival charms   | 500   | Add Field dressing and Second wind                 |
+| Prospector seals  | 900   | Add Supply cache and Cache guard                   |
 
 Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
 

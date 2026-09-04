@@ -22,6 +22,7 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     case 'camp':
     case 'probe':
     case 'scan':
+    case 'skill':
     case 'help':
     case 'records':
     case 'retreat':

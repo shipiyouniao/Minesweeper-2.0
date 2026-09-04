@@ -304,6 +304,56 @@
 .run-sidebar {
   padding: 8px 0;
 }
+.profession-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.profession-preview > img {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  object-fit: contain;
+}
+.profession-preview p,
+.profession-skill p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+.profession-preview small,
+#skill-status {
+  color: var(--blue);
+  font-size: 11px;
+}
+.profession-skill {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--surface);
+}
+.profession-skill-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.profession-skill .skill-button {
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  padding: 4px;
+}
+.profession-skill .skill-button img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+}
 .run-sidebar h3 {
   font-size: 14px;
   margin: 26px 0 12px;

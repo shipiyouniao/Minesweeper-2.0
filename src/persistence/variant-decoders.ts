@@ -24,7 +24,17 @@ export const MAX_ACTIONS = 20000
 
 /** Decode finite identifiers once at the external boundary. */
 export function parseProfession(value: string | null): Profession | null {
-  return value === 'explorer' || value === 'surveyor' || value === 'engineer' ? value : null
+  switch (value) {
+    case 'explorer':
+    case 'surveyor':
+    case 'engineer':
+    case 'archaeologist':
+    case 'alchemist':
+    case 'sentinel':
+      return value
+    default:
+      return null
+  }
 }
 
 /** Accept only the three concrete equipment choices. */
@@ -34,7 +44,13 @@ export function parseEquipment(value: string | null): Equipment | null {
 
 /** Accept only defined permanent camp purchases. */
 export function parseUpgrade(value: string | null): Upgrade | null {
-  return value === 'surveyor' || value === 'engineer' || value === 'workshop' || value === 'archive'
+  return value === 'surveyor' ||
+    value === 'engineer' ||
+    value === 'archaeologist' ||
+    value === 'alchemist' ||
+    value === 'sentinel' ||
+    value === 'workshop' ||
+    value === 'archive'
     ? value
     : parseRelicPack(value)
 }
@@ -97,12 +113,18 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   const seed = reader.number('seed')
   const rules = reader.value('rules')
   const rewards = reader.value('rewards')
+  const professions = reader.value('professions')
   const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const profession = parseProfession(reader.string('profession'))
   const archive = reader.value('archive')
   const values = reader.array('equipment')
   if (
     !integer(seed, 0xffffffff) ||
+    (professions !== undefined && (professions !== 'skills-v1' || rules !== 'relics-v1')) ||
+    (profession !== 'explorer' &&
+      profession !== 'surveyor' &&
+      profession !== 'engineer' &&
+      professions !== 'skills-v1') ||
     (rewards !== undefined && (rewards !== 'difficulty-v1' || rules !== 'relics-v1')) ||
     (rules !== undefined &&
       rules !== 'original' &&
@@ -144,6 +166,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     equipment,
     rules: rules ?? 'original',
     ...(rewards === 'difficulty-v1' ? { rewards } : {}),
+    ...(professions === 'skills-v1' ? { professions } : {}),
     ...(rules === 'relics-v1' ? { packs } : {}),
     ...(difficulty ? { difficulty } : {}),
   }
@@ -169,6 +192,7 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
       return integer(row, config.height - 1) ? { type, row } : null
     }
     case 'descend':
+    case 'skill':
     case 'retreat':
       return { type }
     case 'relic': {

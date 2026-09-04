@@ -16,9 +16,12 @@ export const UPGRADES: readonly Upgrade[] = [
   'engineer',
   'survey-notes',
   'guardian-crests',
+  'archaeologist',
   'survival-charms',
+  'alchemist',
   'prospector-seals',
   'workshop',
+  'sentinel',
   'archive',
 ]
 
@@ -41,6 +44,12 @@ export function upgradeCost(upgrade: Upgrade): number {
       return 1200
     case 'archive':
       return 7500
+    case 'archaeologist':
+      return 450
+    case 'alchemist':
+      return 900
+    case 'sentinel':
+      return 1800
   }
 }
 
@@ -56,6 +65,10 @@ function upgradeStage(upgrade: Upgrade): CampStage {
     case 'prospector-seals':
     case 'workshop':
       return 'middle'
+    case 'archaeologist':
+    case 'alchemist':
+      return 'middle'
+    case 'sentinel':
     case 'archive':
       return 'late'
   }

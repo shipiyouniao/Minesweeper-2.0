@@ -4,7 +4,10 @@ import {
   equipmentCost,
   upgradeCost,
   reachableCells,
+  allowedDeparture,
 } from '../game/expedition.js'
+import { PROFESSIONS } from '../game/professions.js'
+import { professionPreviewTemplate, professionSkillTemplate } from './profession-skill-template.js'
 import { VARIANT_TIERS, expeditionFloors } from '../game/variant-difficulty.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { stats } from '../game/engine.js'
@@ -92,7 +95,7 @@ export function campTemplate(
 ): string {
   const t = variantCopy(language)
   const number = new Intl.NumberFormat(language)
-  const careers: readonly Profession[] = ['explorer', 'surveyor', 'engineer']
+  const careers = PROFESSIONS
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
 
   return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${t.healthHint}</p>
@@ -100,8 +103,9 @@ export function campTemplate(
     ${difficultyTemplate(language, difficulty, true)}
     <p class="variant-note reward-rate">${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p>
     <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career), professionSprite(career))).join('')}</div>
+    ${professionPreviewTemplate(language, profession)}
     <h2>${t.equipment} <small>${spent} / 3</small></h2>
-    ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && spent + equipmentCost(item) > 3, item === 'guard' ? 'shield' : item)).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
+    ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && !allowedDeparture(camp, profession, [...equipment, item]), item === 'guard' ? 'shield' : item)).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
     <button class="primary-button" data-control="start">${t.start} ↗</button>
     <h2>${t.facilities}</h2>${campProgressTemplate(language, camp)}<div class="choice-grid facilities">${UPGRADES.map(
       (upgrade) => {
@@ -114,7 +118,13 @@ export function campTemplate(
           },
           camp.upgrades.includes(upgrade),
           camp.upgrades.includes(upgrade) || camp.supplies < upgradeCost(upgrade),
-          parseRelicPack(upgrade),
+          upgrade === 'surveyor' ||
+            upgrade === 'engineer' ||
+            upgrade === 'archaeologist' ||
+            upgrade === 'alchemist' ||
+            upgrade === 'sentinel'
+            ? professionSprite(upgrade)
+            : parseRelicPack(upgrade),
         )
       },
     ).join('')}</div></section>`
@@ -176,6 +186,7 @@ export function expeditionTemplate(
           ? `<div class="variant-toolbar">${inputModeTemplate(language, flagMode)}
       <p class="variant-note tool-hint" role="status">${t.toolHint}</p>
       <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}</div>
+      ${professionSkillTemplate(language, run)}
       ${run.probeReport ? `<p class="probe-result" role="status">${t.probeResult.replace('{count}', String(run.probeReport.mines))}</p>` : ''}
       <button class="text-button" data-control="retreat">${t.retreat}</button></div>`
           : ''

@@ -225,6 +225,9 @@ export class VariantApp implements VariantInputActions {
       case 'descend':
         this.expedition({ type: 'descend' })
         break
+      case 'skill':
+        this.expedition({ type: 'skill' })
+        break
       case 'difficulty':
         if (this.session instanceof ExpeditionSession) {
           this.session.selectDifficulty(command.value)
@@ -252,9 +255,14 @@ export class VariantApp implements VariantInputActions {
         if (
           this.session instanceof ExpeditionSession &&
           !this.session.run &&
-          allowedDeparture(this.session.camp, command.value, this.equipment)
-        )
+          allowedDeparture(this.session.camp, command.value, [])
+        ) {
           this.profession = command.value
+          // Preserve compatible choices and drop only a guard that would exceed this career's cap.
+          if (!allowedDeparture(this.session.camp, command.value, this.equipment)) {
+            this.equipment = this.equipment.filter((item) => item !== 'guard')
+          }
+        }
         break
       case 'equipment':
         if (this.session instanceof ExpeditionSession && !this.session.run) {

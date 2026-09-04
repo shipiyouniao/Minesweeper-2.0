@@ -110,6 +110,7 @@ export class ExpeditionSession {
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
     const departure: Departure = {
       rules: 'relics-v1',
+      professions: 'skills-v1',
       rewards: 'difficulty-v1',
       packs: ownedRelicPacks(this.camp),
       difficulty,
