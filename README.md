@@ -158,7 +158,7 @@ The repository is a starting point for further TS7 experiments. Any broader comp
 | Pause or resume         | Pause control           | P                                     |
 | Start a new game        | New-game control        | N                                     |
 
-Chording opens neighboring cells when the adjacent flag count matches the number. Incorrect flags can still cause a loss. Wide boards scroll horizontally on small screens. Custom boards are for practice and do not enter the preset-difficulty rankings.
+Chording opens neighboring cells when the adjacent flag count matches the number. Incorrect flags can still cause a loss. The panel uses the available browser width, and square cells scale to their container. Wide boards take the full row on smaller desktop screens. Cells retain an 18 px minimum, so very wide boards on narrow phones still scroll instead of becoming unreadable; the scrolling hint appears only when needed. Keyboard focus is drawn above neighboring cells on every side. Custom boards are for practice and do not enter the preset-difficulty rankings.
 
 Progress and records are stored in the current browser for the current site origin; they do not synchronize across devices. The game remains playable when storage is unavailable. Legacy `MinesweeperRank` records can migrate on the same origin, but unfinished legacy boards cannot. Old `game.html` and `menu.html` URLs, including supported language and difficulty parameters, redirect to the new application.
 
@@ -168,7 +168,9 @@ On first visit, the primary browser language selects Chinese (`zh-*`) or Japanes
 
 The language flyout takes visual inspiration from [VitePress's translation control](https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/components/VPNavBarTranslations.vue), implemented here without Vue or another dependency. Click or press Enter/Space to open it, use arrows or Home/End to choose an option, and press Enter/Space to select. Escape returns focus to the trigger; Tab and outside clicks dismiss the menu.
 
-The speaker button beside the game title toggles sound and remembers the setting. Short Web Audio sine envelopes provide reveal, flag, unflag, button, win, and loss cues. These are original procedural sounds, not recordings or AI-generated audio files, and require no downloads. Sound is enabled by default but the audio context is created only after a user gesture; loading the page is silent. Muting, backgrounding, and hot-reload teardown cancel pending playback. A flood reveal produces one cue, and unsupported or blocked audio does not prevent play.
+The speaker button beside the game title toggles sound and remembers the setting. Short Web Audio sine envelopes provide reveal, flag, unflag, win, and loss cues, plus feedback for difficulty/record tabs, menu opening and dismissal, keyboard navigation, form edits, confirmations, and rejected actions. Navigation and typing use quieter notes. Gameplay cues take priority over incidental menu dismissal from the same gesture, while rapid repeats are bounded to avoid a wall of sound. Muting takes effect immediately and stays silent.
+
+These are original procedural sounds, not recordings or AI-generated audio files, and require no downloads. Sound is enabled by default but the audio context is created only after a user gesture; loading the page is silent. Backgrounding and hot-reload teardown cancel pending playback. A flood reveal produces one cue, and unsupported or blocked audio does not prevent play.
 
 ## Mine placement: shuffle positions, then select
 

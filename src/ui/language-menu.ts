@@ -1,4 +1,5 @@
 import type { Language } from '../types/localization.js'
+import type { InteractionCue } from '../types/audio.js'
 import { parseLanguage } from '../i18n.js'
 
 /** Owns the language flyout's focus, dismissal, and listener lifecycle. */
@@ -8,10 +9,15 @@ export class LanguageMenu {
   private readonly panel: HTMLElement
   private readonly options: readonly HTMLButtonElement[]
   private readonly onSelect: (language: Language) => void
+  private readonly onFeedback: (cue: InteractionCue) => void
   private readonly listeners = new AbortController()
 
   /** Bind the small menu independently of board shortcuts and application commands. */
-  constructor(root: HTMLElement, onSelect: (language: Language) => void) {
+  constructor(
+    root: HTMLElement,
+    onSelect: (language: Language) => void,
+    onFeedback: (cue: InteractionCue) => void,
+  ) {
     const trigger = root.querySelector<HTMLButtonElement>('.language-trigger')
     const panel = root.querySelector<HTMLElement>('[role="menu"]')
     if (!trigger || !panel) throw new Error('Language menu markup is incomplete')
@@ -21,6 +27,7 @@ export class LanguageMenu {
     this.panel = panel
     this.options = [...panel.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]')]
     this.onSelect = onSelect
+    this.onFeedback = onFeedback
 
     const options = { signal: this.listeners.signal }
     trigger.addEventListener('click', this.toggle, options)
@@ -31,7 +38,9 @@ export class LanguageMenu {
   }
 
   /** Hide the menu without stealing focus from an outside click or newly opened dialog. */
-  close(): void {
+  close(feedback = false): void {
+    if (feedback && !this.panel.hidden) this.onFeedback('dismiss')
+
     this.panel.hidden = true
     this.trigger.setAttribute('aria-expanded', 'false')
   }
@@ -48,15 +57,17 @@ export class LanguageMenu {
 
   /** Open at the selected language so keyboard and touch users receive the same context. */
   private open(): void {
+    this.onFeedback('tap')
     this.panel.hidden = false
     this.trigger.setAttribute('aria-expanded', 'true')
     this.focusOption(
       this.options.findIndex((option) => option.getAttribute('aria-checked') === 'true'),
+      false,
     )
   }
 
   /** Keep exactly one option in the tab order while arrow keys move within the menu. */
-  private focusOption(index: number): void {
+  private focusOption(index: number, feedback = true): void {
     const next = this.options[(index + this.options.length) % this.options.length]
 
     for (const option of this.options) {
@@ -64,12 +75,13 @@ export class LanguageMenu {
     }
 
     next?.focus()
+    if (next && feedback) this.onFeedback('navigate')
   }
 
   /** Toggle on native button activation, including Enter and Space. */
   private readonly toggle = (): void => {
     if (this.panel.hidden) this.open()
-    else this.close()
+    else this.close(true)
   }
 
   /** Decode only supported locale values before replacing any application markup. */
@@ -88,17 +100,21 @@ export class LanguageMenu {
 
   /** Support the standard menu keys without allowing them to reach board shortcuts. */
   private readonly handleKey = (event: KeyboardEvent): void => {
-    if (event.key === 'Tab' && !this.panel.hidden) {
+    if (event.key === 'Tab') {
       // Continue native tab navigation from the trigger after removing the menu's tab stop.
-      this.close()
-      this.focus()
+      if (!this.panel.hidden) {
+        this.close()
+        this.focus()
+      }
+
+      this.onFeedback('navigate')
       return
     }
 
     if (event.key === 'Escape' && !this.panel.hidden) {
       event.preventDefault()
       event.stopPropagation()
-      this.close()
+      this.close(true)
       this.focus()
       return
     }
@@ -131,6 +147,6 @@ export class LanguageMenu {
 
   /** Dismiss on an outside pointer action without interfering with its original target. */
   private readonly handleOutside = (event: PointerEvent): void => {
-    if (event.target instanceof Node && !this.root.contains(event.target)) this.close()
+    if (event.target instanceof Node && !this.root.contains(event.target)) this.close(true)
   }
 }

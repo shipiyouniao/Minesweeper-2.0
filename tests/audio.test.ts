@@ -1,10 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { act, createGame, PRESETS } from '../src/game/engine.js'
-import { cueForMove, notesForCue } from '../src/audio/cues.js'
+import { cueForMove, cuePriority, notesForCue } from '../src/audio/cues.js'
 import { BrowserSoundEffects } from '../src/platform/browser-sound-effects.js'
 
-test('rejected moves are silent, flags toggle audibly, and a flood reveal produces one cue', () => {
+test('unchanged states have no gameplay cue, flags toggle audibly, and a flood produces one cue', () => {
   const ready = createGame(PRESETS.easy, 31)
   const flagged = act(ready, { type: 'flag', index: 0 })
   const unflagged = act(flagged, { type: 'flag', index: 0 })
@@ -37,7 +37,19 @@ test('winning and losing replace the normal reveal cue', () => {
 })
 
 test('sound plans stay quiet, bounded, and short enough for interaction feedback', () => {
-  for (const cue of ['tap', 'reveal', 'flag', 'unflag', 'win', 'loss'] as const) {
+  for (const cue of [
+    'tap',
+    'navigate',
+    'dismiss',
+    'blocked',
+    'input',
+    'confirm',
+    'reveal',
+    'flag',
+    'unflag',
+    'win',
+    'loss',
+  ] as const) {
     const notes = notesForCue(cue)
     assert.ok(notes.length > 0 && notes.length <= 4)
 
@@ -49,6 +61,14 @@ test('sound plans stay quiet, bounded, and short enough for interaction feedback
       assert.ok(note.delay + note.duration <= 0.5)
     }
   }
+})
+
+test('gameplay and outcome feedback supersede navigation from the same gesture', () => {
+  assert.ok(cuePriority('reveal') > cuePriority('dismiss'))
+  assert.ok(cuePriority('flag') > cuePriority('navigate'))
+  assert.ok(cuePriority('confirm') > cuePriority('input'))
+  assert.ok(cuePriority('loss') > cuePriority('reveal'))
+  assert.equal(cuePriority('win'), cuePriority('loss'))
 })
 
 test('missing Web Audio does not interrupt gameplay, muting, or repeated disposal', () => {

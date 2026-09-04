@@ -1,5 +1,6 @@
 import type { Config, Difficulty, RankedDifficulty } from './game.js'
 import type { Language } from './localization.js'
+import type { InteractionCue } from './audio.js'
 
 /** Commands accepted by toolbar and dialog controls. */
 export type UiCommand =
@@ -15,6 +16,9 @@ export type UiCommand =
 
 /** Only these keys can request a board-focus movement. */
 export type NavigationKey = 'arrowleft' | 'arrowright' | 'arrowup' | 'arrowdown' | 'home' | 'end'
+
+/** Distinguish a handled board-edge key from an actual move or missing target. */
+export type NavigationResult = 'moved' | 'edge' | 'unavailable'
 
 /** Form fields become domain values before reaching the application controller. */
 export type FormSubmission =
@@ -45,6 +49,9 @@ export interface InputActions {
 
   /** Activate audio within the pointer gesture before a delayed touch action. */
   prepareAudio(): void
+
+  /** Emit intentional UI feedback without coupling input adapters to browser audio. */
+  feedback(cue: InteractionCue): void
 
   /** Apply a cell action using the selected input mode when omitted. */
   play(index: number, flag?: boolean): void

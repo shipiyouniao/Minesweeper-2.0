@@ -21,6 +21,8 @@ export class InputController {
     root.addEventListener('click', this.handleClick, options)
     root.addEventListener('contextmenu', this.handleContextMenu, options)
     root.addEventListener('submit', this.handleSubmit, options)
+    root.addEventListener('input', this.handleInput, options)
+    root.addEventListener('invalid', this.handleInvalid, { ...options, capture: true })
     root.addEventListener('focusin', this.handleFocus, options)
     root.addEventListener('keydown', this.handleKey, options)
     root.addEventListener('pointerdown', this.handlePointerDown, options)
@@ -47,6 +49,10 @@ export class InputController {
 
   /** Route delegated button clicks by their semantic data attribute. */
   private readonly handleClick = (event: MouseEvent): void => {
+    if (event.target instanceof Element && event.target.closest('a')) {
+      this.actions.feedback('tap')
+    }
+
     const target =
       event.target instanceof Element ? event.target.closest<HTMLElement>('button') : null
 
@@ -108,6 +114,18 @@ export class InputController {
     }
   }
 
+  /** Acknowledge edits to names and numeric settings without sounding on page rendering. */
+  private readonly handleInput = (event: Event): void => {
+    if (event.target instanceof HTMLInputElement) {
+      this.actions.feedback('input')
+    }
+  }
+
+  /** Native form validation prevents submit, so acknowledge rejected values here. */
+  private readonly handleInvalid = (): void => {
+    this.actions.feedback('blocked')
+  }
+
   /** Track cell focus so Tab returns to the player's last board position. */
   private readonly handleFocus = (event: FocusEvent): void => {
     const cell = this.cellTarget(event.target)
@@ -119,6 +137,14 @@ export class InputController {
 
   /** Handle shortcuts outside form controls and keep movement inside board bounds. */
   private readonly handleKey = (event: KeyboardEvent): void => {
+    // The language menu owns its keys; other Tab moves receive the same soft feedback.
+    if (
+      event.key === 'Tab' &&
+      !(event.target instanceof Element && event.target.closest('.language-picker'))
+    ) {
+      this.actions.feedback('navigate')
+    }
+
     if (
       event.defaultPrevented ||
       (event.target instanceof Element && event.target.closest('.language-picker')) ||

@@ -28,6 +28,16 @@ function note(frequency: number, delay = 0, duration = 0.09): Tone {
 /** Compose original, lightweight cues without recordings, downloads, or runtime randomness. */
 export function notesForCue(cue: SoundCue): readonly Tone[] {
   switch (cue) {
+    case 'navigate':
+      return [{ ...note(740, 0, 0.025), gain: 0.018 }]
+    case 'input':
+      return [{ ...note(620, 0, 0.025), gain: 0.015 }]
+    case 'dismiss':
+      return [{ ...note(440, 0, 0.05), endFrequency: 330, gain: 0.035 }]
+    case 'blocked':
+      return [{ ...note(240, 0, 0.055), gain: 0.035 }]
+    case 'confirm':
+      return [note(740, 0, 0.06), note(990, 0.04, 0.08)]
     case 'tap':
       return [{ ...note(520, 0, 0.045), gain: 0.04 }]
     case 'reveal':
@@ -40,5 +50,26 @@ export function notesForCue(cue: SoundCue): readonly Tone[] {
       return [note(523.25), note(659.25, 0.08), note(783.99, 0.16), note(1046.5, 0.24, 0.2)]
     case 'loss':
       return [{ ...note(180, 0, 0.24), endFrequency: 80, gain: 0.09 }]
+  }
+}
+
+/** Prefer action results over menu dismissal or key feedback from the same gesture. */
+export function cuePriority(cue: SoundCue): number {
+  switch (cue) {
+    case 'navigate':
+    case 'input':
+    case 'dismiss':
+      return 0
+    case 'tap':
+    case 'blocked':
+      return 1
+    case 'confirm':
+    case 'reveal':
+    case 'flag':
+    case 'unflag':
+      return 2
+    case 'win':
+    case 'loss':
+      return 3
   }
 }

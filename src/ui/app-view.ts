@@ -1,4 +1,5 @@
-import type { NavigationKey } from '../types/ui.js'
+import type { NavigationKey, NavigationResult } from '../types/ui.js'
+import type { InteractionCue } from '../types/audio.js'
 import type { SessionState } from '../types/session.js'
 import type { Language } from '../types/localization.js'
 import type { Score } from '../types/storage.js'
@@ -17,16 +18,20 @@ export class AppView {
   private board: BoardView | null = null
   private menu: LanguageMenu | null = null
   private readonly onLanguageChange: (language: Language) => void
+  private readonly onFeedback: (cue: InteractionCue) => void
+  private readonly resizing = new ResizeObserver(() => this.updateOverflowHint())
 
   /** Receive the mount point and notify the controller when a native dialog closes. */
   constructor(
     root: HTMLElement,
     onDialogClose: () => void,
     onLanguageChange: (language: Language) => void,
+    onFeedback: (cue: InteractionCue) => void,
   ) {
     this.root = root
     this.onDialogClose = onDialogClose
     this.onLanguageChange = onLanguageChange
+    this.onFeedback = onFeedback
   }
 
   /** Expose the browser's actual dialog state for keyboard input routing. */
@@ -42,11 +47,21 @@ export class AppView {
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
     document.title = `${messages.title} · Minesweeper 2.0`
     this.menu?.dispose()
+    this.resizing.disconnect()
     this.root.innerHTML = appTemplate(state, language, flagMode)
-    this.menu = new LanguageMenu(this.element('.language-picker'), this.onLanguageChange)
+    this.element('.layout').classList.toggle('wide-board', state.game.config.width > 20)
+    this.menu = new LanguageMenu(
+      this.element('.language-picker'),
+      this.onLanguageChange,
+      this.onFeedback,
+    )
     this.board = new BoardView(this.element('#board'), state.game.config, focusIndex)
+    this.resizing.observe(this.element('.board-viewport'))
+    this.resizing.observe(this.element('#board'))
+    this.updateOverflowHint()
 
     this.element<HTMLDialogElement>('#dialog').addEventListener('close', this.onDialogClose)
+    this.element<HTMLDialogElement>('#dialog').addEventListener('cancel', this.handleDialogCancel)
   }
 
   /** Update the board and controls from one consistent application snapshot. */
@@ -138,16 +153,28 @@ export class AppView {
   }
 
   /** Delegate arrow/Home/End navigation and report whether the key was consumed. */
-  navigate(index: number, key: NavigationKey): boolean {
-    return this.board?.navigate(index, key) ?? false
+  navigate(index: number, key: NavigationKey): NavigationResult {
+    return this.board?.navigate(index, key) ?? 'unavailable'
+  }
+
+  /** Native Escape dismissal has no command button, so acknowledge it at the DOM boundary. */
+  private readonly handleDialogCancel = (): void => {
+    this.onFeedback('dismiss')
   }
 
   /** Release the mounted DOM when the application is disposed or hot-reloaded. */
   dispose(): void {
+    this.resizing.disconnect()
     this.menu?.dispose()
     this.menu = null
     this.board = null
     this.root.replaceChildren()
+  }
+
+  /** Show the scrolling hint only when the minimum cell size actually requires overflow. */
+  private updateOverflowHint(): void {
+    const viewport = this.element('.board-viewport')
+    this.element('.scroll-hint').hidden = viewport.scrollWidth <= viewport.clientWidth + 1
   }
 
   /** Fail visibly when a template and its renderer disagree about a required element. */

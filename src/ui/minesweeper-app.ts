@@ -1,5 +1,5 @@
 import type { Difficulty, RankedDifficulty } from '../types/game.js'
-import type { SoundEffects } from '../types/audio.js'
+import type { InteractionCue, SoundEffects } from '../types/audio.js'
 import { cueForMove } from '../audio/cues.js'
 import type { Language } from '../types/localization.js'
 import type { GameRepository } from '../types/storage.js'
@@ -42,7 +42,7 @@ export class MinesweeperApp implements InputActions {
     this.language = language
     this.sounds = sounds
     this.recordMode = session.state.mode === 'custom' ? 'easy' : session.state.mode
-    this.view = new AppView(root, this.handleDialogClose, this.handleLanguageChange)
+    this.view = new AppView(root, this.handleDialogClose, this.handleLanguageChange, this.feedback)
     this.input = new InputController(root, this)
 
     this.mount(true)
@@ -58,6 +58,7 @@ export class MinesweeperApp implements InputActions {
   play(index: number, flag = this.flagMode): void {
     const before = this.session.state.game
     if (!this.session.play({ type: flag ? 'flag' : 'reveal', index })) {
+      this.sounds.play('blocked')
       return
     }
 
@@ -73,7 +74,9 @@ export class MinesweeperApp implements InputActions {
 
   /** Route named UI commands to a focused application operation. */
   command(action: UiCommand): void {
-    if (action !== 'toggle-sound') this.sounds.play('tap')
+    if (action !== 'toggle-sound') {
+      this.sounds.play(action === 'close' ? 'dismiss' : 'tap')
+    }
 
     switch (action) {
       case 'toggle-sound':
@@ -111,6 +114,7 @@ export class MinesweeperApp implements InputActions {
 
   /** Open custom configuration or switch to another difficulty's saved session. */
   selectDifficulty(value: Difficulty): void {
+    this.sounds.play('tap')
     if (value === 'custom') {
       this.showDialog(customTemplate(this.language, this.session.state.game.config))
       return
@@ -126,6 +130,7 @@ export class MinesweeperApp implements InputActions {
 
   /** Change the records tab without replacing the current game or dialog pause. */
   selectRecords(value: RankedDifficulty): void {
+    this.sounds.play('tap')
     this.recordMode = value
     this.showRecords()
   }
@@ -139,7 +144,7 @@ export class MinesweeperApp implements InputActions {
     const url = new URL(location.href)
     url.searchParams.set('lang', value)
     history.replaceState(null, '', url)
-    this.sounds.play('tap')
+    this.sounds.play('confirm')
     this.mount(false)
     this.view.focusLanguage()
   }
@@ -149,20 +154,28 @@ export class MinesweeperApp implements InputActions {
     this.sounds.unlock()
   }
 
+  /** Keep navigation and form feedback behind the same mute-aware audio port. */
+  readonly feedback = (cue: InteractionCue): void => {
+    this.sounds.play(cue)
+  }
+
   /** Validate user-entered values before passing them into session operations. */
   submit(submission: FormSubmission): void {
     if (submission.kind === 'custom') {
       const config = submission.config
 
       if (!validConfig(config)) {
+        this.sounds.play('blocked')
         this.view.showCustomError(translations[this.language].invalid)
         return
       }
 
       this.session.changeDifficulty('custom', config)
+      this.sounds.play('confirm')
       this.mount(true)
     } else {
       this.session.renameRecord(submission.name)
+      this.sounds.play('confirm')
       this.view.closeDialog()
     }
   }
@@ -174,7 +187,13 @@ export class MinesweeperApp implements InputActions {
 
   /** Forward navigation while keeping keyboard geometry independent of game rules. */
   navigate(index: number, key: NavigationKey): boolean {
-    return this.view.navigate(index, key)
+    const result = this.view.navigate(index, key)
+
+    if (result !== 'unavailable') {
+      this.sounds.play(result === 'moved' ? 'navigate' : 'blocked')
+    }
+
+    return result !== 'unavailable'
   }
 
   /** Pause and save on backgrounding, then show the privacy cover on return. */

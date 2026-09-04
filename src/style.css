@@ -201,16 +201,19 @@ nav {
   color: var(--blue);
 }
 .layout {
-  max-width: 1080px;
+  max-width: 1480px;
   margin: 65px auto 64px;
   padding: 0 32px;
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 85px;
+  grid-template-columns: clamp(200px, 22vw, 280px) minmax(0, 1fr);
+  gap: clamp(32px, 5vw, 72px);
   align-items: start;
 }
 .introduction {
   padding-top: 40px;
+}
+.layout.wide-board {
+  max-width: 1600px;
 }
 .eyebrow {
   display: flex;
@@ -386,6 +389,8 @@ h1 {
   min-height: 260px;
 }
 .board-viewport {
+  /* Size cells against usable space, excluding the viewport's padding. */
+  container-type: inline-size;
   overflow: auto;
   overscroll-behavior: contain;
   padding: 28px 20px;
@@ -396,27 +401,32 @@ h1 {
   visibility: hidden;
 }
 .board {
-  --cell: 40px;
+  --cell-max: 40px;
+  --gap: 4px;
+  --cell: clamp(
+    18px,
+    calc((100cqi - (var(--columns) - 1) * var(--gap) - 1px) / var(--columns)),
+    var(--cell-max)
+  );
   width: max-content;
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--gap);
+  isolation: isolate;
   user-select: none;
 }
 .board-row {
   display: grid;
   grid-template-columns: repeat(var(--columns), var(--cell));
-  gap: 4px;
+  gap: var(--gap);
 }
 .board.dense {
-  --cell: 28px;
-  gap: 3px;
-}
-.board.dense .board-row {
-  gap: 3px;
+  --cell-max: 32px;
+  --gap: 2px;
 }
 .cell {
+  position: relative;
   width: var(--cell);
   height: var(--cell);
   padding: 0;
@@ -428,10 +438,18 @@ h1 {
   border: 1px solid #dfe3dc;
   border-bottom: 3px solid #d8ddd4;
   color: var(--blue);
-  font: 600 17px var(--mono);
+  font: 600 clamp(11px, calc(var(--cell) * 0.48), 17px) var(--mono);
+  scroll-margin: 8px;
   touch-action: pan-x pan-y;
   -webkit-touch-callout: none;
   transition: background 0.12s;
+}
+.cell:focus-visible {
+  /* Paint above later cells and rows so every side of the focus ring stays visible. */
+  z-index: 2;
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 1px var(--surface);
 }
 .cell.hidden:hover {
   background: #d8dfd3;
@@ -452,8 +470,8 @@ h1 {
 }
 .cell.flagged .icon {
   fill: #3457db15;
-  width: 21px;
-  height: 21px;
+  width: min(21px, calc(var(--cell) * 0.65));
+  height: min(21px, calc(var(--cell) * 0.65));
 }
 .cell.mine {
   color: #686e6b;
@@ -491,12 +509,11 @@ h1 {
   color: #555b65;
 }
 .board.dense .cell {
-  font-size: 13px;
   border-radius: 3px;
 }
 .board.dense .icon {
-  width: 16px;
-  height: 16px;
+  width: min(18px, calc(var(--cell) * 0.65));
+  height: min(18px, calc(var(--cell) * 0.65));
 }
 .status-line {
   display: flex;
@@ -958,11 +975,8 @@ input {
     margin-bottom: 7px;
   }
   .board {
-    --cell: 32px;
-    gap: 3px;
-  }
-  .board-row {
-    gap: 3px;
+    --cell-max: 32px;
+    --gap: 3px;
   }
   .board-viewport {
     padding-block: 16px;
@@ -1130,26 +1144,20 @@ input {
     font-size: 9px;
   }
   .board {
-    --cell: clamp(24px, 7.5vw, 40px);
-    gap: 3px;
-  }
-  .board-row {
-    gap: 3px;
+    --gap: 3px;
   }
   .board-viewport {
-    padding: 23px 14px;
+    padding: 23px 8px;
   }
   .board.dense {
-    --cell: 28px;
-    margin-inline: 0;
+    --gap: 1px;
   }
   .cell {
-    font-size: 15px;
     border-radius: 4px;
   }
   .cell .icon {
-    width: 18px;
-    height: 18px;
+    width: min(18px, calc(var(--cell) * 0.65));
+    height: min(18px, calc(var(--cell) * 0.65));
   }
   .status-line {
     padding: 11px 14px;
@@ -1186,6 +1194,16 @@ input {
   }
   .custom-fields {
     gap: 8px;
+  }
+}
+/* Give wide boards the full row before their cells reach the minimum size. */
+@media (min-width: 801px) and (max-width: 1250px) {
+  .layout.wide-board {
+    display: block;
+    max-width: 1200px;
+  }
+  .wide-board .introduction {
+    display: none;
   }
 }
 @media (pointer: coarse) {

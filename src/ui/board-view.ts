@@ -1,4 +1,4 @@
-import type { NavigationKey } from '../types/ui.js'
+import type { NavigationKey, NavigationResult } from '../types/ui.js'
 import type { Config, Game } from '../types/game.js'
 import type { Messages } from '../types/localization.js'
 import { cellContent, moveFocus } from './presentation.js'
@@ -67,16 +67,18 @@ export class BoardView {
   }
 
   /** Apply a recognized navigation key and let the browser scroll the cell into view. */
-  navigate(index: number, key: NavigationKey): boolean {
+  navigate(index: number, key: NavigationKey): NavigationResult {
     const next = moveFocus(this.config, index, key)
     const cell = this.cells[next]
 
     if (!cell) {
-      return false
+      return 'unavailable'
     }
 
+    if (next === index) return 'edge'
+
     cell.focus({ preventScroll: false })
-    return true
+    return 'moved'
   }
 
   /** Allocate rows and buttons once per board instead of rebuilding them on each move. */

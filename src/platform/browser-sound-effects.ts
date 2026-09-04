@@ -1,5 +1,5 @@
 import type { AudioVoice, SoundCue, SoundEffects } from '../types/audio.js'
-import { notesForCue } from '../audio/cues.js'
+import { cuePriority, notesForCue } from '../audio/cues.js'
 import { scheduleTone } from './audio-synthesis.js'
 
 /** Owns a lazy audio context; the application remains playable without Web Audio. */
@@ -10,6 +10,7 @@ export class BrowserSoundEffects implements SoundEffects {
   private disposed = false
   private generation = 0
   private lastStart = -Infinity
+  private lastCue: SoundCue = 'tap'
 
   /** Read the saved preference without creating a context or starting playback. */
   constructor(enabled: boolean) {
@@ -103,10 +104,17 @@ export class BrowserSoundEffects implements SoundEffects {
   private schedule(context: AudioContext, cue: SoundCue): void {
     const terminal = cue === 'win' || cue === 'loss'
 
+    if (context.currentTime - this.lastStart < 0.035) {
+      if (cuePriority(cue) <= cuePriority(this.lastCue)) return
+
+      // An outside menu click can also reveal a cell: its gameplay cue must win.
+      this.stop()
+    }
+
     if (terminal) this.stop()
-    if (context.currentTime - this.lastStart < 0.035) return
 
     this.lastStart = context.currentTime
+    this.lastCue = cue
 
     for (const tone of notesForCue(cue)) {
       // Eight quiet voices leave headroom even during rapid flagging.
