@@ -393,7 +393,13 @@
 .inventory-tool:active {
   cursor: grabbing;
 }
-.inventory-tool:hover:not(:disabled),
+.inventory-tool:hover:not(:disabled):not([aria-pressed='true']) {
+  background: var(--surface-alt);
+}
+.inventory-tool:focus-visible {
+  outline: 2px dashed var(--muted);
+  outline-offset: 4px;
+}
 .inventory-tool[aria-pressed='true'] {
   border-color: var(--blue);
   background: #eef2ff;
