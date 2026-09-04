@@ -1,4 +1,4 @@
-# Inter-floor relic selection and scrolling
+# Expedition dialogs and scrolling
 
 Clearing an ordinary floor or a non-final boss room opens a relic dialog over the completed board. Each choice includes its existing artwork, name and full effect. Selecting a card claims that relic and advances exactly once. The Archaeologist's fourth offer uses a balanced two-column layout; narrow screens stack compact cards and scroll within the dialog.
 
@@ -8,7 +8,13 @@ The native modal keeps background controls inert. Initial focus announces the ti
 
 ## Presentation ownership
 
-`RelicDialog` owns the native dialog, automatic opening and focus cleanup. `VariantView` passes the current run and visibility state to it after painting the board. `VariantApp` permits relic/next-floor commands from this dialog while retaining the modal guards for board actions and other commands. Pure `relicRewardTemplate` reuses the localized relic catalog and generated sprites. Session and domain reward rules are unchanged; no save migration is needed.
+`ExpeditionDialog` owns the native dialog, automatic opening and focus cleanup for rewards and results. `VariantView` passes the current run and visibility state to it after painting the board. `VariantApp` permits relic/next-floor commands from the reward presentation and returning to camp from the result presentation, while retaining other modal guards. Pure templates reuse the localized relic catalog, settlement calculation and generated sprites. Session and domain reward rules are unchanged; no save migration is needed.
+
+## Expedition settlement
+
+Victory, defeat and extraction automatically open a result dialog showing the outcome, reached floor, supplies brought back and the existing base/bonus breakdown. Returning to camp closes the dialog and focuses the camp heading. Escape or close leaves a **View results** button on the completed board so the player can inspect the board and reopen the same result.
+
+Settlement remains atomic in `ExpeditionSession.dispatch`: supplies and the record are saved and the journal is cleared before the dialog appears. Dismissal, reopening and returning to camp cannot award currency a second time. Reloading a completed expedition opens the camp with its saved result record; pending inter-floor rewards still reopen after reload. The modal deliberately does not invent a second persisted settlement state.
 
 ## Board wheel behavior
 
@@ -26,7 +32,7 @@ Prepare with `npm test`, `npm run build`, and `npm run preview -- --host 127.0.0
 - `BROWSER_CHANNEL`: installed browser channel, such as `msedge`; otherwise use Playwright's Chromium.
 - `GAME_URL`: site base URL, including the trailing slash. The default is `http://127.0.0.1:4173/Minesweeper-2.0/`.
 
-The checks cover ordinary/boss transitions, three/four/zero offers, native keyboard containment, dismissal and reopening, exactly-once selection, reload recovery, pause/resume, three languages, widths of 320/760/1280/3840 pixels, all three modes' wheel behavior, and both enlarged-board scroll boundaries. Browser errors fail the run. Screenshots are written under `.native/reward-ui/`; `--before` captures the old inline layout when pointed at its release. The regular unit suite and both compiler pipelines remain separate required checks.
+The checks cover ordinary/boss transitions, three/four/zero offers, native keyboard containment, dismissal and reopening, exactly-once selection, reload recovery, pause/resume, three languages, widths of 320/760/1280/3840 pixels, all three modes' wheel behavior, and both enlarged-board scroll boundaries. Victory, defeat and extraction checks additionally verify saved supplies, a single result record, cleared journals and no duplicate payout on modal/camp/reload navigation. Browser errors fail the run. Screenshots are written under `.native/reward-ui/`; `--before` captures the old inline layout when pointed at its release. The regular unit suite and both compiler pipelines remain separate required checks.
 
 ## Screenshots
 
@@ -39,3 +45,13 @@ Current desktop and narrow-screen dialog:
 ![Relic dialog on desktop](screenshots/relic-dialog-desktop.png)
 
 ![Relic dialog on a narrow screen](screenshots/relic-dialog-mobile.png)
+
+Settlement on desktop and a narrow screen:
+
+Previous inline result banner, from release `d826812` (captured with `--before-result`):
+
+![Previous inline expedition settlement](screenshots/expedition-result-before.png)
+
+![Expedition settlement on desktop](screenshots/expedition-result-desktop.png)
+
+![Expedition settlement on a narrow screen](screenshots/expedition-result-mobile.png)

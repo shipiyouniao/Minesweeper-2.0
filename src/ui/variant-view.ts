@@ -18,7 +18,7 @@ import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import { tacticalCopy, tacticalPlanCopy } from './tactical-copy.js'
 import { bossSprite } from './tactical-sprites.js'
 import { markBroodCell } from './brood-board.js'
-import { RelicDialog } from './relic-dialog.js'
+import { ExpeditionDialog } from './expedition-dialog.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -27,7 +27,7 @@ export class VariantView {
   private readonly content: HTMLElement
   private readonly status: HTMLElement
   private readonly dialog: HTMLDialogElement
-  private readonly rewards: RelicDialog
+  private readonly expeditionDialog: ExpeditionDialog
   private readonly menu: LanguageMenu
   private a: BoardView | null = null
   private b: BoardView | null = null
@@ -67,24 +67,29 @@ export class VariantView {
     this.content = content
     this.status = status
     this.dialog = dialog
-    this.rewards = new RelicDialog(root, language)
+    this.expeditionDialog = new ExpeditionDialog(root, language)
     this.menu = new LanguageMenu(picker, onLanguage, feedback)
     dialog.addEventListener('cancel', () => feedback('dismiss'), { signal: this.listeners.signal })
   }
 
   /** Expose modal state to application guards, including native Escape dismissal. */
   get dialogOpen(): boolean {
-    return this.dialog.open || this.rewards.open
+    return this.dialog.open || this.expeditionDialog.open
   }
 
   /** Distinguish reward selection from help and destructive-action confirmation. */
   get rewardOpen(): boolean {
-    return this.rewards.open
+    return this.expeditionDialog.rewardOpen
   }
 
-  /** Reopen a dismissed inter-floor reward without changing the session. */
-  showRewards(): void {
-    if (this.expedition) this.rewards.show(this.expedition)
+  /** Distinguish an already settled expedition from pending relic selection. */
+  get resultOpen(): boolean {
+    return this.expeditionDialog.resultOpen
+  }
+
+  /** Reopen dismissed rewards or settlement without changing the session. */
+  showExpeditionDialog(): void {
+    if (this.expedition) this.expeditionDialog.show(this.expedition)
   }
 
   /** Replace content and restore a still-existing control or cell focus after repaint. */
@@ -143,7 +148,7 @@ export class VariantView {
         .querySelector<HTMLElement>('.variant-status, .tactical-event, h1')
         ?.focus({ preventScroll: true })
 
-    this.rewards.render(expedition, this.content.hidden !== false)
+    this.expeditionDialog.render(expedition, this.content.hidden !== false)
   }
 
   /** Update availability warnings and accessible sound/pause state independently of the board. */
@@ -354,7 +359,7 @@ export class VariantView {
   /** Close a pending confirmation without replacing its trigger or board. */
   closeDialog(): void {
     this.dialog.close()
-    this.rewards.close()
+    this.expeditionDialog.close()
   }
 
   /** Dismiss transient menus when the page is backgrounded. */
@@ -396,7 +401,7 @@ export class VariantView {
     this.resize?.disconnect()
     this.listeners.abort()
     this.menu.dispose()
-    this.rewards.dispose()
+    this.expeditionDialog.dispose()
     this.dialog.close()
     this.root.replaceChildren()
   }

@@ -6,6 +6,7 @@ import {
   actExpedition,
   createExpedition,
   frontierCells,
+  expeditionEarnings,
 } from '../../.native/tests/src/game/expedition.js'
 import { walkingPath } from '../../.native/tests/src/game/dungeon-path.js'
 import { defeatEncounter } from '../../.native/tests/tests/encounter-helpers.js'
@@ -18,7 +19,7 @@ const output = new URL('../../.native/reward-ui/', import.meta.url)
 const storageKey = 'minesweeper.variants.v1.expedition'
 
 /** Build real accepted journals; only the fixture driver uses mine truth to reach an exit. */
-function fixture(profession = 'explorer', floor = 1, encounters = 'brood-v1') {
+function fixture(profession = 'explorer', floor = 1, encounters = 'brood-v1', phase = 'reward') {
   const departure = {
     seed: 43,
     difficulty: 'abyss',
@@ -42,7 +43,7 @@ function fixture(profession = 'explorer', floor = 1, encounters = 'brood-v1') {
   })
   let previous = save()
   for (let step = 0; step < 5000; step++) {
-    if (run.phase === 'reward' && run.floor === floor)
+    if (run.phase === phase && run.floor === floor)
       return { run, save: save(), previous, last: actions.at(-1) }
     const batch =
       run.phase === 'boss'
@@ -52,12 +53,19 @@ function fixture(profession = 'explorer', floor = 1, encounters = 'brood-v1') {
               ? run.offers.length
                 ? { type: 'relic', relic: run.offers[0] }
                 : { type: 'descend' }
-              : walkingPath(run, run.exit)
-                ? { type: 'move', index: run.exit }
-                : {
+              : phase === 'lost'
+                ? {
                     type: 'reveal',
-                    index: [...frontierCells(run)].find((i) => !run.game.cells[i].mine),
-                  },
+                    index:
+                      [...frontierCells(run)].find((i) => run.game.cells[i].mine) ??
+                      [...frontierCells(run)][0],
+                  }
+                : walkingPath(run, run.exit)
+                  ? { type: 'move', index: run.exit }
+                  : {
+                      type: 'reveal',
+                      index: [...frontierCells(run)].find((i) => !run.game.cells[i].mine),
+                    },
           ]
     for (const action of batch) {
       previous = save()
@@ -74,6 +82,8 @@ const regular = fixture()
 const archaeologist = fixture('archaeologist')
 const boss = fixture('explorer', 4)
 const exhausted = fixture('explorer', 7, null)
+const victory = fixture('explorer', 12, 'brood-v1', 'won')
+const defeat = fixture('explorer', 1, 'brood-v1', 'lost')
 assert.equal(exhausted.run.offers.length, 0)
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({
@@ -98,6 +108,7 @@ const page = await context.newPage()
 const errors = []
 page.on('pageerror', (error) => errors.push(error.message))
 const modal = page.locator('.relic-dialog[open]')
+const result = page.locator('.expedition-result-dialog[open]')
 
 /** Load an isolated save after the old page has checkpointed itself. */
 async function seed(save, language = 'en') {
@@ -114,6 +125,11 @@ async function journal() {
   return page.evaluate((key) => JSON.parse(localStorage.getItem(key)).journal, storageKey)
 }
 
+/** Read settled totals to catch duplicate payouts on modal reopening and camp navigation. */
+async function settledSave() {
+  return page.evaluate((key) => JSON.parse(localStorage.getItem(key)), storageKey)
+}
+
 /** Wait for the browser's asynchronous scrolling to produce the expected observation. */
 async function wheelOver(viewport, delta) {
   await viewport.hover()
@@ -122,13 +138,18 @@ async function wheelOver(viewport, delta) {
 }
 
 try {
-  if (process.argv.includes('--before')) {
-    await seed(regular.save, 'zh')
+  if (process.argv.includes('--before') || process.argv.includes('--before-result')) {
+    const resultCapture = process.argv.includes('--before-result')
+    await seed(resultCapture ? regular.previous : regular.save, 'zh')
+    if (resultCapture) {
+      await page.locator('[data-control="retreat"]').click()
+      await page.locator('dialog[open] [data-control="confirm"]').click()
+    }
     await page.screenshot({
-      path: fileURLToPath(new URL('before.png', output)),
+      path: fileURLToPath(new URL(resultCapture ? 'result-before.png' : 'before.png', output)),
       fullPage: true,
     })
-    console.log('Captured previous inline reward layout')
+    console.log('Captured previous expedition presentation')
   } else {
     // The actual exit click must open the dialog without a page reload.
     await seed(regular.previous)
@@ -211,7 +232,54 @@ try {
     await modal.waitFor({ state: 'hidden' })
     assert.equal((await journal()).actions.at(-1).type, 'descend')
 
+    // Victory and defeat settle before their dialog opens; closing is presentation only.
+    for (const finished of [victory, defeat]) {
+      await seed(finished.previous)
+      if (finished.last.type === 'attack') await page.locator('[data-control="attack"]').click()
+      else await page.locator(`[data-side="a"] [data-cell="${finished.last.index}"]`).click()
+      await result.waitFor()
+      const settled = await settledSave()
+      assert.equal(settled.journal, null)
+      assert.equal(settled.camp.supplies, expeditionEarnings(finished.run))
+      assert.equal(settled.records.length, 1)
+      assert.equal(settled.records[0].outcome, finished.run.phase)
+      assert.equal(await page.locator('.variant-content .result-banner').count(), 0)
+      await page.keyboard.press('Escape')
+      await page.waitForFunction(() => document.activeElement?.matches('[data-control="result"]'))
+      await page.locator('[data-control="result"]').click()
+      await result.waitFor()
+      assert.deepEqual(await settledSave(), settled)
+      await result.locator('[data-control="camp"]').focus()
+      await page.keyboard.press('Enter')
+      await page.waitForFunction(() => document.activeElement?.matches('.camp-panel h1'))
+      await page.reload()
+      assert.equal(await result.count(), 0)
+      assert.deepEqual(await settledSave(), settled)
+    }
+    for (const language of ['en', 'zh', 'ja']) {
+      await seed(regular.previous, language)
+      await page.locator('[data-control="retreat"]').click()
+      await page.locator('dialog[open] [data-control="confirm"]').click()
+      await result.waitFor()
+      const settled = await settledSave()
+      assert.equal(settled.records[0].outcome, 'retreated')
+      assert.equal(settled.journal, null)
+      assert.equal(settled.records.length, 1)
+      assert.ok(await result.evaluate((el) => el.scrollWidth <= el.clientWidth + 1))
+      if (language === 'zh') {
+        await page.setViewportSize({ width: 1280, height: 900 })
+        await page.screenshot({ path: fileURLToPath(new URL('result-desktop.png', output)) })
+        await page.setViewportSize({ width: 320, height: 480 })
+        await page.screenshot({ path: fileURLToPath(new URL('result-mobile.png', output)) })
+      }
+      await result.locator('[data-control="cancel"]').click()
+      await page.reload()
+      assert.equal(await result.count(), 0)
+      assert.deepEqual(await settledSave(), settled)
+    }
+
     // Fit boards must pass wheel scrolling to the page in all three modes.
+    await seed(exhausted.previous)
     for (const mode of ['classic', 'twin', 'expedition']) {
       await page.goto(`${base}?ruleset=${mode}&lang=en`)
       await page.setViewportSize({ width: 375, height: 420 })
@@ -256,6 +324,7 @@ try {
         languages: 3,
         widths: [320, 760, 1280, 3840],
         ordinaryExit: true,
+        settlements: ['won', 'lost', 'retreated'],
         bossExit: true,
         recovery: true,
         keyboard: true,
