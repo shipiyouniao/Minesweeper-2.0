@@ -1,10 +1,10 @@
+import { upgradeCost } from './camp-progression.js'
 import {
-  upgradeCost,
   TREASURE_SUPPLIES,
   PURSE_SUPPLIES,
   EXIT_SUPPLIES,
-  VICTORY_SUPPLIES,
-} from './camp-progression.js'
+  expeditionReward,
+} from './expedition-rewards.js'
 import { damageVitality, healVitality } from './vitality.js'
 import { hasExpeditionHealth } from './expedition-rules.js'
 import { relicPool } from './relic-packs.js'
@@ -326,9 +326,5 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
 
 /** Settle secured loot: success/extraction retain everything, defeat retains a bounded fraction. */
 export function expeditionEarnings(run: Expedition): number {
-  if (run.phase === 'won') return run.loot + VICTORY_SUPPLIES
-  if (run.phase === 'retreated') return run.loot
-  if (run.phase === 'lost')
-    return Math.floor(run.loot * (run.relics.includes('salvage') ? 0.75 : 0.5))
-  return 0
+  return expeditionReward(run).total
 }

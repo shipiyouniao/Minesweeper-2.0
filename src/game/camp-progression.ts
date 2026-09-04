@@ -1,11 +1,16 @@
 import { VARIANT_TIERS } from './variant-difficulty.js'
 import type { Camp, Upgrade } from '../types/variants.js'
 import type { CampFunding, CampStage } from '../types/camp-progression.js'
+import type { VariantTier } from '../types/variant-difficulty.js'
+import {
+  TREASURE_SUPPLIES,
+  PURSE_SUPPLIES,
+  EXIT_SUPPLIES,
+  VICTORY_SUPPLIES,
+  difficultyRewardPercent,
+  scaleSupplies,
+} from './expedition-rewards.js'
 
-export const TREASURE_SUPPLIES = 6
-export const PURSE_SUPPLIES = 9
-export const EXIT_SUPPLIES = 12
-export const VICTORY_SUPPLIES = 30
 export const UPGRADES: readonly Upgrade[] = [
   'surveyor',
   'engineer',
@@ -35,7 +40,7 @@ export function upgradeCost(upgrade: Upgrade): number {
     case 'workshop':
       return 1200
     case 'archive':
-      return 10000
+      return 7500
   }
 }
 
@@ -67,7 +72,12 @@ export function maximumExpeditionSupplies(floors: number): number {
 
 /** Use the longest released tier for an honest lower bound, never an average-earnings promise. */
 export function maximumRunSupplies(): number {
-  return Math.max(...VARIANT_TIERS.map((tier) => maximumExpeditionSupplies(tier.floors)))
+  return Math.max(...VARIANT_TIERS.map(maximumDifficultySupplies))
+}
+
+/** Combine the base loot ceiling with the current departure's difficulty rate. */
+export function maximumDifficultySupplies(tier: VariantTier): number {
+  return scaleSupplies(maximumExpeditionSupplies(tier.floors), difficultyRewardPercent(tier.id))
 }
 
 /** Show the next unowned facility without writing new counters or changing migrated currency. */

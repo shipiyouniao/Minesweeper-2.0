@@ -30,6 +30,8 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  /** Missing reward revision preserves historical settlement amounts. */
+  readonly rewards?: 'difficulty-v1'
   /** Persist generation and relic rules; omitted direct inputs retain the 9 × 9 scouting layout. */
   readonly rules?: 'original' | 'scouting' | 'difficulty-v1' | 'health-v1' | 'relics-v1'
   /** Only relics-v1 snapshots contain purchased packs; older reward pools remain unchanged. */

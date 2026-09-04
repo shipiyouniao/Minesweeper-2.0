@@ -4,6 +4,7 @@ import {
   campFunding,
   maximumExpeditionSupplies,
   maximumRunSupplies,
+  maximumDifficultySupplies,
   upgradeCost,
   UPGRADES,
 } from '../src/game/camp-progression.js'
@@ -46,20 +47,21 @@ function clearWithTreasures(initial: Expedition): Expedition {
 }
 
 test('prices offer two early professions, a middle milestone and a long-term archive goal', () => {
-  assert.equal(maximumRunSupplies(), 489)
+  assert.equal(maximumRunSupplies(), 2200)
   assert.deepEqual(
     VARIANT_TIERS.map((tier) => maximumExpeditionSupplies(tier.floors)),
     [138, 216, 294, 372, 489],
   )
-  assert.deepEqual(UPGRADES.map(upgradeCost), [40, 60, 100, 250, 500, 900, 1200, 10000])
+  assert.deepEqual(UPGRADES.map(upgradeCost), [40, 60, 100, 250, 500, 900, 1200, 7500])
+  assert.deepEqual(VARIANT_TIERS.map(maximumDifficultySupplies), [276, 540, 882, 1302, 2200])
   const earlyCost = upgradeCost('surveyor') + upgradeCost('engineer')
   assert.equal(earlyCost, 100)
   // Even a three-floor win without a purse can afford both roles after collecting its chests.
   assert.ok(earlyCost <= 3 * (3 * 6 + 12) + 30)
-  for (const tier of VARIANT_TIERS)
-    assert.ok(upgradeCost('archive') >= 20 * maximumExpeditionSupplies(tier.floors))
-  assert.equal(Math.ceil(upgradeCost('workshop') / maximumRunSupplies()), 3)
-  assert.equal(Math.ceil(upgradeCost('archive') / maximumRunSupplies()), 21)
+  // Even ten Abyss wins that skip every optional chest can afford the most expensive item.
+  const abyssMinimum = Math.floor((12 * 12 + 30) * 4.5)
+  assert.equal(Math.ceil(upgradeCost('archive') / abyssMinimum), 10)
+  assert.equal(Math.ceil(upgradeCost('archive') / maximumRunSupplies()), 4)
 })
 
 test('actual legal runs stay within the bound without capping or scaling earned loot', () => {
@@ -136,8 +138,36 @@ test('funding goals advance after purchases and report exact remaining money and
   const workshop = buyUpgrade({ ...themed, supplies: 1200 }, 'workshop')
   assert.equal(campFunding(workshop)?.upgrade, 'archive')
   assert.equal(campFunding(workshop)?.stage, 'late')
-  assert.equal(campFunding(workshop)?.minimumRuns, 21)
+  assert.equal(campFunding(workshop)?.minimumRuns, 4)
   assert.equal(campFunding({ ...EMPTY_CAMP, upgrades: UPGRADES }), null)
+})
+
+test('new full expeditions pay increasing difficulty rewards within the published ceilings', () => {
+  let previous = 0
+  for (const tier of VARIANT_TIERS) {
+    let run = createExpedition({
+      rules: 'relics-v1',
+      rewards: 'difficulty-v1',
+      packs: [],
+      difficulty: tier.id,
+      seed: 0,
+      profession: 'explorer',
+      equipment: [],
+      archive: false,
+    })
+    for (let floor = 1; floor <= tier.floors; floor++) {
+      run = clearWithTreasures(run)
+      assert.ok(run.phase === 'reward' || run.phase === 'won')
+      if (run.phase === 'won') break
+      const relic = run.offers.includes('purse') ? 'purse' : run.offers[0]
+      run = actExpedition(run, relic ? { type: 'relic', relic } : { type: 'descend' })
+    }
+    assert.equal(run.phase, 'won')
+    const earned = expeditionEarnings(run)
+    assert.ok(earned > previous)
+    assert.ok(earned <= maximumDifficultySupplies(tier))
+    previous = earned
+  }
 })
 
 test('existing money and unlocks survive reload, with new purchases settled at the current price', () => {

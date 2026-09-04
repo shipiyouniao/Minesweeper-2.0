@@ -262,7 +262,7 @@ test('extraction settles all collected loot and death uses the advertised salvag
   clearSessionFloor(session)
   const loot = session.run?.loot ?? 0
   assert.ok(session.dispatch({ type: 'retreat' }))
-  assert.equal(session.camp.supplies, loot)
+  assert.equal(session.camp.supplies, Math.floor(loot * 2.5))
   assert.equal(session.camp.completed, 0)
   const run = createExpedition(departure)
   assert.equal(expeditionEarnings({ ...run, loot: 11, phase: 'lost', relics: ['salvage'] }), 8)

@@ -4,6 +4,8 @@
 
 **New game modes:** choose from five difficulty tiers and play a 3–12-floor **Expedition** with relic builds, permanent camp unlocks, professions and equipment. Choose among eight camp purchases, including four [relic theme packs](docs/relic-packs.md) that expand the reward pool to fourteen effects. Track savings along a stepped [pricing curve](docs/camp-progression.md). Start with 2 HP, absorb hits with shields, and recover 1 HP at each exit. Walk a generated explorer through connected floors, collect chests, probe 3×3 areas for locked mine confirmations or scan whole rows, and click the stairs to advance. Or solve **Twin boards**, where matching coordinates cannot both contain mines. Classic mode retains its own difficulties and records. See the [health and replay rules](docs/expedition-health.md), [difficulty rules](docs/variant-difficulties.md) and [expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). Read the [mode design and roadmap](docs/game-modes.md) for complete rules and the approved Sonar, Survey and Tides plans.
 
+Difficulty-based expedition income and authored balance scenarios are documented in [the reward table](docs/expedition-rewards.md).
+
 A playable Minesweeper game and a practical testbed for the **TypeScript 7 native compiler**. This repository revisits a first-year university project with a minimal interface, original artwork, a deterministic game engine, and a native TypeScript development workflow.
 
 **[Play in your browser →](https://shipiyouniao.github.io/Minesweeper-2.0/)** · [Compiler experiment notes](docs/typescript7.md) · [Captured benchmark results](docs/typescript7-benchmark.json)

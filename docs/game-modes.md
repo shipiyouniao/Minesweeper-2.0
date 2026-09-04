@@ -78,20 +78,20 @@ Charges/relics carry between floors and disappear when the run ends. Scanned row
 
 ### Permanent camp growth
 
-| Facility          | Cost   | Effect                                           |
-| ----------------- | ------ | ------------------------------------------------ |
-| Surveyor training | 40     | Unlock Surveyor                                  |
-| Engineer training | 60     | Unlock Engineer                                  |
-| Workshop          | 1,200  | Unlock departure equipment                       |
-| Relic archive     | 10,000 | Add Exit compass and Salvage seal to future runs |
-| Surveyor notes    | 100    | Add Field notes and Rangefinder                  |
-| Guardian crests   | 250    | Add Reactive shell and Rescue ribbon             |
-| Survival charms   | 500    | Add Field dressing and Second wind               |
-| Prospector seals  | 900    | Add Supply cache and Cache guard                 |
+| Facility          | Cost  | Effect                                           |
+| ----------------- | ----- | ------------------------------------------------ |
+| Surveyor training | 40    | Unlock Surveyor                                  |
+| Engineer training | 60    | Unlock Engineer                                  |
+| Workshop          | 1,200 | Unlock departure equipment                       |
+| Relic archive     | 7,500 | Add Exit compass and Salvage seal to future runs |
+| Surveyor notes    | 100   | Add Field notes and Rangefinder                  |
+| Guardian crests   | 250   | Add Reactive shell and Rescue ribbon             |
+| Survival charms   | 500   | Add Field dressing and Second wind               |
+| Prospector seals  | 900   | Add Supply cache and Cache guard                 |
 
 Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
 
-Prices form a stepped curve: both early professions cost 100 supplies together and can be bought after one rewarding expedition; the workshop is a middle milestone; the 10,000-supply archive is a long-term goal requiring at least 21 maximally profitable runs from zero savings. Loot is not capped or reduced. The camp shows savings, remaining cost, percentage and an optimistic minimum-run estimate. Existing currency and purchased facilities are preserved. See [the pricing model and its limitations](camp-progression.md).
+Prices form a stepped curve: both early professions cost 100 supplies together and can be bought after one rewarding expedition; the workshop is a middle milestone; the 7,500-supply archive is affordable within ten successful Abyss clears even without optional chests. New departures receive [difficulty-scaled settlement rewards](expedition-rewards.md), with roughly 200 supplies on the reference Relaxed route. The camp shows savings, remaining cost, percentage and an optimistic minimum-run estimate. Existing currency and purchased facilities are preserved. See [the pricing model and its limitations](camp-progression.md).
 
 This first progression set is finite. Surplus supplies remain visible after all unlocks but have no additional spending sink yet. Biomes, branching events, and more professions can extend the system later; they are not implemented content. There is no uncapped permanent health upgrade or monetized currency.
 
