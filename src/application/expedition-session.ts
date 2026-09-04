@@ -112,7 +112,7 @@ export class ExpeditionSession {
     const departure: Departure = {
       rules: 'relics-v1',
       professions: 'skills-v1',
-      encounters: 'bastion-v1',
+      encounters: 'brood-v1',
       rewards: 'difficulty-v1',
       packs: ownedRelicPacks(this.camp),
       difficulty,

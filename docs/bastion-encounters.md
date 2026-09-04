@@ -14,7 +14,7 @@ Walk to the ordinary stairs on a guarded floor to enter the arena. The exit paym
 | Expert     | 3, 6, 9        | 13 × 11 |           6 |
 | Abyss      | 4, 8, 12       | 15 × 13 |           8 |
 
-These checkpoints currently use the same guardian mechanic. Other planned bosses are not implemented yet; their future mechanics should remain distinct rather than reskinning this encounter.
+Historical `bastion-v1` departures use the guardian at every checkpoint. New `brood-v1` departures alternate it with the [Brood Queen](brood-queen.md), starting from a seeded choice. The other three planned bosses remain unimplemented.
 
 ## Mine deduction and armor
 
@@ -66,6 +66,6 @@ Browser acceptance covers all five tiers in English, Chinese and Japanese, keybo
 
 ![Bastion Guardian arena and turn controls](screenshots/bastion-desktop.png)
 
-Active Expedition and Twin layouts expand with the browser width. Dense grids share the responsive cell limit instead of inheriting the classic 32px cap; narrow screens still fit the board and offer explicit enlargement. Profession skill buttons use a fixed square flex basis and center the image on both axes. Browser geometry checks cover all six professions at 320, 960, 1280, 1920 and 2560px. In the Abyss arena, cells grow from approximately 54px at 1280px to 88px at 1920px and 112px at 2560px.
+Active Expedition and Twin layouts adapt to browser width. The later [compact wide-screen adjustment](brood-queen.md#more-compact-wide-screen-play) caps cells at 88px and the full play container at 2880px, with proportional sidebar controls. Narrow screens still fit and offer explicit enlargement. Skill images remain centered. The screenshot below records the original guardian release layout.
 
 ![Wide-screen arena layout](screenshots/bastion-wide.png)

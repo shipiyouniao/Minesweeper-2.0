@@ -1,4 +1,5 @@
 import { adjacentSteps } from './variant-board.js'
+import { occupied } from './dungeon-occupancy.js'
 import type { Game } from '../types/game.js'
 import type { Expedition } from '../types/variants.js'
 
@@ -23,7 +24,7 @@ export function connectedFloor(game: Game, entrance: number): Set<number> {
 
 /** Breadth-first search uses only revealed walkable cells, never hidden mine knowledge. */
 export function walkingPath(run: Expedition, destination: number): number[] | null {
-  if (!Number.isInteger(destination) || run.walls.includes(destination)) return null
+  if (!Number.isInteger(destination) || occupied(run, destination)) return null
   const target = run.game.cells[destination]
   if (!target || target.visibility !== 'revealed' || target.mine) return null
   const parent = new Map<number, number>([[run.player, run.player]])
@@ -38,7 +39,7 @@ export function walkingPath(run: Expedition, destination: number): number[] | nu
       const cell = run.game.cells[neighbor]
       if (
         !parent.has(neighbor) &&
-        !run.walls.includes(neighbor) &&
+        !occupied(run, neighbor) &&
         cell?.visibility === 'revealed' &&
         !cell.mine
       ) {
@@ -63,8 +64,7 @@ export function walkingPath(run: Expedition, destination: number): number[] | nu
 
 /** Plan a direct walk or the shortest approach to a covered frontier cell. */
 export function approachPath(run: Expedition, destination: number): number[] | null {
-  if ((run.phase !== 'exploring' && run.phase !== 'boss') || run.walls.includes(destination))
-    return null
+  if ((run.phase !== 'exploring' && run.phase !== 'boss') || occupied(run, destination)) return null
   const cell = run.game.cells[destination]
   if (!cell || cell.visibility === 'flagged') return null
   if (cell.visibility === 'revealed') return walkingPath(run, destination)

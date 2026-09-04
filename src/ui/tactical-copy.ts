@@ -1,9 +1,14 @@
 import type { Language } from '../types/localization.js'
 import type { TacticalMessages } from '../types/tactical-ui.js'
-import type { TacticalPlan, TacticalEncounter } from '../types/tactical.js'
+import type { TacticalPlan, TacticalEncounter, EncounterKind } from '../types/tactical.js'
+import { broodCopy } from './brood-copy.js'
 
 /** Keep each language's combat vocabulary and instructions complete and independently readable. */
-export function tacticalCopy(language: Language): TacticalMessages {
+export function tacticalCopy(
+  language: Language,
+  kind: EncounterKind = 'bastion',
+): TacticalMessages {
+  if (kind === 'brood') return broodCopy(language)
   if (language === 'zh')
     return {
       name: '堡垒守卫',
@@ -111,10 +116,10 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
           : 'Flag the two mines around this pylon first'
     case 'used':
       return zh
-        ? '本回合已防御，或机关已关闭'
+        ? '该操作已完成，或目标已清除'
         : ja
-          ? '防御済み、または装置停止済み'
-          : 'Already braced, or this pylon is disabled'
+          ? '操作済み、または対象除去済み'
+          : 'Already used, or the target is cleared'
     default:
       return zh ? '选择可到达的格子' : ja ? '到達可能なマスを選択' : 'Choose a reachable cell'
   }
@@ -132,7 +137,7 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
           ? '防御中 · 今ターンの攻撃を1軽減'
           : 'Braced · block 1 attack damage this turn'
     case 'disabled':
-      return tacticalCopy(language).disabled
+      return tacticalCopy(language, encounter.kind).disabled
     case 'misfire':
       return zh
         ? '校准错误 · 受到 1 点伤害'
@@ -141,17 +146,31 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
           : 'Calibration failed · 1 damage'
     case 'struck':
       return zh
-        ? `命中核心 · 造成 ${encounter.lastDamage} 点伤害`
+        ? `攻击命中 · 造成 ${encounter.lastDamage} 点伤害`
         : ja
-          ? `コア命中 · ${encounter.lastDamage}ダメージ`
-          : `Core struck · ${encounter.lastDamage} damage`
+          ? `攻撃命中 · ${encounter.lastDamage}ダメージ`
+          : `Strike landed · ${encounter.lastDamage} damage`
     case 'hit':
-      return zh ? '守卫攻击命中' : ja ? '守護者の攻撃が命中' : 'The guardian’s attack hit'
+      return zh ? '敌方攻击命中' : ja ? '敵の攻撃が命中' : 'Enemy attack hit'
     case 'evaded':
       return zh ? '已避开或挡住攻击' : ja ? '攻撃を回避または防御' : 'Attack avoided or blocked'
     case 'defeated':
-      return tacticalCopy(language).victory
+      return tacticalCopy(language, encounter.kind).victory
+    case 'web-cut':
+      return zh ? '蛛网已清除 · 路线开放' : ja ? '巣網を除去 · 通行可能' : 'Web cleared · lane open'
+    case 'egg-crushed':
+      return zh
+        ? '虫卵已摧毁 · 孵化取消'
+        : ja
+          ? '卵を破壊 · 孵化を阻止'
+          : 'Egg destroyed · hatching prevented'
+    case 'hatchling-cleared':
+      return zh
+        ? '幼虫已消灭 · 攻击预告取消'
+        : ja
+          ? '幼体を撃破 · 予告取消'
+          : 'Hatchling intercepted · attack cancelled'
     default:
-      return tacticalCopy(language).hint
+      return tacticalCopy(language, encounter.kind).hint
   }
 }

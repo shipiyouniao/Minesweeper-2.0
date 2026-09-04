@@ -29,8 +29,8 @@
 }
 .variant-main:has(.expedition-layout),
 .variant-main:has(.twin-layout) {
-  --play-unit: clamp(1px, 0.0520833333vw, 2px);
-  max-width: none;
+  --play-unit: clamp(1px, 0.0520833333vw, 1.5px);
+  max-width: 2880px;
   width: 100%;
   padding-inline: clamp(16px, 3vw, 80px);
 }
@@ -278,7 +278,7 @@
 }
 .variant-board-panel .board,
 .variant-board-panel .board.dense {
-  --cell-max: clamp(56px, 5vw, 112px);
+  --cell-max: clamp(48px, 4.2vw, 88px);
   position: relative;
 }
 .variant-board-panel .cell {
@@ -821,13 +821,13 @@ dialog > p {
   outline-style: dashed;
   outline-color: #b36336;
 }
-.board .cell.bastion-cell {
+.board .cell.boss-cell {
   background-color: #dce7ee;
 }
 .board .cell.pylon-cell {
   background-color: #f1ead9;
 }
-.board .cell.bastion-cell img,
+.board .cell.boss-cell img,
 .board .cell.pylon-cell img {
   width: 100%;
   height: 100%;

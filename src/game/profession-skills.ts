@@ -1,4 +1,5 @@
 import { inspectArea } from './dungeon-discovery.js'
+import { neighbors } from './engine.js'
 import { revealDungeon } from './dungeon-reveal.js'
 import { hasProfessionSkills } from './professions.js'
 import type { Expedition } from '../types/variants.js'
@@ -9,9 +10,18 @@ function excavationTarget(run: Expedition): number | null {
   const width = run.game.config.width
   const row = Math.floor(run.player / width)
   const column = run.player % width
-  const remaining = run.encounter
-    ? run.encounter.pylons.filter((pylon) => pylon.active).map((pylon) => pylon.index)
-    : run.treasures.filter((index) => !run.collected.includes(index))
+  const remaining =
+    run.encounter?.kind === 'brood'
+      ? run.encounter.nests.filter((center) =>
+          [center, ...neighbors(run.game.config, center)].some(
+            (index) =>
+              run.game.cells[index]?.visibility !== 'revealed' &&
+              !run.confirmedMines.includes(index),
+          ),
+        )
+      : run.encounter
+        ? run.encounter.pylons.filter((pylon) => pylon.active).map((pylon) => pylon.index)
+        : run.treasures.filter((index) => !run.collected.includes(index))
 
   remaining.sort((a, b) => {
     const first = Math.abs(Math.floor(a / width) - row) + Math.abs((a % width) - column)

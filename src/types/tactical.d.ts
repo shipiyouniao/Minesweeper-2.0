@@ -1,26 +1,27 @@
 import type { Expedition, ExpeditionAction, Relic } from './variants.js'
 import type { Config } from './game.js'
 
+/** Released encounter families have independent rules and artwork. */
+export type EncounterKind = 'bastion' | 'brood'
+
 /** A public control protects one armor section until its surrounding flags are calibrated. */
 export interface ShieldPylon {
   readonly index: number
   readonly active: boolean
 }
 
-/** The committed danger footprint stays unchanged throughout the player's turn. */
+/** Sources commit their footprints before a turn; interception can remove a defeated source. */
 export interface TacticalIntent {
-  readonly kind: 'row' | 'column' | 'cross'
+  readonly kind: 'row' | 'column' | 'cross' | 'swarm'
   readonly targets: readonly number[]
   readonly damage: number
 }
 
 /** Encounter-local state is derived from the journal, never accepted as a serialized snapshot. */
-export interface TacticalEncounter {
+export interface TacticalState {
   /** Preserve prior-room discoveries for once-per-floor thresholds without reusing cell indices. */
   readonly priorDiscoveries: number
-  readonly kind: 'bastion'
   readonly boss: number
-  readonly pylons: readonly ShieldPylon[]
   readonly health: number
   readonly maxHealth: number
   readonly lastDamage: number
@@ -40,10 +41,46 @@ export interface TacticalEncounter {
     | 'hit'
     | 'evaded'
     | 'defeated'
+    | 'web-cut'
+    | 'egg-crushed'
+    | 'hatchling-cleared'
 }
 
+/** Armor controls belong to the guardian's encounter variant. */
+export interface BastionEncounter extends TacticalState {
+  readonly kind: 'bastion'
+  readonly pylons: readonly ShieldPylon[]
+}
+
+/** Eggs hatch only after their visible number of explicit end-turn actions. */
+export interface BroodEgg {
+  readonly index: number
+  readonly turns: number
+}
+
+/** A hatchling commits its destination and attack footprint before the player acts. */
+export interface BroodOrder {
+  readonly from: number
+  readonly to: number
+  readonly targets: readonly number[]
+}
+
+/** Webs and creatures occupy safe terrain without changing its mines or clues. */
+export interface BroodEncounter extends TacticalState {
+  readonly kind: 'brood'
+  readonly webs: readonly number[]
+  readonly eggs: readonly BroodEgg[]
+  readonly hatchlings: readonly number[]
+  readonly nests: readonly number[]
+  readonly orders: readonly BroodOrder[]
+  readonly queenTargets: readonly number[]
+}
+
+/** A finite encounter union keeps each boss's state and rules explicit. */
+export type TacticalEncounter = BastionEncounter | BroodEncounter
+
 /** Difficulty changes arena scale and boss endurance without changing action costs. */
-export interface BastionTier {
+export interface EncounterTier {
   readonly config: Config
   readonly health: number
   readonly floors: readonly number[]

@@ -162,7 +162,7 @@ export function expeditionTemplate(
           : run.phase === 'reward'
             ? t.reward
             : run.phase === 'boss'
-              ? tacticalCopy(language).name
+              ? tacticalCopy(language, run.encounter?.kind).name
               : exitReady
                 ? t.exitReady
                 : t.exploring

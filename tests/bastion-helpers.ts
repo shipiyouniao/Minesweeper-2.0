@@ -29,6 +29,7 @@ export function deduceBastionMines(run: Expedition): Set<number> {
 
 /** Produce a legal zero-tool victory transcript; brace makes every explicit turn safe. */
 export function defeatBastion(initial: Expedition): ExpeditionAction[] {
+  assert.ok(initial.encounter?.kind === 'bastion')
   let run = initial
   const actions: ExpeditionAction[] = []
   /** Commit one action and reject a stalled fixture immediately. */
@@ -59,7 +60,7 @@ export function defeatBastion(initial: Expedition): ExpeditionAction[] {
   }
 
   for (const index of deduceBastionMines(run)) apply({ type: 'flag', index })
-  assert.ok(run.encounter)
+  assert.ok(run.encounter?.kind === 'bastion')
   for (const pylon of run.encounter.pylons) {
     // Cardinal cells around a pylon are publicly deduced safe. Open the nearest one first.
     const targets = adjacentSteps(run.game, pylon.index)

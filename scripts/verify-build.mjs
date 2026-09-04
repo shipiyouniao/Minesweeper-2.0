@@ -24,6 +24,11 @@ for (const file of [
   await stat(file)
 for (const sprite of [
   'bastion',
+  'brood-queen',
+  'brood-defeated',
+  'brood-egg',
+  'brood-hatchling',
+  'brood-web',
   'bastion-defeated',
   'bastion-core',
   'bastion-pylon',

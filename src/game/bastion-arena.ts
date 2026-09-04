@@ -2,44 +2,10 @@ import { neighbors } from './engine.js'
 import { placedBoard, shuffled } from './variant-board.js'
 import { bastionIntent } from './tactical-intents.js'
 import type { Departure, Expedition } from '../types/variants.js'
-import type { VariantDifficulty } from '../types/variant-difficulty.js'
-import type { BastionTier } from '../types/tactical.js'
-import type { Cell, Game } from '../types/game.js'
+import { encounterTier as bastionTier } from './encounter-tiers.js'
+import { openArena } from './arena-terrain.js'
 
-/** Open the public arena lanes and propagate every revealed zero through its safe neighbors. */
-function openArena(placed: Game, walls: readonly number[], ringCells: ReadonlySet<number>): Game {
-  const cells: Cell[] = placed.cells.map((cell) => ({ ...cell, visibility: 'hidden' }))
-  const queue = cells.flatMap((_, index) =>
-    !ringCells.has(index) && !walls.includes(index) ? [index] : [],
-  )
-  const visited = new Set<number>()
-  for (const index of queue) {
-    const cell = cells[index]
-    if (!cell || cell.mine || walls.includes(index) || visited.has(index)) continue
-    visited.add(index)
-    cells[index] = { ...cell, visibility: 'revealed' }
-    // Rings are excluded only from direct reveal seeds, not from ordinary blank expansion.
-    // Safe ring cells may open; mines always remain covered until a player earns information.
-    if (cell.adjacent === 0) queue.push(...neighbors(placed.config, index))
-  }
-  return { ...placed, cells, phase: 'playing' }
-}
-
-/** Keep encounter schedules explicit and free of fixed ordinary-dungeon dimensions. */
-export function bastionTier(difficulty: VariantDifficulty = 'standard'): BastionTier {
-  switch (difficulty) {
-    case 'relaxed':
-      return { config: { width: 11, height: 9, mines: 4 }, health: 4, floors: [3] }
-    case 'standard':
-      return { config: { width: 11, height: 9, mines: 4 }, health: 4, floors: [3, 5] }
-    case 'advanced':
-      return { config: { width: 13, height: 11, mines: 4 }, health: 6, floors: [3, 7] }
-    case 'expert':
-      return { config: { width: 13, height: 11, mines: 4 }, health: 6, floors: [3, 6, 9] }
-    case 'abyss':
-      return { config: { width: 15, height: 13, mines: 4 }, health: 8, floors: [4, 8, 12] }
-  }
-}
+export { encounterTier as bastionTier } from './encounter-tiers.js'
 
 /** Historical departures never gain encounters when replayed by a newer application. */
 export function hasBastionEncounters(departure: Departure): boolean {

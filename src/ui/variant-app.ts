@@ -217,7 +217,7 @@ export class VariantApp implements VariantInputActions {
         if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
           this.view.showInformation(
             translations[this.language].how,
-            tacticalCopy(this.language)
+            tacticalCopy(this.language, this.session.run.encounter?.kind)
               .help.map((paragraph) => `<p>${paragraph}</p>`)
               .join(''),
           )

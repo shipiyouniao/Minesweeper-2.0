@@ -16,6 +16,8 @@ import { professionSprite } from './profession-presentation.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
 import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import { tacticalCopy, tacticalPlanCopy } from './tactical-copy.js'
+import { bossSprite } from './tactical-sprites.js'
+import { markBroodCell } from './brood-board.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -243,28 +245,25 @@ export class VariantView {
     if (hint)
       hint.textContent = plan
         ? tacticalPlanCopy(this.language, plan)
-        : tacticalCopy(this.language).hint
+        : tacticalCopy(this.language, run.encounter?.kind).hint
   }
 
   /** Overlay public mechanisms and frozen attack warnings without exposing covered clues. */
   private markTactical(run: Expedition): void {
     const encounter = run.encounter
     if (!encounter) return
-    const t = tacticalCopy(this.language)
+    const t = tacticalCopy(this.language, encounter.kind)
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-cell]')) {
       const index = Number(cell.dataset['cell'])
-      const pylon = encounter.pylons.find((entry) => entry.index === index)
+      const pylon =
+        encounter.kind === 'bastion'
+          ? encounter.pylons.find((entry) => entry.index === index)
+          : null
       if (index === encounter.boss) {
         cell.classList.remove('wall-cell')
-        cell.classList.add('bastion-cell')
+        cell.classList.add('boss-cell')
         cell.removeAttribute('aria-disabled')
-        cell.innerHTML = spriteImage(
-          encounter.health === 0
-            ? 'bastion-defeated'
-            : encounter.pylons.some((entry) => entry.active)
-              ? 'bastion'
-              : 'bastion-core',
-        )
+        cell.innerHTML = spriteImage(bossSprite(encounter))
         cell.setAttribute('aria-label', `${t.name}, ${encounter.health} / ${encounter.maxHealth}`)
       } else if (pylon) {
         cell.classList.add('landmark-cell', 'pylon-cell')
@@ -274,6 +273,7 @@ export class VariantView {
           `${cell.getAttribute('aria-label')}, ${pylon.active ? t.pylon : t.disabled}`,
         )
       }
+      markBroodCell(this.language, run, cell, index)
       if (run.phase === 'boss' && encounter.intent.targets.includes(index)) {
         cell.classList.add('tactical-danger')
         cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${t.danger}`)

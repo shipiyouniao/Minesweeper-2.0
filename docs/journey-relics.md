@@ -54,7 +54,7 @@ Historical snapshots contain only their captured pack IDs, so appending themes c
 
 English, Chinese and Japanese descriptions specify each condition and use limit. The six [generated theme icons](journey-relic-artwork.md) are used in camp purchases, reward choices and owned relics. The alchemist portrait now faces right. Wide play layouts scale sidebar text, inventory, skills and combat controls together; flag SVGs, clue numbers, confirmation ticks and safe markers follow their actual cell dimensions rather than fixed tiny pixel caps. Browser acceptance includes 320px fitting and 3840px layout proportions.
 
-At 3840px, the measured arena cell is 112px, the flag is approximately 73px, sidebar body text is 24px, inventory buttons are 164px and the square skill button is 128px. These are CSS pixels at browser zoom 100%; OS display scaling can change the effective viewport. The sidebar grows with the play interface and relic entries use an icon beside their text. Small viewports retain compact controls and fit the board.
+The screenshots below record this relic release's initial wide layout. The later [compact layout adjustment](brood-queen.md#more-compact-wide-screen-play) caps the play container at 2880px and cells at 88px. At a 3840px viewport flags are about 57px, sidebar text 18px, inventory buttons 123px and skill controls 96px. Measurements use CSS pixels at browser zoom 100%. The sidebar remains proportional, relic entries keep an icon beside their text, and small viewports fit the board.
 
 ![4K play layout with proportional flags, sidebar and right-facing alchemist](screenshots/journey-4k.png)
 
