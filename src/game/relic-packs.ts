@@ -6,6 +6,12 @@ export const RELIC_PACKS: readonly RelicPackDefinition[] = [
   { id: 'guardian-crests', relics: ['reactive-shell', 'rescue-ribbon'] },
   { id: 'survival-charms', relics: ['field-dressing', 'second-wind'] },
   { id: 'prospector-seals', relics: ['supply-cache', 'cache-guard'] },
+  { id: 'cartographer-charts', relics: ['trail-thread', 'landmark-lens'] },
+  { id: 'salvager-kit', relics: ['probe-recycler', 'spare-coil'] },
+  { id: 'mechanist-gears', relics: ['skill-capacitor', 'emergency-gears'] },
+  { id: 'wayfarer-tokens', relics: ['marching-boots', 'shelter-cloak'] },
+  { id: 'duelist-marks', relics: ['breach-sigil', 'duelist-edge'] },
+  { id: 'chronologist-dials', relics: ['reserve-watch', 'second-hand'] },
 ]
 
 /** Decode a finite license without accepting arbitrary saved identifiers. */
@@ -15,6 +21,12 @@ export function parseRelicPack(value: string | null): RelicPack | null {
     case 'guardian-crests':
     case 'survival-charms':
     case 'prospector-seals':
+    case 'cartographer-charts':
+    case 'salvager-kit':
+    case 'mechanist-gears':
+    case 'wayfarer-tokens':
+    case 'duelist-marks':
+    case 'chronologist-dials':
       return value
     default:
       return null

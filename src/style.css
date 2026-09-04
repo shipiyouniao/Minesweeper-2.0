@@ -1,5 +1,6 @@
 @import url('./tokens.css');
 @import url('./variants.css');
+@import url('./play-scale.css');
 
 * {
   box-sizing: border-box;

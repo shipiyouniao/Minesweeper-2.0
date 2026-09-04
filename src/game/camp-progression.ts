@@ -16,18 +16,36 @@ export const UPGRADES: readonly Upgrade[] = [
   'engineer',
   'survey-notes',
   'guardian-crests',
+  'cartographer-charts',
   'archaeologist',
   'survival-charms',
+  'salvager-kit',
   'alchemist',
   'prospector-seals',
   'workshop',
+  'mechanist-gears',
   'sentinel',
+  'wayfarer-tokens',
+  'duelist-marks',
+  'chronologist-dials',
   'archive',
 ]
 
 /** Offer early role variety, then a loadout milestone and a long-term relic-pool goal. */
 export function upgradeCost(upgrade: Upgrade): number {
   switch (upgrade) {
+    case 'cartographer-charts':
+      return 350
+    case 'salvager-kit':
+      return 650
+    case 'mechanist-gears':
+      return 1500
+    case 'wayfarer-tokens':
+      return 2200
+    case 'duelist-marks':
+      return 3200
+    case 'chronologist-dials':
+      return 4500
     case 'surveyor':
       return 40
     case 'engineer':
@@ -64,12 +82,18 @@ function upgradeStage(upgrade: Upgrade): CampStage {
     case 'survival-charms':
     case 'prospector-seals':
     case 'workshop':
+    case 'cartographer-charts':
+    case 'salvager-kit':
+    case 'mechanist-gears':
       return 'middle'
     case 'archaeologist':
     case 'alchemist':
       return 'middle'
     case 'sentinel':
     case 'archive':
+    case 'wayfarer-tokens':
+    case 'duelist-marks':
+    case 'chronologist-dials':
       return 'late'
   }
 }

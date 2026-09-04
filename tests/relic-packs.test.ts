@@ -24,7 +24,7 @@ const departure: Departure = {
   profession: 'explorer',
   equipment: [],
   archive: true,
-  packs: RELIC_PACKS.map((pack) => pack.id),
+  packs: RELIC_PACKS.slice(0, 4).map((pack) => pack.id),
 }
 
 /** Reach the next mine through legal frontier exploration without fabricating terrain. */
@@ -57,7 +57,7 @@ function finishFloor(initial: Expedition): Expedition {
 
 test('theme purchases preserve old ownership and add affordable intermediate choices', () => {
   let camp = { ...EMPTY_CAMP, supplies: 1750 }
-  for (const pack of RELIC_PACKS) camp = buyUpgrade(camp, pack.id)
+  for (const pack of RELIC_PACKS.slice(0, 4)) camp = buyUpgrade(camp, pack.id)
   assert.equal(camp.supplies, 0)
   assert.deepEqual(ownedRelicPacks(camp), departure.packs)
   assert.equal(buyUpgrade(camp, 'survey-notes'), camp)

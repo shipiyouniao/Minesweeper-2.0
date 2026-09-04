@@ -73,6 +73,18 @@ export function parseRelic(value: string | null): Relic | null {
     case 'second-wind':
     case 'supply-cache':
     case 'cache-guard':
+    case 'trail-thread':
+    case 'landmark-lens':
+    case 'probe-recycler':
+    case 'spare-coil':
+    case 'skill-capacitor':
+    case 'emergency-gears':
+    case 'marching-boots':
+    case 'shelter-cloak':
+    case 'breach-sigil':
+    case 'duelist-edge':
+    case 'reserve-watch':
+    case 'second-hand':
       return value
     default:
       return null

@@ -70,6 +70,10 @@ export interface Expedition extends Vitality {
   readonly exit: number
   readonly walls: readonly number[]
   readonly player: number
+  /** Distinct squares physically visited in this room; starting square does not count as travel. */
+  readonly travelled: readonly number[]
+  /** Preserve ordinary-room travel on entering a boss arena without mixing coordinate spaces. */
+  readonly priorTravel: number
   readonly treasures: readonly number[]
   readonly collected: readonly number[]
   readonly relics: readonly Relic[]
