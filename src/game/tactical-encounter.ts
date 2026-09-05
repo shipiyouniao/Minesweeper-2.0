@@ -1,4 +1,6 @@
 import { neighbors } from './engine.js'
+import { actBattle } from './battle-turns.js'
+import { hasCombatBuild } from './combat-build.js'
 import { inspectArea } from './dungeon-discovery.js'
 import { damageVitality } from './vitality.js'
 import { applyDamageRelics } from './relic-effects.js'
@@ -82,6 +84,7 @@ export function actTacticalEncounter(
   action: ExpeditionAction,
   explore: ExploreTransition,
 ): Expedition {
+  if (hasCombatBuild(run.departure)) return actBattle(run, action, explore)
   const encounter = run.encounter
   const plan = tacticalPlan(run, action)
   if (!encounter || !plan.allowed) return run

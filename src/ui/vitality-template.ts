@@ -14,7 +14,7 @@ export function vitalityTemplate(
   const shield = vitality.shields > 0 ? ` (+${vitality.shields})` : ''
   const description = `${t.health} ${value}, ${t.shields} ${vitality.shields}`
 
-  return `<section class="vitality-panel ${vitality.health <= 1 ? 'vitality-low' : ''}" aria-label="${t.health}">
+  return `<section class="vitality-panel ${vitality.health <= vitality.maxHealth / 2 ? 'vitality-low' : ''}" aria-label="${t.health}">
     <p class="vitality-heading"><span>${t.health}</span><strong aria-label="${description}">${value}<span class="vitality-shields">${shield}</span></strong></p>
     <meter class="vitality-bar" min="0" max="${vitality.maxHealth}" value="${vitality.health}" aria-label="${description}">${value}</meter>
     ${showHint ? `<p class="variant-note">${legacy ? t.legacyHealth : t.healthHint}</p>` : ''}

@@ -55,11 +55,11 @@ function calibratedArena(relics: readonly Relic[]): Expedition {
 }
 
 test('six themes add twelve distinct choices with a stepped price table and complete locale coverage', () => {
-  assert.equal(UPGRADES.length, 17)
+  assert.equal(UPGRADES.length, 26)
   assert.equal(RELIC_PACKS.length, 10)
   assert.equal(
     UPGRADES.reduce((total, id) => total + upgradeCost(id), 0),
-    26100,
+    39800,
   )
   assert.equal(relicPool(departure).length, 26)
   assert.equal(new Set(relicPool(departure)).size, 26)

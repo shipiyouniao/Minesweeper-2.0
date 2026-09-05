@@ -71,7 +71,7 @@ function clearFloor(initial: Expedition): Expedition {
 
 test('three new careers are affordable sidegrades and purchases remain permanent and unique', () => {
   assert.equal(PROFESSIONS.length, 6)
-  assert.equal(UPGRADES.length, 17)
+  assert.equal(UPGRADES.length, 26)
   let camp = { ...EMPTY_CAMP, supplies: 3150 }
   for (const profession of ['archaeologist', 'alchemist', 'sentinel'] as const) {
     assert.equal(allowedDeparture(camp, profession, []), false)

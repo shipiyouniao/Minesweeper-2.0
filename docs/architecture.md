@@ -122,3 +122,9 @@ Expedition envelope version 3 journals explicit `move` and `probe` coordinates a
 ### Profession skills
 
 `professions.ts` owns the six-role resource catalog and the `skills-v1` gate. Pure `profession-skills.ts` functions derive footprints and public eligibility, then apply bounded exploration effects. The expedition transition dispatches one `skill` intent and resets its used marker only on floor entry. `ExpeditionSession` persists departure ownership and accepted intents; replay rebuilds skill expenditure. Presentation modules own localized descriptions, generated icon selection and accessible controls. Historical departures retain their original three-option relic behavior and cannot execute new skills. See [the full profession design](profession-skills.md) and [artwork provenance](profession-artwork.md).
+
+## Revised tactical rules
+
+`battle-arena.ts` owns connected shuffled layouts and generation acceptance; `mine-deduction.ts` reads public clue constraints. `battle-turns.ts` owns the new objective, exposure, damage and action transitions. `combat-build.ts` owns finite equipment/training catalogs, derived stats and the vitality scale. These modules contain no DOM, storage or audio calls. The application snapshots `tactics-v2`, training and the Battle manual license in each new departure; older encounter functions remain available for historical replay.
+
+`battle-presentation.ts` renders versioned combat help, stats and build sources. The existing view owns cell overlays and input lifetimes. `combat-build.d.ts` declares the concrete contracts; no serialized combat snapshot is trusted. See the [rules and balance table](tactical-builds.md).

@@ -1,3 +1,5 @@
+import { battleHealthCopy } from './combat-build-copy.js'
+import { hasCombatBuild } from '../game/combat-build.js'
 import { cueForVitality } from '../audio/cues.js'
 import { hasExpeditionHealth } from '../game/expedition-rules.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
@@ -231,7 +233,11 @@ export class VariantApp implements VariantInputActions {
         if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
           this.view.showInformation(
             translations[this.language].how,
-            tacticalCopy(this.language, this.session.run.encounter?.kind)
+            tacticalCopy(
+              this.language,
+              this.session.run.encounter?.kind,
+              hasCombatBuild(this.session.run.departure),
+            )
               .help.map((paragraph) => `<p>${paragraph}</p>`)
               .join(''),
           )
@@ -239,7 +245,7 @@ export class VariantApp implements VariantInputActions {
         }
         this.view.showInformation(
           translations[this.language].how,
-          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${this.session.run && !hasExpeditionHealth(this.session.run.departure) ? t.legacyHealth : t.healthHelp}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
+          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${this.session.run && !hasExpeditionHealth(this.session.run.departure) ? t.legacyHealth : this.session.run && !hasCombatBuild(this.session.run.departure) ? t.healthHelp : battleHealthCopy(this.language)}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
         )
         return
       }
@@ -277,6 +283,9 @@ export class VariantApp implements VariantInputActions {
         this.expedition({ type: 'skill' })
         break
       case 'attack':
+        if (this.session instanceof ExpeditionSession && this.session.run?.encounter)
+          this.expedition(tacticalCellAction(this.session.run, this.session.run.encounter.boss))
+        break
       case 'brace':
       case 'end-turn':
         this.expedition({ type: command.type })

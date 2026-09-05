@@ -8,6 +8,7 @@ export type DungeonSprite =
   | 'brood-egg'
   | 'brood-hatchling'
   | 'brood-web'
+  | 'brood-nest'
   | 'bastion-defeated'
   | 'bastion-core'
   | 'bastion-pylon'

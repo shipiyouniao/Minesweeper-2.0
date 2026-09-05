@@ -1,5 +1,7 @@
 import { neighbors } from './engine.js'
 import { adjacentSteps } from './variant-board.js'
+import { shuffled } from './variant-board.js'
+import { combatStats, hasCombatBuild } from './combat-build.js'
 import type { Expedition } from '../types/variants.js'
 import type { BroodEncounter, BroodOrder } from '../types/tactical.js'
 
@@ -11,6 +13,11 @@ function hatchlingStep(run: Expedition, origin: number, reserved: ReadonlySet<nu
   const queue = [origin]
   for (const current of queue) {
     if (adjacentSteps(run.game, current).includes(run.player)) {
+      if (hasCombatBuild(run.departure)) {
+        const path = [current]
+        while (path[0] !== origin) path.unshift(parents.get(path[0]!) ?? origin)
+        return path[Math.min(2, path.length - 1)]!
+      }
       let next = current
       while (parents.get(next) !== origin && next !== origin) next = parents.get(next) ?? origin
       return next
@@ -22,6 +29,7 @@ function hatchlingStep(run: Expedition, origin: number, reserved: ReadonlySet<nu
         reserved.has(index) ||
         index === run.player ||
         run.walls.includes(index) ||
+        (hasCombatBuild(run.departure) && encounter.nests.includes(index)) ||
         encounter.webs.includes(index) ||
         encounter.eggs.some((egg) => egg.index === index) ||
         (encounter.hatchlings.includes(index) && index !== origin) ||
@@ -47,7 +55,10 @@ export function broodIntent(encounter: BroodEncounter): BroodEncounter {
         .flatMap((order) => order.targets),
     ]),
   ]
-  return { ...encounter, intent: { kind: 'swarm', targets, damage: 1 } }
+  return {
+    ...encounter,
+    intent: { kind: 'swarm', targets, damage: encounter.destroyedNests ? 5 : 1 },
+  }
 }
 
 /** Announce one committed swarm step and a queen burst every third turn; waiting never advances it. */
@@ -65,7 +76,7 @@ export function forecastBrood(run: Expedition): Expedition {
     }
   })
   const queenTargets =
-    encounter.turn % 3 === 0
+    encounter.turn % (hasCombatBuild(run.departure) && encounter.nests.length === 0 ? 2 : 3) === 0
       ? [run.player, ...neighbors(run.game.config, run.player)].filter(
           (index) => !run.walls.includes(index),
         )
@@ -88,7 +99,20 @@ export function advanceBrood(run: Expedition): Expedition {
   }
   // At most three living creatures plus eggs. Occupied nests never displace the player or another entity.
   if (encounter.turn % 3 === 0) {
-    for (const index of encounter.nests) {
+    const sites = hasCombatBuild(run.departure)
+      ? shuffled(
+          [...new Set(encounter.nests.flatMap((nest) => neighbors(run.game.config, nest)))].filter(
+            (index) =>
+              run.game.cells[index]?.visibility === 'revealed' &&
+              !run.game.cells[index]?.mine &&
+              !run.walls.includes(index) &&
+              !encounter.webs.includes(index) &&
+              !encounter.nests.includes(index),
+          ),
+          run.departure.seed ^ encounter.turn,
+        )
+      : encounter.nests
+    for (const index of sites) {
       if (eggs.length + hatchlings.length >= 3) break
       if (
         index !== run.player &&
@@ -98,7 +122,7 @@ export function advanceBrood(run: Expedition): Expedition {
         eggs.push({ index, turns: 2 })
     }
   }
-  return forecastBrood({
+  const result: Expedition = {
     ...run,
     encounter: {
       ...encounter,
@@ -108,6 +132,16 @@ export function advanceBrood(run: Expedition): Expedition {
       points: 3,
       braced: false,
       turnTriggers: [],
+      ...(hasCombatBuild(run.departure)
+        ? { health: Math.min(encounter.maxHealth, encounter.health + encounter.nests.length * 3) }
+        : {}),
+    },
+  }
+  return forecastBrood({
+    ...result,
+    encounter: {
+      ...result.encounter!,
+      points: hasCombatBuild(run.departure) ? combatStats(result).actions : 3,
     },
   })
 }

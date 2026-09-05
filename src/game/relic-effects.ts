@@ -1,5 +1,5 @@
 import { inspectArea, probeArea } from './dungeon-discovery.js'
-import { healVitality } from './vitality.js'
+import { healExpedition, hasCombatBuild } from './combat-build.js'
 import type { Expedition, ExpeditionAction, Relic } from '../types/variants.js'
 
 /** Each charge belongs to a floor or run, and old journals never activate new effects. */
@@ -26,7 +26,10 @@ export function applyDamageRelics(
 ): Expedition {
   let result = damaged
   if (result.health === 0 && available(result, 'second-wind', true)) {
-    result = { ...claim(result, 'second-wind', true), health: 1 }
+    result = {
+      ...claim(result, 'second-wind', true),
+      health: hasCombatBuild(result.departure) ? 5 : 1,
+    }
   }
   if (result.health === 0) return result
 
@@ -49,7 +52,7 @@ export function applyTreasureRelics(before: Expedition, collected: Expedition): 
   if (collected.collected.length <= before.collected.length) return collected
   let result = collected
   if (available(result, 'field-dressing')) {
-    result = { ...claim(result, 'field-dressing'), health: healVitality(result, 1).health }
+    result = { ...claim(result, 'field-dressing'), health: healExpedition(result, 1).health }
   }
   if (available(result, 'supply-cache')) {
     result = { ...claim(result, 'supply-cache'), scans: Math.min(4, result.scans + 1) }

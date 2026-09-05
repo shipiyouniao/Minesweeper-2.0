@@ -1,5 +1,6 @@
 import { addVariantRecord } from '../game/variant-difficulty.js'
 import { ownedRelicPacks } from '../game/relic-packs.js'
+import { ownedCombatTraining } from '../game/combat-build.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import {
   actExpedition,
@@ -47,7 +48,11 @@ export class ExpeditionSession {
     if (
       allowedDeparture(this.save.camp, journal.departure.profession, journal.departure.equipment) &&
       journal.departure.archive === this.save.camp.upgrades.includes('archive') &&
-      (journal.departure.packs ?? []).every((pack) => this.save.camp.upgrades.includes(pack))
+      (journal.departure.packs ?? []).every((pack) => this.save.camp.upgrades.includes(pack)) &&
+      (journal.departure.training ?? []).every((training) =>
+        this.save.camp.upgrades.includes(training),
+      ) &&
+      (!journal.departure.battleRelics || this.save.camp.upgrades.includes('battle-manual'))
     ) {
       let run = createExpedition(journal.departure)
       let valid = true
@@ -112,7 +117,9 @@ export class ExpeditionSession {
     const departure: Departure = {
       rules: 'relics-v1',
       professions: 'skills-v1',
-      encounters: 'brood-v1',
+      encounters: 'tactics-v2',
+      training: ownedCombatTraining(this.camp),
+      battleRelics: this.camp.upgrades.includes('battle-manual'),
       rewards: 'difficulty-v1',
       packs: ownedRelicPacks(this.camp),
       difficulty,

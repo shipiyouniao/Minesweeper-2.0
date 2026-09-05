@@ -916,3 +916,56 @@ dialog > p {
     justify-content: center;
   }
 }
+
+/* Combat totals scale with the sidebar; source details remain optional. */
+.combat-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px 0;
+}
+.combat-stats span {
+  display: grid;
+  gap: 4px;
+  font-size: 0.85em;
+}
+.combat-stats strong {
+  font-size: 1.4em;
+}
+.combat-sources {
+  margin-bottom: 12px;
+  font-size: 0.85em;
+}
+.combat-sources summary {
+  cursor: pointer;
+}
+.combat-sources ul {
+  padding-inline-start: 18px;
+}
+.combat-sources li {
+  margin-block: 8px;
+}
+.nest-destroyed > .dungeon-sprite {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+.mechanism-amber {
+  box-shadow: inset 0 0 0 2px #b98537;
+}
+.mechanism-blue {
+  box-shadow: inset 0 0 0 2px #548fb4;
+}
+
+.landmark-player {
+  position: absolute;
+  width: 48%;
+  height: 48%;
+  inset-inline-end: 0;
+  bottom: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.landmark-player .dungeon-sprite {
+  width: 100%;
+  height: 100%;
+}

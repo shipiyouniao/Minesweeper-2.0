@@ -1,4 +1,7 @@
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
+import { combatPurchaseCopy, combatRelicCopy } from './combat-build-copy.js'
+import { parseCombatPurchase } from '../game/combat-build.js'
+import { parseRelicPack } from '../game/relic-packs.js'
 import { expansionRelicCopy, relicPackCopy } from './relic-expansion-copy.js'
 import type { Language } from '../types/localization.js'
 import type { Equipment, Profession, Relic, Upgrade } from '../types/variants.js'
@@ -254,7 +257,57 @@ export function professionCopy(language: Language, profession: Profession): Vari
 }
 
 /** Explain each temporary relic's exact effect and resource cap. */
-export function relicCopy(language: Language, relic: Relic): VariantDescription {
+export function relicCopy(language: Language, relic: Relic, revised = false): VariantDescription {
+  if (revised && relic === 'reserve-watch')
+    return {
+      name: localized(language, 'Reserve watch', '储备怀表', '予備の懐中時計'),
+      note: localized(
+        language,
+        'Once per floor, end a turn with at least 1 AP left to add 1 AP next turn, up to 5.',
+        '每层一次，结束回合时保留至少 1 点行动力，下一回合额外 +1，总上限 5。',
+        '各階1回、行動力を1以上残して終了すると次のターン+1、上限5。',
+      ),
+    }
+  if (revised && relic === 'duelist-edge')
+    return {
+      name: localized(language, 'Duelist edge', '决斗锋刃', '決闘の刃'),
+      note: localized(
+        language,
+        'First strike each floor: +4 damage.',
+        '每层首次攻击伤害 +4。',
+        '各階の初撃ダメージ+4。',
+      ),
+    }
+  if (revised && relic === 'field-dressing')
+    return {
+      name: localized(language, 'Field dressing', '野战绷带', '野戦包帯'),
+      note: localized(
+        language,
+        'First chest each floor restores 5 health.',
+        '每层首个宝箱恢复 5 点生命。',
+        '各階の最初の宝箱で体力5回復。',
+      ),
+    }
+  if (revised && relic === 'second-wind')
+    return {
+      name: localized(language, 'Second wind', '绝境重生', '再起'),
+      note: localized(
+        language,
+        'Once per expedition, survive lethal damage with 5 health.',
+        '每局一次，受到致命伤害后以 5 点生命存活。',
+        '遠征中1回、致命傷を体力5で耐える。',
+      ),
+    }
+  if (revised && relic === 'breach-sigil')
+    return {
+      name: localized(language, 'Breach sigil', '破阵印记', '突破の印'),
+      note: localized(
+        language,
+        'First pylon disabled each floor refunds 1 AP, up to 5.',
+        '每层首次关闭机关返还 1 点行动力，总上限 5。',
+        '各階最初の装置停止で行動力1回復、上限5。',
+      ),
+    }
   switch (relic) {
     case 'lantern':
       return {
@@ -316,6 +369,10 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
           '敗北時の回収率が50%から75%に。',
         ),
       }
+    case 'tempered-edge':
+    case 'layered-armor':
+    case 'tactics-hourglass':
+      return combatRelicCopy(language, relic)
     default:
       return expansionRelicCopy(language, relic)
   }
@@ -323,6 +380,8 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
 
 /** Describe finite camp unlocks without hiding their actual gameplay consequence. */
 export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescription {
+  const combat = parseCombatPurchase(upgrade)
+  if (combat) return combatPurchaseCopy(language, combat)
   if (
     upgrade === 'surveyor' ||
     upgrade === 'engineer' ||
@@ -331,7 +390,8 @@ export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescri
     upgrade === 'sentinel'
   )
     return professionCopy(language, upgrade)
-  if (upgrade !== 'workshop' && upgrade !== 'archive') return relicPackCopy(language, upgrade)
+  const pack = parseRelicPack(upgrade)
+  if (pack) return relicPackCopy(language, pack)
   return upgrade === 'workshop'
     ? {
         name: localized(language, 'Workshop', '工坊', '工房'),
@@ -371,6 +431,8 @@ export function equipmentCopy(language: Language, equipment: Equipment): Variant
         name: localized(language, 'Guard · 2 pts', '护盾 · 2 点', '防護 · 2 pt'),
         note: localized(language, '+1 starting shield', '初始 +1 护盾', '初期シールド+1'),
       }
+    default:
+      return combatPurchaseCopy(language, equipment)
   }
 }
 

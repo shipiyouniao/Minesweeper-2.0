@@ -1,6 +1,7 @@
 import { enterBastion } from './bastion-arena.js'
 import { encounterTier } from './encounter-tiers.js'
 import { enterBrood } from './brood-arena.js'
+import { enterBattle } from './battle-arena.js'
 import type { Departure, Expedition } from '../types/variants.js'
 
 /** Versioned rosters preserve old guardian-only and exploration-only journals. */
@@ -8,7 +9,9 @@ export function hasEncounters(departure: Departure): boolean {
   return (
     departure.rules === 'relics-v1' &&
     departure.professions === 'skills-v1' &&
-    (departure.encounters === 'bastion-v1' || departure.encounters === 'brood-v1')
+    (departure.encounters === 'bastion-v1' ||
+      departure.encounters === 'brood-v1' ||
+      departure.encounters === 'tactics-v2')
   )
 }
 
@@ -23,6 +26,8 @@ export function isEncounterFloor(run: Expedition): boolean {
 /** Alternate the new roster from a seeded first boss; old departures always retain the guardian. */
 export function enterEncounter(run: Expedition): Expedition {
   const checkpoint = encounterTier(run.departure.difficulty).floors.indexOf(run.floor)
+  if (run.departure.encounters === 'tactics-v2')
+    return enterBattle(run, ((run.departure.seed + checkpoint) & 1) === 1 ? 'brood' : 'bastion')
   return run.departure.encounters === 'brood-v1' && ((run.departure.seed + checkpoint) & 1) === 1
     ? enterBrood(run)
     : enterBastion(run)

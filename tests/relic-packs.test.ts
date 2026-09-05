@@ -85,7 +85,7 @@ test('new journals snapshot licensed themes; old journals retain their original 
   let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.ok(session.start('explorer', []))
   assert.deepEqual(session.run?.departure.packs, departure.packs)
-  assert.equal(session.run?.health, 2)
+  assert.equal(session.run?.health, 10)
   assert.equal(session.run?.game.config.width, 11)
   const expected = session.run
   session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())

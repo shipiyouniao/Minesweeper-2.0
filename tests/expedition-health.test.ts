@@ -184,9 +184,9 @@ test('journal replay restores damage and locks, then settles death exactly once'
   let session = new ExpeditionSession(new VariantRepository(storage), runtime)
   assert.ok(session.start('explorer', []))
   assert.equal(session.run?.departure.rules, 'relics-v1')
-  for (let step = 0; step < 121 && session.run?.health === 2; step++)
+  for (let step = 0; step < 121 && session.run?.health === 10; step++)
     assert.ok(session.dispatch(hazardAction(session.run)))
-  assert.equal(session.run?.health, 1)
+  assert.equal(session.run?.health, 5)
   const expected = session.run
   session = new ExpeditionSession(new VariantRepository(storage), runtime)
   assert.deepEqual(session.run, expected)
@@ -248,9 +248,9 @@ test('exit recovery replays once and carries into the next floor after refresh',
   const storage = new MemoryStorage()
   let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   session.start('explorer', [])
-  for (let step = 0; step < 121 && session.run?.health === 2; step++)
+  for (let step = 0; step < 121 && session.run?.health === 10; step++)
     session.dispatch(hazardAction(session.run))
-  assert.equal(session.run?.health, 1)
+  assert.equal(session.run?.health, 5)
 
   for (let step = 0; step < 121; step++) {
     const run = session.run
@@ -266,7 +266,7 @@ test('exit recovery replays once and carries into the next floor after refresh',
     )
   }
   assert.equal(session.run?.phase, 'reward')
-  assert.equal(session.run?.health, 2)
+  assert.equal(session.run?.health, 10)
   const reward = session.run
   session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.deepEqual(session.run, reward)
@@ -278,7 +278,7 @@ test('exit recovery replays once and carries into the next floor after refresh',
   session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.deepEqual(session.run, next)
   assert.equal(session.run?.floor, 2)
-  assert.equal(session.run?.health, 2)
+  assert.equal(session.run?.health, 10)
 })
 
 test('historical shield-hit journals resume without converting to the health rules', () => {
