@@ -8,7 +8,6 @@ import { bastionIntent } from './tactical-intents.js'
 import { forecastBrood } from './brood-turns.js'
 import type { Config, Game } from '../types/game.js'
 import type { Expedition } from '../types/variants.js'
-import type { EncounterKind } from '../types/tactical.js'
 import type { BattleLayout } from '../types/combat-build.js'
 
 /** Flood only justified safe cells reachable from the current public opening. */
@@ -169,7 +168,7 @@ export function generateBattle(config: Config, seed: number, count: number): Bat
 }
 
 /** Replace the room while preserving tools, health and all previously spent floor effects. */
-export function enterBattle(run: Expedition, kind: EncounterKind): Expedition {
+export function enterBattle(run: Expedition, kind: 'bastion' | 'brood'): Expedition {
   const tier = encounterTier(run.departure.difficulty)
   const area = tier.config.width * tier.config.height
   const config = { ...tier.config, mines: Math.round(area * 0.17) }

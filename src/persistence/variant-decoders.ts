@@ -204,6 +204,7 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
     case 'attack':
     case 'brace':
     case 'end-turn':
+    case 'shift':
     case 'retreat':
       return { type }
     case 'relic': {

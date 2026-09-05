@@ -1,3 +1,4 @@
+import { defeatMirror } from './mirror-helpers.js'
 import assert from 'node:assert/strict'
 import { actExpedition, frontierCells } from '../src/game/expedition.js'
 import { deduceMines } from '../src/game/mine-deduction.js'
@@ -11,6 +12,7 @@ import type { BattleTestPlan } from './battle-types.js'
 function objectiveDistance(run: Expedition, waypoint?: number): number {
   const encounter = run.encounter
   if (!encounter) return 0
+  assert.ok(encounter.kind !== 'mirror')
   const goals =
     encounter.kind === 'bastion'
       ? encounter.pylons.filter((entry) => entry.active).map((entry) => entry.index)
@@ -44,6 +46,7 @@ function score(run: Expedition, waypoint?: number): number {
   if (run.phase === 'lost') return -100000
   if (run.phase === 'reward' || run.phase === 'won') return 100000
   const encounter = run.encounter!
+  assert.ok(encounter.kind !== 'mirror')
   const remaining =
     encounter.kind === 'bastion'
       ? encounter.pylons.filter((entry) => entry.active).length
@@ -69,6 +72,7 @@ function score(run: Expedition, waypoint?: number): number {
 /** Enumerate legal reasoning, movement and combat choices from the visible board only. */
 function choices(run: Expedition, knownSafe: ReadonlySet<number>): ExpeditionAction[] {
   const encounter = run.encounter!
+  assert.ok(encounter.kind !== 'mirror')
   const adjacent = adjacentSteps(run.game, run.player)
   const actions: ExpeditionAction[] = [{ type: 'attack' }, { type: 'brace' }]
   const objectives =
@@ -95,6 +99,7 @@ function choices(run: Expedition, knownSafe: ReadonlySet<number>): ExpeditionAct
 
 /** Play complete turns with a bounded beam, proving wins through accepted public-state actions. */
 export function defeatBattle(initial: Expedition): ExpeditionAction[] {
+  if (initial.encounter?.kind === 'mirror') return defeatMirror(initial)
   let run = initial
   const transcript: ExpeditionAction[] = []
   const knownSafe = new Set<number>()
@@ -128,6 +133,7 @@ export function defeatBattle(initial: Expedition): ExpeditionAction[] {
     }
     visited.add(signature)
     const encounter = run.encounter!
+    assert.ok(encounter.kind !== 'mirror')
     const objectives =
       encounter.kind === 'bastion'
         ? encounter.pylons.filter((entry) => entry.active).map((entry) => entry.index)

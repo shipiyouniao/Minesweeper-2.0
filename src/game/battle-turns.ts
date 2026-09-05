@@ -11,6 +11,7 @@ import { applyCombatRelics, strikeDamage } from './combat-relics.js'
 import { bastionIntent } from './tactical-intents.js'
 import { advanceBrood, broodIntent, clearBrood } from './brood-turns.js'
 import { tacticalPlan } from './tactical-planning.js'
+import { advanceMirror, disableMirrorSeal, shiftMirror, strikeMirror } from './mirror-battle.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { ExploreTransition } from '../types/tactical.js'
 
@@ -32,6 +33,11 @@ function correctFlags(run: Expedition, index: number): boolean {
 function interact(run: Expedition, index: number): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+  if (encounter.kind === 'mirror') {
+    if (!correctFlags(run, index))
+      return { ...injure(run, 5), encounter: { ...encounter, event: 'misfire' } }
+    return disableMirrorSeal({ ...inspectArea(run, neighbors(run.game.config, index)), encounter })
+  }
   if (encounter.kind === 'bastion') {
     if (index === encounter.boss)
       return {
@@ -88,6 +94,11 @@ function endTurn(run: Expedition): Expedition {
   }
   if (next.phase === 'lost') return advanced
   if (encounter.kind === 'brood') return advanceBrood(advanced)
+  if (encounter.kind === 'mirror')
+    return advanceMirror({
+      ...advanced,
+      encounter: { ...encounter, event: damage > 0 ? 'hit' : 'evaded' },
+    })
   const weakened = encounter.mechanisms.some((entry) => entry.effect === 'weaken' && !entry.active)
   const result: Expedition = {
     ...advanced,
@@ -127,6 +138,10 @@ export function actBattle(
   if (action.type === 'brace')
     next = { ...run, encounter: { ...encounter, braced: true, event: 'braced' } }
   else if (action.type === 'interact') next = interact(run, action.index)
+  else if (action.type === 'shift' && encounter.kind === 'mirror')
+    next = shiftMirror({ ...run, encounter })
+  else if (action.type === 'attack' && encounter.kind === 'mirror')
+    next = strikeMirror({ ...run, encounter }, strikeDamage(run))
   else if (action.type === 'attack') {
     const armor = encounter.kind === 'brood' ? encounter.nests.length * 3 : 0
     const health = Math.max(0, encounter.health - Math.max(1, strikeDamage(run) - armor))

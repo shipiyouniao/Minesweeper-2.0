@@ -43,11 +43,12 @@ import {
 } from '../game/expedition-rewards.js'
 import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
-import { tacticalTemplate } from './tactical-template.js'
+import { tacticalTemplate, tacticalControlsTemplate } from './tactical-template.js'
 import { tacticalCopy } from './tactical-copy.js'
 import { combatSprite, battleHealthCopy } from './combat-build-copy.js'
 import { parseCombatPurchase } from '../game/combat-build.js'
 import { icon } from '../icons.js'
+import { mirrorBoardLabel } from './mirror-board.js'
 
 /** Render one accessible choice card; its ID is a finite catalog value. */
 function choice(
@@ -190,7 +191,7 @@ export function expeditionTemplate(
     ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
     ${run.phase === 'reward' ? `<button class="primary-button" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
-    ${boardZoomTemplate(language)}<div class="expedition-layout">${boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
+    ${boardZoomTemplate(language)}<div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards">${run.phase === 'boss' ? `<div class="mirror-playbar">${tacticalControlsTemplate(language, run)}<span>${tacticalCopy(language, 'mirror').points} ${run.encounter.points}</span></div>` : ''}<div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${
         run.phase === 'exploring' || run.phase === 'boss'
           ? `<div class="variant-toolbar">${inputModeTemplate(language, flagMode)}

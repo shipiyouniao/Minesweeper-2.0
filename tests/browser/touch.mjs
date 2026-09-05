@@ -6,7 +6,7 @@ const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
 const key = 'minesweeper.variants.v1.expedition'
-const fixtures = [battleFixture(42).entered, battleFixture(43).entered]
+const fixtures = [battleFixture(42).entered, battleFixture(43).entered, battleFixture(44).entered]
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || undefined,
   headless: true,
@@ -102,10 +102,14 @@ try {
         await stable(before)
 
         // Some mobile browsers deliver a native menu on a retargeted cell after the hold.
-        await page.locator(`[data-cell="${point.index + 1}"]`).dispatchEvent('contextmenu')
+        await page
+          .locator(`[data-side="a"] [data-cell="${point.index + 1}"]`)
+          .dispatchEvent('contextmenu')
         await touch('touchEnd')
         await stable(before)
-        await page.locator(`[data-cell="${point.index + 1}"]`).dispatchEvent('contextmenu')
+        await page
+          .locator(`[data-side="a"] [data-cell="${point.index + 1}"]`)
+          .dispatchEvent('contextmenu')
         assert.deepEqual(await actions(), [...original, { type: 'flag', index: point.index }])
 
         // A fresh gesture is immediately usable; it must not inherit synthetic-click suppression.
@@ -177,7 +181,7 @@ try {
   console.log(
     JSON.stringify({
       passed: true,
-      bosses: 2,
+      bosses: 3,
       languages: 3,
       widths: [320, 390],
       nativeTouch: true,

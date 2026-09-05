@@ -22,6 +22,8 @@ import { tacticalCopy, tacticalPlanCopy } from './tactical-copy.js'
 import { bossSprite } from './tactical-sprites.js'
 import { markBroodCell } from './brood-board.js'
 import { ExpeditionDialog } from './expedition-dialog.js'
+import { mirrorPreview, markMirrorCell } from './mirror-board.js'
+import { mirrorName } from './mirror-copy.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -106,7 +108,7 @@ export class VariantView {
     const scrollA = [oldA?.scrollLeft ?? 0, oldA?.scrollTop ?? 0]
     const scrollB = [oldB?.scrollLeft ?? 0, oldB?.scrollTop ?? 0]
     const identity = expedition
-      ? `${expedition.departure.seed}:${expedition.floor}:${expedition.game.config.width}:${Boolean(expedition.encounter)}`
+      ? `${expedition.departure.seed}:${expedition.floor}:${expedition.game.config.width}:${Boolean(expedition.encounter)}:${expedition.encounter?.kind === 'mirror' ? expedition.encounter.active : ''}`
       : a
         ? `twin:${a.seed}:${a.config.width}`
         : null
@@ -129,6 +131,12 @@ export class VariantView {
     this.applyZoom()
     if (expedition) this.markExpedition(expedition)
     if (expedition?.encounter) this.markTactical(expedition)
+    const comparison = expedition ? mirrorPreview(expedition) : null
+    if (comparison) {
+      this.markExpedition(comparison, 'b')
+      this.markTactical(comparison, 'b')
+      this.content.querySelector('[data-side="b"]')?.setAttribute('aria-readonly', 'true')
+    }
     if (sameBoard) {
       this.content
         .querySelector('[data-side="a"]')
@@ -262,7 +270,7 @@ export class VariantView {
         ? tacticalPlan(run, tacticalCellAction(run, index))
         : null
     const route = new Set(plan?.path ?? [])
-    for (const cell of this.content.querySelectorAll<HTMLElement>('[data-cell]')) {
+    for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]')) {
       const onRoute = route.has(Number(cell.dataset['cell']))
       cell.classList.toggle('tactical-route', onRoute)
       cell.classList.toggle('tactical-unaffordable', Boolean(plan && !plan.allowed && onRoute))
@@ -275,11 +283,13 @@ export class VariantView {
   }
 
   /** Overlay public mechanisms and frozen attack warnings without exposing covered clues. */
-  private markTactical(run: Expedition): void {
+  private markTactical(run: Expedition, side: BoardSide = 'a'): void {
     const encounter = run.encounter
     if (!encounter) return
     const t = tacticalCopy(this.language, encounter.kind)
-    for (const cell of this.content.querySelectorAll<HTMLElement>('[data-cell]')) {
+    for (const cell of this.content.querySelectorAll<HTMLElement>(
+      `[data-side="${side}"] [data-cell]`,
+    )) {
       const index = Number(cell.dataset['cell'])
       const pylon =
         encounter.kind === 'bastion'
@@ -290,7 +300,10 @@ export class VariantView {
         cell.classList.add('boss-cell')
         cell.removeAttribute('aria-disabled')
         cell.innerHTML = spriteImage(bossSprite(encounter))
-        cell.setAttribute('aria-label', `${t.name}, ${encounter.health} / ${encounter.maxHealth}`)
+        const name =
+          encounter.kind === 'mirror' ? mirrorName(this.language, encounter.active) : t.name
+        const vitality = encounter.kind === 'mirror' ? encounter[encounter.active] : encounter
+        cell.setAttribute('aria-label', `${name}, ${vitality.health} / ${vitality.maxHealth}`)
       } else if (pylon) {
         cell.classList.add('landmark-cell', 'pylon-cell')
         const mechanism =
@@ -322,6 +335,7 @@ export class VariantView {
         )
       }
       markBroodCell(this.language, run, cell, index)
+      markMirrorCell(this.language, run, cell, index)
       if (index === run.player && cell.classList.contains('landmark-cell'))
         cell.insertAdjacentHTML(
           'beforeend',
@@ -453,10 +467,12 @@ export class VariantView {
   }
 
   /** Add advertised landmarks and legal frontier hints; hidden mine values never enter attributes. */
-  private markExpedition(run: Expedition): void {
+  private markExpedition(run: Expedition, side: BoardSide = 'a'): void {
     const frontier = frontierCells(run)
     const t = variantCopy(this.language)
-    for (const cell of this.content.querySelectorAll<HTMLElement>('[data-cell]')) {
+    for (const cell of this.content.querySelectorAll<HTMLElement>(
+      `[data-side="${side}"] [data-cell]`,
+    )) {
       const index = Number(cell.dataset['cell'])
       const treasure = run.treasures.includes(index)
       cell.classList.toggle('frontier', run.phase === 'exploring' && frontier.has(index))
@@ -510,8 +526,16 @@ export class VariantView {
       if (frontier.has(index))
         cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + t.frontier)
     }
-    const grid = this.content.querySelector<HTMLElement>('[data-side="a"]')
+    const grid = this.content.querySelector<HTMLElement>(`[data-side="${side}"]`)
     const current = grid?.querySelector<HTMLElement>(`[data-cell="${run.player}"]`)
+    if (side === 'b') {
+      current?.classList.add('mirror-parked')
+      current?.insertAdjacentHTML(
+        'beforeend',
+        `<span class="landmark-player">${spriteImage(professionSprite(run.departure.profession))}</span>`,
+      )
+      return
+    }
     if (grid && current) {
       current.classList.add('player-cell')
       const profession = professionCopy(this.language, run.departure.profession).name

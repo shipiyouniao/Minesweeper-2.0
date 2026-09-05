@@ -13,7 +13,7 @@ Relic Dungeon is part of Expedition, not a separate mode: it describes the multi
 - Playable modes support English, Chinese, Japanese, keyboard navigation, pointer input, a touch flag toggle, mute-aware procedural sound, responsive boards, and a background privacy cover.
 - Covered clues never appear in DOM text or accessibility labels. Paid scans, advertised safe landmarks, and completed-board results intentionally disclose information.
 - Each special mode has its own versioned progress and records. Move counts and expedition depth/earnings never enter classic time rankings. Records are local, not an online competitive leaderboard.
-- Random boards are **not guaranteed to be solvable without guessing**. A guaranteed safe route proves connectivity, not logical solvability. Tools and extraction help manage uncertainty in Expedition.
+- Ordinary exploration boards are **not guaranteed to be solvable without guessing**. Their connected routes do not prove logical solvability. Boss arenas additionally pass public-clue solvability checks; tools and extraction remain available.
 
 ## Expedition — implemented
 
@@ -21,11 +21,11 @@ Relic Dungeon is part of Expedition, not a separate mode: it describes the multi
 
 Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → defeat the boss on guarded floors → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
 
-[Bastion Guardian](bastion-encounters.md) and [Brood Queen](brood-queen.md) provide separate tactical rooms with three action points, frozen attack forecasts and shared expedition health. The guardian uses shield mechanisms; the queen uses removable webs, hatching eggs and interceptable creatures. Only End turn resolves enemy attacks. New departures snapshot the alternating roster; historical saves retain their original exits or guardian-only encounters.
+[Bastion Guardian and Brood Queen](tactical-builds.md) and [Mirror Twins](mirror-twins.md) provide separate tactical rooms with a shared health/build system. Bastion uses calibrated controls and core windows; the queen has permanently destroyable nests and interceptable creatures; the twins use two mine-exclusive realms, crossed seals and alternating attacks. Only End turn resolves enemy attacks. The seeded roster rotates across the selected difficulty's checkpoints. Incompatible journals return to camp under the [save policy](save-policy.md).
 
 ### Floor rules
 
-- Five difficulty tiers determine board size, density and expedition length; see the [difficulty catalog and replay rules](variant-difficulties.md). Historical runs retain five 9 × 9 floors with 15, 17, 19, 21 and 23 mines.
+- Five difficulty tiers determine board size, density and expedition length; see the [difficulty catalog and replay rules](variant-difficulties.md).
 - Choose the entrance from the interior coordinates using the floor seed. Pick stairs from the farthest reachable cells (within two steps of the maximum distance, and at least six steps away), using actual four-direction floor distance. Neither landmark has a fixed corner or direction.
 - The entrance has a safe neighborhood. Reveal its whole connected blank region and the surrounding numbered boundary, following normal eight-neighbor flood fill. At least two exposed cells have positive clues, and elementary deductions must lead to a provable mine. This opening check does not promise a guess-free complete floor.
 - Flood the complete safe terrain from the entrance using four directions. Convert every disconnected safe pocket into an impassable wall before placing treasure. Every retained safe floor cell, chest and exit belongs to the entrance component. Mine counts and eight-neighbor clues remain unchanged.
@@ -39,17 +39,20 @@ Prepare at camp → choose profession/equipment → explore a floor → walk to 
 
 ### Health and shields
 
-New expeditions start at **2/2 HP**. A mine deals 1 damage, consuming a shield first. Surviving a hit confirms the mine with a locked gold flag; it stays impassable and all clues remain truthful. Reaching each exit restores **1 HP**, capped at maximum health, once per floor. Health and shields carry into the next floor. Zero HP ends the expedition; extraction never heals.
+New expeditions start at **10/10 HP** before equipment and finite training bonuses. A mine deals 5 damage. Each shield charge absorbs up to 5 before health; at most two charges can be held. Surviving a mine hit confirms it with a locked gold flag. Reaching an ordinary exit restores 5 HP, capped at maximum, once per floor. A boss victory fully heals and grants one shield.
 
-The health bar includes protection in the same readout: **2/2 (+1)** means full health and one shield. Shields do not increase maximum health and remain capped at 2. Damage, shield activation/acquisition and healing have distinct synthesized cues under the existing mute control. See [health design, replay compatibility and validation](expedition-health.md).
+The shared health bar displays protection as **10/10 (+1)**. Health and shields carry between rooms and floors. Zero HP ends the expedition; extraction does not heal. Enemy attacks use the [combat defense rules](tactical-builds.md); mines and wrong calibration ignore armor.
 
 ### Professions and tools
 
-| Profession | Starting resources        | Unlock              |
-| ---------- | ------------------------- | ------------------- |
-| Explorer   | 2 probes, 1 scan          | Initially available |
-| Surveyor   | 1 probe, 2 scans          | 40 supplies         |
-| Engineer   | 1 probe, 1 scan, 1 shield | 60 supplies         |
+| Profession    | Starting resources        | Unlock              |
+| ------------- | ------------------------- | ------------------- |
+| Explorer      | 2 probes, 1 scan          | Initially available |
+| Surveyor      | 1 probe, 2 scans          | 40 supplies         |
+| Engineer      | 1 probe, 1 scan, 1 shield | 60 supplies         |
+| Archaeologist | 1 probe                   | 450 supplies        |
+| Alchemist     | 2 shields                 | 900 supplies        |
+| Sentinel      | 1 probe, 1 shield         | 1,800 supplies      |
 
 **Probe:** drag its square inventory button to a cell. Inspect the centered 3×3 neighborhood, clipped at board edges. Every mine receives a locked gold flag, including mines previously flagged by the player. Non-mine cells receive a persistent green safe marker while their clue stays covered; an incorrect ordinary flag there is cleared. Walls are ignored. The player does not move and treasures are not collected. A visible report includes the total mine count, including zero and already confirmed mines.
 

@@ -1,11 +1,12 @@
 import { available, claim } from './relic-effects.js'
+import { roomDiscoveries, roomTravel } from './mirror-state.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 
 /** Count unique physical travel, including a reveal's approach, without rewarding backtracking. */
 export function recordTravel(run: Expedition, path: readonly number[]): Expedition {
   const travelled = [...new Set([...run.travelled, ...path])]
   const result = { ...run, travelled }
-  const distance = run.priorTravel + travelled.length - 1
+  const distance = run.priorTravel + roomTravel(result)
 
   return distance >= 12 && available(result, 'trail-thread')
     ? { ...claim(result, 'trail-thread'), scans: Math.min(4, result.scans + 1) }
@@ -25,7 +26,7 @@ export function applyToolRelics(
   )
     return after
   let result = after
-  const discoveries = after.confirmedMines.length - before.confirmedMines.length
+  const discoveries = roomDiscoveries(after) - roomDiscoveries(before)
 
   if (
     action.type === 'probe' &&

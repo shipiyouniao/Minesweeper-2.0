@@ -70,7 +70,12 @@ export class VariantApp implements VariantInputActions {
 
   /** Apply board input only while the board is visible and no modal owns interaction. */
   play(side: BoardSide, index: number, flag = this.flagMode): void {
-    if (this.paused || this.view.dialogOpen || this.moving) {
+    if (
+      this.paused ||
+      this.view.dialogOpen ||
+      this.moving ||
+      (this.session instanceof ExpeditionSession && side === 'b')
+    ) {
       this.sounds.play('blocked')
       return
     }
@@ -282,6 +287,8 @@ export class VariantApp implements VariantInputActions {
         break
       case 'brace':
       case 'end-turn':
+      case 'shift':
+        this.input.cancelTools()
         this.expedition({ type: command.type })
         break
       case 'difficulty':
@@ -447,7 +454,7 @@ export class VariantApp implements VariantInputActions {
               this.session.difficulty,
             ),
         run?.game ?? null,
-        null,
+        run?.encounter?.kind === 'mirror' ? run.encounter.other.game : null,
         run,
       )
     } else {

@@ -1,5 +1,6 @@
 import { encounterTier } from './encounter-tiers.js'
 import { enterBattle } from './battle-arena.js'
+import { enterMirror } from './mirror-battle.js'
 import type { Expedition } from '../types/variants.js'
 
 /** Place boss rooms at the selected difficulty's authored checkpoints. */
@@ -7,8 +8,9 @@ export function isEncounterFloor(run: Expedition): boolean {
   return encounterTier(run.departure.difficulty).floors.includes(run.floor)
 }
 
-/** Alternate the released roster from a seeded first boss. */
+/** Rotate three distinct encounters from a seeded first boss without immediate repeats. */
 export function enterEncounter(run: Expedition): Expedition {
   const checkpoint = encounterTier(run.departure.difficulty).floors.indexOf(run.floor)
-  return enterBattle(run, ((run.departure.seed + checkpoint) & 1) === 1 ? 'brood' : 'bastion')
+  const slot = (run.departure.seed + checkpoint) % 3
+  return slot === 2 ? enterMirror(run) : enterBattle(run, slot === 1 ? 'brood' : 'bastion')
 }

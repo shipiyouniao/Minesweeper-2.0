@@ -2,7 +2,9 @@
 
 # Minesweeper 2.0 — A TypeScript 7 Experiment
 
-**New game modes:** choose from five difficulty tiers and play a 3–12-floor **Expedition** with relic builds, permanent camp unlocks, professions and equipment. Choose among seventeen camp purchases and [six professions with floor skills](docs/profession-skills.md), including ten [relic theme packs](docs/journey-relics.md) that expand the reward pool to twenty-six effects. Track savings along a stepped [pricing curve](docs/camp-progression.md). Start with 2 HP, absorb hits with shields, and recover 1 HP at each exit. Walk a generated explorer through connected floors, collect chests, probe 3×3 areas for locked mine confirmations or scan whole rows, and click the stairs to advance. Or solve **Twin boards**, where matching coordinates cannot both contain mines. Classic mode retains its own difficulties and records. See the [health and replay rules](docs/expedition-health.md), [difficulty rules](docs/variant-difficulties.md) and [expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). Read the [mode design and roadmap](docs/game-modes.md) for complete rules and the approved Sonar, Survey and Tides plans.
+**Play three modes:** Classic Minesweeper, mine-exclusive **Twin boards**, and a 3–12-floor **Expedition** across five difficulty tiers. Expedition combines connected dungeon exploration, six professions with [once-per-floor skills](docs/profession-skills.md), a shared health/shield system, bounded equipment and 29 possible relics. The camp offers 24 distinct gameplay unlocks plus two one-time trainings, with a stepped [pricing curve](docs/camp-progression.md).
+
+**New boss: [Mirror Twins](docs/mirror-twins.md).** Compare two mine-exclusive realms, disable crossed seals, shift between remembered positions and alternate attacks to break reflection. Both twins have their own artwork, health and frozen attack forecast. Every third turn creates a shared recharge opening. Read the [mode design](docs/game-modes.md) and [expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1) for current rules and planned modes.
 
 Difficulty-based expedition income and authored balance scenarios are documented in [the reward table](docs/expedition-rewards.md).
 
@@ -12,7 +14,7 @@ A playable Minesweeper game and a practical testbed for the **TypeScript 7 nativ
 
 [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [License](LICENSE)
 
-**Tactical encounters:** [revised Bastion Guardian and Brood Queen](docs/tactical-builds.md) combine fully deducible minefields with regional controls, timed core openings and permanently destroyable nests. Attack, defense and action-point builds connect six equipment licenses, three combat relics and two capped, one-time trainings. The catalog contains 24 distinct gameplay purchases plus those two trainings. Ordinary floors retain free exploration. Incompatible saved expeditions [return to camp](docs/save-policy.md), preserving permanent progress.
+**Tactical encounters:** [Bastion Guardian and Brood Queen](docs/tactical-builds.md), alongside [Mirror Twins](docs/mirror-twins.md), combine fully deducible minefields with regional controls, timed core openings and permanently destroyable nests. Attack, defense and action-point builds connect six equipment licenses, three combat relics and two capped, one-time trainings. The catalog contains 24 distinct gameplay purchases plus those two trainings. Ordinary floors retain free exploration. Incompatible saved expeditions [return to camp](docs/save-policy.md), preserving permanent progress.
 
 ## Why this project exists
 

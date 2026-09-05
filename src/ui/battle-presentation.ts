@@ -1,3 +1,4 @@
+import { mirrorCopy, mirrorDefense } from './mirror-copy.js'
 import { battleText, combatPurchaseCopy } from './combat-build-copy.js'
 import { combatStats } from '../game/combat-build.js'
 import { relicCopy } from './variant-copy.js'
@@ -22,7 +23,7 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
           '揭开巢穴并标出周围的雷，再靠近摧毁。存活巢穴会持续治疗女王并提供护甲。',
           '巣を開き周囲の地雷に旗を立て、接近して破壊。残った巣は女王を回復・防護する。',
         )
-  return {
+  const copy: TacticalMessages = {
     name:
       kind === 'bastion'
         ? t('Bastion Guardian', '堡垒守卫', '城塞の守護者')
@@ -88,10 +89,12 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
       ),
     ],
   }
+  return kind === 'mirror' ? mirrorCopy(language, copy) : copy
 }
 
 /** Summarize the actual remaining objectives and core window, rather than a generic boss phase. */
 export function battleStatus(language: Language, encounter: TacticalEncounter): string {
+  if (encounter.kind === 'mirror') return mirrorDefense(language, encounter, encounter.active)
   if (encounter.kind === 'brood')
     return battleText(
       language,

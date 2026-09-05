@@ -127,7 +127,7 @@ export function incomingCombatDamage(run: Expedition, raw: number): number {
 
 /** Add only the frozen attack sources covering this square; interception removes its source. */
 export function battleThreat(encounter: TacticalEncounter, index: number): number {
-  if (encounter.kind === 'bastion')
+  if (encounter.kind !== 'brood')
     return encounter.intent.targets.includes(index) ? encounter.intent.damage : 0
   return (
     (encounter.queenTargets.includes(index) ? 5 : 0) +
