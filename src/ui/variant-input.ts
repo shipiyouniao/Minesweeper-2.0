@@ -1,3 +1,4 @@
+import { BoardRightClick } from './board-right-click.js'
 import { parseVariantDifficulty } from '../game/variant-difficulty.js'
 import {
   parseEquipment,
@@ -40,6 +41,8 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     case 'restart':
     case 'flag-mode':
     case 'reveal-mode':
+    case 'safe-mode':
+    case 'chord-mode':
     case 'sound':
     case 'pause':
     case 'confirm':
@@ -86,6 +89,7 @@ export class VariantInput {
   private readonly tools: DungeonToolController
   private readonly actions: VariantInputActions
   private readonly listeners = new AbortController()
+  private readonly rightClick: BoardRightClick
   private hold: VariantCellHold | null = null
   private holdTimer: number | undefined
   private suppressUntil = 0
@@ -94,6 +98,13 @@ export class VariantInput {
   /** Delegate input once so view updates cannot accumulate event handlers. */
   constructor(root: HTMLElement, actions: VariantInputActions) {
     this.actions = actions
+    this.rightClick = new BoardRightClick(root, (element) => {
+      const cell = cellTarget(element)
+      if (cell) {
+        this.actions.unlock()
+        this.actions.play(cell.side, cell.index, true)
+      }
+    })
     this.tools = new DungeonToolController(root, actions)
     const options = { signal: this.listeners.signal }
     root.addEventListener('click', this.click, options)
@@ -114,6 +125,7 @@ export class VariantInput {
 
   /** Release root, document and page lifecycle listeners together. */
   dispose(): void {
+    this.rightClick.dispose()
     this.endHold()
     this.tools.dispose()
     this.listeners.abort()
@@ -191,13 +203,25 @@ export class VariantInput {
     )
       this.actions.feedback('navigate')
     const cell = cellTarget(event.target)
-    if (!cell || event.altKey || event.ctrlKey || event.metaKey) return
+    if (
+      !cell ||
+      event.defaultPrevented ||
+      event.isComposing ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey
+    )
+      return
     const key = event.key.toLowerCase()
     const navigation = parseNavigation(key)
 
     if (navigation) {
       event.preventDefault()
       this.actions.navigate(cell.side, cell.index, navigation)
+    } else if (key === 's' || key === 'c') {
+      event.preventDefault()
+      if (key === 's') this.actions.annotate(cell.side, cell.index)
+      else this.actions.chord(cell.side, cell.index)
     } else if (key === 'f') {
       event.preventDefault()
       this.actions.play(cell.side, cell.index, true)
@@ -211,6 +235,7 @@ export class VariantInput {
 
   /** Cancel stale gestures before replacing a floor or changing page state. */
   cancelTools(): void {
+    this.rightClick.cancel()
     this.endHold()
     this.tools.cancel()
   }

@@ -157,16 +157,19 @@ The repository is a starting point for further TS7 experiments. Any broader comp
 - A static website that runs without an account, application server, or NW.js installation.
 - A compact, keyboard-accessible language flyout and optional, original synthesized interaction sounds.
 
-| Action                  | Mouse                   | Touch / keyboard                      |
-| ----------------------- | ----------------------- | ------------------------------------- |
-| Reveal a cell           | Left-click              | Tap; Space or Enter                   |
-| Toggle a flag           | Right-click             | Long press; flag mode; F              |
-| Chord neighboring cells | Click a revealed number | Tap a revealed number; Space or Enter |
-| Move board focus        | —                       | Arrow keys, Home / End                |
-| Pause or resume         | Pause control           | P                                     |
-| Start a new game        | New-game control        | N                                     |
+| Action                  | Mouse                                      | Touch / keyboard                |
+| ----------------------- | ------------------------------------------ | ------------------------------- |
+| Reveal a cell           | Left-click                                 | Tap; Space or Enter             |
+| Toggle a flag           | Right-click and release                    | Long press; flag mode; F        |
+| Mark suspected safe     | Note safe mode                             | Note safe mode; S               |
+| Chord neighboring cells | Quick open mode; Classic/Twin number click | Quick open mode; C              |
+| Move board focus        | —                                          | Arrow keys; H/J/K/L; Home / End |
+| Pause or resume         | Pause control                              | P                               |
+| Start a new game        | New-game control                           | N                               |
 
 Chording opens neighboring cells when the adjacent flag count matches the number. Incorrect flags can still cause a loss. The panel uses the available browser width, and square cells scale to their container. Wide boards take the full row on smaller desktop screens. Cells retain an 18 px minimum, so very wide boards on narrow phones still scroll instead of becoming unreadable; the scrolling hint appears only when needed. Keyboard focus is drawn above neighboring cells on every side. Custom boards are for practice and do not enter the preset-difficulty rankings.
+
+Expedition quick opening follows reachable paths and pays normal Boss AP costs. Unreachable neighbors receive removable suspected-safe notes; a mine hit stops the batch. Red triggered mines, gold confirmed-mine flags and solid green confirmed-safe dots remain distinct. Right drags cancel flags; browser-owned gestures may still need a site exception. See [board interaction](docs/board-interaction.md) for the rules, controls, Vimium guidance and save changes.
 
 Progress and records are stored in the current browser for the current site origin; they do not synchronize across devices. The game remains playable when storage is unavailable. Legacy `MinesweeperRank` records can migrate on the same origin, but unfinished legacy boards cannot. Old `game.html` and `menu.html` URLs, including supported language and difficulty parameters, redirect to the new application.
 

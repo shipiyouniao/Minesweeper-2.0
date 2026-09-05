@@ -1,3 +1,5 @@
+import type { BoardInputMode } from '../types/ui.js'
+import { boardHelpTemplate } from './board-help.js'
 import { battleHealthCopy } from './combat-build-copy.js'
 import { cueForVitality } from '../audio/cues.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
@@ -39,7 +41,7 @@ export class VariantApp implements VariantInputActions {
   private readonly input: VariantInput
   private profession: Profession = 'explorer'
   private equipment: readonly Equipment[] = []
-  private flagMode = false
+  private inputMode: BoardInputMode = 'reveal'
   private paused = false
   private pending: 'retreat' | 'restart' | null = null
   private pendingDifficulty: VariantDifficulty | null = null
@@ -69,7 +71,12 @@ export class VariantApp implements VariantInputActions {
   }
 
   /** Apply board input only while the board is visible and no modal owns interaction. */
-  play(side: BoardSide, index: number, flag = this.flagMode): void {
+  play(side: BoardSide, index: number, flag?: boolean): void {
+    if (flag === undefined && (this.inputMode === 'mark-safe' || this.inputMode === 'chord')) {
+      this.cellCommand(side, index, this.inputMode)
+      return
+    }
+    flag ??= this.inputMode === 'flag'
     if (
       this.paused ||
       this.view.dialogOpen ||
@@ -107,6 +114,44 @@ export class VariantApp implements VariantInputActions {
       return
     }
     this.commitPlay(side, index, flag)
+  }
+
+  /** Keep player notes available without moving the character or spending AP. */
+  annotate(side: BoardSide, index: number): void {
+    this.cellCommand(side, index, 'mark-safe')
+  }
+
+  /** Dispatch a bounded batch whose individual reveals retain normal costs. */
+  chord(side: BoardSide, index: number): void {
+    this.cellCommand(side, index, 'chord')
+  }
+
+  /** Apply extra cell commands only on the interactive, uncovered board. */
+  private cellCommand(side: BoardSide, index: number, type: 'mark-safe' | 'chord'): void {
+    if (
+      this.paused ||
+      this.view.dialogOpen ||
+      this.moving ||
+      (this.session instanceof ExpeditionSession && side === 'b')
+    )
+      return
+    this.input.cancelTools()
+    if (this.session instanceof ExpeditionSession) this.expedition({ type, index })
+    else {
+      const changed = this.session.dispatch({ side, type, index })
+      this.sounds.play(
+        !changed
+          ? 'blocked'
+          : this.session.state.phase === 'lost'
+            ? 'loss'
+            : this.session.state.phase === 'won'
+              ? 'win'
+              : type === 'chord'
+                ? 'reveal'
+                : 'flag',
+      )
+    }
+    this.render()
   }
 
   /** Commit one board action after any visible movement has completed. */
@@ -238,13 +283,13 @@ export class VariantApp implements VariantInputActions {
             translations[this.language].how,
             tacticalCopy(this.language, this.session.run.encounter?.kind)
               .help.map((paragraph) => `<p>${paragraph}</p>`)
-              .join(''),
+              .join('') + boardHelpTemplate(this.language, true),
           )
           return
         }
         this.view.showInformation(
           translations[this.language].how,
-          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${battleHealthCopy(this.language)}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
+          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p>${boardHelpTemplate(this.language, this.session instanceof ExpeditionSession)}${this.session instanceof ExpeditionSession ? `<p>${battleHealthCopy(this.language)}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
         )
         return
       }
@@ -267,10 +312,16 @@ export class VariantApp implements VariantInputActions {
         this.paused = !this.paused
         break
       case 'flag-mode':
-        this.flagMode = true
+        this.inputMode = 'flag'
         break
       case 'reveal-mode':
-        this.flagMode = false
+        this.inputMode = 'reveal'
+        break
+      case 'safe-mode':
+        this.inputMode = 'mark-safe'
+        break
+      case 'chord-mode':
+        this.inputMode = 'chord'
         break
       case 'zoom':
         this.view.toggleZoom()
@@ -445,7 +496,7 @@ export class VariantApp implements VariantInputActions {
       const run = this.session.run
       this.view.render(
         run
-          ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.flagMode)
+          ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.inputMode)
           : campTemplate(
               this.language,
               this.session.camp,
@@ -461,7 +512,7 @@ export class VariantApp implements VariantInputActions {
       const state = this.session.state
       const a = state.phase === 'lost' ? { ...state.a, phase: 'lost' as const } : state.a
       const b = state.phase === 'lost' ? { ...state.b, phase: 'lost' as const } : state.b
-      this.view.render(twinTemplate(this.language, state, this.flagMode), a, b, null)
+      this.view.render(twinTemplate(this.language, state, this.inputMode), a, b, null)
     }
   }
 

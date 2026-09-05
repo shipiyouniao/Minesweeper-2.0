@@ -36,6 +36,9 @@ export interface Messages {
   readonly lostNote: string
   readonly reveal: string
   readonly flag: string
+  readonly markSafe: string
+  readonly suspectedSafe: string
+  readonly quickReveal: string
   readonly flagMode: string
   readonly revealMode: string
   readonly helpMouse: string

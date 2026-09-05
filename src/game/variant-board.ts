@@ -32,6 +32,7 @@ export function placedBoard(
     seed,
     firstClick: opening,
     exploded: null,
+    safeMarks: [],
     phase: 'playing',
     cells: Array.from({ length: config.width * config.height }, (_, index) => ({
       mine: mines.has(index),

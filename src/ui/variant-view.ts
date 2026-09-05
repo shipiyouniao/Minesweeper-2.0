@@ -511,15 +511,22 @@ export class VariantView {
         cell.insertAdjacentHTML('afterbegin', spriteImage(mark))
       }
       if (label) cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + label)
+      const triggered = run.triggeredMines.includes(index)
       const confirmed = run.confirmedMines.includes(index)
       const surveyedSafe = run.surveyedCells.includes(index) && !confirmed && !wall
-      cell.classList.toggle('confirmed-mine', confirmed)
+      cell.classList.toggle('confirmed-mine', confirmed && !triggered)
+      cell.classList.toggle('triggered-mine', triggered)
+      if (triggered) cell.innerHTML = icon('mine')
       cell.classList.toggle(
         'surveyed-safe',
         surveyedSafe && run.game.cells[index]?.visibility === 'hidden',
       )
-      if (confirmed || surveyedSafe) {
-        const knowledge = confirmed ? t.confirmedMine : t.confirmedSafe
+      if (triggered || confirmed || surveyedSafe) {
+        const knowledge = triggered
+          ? t.triggeredMine
+          : confirmed
+            ? t.confirmedMine
+            : t.confirmedSafe
         cell.title = knowledge
         cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + knowledge)
       }

@@ -203,6 +203,7 @@ export function enterBattle(run: Expedition, kind: 'bastion' | 'brood'): Expedit
     collected: [],
     scannedRows: [],
     confirmedMines: [],
+    triggeredMines: [],
     surveyedCells: [],
     probeReport: null,
     phase: 'boss',

@@ -46,6 +46,8 @@ function decodeSnapshotValue(value: JsonValue): GameSnapshot | null {
   const seed = reader.number('seed')
   const firstClick = reader.value('firstClick') === null ? null : reader.number('firstClick')
   const rawVisibility = reader.array('visible')
+  // Notes add metadata to the unchanged Classic rules; existing boards simply have no notes.
+  const rawMarks = reader.value('safeMarks') === undefined ? [] : reader.array('safeMarks')
 
   if (!config || seed === null || !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) {
     return null
@@ -81,7 +83,25 @@ function decodeSnapshotValue(value: JsonValue): GameSnapshot | null {
     visible.push(visibility)
   }
 
-  return { config, seed, firstClick, visible }
+  if (!rawMarks || rawMarks.length > cellCount) return null
+  const safeMarks: number[] = []
+  const seenMarks = new Set<number>()
+
+  for (const index of rawMarks) {
+    if (
+      typeof index !== 'number' ||
+      !Number.isInteger(index) ||
+      index < 0 ||
+      index >= cellCount ||
+      visible[index] !== 'hidden' ||
+      seenMarks.has(index)
+    )
+      return null
+    seenMarks.add(index)
+    safeMarks.push(index)
+  }
+
+  return { config, seed, firstClick, visible, safeMarks }
 }
 
 /** Decode external snapshot text; the pure engine receives only GameSnapshot values. */

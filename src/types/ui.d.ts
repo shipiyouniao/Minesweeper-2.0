@@ -10,6 +10,8 @@ export type UiCommand =
   | 'pause'
   | 'flag-mode'
   | 'reveal-mode'
+  | 'safe-mode'
+  | 'chord-mode'
   | 'restart-confirmed'
   | 'new'
   | 'toggle-sound'
@@ -19,6 +21,18 @@ export type NavigationKey = 'arrowleft' | 'arrowright' | 'arrowup' | 'arrowdown'
 
 /** Distinguish a handled board-edge key from an actual move or missing target. */
 export type NavigationResult = 'moved' | 'edge' | 'unavailable'
+
+/** A selected tool describes the next cell activation, without overlapping boolean modes. */
+export type BoardInputMode = 'reveal' | 'flag' | 'mark-safe' | 'chord'
+
+/** A right press retains its starting square until release or cancellation. */
+export interface BoardRightPress {
+  readonly pointerId: number
+  readonly cell: HTMLElement
+  readonly x: number
+  readonly y: number
+  cancelled: boolean
+}
 
 /** Form fields become domain values before reaching the application controller. */
 export type FormSubmission =
@@ -55,6 +69,12 @@ export interface InputActions {
 
   /** Apply a cell action using the selected input mode when omitted. */
   play(index: number, flag?: boolean): void
+
+  /** Toggle a hypothesis without revealing or walking to its square. */
+  annotate(index: number): void
+
+  /** Request flag-count-based opening of a revealed number's neighbors. */
+  chord(index: number): void
 
   /** Handle an allowed toolbar or dialog command. */
   command(action: UiCommand): void

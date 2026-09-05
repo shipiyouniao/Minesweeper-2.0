@@ -141,6 +141,8 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       if (encounter.kind !== 'mirror') reason = 'inactive'
       break
     case 'flag':
+    case 'mark-safe':
+    case 'chord':
     case 'end-turn':
     case 'retreat':
       cost = 0

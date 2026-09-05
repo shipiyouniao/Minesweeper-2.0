@@ -95,6 +95,7 @@ function createRoom(game: Game, entrance: number, boss: number): MirrorRoom {
     player: entrance,
     travelled: [entrance],
     confirmedMines: [],
+    triggeredMines: [],
     surveyedCells: [],
     scannedRows: [],
     probeReport: null,

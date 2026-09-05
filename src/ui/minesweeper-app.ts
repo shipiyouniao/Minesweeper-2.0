@@ -1,3 +1,4 @@
+import type { BoardInputMode } from '../types/ui.js'
 import type { Difficulty, RankedDifficulty } from '../types/game.js'
 import type { InteractionCue, SoundEffects } from '../types/audio.js'
 import { cueForMove } from '../audio/cues.js'
@@ -27,7 +28,7 @@ export class MinesweeperApp implements InputActions {
   private readonly input: InputController
   private readonly ticker: number
   private language: Language
-  private flagMode = false
+  private inputMode: BoardInputMode = 'reveal'
   private recordMode: RankedDifficulty
 
   /** Mount a complete app with explicit session, repository, and locale dependencies. */
@@ -58,9 +59,24 @@ export class MinesweeperApp implements InputActions {
   }
 
   /** Send a player action through the session and present any resulting outcome. */
-  play(index: number, flag = this.flagMode): void {
+  play(index: number, flag?: boolean): void {
+    this.applyCell(index, flag === undefined ? this.inputMode : flag ? 'flag' : 'reveal')
+  }
+
+  /** Record or remove a player hypothesis without starting the clock. */
+  annotate(index: number): void {
+    this.applyCell(index, 'mark-safe')
+  }
+
+  /** Open a number with the same rule used by repeated mouse clicks. */
+  chord(index: number): void {
+    this.applyCell(index, 'chord')
+  }
+
+  /** Resolve the selected cell operation, then present its sound and result. */
+  private applyCell(index: number, type: BoardInputMode): void {
     const before = this.session.state.game
-    if (!this.session.play({ type: flag ? 'flag' : 'reveal', index })) {
+    if (!this.session.play({ type, index })) {
       this.sounds.play('blocked')
       return
     }
@@ -68,7 +84,9 @@ export class MinesweeperApp implements InputActions {
     this.render()
     const state = this.session.state
     const cue = cueForMove(before, state.game, index)
-    if (cue) this.sounds.play(cue)
+    if (type === 'mark-safe')
+      this.sounds.play(state.game.safeMarks.includes(index) ? 'flag' : 'unflag')
+    else if (cue) this.sounds.play(cue)
 
     if (state.game.phase === 'won' || state.game.phase === 'lost') {
       this.showDialog(resultTemplate(this.language, state))
@@ -103,7 +121,16 @@ export class MinesweeperApp implements InputActions {
         break
       case 'flag-mode':
       case 'reveal-mode':
-        this.flagMode = action === 'flag-mode'
+      case 'safe-mode':
+      case 'chord-mode':
+        this.inputMode =
+          action === 'flag-mode'
+            ? 'flag'
+            : action === 'safe-mode'
+              ? 'mark-safe'
+              : action === 'chord-mode'
+                ? 'chord'
+                : 'reveal'
         this.render()
         break
       case 'restart-confirmed':
@@ -221,7 +248,7 @@ export class MinesweeperApp implements InputActions {
   private mount(resetFocus: boolean): void {
     // A hold on the old board must never flag the same index on its replacement.
     this.input.cancelGesture()
-    this.view.mount(this.session.state, this.language, this.flagMode, resetFocus)
+    this.view.mount(this.session.state, this.language, this.inputMode, resetFocus)
     this.render()
   }
 
@@ -230,7 +257,7 @@ export class MinesweeperApp implements InputActions {
     const state = this.session.state
     const best = state.mode === 'custom' ? undefined : this.repository.scores(state.mode)[0]
 
-    this.view.render(state, this.language, this.flagMode, best, this.repository.available)
+    this.view.render(state, this.language, this.inputMode, best, this.repository.available)
     this.view.renderSound(this.sounds.enabled, this.language)
   }
 

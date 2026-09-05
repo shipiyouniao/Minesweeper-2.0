@@ -1,4 +1,4 @@
-import { neighbors } from './engine.js'
+import { neighbors, pruneSafeMarks } from './engine.js'
 import type { Game } from '../types/game.js'
 import type { Expedition } from '../types/variants.js'
 
@@ -13,9 +13,9 @@ export function revealDungeon(run: Expedition, index: number): Game {
     const cell = cells[target]
     if (!cell || cell.visibility !== 'hidden') continue
     cells[target] = { ...cell, visibility: 'revealed' }
-    if (cell.mine) return { ...run.game, cells, phase: 'lost', exploded: target }
+    if (cell.mine) return pruneSafeMarks({ ...run.game, cells, phase: 'lost', exploded: target })
     if (cell.adjacent === 0) queue.push(...neighbors(run.game.config, target))
   }
 
-  return { ...run.game, cells, phase: 'playing' }
+  return pruneSafeMarks({ ...run.game, cells, phase: 'playing' })
 }

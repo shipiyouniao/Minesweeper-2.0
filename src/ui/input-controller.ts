@@ -1,3 +1,4 @@
+import { BoardRightClick } from './board-right-click.js'
 import type { InputActions, TouchPoint } from '../types/ui.js'
 import { parseDifficulty } from '../game/difficulty.js'
 import { parseCommand, parseNavigation, parseSubmission } from './input-parser.js'
@@ -9,6 +10,7 @@ import { parseCommand, parseNavigation, parseSubmission } from './input-parser.j
 export class InputController {
   private readonly actions: InputActions
   private readonly listeners = new AbortController()
+  private readonly rightClick: BoardRightClick
   private longPress: number | undefined
   private touchStart: TouchPoint | null = null
   private lastTouchFlag = -Infinity
@@ -16,6 +18,10 @@ export class InputController {
   /** Attach delegated listeners once, so replacing the board cannot duplicate them. */
   constructor(root: HTMLElement, actions: InputActions) {
     this.actions = actions
+    this.rightClick = new BoardRightClick(root, (cell) => {
+      this.actions.prepareAudio()
+      this.actions.play(Number(cell.dataset['cell']), true)
+    })
     const options = { signal: this.listeners.signal }
 
     root.addEventListener('click', this.handleClick, options)
@@ -36,6 +42,7 @@ export class InputController {
 
   /** Cancel delayed flags before scrolling, changing boards, or disposing the app. */
   readonly cancelGesture = (): void => {
+    this.rightClick.cancel()
     clearTimeout(this.longPress)
     this.longPress = undefined
     this.touchStart = null
@@ -43,6 +50,7 @@ export class InputController {
 
   /** Release every listener and pending gesture, including document/window listeners. */
   dispose(): void {
+    this.rightClick.dispose()
     this.cancelGesture()
     this.listeners.abort()
   }
@@ -147,10 +155,16 @@ export class InputController {
 
     if (
       event.defaultPrevented ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.isComposing ||
       (event.target instanceof Element && event.target.closest('.language-picker')) ||
       this.actions.dialogOpen ||
       event.target instanceof HTMLInputElement ||
-      event.target instanceof HTMLSelectElement
+      event.target instanceof HTMLSelectElement ||
+      event.target instanceof HTMLTextAreaElement ||
+      (event.target instanceof HTMLElement && event.target.isContentEditable)
     ) {
       return
     }
@@ -171,9 +185,13 @@ export class InputController {
 
     const index = Number(cell.dataset['cell'])
 
-    if (key === 'f' || key === ' ' || key === 'enter') {
+    if (key === 's' || key === 'c') {
       event.preventDefault()
-      this.actions.play(index, key === 'f')
+      if (key === 's') this.actions.annotate(index)
+      else this.actions.chord(index)
+    } else if (key === 'f' || key === ' ' || key === 'enter') {
+      event.preventDefault()
+      this.actions.play(index, key === 'f' ? true : undefined)
     } else {
       const navigation = parseNavigation(key)
 
