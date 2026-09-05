@@ -14,7 +14,12 @@ export type MagneticForecast =
       readonly axis: 'horizontal' | 'vertical'
       readonly polarity: 'pull' | 'push'
     }
-  | { readonly kind: 'charge'; readonly anchor: number; readonly path: readonly number[] }
+  | {
+      readonly kind: 'charge'
+      readonly anchor: number
+      readonly path: readonly number[]
+      readonly resolvesOn: number
+    }
   | { readonly kind: 'recovery' }
 
 /** A public projection cannot tell whether a covered landing cell actually contains a mine. */
@@ -31,6 +36,8 @@ export interface MagneticResolution {
   readonly turn: number
   readonly playerPath: readonly number[]
   readonly bossPath: readonly number[]
+  readonly blastCells: readonly number[]
+  readonly detonatedMines: readonly number[]
   readonly impact: number | null
   readonly outcome: 'shifted' | 'grounded' | 'collision' | 'overloaded' | 'recovered'
 }
@@ -39,6 +46,7 @@ export interface MagneticResolution {
 export interface MagneticEncounter extends TacticalState {
   readonly kind: 'magnetic'
   readonly anchors: readonly MagneticAnchor[]
+  readonly craters: readonly number[]
   readonly forecast: MagneticForecast
   readonly exposedUntil: number
   readonly resolution: MagneticResolution | null

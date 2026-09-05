@@ -32,7 +32,12 @@ function save() {
 }
 
 for (const action of defeatMagnetic(run)) {
-  if (!charge && action.type === 'end-turn' && run.encounter.forecast.kind === 'charge')
+  if (
+    !charge &&
+    action.type === 'end-turn' &&
+    run.encounter.forecast.kind === 'charge' &&
+    run.encounter.turn === run.encounter.forecast.resolvesOn
+  )
     charge = { run, save: save(), next: actExpedition(run, action) }
   if (!pulse && run.encounter.forecast.kind === 'field' && !run.encounter.braced) {
     const next = actExpedition(run, { type: 'end-turn' })
@@ -160,6 +165,10 @@ try {
   )
 
   await seed(charge.save, 'zh')
+  assert.equal(
+    await page.locator('.magnetic-blast-warning').count(),
+    charge.next.encounter.resolution.blastCells.length,
+  )
   await page.locator('.magnetic-stage').scrollIntoViewIfNeeded()
   await page.screenshot({
     path: fileURLToPath(new URL('magnetic-lure.png', output)),
@@ -175,12 +184,21 @@ try {
   })
   await settled(charge.next)
   assert.equal((await journal()).actions.length, chargeBefore.actions.length + 1)
-  assert.ok(await page.locator('[data-control="attack"]').isEnabled())
+  assert.equal(await page.locator('.magnetic-crater').count(), charge.next.encounter.craters.length)
   assert.equal(await page.locator('.magnetic-exposed').count(), 1)
   await page.screenshot({
     path: fileURLToPath(new URL('magnetic-exposed.png', output)),
     fullPage: true,
   })
+
+  await seed(charge.save, 'zh')
+  await page.locator('[data-control="end-turn"]').click()
+  await page.locator('.magnetic-mine-explosion').first().waitFor()
+  await page.screenshot({
+    path: fileURLToPath(new URL('magnetic-explosion.png', output)),
+    fullPage: true,
+  })
+  await settled(charge.next)
 
   // Cancelling presentation after commit must retain that turn and release the input guard.
   await seed(charge.save)
@@ -236,6 +254,12 @@ try {
   await touch.goto(`${base}?ruleset=expedition&lang=zh`)
   await touch.locator(`[data-cell="${fixture.objective.action.index}"]`).tap()
   await touch.locator('.magnetic-charge').waitFor()
+  await touch.locator('[data-control="end-turn"]').tap()
+  await touch
+    .locator('.magnetic-key')
+    .getByText('本回合结束时冲锋 · 撤出路线与 3×3 爆区', { exact: true })
+    .waitFor()
+  assert.equal(await touch.locator('.magnetic-exposed').count(), 0)
   await touch.locator('[data-control="end-turn"]').tap()
   await touch.locator('.magnetic-exposed').waitFor()
   assert.equal(await touch.locator('.magnetic-performing').count(), 0)

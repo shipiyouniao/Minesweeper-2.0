@@ -1,5 +1,6 @@
 import { encounterTier } from './encounter-tiers.js'
 import { generateMagnetic } from './magnetic-generation.js'
+import { blastMagnetic } from './magnetic-blast.js'
 import { magneticForecast, magneticLurePath, magneticProjection } from './magnetic-field.js'
 import { combatStats, damageExpedition, incomingCombatDamage } from './combat-build.js'
 import { applyDamageRelics } from './relic-effects.js'
@@ -12,6 +13,23 @@ import type { MagneticExpedition, MagneticResolution } from '../types/magnetic.j
 
 /** Freeze the next field and its public footprint, independently of cursor and tool previews. */
 function forecastRun(run: MagneticExpedition): MagneticExpedition {
+  const pending = run.encounter.forecast
+  if (pending.kind === 'charge' && run.encounter.turn <= pending.resolvesOn) {
+    const targets =
+      run.encounter.turn === pending.resolvesOn
+        ? [
+            ...new Set([
+              ...pending.path.slice(1),
+              pending.anchor,
+              ...neighbors(run.game.config, pending.anchor),
+            ]),
+          ]
+        : []
+    return {
+      ...run,
+      encounter: { ...run.encounter, intent: { kind: 'cross', targets, damage: 5 } },
+    }
+  }
   const encounter = {
     ...run.encounter,
     forecast: magneticForecast(run.encounter.turn, run.encounter.exposedUntil),
@@ -69,6 +87,7 @@ export function enterMagnetic(run: Expedition): Expedition {
       turnTriggers: [],
       event: 'entered',
       anchors: layout.objectives.map((index) => ({ index, calibrated: false })),
+      craters: [],
       forecast: { kind: 'recovery' },
       exposedUntil: 0,
       resolution: null,
@@ -99,8 +118,8 @@ export function lureMagnetic(run: MagneticExpedition, index: number): Expedition
       anchors: run.encounter.anchors.map((entry) =>
         entry.index === index ? { ...entry, calibrated: true } : entry,
       ),
-      forecast: { kind: 'charge', anchor: index, path },
-      intent: { kind: 'cross', targets: path.slice(1), damage: 5 },
+      forecast: { kind: 'charge', anchor: index, path, resolvesOn: run.encounter.turn + 1 },
+      intent: { kind: 'cross', targets: [], damage: 5 },
       event: anchor.calibrated ? 'magnet-lured' : 'disabled',
     },
   }
@@ -153,6 +172,8 @@ function resolveField(run: MagneticExpedition): Expedition {
     turn: run.encounter.turn,
     playerPath: path,
     bossPath: [run.encounter.boss],
+    blastCells: [],
+    detonatedMines: [],
     impact,
     outcome,
   })
@@ -167,29 +188,39 @@ function resolveCharge(run: MagneticExpedition): Expedition {
   let next: Expedition = hit ? injureMagnetic(run, incomingCombatDamage(run, 5), null) : run
   const blocked = run.player === anchor
   const bossPath = blocked ? [...path.slice(0, -1), ...path.slice(0, -2).reverse()] : path
+  const blastCells = blocked ? [] : [anchor, ...neighbors(run.game.config, anchor)]
+  const detonatedMines = blastCells.filter((index) => run.game.cells[index]?.mine)
   if (!blocked) {
+    if (blastCells.includes(run.player) && next.phase !== 'lost')
+      next = injureMagnetic(next, incomingCombatDamage(next, 5), null)
+    const damage = Math.min(6 + Math.min(3, detonatedMines.length), encounter.health - 1)
     const cells = next.game.cells.map((cell, index) =>
       index === encounter.boss ? { ...cell, visibility: 'revealed' as const } : cell,
     )
-    next = {
-      ...next,
-      game: { ...next.game, cells },
-      walls: [...run.walls.filter((index) => index !== encounter.boss), anchor],
-      exit: anchor,
-      encounter: {
-        ...encounter,
-        boss: anchor,
-        health: Math.max(1, encounter.health - 6),
-        lastDamage: Math.min(6, encounter.health - 1),
-        exposedUntil: encounter.turn + 3,
+    next = blastMagnetic(
+      {
+        ...next,
+        game: { ...next.game, cells },
+        walls: [...run.walls.filter((index) => index !== encounter.boss), anchor],
+        exit: anchor,
+        encounter: {
+          ...encounter,
+          boss: anchor,
+          health: encounter.health - damage,
+          lastDamage: damage,
+          exposedUntil: encounter.turn + 3,
+        },
       },
-    }
+      anchor,
+    )
   }
 
   return finishTurn(next, run, {
     turn: encounter.turn,
     playerPath: [run.player],
     bossPath,
+    blastCells,
+    detonatedMines,
     impact: blocked ? run.player : anchor,
     outcome: blocked ? 'collision' : 'overloaded',
   })
@@ -231,6 +262,10 @@ function finishTurn(
 
 /** End-turn is the only clock; pauses, previews and animation frames never advance combat. */
 export function advanceMagnetic(run: MagneticExpedition): Expedition {
-  if (run.encounter.forecast.kind === 'charge') return resolveCharge(run)
+  if (
+    run.encounter.forecast.kind === 'charge' &&
+    run.encounter.turn >= run.encounter.forecast.resolvesOn
+  )
+    return resolveCharge(run)
   return resolveField(run)
 }

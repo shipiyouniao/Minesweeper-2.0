@@ -131,10 +131,10 @@ export function createExpedition(departure: Departure): Expedition {
   }
 }
 
-/** Find every revealed safe cell connected to the entrance by orthogonal steps. */
+/** Find every revealed safe cell connected to the player by orthogonal steps. */
 export function reachableCells(run: Expedition): Set<number> {
-  const found = new Set<number>([run.entrance])
-  const queue = [run.entrance]
+  const found = new Set<number>([run.player])
+  const queue = [run.player]
 
   for (let cursor = 0; cursor < queue.length; cursor++) {
     const index = queue[cursor]

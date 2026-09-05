@@ -1,4 +1,5 @@
 import { magneticProjection } from '../game/magnetic-field.js'
+import { neighbors } from '../game/engine.js'
 import { magneticLandingCopy, magneticStatus } from './magnetic-copy.js'
 import { battleText } from './combat-build-copy.js'
 import { spriteImage, spriteUrl } from './dungeon-sprites.js'
@@ -32,6 +33,17 @@ export function markMagneticCell(
 ): void {
   const encounter = run.encounter
   if (encounter?.kind !== 'magnetic') return
+  if (encounter.craters.includes(index)) {
+    cell.classList.add('magnetic-crater')
+    const label = battleText(
+      language,
+      'Detonated mine · walkable crater',
+      '地雷已炸毁 · 弹坑可通行',
+      '地雷爆破済み · 通行可能なクレーター',
+    )
+    cell.title = label
+    cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
+  }
   if (index === encounter.boss) {
     cell.classList.add('magnetic-boss')
     cell.classList.toggle('magnetic-exposed', encounter.exposedUntil >= encounter.turn)
@@ -120,9 +132,14 @@ export class MagneticBoard {
     this.restoreLanding()
     grid.querySelector('.magnetic-overlay')?.remove()
     for (const mark of grid.querySelectorAll('.magnetic-arrow')) mark.remove()
-    for (const cell of grid.querySelectorAll('.magnetic-landing, .magnetic-grounded'))
-      cell.classList.remove('magnetic-landing', 'magnetic-grounded')
+    for (const cell of grid.querySelectorAll(
+      '.magnetic-landing, .magnetic-grounded, .magnetic-blast-warning',
+    ))
+      cell.classList.remove('magnetic-landing', 'magnetic-grounded', 'magnetic-blast-warning')
     const forecast = run.encounter.forecast
+    if (forecast.kind === 'charge')
+      for (const index of [forecast.anchor, ...neighbors(run.game.config, forecast.anchor)])
+        this.cell(index)?.classList.add('magnetic-blast-warning')
     grid.dataset['magnetic'] = forecast.kind === 'field' ? forecast.polarity : forecast.kind
     const projection = magneticProjection(run)
     const rotation = { left: '180deg', right: '0deg', up: '-90deg', down: '90deg', none: '0deg' }
@@ -231,7 +248,7 @@ export class MagneticBoard {
     const generation = this.generation
     const resolution = encounter.resolution
     const field = before.encounter.forecast
-    if (field.kind === 'recovery' && resolution.outcome === 'recovered') return
+    if (resolution.outcome === 'recovered' && field.kind !== 'field') return
     grid.classList.add('magnetic-performing')
     grid.dataset['performance'] = 'gather'
     const buildup = grid.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.09)' }], {
@@ -266,6 +283,26 @@ export class MagneticBoard {
       await Promise.all(motions.map((animation) => animation.finished))
       if (generation !== this.generation) return
       grid.dataset['performance'] = 'impact'
+      const blasts: Animation[] = []
+      for (const index of resolution.blastCells) {
+        const cell = this.cell(index)
+        if (!cell) continue
+        const burst = document.createElement('div')
+        const mine = resolution.detonatedMines.includes(index)
+        burst.className = `magnetic-blast ${mine ? 'magnetic-mine-explosion' : ''}`
+        burst.style.cssText = `left:${cell.offsetLeft}px;top:${cell.offsetTop}px;width:${cell.offsetWidth}px;height:${cell.offsetHeight}px`
+        grid.append(burst)
+        const animation = burst.animate(
+          [
+            { transform: 'scale(.25)', opacity: 0 },
+            { transform: mine ? 'scale(1.6)' : 'scale(1)', opacity: 1, offset: 0.3 },
+            { transform: 'scale(1.3)', opacity: 0 },
+          ],
+          { duration: 650, easing: 'ease-out' },
+        )
+        this.animations.push(animation)
+        blasts.push(animation)
+      }
       const impact = this.cell(resolution.impact ?? resolution.playerPath.at(-1) ?? before.player)
       if (impact) {
         const ring = document.createElement('div')
@@ -282,6 +319,7 @@ export class MagneticBoard {
         this.animations.push(animation)
         await animation.finished
       }
+      await Promise.all(blasts.map((animation) => animation.finished))
     } catch {
       // Pausing, resizing or unmounting cancels presentation after the journal is already committed.
     } finally {
@@ -301,7 +339,9 @@ export class MagneticBoard {
       'magnetic-knight-moving',
     )
     if (grid) delete grid.dataset['performance']
-    for (const actor of this.root.querySelectorAll('.magnetic-actor, .magnetic-impact'))
+    for (const actor of this.root.querySelectorAll(
+      '.magnetic-actor, .magnetic-impact, .magnetic-blast',
+    ))
       actor.remove()
   }
 
