@@ -35,6 +35,7 @@ import type {
   Equipment,
   Expedition,
   ExpeditionAction,
+  ExitIntent,
   Profession,
   Relic,
   Upgrade,
@@ -234,26 +235,23 @@ function revealFrontier(run: Expedition, index: number): Expedition {
 
   // A chest reached on the approach may have surveyed clues; preserve those discoveries.
   const game = revealDungeon(approached, index)
-  return finishAtExit(
-    collectTreasures(
-      {
-        ...approached,
-        game,
-        player: index,
-        phase: game.phase === 'lost' ? 'lost' : 'exploring',
-        steps: run.steps + 1,
-      },
-      [index],
-    ),
+  return collectTreasures(
+    {
+      ...approached,
+      game,
+      player: index,
+      phase: game.phase === 'lost' ? 'lost' : 'exploring',
+      steps: run.steps + 1,
+    },
+    [index],
   )
 }
 
-/** Walk through known floor cells and enter the stairs only after physically arriving. */
+/** Walk through known floor cells; the action orchestrator owns explicit stair entry. */
 function movePlayer(run: Expedition, index: number): Expedition {
   const path = walkingPath(run, index)
   if (!path || (path.length === 1 && index !== run.exit)) return run
-  const moved = collectTreasures({ ...run, player: index, steps: run.steps + 1 }, path)
-  return finishAtExit(moved)
+  return collectTreasures({ ...run, player: index, steps: run.steps + 1 }, path)
 }
 
 /** Commit an exit reward only for a living explorer that actually reached the stairs. */
@@ -342,12 +340,34 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
 
 /** Apply the accepted intent, then process each newly earned discovery reaction once. */
 export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
-  if (action.type === 'chord') return chordExpedition(run, action.index, actExpedition)
+  if (action.type === 'chord') return chordExpedition(run, action.index, revealForBatch)
+  return applyExpedition(run, action, 'enter')
+}
 
+/** Retain normal movement, damage and discovery while requiring an explicit stair entry. */
+function revealForBatch(run: Expedition, action: ExpeditionAction): Expedition {
+  return applyExpedition(run, action, 'stay')
+}
+
+/** Share post-action reactions between direct actions and each quick-open reveal. */
+function applyExpedition(
+  run: Expedition,
+  action: ExpeditionAction,
+  exitIntent: ExitIntent,
+): Expedition {
   let next =
     run.phase === 'boss'
       ? actBattle(run, action, transitionExpedition)
       : transitionExpedition(run, action)
+
+  if (
+    exitIntent === 'enter' &&
+    run.phase === 'exploring' &&
+    next !== run &&
+    (action.type === 'move' || action.type === 'reveal') &&
+    action.index === run.exit
+  )
+    next = finishAtExit(next)
 
   // Combat completion is the only way to collect the guarded floor's ordinary exit reward.
   if (next.phase === 'boss' && next.encounter?.health === 0) {

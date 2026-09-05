@@ -102,7 +102,7 @@ export class VariantInput {
       const cell = cellTarget(element)
       if (cell) {
         this.actions.unlock()
-        this.actions.play(cell.side, cell.index, true)
+        this.actions.secondary(cell.side, cell.index)
       }
     })
     this.tools = new DungeonToolController(root, actions)
@@ -155,17 +155,17 @@ export class VariantInput {
       this.actions.feedback('tap')
   }
 
-  /** Replace the board context menu with a flag action. */
+  /** Replace the board menu with a mark cycle or quick-open on the captured cell. */
   private readonly context = (event: MouseEvent): void => {
     const cell = cellTarget(event.target)
     if (!cell) return
     event.preventDefault()
     if (this.hold) {
-      this.flagHold()
+      this.activateHold()
       return
     }
     if (performance.now() < this.suppressUntil) return
-    this.actions.play(cell.side, cell.index, true)
+    this.actions.secondary(cell.side, cell.index)
   }
 
   /** Update each grid's roving tab stop without emitting render-induced sounds. */
@@ -259,16 +259,16 @@ export class VariantInput {
       originY: event.clientY,
       cancelled: false,
     }
-    if (!this.tools.armed) this.holdTimer = window.setTimeout(this.flagHold, 450)
+    if (!this.tools.armed) this.holdTimer = window.setTimeout(this.activateHold, 450)
   }
 
-  /** Flag the captured cell once, before any native menu or synthetic click can run. */
-  private readonly flagHold = (): void => {
+  /** Apply the captured cell's shortcut once, before any native menu or synthetic click. */
+  private readonly activateHold = (): void => {
     const hold = this.hold
     if (!hold || hold.cancelled || this.tools.armed) return
     this.cancelHold()
     this.suppressUntil = performance.now() + 700
-    this.actions.play(hold.target.side, hold.target.index, true)
+    this.actions.secondary(hold.target.side, hold.target.index)
   }
 
   /** Movement beyond touch slop belongs to scrolling, not a flag action. */

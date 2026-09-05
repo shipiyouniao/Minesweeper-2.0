@@ -270,9 +270,9 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
         name: localized(language, 'Aegis', '庇护', '加護'),
         note: localized(
           language,
-          'Gain 1 shield once, up to 2. A protected mine receives a locked gold flag; it is never removed.',
-          '获得 1 次护盾，上限 2。护盾将踩中的雷标成锁定金旗，不会移除地雷。',
-          'シールドを1回獲得、上限2。踏んだ地雷を解除不可の金の旗で示し、地雷は消しません。',
+          'Gain 1 shield, up to 2. Absorbs up to 5 damage; a mine hit leaves a locked red mine marker.',
+          '获得 1 层护盾，上限 2 层。抵挡最多 5 点伤害；踩中的雷留下不可取消的红色地雷标记。',
+          'シールドを1つ獲得、上限2。最大5ダメージを吸収。踏んだ地雷は解除できない赤い地雷印になります。',
         ),
       }
     case 'purse':

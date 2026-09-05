@@ -52,6 +52,8 @@ export interface VariantInputActions {
   command(command: VariantCommand): void
   /** Apply a reveal or explicit flag action on one board. */
   play(side: BoardSide, index: number, flag?: boolean): void
+  /** Cycle player marks or quick-open using right-click and touch-hold. */
+  secondary(side: BoardSide, index: number): void
   /** Toggle a player note on an interactive board. */
   annotate(side: BoardSide, index: number): void
   /** Open a number's neighbors through the active ruleset. */

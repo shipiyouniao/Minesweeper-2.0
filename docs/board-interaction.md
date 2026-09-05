@@ -12,27 +12,30 @@ This update addresses [issue #21](https://github.com/shipiyouniao/Minesweeper-2.
 | Confirmed safe | A survey or the other mirror realm proved safety             | Solid green dot     | No             |
 | Suspected safe | A player note or unfinished quick-open deduction             | Cyan outlined check | Yes            |
 
-Choose **Note safe** and activate a covered cell, or press **S** on it. Repeat to remove the note. A manual safe note replaces an ordinary flag; a manual flag replaces a safe note. Revealing the cell removes its note. A tool confirmation supersedes either hypothesis. Triggering a mine permanently records that source for this room, even if a later scan covers it.
+Right-click or touch-and-hold a covered cell to cycle **unmarked → flag → suspected safe → unmarked**. Confirmed states remain locked. Alternatively, choose **Note safe** and click/tap a covered cell, or press **S**; repeat to remove the note. Flag mode and **F** remain explicit flag toggles. Revealing the cell removes its note. A tool confirmation supersedes either hypothesis. Triggering a mine permanently records that source for this room, even if a later scan covers it.
 
 Notes work in Classic, Twin and Expedition. They never reveal covered numbers, count as flags, establish walkable terrain, grant discovery rewards or become trusted input to the solver. A suspected-safe cell can contain a mine. Mirrored rooms retain their own notes and triggered hazards when switching sides.
 
 ## Quick open
 
-Activate **Quick open**, then select a revealed number, or press **C** on it. Classic and Twin also retain their existing repeated-number activation. Adjacent flag count must equal that number. Matching counts do not verify flag correctness.
+Right-click or touch-and-hold a revealed cell to quick-open. You can also select **Quick open** and click/tap the cell, or press **C**. Classic and Twin retain their repeated-cell activation. Neighboring suspected-safe notes and confirmed-safe cells are dig targets even when flags do not match. Other unknown neighbors still require the flag count to equal the clue. A player's note is an explicit dig request, not verified safety: mistakes cause normal mine damage and stop the batch. Ordinary Expedition clicks still move/interact, so the shortcut does not take over tactical movement.
 
-In Expedition, the command considers only that number's originally covered, unflagged neighbors, excluding walls and occupied terrain. It follows known routes and resolves ordinary reveal actions one at a time. After each reveal, it recomputes reachability: opening a blank region can connect another target. It selects the cheapest currently allowed reveal, breaking ties by board index, making replay deterministic.
+In Expedition, the command considers only the selected cell's originally covered, unflagged neighbors, excluding walls and occupied terrain. Survey and mirror confirmations join player notes as eligible targets without testing hidden mine values. It follows known routes and resolves ordinary reveal actions one at a time. After each reveal, it recomputes reachability: opening a blank region can connect another target. It selects the cheapest currently allowed reveal, breaking ties by board index, making replay deterministic. Notes and confirmations remain in place when travel or AP prevents digging them; unrelated unknown neighbors do not receive new notes when flags do not match.
 
 Boss reveals pay their existing approach-and-dig AP cost. Moving relic effects, injuries, surveys, collection and once-per-floor triggers continue through the normal action pipeline. The command never ends a turn or switches realms automatically. It stops on a mine hit, a phase change, or when no remaining target is affordable and reachable. Remaining uncertain targets receive removable safe notes. Already confirmed-safe cells keep their stronger confirmation. A repeated no-op command spends nothing.
+
+Revealing or reaching the exit during a quick-open batch does not finish the floor, grant its reward or start its Boss room. Continue exploring, then deliberately click/tap the exit in Reveal mode to enter it. This also works if the batch leaves the character standing on the exit. Passing through stairs is not an exit intent.
 
 ## Keyboard and mouse
 
 - Arrows and **H/J/K/L** move board focus left/down/up/right. Focus movement spends no AP; it does not move the character.
 - **Enter/Space** activates the selected mode. **F** flags, **S** toggles a safe note, **C** quick-opens neighbors.
-- Mouse right-click flags on release. Movement beyond eight CSS pixels cancels the whole press, including a drag that returns to its origin. A new right-click works immediately after cancellation.
+- Mouse right-click applies the mark cycle or quick-open on release. Movement beyond eight CSS pixels cancels the whole press, including a drag that returns to its origin. A new right-click works immediately after cancellation.
 - Touch/pen long presses keep their existing original-cell capture and scroll cancellation. Right-mouse handling does not replace touch scrolling.
-- Notes and quick opening have visible mode buttons, so neither feature requires a keyboard or an ambiguous double-click gesture.
+- All four mode buttons sit above the board area, remain available while scrolling through it, and have at least 44 px-high touch targets. A short hint explains the selected action.
+- After **C** in Expedition, the roving keyboard focus follows the character's final square, including when an unreachable/no-op command leaves the character in place. Pointer actions retain their own focus; terminal dialogs keep focus ownership.
 
-The board captures cancelable right-pointer events and their compatibility mouse events. It also consumes the trailing context menu so one press produces at most one flag. Gestures beginning outside game cells remain outside this handler. Listener teardown, page blur and replacement boards discard pending presses.
+The board captures cancelable right-pointer events and their compatibility mouse events. It also consumes the trailing context menu so one press produces at most one action, even when a slow render delays that menu. Fresh pointer input or a deliberate keyboard menu request starts a new sequence; unrelated keys do not release delayed-menu suppression. Gestures beginning outside game cells remain outside this handler. Listener teardown, page blur and replacement boards discard pending presses.
 
 ### Browser extensions and built-in gestures
 
@@ -46,8 +49,8 @@ For **Microsoft Edge's built-in gestures**, the reliable fallback is to search E
 
 ## State and maintenance
 
-`Game.safeMarks` stores a bounded list of player notes; `Expedition.triggeredMines` records hit provenance alongside the full `confirmedMines` set. Named contracts remain in `.d.ts` modules. `dungeon-chord.ts` owns pure batch orchestration; `BoardRightClick` owns the browser listener and gesture lifecycle.
+`Game.safeMarks` stores a bounded list of player notes; `Expedition.triggeredMines` records hit provenance alongside the full `confirmedMines` set. Named contracts remain in `.d.ts` modules. `dungeon-chord.ts` owns pure batch orchestration; `BoardRightClick` owns the browser listener and gesture lifecycle. `secondaryBoardAction` maps visible cell state to existing typed intents, and `board-controls.ts` supplies the shared pointer toolbar. The expedition orchestrator applies the explicit `ExitIntent` policy while sharing movement, damage and discovery reactions between direct and batch actions.
 
-Expedition rules revision **3** retires earlier journals using their checkpointed extraction value and preserves camp progress under the [save policy](save-policy.md). No previous gameplay engine is retained. Classic's unchanged rules keep the current session format; the decoder initializes absent note metadata to an empty list, preserving active boards, preferences and records. Twin retains its journal format and replays the new typed intents through its current engine.
+Expedition rules revision **4** accounts for note-directed quick opening and deliberate exit entry. Earlier journals return their checkpointed extraction value to camp and preserve permanent progress under the [save policy](save-policy.md). No previous gameplay engine is retained. Classic keeps its current snapshot format, preserving active boards, preferences and records. Twin retains its journal format: previously accepted matching-flag chords keep their neighbor order, while formerly rejected commands were never stored.
 
-Regression coverage exercises false-flag damage, shielded hit provenance, unreachable and AP-limited quick opening, note removal and confirmation, mirrored state, save validation, keyboard shortcuts, native browser right-button sequences and mobile touch scrolling. Browser touch emulation does not replace physical-device testing, and tests of page listeners do not establish compatibility with every installed gesture extension.
+Regression coverage exercises false-flag damage, shielded hit provenance, unreachable and AP-limited quick opening, note removal and confirmation, mirrored state, save validation, keyboard shortcuts, native browser right-button sequences and mobile touch scrolling. Browser C checks verify an unequipped Explorer loses five health on a mine, a shielded Engineer spends one shield instead, and both results survive reload. Browser touch emulation does not replace physical-device testing, and tests of page listeners do not establish compatibility with every installed gesture extension.

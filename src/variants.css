@@ -10,14 +10,12 @@
   color: var(--muted);
   margin-right: 12px;
 }
-.ruleset-tabs button,
-.variant-input-mode button {
+.ruleset-tabs button {
   border-radius: 8px;
   padding: 10px 16px;
   border: 1px solid transparent;
 }
-.ruleset-tabs button[aria-pressed='true'],
-.variant-input-mode button[aria-pressed='true'] {
+.ruleset-tabs button[aria-pressed='true'] {
   color: var(--blue);
   background: var(--surface);
   border-color: var(--line);
@@ -473,13 +471,6 @@ html:has(.expedition-dialog[open]) {
   align-items: stretch;
   gap: 12px;
 }
-.variant-input-mode {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  flex-wrap: wrap;
-}
 .twin-tools {
   display: flex;
   justify-content: space-between;
@@ -689,9 +680,6 @@ html:has(.expedition-dialog[open]) {
   cursor: not-allowed;
 }
 
-.variant-input-mode {
-  flex-wrap: wrap;
-}
 .variant-board-panel .cell.confirmed-mine .icon {
   color: #a56505;
 }

@@ -344,7 +344,7 @@ h1 {
   border-radius: 15px;
   background: var(--surface);
   box-shadow: 0 4px 24px #252a3204;
-  overflow: hidden;
+  overflow: clip;
 }
 .score-strip {
   display: flex;
@@ -552,7 +552,7 @@ h1 {
 }
 .game-toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 14px 18px;
   border-top: 1px solid var(--line);
@@ -604,6 +604,59 @@ h1 {
 .input-mode .icon {
   width: 14px;
   height: 14px;
+}
+
+/* Keep mouse/touch modes beside the board while the page itself remains scrollable. */
+.board-play-area {
+  position: relative;
+  min-width: 0;
+}
+.board-controls {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 2px 8px #252a3208;
+}
+.board-controls .input-mode {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  padding: 0;
+  border: 0;
+}
+.board-controls .input-mode button {
+  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  padding: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.board-mode-hint,
+.board-gesture-hint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 6px 0 0;
+}
+.board-mode-hint {
+  min-height: 3em;
+}
+.board-gesture-hint {
+  font-size: 11px;
+}
+.board-play-area .cell {
+  scroll-margin-block-start: 190px;
+}
+@media (max-width: 520px) {
+  .board-controls .input-mode {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .toolbar-right {
   display: flex;

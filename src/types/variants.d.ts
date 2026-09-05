@@ -132,6 +132,9 @@ export interface VariantRecord {
   readonly earned: number
 }
 
+/** Batch digging may expose or cross stairs; only a direct action commits entry. */
+export type ExitIntent = 'enter' | 'stay'
+
 /** Replay envelopes never trust serialized mines, clues, charges, or rewards. */
 export interface ExpeditionJournal {
   readonly rulesRevision: number

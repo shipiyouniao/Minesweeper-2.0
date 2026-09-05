@@ -440,6 +440,18 @@ export class VariantView {
     }
   }
 
+  /** Follow the final player position after a keyboard batch, keeping one roving tab stop. */
+  focusPlayer(): void {
+    const run = this.expedition
+    if (!run) return
+    this.focus('a', run.player)
+    const cell = this.content.querySelector<HTMLElement>(
+      `[data-side="a"] [data-cell="${run.player}"]`,
+    )
+    cell?.focus({ preventScroll: true })
+    cell?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+  }
+
   /** Delegate geometry to the shared board view so keyboard behavior stays consistent. */
   navigate(side: BoardSide, index: number, key: NavigationKey): NavigationResult {
     return (side === 'a' ? this.a : this.b)?.navigate(index, key) ?? 'unavailable'

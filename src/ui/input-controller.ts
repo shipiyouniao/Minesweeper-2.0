@@ -13,14 +13,14 @@ export class InputController {
   private readonly rightClick: BoardRightClick
   private longPress: number | undefined
   private touchStart: TouchPoint | null = null
-  private lastTouchFlag = -Infinity
+  private lastTouchAction = -Infinity
 
   /** Attach delegated listeners once, so replacing the board cannot duplicate them. */
   constructor(root: HTMLElement, actions: InputActions) {
     this.actions = actions
     this.rightClick = new BoardRightClick(root, (cell) => {
       this.actions.prepareAudio()
-      this.actions.play(Number(cell.dataset['cell']), true)
+      this.actions.secondary(Number(cell.dataset['cell']))
     })
     const options = { signal: this.listeners.signal }
 
@@ -95,7 +95,7 @@ export class InputController {
     }
   }
 
-  /** Replace the board context menu with a flag action. */
+  /** Replace the board context menu with its public mark/quick-open shortcut. */
   private readonly handleContextMenu = (event: MouseEvent): void => {
     const cell = this.cellTarget(event.target)
 
@@ -106,7 +106,7 @@ export class InputController {
     event.preventDefault()
 
     if (!this.suppressTouchClick()) {
-      this.actions.play(Number(cell.dataset['cell']), true)
+      this.actions.secondary(Number(cell.dataset['cell']))
     }
   }
 
@@ -203,6 +203,12 @@ export class InputController {
 
   /** Begin a touch/pen hold; scrolling or release cancels it before the deadline. */
   private readonly handlePointerDown = (event: PointerEvent): void => {
+    if (!event.isPrimary || event.button !== 0) {
+      this.cancelGesture()
+      return
+    }
+    // A real new press must not inherit suppression of the preceding hold's synthetic click.
+    this.lastTouchAction = -Infinity
     const cell = this.cellTarget(event.target)
 
     if (!cell) {
@@ -216,10 +222,10 @@ export class InputController {
     this.cancelGesture()
     this.touchStart = { x: event.clientX, y: event.clientY }
 
-    // A hold produces a flag, then suppresses the browser's synthetic click/menu.
+    // A hold acts on the original cell, then suppresses the synthetic click/menu.
     this.longPress = window.setTimeout(() => {
-      this.lastTouchFlag = performance.now()
-      this.actions.play(Number(cell.dataset['cell']), true)
+      this.lastTouchAction = performance.now()
+      this.actions.secondary(Number(cell.dataset['cell']))
       this.touchStart = null
       this.longPress = undefined
     }, 450)
@@ -253,8 +259,8 @@ export class InputController {
     return target instanceof Element ? target.closest<HTMLElement>('[data-cell]') : null
   }
 
-  /** Ignore the duplicate click/context menu browsers emit after a touch flag. */
+  /** Ignore the duplicate click/context menu browsers emit after a touch action. */
   private suppressTouchClick(): boolean {
-    return performance.now() - this.lastTouchFlag < 700
+    return performance.now() - this.lastTouchAction < 700
   }
 }

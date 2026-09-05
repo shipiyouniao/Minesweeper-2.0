@@ -1,4 +1,5 @@
 import type { BoardInputMode } from '../types/ui.js'
+import { boardControlsTemplate } from './board-controls.js'
 import {
   EQUIPMENT,
   UPGRADES,
@@ -103,6 +104,8 @@ export function campTemplate(
   const number = new Intl.NumberFormat(language)
   const careers = PROFESSIONS
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
+  // Sort a display copy so new purchases fit their price tier without changing catalog order.
+  const upgrades = [...UPGRADES].sort((a, b) => upgradeCost(a) - upgradeCost(b))
 
   return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${battleHealthCopy(language)}</p>
     <div class="variant-metrics">${metric(t.supplies, number.format(camp.supplies))}${metric(t.departures, camp.completed)}</div>
@@ -113,8 +116,8 @@ export function campTemplate(
     <h2>${t.equipment} <small>${spent} / 3</small></h2>
     ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && !allowedDeparture(camp, profession, [...equipment, item]), combatSprite(item))).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
     <button class="primary-button" data-control="start">${t.start} ↗</button>
-    <h2>${t.facilities}</h2>${campProgressTemplate(language, camp)}<div class="choice-grid facilities">${UPGRADES.map(
-      (upgrade) => {
+    <h2>${t.facilities}</h2>${campProgressTemplate(language, camp)}<div class="choice-grid facilities">${upgrades
+      .map((upgrade) => {
         const description = upgradeCopy(language, upgrade)
         return choice(
           `upgrade:${upgrade}`,
@@ -136,8 +139,8 @@ export function campTemplate(
                 ? combatSprite(parseCombatPurchase(upgrade)!)
                 : parseRelicPack(upgrade),
         )
-      },
-    ).join('')}</div></section>`
+      })
+      .join('')}</div></section>`
 }
 
 /** Render the common board frame; BoardView owns the actual grid cells. */
@@ -192,10 +195,10 @@ export function expeditionTemplate(
     ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
     ${run.phase === 'reward' ? `<button class="primary-button" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
-    ${boardZoomTemplate(language)}<div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards">${run.phase === 'boss' ? `<div class="mirror-playbar">${tacticalControlsTemplate(language, run)}<span>${tacticalCopy(language, 'mirror').points} ${run.encounter.points}</span></div>` : ''}<div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
+    ${boardZoomTemplate(language)}<div class="board-play-area">${run.phase === 'exploring' || run.phase === 'boss' ? boardControlsTemplate(language, inputMode, 'data-control') : ''}<div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards">${run.phase === 'boss' ? `<div class="mirror-playbar">${tacticalControlsTemplate(language, run)}<span>${tacticalCopy(language, 'mirror').points} ${run.encounter.points}</span></div>` : ''}<div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${
         run.phase === 'exploring' || run.phase === 'boss'
-          ? `<div class="variant-toolbar">${inputModeTemplate(language, inputMode)}
+          ? `<div class="variant-toolbar">
       <p class="variant-note tool-hint" role="status">${t.toolHint}</p>
       <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}</div>
       ${professionSkillTemplate(language, run)}
@@ -206,7 +209,7 @@ export function expeditionTemplate(
       <h3>${t.relics}</h3>${relics ? `<ul class="relic-list">${relics}</ul>` : `<p class="variant-note">${t.noRelics}</p>`}
       ${run.encounter ? '' : `<div class="dungeon-legend"><span>${spriteImage('entrance')}${t.entrance}</span><span>${spriteImage('exit')}${t.exit}</span><span>${spriteImage('treasure')}${t.treasure}</span><span>${spriteImage('wall')}${t.wall}</span></div>`}
       <ul class="scan-results">${run.scannedRows.map((row) => `<li>${common.row} ${row + 1}: <strong>${run.game.cells.slice(row * run.game.config.width, (row + 1) * run.game.config.width).filter((cell) => cell.mine).length}</strong> ${t.rowMines}</li>`).join('')}</ul>
-    </aside></div>`
+    </aside></div></div>`
 }
 
 /** Present existing offers in a modal without changing reward or advancement rules. */
@@ -240,12 +243,6 @@ export function expeditionResultTemplate(language: Language, run: Expedition): s
     <button class="primary-button" data-control="camp">${t.camp}</button>`
 }
 
-/** Offer an explicit flag toggle for touch users alongside keyboard/right-click shortcuts. */
-export function inputModeTemplate(language: Language, inputMode: BoardInputMode): string {
-  const t = translations[language]
-  return `<div class="variant-input-mode" role="group" aria-label="${t.play}"><button data-control="reveal-mode" aria-pressed="${inputMode === 'reveal'}">${t.reveal}</button><button data-control="flag-mode" aria-pressed="${inputMode === 'flag'}">${t.flag}</button><button data-control="safe-mode" aria-pressed="${inputMode === 'mark-safe'}">${t.markSafe}</button><button data-control="chord-mode" aria-pressed="${inputMode === 'chord'}">${t.quickReveal}</button></div>`
-}
-
 /** Present both boards at once, with responsive stacking on narrow screens. */
 export function twinTemplate(language: Language, state: Twin, inputMode: BoardInputMode): string {
   const t = variantCopy(language)
@@ -261,9 +258,9 @@ export function twinTemplate(language: Language, state: Twin, inputMode: BoardIn
 
   return `${difficultyTemplate(language, state.difficulty, false)}<div class="variant-metrics">${metric(t.steps, state.moves)}${metric('A · ' + common.progress, `${stats(state.a).revealed} / ${state.a.cells.length - state.a.config.mines}`)}${metric('B · ' + common.progress, `${stats(state.b).revealed} / ${state.a.cells.length - state.a.config.mines}`)}</div>
     <p class="variant-status" role="status" tabindex="-1">${status}</p>
-    <div class="twin-tools">${inputModeTemplate(language, inputMode)}<button class="secondary-button" data-control="restart">${common.restart}</button></div>
+    <div class="twin-tools"><button class="secondary-button" data-control="restart">${common.restart}</button></div>
     ${state.a.phase === 'won' || state.b.phase === 'won' ? `<p class="variant-note">${t.safePartner}</p>` : ''}
-    ${boardZoomTemplate(language)}<div class="twin-layout">${boardFrame('a', 'A')}${boardFrame('b', 'B')}</div>`
+    ${boardZoomTemplate(language)}<div class="board-play-area">${boardControlsTemplate(language, inputMode, 'data-control')}<div class="twin-layout">${boardFrame('a', 'A')}${boardFrame('b', 'B')}</div></div>`
 }
 
 /** Render a square, explicitly targeted inventory button with a persistent charge badge. */
