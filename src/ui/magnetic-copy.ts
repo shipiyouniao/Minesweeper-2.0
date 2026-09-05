@@ -40,9 +40,14 @@ export function magneticCopy(language: Language, common: TacticalMessages): Tact
         '錨を開き周囲の地雷をマーク。錨上か隣からクリックし1行動力で起動。騎士から2マス以上の開いた経路が必要。調整失敗は5ダメージ。再誘導に再調整は不要。',
       ),
       t(
-        'The gold route replaces this turn’s pulse. End turn pulls the knight along it. A charge hit deals 5 base damage, reduced by defense and bracing to a minimum of 1. Vacate the destination: blocking it cancels the crash. A successful crash deals 6 to the knight, leaving at least 1 HP, and exposes it for three turns without pulses. Alternate anchors to reopen the core.',
-        '金色路线会替代本回合脉冲。结束回合时骑士沿线移动，撞到角色造成 5 点基础伤害，可被防御属性与防御动作减免，最低 1 点。请让出终点，占住终点会阻止撞击。撞击使骑士损失 6 生命（至少剩 1），随后暴露三回合且不放脉冲。交替使用锚点可再次破甲。',
-        '金色の経路が今ターンの磁力に代わる。ターン終了で騎士が移動。突進は基礎5ダメージで、防護と防御行動により最低1まで軽減。終点を空けないと衝突失敗。成功で騎士に6ダメージ（最低1残る）、3ターン露出し磁力停止。錨を交互に使い再び露出させる。',
+        'Activation cancels the pulse. The first End turn only charges up; you then have a full escape turn before the next End turn launches the knight. Clear the gold route and the outlined 3×3 blast zone. Blocking the anchor cancels the crash. Passing through you deals 5 base damage.',
+        '启动后停止脉冲。第一次结束回合只蓄力，再给你一个完整回合撤离，第二次结束回合才冲锋。避开金色路线与标出的 3×3 爆区；占住锚点会阻止撞锚。冲锋经过角色造成 5 点基础伤害。',
+        '起動で磁力停止。最初のターン終了は溜めのみ。その後1ターン退避でき、次の終了で突進。金色の経路と3×3の爆破範囲を避けよう。錨上にいると衝突失敗。突進接触は基礎5ダメージ。',
+      ),
+      t(
+        'A crash opens the entire 3×3 zone, destroys its mines and blocking terrain, and leaves walkable craters. Numbers update to count remaining mines. The knight takes 6 damage plus 1 per detonated mine (at most 3 extra), always retaining 1 HP, then exposes its core for three turns. Anyone in the zone takes 5 base blast damage, separately from charge damage. Defense and bracing reduce each hit to a minimum of 1. Ordinary player mine hits still leave impassable mines.',
+        '撞锚揭开整个 3×3 区域，炸毁地雷与阻路地形，留下可通行弹坑，数字随剩余地雷更新。骑士受到 6 点伤害，每颗引爆的雷追加 1 点、最多追加 3 点，至少剩 1 生命，随后核心暴露三回合。爆区内角色另受一次 5 点基础爆炸伤害；冲锋和爆炸分别计算防御减免，最低各 1 点。普通踩雷仍会留下不可通行的雷。',
+        '衝突で3×3を開き、地雷と障害物を破壊。クレーターは通行可能で数字は残る地雷数に更新。騎士に6＋爆破地雷1個につき1（追加最大3）ダメージ、HPは最低1残り、コアは3ターン露出。範囲内では突進とは別に基礎5の爆発ダメージ。防護と防御で各最低1まで軽減。通常の地雷接触では地雷が残り通行不可。',
       ),
       common.help.at(-1)!,
     ],
@@ -53,12 +58,20 @@ export function magneticCopy(language: Language, common: TacticalMessages): Tact
 export function magneticStatus(language: Language, encounter: MagneticEncounter): string {
   if (encounter.health === 0) return battleText(language, 'Defeated', '已击败', '撃破済み')
   if (encounter.forecast.kind === 'charge')
-    return battleText(
-      language,
-      'Lure ready · clear the gold route',
-      '牵引就绪 · 避开金色路线',
-      '誘導準備完了 · 金色の経路を空ける',
-    )
+    if (encounter.turn < encounter.forecast.resolvesOn)
+      return battleText(
+        language,
+        'Charging · one full escape turn after End turn',
+        '蓄力中 · 结束回合后还有一整回合撤离',
+        '溜め中 · ターン終了後に1ターン退避可能',
+      )
+    else
+      return battleText(
+        language,
+        'Charge at End turn · leave the route and 3×3 blast zone',
+        '本回合结束时冲锋 · 撤出路线与 3×3 爆区',
+        'ターン終了で突進 · 経路と3×3爆破範囲から退避',
+      )
   const remaining = Math.max(0, encounter.exposedUntil - encounter.turn + 1)
   if (remaining)
     return battleText(

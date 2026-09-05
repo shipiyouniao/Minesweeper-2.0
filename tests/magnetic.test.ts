@@ -1,8 +1,9 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { CURRENT_DEPARTURE } from './helpers.js'
-import { createExpedition, actExpedition } from '../src/game/expedition.js'
+import { createExpedition, actExpedition, frontierCells } from '../src/game/expedition.js'
 import { enterMagnetic } from '../src/game/magnetic-battle.js'
+import { blastMagnetic } from '../src/game/magnetic-blast.js'
 import { generateMagnetic } from '../src/game/magnetic-generation.js'
 import {
   magneticForecast,
@@ -12,13 +13,149 @@ import {
 import { solveBattle } from '../src/game/battle-arena.js'
 import { encounterTier } from '../src/game/encounter-tiers.js'
 import { tacticalPlan, tacticalCellAction } from '../src/game/tactical-planning.js'
-import { adjacentSteps } from '../src/game/variant-board.js'
+import { adjacentSteps, placedBoard } from '../src/game/variant-board.js'
 import { neighbors } from '../src/game/engine.js'
+import { walkingPath } from '../src/game/dungeon-path.js'
 import { professionSkillArea } from '../src/game/profession-skills.js'
 import { tacticalCopy, tacticalPlanCopy } from '../src/ui/tactical-copy.js'
 import { defeatMagnetic } from './magnetic-helpers.js'
 import type { MagneticExpedition } from '../src/types/magnetic.js'
 import type { VariantDifficulty } from '../src/types/variant-difficulty.js'
+
+/** A known one-cell corridor with a hidden bypass that only the anchor blast opens. */
+function corridor(): MagneticExpedition {
+  const run = arena()
+  const board = placedBoard({ width: 5, height: 3, mines: 5 }, new Set([0, 1, 2, 3, 4]), 1, 6)
+  return {
+    ...run,
+    entrance: 6,
+    player: 9,
+    exit: 5,
+    walls: [5, 13],
+    game: {
+      ...board,
+      cells: board.cells.map((cell, index) => ({
+        ...cell,
+        visibility: index < 5 ? 'flagged' : index < 10 ? 'revealed' : 'hidden',
+      })),
+    },
+    confirmedMines: [3, 4],
+    triggeredMines: [4],
+    encounter: {
+      ...run.encounter,
+      boss: 5,
+      anchors: [
+        { index: 8, calibrated: false },
+        { index: 11, calibrated: false },
+      ],
+      forecast: { kind: 'recovery' },
+    },
+  }
+}
+
+test('anchor blast opens a bypass, destroys locked mines and terrain, and updates every clue', () => {
+  const run = corridor()
+  const lure = actExpedition(run, { type: 'interact', index: 8 })
+  const escapeTurn = actExpedition(lure, { type: 'end-turn' })
+  assert.deepEqual(escapeTurn.game, lure.game)
+  assert.equal(escapeTurn.encounter?.boss, 5)
+  const crashed = actExpedition(escapeTurn, { type: 'end-turn' })
+  assert.ok(crashed.encounter?.kind === 'magnetic')
+  assert.deepEqual(crashed.encounter.craters, [2, 3, 4])
+  assert.equal(crashed.game.config.mines, 2)
+  assert.equal(crashed.health, 5)
+  assert.equal(crashed.encounter.lastDamage, 9)
+  assert.equal(crashed.player, 9)
+  assert.equal(crashed.encounter.boss, 8)
+  assert.ok(!crashed.walls.includes(13))
+  assert.ok(walkingPath(crashed, 6), 'Blast ring must reconnect both sides of the occupied anchor')
+  assert.ok(walkingPath(crashed, 4), 'Destroyed mine is now walkable')
+  for (const index of [2, 3, 4]) {
+    assert.equal(crashed.game.cells[index]?.mine, false)
+    assert.equal(crashed.game.cells[index]?.visibility, 'revealed')
+    assert.ok(!crashed.confirmedMines.includes(index) && !crashed.triggeredMines.includes(index))
+  }
+  for (const [index, cell] of crashed.game.cells.entries())
+    assert.equal(
+      cell.adjacent,
+      neighbors(crashed.game.config, index).filter((other) => crashed.game.cells[other]?.mine)
+        .length,
+    )
+  assert.equal(actExpedition(crashed, { type: 'move', index: 4 }).player, 4)
+  assert.deepEqual(
+    actExpedition(escapeTurn, { type: 'end-turn' }),
+    crashed,
+    'Blast replay is deterministic',
+  )
+})
+
+test('an isolated player can reveal adjacent frontier even when the entrance is disconnected', () => {
+  const run = corridor()
+  const isolated = { ...run, walls: [5, 8, 13], encounter: { ...run.encounter, boss: 8 } }
+  assert.equal(walkingPath(isolated, isolated.entrance), null)
+  assert.equal(tacticalPlan(isolated, { type: 'reveal', index: 14 }).allowed, true)
+  assert.ok(frontierCells(isolated).has(14))
+  assert.equal(actExpedition(isolated, { type: 'reveal', index: 14 }).player, 14)
+})
+
+test('repeated blasts cannot detonate spent mines, and edge blasts do not wrap around the board', () => {
+  const run = corridor()
+  const first = blastMagnetic(run, 0)
+  assert.deepEqual(first.encounter.craters, [0, 1])
+  assert.equal(first.game.cells[4]?.mine, true)
+  assert.equal(first.game.cells[9]?.visibility, run.game.cells[9]?.visibility)
+  const repeated = blastMagnetic(first, 0)
+  assert.deepEqual(repeated, first)
+})
+
+test('dense mine clusters add at most three boss damage and blast damage can defeat the player', () => {
+  const run = corridor()
+  const board = placedBoard(
+    { width: 5, height: 3, mines: 8 },
+    new Set([0, 1, 2, 3, 4, 12, 13, 14]),
+    1,
+    6,
+  )
+  const dense = {
+    ...run,
+    walls: [5],
+    health: 4,
+    game: {
+      ...board,
+      cells: board.cells.map((cell) => ({
+        ...cell,
+        visibility: cell.mine ? ('flagged' as const) : ('revealed' as const),
+      })),
+    },
+  }
+  const lured = actExpedition(dense, { type: 'interact', index: 8 })
+  const crashed = actExpedition(actExpedition(lured, { type: 'end-turn' }), { type: 'end-turn' })
+  assert.ok(crashed.encounter?.kind === 'magnetic')
+  assert.equal(crashed.encounter.resolution?.detonatedMines.length, 6)
+  assert.equal(crashed.encounter.lastDamage, 9)
+  assert.equal(crashed.phase, 'lost')
+  assert.equal(crashed.health, 0)
+  assert.equal(crashed.game.config.mines, 2)
+})
+
+test('blast damage is bounded and nonlethal for the knight, with player defense and shields respected', () => {
+  for (const bossHealth of [1, 4, 28]) {
+    const run = corridor()
+    const initial = { ...run, encounter: { ...run.encounter, health: bossHealth } }
+    const lured = actExpedition(initial, { type: 'interact', index: 8 })
+    const withdrawal = actExpedition(lured, { type: 'end-turn' })
+    for (const shields of [0, 1]) {
+      const braced = actExpedition({ ...withdrawal, shields }, { type: 'brace' })
+      const crashed = actExpedition(braced, { type: 'end-turn' })
+      assert.equal(crashed.health, shields ? 10 : 8)
+      assert.equal(crashed.shields, 0)
+      assert.equal(crashed.encounter?.health, Math.max(1, bossHealth - 9))
+    }
+    const escaped = actExpedition(withdrawal, { type: 'move', index: 6 })
+    const ended = actExpedition(escaped, { type: 'end-turn' })
+    assert.equal(ended.health, 5, 'Outside blast but on the charge route still takes a charge hit')
+  }
+})
 
 const tiers: readonly VariantDifficulty[] = ['relaxed', 'standard', 'advanced', 'expert', 'abyss']
 
@@ -229,12 +366,19 @@ test('calibration, frozen lure, crash, movement and three-turn exposure share ac
   assert.equal(lure.encounter.points, 2)
   assert.equal(lure.encounter.event, 'disabled')
   assert.equal(tacticalPlan(lure, { type: 'interact', index }).reason, 'magnet-busy')
-  const crashed = actExpedition(lure, { type: 'end-turn' })
+  const withdrawal = actExpedition(lure, { type: 'end-turn' })
+  assert.equal(withdrawal.encounter?.boss, run.encounter.boss)
+  assert.equal(withdrawal.health, run.health)
+  assert.equal(withdrawal.encounter?.points, 3)
+  const crashed = actExpedition(withdrawal, { type: 'end-turn' })
   assert.ok(crashed.encounter?.kind === 'magnetic')
   assert.equal(crashed.encounter.boss, index)
-  assert.equal(crashed.encounter.health, run.encounter.health - 6)
+  assert.equal(
+    crashed.encounter.health,
+    run.encounter.health - 6 - Math.min(3, crashed.encounter.resolution!.detonatedMines.length),
+  )
   assert.ok(crashed.walls.includes(index) && !crashed.walls.includes(run.encounter.boss))
-  assert.equal(crashed.health, 10)
+  assert.equal(crashed.health, 5)
   assert.deepEqual(crashed.encounter.resolution?.bossPath, lure.encounter.forecast.path)
   assert.equal(crashed.encounter.exposedUntil - crashed.encounter.turn + 1, 3)
   assert.equal(actExpedition(crashed, { type: 'attack' }).encounter?.lastDamage, 5)
@@ -248,7 +392,7 @@ test('blocking the announced charge destination hurts without stacking the boss 
   const index = target(staged)
   const run = { ...staged, player: index }
   const lure = actExpedition(run, { type: 'interact', index })
-  const blocked = actExpedition(lure, { type: 'end-turn' })
+  const blocked = actExpedition(actExpedition(lure, { type: 'end-turn' }), { type: 'end-turn' })
   assert.ok(blocked.encounter?.kind === 'magnetic')
   assert.equal(blocked.health, 5)
   assert.equal(blocked.player, index)
@@ -303,7 +447,7 @@ test('builds apply bounded calibration refunds, attack power, AP and profession 
   const lured = actExpedition(run, { type: 'interact', index: target(run) })
   assert.equal(lured.encounter?.points, 4)
   assert.ok(lured.floorTriggers.includes('breach-sigil'))
-  const crashed = actExpedition(lured, { type: 'end-turn' })
+  const crashed = actExpedition(actExpedition(lured, { type: 'end-turn' }), { type: 'end-turn' })
   assert.equal(crashed.encounter?.points, 4)
   const hit = actExpedition(crashed, { type: 'attack' })
   assert.equal(hit.encounter?.lastDamage, 13)

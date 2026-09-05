@@ -581,7 +581,7 @@ export class VariantApp implements VariantInputActions {
     this.magneticPerformance = true
     const forecast = before.encounter.forecast
     this.sounds.play(
-      forecast.kind === 'charge'
+      forecast.kind === 'charge' && before.encounter.turn >= forecast.resolvesOn
         ? 'magnet-charge'
         : forecast.kind === 'field'
           ? forecast.polarity === 'pull'

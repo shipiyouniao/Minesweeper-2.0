@@ -24,7 +24,9 @@ The first boss is selected by `seed % 4`: Bastion Guardian, Brood Queen, Mirror 
 | Wall or arena edge collision              | 3 base damage; defense reduces it, to a minimum of 1                                   |
 | Mine / wrong calibration                  | 5 damage, ignoring armor; shields and survival reactions still apply                   |
 | Knight passing through the player         | 5 base damage; defense and bracing reduce it, to a minimum of 1                        |
-| Knight crashing into an unoccupied anchor | 6 boss damage, leaving at least 1 health                                               |
+| Knight crashing into an unoccupied anchor | 6 boss damage + 1 per detonated mine, capped at 3 extra; leaves at least 1 health      |
+| Anchor blast                              | Reveals and clears the 3×3 area; player takes 5 base damage, reduced by defense        |
+| Charge delay                              | First End turn charges up; the next full turn is for escape, then End turn charges     |
 | Core exposure                             | The next 3 player turns, with no magnetic pulses                                       |
 | Victory                                   | Shared full healing, one shield up to the cap, and the ordinary floor reward once      |
 
@@ -37,7 +39,7 @@ The forecast is drawn on the board, not just described in a status sentence:
 - **Blue inward arrows** show attraction toward the knight's row or column axis. **Coral outward arrows** show repulsion. The glyph direction distinguishes the two without relying only on color.
 - A moving dashed line and a translucent explorer show the current projected route and endpoint. An amber route crosses unverified cells; it never reveals their hidden mine values. A confirmed mine stops the public projection at that known hazard.
 - Grounding has a distinct outline. Bracing cancels the entire pulse; standing on a calibrated anchor does the same. A pulse also stops if it reaches a calibrated anchor. Grounding does not cancel a knight's charge.
-- A **gold route and knight ghost** announce an accepted lure. This replaces the current pulse. The player must leave the route, especially its endpoint, before ending the turn.
+- A **gold route and knight ghost** announce an accepted lure. The outlined 3×3 area marks the blast zone without exposing hidden mines. The first End turn only charges up, granting one full escape turn. The following End turn launches the charge; leave both its route and blast zone.
 - During resolution, the magnetic core gathers energy, the explorer or knight visibly follows the actual path, and a ring marks the collision. A successful anchor crash adds an overload burst and a broken rotating core ring for the exposure window.
 
 The six-turn cycle is horizontal attraction, vertical repulsion, recharge, vertical attraction, horizontal repulsion, recharge. Attraction stops on the neutral axis instead of crossing it. The direction and polarity are fixed for the turn; only a deliberate anchor activation replaces the forecast. Mouse movement and tool previews never retarget it.
@@ -48,9 +50,11 @@ Unknown terrain remains uncertain: a projected two-cell route can stop early on 
 
 Each arena advertises two initially covered numbered anchors. Open an anchor and correctly flag its neighboring mines. Its route from the knight must already be revealed and at least two steps long. Activate it from the anchor or an adjacent square. A matching flag count permits an attempt; incorrect flags still cause a failed calibration and damage.
 
-The knight follows a deterministic shortest path through that known route at End turn. The route stays fixed after activation, including when the player moves or uses tools. If the player remains on the destination, the charge rebounds to its original position and deals damage without breaking armor. It never leaves the knight stacked on the player or turns the player's square into a wall.
+The knight follows a deterministic shortest path through that known route after one full escape turn. The route and deadline stay fixed after activation, including when the player moves or uses tools. If the player remains on the destination, the charge rebounds to its original position and deals damage without breaking armor or detonating the anchor. It never leaves the knight stacked on the player or turns the player's square into a wall.
 
 A successful crash moves the knight to the anchor and opens its core for three full turns. The knight cannot be attacked outside this window, even with a complete offensive build. The crash alone cannot kill it; a real strike is needed. Once the window closes, use the other anchor to reopen it. Calibrations persist, but activating an already calibrated anchor does not award another calibration refund.
+
+The crash reveals every cell in the clipped 3×3 anchor area and destroys its mines and blocking terrain. Only the knight's cell remains blocked, leaving an open ring to bypass it. Destroyed mines become permanent walkable craters with no flags; clue numbers and the remaining mine count update together. Each newly destroyed mine adds 1 boss damage, capped at 3 extra per crash, and the combined hit always leaves at least 1 HP. A player anywhere in the blast takes one 5-base-damage hit, separately from any charge-path hit; defense, bracing and shields apply. Repeated blasts cannot explode the same mine again. Ordinary player mine collisions still leave locked, impassable mines.
 
 Click or tap a calibrated anchor to walk onto it and ground the explorer; click it again while standing there to start another lure, then move off the destination before End turn. This keeps both grounding and repeated activation available without a keyboard-only command.
 
@@ -60,11 +64,11 @@ Clearing safe routes has a direct combat purpose. Both anchors sit behind number
 
 Focus lens refunds the first successful calibration in a turn; Breach sigil refunds the first calibration in a floor, within their existing caps. Reusing an anchor cannot farm either effect. Archaeologist excavation scouts uncalibrated anchors. Other profession skills and tools keep their ordinary costs and shared once-per-floor/resource limits. Forced safe travel uses the existing unique-travel accounting.
 
-The single expedition rules revision advances to **5** because boss selection and replay behavior changed. Older version-4 journals return their checkpointed extraction supplies to camp; legacy envelopes retain their one-time 200-supply retirement rule. Camp purchases, balances and records remain intact. No old encounter implementation is retained. See [save maintenance](save-policy.md).
+The single expedition rules revision is **6** because delayed charges, destructive blasts and player-origin exploration change replay behavior. Older version-4 journals return their checkpointed extraction supplies to camp; legacy envelopes retain their one-time 200-supply retirement rule. Camp purchases, balances and records remain intact. No old encounter implementation is retained. See [save maintenance](save-policy.md).
 
 ## Ownership and acceptance
 
-`magnetic-generation.ts` extends the shared exact-count shuffled arena generator and public-clue solver. It rejects anchors whose occupation would disconnect any retained safe terrain. Original boss squares become ordinary known floor when vacated. Mines and clue numbers never move.
+`magnetic-generation.ts` extends the shared exact-count shuffled arena generator and public-clue solver. It rejects anchors whose occupation would disconnect retained safe terrain. `magnetic-blast.ts` clears the complete ring around a successful landing, reconnecting previously known approaches without guessing. Original boss squares become ordinary known floor when vacated. Surviving mines stay in place; blast destruction updates clue numbers. Exploration frontiers and walking both start at the player's current position.
 
 `magnetic-field.ts` owns public forecasts, projections and known-route searches. `magnetic-battle.ts` resolves injuries, grounding, charges, exposure and turn reset. The shared tactical orchestrator owns action costs and build reactions. Named contracts live in `src/types/magnetic.d.ts`.
 

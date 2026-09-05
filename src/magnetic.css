@@ -202,6 +202,35 @@
     0 0 12px #d5a33466,
     inset 0 0 12px #d5a33444;
 }
+.board .cell.magnetic-crater {
+  background:
+    radial-gradient(ellipse at center, #66594b33 20%, #a18d7033 42%, transparent 65%),
+    var(--surface);
+  box-shadow: inset 0 0 0 2px #9b856166;
+}
+.board .cell.magnetic-crater::after {
+  content: '';
+  position: absolute;
+  inset: 17%;
+  border: 2px dashed #88775c88;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.board .cell.magnetic-blast-warning {
+  box-shadow: inset 0 0 0 2px #c56635;
+  background-image: repeating-linear-gradient(135deg, #dc873326 0 4px, transparent 4px 9px);
+}
+.magnetic-blast {
+  position: absolute;
+  pointer-events: none;
+  z-index: 11;
+  border-radius: 20%;
+  background: radial-gradient(circle, #fff5c9, #edaf5688 45%, #cb572b00 75%);
+}
+.magnetic-mine-explosion {
+  background: radial-gradient(circle, #fffce0 10%, #ffcc51 25%, #e5672d99 50%, #5a403b00 75%);
+  box-shadow: 0 0 18px #ed9e4988;
+}
 @keyframes magnetic-flow {
   50% {
     opacity: 0.25;

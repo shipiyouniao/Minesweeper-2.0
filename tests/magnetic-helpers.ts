@@ -5,6 +5,7 @@ import { walkingPath, approachPath } from '../src/game/dungeon-path.js'
 import { tacticalPlan } from '../src/game/tactical-planning.js'
 import { magneticLurePath } from '../src/game/magnetic-field.js'
 import { adjacentSteps } from '../src/game/variant-board.js'
+import { neighbors } from '../src/game/engine.js'
 import type { Expedition, ExpeditionAction } from '../src/types/variants.js'
 
 /** Prove baseline viability with public deductions, deliberate grounding and legal journal actions. */
@@ -101,6 +102,21 @@ export function defeatMagnetic(initial: Expedition): ExpeditionAction[] {
     if (budget() < 1) end()
     apply({ type: 'interact', index: target.index })
     end()
+    const danger = new Set([target.index, ...neighbors(run.game.config, target.index)])
+    assert.ok(run.encounter?.kind === 'magnetic' && run.encounter.forecast.kind === 'charge')
+    const route = run.encounter.forecast.path
+    const escapes = run.game.cells
+      .flatMap((_, index) => {
+        const path = walkingPath(run, index)
+        return !danger.has(index) && !route.includes(index) && path && path.length - 1 <= budget()
+          ? [{ index, distance: path.length }]
+          : []
+      })
+      .sort((a, b) => a.distance - b.distance)
+    assert.ok(escapes[0], 'No known escape within the full withdrawal turn')
+    walk(escapes[0].index)
+    end()
+    walk(target.position)
   }
   assert.ok(run.phase === 'reward' || run.phase === 'won', 'Magnetic encounter did not finish')
   return actions
