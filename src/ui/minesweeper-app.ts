@@ -10,6 +10,7 @@ import { validConfig } from '../game/engine.js'
 import { translations } from '../i18n.js'
 import { AppView } from './app-view.js'
 import { InputController } from './input-controller.js'
+import { secondaryBoardAction } from './board-actions.js'
 import {
   customTemplate,
   helpTemplate,
@@ -61,6 +62,12 @@ export class MinesweeperApp implements InputActions {
   /** Send a player action through the session and present any resulting outcome. */
   play(index: number, flag?: boolean): void {
     this.applyCell(index, flag === undefined ? this.inputMode : flag ? 'flag' : 'reveal')
+  }
+
+  /** Right-click and touch-hold cycle annotations or quick-open without selecting a mode. */
+  secondary(index: number): void {
+    const action = secondaryBoardAction(this.session.state.game, index)
+    if (action) this.applyCell(index, action)
   }
 
   /** Record or remove a player hypothesis without starting the clock. */

@@ -22,7 +22,10 @@ export function chordExpedition(
   apply: ExploreTransition,
 ): Expedition {
   if ((run.phase !== 'exploring' && run.phase !== 'boss') || occupied(run, index)) return run
-  const targets = chordTargets(run.game, index).filter((other) => !occupied(run, other))
+  const confirmedSafe = run.surveyedCells.filter((other) => !run.confirmedMines.includes(other))
+  const targets = chordTargets(run.game, index, confirmedSafe).filter(
+    (other) => !occupied(run, other),
+  )
   if (!targets.length) return run
 
   const marks = targets.filter(

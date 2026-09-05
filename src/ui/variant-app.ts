@@ -27,6 +27,7 @@ import {
 } from './variant-templates.js'
 import { VariantView } from './variant-view.js'
 import { VariantInput } from './variant-input.js'
+import { secondaryBoardAction } from './board-actions.js'
 
 /** Coordinates special-mode sessions with dedicated input and rendering adapters. */
 export class VariantApp implements VariantInputActions {
@@ -116,6 +117,16 @@ export class VariantApp implements VariantInputActions {
     this.commitPlay(side, index, flag)
   }
 
+  /** Keep pointer shortcuts on the same guarded commands used by explicit board controls. */
+  secondary(side: BoardSide, index: number): void {
+    const game =
+      this.session instanceof TwinSession ? this.session.state[side] : this.session.run?.game
+    if (!game) return
+    const action = secondaryBoardAction(game, index)
+    if (action === 'flag') this.play(side, index, true)
+    else if (action) this.cellCommand(side, index, action)
+  }
+
   /** Keep player notes available without moving the character or spending AP. */
   annotate(side: BoardSide, index: number): void {
     this.cellCommand(side, index, 'mark-safe')
@@ -123,18 +134,21 @@ export class VariantApp implements VariantInputActions {
 
   /** Dispatch a bounded batch whose individual reveals retain normal costs. */
   chord(side: BoardSide, index: number): void {
-    this.cellCommand(side, index, 'chord')
+    if (!this.cellCommand(side, index, 'chord')) return
+    const run = this.session instanceof ExpeditionSession ? this.session.run : null
+    if (run && (run.phase === 'exploring' || run.phase === 'boss') && !this.view.dialogOpen)
+      this.view.focusPlayer()
   }
 
   /** Apply extra cell commands only on the interactive, uncovered board. */
-  private cellCommand(side: BoardSide, index: number, type: 'mark-safe' | 'chord'): void {
+  private cellCommand(side: BoardSide, index: number, type: 'mark-safe' | 'chord'): boolean {
     if (
       this.paused ||
       this.view.dialogOpen ||
       this.moving ||
       (this.session instanceof ExpeditionSession && side === 'b')
     )
-      return
+      return false
     this.input.cancelTools()
     if (this.session instanceof ExpeditionSession) this.expedition({ type, index })
     else {
@@ -152,6 +166,7 @@ export class VariantApp implements VariantInputActions {
       )
     }
     this.render()
+    return true
   }
 
   /** Commit one board action after any visible movement has completed. */
@@ -220,7 +235,7 @@ export class VariantApp implements VariantInputActions {
   /** Display a pointer or keyboard route only while interaction is available. */
   previewRoute(index: number | null): void {
     if (this.paused || this.moving || this.view.dialogOpen) return
-    this.view.previewRoute(index)
+    this.view.previewRoute(this.inputMode === 'reveal' ? index : null)
   }
 
   /** Consume a targeted tool through the replayable domain action. */

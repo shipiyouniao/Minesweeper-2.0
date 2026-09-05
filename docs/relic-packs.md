@@ -32,7 +32,7 @@ The seventeen-item catalog costs 26,100 supplies. The current [difficulty reward
 
 The first eligible trigger consumes its allowance even if its benefit is capped. Returning to a chest, toggling flags, repeating a scan or probing known information cannot pay again. Badges show **Used this floor** or **Used this expedition**. Descending resets floor allowances and retains spent expedition allowances. Effects activate after selecting their relic and entering the next floor.
 
-Confirmed mines retain locked gold flags, mine status and unchanged clues. Reactive shell does not move the player, collect remote treasure or reveal all safe tiles. Second wind prevents the loss transition before hidden mines can be exposed; the hit mine remains impassable. Revival does not also activate Rescue ribbon.
+Discovered mines use locked gold flags; triggered hazards keep locked red mine markers, including shielded hits. Their mine status and clues remain unchanged. Reactive shell does not move the player, collect remote treasure or reveal all safe tiles. Second wind prevents the loss transition before hidden mines can be exposed; the hit mine remains impassable. Revival does not also activate Rescue ribbon.
 
 Chest benefits apply on physical collection, including along an approach path, before a later mine hit on that route. Revealing a chest alone does not collect it. Shield reconnaissance can produce discoveries for Field notes. Each reaction is claimed before it creates information, preventing repeated rewards. None of the new effects creates currency.
 

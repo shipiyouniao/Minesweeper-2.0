@@ -13,8 +13,10 @@ import { decodeExpeditionSave } from '../src/persistence/variant-decoders.js'
 import { EXPEDITION_RULES_REVISION } from '../src/persistence/expedition-format.js'
 import { parseNavigation } from '../src/ui/input-parser.js'
 import { boardHelpTemplate } from '../src/ui/board-help.js'
+import { secondaryBoardAction } from '../src/ui/board-actions.js'
 import type { Expedition } from '../src/types/variants.js'
 import { CURRENT_DEPARTURE } from './helpers.js'
+import { isEncounterFloor } from '../src/game/encounter-roster.js'
 
 /** A small numbered room isolates travel, notes and false-flag effects without flood expansion. */
 function room(): Expedition {
@@ -54,6 +56,45 @@ function battle(points: number): Expedition {
     encounter: { ...entered.encounter, points, boss: 4, pylons: [], mechanisms: [] },
   }
 }
+
+test('pointer shortcuts cycle player marks and quick-open revealed cells using public state', () => {
+  let game = createGame(PRESETS.easy, 42)
+  for (const expected of ['flag', 'mark-safe', 'mark-safe'] as const) {
+    const type = secondaryBoardAction(game, 1)
+    assert.equal(type, expected)
+    assert.ok(type)
+    game = act(game, { type, index: 1 })
+  }
+  assert.equal(game.cells[1]?.visibility, 'hidden')
+  assert.deepEqual(game.safeMarks, [])
+  const opened = act(game, { type: 'reveal', index: 10 })
+  assert.equal(secondaryBoardAction(opened, 10), 'chord')
+  assert.equal(secondaryBoardAction(game, -1), null)
+})
+
+test('quick opening exposes stairs without ending exploration or granting an exit payment', () => {
+  const original = { ...room(), exit: 13 }
+  const next = actExpedition(original, { type: 'chord', index: 12 })
+  assert.equal(next.game.cells[13]?.visibility, 'revealed')
+  assert.equal(next.phase, 'exploring')
+  assert.equal(next.loot, original.loot)
+  assert.deepEqual(next.offers, original.offers)
+  const standing = { ...next, player: next.exit }
+  assert.equal(actExpedition(standing, { type: 'reveal', index: next.exit }), standing)
+  const entered = actExpedition(standing, { type: 'move', index: next.exit })
+  assert.equal(entered.phase, 'reward')
+  assert.ok(entered.loot > next.loot)
+})
+
+test('quick opening guarded stairs waits for deliberate entry before starting the boss', () => {
+  const original = { ...room(), floor: 3, exit: 13 }
+  assert.ok(isEncounterFloor(original))
+  const next = actExpedition(original, { type: 'chord', index: 12 })
+  assert.equal(next.phase, 'exploring')
+  assert.equal(next.encounter, null)
+  const entered = actExpedition(next, { type: 'move', index: next.exit })
+  assert.equal(entered.phase, 'boss')
+})
 
 test('safe hypotheses are removable, exclusive with flags, persisted, and never open a first click', () => {
   const initial = createGame(PRESETS.easy, 42)
@@ -119,6 +160,60 @@ test('boss quick open spends per-reveal AP and does not advance the enemy turn',
   const removed = actExpedition(next, { type: 'mark-safe', index: next.game.safeMarks[0]! })
   assert.equal(removed.game.safeMarks.length, 5)
   assert.equal(removed.encounter?.points, 0)
+})
+
+test('safe notes open without matching flags in Classic and Twin; an incorrect note can hit a mine', () => {
+  const game = act(room().game, { type: 'flag', index: 7 })
+  const noted = act(game, { type: 'mark-safe', index: 13 })
+  assert.deepEqual(chordTargets(noted, 12), [13])
+  const opened = act(noted, { type: 'chord', index: 12 })
+  assert.equal(opened.cells[13]?.visibility, 'revealed')
+  assert.equal(opened.cells[7]?.visibility, 'hidden')
+  assert.deepEqual(opened.safeMarks, [])
+  const twin = { ...createTwin(42), a: noted, b: game, phase: 'playing' as const }
+  const paired = actTwin(twin, { side: 'a', type: 'chord', index: 12 })
+  assert.equal(paired.a.cells[13]?.visibility, 'revealed')
+  assert.equal(paired.b, twin.b)
+  const mistaken = act(game, { type: 'mark-safe', index: 7 })
+  assert.equal(act(mistaken, { type: 'chord', index: 12 }).phase, 'lost')
+})
+
+test('Expedition quick opening digs only noted or surveyed neighbors when flags do not match', () => {
+  const unflagged = actExpedition(room(), { type: 'flag', index: 7 })
+  const noted = actExpedition(unflagged, { type: 'mark-safe', index: 11 })
+  const surveyed = inspectArea(noted, [13])
+  const next = actExpedition(surveyed, { type: 'chord', index: 12 })
+  assert.equal(next.game.cells[11]?.visibility, 'revealed')
+  assert.equal(next.game.cells[13]?.visibility, 'revealed')
+  assert.equal(next.game.cells[7]?.visibility, 'hidden')
+  assert.equal(next.game.cells[17]?.visibility, 'hidden')
+  assert.deepEqual(next.game.safeMarks, [])
+  assert.equal(next.health, surveyed.health)
+})
+
+test('noted and surveyed Boss targets retain their marks when unreachable or unaffordable', () => {
+  const unflagged = actExpedition(battle(1), { type: 'flag', index: 7 })
+  const noted = actExpedition(unflagged, { type: 'mark-safe', index: 11 })
+  const surveyed = inspectArea(noted, [13])
+  const next = actExpedition(surveyed, { type: 'chord', index: 12 })
+  assert.equal(next.encounter?.points, 0)
+  assert.equal(next.game.cells[11]?.visibility, 'revealed')
+  assert.equal(next.game.cells[13]?.visibility, 'hidden')
+  assert.ok(next.surveyedCells.includes(13))
+  assert.equal(actExpedition(next, { type: 'chord', index: 12 }), next)
+  const distant = { ...surveyed, player: 0 }
+  assert.equal(actExpedition(distant, { type: 'chord', index: 12 }), distant)
+  assert.deepEqual(distant.game.safeMarks, [11])
+})
+
+test('quick opening a mistaken safe note deals normal mine damage and stops the batch', () => {
+  const unflagged = actExpedition(room(), { type: 'flag', index: 7 })
+  const mistaken = actExpedition(unflagged, { type: 'mark-safe', index: 7 })
+  const next = actExpedition(mistaken, { type: 'chord', index: 12 })
+  assert.equal(next.health, 5)
+  assert.deepEqual(next.triggeredMines, [7])
+  assert.equal(next.game.cells[11]?.visibility, 'hidden')
+  assert.deepEqual(next.game.safeMarks, [])
 })
 
 test('unreachable targets become hypotheses without inspecting hidden mines or creating paths', () => {

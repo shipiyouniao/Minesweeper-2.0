@@ -11,6 +11,7 @@ import { BoardView } from './board-view.js'
 import { LanguageMenu } from './language-menu.js'
 import { formatTime, statusText } from './presentation.js'
 import { appTemplate } from './templates.js'
+import { boardControlHint } from './board-controls.js'
 
 /** Owns application DOM updates and modal presentation, without changing game state. */
 export class AppView {
@@ -118,6 +119,7 @@ export class AppView {
       'aria-pressed',
       String(inputMode === 'chord'),
     )
+    this.element('.board-mode-hint').textContent = boardControlHint(language, inputMode)
     this.renderTime(state.elapsed, storageAvailable)
   }
 

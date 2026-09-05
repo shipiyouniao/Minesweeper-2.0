@@ -32,14 +32,14 @@ Prepare at camp → choose profession/equipment → explore a floor → walk to 
 - Every mine must border this component, so no covered hazard is stranded behind walls. Placement tests up to 128 deterministic shuffled candidates against reachability and opening-clue requirements. A finite fallback joins alternating safe rows with a clear spine and supplies a provable opening clue. Exact mine counts remain unchanged; no independent per-cell rolls or fixed diagonal corridor are used.
 - A visible explorer starts at the entrance. Clicking revealed floor uses breadth-first search to walk the shortest known safe route. Clicking a highlighted covered frontier first walks to its nearest reachable neighbor, then reveals the destination. Routes never cross walls, flags, mines, or unknown cells. Every mine hit leaves the explorer at the safe approach cell, including a hit survived by spending HP.
 - Numbers count all eight neighbors. Ordinary blank-region expansion applies. Diagonally revealed areas do not count as connected until there is an orthogonal route.
-- Ordinary blue flags are hypotheses and block walking. Confirmed gold flags from discovery tools or survived mine hits are facts; right-click, F and touch flag mode cannot remove them. Clicking an open number moves the explorer there; it does not chord in Expedition.
+- Ordinary blue flags and cyan safe notes are player hypotheses. Gold flags identify discovered mines; red mine markers identify triggered hazards, including shielded hits. Both confirmed hazard states are locked. An ordinary click on revealed floor moves the explorer; right-click/hold or Quick open digs eligible neighbors. Safe notes and confirmed-safe cells do not need matching flags; other unknown cells do. See [board interaction](board-interaction.md).
 - Three advertised safe treasure landmarks encourage detours. Each grants 6 loot when physically visited, once per floor. Revealing a treasure, connecting it, or opening it with a flood/probe does not collect it. A walk collects chests along its path.
-- Connecting or remotely revealing the stairs does not leave automatically. Click the stairs and physically arrive to end the floor; there is no sidebar departure button. A frontier reveal that steps onto the stairs also counts as arrival. Each exit grants 12 loot; completing the final configured floor also grants a 30-supply victory bonus.
+- Connecting or remotely revealing the stairs does not leave automatically. Deliberately select the stairs in Reveal mode and physically arrive to end the floor; there is no sidebar departure button. Quick opening can reveal or reach stairs while keeping the current floor open for exploration. Each exit grants 12 loot; completing the final configured floor also grants a 30-supply victory bonus.
 - Extraction during exploration or relic selection banks all collected loot after confirmation. Defeat retains half, rounded down. A floor not actually exited grants no exit bonus.
 
 ### Health and shields
 
-New expeditions start at **10/10 HP** before equipment and finite training bonuses. A mine deals 5 damage. Each shield charge absorbs up to 5 before health; at most two charges can be held. Surviving a mine hit confirms it with a locked gold flag. Reaching an ordinary exit restores 5 HP, capped at maximum, once per floor. A boss victory fully heals and grants one shield.
+New expeditions start at **10/10 HP** before equipment and finite training bonuses. A mine deals 5 damage. Each shield charge absorbs up to 5 before health; at most two charges can be held. A mine hit leaves a locked red mine marker, including when a shield absorbs the damage. Deliberately entering an ordinary exit restores 5 HP, capped at maximum, once per floor. A boss victory fully heals and grants one shield.
 
 The shared health bar displays protection as **10/10 (+1)**. Health and shields carry between rooms and floors. Zero HP ends the expedition; extraction does not heal. Enemy attacks use the [combat defense rules](tactical-builds.md); mines and wrong calibration ignore armor.
 
@@ -62,7 +62,7 @@ Repeating an area with no new information consumes no charge. Partially overlapp
 
 The probe previews a 3×3 square; the scanner previews its entire target row. Keyboard users can select a tool, focus a target with the board keys and activate with Enter/Space; Escape cancels. Off-board drops and targets with no new information consume nothing. Tools never teleport the explorer or award treasure.
 
-**Shield:** intercept a mine reveal, place the same locked gold confirmation flag, and consume one charge. The mine remains; all clues stay correct. A shield cannot turn a mined square into a traversable route.
+**Shield:** absorb up to five incoming damage per charge. A shielded mine hit leaves a locked red mine marker. The mine remains; all clues stay correct. A shield cannot turn a mined square into a traversable route. Later surveys preserve the red marker; newly discovered mines use gold flags.
 
 ### Relic build
 

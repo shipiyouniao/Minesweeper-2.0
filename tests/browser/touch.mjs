@@ -119,7 +119,7 @@ try {
         await stable(before)
         assert.deepEqual((await actions()).slice(-2), [
           { type: 'flag', index: point.index },
-          { type: 'flag', index: point.index },
+          { type: 'mark-safe', index: point.index },
         ])
 
         await seed(fixture.save, language)

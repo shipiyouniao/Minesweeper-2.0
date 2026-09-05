@@ -1,5 +1,6 @@
 import type { BoardInputMode } from '../types/ui.js'
 import { boardHelpTemplate } from './board-help.js'
+import { boardControlsTemplate } from './board-controls.js'
 import { DIFFICULTIES, RANKED_DIFFICULTIES } from '../game/difficulty.js'
 import type { HelpStep } from '../types/ui.js'
 import type { Config, Difficulty, RankedDifficulty } from '../types/game.js'
@@ -158,22 +159,27 @@ export function appTemplate(
               <strong id="best">—</strong>
             </div>
           </div>
-          <div class="board-shell">
-            <div class="board-viewport" tabindex="-1">
-              <div
-                id="board"
-                class="board"
-                role="grid"
-                aria-label="${t.board}"
-                aria-rowcount="${game.config.height}"
-                aria-colcount="${game.config.width}"
-              ></div>
-            </div>
-            <div id="pause-cover" class="pause-cover" hidden>
-              <span class="pause-art">${icon('leaf')}</span>
-              <h3>${t.paused}</h3>
-              <p>${t.pausedNote}</p>
-              <button class="primary-button" data-action="pause">${icon('play')}${t.resume}</button>
+          <div class="board-play-area">
+            ${boardControlsTemplate(language, inputMode, 'data-action')}
+            <div class="board-shell">
+              <div class="board-viewport" tabindex="-1">
+                <div
+                  id="board"
+                  class="board"
+                  role="grid"
+                  aria-label="${t.board}"
+                  aria-rowcount="${game.config.height}"
+                  aria-colcount="${game.config.width}"
+                ></div>
+              </div>
+              <div id="pause-cover" class="pause-cover" hidden>
+                <span class="pause-art">${icon('leaf')}</span>
+                <h3>${t.paused}</h3>
+                <p>${t.pausedNote}</p>
+                <button class="primary-button" data-action="pause">
+                  ${icon('play')}${t.resume}
+                </button>
+              </div>
             </div>
           </div>
           <div class="status-line" role="status" aria-live="polite">
@@ -182,24 +188,6 @@ export function appTemplate(
             <span id="progress"></span>
           </div>
           <div class="game-toolbar">
-            <div class="input-mode" role="group" aria-label="${t.flagMode}">
-              <button data-action="reveal-mode" aria-pressed="${inputMode === 'reveal'}">
-                ${icon('pointer')}
-                <span>${t.reveal}</span>
-              </button>
-              <button data-action="flag-mode" aria-pressed="${inputMode === 'flag'}">
-                ${icon('flag')}
-                <span>${t.flag}</span>
-              </button>
-              <button data-action="safe-mode" aria-pressed="${inputMode === 'mark-safe'}">
-                ${icon('check')}
-                <span>${t.markSafe}</span>
-              </button>
-              <button data-action="chord-mode" aria-pressed="${inputMode === 'chord'}">
-                ${icon('pointer')}
-                <span>${t.quickReveal}</span>
-              </button>
-            </div>
             <div class="toolbar-right">
               <button
                 id="pause-button"

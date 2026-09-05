@@ -25,6 +25,9 @@ export type NavigationResult = 'moved' | 'edge' | 'unavailable'
 /** A selected tool describes the next cell activation, without overlapping boolean modes. */
 export type BoardInputMode = 'reveal' | 'flag' | 'mark-safe' | 'chord'
 
+/** Right-click and touch-hold share these public cell operations. */
+export type BoardSecondaryAction = 'flag' | 'mark-safe' | 'chord'
+
 /** A right press retains its starting square until release or cancellation. */
 export interface BoardRightPress {
   readonly pointerId: number
@@ -69,6 +72,9 @@ export interface InputActions {
 
   /** Apply a cell action using the selected input mode when omitted. */
   play(index: number, flag?: boolean): void
+
+  /** Cycle covered-cell notes or quick-open a revealed number with a pointer gesture. */
+  secondary(index: number): void
 
   /** Toggle a hypothesis without revealing or walking to its square. */
   annotate(index: number): void

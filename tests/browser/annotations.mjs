@@ -3,8 +3,9 @@ import { createRequire } from 'node:module'
 import { mkdir } from 'node:fs/promises'
 import { battleFixture } from './battle-fixtures.mjs'
 import { actExpedition, createExpedition } from '../../.native/tests/src/game/expedition.js'
-import { chordTargets } from '../../.native/tests/src/game/engine.js'
+import { withChord } from './annotation-fixtures.mjs'
 import { tacticalPlan } from '../../.native/tests/src/game/tactical-planning.js'
+import { EXPEDITION_RULES_REVISION } from '../../.native/tests/src/persistence/expedition-format.js'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
@@ -47,45 +48,6 @@ async function actions() {
   return page.evaluate((key) => JSON.parse(localStorage.getItem(key)).journal.actions, key)
 }
 
-/** Derive a flag-count chord from visible numbers; fixture flags are placed with legal actions. */
-function withChord(fixture) {
-  let run = fixture.run
-  const actions = [...fixture.save.journal.actions]
-  const index = run.game.cells.findIndex(
-    (cell, index) =>
-      cell.visibility === 'revealed' &&
-      cell.adjacent > 0 &&
-      !run.walls.includes(index) &&
-      run.game.cells.some(
-        (other, target) =>
-          other.visibility === 'hidden' &&
-          !run.walls.includes(target) &&
-          Math.abs(
-            Math.floor(target / run.game.config.width) - Math.floor(index / run.game.config.width),
-          ) <= 1 &&
-          Math.abs((target % run.game.config.width) - (index % run.game.config.width)) <= 1,
-      ),
-  )
-  assert.ok(index >= 0)
-  const width = run.game.config.width
-  for (let target = 0; target < run.game.cells.length; target++) {
-    if (
-      !run.game.cells[target].mine ||
-      Math.abs(Math.floor(target / width) - Math.floor(index / width)) > 1 ||
-      Math.abs((target % width) - (index % width)) > 1
-    )
-      continue
-    const action = { type: 'flag', index: target }
-    const next = actExpedition(run, action)
-    if (next !== run) {
-      actions.push(action)
-      run = next
-    }
-  }
-  assert.ok(chordTargets(run.game, index).length > 0)
-  return { run, index, save: { ...fixture.save, journal: { ...fixture.save.journal, actions } } }
-}
-
 try {
   // Native mouse sequences exercise Windows-style context menus and drag cancellation.
   for (const fixture of fixtures) {
@@ -108,12 +70,29 @@ try {
     )
     const cell = page.locator(`[data-side="a"] [data-cell="${index}"]`)
     const before = await actions()
+    // A slow release must not turn its delayed native context menu into a second command.
+    await page.evaluate(() => {
+      window.addEventListener(
+        'pointerup',
+        () => {
+          const deadline = performance.now() + 800
+          while (performance.now() < deadline) {
+            /* simulate a busy main thread */
+          }
+        },
+        { once: true },
+      )
+    })
     await cell.click({ button: 'right' })
+    assert.deepEqual(await actions(), [...before, { type: 'flag', index }])
+    // An unrelated key must not release ownership of a trailing native right-click menu.
+    await page.keyboard.press('Shift')
+    await cell.dispatchEvent('contextmenu', { button: 2, bubbles: true, cancelable: true })
     assert.deepEqual(await actions(), [...before, { type: 'flag', index }])
     await cell.click({ button: 'right' })
     assert.deepEqual((await actions()).slice(-2), [
       { type: 'flag', index },
-      { type: 'flag', index },
+      { type: 'mark-safe', index },
     ])
     await cell.scrollIntoViewIfNeeded()
     const box = await cell.boundingBox()
@@ -140,6 +119,14 @@ try {
         ),
       )
     assert.equal(outsideMenu, true, 'context menus outside cells remain available')
+    const beforeKeyboardMenu = await actions()
+    await cell.focus()
+    await page.keyboard.press('Shift+F10')
+    assert.equal(
+      (await actions()).length,
+      beforeKeyboardMenu.length + 1,
+      'a keyboard menu is a fresh action',
+    )
   }
 
   for (const language of ['en', 'zh', 'ja']) {
@@ -175,6 +162,25 @@ try {
       createExpedition(fixture.save.journal.departure),
     )
     assert.ok(current.encounter.points >= 0)
+    assert.equal(
+      await page.evaluate(() => document.activeElement.dataset.cell),
+      String(current.player),
+    )
+    assert.equal(
+      await page.locator('[data-side="a"] [tabindex="0"]').getAttribute('data-cell'),
+      String(current.player),
+    )
+    const covered = current.game.cells.findIndex((cell) => cell.visibility === 'hidden')
+    if (covered >= 0) {
+      const unchanged = await actions()
+      await page.locator(`[data-side="a"] [data-cell="${covered}"]`).focus()
+      await page.keyboard.press('c')
+      assert.deepEqual(await actions(), unchanged)
+      assert.equal(
+        await page.evaluate(() => document.activeElement.dataset.cell),
+        String(current.player),
+      )
+    }
     assert.deepEqual(
       await page
         .locator('[data-side="a"] .suspected-safe')
@@ -190,7 +196,7 @@ try {
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
         `${language} ${width} overflow`,
       )
-      assert.equal(await page.locator('.variant-input-mode button').count(), 4)
+      assert.equal(await page.locator('.board-controls button').count(), 4)
       if (language === 'zh' && (width === 390 || width === 3840))
         await page.screenshot({
           path: new URL(
@@ -204,6 +210,44 @@ try {
     await page.locator('.board-help details').click()
     assert.ok((await page.locator('.board-help').innerText()).includes('Vimium'))
     await page.keyboard.press('Escape')
+  }
+
+  // Real C presses must show mine damage or the spent shield, including after a saved restore.
+  for (const profession of ['explorer', 'engineer']) {
+    const departure = { ...fixtures[0].save.journal.departure, profession }
+    let run = createExpedition(departure)
+    const flags = [{ type: 'flag', index: 5 }]
+    run = actExpedition(run, flags[0])
+    const fixture = {
+      run,
+      save: {
+        ...fixtures[0].save,
+        camp: {
+          supplies: 0,
+          upgrades: profession === 'engineer' ? ['engineer'] : [],
+          completed: 0,
+        },
+        journal: {
+          rulesRevision: EXPEDITION_RULES_REVISION,
+          returnSupplies: 0,
+          departure,
+          actions: flags,
+        },
+      },
+    }
+    const expected = actExpedition(run, { type: 'chord', index: 4 })
+    assert.equal(expected.triggeredMines.length, 1)
+    assert.equal(expected.health, profession === 'explorer' ? 5 : 10)
+    assert.equal(expected.shields, 0)
+    await seed(fixture, 'zh')
+    await page.locator('[data-side="a"] [data-cell="4"]').focus()
+    await page.keyboard.press('c')
+    assert.equal(Number(await page.locator('.vitality-bar').getAttribute('value')), expected.health)
+    assert.equal(await page.locator('.vitality-shields').innerText(), '')
+    assert.equal(await page.locator('.triggered-mine').count(), 1)
+    assert.deepEqual(await actions(), [...flags, { type: 'chord', index: 4 }])
+    await page.reload()
+    assert.equal(Number(await page.locator('.vitality-bar').getAttribute('value')), expected.health)
   }
 
   // A shielded hit and a later tool discovery have distinct, locked provenance in the DOM.

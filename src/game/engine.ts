@@ -172,22 +172,22 @@ function beginGame(game: Game, index: number): Game {
   }
 }
 
-/** Resolve a reveal/chord into starting cells, or reject a mismatched flag count. */
-function revealTargets(game: Game, action: Action, original: Cell): number[] | null {
+/** Resolve a reveal/chord from explicit notes and deductions supported by its flag count. */
+function revealTargets(game: Game, action: Action, original: Cell): readonly number[] | null {
   if (original.visibility !== 'revealed' && action.type !== 'chord') {
     return [action.index]
   }
 
-  if (original.visibility !== 'revealed' || original.adjacent === 0) {
-    return null
-  }
+  const targets = chordTargets(game, action.index)
+  if (targets.length) return targets
 
-  const around = neighbors(game.config, action.index)
-  const flags = around.filter((index) => game.cells[index]?.visibility === 'flagged').length
-
-  // Matching counts allow the move; correctness is intentionally not assumed.
-  // A player can still lose by chording beside incorrectly placed flags.
-  return flags === original.adjacent ? around : null
+  // A matched number click remains accepted when its neighbors are already open.
+  const flags = neighbors(game.config, action.index).filter(
+    (index) => game.cells[index]?.visibility === 'flagged',
+  ).length
+  return original.visibility === 'revealed' && original.adjacent > 0 && flags === original.adjacent
+    ? targets
+    : null
 }
 
 /** Reveal targets and blank regions iteratively, stopping immediately at a mine. */
@@ -292,16 +292,22 @@ export function pruneSafeMarks(game: Game): Game {
   return safeMarks.length === game.safeMarks.length ? game : { ...game, safeMarks }
 }
 
-/** Read a number and its flag count without testing hidden mine correctness. */
-export function chordTargets(game: Game, index: number): readonly number[] {
+/** Notes and public confirmations are explicit dig targets; only other cells need matching flags. */
+export function chordTargets(
+  game: Game,
+  index: number,
+  confirmedSafe: readonly number[] = [],
+): readonly number[] {
   const cell = game.cells[index]
-  if (!Number.isInteger(index) || !cell || cell.visibility !== 'revealed' || cell.adjacent === 0)
-    return []
+  if (!Number.isInteger(index) || !cell || cell.visibility !== 'revealed') return []
   const around = neighbors(game.config, index)
   const flags = around.filter((other) => game.cells[other]?.visibility === 'flagged').length
-  return flags === cell.adjacent
-    ? around.filter((other) => game.cells[other]?.visibility === 'hidden')
-    : []
+  // Keep neighbor order stable, and never inspect hidden mine values to validate a player note.
+  return around.filter(
+    (other) =>
+      game.cells[other]?.visibility === 'hidden' &&
+      (flags === cell.adjacent || game.safeMarks.includes(other) || confirmedSafe.includes(other)),
+  )
 }
 
 /** Produce a minimal serializable snapshot; mines and clues are regenerated on restore. */

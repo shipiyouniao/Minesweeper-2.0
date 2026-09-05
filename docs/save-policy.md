@@ -2,7 +2,7 @@
 
 The game supports **one current expedition implementation**. When a rules update invalidates an active expedition, the explorer returns to camp. Permanent supplies, purchases, completion counts and records are preserved. Old generators, combat resolvers, reward tables and localized rule variants are removed instead of retained for replay.
 
-The board-annotation release uses rules revision **3**. Earlier version-4 journals bank their recorded extraction checkpoint and return to camp without replay.
+The pointer-controls and deliberate-exit release uses rules revision **4**. Earlier version-4 journals bank their recorded extraction checkpoint and return to camp without replay.
 
 ## This transition
 
