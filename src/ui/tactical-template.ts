@@ -21,7 +21,7 @@ export function tacticalTemplate(language: Language, run: Expedition): string {
     <div class="tactical-counters"><span>${t.turn} <strong>${encounter.turn}</strong></span><span>${t.points} <strong class="tactical-points">${Math.min(combatStats(run).actions, encounter.points)} / ${combatStats(run).actions}${encounter.points > combatStats(run).actions ? ` (+${encounter.points - combatStats(run).actions})` : ''}</strong></span></div>
     ${combatStatsTemplate(language, run)}
     <p class="tactical-event" role="status" tabindex="-1">${tacticalEventCopy(language, encounter)}</p>
-    ${encounter.kind === 'mirror' ? '' : tacticalControlsTemplate(language, run)}
+    ${encounter.kind === 'mirror' || encounter.kind === 'magnetic' ? '' : tacticalControlsTemplate(language, run)}
     <p class="tactical-plan" role="status">${t.hint}</p></section>`
 }
 

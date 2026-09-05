@@ -22,9 +22,13 @@ function excavationTarget(run: Expedition): number | null {
         ? run.encounter[run.encounter.active].seal.active
           ? [run.encounter[run.encounter.active].seal.index]
           : []
-        : run.encounter
-          ? run.encounter.pylons.filter((pylon) => pylon.active).map((pylon) => pylon.index)
-          : run.treasures.filter((index) => !run.collected.includes(index))
+        : run.encounter?.kind === 'magnetic'
+          ? run.encounter.anchors
+              .filter((anchor) => !anchor.calibrated)
+              .map((anchor) => anchor.index)
+          : run.encounter
+            ? run.encounter.pylons.filter((pylon) => pylon.active).map((pylon) => pylon.index)
+            : run.treasures.filter((index) => !run.collected.includes(index))
 
   remaining.sort((a, b) => {
     const first = Math.abs(Math.floor(a / width) - row) + Math.abs((a % width) - column)

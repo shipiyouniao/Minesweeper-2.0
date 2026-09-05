@@ -1,5 +1,5 @@
 /** Increment when a change can invalidate replay; retain only the current game rules. */
-export const EXPEDITION_RULES_REVISION = 4
+export const EXPEDITION_RULES_REVISION = 5
 
 /** Envelopes before version four have no extraction checkpoint. */
 export const OLD_EXPEDITION_COMPENSATION = 200

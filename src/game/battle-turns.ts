@@ -12,6 +12,7 @@ import { bastionIntent } from './tactical-intents.js'
 import { advanceBrood, broodIntent, clearBrood } from './brood-turns.js'
 import { tacticalPlan } from './tactical-planning.js'
 import { advanceMirror, disableMirrorSeal, shiftMirror, strikeMirror } from './mirror-battle.js'
+import { advanceMagnetic, lureMagnetic } from './magnetic-battle.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { ExploreTransition } from '../types/tactical.js'
 
@@ -33,6 +34,7 @@ function correctFlags(run: Expedition, index: number): boolean {
 function interact(run: Expedition, index: number): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+  if (encounter.kind === 'magnetic') return lureMagnetic({ ...run, encounter }, index)
   if (encounter.kind === 'mirror') {
     if (!correctFlags(run, index))
       return { ...injure(run, 5), encounter: { ...encounter, event: 'misfire' } }
@@ -85,6 +87,7 @@ function interact(run: Expedition, index: number): Expedition {
 function endTurn(run: Expedition): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+  if (encounter.kind === 'magnetic') return advanceMagnetic({ ...run, encounter })
   const damage = incomingCombatDamage(run, battleThreat(encounter, run.player))
   const next = damage > 0 ? injure(run, damage) : run
   const advanced: Expedition = {

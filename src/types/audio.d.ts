@@ -3,7 +3,18 @@ export type InteractionCue = 'tap' | 'navigate' | 'dismiss' | 'blocked' | 'input
 
 /** Gameplay cues have priority over navigation feedback from the same browser event. */
 export type SoundCue =
-  InteractionCue | 'reveal' | 'flag' | 'unflag' | 'win' | 'loss' | 'damage' | 'shield' | 'heal'
+  | InteractionCue
+  | 'reveal'
+  | 'flag'
+  | 'unflag'
+  | 'win'
+  | 'loss'
+  | 'damage'
+  | 'shield'
+  | 'heal'
+  | 'magnet-pull'
+  | 'magnet-push'
+  | 'magnet-charge'
 
 /** A short oscillator envelope, expressed in seconds and hertz. */
 export interface Tone {

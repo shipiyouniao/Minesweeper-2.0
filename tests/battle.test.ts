@@ -74,7 +74,7 @@ test('shuffled battle layouts have meaningful hidden objectives and fully deduci
     for (let seed = 0; seed < 20; seed++) {
       const run = arena(seed % 2 ? 'brood' : 'bastion', difficulty, seed)
       const { game, walls, encounter } = run
-      assert.ok(encounter && encounter.kind !== 'mirror')
+      assert.ok(encounter && (encounter.kind === 'bastion' || encounter.kind === 'brood'))
       assert.equal(game.cells.filter((cell) => cell.mine).length, game.config.mines)
       assert.ok(game.config.mines >= 17)
       assert.ok(
@@ -133,7 +133,7 @@ test('both revised encounters require their mine objectives even with a complete
     const run = arena(kind, 'abyss', 43, ['steel-blade'], ['tempered-edge', 'tactics-hourglass'])
     assert.equal(tacticalPlan(run, { type: 'attack' }).allowed, false)
     assert.equal(actExpedition(run, { type: 'attack' }), run)
-    assert.ok(run.encounter && run.encounter.kind !== 'mirror')
+    assert.ok(run.encounter && (run.encounter.kind === 'bastion' || run.encounter.kind === 'brood'))
     const index =
       run.encounter.kind === 'brood' ? run.encounter.nests[0]! : run.encounter.pylons[0]!.index
     assert.equal(tacticalCellAction(run, index).type, 'reveal')

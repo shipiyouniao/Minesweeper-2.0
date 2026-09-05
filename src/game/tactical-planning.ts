@@ -4,6 +4,7 @@ import { neighbors } from './engine.js'
 import { walkingPointCost } from './combat-relics.js'
 import { occupied } from './dungeon-occupancy.js'
 import { oppositeMirror } from './mirror-state.js'
+import { magneticLurePath } from './magnetic-field.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 
@@ -11,6 +12,16 @@ import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 export function tacticalCellAction(run: Expedition, index: number): ExpeditionAction {
   const encounter = run.encounter
   if (encounter) {
+    if (
+      encounter.kind === 'magnetic' &&
+      index !== encounter.boss &&
+      encounter.anchors.some(
+        (entry) => entry.index === index && (!entry.calibrated || run.player === index),
+      ) &&
+      run.game.cells[index]?.visibility === 'revealed' &&
+      (run.player === index || adjacentSteps(run.game, run.player).includes(index))
+    )
+      return { type: 'interact', index }
     if (
       encounter.kind === 'mirror' &&
       encounter[encounter.active].seal.active &&
@@ -77,7 +88,10 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
     }
     case 'attack':
       cost = 2
-      if (encounter.kind === 'mirror' && encounter[encounter.active].health === 0) reason = 'used'
+      if (encounter.kind === 'magnetic' && encounter.exposedUntil < encounter.turn)
+        reason = 'magnet-armor'
+      else if (encounter.kind === 'mirror' && encounter[encounter.active].health === 0)
+        reason = 'used'
       else if (
         encounter.kind === 'mirror' &&
         encounter[oppositeMirror(encounter.active)].seal.active
@@ -98,6 +112,27 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       break
     case 'interact': {
       const core = encounter.kind === 'bastion' && action.index === encounter.boss
+      if (encounter.kind === 'magnetic') {
+        const anchor = encounter.anchors.find((entry) => entry.index === action.index)
+        if (!anchor || action.index === encounter.boss) reason = 'used'
+        else if (encounter.forecast.kind === 'charge' || encounter.exposedUntil >= encounter.turn)
+          reason = 'magnet-busy'
+        else if (run.game.cells[action.index]?.visibility !== 'revealed') reason = 'path'
+        else if (
+          run.player !== action.index &&
+          !adjacentSteps(run.game, run.player).includes(action.index)
+        )
+          reason = 'adjacent'
+        else if (
+          !anchor.calibrated &&
+          neighbors(run.game.config, action.index).filter(
+            (index) => run.game.cells[index]?.visibility === 'flagged',
+          ).length !== run.game.cells[action.index]?.adjacent
+        )
+          reason = 'flags'
+        else if (!magneticLurePath({ ...run, encounter }, action.index)) reason = 'magnet-route'
+        break
+      }
       const objective =
         encounter.kind === 'bastion'
           ? encounter.pylons.some((pylon) => pylon.index === action.index && pylon.active)

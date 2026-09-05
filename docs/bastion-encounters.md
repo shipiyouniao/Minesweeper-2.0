@@ -16,7 +16,7 @@ Walk to the ordinary stairs on a guarded floor to enter the arena. The exit paym
 | Expert     | 3, 6, 9        | 13 × 11 |           6 |
 | Abyss      | 4, 8, 12       | 15 × 13 |           8 |
 
-Historical `bastion-v1` departures use the guardian at every checkpoint. New `brood-v1` departures alternate it with the [Brood Queen](brood-queen.md), starting from a seeded choice. The other three planned bosses remain unimplemented.
+Current expeditions rotate Bastion Guardian, [Brood Queen](brood-queen.md), [Mirror Twins](mirror-twins.md) and [Magnetic Knight](magnetic-knight.md) from a seeded first encounter. Historical journals retire at the [save boundary](save-policy.md); no previous combat implementation remains.
 
 ## Mine deduction and armor
 

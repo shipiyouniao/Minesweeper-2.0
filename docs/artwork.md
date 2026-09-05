@@ -20,3 +20,7 @@ Use case: editorial repository banner. Create one finished, beautifully typeset 
 ## Dungeon sprites
 
 Nine transparent PNG assets were generated for the explorer, terrain, landmarks and square inventory controls. See [the complete prompt set and asset map](dungeon-artwork.md). Cell descriptions and numbers remain accessible text.
+
+## Magnetic Knight
+
+The fourth boss family adds original generated knight and anchor sprites, plus board-native magnetic forecasts, physical motion and overload effects. See [the prompt and provenance record](magnetic-artwork.md).

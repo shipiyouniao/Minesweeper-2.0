@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
 const key = 'minesweeper.variants.v1.expedition'
-const fixture = battleFixture(44)
+const fixture = battleFixture(46)
 assert.equal(fixture.entered.run.encounter.kind, 'mirror')
 const output = new URL('../../.native/mirror-ui/', import.meta.url)
 await mkdir(output, { recursive: true })

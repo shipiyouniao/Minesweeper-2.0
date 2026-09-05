@@ -46,6 +46,7 @@ export class VariantApp implements VariantInputActions {
   private pending: 'retreat' | 'restart' | null = null
   private pendingDifficulty: VariantDifficulty | null = null
   private moving = false
+  private magneticPerformance = false
   private walkGeneration = 0
 
   /** Wire one active mode, sharing only browser preferences and the sound port. */
@@ -219,10 +220,14 @@ export class VariantApp implements VariantInputActions {
 
   /** Discard pending movement before replacing or hiding its board. */
   private cancelMovement(): void {
+    const committed = this.magneticPerformance
+    this.magneticPerformance = false
     this.walkGeneration++
     this.moving = false
     this.view.cancelWalk()
     this.input.cancelTools()
+    // Magnetic turns are committed before their animation; help and language changes must see them.
+    if (committed) this.render()
   }
 
   /** Preview only an interactive expedition's explicit target area. */
@@ -360,10 +365,19 @@ export class VariantApp implements VariantInputActions {
           this.expedition(tacticalCellAction(this.session.run, this.session.run.encounter.boss))
         break
       case 'brace':
-      case 'end-turn':
       case 'shift':
         this.input.cancelTools()
         this.expedition({ type: command.type })
+        break
+      case 'end-turn':
+        if (
+          this.session instanceof ExpeditionSession &&
+          this.session.run?.encounter?.kind === 'magnetic'
+        ) {
+          void this.magneticTurn()
+          return
+        }
+        this.expedition({ type: 'end-turn' })
         break
       case 'difficulty':
         if (this.session instanceof ExpeditionSession) {
@@ -552,6 +566,36 @@ export class VariantApp implements VariantInputActions {
     const cue = before && after ? cueForVitality(before, after) : null
 
     this.sounds.play(!changed ? 'blocked' : after?.phase === 'won' ? 'win' : (cue ?? 'confirm'))
+  }
+
+  /** Commit the turn before its interruptible performance so cancellation cannot duplicate actions. */
+  private async magneticTurn(): Promise<void> {
+    if (!(this.session instanceof ExpeditionSession)) return
+    const before = this.session.run
+    if (!before || before.encounter?.kind !== 'magnetic') return
+    const changed = this.session.dispatch({ type: 'end-turn' })
+    const after = this.session.run
+    if (!changed || !after) return
+    const generation = ++this.walkGeneration
+    this.moving = true
+    this.magneticPerformance = true
+    const forecast = before.encounter.forecast
+    this.sounds.play(
+      forecast.kind === 'charge'
+        ? 'magnet-charge'
+        : forecast.kind === 'field'
+          ? forecast.polarity === 'pull'
+            ? 'magnet-pull'
+            : 'magnet-push'
+          : 'confirm',
+    )
+    await this.view.magneticTurn(before, after)
+    if (generation !== this.walkGeneration) return
+    this.moving = false
+    this.magneticPerformance = false
+    const cue = cueForVitality(before, after)
+    if (cue) this.sounds.play(cue)
+    this.render()
   }
 
   /** Give rejected purchases and accepted choices distinct audible feedback. */

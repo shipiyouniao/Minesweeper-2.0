@@ -136,3 +136,9 @@ Expedition envelope version 4 separates the current replay journal from permanen
 ### Mirror room ownership
 
 `mirror-generation.ts` accepts connected pairs through a public two-board solver. `mirror-battle.ts` implements the twin-specific state transitions and frozen forecasts; common AP, damage and build effects stay in the tactical orchestrator. `mirror-state.ts` snapshots only room-local terrain, discoveries and position. It counts both realms for discovery/travel thresholds and propagates confirmed mine-exclusion knowledge. Shared resources and trigger limits never enter the parked snapshot. Contracts live in `src/types/mirror.d.ts`; the comparison board derives a read-only view. See [Mirror Twins](mirror-twins.md).
+
+### Magnetic encounter and presentation
+
+`magnetic-generation.ts` adds safe anchor occupancy checks to the existing shuffled, publicly deducible arenas. `magnetic-field.ts` owns public geometric forecasts and known-route planning, while `magnetic-battle.ts` owns grounding, collision damage, lures and exposure. `magnetic.d.ts` declares their finite state and result contracts. The tactical orchestrator still charges AP and applies the shared build effects.
+
+`MagneticBoard` owns the board forecast layer, resize observer and temporary animation actors. `VariantApp` commits a magnetic turn before playing its interruptible performance; cancellation reveals the committed state. The view never dispatches actions, and replay does not replay animations or sounds. Reduced motion retains directional arrows, routes and landing markers. See [Magnetic Knight](magnetic-knight.md).

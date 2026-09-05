@@ -1,0 +1,233 @@
+/* Forecast and resolution share the board's measured geometry, at every zoom and viewport. */
+.magnetic-stage {
+  min-width: 0;
+}
+.magnetic-playbar {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+.magnetic-playbar .tactical-controls {
+  position: sticky;
+  top: 8px;
+  z-index: 12;
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 2px 12px #1e344710;
+}
+.magnetic-key {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border: 1px solid #b8d6df;
+  background: #f0f8fa;
+  border-radius: 12px;
+  color: #297287;
+  font-size: 0.85em;
+}
+.magnetic-key[data-polarity='push'] {
+  color: #a8533e;
+  border-color: #e2bcaf;
+  background: #fcf3ee;
+}
+.magnetic-key[data-polarity='charge'] {
+  color: #926017;
+  border-color: #ddc795;
+  background: #fbf6e8;
+}
+.magnetic-key[data-polarity='recovery'] {
+  color: var(--muted);
+  border-color: var(--line);
+  background: var(--surface);
+}
+.magnetic-symbol {
+  font-size: 1.6em;
+  white-space: nowrap;
+  min-width: 2.8em;
+  text-align: center;
+  line-height: 1.4;
+}
+.magnetic-symbol.vertical {
+  transform: rotate(90deg);
+}
+.board[data-magnetic] {
+  --magnet-color: #438fa8;
+}
+.board[data-magnetic='push'] {
+  --magnet-color: #c77758;
+}
+.board[data-magnetic='charge'] {
+  --magnet-color: #bd8c31;
+}
+.board .cell.magnetic-anchor {
+  background: #e9eff0;
+}
+.board .cell.magnetic-calibrated {
+  box-shadow: inset 0 0 0 2px #73b3a0;
+  background: #e4f2ec;
+}
+.board .cell.magnetic-anchor > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.magnetic-core-ring {
+  position: absolute;
+  inset: 3%;
+  border: 2px solid var(--magnet-color);
+  border-radius: 50%;
+  opacity: 0.65;
+  pointer-events: none;
+  animation: magnetic-core 2.4s ease-in-out infinite;
+}
+.board .cell.magnetic-exposed {
+  background: #f6e7b4;
+}
+.magnetic-exposed .magnetic-core-ring {
+  border-style: dashed;
+  border-color: #c88f21;
+  animation: magnetic-spin 8s linear infinite;
+}
+.magnetic-defeated > img {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+.magnetic-defeated .magnetic-core-ring {
+  display: none;
+}
+.magnetic-arrow {
+  position: absolute;
+  inset: auto auto -8% 3%;
+  color: var(--magnet-color);
+  font-family: sans-serif;
+  font-size: calc(var(--cell) * 0.52);
+  line-height: 1;
+  transform: rotate(var(--magnetic-angle));
+  pointer-events: none;
+  opacity: 0.6;
+  z-index: 3;
+  animation: magnetic-flow 1.6s ease-in-out infinite;
+}
+.magnetic-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  color: var(--magnet-color);
+}
+.magnetic-lines {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+.magnetic-trail-halo,
+.magnetic-trail {
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.magnetic-trail-halo {
+  stroke: #ffffffc9;
+  stroke-width: 6;
+}
+.magnetic-trail {
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-dasharray: 7 7;
+  animation: magnetic-trail 1s linear infinite;
+}
+.magnetic-charge .magnetic-trail {
+  stroke-width: 3.5;
+}
+.magnetic-uncertain {
+  color: #b48636;
+}
+.magnetic-ghost {
+  position: absolute;
+  opacity: 0.38;
+  border: 2px dashed currentColor;
+  border-radius: 10%;
+  box-sizing: border-box;
+}
+.magnetic-ghost img {
+  width: 100%;
+  height: 100%;
+}
+.board .cell.magnetic-landing {
+  outline: 2px dashed var(--magnet-color);
+  outline-offset: -2px;
+}
+.board .cell.magnetic-grounded {
+  box-shadow: inset 0 0 0 3px #6ba58c;
+}
+.magnetic-actor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 9;
+  filter: drop-shadow(0 0 5px var(--magnet-color));
+}
+.magnetic-player-moving .dungeon-player,
+.magnetic-player-moving .landmark-player {
+  opacity: 0;
+}
+.magnetic-knight-moving .boss-cell > img,
+.magnetic-knight-moving .magnetic-core-ring {
+  visibility: hidden;
+}
+.magnetic-performing .magnetic-trail {
+  stroke-width: 5;
+  animation-duration: 0.25s;
+}
+.magnetic-performing[data-performance='gather'] .magnetic-core-ring {
+  box-shadow:
+    0 0 0 7px #68a8bd22,
+    0 0 0 15px #68a8bd11;
+}
+.magnetic-impact {
+  position: absolute;
+  box-sizing: border-box;
+  border: 4px solid var(--magnet-color);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10;
+}
+.magnetic-overload {
+  border-color: #d5a334;
+  box-shadow:
+    0 0 12px #d5a33466,
+    inset 0 0 12px #d5a33444;
+}
+@keyframes magnetic-flow {
+  50% {
+    opacity: 0.25;
+    transform: rotate(var(--magnetic-angle)) translateX(2px);
+  }
+}
+@keyframes magnetic-core {
+  50% {
+    scale: 1.13;
+    opacity: 0.25;
+  }
+}
+@keyframes magnetic-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes magnetic-trail {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .magnetic-arrow,
+  .magnetic-core-ring,
+  .magnetic-trail {
+    animation: none;
+  }
+}
