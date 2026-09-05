@@ -9,6 +9,8 @@ export function parseCommand(value: string): UiCommand | null {
     case 'pause':
     case 'flag-mode':
     case 'reveal-mode':
+    case 'safe-mode':
+    case 'chord-mode':
     case 'restart-confirmed':
     case 'new':
     case 'toggle-sound':
@@ -21,6 +23,14 @@ export function parseCommand(value: string): UiCommand | null {
 /** Decode only navigation keys; other keyboard shortcuts are routed separately. */
 export function parseNavigation(value: string): NavigationKey | null {
   switch (value) {
+    case 'h':
+      return 'arrowleft'
+    case 'j':
+      return 'arrowdown'
+    case 'k':
+      return 'arrowup'
+    case 'l':
+      return 'arrowright'
     case 'arrowleft':
     case 'arrowright':
     case 'arrowup':

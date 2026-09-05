@@ -1,3 +1,4 @@
+import type { BoardInputMode } from '../types/ui.js'
 import {
   EQUIPMENT,
   UPGRADES,
@@ -149,7 +150,7 @@ export function expeditionTemplate(
   language: Language,
   run: Expedition,
   earned: number,
-  flagMode: boolean,
+  inputMode: BoardInputMode,
 ): string {
   const t = variantCopy(language)
   const common = translations[language]
@@ -194,7 +195,7 @@ export function expeditionTemplate(
     ${boardZoomTemplate(language)}<div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards">${run.phase === 'boss' ? `<div class="mirror-playbar">${tacticalControlsTemplate(language, run)}<span>${tacticalCopy(language, 'mirror').points} ${run.encounter.points}</span></div>` : ''}<div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${
         run.phase === 'exploring' || run.phase === 'boss'
-          ? `<div class="variant-toolbar">${inputModeTemplate(language, flagMode)}
+          ? `<div class="variant-toolbar">${inputModeTemplate(language, inputMode)}
       <p class="variant-note tool-hint" role="status">${t.toolHint}</p>
       <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}</div>
       ${professionSkillTemplate(language, run)}
@@ -240,13 +241,13 @@ export function expeditionResultTemplate(language: Language, run: Expedition): s
 }
 
 /** Offer an explicit flag toggle for touch users alongside keyboard/right-click shortcuts. */
-export function inputModeTemplate(language: Language, flagMode: boolean): string {
+export function inputModeTemplate(language: Language, inputMode: BoardInputMode): string {
   const t = translations[language]
-  return `<div class="variant-input-mode" role="group" aria-label="${t.play}"><button data-control="reveal-mode" aria-pressed="${!flagMode}">${t.reveal}</button><button data-control="flag-mode" aria-pressed="${flagMode}">${t.flag}</button></div>`
+  return `<div class="variant-input-mode" role="group" aria-label="${t.play}"><button data-control="reveal-mode" aria-pressed="${inputMode === 'reveal'}">${t.reveal}</button><button data-control="flag-mode" aria-pressed="${inputMode === 'flag'}">${t.flag}</button><button data-control="safe-mode" aria-pressed="${inputMode === 'mark-safe'}">${t.markSafe}</button><button data-control="chord-mode" aria-pressed="${inputMode === 'chord'}">${t.quickReveal}</button></div>`
 }
 
 /** Present both boards at once, with responsive stacking on narrow screens. */
-export function twinTemplate(language: Language, state: Twin, flagMode: boolean): string {
+export function twinTemplate(language: Language, state: Twin, inputMode: BoardInputMode): string {
   const t = variantCopy(language)
   const common = translations[language]
   const status =
@@ -260,7 +261,7 @@ export function twinTemplate(language: Language, state: Twin, flagMode: boolean)
 
   return `${difficultyTemplate(language, state.difficulty, false)}<div class="variant-metrics">${metric(t.steps, state.moves)}${metric('A · ' + common.progress, `${stats(state.a).revealed} / ${state.a.cells.length - state.a.config.mines}`)}${metric('B · ' + common.progress, `${stats(state.b).revealed} / ${state.a.cells.length - state.a.config.mines}`)}</div>
     <p class="variant-status" role="status" tabindex="-1">${status}</p>
-    <div class="twin-tools">${inputModeTemplate(language, flagMode)}<button class="secondary-button" data-control="restart">${common.restart}</button></div>
+    <div class="twin-tools">${inputModeTemplate(language, inputMode)}<button class="secondary-button" data-control="restart">${common.restart}</button></div>
     ${state.a.phase === 'won' || state.b.phase === 'won' ? `<p class="variant-note">${t.safePartner}</p>` : ''}
     ${boardZoomTemplate(language)}<div class="twin-layout">${boardFrame('a', 'A')}${boardFrame('b', 'B')}</div>`
 }

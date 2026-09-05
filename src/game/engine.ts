@@ -130,6 +130,7 @@ export function createGame(config: Config, seed: number): Game {
     firstClick: null,
     phase: 'ready',
     exploded: null,
+    safeMarks: [],
     cells: Array.from({ length: config.width * config.height }, () => ({
       mine: false,
       adjacent: 0,
@@ -252,8 +253,27 @@ export function act(game: Game, action: Action): Game {
     return game
   }
 
+  if (action.type === 'mark-safe') {
+    if (original.visibility === 'revealed') return game
+    const marked = game.safeMarks.includes(action.index)
+    return {
+      ...game,
+      safeMarks: marked
+        ? game.safeMarks.filter((index) => index !== action.index)
+        : [...game.safeMarks, action.index],
+      cells:
+        original.visibility === 'flagged'
+          ? game.cells.map((cell, index) =>
+              index === action.index ? { ...cell, visibility: 'hidden' } : cell,
+            )
+          : game.cells,
+    }
+  }
+
   if (action.type === 'flag') {
-    return original.visibility === 'revealed' ? game : toggleFlag(game, action.index)
+    return original.visibility === 'revealed'
+      ? game
+      : pruneSafeMarks(toggleFlag(game, action.index))
   }
 
   if (original.visibility === 'flagged' || (game.phase === 'ready' && action.type !== 'reveal')) {
@@ -263,7 +283,25 @@ export function act(game: Game, action: Action): Game {
   const next = game.phase === 'ready' ? beginGame(game, action.index) : game
   const targets = revealTargets(next, action, original)
 
-  return targets === null ? game : finishIfWon(revealRegion(next, targets))
+  return targets === null ? game : pruneSafeMarks(finishIfWon(revealRegion(next, targets)))
+}
+
+/** Remove notes only when their square has actually been revealed or flagged. */
+export function pruneSafeMarks(game: Game): Game {
+  const safeMarks = game.safeMarks.filter((index) => game.cells[index]?.visibility === 'hidden')
+  return safeMarks.length === game.safeMarks.length ? game : { ...game, safeMarks }
+}
+
+/** Read a number and its flag count without testing hidden mine correctness. */
+export function chordTargets(game: Game, index: number): readonly number[] {
+  const cell = game.cells[index]
+  if (!Number.isInteger(index) || !cell || cell.visibility !== 'revealed' || cell.adjacent === 0)
+    return []
+  const around = neighbors(game.config, index)
+  const flags = around.filter((other) => game.cells[other]?.visibility === 'flagged').length
+  return flags === cell.adjacent
+    ? around.filter((other) => game.cells[other]?.visibility === 'hidden')
+    : []
 }
 
 /** Produce a minimal serializable snapshot; mines and clues are regenerated on restore. */
@@ -273,6 +311,7 @@ export function snapshot(game: Game): GameSnapshot {
     seed: game.seed,
     firstClick: game.firstClick,
     visible: game.cells.map((cell) => cell.visibility),
+    safeMarks: game.safeMarks,
   }
 }
 
@@ -283,7 +322,15 @@ export function restore(value: GameSnapshot): Game | null {
     !Number.isInteger(value.seed) ||
     value.seed < 0 ||
     value.seed > 0xffffffff ||
-    value.visible.length !== value.config.width * value.config.height
+    value.visible.length !== value.config.width * value.config.height ||
+    value.safeMarks.some(
+      (index) =>
+        !Number.isInteger(index) ||
+        index < 0 ||
+        index >= value.visible.length ||
+        value.visible[index] !== 'hidden',
+    ) ||
+    new Set(value.safeMarks).size !== value.safeMarks.length
   ) {
     return null
   }
@@ -299,6 +346,7 @@ export function restore(value: GameSnapshot): Game | null {
 
     return {
       ...game,
+      safeMarks: [...value.safeMarks],
       cells: game.cells.map((cell, index) => ({ ...cell, visibility: visible[index] ?? 'hidden' })),
     }
   }
@@ -329,6 +377,7 @@ export function restore(value: GameSnapshot): Game | null {
     cells,
     phase: 'playing',
     exploded: null,
+    safeMarks: [...value.safeMarks],
   }
 
   return stats(game).remaining > 0 ? game : null

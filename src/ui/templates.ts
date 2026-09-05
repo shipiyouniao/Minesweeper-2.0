@@ -1,3 +1,5 @@
+import type { BoardInputMode } from '../types/ui.js'
+import { boardHelpTemplate } from './board-help.js'
 import { DIFFICULTIES, RANKED_DIFFICULTIES } from '../game/difficulty.js'
 import type { HelpStep } from '../types/ui.js'
 import type { Config, Difficulty, RankedDifficulty } from '../types/game.js'
@@ -89,7 +91,11 @@ export function siteHeaderTemplate(
 }
 
 /** Render the static application shell from state; event binding belongs to the view. */
-export function appTemplate(state: SessionState, language: Language, flagMode: boolean): string {
+export function appTemplate(
+  state: SessionState,
+  language: Language,
+  inputMode: BoardInputMode,
+): string {
   const t = translations[language]
   const { game, mode } = state
 
@@ -177,13 +183,21 @@ export function appTemplate(state: SessionState, language: Language, flagMode: b
           </div>
           <div class="game-toolbar">
             <div class="input-mode" role="group" aria-label="${t.flagMode}">
-              <button data-action="reveal-mode" aria-pressed="${!flagMode}">
+              <button data-action="reveal-mode" aria-pressed="${inputMode === 'reveal'}">
                 ${icon('pointer')}
                 <span>${t.reveal}</span>
               </button>
-              <button data-action="flag-mode" aria-pressed="${flagMode}">
+              <button data-action="flag-mode" aria-pressed="${inputMode === 'flag'}">
                 ${icon('flag')}
                 <span>${t.flag}</span>
+              </button>
+              <button data-action="safe-mode" aria-pressed="${inputMode === 'mark-safe'}">
+                ${icon('check')}
+                <span>${t.markSafe}</span>
+              </button>
+              <button data-action="chord-mode" aria-pressed="${inputMode === 'chord'}">
+                ${icon('pointer')}
+                <span>${t.quickReveal}</span>
               </button>
             </div>
             <div class="toolbar-right">
@@ -251,6 +265,7 @@ export function helpTemplate(language: Language): string {
     <ol class="help-list">
       ${steps.map((step, index) => helpStep(step, index)).join('')}
     </ol>
+    ${boardHelpTemplate(language)}
     <p class="safe-note">${icon('check')}${t.readyNote}</p>
   `
 }

@@ -26,6 +26,8 @@ export interface Cell {
 
 /** A complete value representing one point in a game's history. */
 export interface Game {
+  /** Player hypotheses only; never used as evidence by pathfinding or deduction. */
+  readonly safeMarks: readonly number[]
   readonly config: Config
   readonly seed: number
   readonly firstClick: number | null
@@ -36,12 +38,14 @@ export interface Game {
 
 /** Player intent contains no browser event, clock, or storage dependency. */
 export type Action =
+  | { readonly type: 'mark-safe'; readonly index: number }
   | { readonly type: 'reveal'; readonly index: number }
   | { readonly type: 'flag'; readonly index: number }
   | { readonly type: 'chord'; readonly index: number }
 
 /** Only the seed, opening move, and player-visible state need to be persisted. */
 export interface GameSnapshot {
+  readonly safeMarks: readonly number[]
   readonly config: Config
   readonly seed: number
   readonly firstClick: number | null

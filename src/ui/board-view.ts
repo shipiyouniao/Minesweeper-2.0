@@ -1,3 +1,4 @@
+import { icon } from '../icons.js'
 import type { NavigationKey, NavigationResult } from '../types/ui.js'
 import type { Config, Game } from '../types/game.js'
 import type { Messages } from '../types/localization.js'
@@ -26,6 +27,8 @@ export class BoardView {
   /** Paint visible cell information while leaving covered clues out of the DOM. */
   render(game: Game, paused: boolean, messages: Messages): void {
     const ended = game.phase === 'won' || game.phase === 'lost'
+    // Index notes once so a densely annotated board does not rescan them for every cell.
+    const safeMarks = new Set(game.safeMarks)
 
     for (const [index, button] of this.cells.entries()) {
       const cell = game.cells[index]
@@ -36,9 +39,13 @@ export class BoardView {
 
       const showMine = ended && cell.mine
       const wrongFlag = ended && !cell.mine && cell.visibility === 'flagged'
-      const content = cellContent(cell, ended, messages)
+      const suspected = !ended && cell.visibility === 'hidden' && safeMarks.has(index)
+      const content = suspected
+        ? { html: icon('check'), label: messages.suspectedSafe }
+        : cellContent(cell, ended, messages)
 
       button.className = `cell ${cell.visibility}${showMine ? ' mine' : ''}${wrongFlag ? ' wrong' : ''}${index === game.exploded ? ' exploded' : ''}`
+      button.classList.toggle('suspected-safe', suspected)
       button.dataset['state'] = cell.visibility
       button.dataset['number'] = cell.visibility === 'revealed' ? String(cell.adjacent) : ''
       button.innerHTML = content.html

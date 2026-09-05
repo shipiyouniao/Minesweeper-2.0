@@ -25,6 +25,7 @@ import { generateDungeon } from './dungeon-generator.js'
 import { probeDungeon, scanDungeon, scoutExit } from './dungeon-discovery.js'
 import { act } from './engine.js'
 import { revealDungeon } from './dungeon-reveal.js'
+import { chordExpedition } from './dungeon-chord.js'
 import { adjacentSteps, shuffled } from './variant-board.js'
 import { approachPath, walkingPath } from './dungeon-path.js'
 import { expeditionConfig, expeditionFloors } from './variant-difficulty.js'
@@ -102,6 +103,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
     offers: [],
     scannedRows: [],
     confirmedMines: [],
+    triggeredMines: [],
     surveyedCells: [],
     probeReport: null,
     probes: 0,
@@ -216,6 +218,7 @@ function revealFrontier(run: Expedition, index: number): Expedition {
     // Survival confirms the hazard, never erases it or moves the player onto it.
     return {
       ...reacted,
+      triggeredMines: [...new Set([...reacted.triggeredMines, index])],
       game: survived
         ? reacted.game.cells[index]?.visibility === 'flagged'
           ? reacted.game
@@ -317,9 +320,15 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
       return revealFrontier(run, action.index)
     case 'move':
       return movePlayer(run, action.index)
+    case 'mark-safe':
     case 'flag': {
-      if (run.walls.includes(action.index) || run.confirmedMines.includes(action.index)) return run
-      const game = act(run.game, { type: 'flag', index: action.index })
+      if (
+        occupied(run, action.index) ||
+        run.confirmedMines.includes(action.index) ||
+        run.surveyedCells.includes(action.index)
+      )
+        return run
+      const game = act(run.game, { type: action.type, index: action.index })
       return game === run.game ? run : { ...run, game, steps: run.steps + 1 }
     }
     case 'sweep':
@@ -333,6 +342,8 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
 
 /** Apply the accepted intent, then process each newly earned discovery reaction once. */
 export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
+  if (action.type === 'chord') return chordExpedition(run, action.index, actExpedition)
+
   let next =
     run.phase === 'boss'
       ? actBattle(run, action, transitionExpedition)

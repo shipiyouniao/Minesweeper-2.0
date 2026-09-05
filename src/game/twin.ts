@@ -50,7 +50,7 @@ export function actTwin(twin: Twin, action: TwinAction): Twin {
     action.index >= twin.a.cells.length
   )
     return twin
-  if (twin.phase === 'ready' && action.type === 'flag') return twin
+  if (twin.phase === 'ready' && action.type !== 'reveal') return twin
 
   const next = twin.phase === 'ready' ? beginTwin(twin, action.index) : twin
   const before = next[action.side]

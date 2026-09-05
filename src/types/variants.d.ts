@@ -83,6 +83,8 @@ export interface Expedition extends Vitality {
   readonly offers: readonly Relic[]
   readonly scannedRows: readonly number[]
   readonly confirmedMines: readonly number[]
+  /** Confirmed hazards actually triggered, including hits absorbed by shields. */
+  readonly triggeredMines: readonly number[]
   readonly surveyedCells: readonly number[]
   readonly probeReport: ProbeReport | null
   readonly probes: number
@@ -94,7 +96,10 @@ export interface Expedition extends Vitality {
 
 /** Explicit run intents; all effects can be replayed without browser state. */
 export type ExpeditionAction =
-  | { readonly type: 'reveal' | 'flag' | 'move' | 'probe' | 'interact'; readonly index: number }
+  | {
+      readonly type: 'reveal' | 'flag' | 'mark-safe' | 'chord' | 'move' | 'probe' | 'interact'
+      readonly index: number
+    }
   | { readonly type: 'sweep'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
   | { readonly type: 'retreat' | 'descend' | 'skill' | 'attack' | 'brace' | 'end-turn' | 'shift' }
@@ -113,7 +118,7 @@ export interface Twin {
 /** A twin board intent can never refer to an arbitrary board name. */
 export interface TwinAction {
   readonly side: BoardSide
-  readonly type: 'reveal' | 'flag'
+  readonly type: 'reveal' | 'flag' | 'mark-safe' | 'chord'
   readonly index: number
 }
 

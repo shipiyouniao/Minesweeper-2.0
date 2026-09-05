@@ -2,7 +2,7 @@
 
 The game supports **one current expedition implementation**. When a rules update invalidates an active expedition, the explorer returns to camp. Permanent supplies, purchases, completion counts and records are preserved. Old generators, combat resolvers, reward tables and localized rule variants are removed instead of retained for replay.
 
-The Mirror Twins release uses rules revision **2**. Revision-1 version-4 journals bank their recorded extraction checkpoint and return to camp without replay.
+The board-annotation release uses rules revision **3**. Earlier version-4 journals bank their recorded extraction checkpoint and return to camp without replay.
 
 ## This transition
 
@@ -31,6 +31,8 @@ Increment `EXPEDITION_RULES_REVISION` when changing anything that can invalidate
 Presentation, translations, artwork and compiler changes that preserve replay do not require a revision bump. Tests and browser fixtures import the current revision constant. Schema migrations may keep a small envelope reader, but must not retain obsolete gameplay engines.
 
 This policy applies to expeditions and their camp. Classic and Twin saves use independent slots. Their progress is not modified by expedition retirement.
+
+Classic's unchanged rules preserve active boards; absent note metadata initializes to an empty list at the decoder boundary. Twin notes and quick-open commands use its existing typed replay journal. Neither mode keeps an older game engine.
 
 ## Verification
 

@@ -32,6 +32,7 @@ export function variantCopy(language: Language): VariantMessages {
       '确认有雷 · 标记已锁定',
       '地雷確定 · 旗を固定',
     ),
+    triggeredMine: t('Triggered mine', '已踩雷', '踏んだ地雷'),
     confirmedSafe: t('Confirmed safe', '已确认安全', '安全確認済み'),
     probeResult: t(
       'Probe found {count} mines.',

@@ -12,6 +12,7 @@ export interface MirrorRoom {
   readonly player: number
   readonly travelled: readonly number[]
   readonly confirmedMines: readonly number[]
+  readonly triggeredMines: readonly number[]
   readonly surveyedCells: readonly number[]
   readonly scannedRows: readonly number[]
   readonly probeReport: ProbeReport | null

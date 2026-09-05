@@ -15,6 +15,7 @@ export function mirrorRoom(run: Expedition): MirrorRoom {
     player: run.player,
     travelled: run.travelled,
     confirmedMines: run.confirmedMines,
+    triggeredMines: run.triggeredMines,
     surveyedCells: run.surveyedCells,
     scannedRows: run.scannedRows,
     probeReport: run.probeReport,
@@ -69,6 +70,7 @@ export function shareMirrorKnowledge(run: Expedition): Expedition {
 function clearSafeFlags(game: Game, safe: readonly number[]): Game {
   return {
     ...game,
+    safeMarks: game.safeMarks.filter((index) => !safe.includes(index)),
     cells: game.cells.map((cell, index) =>
       safe.includes(index) && cell.visibility === 'flagged'
         ? { ...cell, visibility: 'hidden' }

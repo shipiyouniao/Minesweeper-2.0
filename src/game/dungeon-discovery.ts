@@ -83,7 +83,11 @@ export function inspectArea(run: Expedition, area: readonly number[]): Expeditio
 
   return {
     ...run,
-    game: { ...run.game, cells },
+    game: {
+      ...run.game,
+      cells,
+      safeMarks: run.game.safeMarks.filter((index) => !area.includes(index)),
+    },
     confirmedMines,
     surveyedCells,
   }

@@ -191,6 +191,8 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
     case 'move':
     case 'probe':
     case 'interact':
+    case 'mark-safe':
+    case 'chord':
     case 'flag': {
       const index = reader.number('index')
       return integer(index, config.width * config.height - 1) ? { type, index } : null
@@ -334,7 +336,7 @@ function decodeTwinAction(value: JsonValue, config: Config): TwinAction | null {
   const index = reader.number('index')
 
   return (side === 'a' || side === 'b') &&
-    (type === 'reveal' || type === 'flag') &&
+    (type === 'reveal' || type === 'flag' || type === 'mark-safe' || type === 'chord') &&
     integer(index, config.width * config.height - 1)
     ? { side, type, index }
     : null

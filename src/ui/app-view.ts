@@ -1,3 +1,4 @@
+import type { BoardInputMode } from '../types/ui.js'
 import type { NavigationKey, NavigationResult } from '../types/ui.js'
 import type { InteractionCue } from '../types/audio.js'
 import type { SessionState } from '../types/session.js'
@@ -40,7 +41,12 @@ export class AppView {
   }
 
   /** Rebuild the shell on a new board or language change, optionally resetting focus. */
-  mount(state: SessionState, language: Language, flagMode: boolean, resetFocus: boolean): void {
+  mount(
+    state: SessionState,
+    language: Language,
+    inputMode: BoardInputMode,
+    resetFocus: boolean,
+  ): void {
     const messages = translations[language]
     const focusIndex = resetFocus ? 0 : (this.board?.focusIndex ?? 0)
 
@@ -48,7 +54,7 @@ export class AppView {
     document.title = `${messages.title} · Minesweeper 2.0`
     this.menu?.dispose()
     this.resizing.disconnect()
-    this.root.innerHTML = appTemplate(state, language, flagMode)
+    this.root.innerHTML = appTemplate(state, language, inputMode)
     this.element('.layout').classList.toggle('wide-board', state.game.config.width > 20)
     this.menu = new LanguageMenu(
       this.element('.language-picker'),
@@ -68,7 +74,7 @@ export class AppView {
   render(
     state: SessionState,
     language: Language,
-    flagMode: boolean,
+    inputMode: BoardInputMode,
     best: Score | undefined,
     storageAvailable: boolean,
   ): void {
@@ -96,8 +102,22 @@ export class AppView {
     pauseButton.innerHTML = icon(paused ? 'play' : 'pause')
     pauseButton.setAttribute('aria-label', paused ? messages.resume : messages.pause)
 
-    this.element('[data-action="reveal-mode"]').setAttribute('aria-pressed', String(!flagMode))
-    this.element('[data-action="flag-mode"]').setAttribute('aria-pressed', String(flagMode))
+    this.element('[data-action="reveal-mode"]').setAttribute(
+      'aria-pressed',
+      String(inputMode === 'reveal'),
+    )
+    this.element('[data-action="flag-mode"]').setAttribute(
+      'aria-pressed',
+      String(inputMode === 'flag'),
+    )
+    this.element('[data-action="safe-mode"]').setAttribute(
+      'aria-pressed',
+      String(inputMode === 'mark-safe'),
+    )
+    this.element('[data-action="chord-mode"]').setAttribute(
+      'aria-pressed',
+      String(inputMode === 'chord'),
+    )
     this.renderTime(state.elapsed, storageAvailable)
   }
 

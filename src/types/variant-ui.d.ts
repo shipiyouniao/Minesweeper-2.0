@@ -27,6 +27,8 @@ export type VariantCommand =
         | 'restart'
         | 'flag-mode'
         | 'reveal-mode'
+        | 'safe-mode'
+        | 'chord-mode'
         | 'sound'
         | 'pause'
         | 'confirm'
@@ -50,6 +52,10 @@ export interface VariantInputActions {
   command(command: VariantCommand): void
   /** Apply a reveal or explicit flag action on one board. */
   play(side: BoardSide, index: number, flag?: boolean): void
+  /** Toggle a player note on an interactive board. */
+  annotate(side: BoardSide, index: number): void
+  /** Open a number's neighbors through the active ruleset. */
+  chord(side: BoardSide, index: number): void
   /** Remember focus and highlight the same public coordinate on the other board. */
   focus(side: BoardSide, index: number): void
   /** Apply an already decoded directional key. */
@@ -158,6 +164,7 @@ export interface VariantMessages {
   readonly controls: string
   readonly rowMines: string
   readonly confirmedMine: string
+  readonly triggeredMine: string
   readonly confirmedSafe: string
   readonly probeResult: string
 }

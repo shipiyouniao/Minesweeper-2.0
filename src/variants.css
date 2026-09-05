@@ -680,6 +680,18 @@ html:has(.expedition-dialog[open]) {
   border-color: #a56505;
   cursor: not-allowed;
 }
+
+/* A triggered hazard is certain, but its source is a hit rather than a survey. */
+.variant-board-panel .cell.triggered-mine {
+  background: #fbe1de;
+  border-color: #bb4e43;
+  color: #a33d33;
+  cursor: not-allowed;
+}
+
+.variant-input-mode {
+  flex-wrap: wrap;
+}
 .variant-board-panel .cell.confirmed-mine .icon {
   color: #a56505;
 }
