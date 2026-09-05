@@ -38,15 +38,11 @@ export function ownedRelicPacks(camp: Camp): RelicPack[] {
   return RELIC_PACKS.filter((pack) => camp.upgrades.includes(pack.id)).map((pack) => pack.id)
 }
 
-/** Keep historical reward order exact; only new journals append their captured themes. */
+/** Append owned themes in stable catalog order for deterministic reward offers. */
 export function relicPool(departure: Departure): Relic[] {
   const base: Relic[] = ['lantern', 'lens', 'aegis', 'purse']
   if (departure.archive) base.push('compass', 'salvage')
-  if (departure.rules === 'relics-v1') {
-    for (const pack of RELIC_PACKS)
-      if (departure.packs?.includes(pack.id)) base.push(...pack.relics)
-  }
-  if (departure.encounters === 'tactics-v2' && departure.battleRelics)
-    base.push('tempered-edge', 'layered-armor', 'tactics-hourglass')
+  for (const pack of RELIC_PACKS) if (departure.packs.includes(pack.id)) base.push(...pack.relics)
+  if (departure.battleRelics) base.push('tempered-edge', 'layered-armor', 'tactics-hourglass')
   return base
 }

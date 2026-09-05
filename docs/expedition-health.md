@@ -1,5 +1,7 @@
 # Expedition health and shields
 
+> Historical delivery notes: the [current combat table](tactical-builds.md) and [save policy](save-policy.md) supersede older numeric values and replay-compatibility statements below. Only the current expedition implementation is shipped.
+
 This delivery implements the shared-health workstream in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). It gives ordinary exploration room for a mistake and establishes the resource model for future tactical Boss rooms.
 
 ## Playable rules

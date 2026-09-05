@@ -1,6 +1,6 @@
 # Tactical encounters and expedition builds
 
-New departures use the `tactics-v2` encounter revision. The first two bosses now connect mine deduction, regional objectives and a bounded character build. Older `bastion-v1` and `brood-v1` journals keep their original maps, damage, turns and rewards.
+The current tactical encounters connect mine deduction, regional objectives and a bounded character build. Incompatible saved expeditions return to camp under the [save policy](save-policy.md); historical combat engines are no longer shipped.
 
 ## Design goals
 
@@ -39,7 +39,7 @@ Generation tries 128 seeded candidates, then a separately tested 128-candidate d
 | Ordinary floor exit                                     |         Restores 5 health, up to the maximum |
 | Boss victory                                            |            Full health and one shield charge |
 
-Health is shared across ordinary floors and bosses. Shields remain visible beside it, for example `10/10 (+1)`. There is no damage immunity from stacking armor. Existing healing and revival relics use the new health scale: Field dressing restores 5 health, and Second wind revives with 5. Historical departures retain their old values.
+Health is shared across ordinary floors and bosses. Shields remain visible beside it, for example `10/10 (+1)`. There is no damage immunity from stacking armor. Existing healing and revival relics use the new health scale: Field dressing restores 5 health, and Second wind revives with 5. Rule changes retire incompatible expeditions at the persistence boundary.
 
 The combat panel displays attack, defense, effective turn AP and expandable equipment/training/relic sources. The Duelist edge opening strike grants +4 damage under this revision. Reserve watch adds one AP to the next turn's actual allowance, capped at five. Existing once-per-floor and once-per-run effects keep their claim limits; entering a boss room does not refill tools or a spent profession skill.
 
@@ -85,9 +85,11 @@ Example choices: Steel blade plus Medical kit spends all three points on offense
 
 ## Acceptance and limitations
 
-The automated acceptance player reads public clues and forecasts, derives safe cells and mine flags, and searches a bounded set of legal turn plans. It does not read covered mine values. Tests run baseline victories across all five tiers and both bosses, additional offensive/defensive/mobile builds, generation/connectivity samples, capped purchases and refunds, forecast behavior, reinforcement limits and historical journal recovery. These deterministic scenarios establish correctness and viable routes; they are not measured human win rates.
+The automated acceptance player reads public clues and forecasts, derives safe cells and mine flags, and searches a bounded set of legal turn plans. It does not read covered mine values. Tests run baseline victories across all five tiers and both bosses, additional offensive/defensive/mobile builds, generation/connectivity samples, capped purchases and refunds, forecast behavior, reinforcement limits and current replay and old-journal retirement. These deterministic scenarios establish correctness and viable routes; they are not measured human win rates.
 
 `tests/browser/battles.mjs` checks both live UI flows in English, Chinese and Japanese at 320, 1280 and 3840 pixels. It exercises objective clicks, core priming, boss reward dialogs, camp purchases, departure snapshots, reload recovery and hidden-number protection. Run it after compiling tests and building/serving the game, with an installed Playwright or `PLAYWRIGHT_MODULE` pointing to one. `GAME_URL` can target a preview or Pages release; `BROWSER_CHANNEL` selects an installed supported browser.
+
+`tests/browser/touch.mjs` uses Chromium mobile emulation and native touch input for both bosses in three languages at 320 and 390 pixels. It checks stationary long-press flags, stable row positions, duplicate menu/click suppression, immediate repeat gestures, tap-to-flag mode, swipe cancellation, page scrolling, enlarged-board panning and selected-tool priority. This supplements desktop coverage; it is not a physical iOS or Android device test.
 
 ![Revised queen encounter](screenshots/tactical-brood-desktop.png)
 

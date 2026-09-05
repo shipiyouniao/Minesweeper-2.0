@@ -65,21 +65,21 @@ export function expansionRelicCopy(language: Language, relic: ExpansionRelic): V
       return description(
         language,
         'Field dressing',
-        '行军绷带',
-        '応急包帯',
-        'The first chest collected each floor restores 1 HP, up to maximum health.',
-        '每层收集的第一个宝箱恢复 1 点生命，不超过生命上限。',
-        '各階で最初に回収する宝箱でHPを1回復。最大HPまで。',
+        '野战绷带',
+        '野戦包帯',
+        'First chest each floor restores 5 health.',
+        '每层首个宝箱恢复 5 点生命。',
+        '各階の最初の宝箱で体力5回復。',
       )
     case 'second-wind':
       return description(
         language,
         'Second wind',
-        '余烬护符',
-        '再起のお守り',
-        'Survive one lethal hit with 1 HP. Once per expedition.',
-        '受到致命伤害时保留 1 点生命。每局一次。',
-        '致命的なダメージをHP1で耐える。遠征中1回。',
+        '绝境重生',
+        '再起',
+        'Once per expedition, survive lethal damage with 5 health.',
+        '每局一次，受到致命伤害后以 5 点生命存活。',
+        '遠征中1回、致命傷を体力5で耐える。',
       )
     case 'supply-cache':
       return description(

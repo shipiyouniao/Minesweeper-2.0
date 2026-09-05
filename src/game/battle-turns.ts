@@ -40,7 +40,7 @@ function interact(run: Expedition, index: number): Expedition {
       }
     if (!correctFlags(run, index))
       return { ...injure(run, 5), encounter: { ...encounter, event: 'misfire' } }
-    const mechanisms = (encounter.mechanisms ?? []).map((entry) =>
+    const mechanisms = encounter.mechanisms.map((entry) =>
       entry.index === index ? { ...entry, active: false } : entry,
     )
     const next = inspectArea(run, neighbors(run.game.config, index))
@@ -54,7 +54,7 @@ function interact(run: Expedition, index: number): Expedition {
         ),
         exposedUntil:
           encounter.turn +
-          (mechanisms?.some((entry) => entry.effect === 'extend' && !entry.active) ? 3 : 1),
+          (mechanisms.some((entry) => entry.effect === 'extend' && !entry.active) ? 3 : 1),
         event: 'disabled',
       },
     }
@@ -68,7 +68,7 @@ function interact(run: Expedition, index: number): Expedition {
     encounter: broodIntent({
       ...encounter,
       nests: encounter.nests.filter((nest) => nest !== index),
-      destroyedNests: [...(encounter.destroyedNests ?? []), index],
+      destroyedNests: [...encounter.destroyedNests, index],
       health: Math.max(1, encounter.health - 3),
       event: 'nest-destroyed',
     }),
@@ -88,7 +88,7 @@ function endTurn(run: Expedition): Expedition {
   }
   if (next.phase === 'lost') return advanced
   if (encounter.kind === 'brood') return advanceBrood(advanced)
-  const weakened = encounter.mechanisms?.some((entry) => entry.effect === 'weaken' && !entry.active)
+  const weakened = encounter.mechanisms.some((entry) => entry.effect === 'weaken' && !entry.active)
   const result: Expedition = {
     ...advanced,
     encounter: {

@@ -1,20 +1,16 @@
+import { EXPEDITION_RULES_REVISION } from '../src/persistence/expedition-format.js'
+import { CURRENT_DEPARTURE } from './helpers.js'
 import { defeatEncounter } from './encounter-helpers.js'
 import assert from 'node:assert/strict'
-import { createHash } from 'node:crypto'
+
 import test from 'node:test'
 import {
   VARIANT_TIERS,
   expeditionConfig,
-  expeditionFloors,
   addVariantRecord,
 } from '../src/game/variant-difficulty.js'
 import { actTwin, createTwin } from '../src/game/twin.js'
-import {
-  createExpedition,
-  actExpedition,
-  frontierCells,
-  reachableCells,
-} from '../src/game/expedition.js'
+import { frontierCells, reachableCells } from '../src/game/expedition.js'
 import { generateDungeon } from '../src/game/dungeon-generator.js'
 import { connectedFloor } from '../src/game/dungeon-path.js'
 import { neighbors } from '../src/game/engine.js'
@@ -26,25 +22,6 @@ import { difficultyCopy } from '../src/ui/variant-copy.js'
 import { parseVariantCommand } from '../src/ui/variant-input.js'
 import type { Departure, VariantRecord } from '../src/types/variants.js'
 import { FakeRuntime, MemoryStorage } from './helpers.js'
-
-test('historical generators match the released layout fingerprint', () => {
-  // Captured from e314f814: both opening rules, every old floor density and paired openings.
-  const hash = createHash('sha256')
-  for (let seed = 0; seed < 100; seed++) {
-    for (const mode of ['compact', 'flood'] as const)
-      for (const mines of [15, 17, 19, 21, 23])
-        hash.update(JSON.stringify(generateDungeon(seed, mines, mode)))
-
-    hash.update(
-      JSON.stringify(actTwin(createTwin(seed), { side: 'a', type: 'reveal', index: seed % 81 })),
-    )
-  }
-
-  assert.equal(
-    hash.digest('hex'),
-    '6ebf91e10ef136c23f40b19959f92f832a4f2e2b2487e002c0f8afb5d0a30b2b',
-  )
-})
 
 test('all five tiers produce exact disjoint Twin mines and safe openings, including the last cell', () => {
   assert.equal(VARIANT_TIERS.length, 5)
@@ -69,7 +46,7 @@ test('all five tiers produce exact disjoint Twin mines and safe openings, includ
 test('every tier and floor preserves exact mine counts, connected landmarks and complete blank openings', () => {
   for (const tier of VARIANT_TIERS) {
     const departure: Departure = {
-      rules: 'difficulty-v1',
+      ...CURRENT_DEPARTURE,
       difficulty: tier.id,
       seed: 0,
       profession: 'explorer',
@@ -79,7 +56,7 @@ test('every tier and floor preserves exact mine counts, connected landmarks and 
     for (let floor = 1; floor <= tier.floors; floor++) {
       const config = expeditionConfig(departure, floor)
       for (let seed = 0; seed < 8; seed++) {
-        const layout = generateDungeon(seed, config.mines, 'flood', config.width, config.height)
+        const layout = generateDungeon(seed, config.mines, config.width, config.height)
         assert.equal(layout.game.cells.filter((cell) => cell.mine).length, config.mines)
         const connected = connectedFloor(layout.game, layout.entrance)
         assert.ok(connected.has(layout.exit))
@@ -171,7 +148,7 @@ test('large-board tool targets and Twin final-row actions survive reload; bounds
     }
     assert.equal(decodeTwinSave(JSON.stringify(badTwin)), null)
     const departure = {
-      rules: 'difficulty-v1',
+      ...CURRENT_DEPARTURE,
       difficulty: tier.id,
       seed: 1,
       profession: 'explorer',
@@ -179,66 +156,32 @@ test('large-board tool targets and Twin final-row actions survive reload; bounds
       archive: false,
     }
     const badRun = {
-      version: 3,
+      version: 4,
       camp: session.camp,
       records: [],
-      journal: { departure, actions: [{ type: 'sweep', row: tier.size }] },
+      journal: {
+        rulesRevision: EXPEDITION_RULES_REVISION,
+        returnSupplies: 0,
+        departure,
+        actions: [{ type: 'sweep', row: tier.size }],
+      },
     }
-    assert.equal(decodeExpeditionSave(JSON.stringify(badRun)), null)
+    assert.equal(decodeExpeditionSave(JSON.stringify(badRun))?.journal, null)
     assert.equal(
       decodeExpeditionSave(
         JSON.stringify({
           ...badRun,
-          journal: { departure: { ...departure, difficulty: 'invalid' }, actions: [] },
+          journal: {
+            rulesRevision: EXPEDITION_RULES_REVISION,
+            returnSupplies: 0,
+            departure: { ...departure, difficulty: 'invalid' },
+            actions: [],
+          },
         }),
-      ),
+      )?.journal,
       null,
     )
   }
-})
-
-test('historical journals retain their 9 by 9 layouts and remain distinct from new difficulty rules', () => {
-  for (const rules of ['original', 'scouting'] as const) {
-    const storage = new MemoryStorage()
-    const departure: Departure = {
-      rules,
-      seed: 31,
-      profession: 'explorer',
-      equipment: [],
-      archive: false,
-    }
-    const run = createExpedition(departure)
-    storage.setItem(
-      'minesweeper.variants.v1.expedition',
-      JSON.stringify({
-        version: 3,
-        camp: { supplies: 9, upgrades: [], completed: 0 },
-        journal: { departure, actions: [{ type: 'scan', row: 8 }] },
-        records: [],
-      }),
-    )
-    const session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
-    assert.deepEqual(session.run, actExpedition(run, { type: 'scan', row: 8 }))
-    assert.equal(expeditionFloors(departure), 5)
-    assert.equal(session.run?.game.config.width, 9)
-    session.selectDifficulty('abyss')
-    assert.equal(session.run?.departure.difficulty, undefined)
-  }
-  const storage = new MemoryStorage()
-  storage.setItem(
-    'minesweeper.variants.v1.twin',
-    JSON.stringify({
-      version: 1,
-      seed: 31,
-      actions: [{ side: 'a', type: 'reveal', index: 40 }],
-      records: [],
-      settled: false,
-    }),
-  )
-  assert.deepEqual(
-    new TwinSession(new VariantRepository(storage), new FakeRuntime()).state,
-    actTwin(createTwin(31), { side: 'a', type: 'reveal', index: 40 }),
-  )
 })
 
 test('results retain ten entries per difficulty without evicting other tiers or historical results', () => {

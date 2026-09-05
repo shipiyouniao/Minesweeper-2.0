@@ -24,11 +24,6 @@ export const COMBAT_PURCHASES: readonly CombatPurchase[] = [
   ...COMBAT_TRAINING,
 ]
 
-/** A single revision gates generation, vitality, combat builds and the appended reward pool. */
-export function hasCombatBuild(departure: Departure): boolean {
-  return departure.encounters === 'tactics-v2'
-}
-
 /** Decode concrete equipment identifiers at storage and input boundaries. */
 export function parseCombatEquipment(value: string | null): CombatEquipment | null {
   switch (value) {
@@ -89,19 +84,18 @@ export function ownedCombatTraining(camp: Camp): CombatTraining[] {
 export function startingHealth(departure: Departure): number {
   return (
     10 +
-    Number(departure.training?.includes('vitality-training')) +
+    Number(departure.training.includes('vitality-training')) +
     2 * Number(departure.equipment.includes('medical-kit'))
   )
 }
 
 /** Derive effective stats from the current build; action bonuses never exceed five. */
 export function combatStats(run: Expedition): CombatStats {
-  if (!hasCombatBuild(run.departure)) return { attack: 2, defense: 0, actions: 3 }
   const equipment = run.departure.equipment
   return {
     attack:
       5 +
-      Number(run.departure.training?.includes('weapon-training')) +
+      Number(run.departure.training.includes('weapon-training')) +
       2 * Number(equipment.includes('steel-blade')) +
       3 * Number(run.relics.includes('tempered-edge')),
     defense:
@@ -115,21 +109,14 @@ export function combatStats(run: Expedition): CombatStats {
   }
 }
 
-/** Shields remain discrete charges in the health bar; each new-rules charge absorbs five damage. */
+/** Each shield charge absorbs five damage and remains visible beside the health bar. */
 export function damageExpedition(run: Expedition, amount: number): Vitality {
-  if (!hasCombatBuild(run.departure)) return damageVitality(run, amount)
-  if (!Number.isSafeInteger(amount) || amount <= 0 || run.health === 0) return run
-  const absorbed = Math.min(run.shields, Math.ceil(amount / 5))
-  return {
-    health: Math.max(0, run.health - Math.max(0, amount - absorbed * 5)),
-    maxHealth: run.maxHealth,
-    shields: run.shields - absorbed,
-  }
+  return damageVitality(run, amount)
 }
 
-/** Existing one-unit recovery effects retain their relative strength on the new health scale. */
+/** Convert one recovery unit into five health, up to the explorer's maximum. */
 export function healExpedition(run: Expedition, units: number): Vitality {
-  return healVitality(run, units * (hasCombatBuild(run.departure) ? 5 : 1))
+  return healVitality(run, units * 5)
 }
 
 /** Armor mitigates enemy attacks, while every unbraced hit retains at least one damage. */

@@ -1,7 +1,5 @@
 import { battleHealthCopy } from './combat-build-copy.js'
-import { hasCombatBuild } from '../game/combat-build.js'
 import { cueForVitality } from '../audio/cues.js'
-import { hasExpeditionHealth } from '../game/expedition-rules.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
@@ -233,11 +231,7 @@ export class VariantApp implements VariantInputActions {
         if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
           this.view.showInformation(
             translations[this.language].how,
-            tacticalCopy(
-              this.language,
-              this.session.run.encounter?.kind,
-              hasCombatBuild(this.session.run.departure),
-            )
+            tacticalCopy(this.language, this.session.run.encounter?.kind)
               .help.map((paragraph) => `<p>${paragraph}</p>`)
               .join(''),
           )
@@ -245,7 +239,7 @@ export class VariantApp implements VariantInputActions {
         }
         this.view.showInformation(
           translations[this.language].how,
-          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${this.session.run && !hasExpeditionHealth(this.session.run.departure) ? t.legacyHealth : this.session.run && !hasCombatBuild(this.session.run.departure) ? t.healthHelp : battleHealthCopy(this.language)}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
+          `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p><p>${t.controls}</p>${this.session instanceof ExpeditionSession ? `<p>${battleHealthCopy(this.language)}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
         )
         return
       }
@@ -437,6 +431,7 @@ export class VariantApp implements VariantInputActions {
       this.paused,
       this.session.atMoveLimit,
       this.repository.migrated,
+      this.repository.returnedSupplies,
     )
 
     if (this.session instanceof ExpeditionSession) {

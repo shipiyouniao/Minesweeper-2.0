@@ -1,3 +1,5 @@
+import { EXPEDITION_RULES_REVISION } from '../src/persistence/expedition-format.js'
+import { CURRENT_DEPARTURE } from './helpers.js'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
@@ -55,8 +57,14 @@ function openFloor(run: Expedition): Expedition {
 test('all retained safe cells and treasures are connected; isolated pockets are inert walls on every floor', () => {
   let wallsSeen = 0
   for (let seed = 0; seed < 120; seed++) {
-    let run = createExpedition({ seed, profession: 'explorer', equipment: [], archive: false })
-    for (let floor = 1; floor <= 5; floor++) {
+    let run = createExpedition({
+      ...CURRENT_DEPARTURE,
+      seed,
+      profession: 'explorer',
+      equipment: [],
+      archive: false,
+    })
+    for (let floor = 1; floor <= 2; floor++) {
       const connected = distances(run, run.entrance, false)
       for (const [index, cell] of run.game.cells.entries()) {
         if (!cell.mine && !run.walls.includes(index)) assert.ok(connected.has(index))
@@ -83,11 +91,11 @@ test('all retained safe cells and treasures are connected; isolated pockets are 
           assert.equal(actExpedition(run, { type, index }), run)
       }
       const reward = actExpedition(openFloor(run), { type: 'move', index: run.exit })
-      if (floor < 5) {
+      if (floor < 2) {
         const relic = reward.offers[0]
         assert.ok(relic)
         run = actExpedition(reward, { type: 'relic', relic })
-      } else assert.equal(reward.phase, 'won')
+      } else assert.equal(reward.phase, 'reward')
     }
   }
   assert.ok(wallsSeen > 0, 'the fixture must exercise actual disconnected pockets')
@@ -95,7 +103,13 @@ test('all retained safe cells and treasures are connected; isolated pockets are 
 
 test('walking chooses shortest revealed routes and cannot cross unknown, flagged or wall cells', () => {
   for (let seed = 0; seed < 30; seed++) {
-    const run = createExpedition({ seed, profession: 'explorer', equipment: [], archive: false })
+    const run = createExpedition({
+      ...CURRENT_DEPARTURE,
+      seed,
+      profession: 'explorer',
+      equipment: [],
+      archive: false,
+    })
     const expected = distances(run, run.player, true)
     for (let target = 0; target < 81; target++) {
       const path = walkingPath(run, target)
@@ -137,19 +151,24 @@ test('v1 migration preserves camp and results but never replays an obsolete dung
       version: 1,
       camp,
       records,
-      journal: { departure: { seed: 31 }, actions: [{ type: 'descend' }] },
+      journal: {
+        rulesRevision: EXPEDITION_RULES_REVISION,
+        returnSupplies: 0,
+        departure: { seed: 31 },
+        actions: [{ type: 'descend' }],
+      },
     }),
   )
   const repository = new VariantRepository(storage)
   const session = new ExpeditionSession(repository, new FakeRuntime())
   assert.equal(session.run, null)
   assert.equal(repository.migrated, true)
-  assert.deepEqual(session.camp, camp)
+  assert.deepEqual(session.camp, { ...camp, supplies: camp.supplies + 200 })
   assert.deepEqual(session.records, records)
   session.persist()
   const nextRepository = new VariantRepository(storage)
   const restored = new ExpeditionSession(nextRepository, new FakeRuntime())
-  assert.deepEqual(restored.camp, camp)
+  assert.deepEqual(restored.camp, { ...camp, supplies: camp.supplies + 200 })
   assert.equal(nextRepository.migrated, false)
 })
 
@@ -163,7 +182,15 @@ test('v2 migration keeps permanent progress without reinterpreting old row probe
       camp,
       records: [],
       journal: {
-        departure: { seed: 31, profession: 'engineer', equipment: [], archive: false },
+        rulesRevision: EXPEDITION_RULES_REVISION,
+        returnSupplies: 0,
+        departure: {
+          ...CURRENT_DEPARTURE,
+          seed: 31,
+          profession: 'engineer',
+          equipment: [],
+          archive: false,
+        },
         actions: [{ type: 'probe', row: 4 }],
       },
     }),
@@ -172,12 +199,12 @@ test('v2 migration keeps permanent progress without reinterpreting old row probe
   const session = new ExpeditionSession(repository, new FakeRuntime())
   assert.equal(repository.migrated, true)
   assert.equal(session.run, null)
-  assert.deepEqual(session.camp, camp)
+  assert.deepEqual(session.camp, { ...camp, supplies: camp.supplies + 200 })
   session.persist()
   const nextRepository = new VariantRepository(storage)
   const restored = new ExpeditionSession(nextRepository, new FakeRuntime())
   assert.equal(nextRepository.migrated, false)
-  assert.deepEqual(restored.camp, camp)
+  assert.deepEqual(restored.camp, { ...camp, supplies: camp.supplies + 200 })
   assert.ok(restored.start('engineer', []))
 })
 

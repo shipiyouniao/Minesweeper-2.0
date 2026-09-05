@@ -1,3 +1,4 @@
+import { EXPEDITION_RULES_REVISION } from '../persistence/expedition-format.js'
 import { addVariantRecord } from '../game/variant-difficulty.js'
 import { ownedRelicPacks } from '../game/relic-packs.js'
 import { ownedCombatTraining } from '../game/combat-build.js'
@@ -37,21 +38,21 @@ export class ExpeditionSession {
     this.repository = repository
     this.runtime = runtime
     this.save = repository.expedition() ?? {
-      version: 3,
+      version: 4,
       camp: EMPTY_CAMP,
       journal: null,
       records: [],
     }
+    // Commit the camp credit and removal of the obsolete journal in one storage write.
+    if (repository.migrated || repository.recovered) this.persist()
     const journal = this.save.journal
     if (!journal) return
 
     if (
       allowedDeparture(this.save.camp, journal.departure.profession, journal.departure.equipment) &&
       journal.departure.archive === this.save.camp.upgrades.includes('archive') &&
-      (journal.departure.packs ?? []).every((pack) => this.save.camp.upgrades.includes(pack)) &&
-      (journal.departure.training ?? []).every((training) =>
-        this.save.camp.upgrades.includes(training),
-      ) &&
+      journal.departure.packs.every((pack) => this.save.camp.upgrades.includes(pack)) &&
+      journal.departure.training.every((training) => this.save.camp.upgrades.includes(training)) &&
       (!journal.departure.battleRelics || this.save.camp.upgrades.includes('battle-manual'))
     ) {
       let run = createExpedition(journal.departure)
@@ -71,6 +72,7 @@ export class ExpeditionSession {
     if (!this.current) {
       repository.recovered = true
       this.save = { ...this.save, journal: null }
+      this.persist()
     }
   }
 
@@ -115,12 +117,8 @@ export class ExpeditionSession {
   ): boolean {
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
     const departure: Departure = {
-      rules: 'relics-v1',
-      professions: 'skills-v1',
-      encounters: 'tactics-v2',
       training: ownedCombatTraining(this.camp),
       battleRelics: this.camp.upgrades.includes('battle-manual'),
-      rewards: 'difficulty-v1',
       packs: ownedRelicPacks(this.camp),
       difficulty,
       seed: this.runtime.randomSeed(),
@@ -129,7 +127,16 @@ export class ExpeditionSession {
       archive: this.camp.upgrades.includes('archive'),
     }
     this.current = createExpedition(departure)
-    this.save = { ...this.save, difficulty, journal: { departure, actions: [] } }
+    this.save = {
+      ...this.save,
+      difficulty,
+      journal: {
+        departure,
+        actions: [],
+        rulesRevision: EXPEDITION_RULES_REVISION,
+        returnSupplies: 0,
+      },
+    }
     this.persist()
     return true
   }
@@ -147,12 +154,20 @@ export class ExpeditionSession {
     const next = actExpedition(run, action)
     if (next === run) return false
     this.current = next
-    this.save = { ...this.save, journal: { ...journal, actions: [...journal.actions, action] } }
+    this.save = {
+      ...this.save,
+      journal: {
+        ...journal,
+        actions: [...journal.actions, action],
+        // A future release can bank extraction without retaining this release's game engine.
+        returnSupplies: expeditionEarnings({ ...next, phase: 'retreated' }),
+      },
+    }
 
     if (next.phase === 'lost' || next.phase === 'won' || next.phase === 'retreated') {
       const earned = expeditionEarnings(next)
       const record: VariantRecord = {
-        ...(next.departure.difficulty ? { difficulty: next.departure.difficulty } : {}),
+        difficulty: next.departure.difficulty,
         date: this.runtime.date(),
         outcome: next.phase,
         steps: next.steps,
@@ -160,12 +175,12 @@ export class ExpeditionSession {
         earned,
       }
       this.save = {
-        version: 3,
+        version: 4,
         difficulty: this.difficulty,
         journal: null,
         camp: {
           ...this.camp,
-          supplies: this.camp.supplies + earned,
+          supplies: Math.min(Number.MAX_SAFE_INTEGER, this.camp.supplies + earned),
           completed: this.camp.completed + Number(next.phase === 'won'),
         },
         records: addVariantRecord(this.save.records, record),

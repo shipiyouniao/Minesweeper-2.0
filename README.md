@@ -12,7 +12,7 @@ A playable Minesweeper game and a practical testbed for the **TypeScript 7 nativ
 
 [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [License](LICENSE)
 
-**Tactical encounters:** [revised Bastion Guardian and Brood Queen](docs/tactical-builds.md) combine fully deducible minefields with regional controls, timed core openings and permanently destroyable nests. Attack, defense and action-point builds connect six equipment licenses, three combat relics and two capped, one-time trainings. The catalog contains 24 distinct gameplay purchases plus those two trainings. Ordinary floors retain free exploration, and historical journals retain their original rules.
+**Tactical encounters:** [revised Bastion Guardian and Brood Queen](docs/tactical-builds.md) combine fully deducible minefields with regional controls, timed core openings and permanently destroyable nests. Attack, defense and action-point builds connect six equipment licenses, three combat relics and two capped, one-time trainings. The catalog contains 24 distinct gameplay purchases plus those two trainings. Ordinary floors retain free exploration. Incompatible saved expeditions [return to camp](docs/save-policy.md), preserving permanent progress.
 
 ## Why this project exists
 

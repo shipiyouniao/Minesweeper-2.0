@@ -1,3 +1,5 @@
+import { EXPEDITION_RULES_REVISION } from '../src/persistence/expedition-format.js'
+import { CURRENT_DEPARTURE } from './helpers.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
@@ -33,15 +35,12 @@ import type { VariantDifficulty } from '../src/types/variant-difficulty.js'
 import type { EncounterKind } from '../src/types/tactical.js'
 
 const departure: Departure = {
+  ...CURRENT_DEPARTURE,
   seed: 43,
   profession: 'explorer',
   difficulty: 'standard',
   equipment: [],
   archive: false,
-  rules: 'relics-v1',
-  professions: 'skills-v1',
-  encounters: 'tactics-v2',
-  rewards: 'difficulty-v1',
   packs: [],
   training: [],
   battleRelics: false,
@@ -285,12 +284,14 @@ test('the catalog contains 24 distinct gameplay choices plus two one-time traini
   }
 })
 
-test('training and combat licenses are snapshotted and validated without rewriting historical journals', () => {
+test('training and combat licenses are snapshotted and validated under the current rules', () => {
   const camp = { supplies: 42, completed: 0, upgrades: [...UPGRADES] }
   const save = {
-    version: 3,
+    version: 4,
     camp,
     journal: {
+      rulesRevision: EXPEDITION_RULES_REVISION,
+      returnSupplies: 0,
       departure: { ...departure, training: COMBAT_TRAINING, battleRelics: true },
       actions: [],
     },
@@ -302,20 +303,16 @@ test('training and combat licenses are snapshotted and validated without rewriti
       decodeExpeditionSave(
         JSON.stringify({
           ...save,
-          journal: { departure: { ...save.journal.departure, training }, actions: [] },
+          journal: {
+            rulesRevision: EXPEDITION_RULES_REVISION,
+            returnSupplies: 0,
+            departure: { ...save.journal.departure, training },
+            actions: [],
+          },
         }),
-      ),
+      )?.journal,
       null,
     )
-  assert.equal(
-    decodeExpeditionSave(
-      JSON.stringify({
-        ...save,
-        journal: { departure: { ...save.journal.departure, encounters: 'brood-v1' }, actions: [] },
-      }),
-    ),
-    null,
-  )
   const storage = new MemoryStorage()
   storage.setItem(
     'minesweeper.variants.v1.expedition',

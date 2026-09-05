@@ -23,13 +23,9 @@ export function difficultyRewardPercent(difficulty: VariantDifficulty): number {
   }
 }
 
-/** A captured revision keeps existing journals on their original settlement rules. */
+/** Apply the selected difficulty to both normal settlement and update extraction. */
 export function expeditionRewardPercent(departure: Departure): number {
-  return departure.rules === 'relics-v1' &&
-    departure.rewards === 'difficulty-v1' &&
-    departure.difficulty
-    ? difficultyRewardPercent(departure.difficulty)
-    : 100
+  return difficultyRewardPercent(departure.difficulty)
 }
 
 /** Bank whole supplies once, after applying the recorded difficulty rate. */

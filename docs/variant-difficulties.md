@@ -1,5 +1,7 @@
 # Variant difficulty rules
 
+> Historical delivery notes: the [current combat table](tactical-builds.md) and [save policy](save-policy.md) supersede older numeric values and replay-compatibility statements below. Only the current expedition implementation is shipped.
+
 Twin and Expedition each offer five difficulty tiers. Choose a tier at camp before an expedition, or above the Twin boards before starting a new pair. Changing a running Twin pair requires confirmation; an active expedition keeps its departure rules.
 
 | Tier     | Twin size, each | Mines per Twin board | Expedition size | Floors | Expedition mine density, first to last |

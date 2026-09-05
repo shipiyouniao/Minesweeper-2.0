@@ -48,21 +48,10 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
-  /** Encounter rules are opt-in snapshots; historical journals keep exploration-only exits. */
-  readonly encounters?: 'bastion-v1' | 'brood-v1' | 'tactics-v2'
-  /** Combat training and relic licenses are captured only by tactics-v2 departures. */
-  readonly training?: readonly CombatTraining[]
-  readonly battleRelics?: boolean
-  /** Missing career revision preserves historical tools, offers and action availability. */
-  readonly professions?: 'skills-v1'
-  /** Missing reward revision preserves historical settlement amounts. */
-  readonly rewards?: 'difficulty-v1'
-  /** Persist generation and relic rules; omitted direct inputs retain the 9 × 9 scouting layout. */
-  readonly rules?: 'original' | 'scouting' | 'difficulty-v1' | 'health-v1' | 'relics-v1'
-  /** Only relics-v1 snapshots contain purchased packs; older reward pools remain unchanged. */
-  readonly packs?: readonly RelicPack[]
-  /** Difficulty and health journals require this field; historical departures omit it. */
-  readonly difficulty?: VariantDifficulty
+  readonly training: readonly CombatTraining[]
+  readonly battleRelics: boolean
+  readonly packs: readonly RelicPack[]
+  readonly difficulty: VariantDifficulty
   readonly seed: number
   readonly profession: Profession
   readonly equipment: readonly Equipment[]
@@ -107,8 +96,6 @@ export interface Expedition extends Vitality {
 export type ExpeditionAction =
   | { readonly type: 'reveal' | 'flag' | 'move' | 'probe' | 'interact'; readonly index: number }
   | { readonly type: 'sweep'; readonly row: number }
-  /** Historical count-only intent retained for existing journals; the UI emits sweep. */
-  | { readonly type: 'scan'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
   | { readonly type: 'retreat' | 'descend' | 'skill' | 'attack' | 'brace' | 'end-turn' }
 
@@ -142,6 +129,9 @@ export interface VariantRecord {
 
 /** Replay envelopes never trust serialized mines, clues, charges, or rewards. */
 export interface ExpeditionJournal {
+  readonly rulesRevision: number
+  /** Extraction value only; never used to reconstruct an active run's resources. */
+  readonly returnSupplies: number
   readonly departure: Departure
   readonly actions: readonly ExpeditionAction[]
 }
@@ -149,7 +139,7 @@ export interface ExpeditionJournal {
 /** One atomic value prevents refresh from awarding a settled run twice. */
 export interface ExpeditionSave {
   readonly difficulty?: VariantDifficulty
-  readonly version: 3
+  readonly version: 4
   readonly camp: Camp
   readonly journal: ExpeditionJournal | null
   readonly records: readonly VariantRecord[]
@@ -179,4 +169,12 @@ export type VariantSave = ExpeditionSave | TwinSave
 export interface MountedGame {
   /** Persist current progress and release browser resources. */
   dispose(): void
+}
+
+/** Storage normalization reports recovery separately from durable gameplay state. */
+export interface ExpeditionLoad {
+  readonly save: ExpeditionSave
+  readonly migrated: boolean
+  readonly recovered: boolean
+  readonly returnedSupplies: number | null
 }

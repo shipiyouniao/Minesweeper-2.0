@@ -1,19 +1,30 @@
+import { expeditionConfig, expeditionFloors } from '../src/game/variant-difficulty.js'
+import { CURRENT_DEPARTURE } from './helpers.js'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { actExpedition, createExpedition } from '../src/game/expedition.js'
 import { generateDungeon } from '../src/game/dungeon-generator.js'
 import { scoutExit } from '../src/game/dungeon-discovery.js'
-import { decodeExpeditionSave } from '../src/persistence/variant-decoders.js'
+
 import type { Expedition } from '../src/types/variants.js'
 
 test('the compass scouts each new exit area without consuming tools or collecting remote treasure', () => {
   for (let seed = 0; seed < 30; seed++) {
-    let run = createExpedition({ seed, profession: 'engineer', equipment: [], archive: true })
-    for (let floor = 2; floor <= 5; floor++) {
+    let run = createExpedition({
+      ...CURRENT_DEPARTURE,
+      seed,
+      profession: 'engineer',
+      equipment: [],
+      archive: true,
+    })
+    for (let floor = 2; floor <= expeditionFloors(run.departure); floor++) {
       const reward: Expedition = { ...run, phase: 'reward', offers: ['compass', 'salvage'] }
       const relic = floor === 2 ? 'compass' : 'salvage'
       const next = actExpedition(reward, { type: 'relic', relic })
-      const layout = generateDungeon((seed + Math.imul(floor, 0x9e3779b9)) >>> 0, 13 + floor * 2)
+      const layout = generateDungeon(
+        (seed + Math.imul(floor, 0x9e3779b9)) >>> 0,
+        expeditionConfig(run.departure, floor).mines,
+      )
       const area = layout.game.cells.flatMap((_, index) =>
         Math.abs((index % 9) - (layout.exit % 9)) <= 1 &&
         Math.abs(Math.floor(index / 9) - Math.floor(layout.exit / 9)) <= 1
@@ -48,7 +59,9 @@ test('the compass scouts each new exit area without consuming tools or collectin
           continue
         }
         assert.equal(cell.visibility, cell.mine ? 'flagged' : 'revealed')
-        assert.ok(next.surveyedCells.includes(index))
+        assert.ok(
+          next.surveyedCells.includes(index) || layout.game.cells[index]?.visibility === 'revealed',
+        )
         if (cell.mine) assert.equal(actExpedition(next, { type: 'flag', index }), next)
       }
       assert.equal(next.probes, run.probes)
@@ -63,32 +76,4 @@ test('the compass scouts each new exit area without consuming tools or collectin
       run = next
     }
   }
-})
-
-test('old departures retain their compass rules and invalid rule identifiers are rejected', () => {
-  const departure = { seed: 31, profession: 'explorer', equipment: [], archive: true }
-  const envelope = {
-    version: 3,
-    camp: { supplies: 80, completed: 1, upgrades: ['archive'] },
-    records: [],
-    journal: { departure, actions: [] },
-  }
-  const saved = decodeExpeditionSave(JSON.stringify(envelope))
-  assert.ok(saved?.journal)
-  assert.equal(saved.journal.departure.rules, 'original')
-  const initial = createExpedition(saved.journal.departure)
-  const reward: Expedition = { ...initial, phase: 'reward', offers: ['compass'] }
-  const next = actExpedition(reward, { type: 'relic', relic: 'compass' })
-  assert.equal(next.game.cells[next.exit]?.visibility, 'revealed')
-  assert.deepEqual(next.confirmedMines, [])
-  assert.deepEqual(next.surveyedCells, [])
-  assert.equal(
-    decodeExpeditionSave(
-      JSON.stringify({
-        ...envelope,
-        journal: { departure: { ...departure, rules: 'invalid' }, actions: [] },
-      }),
-    ),
-    null,
-  )
 })

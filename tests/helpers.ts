@@ -1,5 +1,7 @@
 import type { SessionRuntime } from '../src/types/session.js'
 import type { StorageLike } from '../src/types/storage.js'
+import type { Departure } from '../src/types/variants.js'
+
 /** In-memory storage shared by repository and session tests. */
 export class MemoryStorage implements StorageLike {
   readonly data = new Map<string, string>()
@@ -44,4 +46,16 @@ export class FakeRuntime implements SessionRuntime {
   date(): string {
     return '2026-09-03T00:00:00.000Z'
   }
+}
+
+/** Complete current-rule fixture; individual tests override only their relevant choices. */
+export const CURRENT_DEPARTURE: Departure = {
+  seed: 31,
+  profession: 'explorer',
+  difficulty: 'relaxed',
+  equipment: [],
+  archive: false,
+  training: [],
+  battleRelics: false,
+  packs: [],
 }

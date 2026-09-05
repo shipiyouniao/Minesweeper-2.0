@@ -9,7 +9,7 @@ export interface BattleLayout {
   readonly objectives: readonly number[]
 }
 
-/** New departures opt into this finite catalog; historical journals keep their original stats. */
+/** Optional combat equipment shares the expedition's bounded departure budget. */
 export type CombatEquipment =
   'steel-blade' | 'plated-vest' | 'field-boots' | 'medical-kit' | 'focus-lens' | 'clearing-hook'
 

@@ -28,12 +28,7 @@ export function professionResources(profession: Profession): ProfessionResources
   }
 }
 
-/** Keep historical journals on their original three-role behavior. */
-export function hasProfessionSkills(departure: Departure): boolean {
-  return departure.rules === 'relics-v1' && departure.professions === 'skills-v1'
-}
-
-/** Extra relic choice belongs to the Archaeologist's versioned career, not the entire pool. */
+/** Extra relic choice belongs to the Archaeologist's career, not the entire pool. */
 export function professionOfferCount(departure: Departure): number {
-  return hasProfessionSkills(departure) && departure.profession === 'archaeologist' ? 4 : 3
+  return departure.profession === 'archaeologist' ? 4 : 3
 }

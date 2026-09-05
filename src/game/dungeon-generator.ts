@@ -2,37 +2,22 @@ import { neighbors, randomIndex } from './engine.js'
 import { adjacentSteps, placedBoard, shuffled } from './variant-board.js'
 import { connectedFloor } from './dungeon-path.js'
 import type { Config, Game } from '../types/game.js'
-import type { DungeonLayout, DungeonOpening } from '../types/dungeon-generation.js'
+import type { DungeonLayout } from '../types/dungeon-generation.js'
 
 /** Generate a varied entrance, naturally expanded blank region and distant reachable stairs. */
-export function generateDungeon(
-  seed: number,
-  mines: number,
-  mode: DungeonOpening = 'flood',
-  width = 9,
-  height = 9,
-): DungeonLayout {
+export function generateDungeon(seed: number, mines: number, width = 9, height = 9): DungeonLayout {
   const config: Config = { width, height, mines }
   const next = randomIndex(seed ^ 0x37a1)
   const entrance = (1 + next(height - 2)) * width + 1 + next(width - 2)
   const indices = Array.from({ length: config.width * config.height }, (_, index) => index)
   const safe = new Set([entrance, ...neighbors(config, entrance)])
-  const diagonal = next(2) === 0 ? [-width - 1, width + 1] : [-width + 1, width - 1]
-  const opening = new Set([
-    entrance,
-    entrance - width,
-    entrance + width,
-    entrance - 1,
-    entrance + 1,
-    ...diagonal.map((offset) => entrance + offset),
-  ])
   const eligible = indices.filter((index) => !safe.has(index))
 
   for (let attempt = 0; attempt < 128; attempt++) {
     const selected = new Set(
       shuffled(eligible, seed + Math.imul(attempt + 1, 0x45d9f3b)).slice(0, mines),
     )
-    const game = openingBoard(config, selected, seed, entrance, opening, mode)
+    const game = openingBoard(config, selected, seed, entrance)
     const floor = connectedFloor(game, entrance)
     const walls = new Set(indices.filter((index) => !selected.has(index) && !floor.has(index)))
     const accessible = [...selected].every((index) =>
@@ -52,28 +37,17 @@ export function generateDungeon(
     }
   }
 
-  return fallbackLayout(config, seed, entrance, opening, safe, mode)
+  return fallbackLayout(config, seed, entrance, safe)
 }
 
-/** Use standard flood fill, retaining the historical seven-cell opening only for old journals. */
+/** Expand every safe zero connected to the entrance through ordinary flood fill. */
 function openingBoard(
   config: Config,
   mines: ReadonlySet<number>,
   seed: number,
   entrance: number,
-  opening: ReadonlySet<number>,
-  mode: DungeonOpening,
 ): Game {
-  const game = placedBoard(config, mines, seed, entrance)
-  if (mode === 'flood') return { ...game, phase: 'playing' }
-  return {
-    ...game,
-    phase: 'playing',
-    cells: game.cells.map((cell, index) => ({
-      ...cell,
-      visibility: opening.has(index) ? 'revealed' : 'hidden',
-    })),
-  }
+  return { ...placedBoard(config, mines, seed, entrance), phase: 'playing' }
 }
 
 /** Validate an opening using only public clues and elementary safe/mine deductions. */
@@ -148,9 +122,7 @@ function fallbackLayout(
   config: Config,
   seed: number,
   entrance: number,
-  opening: ReadonlySet<number>,
   safe: ReadonlySet<number>,
-  mode: DungeonOpening,
 ): DungeonLayout {
   const { width, height } = config
   const x = entrance % width
@@ -169,7 +141,7 @@ function fallbackLayout(
     ...guaranteed,
     ...shuffled(eligible, seed ^ 0xc011).slice(0, config.mines - 3),
   ])
-  const game = openingBoard(config, selected, seed, entrance, opening, mode)
+  const game = openingBoard(config, selected, seed, entrance)
 
   // The clear spine joins all safe rows. After the center's two safe corners,
   // the facing clue has exactly three unknown neighbors, all guaranteed mines.

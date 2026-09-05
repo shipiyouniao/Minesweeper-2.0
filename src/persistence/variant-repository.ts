@@ -1,7 +1,6 @@
 import type { ExpeditionSave, TwinSave, VariantSave } from '../types/variants.js'
 import type { StorageLike } from '../types/storage.js'
-import { decodeExpeditionSave, decodeTwinSave } from './variant-decoders.js'
-import { JsonObjectReader, parseJson } from './json-reader.js'
+import { loadExpeditionSave, decodeTwinSave } from './variant-decoders.js'
 
 /** Owns mode-specific storage, containing browser quota/privacy failures at one boundary. */
 export class VariantRepository {
@@ -9,6 +8,7 @@ export class VariantRepository {
   available = true
   recovered = false
   migrated = false
+  returnedSupplies: number | null = null
 
   /** Accept the same storage port used by classic mode and test adapters. */
   constructor(storage: StorageLike) {
@@ -18,10 +18,11 @@ export class VariantRepository {
   /** Load the camp and expedition envelope without accessing any classic slot. */
   expedition(): ExpeditionSave | null {
     const text = this.read('expedition')
-    const save = decodeExpeditionSave(text)
-    this.migrated = save !== null && JsonObjectReader.from(parseJson(text))?.number('version') !== 3
-    if (text !== null && !save) this.recovered = true
-    return save
+    const loaded = loadExpeditionSave(text)
+    this.migrated = loaded?.migrated ?? false
+    this.returnedSupplies = loaded?.returnedSupplies ?? null
+    this.recovered = loaded?.recovered ?? text !== null
+    return loaded?.save ?? null
   }
 
   /** Load the paired-board envelope using its own schema decoder. */

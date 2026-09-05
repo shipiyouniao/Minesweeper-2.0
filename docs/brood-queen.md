@@ -1,6 +1,6 @@
 # Brood Queen: routes, eggs and interception
 
-This document records the historical first encounter revision. New departures use the [revised tactical encounters and build rules](tactical-builds.md); saved older expeditions retain the behavior below.
+This document records the historical first encounter revision. The implementation below has been removed. Current play uses the [tactical encounters and build rules](tactical-builds.md); incompatible saved expeditions [return to camp](save-policy.md).
 
 The second encounter in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1) is a route-management battle. The queen has no shield pylons. Players can strike her immediately from an adjacent square, but removable webs and advancing hatchlings compete for movement and action points. Ordinary floors remain untimed exploration.
 

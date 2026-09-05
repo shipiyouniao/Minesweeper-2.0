@@ -105,10 +105,10 @@ export function journeyRelicCopy(language: Language, relic: JourneyRelic): Varia
         language,
         'Breach sigil',
         '破阵印记',
-        '破陣の印',
-        'Your first successful pylon calibration each floor returns 1 AP. AP cap 4.',
-        '每层首次成功关闭护盾塔后返还 1 点行动点，行动点上限 4。',
-        '各階で初めて防護塔を停止すると行動力+1。上限4。',
+        '突破の印',
+        'First pylon disabled each floor refunds 1 AP, up to 5.',
+        '每层首次关闭机关返还 1 点行动力，总上限 5。',
+        '各階最初の装置停止で行動力1回復、上限5。',
       )
     case 'duelist-edge':
       return localized(
@@ -116,19 +116,19 @@ export function journeyRelicCopy(language: Language, relic: JourneyRelic): Varia
         'Duelist edge',
         '决斗锋刃',
         '決闘の刃',
-        'Your first strike each floor deals 2 extra damage. Active pylons still block attacks.',
-        '每层首次攻击额外造成 2 点伤害。护盾塔未全部关闭时仍无法攻击。',
-        '各階で最初の攻撃はダメージ+2。防護塔が残っている間は攻撃できない。',
+        'First strike each floor: +4 damage.',
+        '每层首次攻击伤害 +4。',
+        '各階の初撃ダメージ+4。',
       )
     case 'reserve-watch':
       return localized(
         language,
         'Reserve watch',
-        '储时怀表',
-        '蓄時の懐中時計',
-        'End a combat turn with unused AP to start the next with 4 AP. Once per floor.',
-        '战斗中，保留行动点结束回合后，下回合以 4 点行动点开始。每层一次。',
-        '戦闘で行動力を残してターンを終えると、次は行動力4で開始。各階1回。',
+        '储备怀表',
+        '予備の懐中時計',
+        'Once per floor, end a turn with at least 1 AP left to add 1 AP next turn, up to 5.',
+        '每层一次，结束回合时保留至少 1 点行动力，下一回合额外 +1，总上限 5。',
+        '各階1回、行動力を1以上残して終了すると次のターン+1、上限5。',
       )
     case 'second-hand':
       return localized(

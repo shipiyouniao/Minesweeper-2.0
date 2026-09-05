@@ -1,9 +1,8 @@
 import type { Config } from '../types/game.js'
-import { hasExpeditionHealth } from './expedition-rules.js'
 import type { Departure, VariantRecord } from '../types/variants.js'
 import type { VariantDifficulty, VariantTier } from '../types/variant-difficulty.js'
 
-/** Freeze these values for difficulty-v1 journals; balance changes need a new rules revision. */
+/** Shared tier table; replay-affecting edits require an expedition rules revision bump. */
 export const VARIANT_TIERS: readonly VariantTier[] = [
   {
     id: 'relaxed',
@@ -74,22 +73,13 @@ export function twinConfig(difficulty?: VariantDifficulty): Config {
   return difficulty ? variantTier(difficulty).twin : { width: 9, height: 9, mines: 12 }
 }
 
-/** Old expedition rules always keep five floors, even if a caller supplies a tier. */
+/** Read expedition length from the selected tier. */
 export function expeditionFloors(departure: Departure): number {
-  return (departure.rules === 'difficulty-v1' || hasExpeditionHealth(departure)) &&
-    departure.difficulty
-    ? variantTier(departure.difficulty).floors
-    : 5
+  return variantTier(departure.difficulty).floors
 }
 
-/** Interpolate mine density across the selected run while preserving old exact layouts. */
+/** Interpolate mine density across the selected expedition. */
 export function expeditionConfig(departure: Departure, floor: number): Config {
-  if (
-    (departure.rules !== 'difficulty-v1' && !hasExpeditionHealth(departure)) ||
-    !departure.difficulty
-  )
-    return { width: 9, height: 9, mines: 13 + floor * 2 }
-
   const tier = variantTier(departure.difficulty)
   const progress = (floor - 1) / (tier.floors - 1)
   const density = tier.firstDensity + (tier.lastDensity - tier.firstDensity) * progress

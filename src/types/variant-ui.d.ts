@@ -67,6 +67,15 @@ export interface VariantCellTarget {
   readonly index: number
 }
 
+/** A touch hold keeps its original cell even if the browser later retargets an event. */
+export interface VariantCellHold {
+  readonly pointerId: number
+  readonly target: VariantCellTarget
+  readonly originX: number
+  readonly originY: number
+  cancelled: boolean
+}
+
 /** Localized labels shared by the two special-mode screens. */
 export interface VariantMessages {
   readonly difficulty: string
@@ -100,9 +109,6 @@ export interface VariantMessages {
   readonly probes: string
   readonly scans: string
   readonly health: string
-  readonly healthHint: string
-  readonly healthHelp: string
-  readonly legacyHealth: string
   readonly shields: string
   readonly probe: string
   readonly scan: string

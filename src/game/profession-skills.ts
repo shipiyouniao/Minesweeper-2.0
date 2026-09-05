@@ -1,7 +1,6 @@
 import { inspectArea } from './dungeon-discovery.js'
 import { neighbors } from './engine.js'
 import { revealDungeon } from './dungeon-reveal.js'
-import { hasProfessionSkills } from './professions.js'
 import type { Expedition } from '../types/variants.js'
 import type { SkillAvailability } from '../types/profession.js'
 
@@ -69,7 +68,6 @@ function hasSkillInformation(run: Expedition): boolean {
 
 /** Explain the same eligibility checks to both the rules and the localized control. */
 export function professionSkillAvailability(run: Expedition): SkillAvailability {
-  if (!hasProfessionSkills(run.departure)) return 'legacy'
   if (run.phase !== 'exploring' && run.phase !== 'boss') return 'inactive'
   if (run.skillUsed) return 'used'
 

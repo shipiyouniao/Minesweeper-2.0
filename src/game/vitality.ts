@@ -4,12 +4,12 @@ import type { Vitality } from '../types/vitality.js'
 export function damageVitality(vitality: Vitality, damage: number): Vitality {
   if (!Number.isSafeInteger(damage) || damage <= 0 || vitality.health === 0) return vitality
 
-  const absorbed = Math.min(vitality.shields, damage)
+  const absorbed = Math.min(vitality.shields, Math.ceil(damage / 5))
 
   return {
     ...vitality,
     shields: vitality.shields - absorbed,
-    health: Math.max(0, vitality.health - (damage - absorbed)),
+    health: Math.max(0, vitality.health - Math.max(0, damage - absorbed * 5)),
   }
 }
 
