@@ -54,9 +54,9 @@ export function combatPurchaseCopy(language: Language, item: CombatPurchase): Va
       return {
         name: t('Focus lens', '校准透镜', '調整レンズ'),
         note: t(
-          '1 loadout point. The first pylon or nest completed each turn refunds 1 AP.',
-          '装备预算 1 点。每回合首次关闭机关或摧毁巢穴，返还 1 点行动力。',
-          '装備1ポイント。毎ターン最初の装置停止・巣破壊で行動力1回復。',
+          '1 loadout point. The first control or seal disabled, nest destroyed, or anchor calibrated each turn refunds 1 AP.',
+          '装备预算 1 点。每回合首次关闭机关或封印、摧毁巢穴、校准锚点，返还 1 点行动力。',
+          '装備1ポイント。毎ターン最初の装置・封印停止、巣破壊、錨調整で行動力1回復。',
         ),
       }
     case 'clearing-hook':

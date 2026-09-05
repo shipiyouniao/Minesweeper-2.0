@@ -24,6 +24,7 @@ import { markBroodCell } from './brood-board.js'
 import { ExpeditionDialog } from './expedition-dialog.js'
 import { mirrorPreview, markMirrorCell } from './mirror-board.js'
 import { mirrorName } from './mirror-copy.js'
+import { MagneticBoard, markMagneticCell } from './magnetic-board.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -33,6 +34,7 @@ export class VariantView {
   private readonly status: HTMLElement
   private readonly dialog: HTMLDialogElement
   private readonly expeditionDialog: ExpeditionDialog
+  private readonly magnetic: MagneticBoard
   private readonly menu: LanguageMenu
   private a: BoardView | null = null
   private b: BoardView | null = null
@@ -73,6 +75,7 @@ export class VariantView {
     this.status = status
     this.dialog = dialog
     this.expeditionDialog = new ExpeditionDialog(root, language)
+    this.magnetic = new MagneticBoard(root, language)
     this.menu = new LanguageMenu(picker, onLanguage, feedback)
     dialog.addEventListener('cancel', () => feedback('dismiss'), { signal: this.listeners.signal })
   }
@@ -132,6 +135,7 @@ export class VariantView {
     this.applyZoom()
     if (expedition) this.markExpedition(expedition)
     if (expedition?.encounter) this.markTactical(expedition)
+    this.magnetic.render(expedition)
     const comparison = expedition ? mirrorPreview(expedition) : null
     if (comparison) {
       this.markExpedition(comparison, 'b')
@@ -353,13 +357,18 @@ export class VariantView {
       }
       markBroodCell(this.language, run, cell, index)
       markMirrorCell(this.language, run, cell, index)
+      markMagneticCell(this.language, run, cell, index)
       if (index === run.player && cell.classList.contains('landmark-cell'))
         cell.insertAdjacentHTML(
           'beforeend',
           `<span class="landmark-player">${spriteImage(professionSprite(run.departure.profession))}</span>`,
         )
 
-      if (run.phase === 'boss' && encounter.intent.targets.includes(index)) {
+      if (
+        run.phase === 'boss' &&
+        encounter.intent.targets.includes(index) &&
+        (encounter.kind !== 'magnetic' || encounter.forecast.kind === 'charge')
+      ) {
         cell.classList.add('tactical-danger')
         const danger = `${t.danger} · ${battleThreat(encounter, index)}`
         cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${danger}`)
@@ -421,6 +430,12 @@ export class VariantView {
   /** Cancel a walk when paused, backgrounded, remounted or disposed. */
   cancelWalk(): void {
     this.walking?.cancel()
+    this.magnetic.cancel()
+  }
+
+  /** Animate one already committed magnetic turn before presenting its new snapshot. */
+  async magneticTurn(before: Expedition, after: Expedition): Promise<void> {
+    await this.magnetic.perform(before, after)
   }
 
   /** Close a pending confirmation without replacing its trigger or board. */
@@ -479,6 +494,7 @@ export class VariantView {
     this.cancelWalk()
     this.resize?.disconnect()
     this.listeners.abort()
+    this.magnetic.dispose()
     this.menu.dispose()
     this.expeditionDialog.dispose()
     this.dialog.close()

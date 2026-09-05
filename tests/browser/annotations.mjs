@@ -11,7 +11,7 @@ const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
 const key = 'minesweeper.variants.v1.expedition'
-const fixtures = [42, 43, 44].map((seed) => battleFixture(seed).entered)
+const fixtures = [44, 45, 46, 47].map((seed) => battleFixture(seed).entered)
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || undefined,
   headless: true,
@@ -328,7 +328,7 @@ try {
   console.log(
     JSON.stringify({
       passed: true,
-      bosses: 3,
+      bosses: 4,
       languages: 3,
       widths: [320, 390, 1280, 3840],
       notes: true,

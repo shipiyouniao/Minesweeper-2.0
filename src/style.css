@@ -2,6 +2,7 @@
 @import url('./variants.css');
 @import url('./play-scale.css');
 @import url('./camp.css');
+@import url('./magnetic.css');
 
 * {
   box-sizing: border-box;

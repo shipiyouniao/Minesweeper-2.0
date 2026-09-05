@@ -106,9 +106,9 @@ export function journeyRelicCopy(language: Language, relic: JourneyRelic): Varia
         'Breach sigil',
         '破阵印记',
         '突破の印',
-        'First pylon disabled each floor refunds 1 AP, up to 5.',
-        '每层首次关闭机关返还 1 点行动力，总上限 5。',
-        '各階最初の装置停止で行動力1回復、上限5。',
+        'First control or seal disabled, or anchor calibrated, each floor refunds 1 AP, up to 5.',
+        '每层首次关闭机关、封印或校准锚点，返还 1 点行动力，总上限 5。',
+        '各階最初の装置・封印停止、または錨調整で行動力1回復、上限5。',
       )
     case 'duelist-edge':
       return localized(

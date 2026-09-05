@@ -162,19 +162,19 @@ test('mirror public deduction cannot read covered mine bits or covered numbers',
   assert.deepEqual(mirrorKnowledge(poisoned), mirrorKnowledge(run))
 })
 
-test('the seeded three-boss rotation reaches every family and never repeats adjacent checkpoints', () => {
-  const kinds = [42, 43, 44].map(
+test('the seeded four-boss rotation reaches every family and never repeats adjacent checkpoints', () => {
+  const kinds = [44, 45, 46, 47].map(
     (seed) =>
       enterEncounter({
         ...createExpedition({ ...CURRENT_DEPARTURE, seed }),
         floor: 3,
       }).encounter?.kind,
   )
-  assert.deepEqual(kinds, ['bastion', 'brood', 'mirror'])
-  const run = createExpedition({ ...CURRENT_DEPARTURE, seed: 44, difficulty: 'abyss' })
+  assert.deepEqual(kinds, ['bastion', 'brood', 'mirror', 'magnetic'])
+  const run = createExpedition({ ...CURRENT_DEPARTURE, seed: 46, difficulty: 'abyss' })
   assert.deepEqual(
     encounterTier('abyss').floors.map((floor) => enterEncounter({ ...run, floor }).encounter?.kind),
-    ['mirror', 'bastion', 'brood'],
+    ['mirror', 'magnetic', 'bastion'],
   )
 })
 

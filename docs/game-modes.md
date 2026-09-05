@@ -186,3 +186,7 @@ Tides is the highest-risk design because its generator preserves a system of con
 Saves are local and disappear when browser storage is cleared. They are not an anti-cheat system. One active run per special ruleset is supported; simultaneous edits to one ruleset in multiple tabs use last-write-wins browser storage. Journals are bounded at 20,000 accepted actions to limit recovery work; Expedition can still extract at its limit and Twin can restart. Storage failures are shown while in-memory play continues.
 
 No new compiler performance figures are claimed. Historical TS6/TS7 A/B reports remain tied to their measured commits.
+
+### Magnetic Knight encounter
+
+The fourth released boss family adds visible push/pull fields, projected landings, grounding and reusable numbered anchors. A known route lets the player lure the knight into an anchor, with physical charge and impact effects, then strike during three turns of core exposure. The seeded roster now contains Bastion Guardian, Brood Queen, Mirror Twins and Magnetic Knight; checkpoint floors and rewards are unchanged. Read [the full rules, values and acceptance](magnetic-knight.md).

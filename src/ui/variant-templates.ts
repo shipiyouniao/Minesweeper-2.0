@@ -21,6 +21,7 @@ import { tacticalCopy } from './tactical-copy.js'
 import { battleHealthCopy } from './combat-build-copy.js'
 import { icon } from '../icons.js'
 import { mirrorBoardLabel } from './mirror-board.js'
+import { magneticPlaybar } from './magnetic-board.js'
 
 /** Render one accessible choice card; its ID is a finite catalog value. */
 export function choice(
@@ -114,7 +115,7 @@ export function expeditionTemplate(
     ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
     ${run.phase === 'reward' ? `<button class="primary-button" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
-    ${boardZoomTemplate(language)}<div class="board-play-area">${run.phase === 'exploring' || run.phase === 'boss' ? boardControlsTemplate(language, inputMode, 'data-control') : ''}<div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards">${run.phase === 'boss' ? `<div class="mirror-playbar">${tacticalControlsTemplate(language, run)}<span>${tacticalCopy(language, 'mirror').points} ${run.encounter.points}</span></div>` : ''}<div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
+    ${boardZoomTemplate(language)}<div class="board-play-area">${run.phase === 'exploring' || run.phase === 'boss' ? boardControlsTemplate(language, inputMode, 'data-control') : ''}<div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards">${run.phase === 'boss' ? `<div class="mirror-playbar">${tacticalControlsTemplate(language, run)}<span>${tacticalCopy(language, 'mirror').points} ${run.encounter.points}</span></div>` : ''}<div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`)}</div>` : boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
       ${
         run.phase === 'exploring' || run.phase === 'boss'
           ? `<div class="variant-toolbar">

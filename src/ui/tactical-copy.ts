@@ -8,6 +8,24 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
   const zh = language === 'zh'
   const ja = language === 'ja'
   switch (plan.reason) {
+    case 'magnet-armor':
+      return zh
+        ? '启动锚点，牵引骑士撞击后破甲'
+        : ja
+          ? '錨を起動し騎士を衝突させる'
+          : 'Lure the knight into an anchor to break its armor'
+    case 'magnet-route':
+      return zh
+        ? '先揭开骑士到锚点的通路，至少留出两格牵引距离'
+        : ja
+          ? '騎士から錨まで2マス以上の経路を開く'
+          : 'Open a route of at least two cells from the knight to the anchor'
+    case 'magnet-busy':
+      return zh
+        ? '牵引或破甲期间无法再次启动锚点'
+        : ja
+          ? '誘導・コア露出中は再起動不可'
+          : 'Anchors recharge after the lure and exposure window'
     case 'mirror-seal':
       return zh
         ? '先关闭另一侧镜域的封印'
@@ -77,6 +95,12 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
 export function tacticalEventCopy(language: Language, encounter: TacticalEncounter): string {
   const zh = language === 'zh'
   const ja = language === 'ja'
+  if (encounter.kind === 'magnetic' && encounter.event === 'braced')
+    return zh
+      ? '已稳固 · 抵抗本回合磁力，敌方伤害减少 3'
+      : ja
+        ? '固定中 · 磁力を防ぎ、敵ダメージを3軽減'
+        : 'Grounded · resist the pulse and reduce enemy damage by 3'
   if (encounter.event === 'braced')
     return zh
       ? '已防御 · 本回合敌方伤害减少 3'
@@ -90,6 +114,24 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
         ? '調整失敗 · 5ダメージ'
         : 'Calibration failed · 5 damage'
   switch (encounter.event) {
+    case 'magnet-lured':
+      return zh
+        ? '牵引已锁定 · 让出金色路线'
+        : ja
+          ? '誘導確定 · 金色の経路を空ける'
+          : 'Lure locked · clear the gold route'
+    case 'magnet-overloaded':
+      return zh
+        ? '磁芯过载 · 三回合破甲窗口'
+        : ja
+          ? 'コア過負荷 · 3ターン露出'
+          : 'Core overloaded · three-turn strike window'
+    case 'magnet-grounded':
+      return zh
+        ? '已抵抗磁力位移'
+        : ja
+          ? '磁力による移動を防いだ'
+          : 'Magnetic displacement resisted'
     case 'shifted':
       return zh
         ? '已切换镜域 · 继续本回合'

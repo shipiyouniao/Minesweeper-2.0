@@ -80,7 +80,7 @@ function fixtures() {
       },
     })
   }
-  for (const seed of [42, 43, 44]) {
+  for (const seed of [44, 45, 46, 47]) {
     const c = withChord(battleFixture(seed).entered)
     list.push({
       ruleset: 'expedition',
@@ -308,7 +308,7 @@ try {
       pointerOnly: true,
       modes: 3,
       twinSides: 2,
-      bosses: 3,
+      bosses: 4,
       nativeTouch: true,
       markCycle: true,
       explicitButtons: true,
