@@ -19,15 +19,13 @@ import type { VariantCommand, VariantInputActions } from '../types/variant-ui.js
 import type { NavigationKey } from '../types/ui.js'
 import { VariantRepository } from '../persistence/variant-repository.js'
 import { variantCopy } from './variant-copy.js'
-import {
-  campTemplate,
-  expeditionTemplate,
-  twinTemplate,
-  variantRecords,
-} from './variant-templates.js'
+import { expeditionTemplate, twinTemplate, variantRecords } from './variant-templates.js'
 import { VariantView } from './variant-view.js'
 import { VariantInput } from './variant-input.js'
 import { secondaryBoardAction } from './board-actions.js'
+import { campTemplate } from './camp-template.js'
+import { navigateCamp } from './camp-navigation.js'
+import type { CampScreen } from '../types/camp-navigation.js'
 
 /** Coordinates special-mode sessions with dedicated input and rendering adapters. */
 export class VariantApp implements VariantInputActions {
@@ -42,6 +40,7 @@ export class VariantApp implements VariantInputActions {
   private readonly input: VariantInput
   private profession: Profession = 'explorer'
   private equipment: readonly Equipment[] = []
+  private campScreen: CampScreen = { page: 'overview', category: 'all', selected: 'surveyor' }
   private inputMode: BoardInputMode = 'reveal'
   private paused = false
   private pending: 'retreat' | 'restart' | null = null
@@ -287,6 +286,15 @@ export class VariantApp implements VariantInputActions {
     if (command.type !== 'probe' && command.type !== 'scan') this.cancelMovement()
 
     switch (command.type) {
+      case 'camp-page':
+      case 'shop-category':
+      case 'shop-item':
+        if (!(this.session instanceof ExpeditionSession) || this.session.run) return
+        this.campScreen = navigateCamp(this.campScreen, command)
+        this.render()
+        if (command.type === 'camp-page') this.view.focusCampHeading()
+        else if (command.type === 'shop-item') this.view.showShopDetail()
+        return
       case 'rewards':
       case 'result':
         this.view.showExpeditionDialog()
@@ -378,7 +386,10 @@ export class VariantApp implements VariantInputActions {
           this.result(this.session.start(this.profession, this.equipment))
         break
       case 'camp':
-        if (this.session instanceof ExpeditionSession) this.result(this.session.returnToCamp())
+        if (this.session instanceof ExpeditionSession) {
+          this.result(this.session.returnToCamp())
+          this.campScreen = { ...this.campScreen, page: 'overview' }
+        }
         break
       case 'profession':
         if (
@@ -518,6 +529,7 @@ export class VariantApp implements VariantInputActions {
               this.profession,
               this.equipment,
               this.session.difficulty,
+              this.campScreen,
             ),
         run?.game ?? null,
         run?.encounter?.kind === 'mirror' ? run.encounter.other.game : null,

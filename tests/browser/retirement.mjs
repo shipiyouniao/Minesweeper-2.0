@@ -54,6 +54,7 @@ try {
       assert.equal((await saved()).journal, null)
       assert.equal((await saved()).version, 4)
       assert.equal(await page.locator('.tactical-panel').count(), 0)
+      await page.locator('[data-control="camp-page:equipment"]').click()
       for (const equipment of ['probe', 'scanner', 'guard']) {
         const card = page.locator(`[data-control="equipment:${equipment}"]`)
         assert.ok(!(await card.locator('strong').innerText()).includes('·'))

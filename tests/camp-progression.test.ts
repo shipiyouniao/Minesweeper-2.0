@@ -22,7 +22,6 @@ import { walkingPath } from '../src/game/dungeon-path.js'
 import { VARIANT_TIERS } from '../src/game/variant-difficulty.js'
 import { ExpeditionSession } from '../src/application/expedition-session.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
-import { campProgressTemplate } from '../src/ui/camp-progress-template.js'
 import type { Expedition } from '../src/types/variants.js'
 import { FakeRuntime, MemoryStorage } from './helpers.js'
 
@@ -186,18 +185,4 @@ test('existing money and unlocks survive reload, with new purchases settled at t
   assert.equal(session.purchase('surveyor'), false)
   const restored = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.deepEqual(restored.run, session.run)
-})
-
-test('funding UI distinguishes saving, ready and fully owned states in all locales', () => {
-  for (const language of ['en', 'zh', 'ja'] as const) {
-    const saving = campProgressTemplate(language, { ...EMPTY_CAMP, supplies: 10 })
-    assert.ok(saving.includes('max="40" value="10"'))
-    assert.ok(saving.includes('25%'))
-    const ready = campProgressTemplate(language, { ...EMPTY_CAMP, supplies: 40 })
-    assert.ok(ready.includes('max="40" value="40"'))
-    assert.ok(!ready.includes('undefined'))
-    const complete = campProgressTemplate(language, { ...EMPTY_CAMP, upgrades: UPGRADES })
-    assert.ok(!complete.includes('<progress'))
-    assert.ok(complete.length > 30)
-  }
 })

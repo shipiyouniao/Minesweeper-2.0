@@ -122,12 +122,17 @@ try {
     },
     'zh',
   )
-  assert.equal(await page.locator('[data-control^="upgrade:"]').count(), UPGRADES.length)
+  await page.locator('[data-control="camp-page:shop"]').click()
+  assert.equal(await page.locator('.shop-tile').count(), UPGRADES.length)
+  await page.locator('[data-control="shop-item:vitality-training"]').click()
   await page.locator('[data-control="upgrade:vitality-training"]').click()
+  await page.locator('[data-control="shop-item:weapon-training"]').click()
   await page.locator('[data-control="upgrade:weapon-training"]').click()
   assert.ok(await page.locator('[data-control="upgrade:weapon-training"]').isDisabled())
+  await page.locator('[data-control="camp-page:equipment"]').click()
   await page.locator('[data-control="equipment:steel-blade"]').click()
   await page.locator('[data-control="equipment:medical-kit"]').click()
+  await page.locator('[data-control="camp-page:overview"]').click()
   await page.locator('[data-control="start"]').click()
   assert.match(await page.locator('.vitality-heading').innerText(), /13\/13/)
   const started = await journal()
