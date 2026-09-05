@@ -1,59 +1,29 @@
 import type { BoardInputMode } from '../types/ui.js'
 import { boardControlsTemplate } from './board-controls.js'
-import {
-  EQUIPMENT,
-  UPGRADES,
-  equipmentCost,
-  upgradeCost,
-  reachableCells,
-  allowedDeparture,
-} from '../game/expedition.js'
-import { PROFESSIONS } from '../game/professions.js'
-import { professionPreviewTemplate, professionSkillTemplate } from './profession-skill-template.js'
+import { reachableCells } from '../game/expedition.js'
+import { professionSkillTemplate } from './profession-skill-template.js'
 import { VARIANT_TIERS, expeditionFloors } from '../game/variant-difficulty.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { stats } from '../game/engine.js'
 import { translations } from '../i18n.js'
 import type { Language } from '../types/localization.js'
-import type {
-  Camp,
-  Equipment,
-  Expedition,
-  Profession,
-  Twin,
-  VariantRecord,
-} from '../types/variants.js'
+import type { Expedition, Twin, VariantRecord } from '../types/variants.js'
 import type { VariantDescription } from '../types/variant-ui.js'
-import {
-  difficultyCopy,
-  equipmentCopy,
-  professionCopy,
-  relicCopy,
-  upgradeCopy,
-  variantCopy,
-} from './variant-copy.js'
+import { difficultyCopy, relicCopy, variantCopy } from './variant-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
-import { professionSprite } from './profession-presentation.js'
 import type { DungeonSprite, DungeonTool } from '../types/dungeon-ui.js'
-import { campProgressTemplate } from './camp-progress-template.js'
-import { parseRelicPack } from '../game/relic-packs.js'
 import { relicSprite } from './relic-presentation.js'
-import {
-  difficultyRewardPercent,
-  expeditionReward,
-  expeditionRewardPercent,
-} from '../game/expedition-rewards.js'
+import { expeditionReward, expeditionRewardPercent } from '../game/expedition-rewards.js'
 import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
 import { tacticalTemplate, tacticalControlsTemplate } from './tactical-template.js'
 import { tacticalCopy } from './tactical-copy.js'
-import { combatSprite, battleHealthCopy } from './combat-build-copy.js'
-import { parseCombatPurchase } from '../game/combat-build.js'
+import { battleHealthCopy } from './combat-build-copy.js'
 import { icon } from '../icons.js'
 import { mirrorBoardLabel } from './mirror-board.js'
 
 /** Render one accessible choice card; its ID is a finite catalog value. */
-function choice(
+export function choice(
   control: string,
   description: VariantDescription,
   selected: boolean,
@@ -90,57 +60,6 @@ function recordList(
           )
           .join('')}</ol>`
   }</section>`
-}
-
-/** Present the permanent camp and departure choices without mixing them with run resources. */
-export function campTemplate(
-  language: Language,
-  camp: Camp,
-  profession: Profession,
-  equipment: readonly Equipment[],
-  difficulty: VariantDifficulty = 'standard',
-): string {
-  const t = variantCopy(language)
-  const number = new Intl.NumberFormat(language)
-  const careers = PROFESSIONS
-  const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
-  // Sort a display copy so new purchases fit their price tier without changing catalog order.
-  const upgrades = [...UPGRADES].sort((a, b) => upgradeCost(a) - upgradeCost(b))
-
-  return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${battleHealthCopy(language)}</p>
-    <div class="variant-metrics">${metric(t.supplies, number.format(camp.supplies))}${metric(t.departures, camp.completed)}</div>
-    ${difficultyTemplate(language, difficulty, true)}
-    <p class="variant-note reward-rate">${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p>
-    <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career), professionSprite(career))).join('')}</div>
-    ${professionPreviewTemplate(language, profession)}
-    <h2>${t.equipment} <small>${spent} / 3</small></h2>
-    ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && !allowedDeparture(camp, profession, [...equipment, item]), combatSprite(item))).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
-    <button class="primary-button" data-control="start">${t.start} ↗</button>
-    <h2>${t.facilities}</h2>${campProgressTemplate(language, camp)}<div class="choice-grid facilities">${upgrades
-      .map((upgrade) => {
-        const description = upgradeCopy(language, upgrade)
-        return choice(
-          `upgrade:${upgrade}`,
-          {
-            name: `${description.name} · ${camp.upgrades.includes(upgrade) ? t.owned : number.format(upgradeCost(upgrade)) + ' ' + t.supplies}`,
-            note: description.note,
-          },
-          camp.upgrades.includes(upgrade),
-          camp.upgrades.includes(upgrade) || camp.supplies < upgradeCost(upgrade),
-          upgrade === 'surveyor' ||
-            upgrade === 'engineer' ||
-            upgrade === 'archaeologist' ||
-            upgrade === 'alchemist' ||
-            upgrade === 'sentinel'
-            ? professionSprite(upgrade)
-            : upgrade === 'workshop' || upgrade === 'archive'
-              ? upgrade
-              : parseCombatPurchase(upgrade)
-                ? combatSprite(parseCombatPurchase(upgrade)!)
-                : parseRelicPack(upgrade),
-        )
-      })
-      .join('')}</div></section>`
 }
 
 /** Render the common board frame; BoardView owns the actual grid cells. */
@@ -291,7 +210,7 @@ export function variantRecords(
 }
 
 /** Expose dimensions before departure with wrapping buttons instead of a browser select. */
-function difficultyTemplate(
+export function difficultyTemplate(
   language: Language,
   selected: VariantDifficulty | undefined,
   expedition: boolean,

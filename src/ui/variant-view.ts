@@ -125,6 +125,7 @@ export class VariantView {
     const cell = active?.dataset['cell']
     const side = active?.closest<HTMLElement>('[data-side]')?.dataset['side']
     const control = active?.dataset['control']
+    const fallback = active?.dataset['focusFallback']
     this.content.innerHTML = html
     this.a = this.board('a', a, this.focusA)
     this.b = this.board('b', b, this.focusB)
@@ -152,7 +153,10 @@ export class VariantView {
         : control
           ? `[data-control="${CSS.escape(control)}"]`
           : null
-    const target = selector ? this.content.querySelector<HTMLElement>(selector) : null
+    let target = selector ? this.content.querySelector<HTMLElement>(selector) : null
+    // A completed purchase becomes disabled; retain focus on the inspected item's tile.
+    if (target?.hasAttribute('disabled') && fallback)
+      target = this.content.querySelector<HTMLElement>(`[data-control="${CSS.escape(fallback)}"]`)
     if (target && !target.hasAttribute('disabled')) target.focus({ preventScroll: true })
     else if (active)
       this.content
@@ -160,6 +164,19 @@ export class VariantView {
         ?.focus({ preventScroll: true })
 
     this.expeditionDialog.render(expedition, this.content.hidden !== false)
+  }
+
+  /** Announce a new camp screen and bring its heading into view after explicit navigation. */
+  focusCampHeading(): void {
+    const heading = this.content.querySelector<HTMLElement>('.camp-panel h1')
+    heading?.focus({ preventScroll: true })
+    heading?.scrollIntoView({ block: 'nearest' })
+  }
+
+  /** Reveal inline mobile details without moving keyboard focus away from the selected tile. */
+  showShopDetail(): void {
+    if (matchMedia('(max-width: 900px)').matches)
+      this.content.querySelector('.shop-detail')?.scrollIntoView({ block: 'nearest' })
   }
 
   /** Update availability warnings and accessible sound/pause state independently of the board. */

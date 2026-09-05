@@ -8,6 +8,8 @@
 
 Difficulty-based expedition income and authored balance scenarios are documented in [the reward table](docs/expedition-rewards.md).
 
+**Camp interface:** a compact departure overview opens separate profession, loadout, route and [shop screens](docs/camp-interface.md). Browse square item tiles by category, inspect effects in a detail panel, and purchase with a separate button. All 26 purchases are sorted by price; mobile details expand below the selected row.
+
 A playable Minesweeper game and a practical testbed for the **TypeScript 7 native compiler**. This repository revisits a first-year university project with a minimal interface, original artwork, a deterministic game engine, and a native TypeScript development workflow.
 
 **[Play in your browser →](https://shipiyouniao.github.io/Minesweeper-2.0/)** · [Compiler experiment notes](docs/typescript7.md) · [Captured benchmark results](docs/typescript7-benchmark.json)

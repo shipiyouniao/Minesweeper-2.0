@@ -3,9 +3,11 @@ import type { BoardSide, Equipment, Profession, Relic, Upgrade } from './variant
 import type { NavigationKey } from './ui.js'
 import type { InteractionCue } from './audio.js'
 import type { DungeonTool } from './dungeon-ui.js'
+import type { CampCommand } from './camp-navigation.js'
 
 /** Commands decoded from finite button attributes at the UI boundary. */
 export type VariantCommand =
+  | CampCommand
   | {
       readonly type:
         | 'start'
@@ -103,13 +105,6 @@ export interface VariantMessages {
   readonly start: string
   readonly profession: string
   readonly equipment: string
-  readonly campGoal: string
-  readonly campEarly: string
-  readonly campMiddle: string
-  readonly campLate: string
-  readonly campRemaining: string
-  readonly campAffordable: string
-  readonly campComplete: string
   readonly facilities: string
   readonly owned: string
   readonly locked: string
