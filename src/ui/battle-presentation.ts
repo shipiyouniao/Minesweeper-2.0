@@ -6,12 +6,8 @@ import type { TacticalMessages } from '../types/tactical-ui.js'
 import type { EncounterKind, TacticalEncounter } from '../types/tactical.js'
 import type { Expedition } from '../types/variants.js'
 
-/** Replace only versioned combat instructions while retaining each boss's localized identity. */
-export function battleCopy(
-  language: Language,
-  kind: EncounterKind,
-  base: TacticalMessages,
-): TacticalMessages {
+/** Keep current rules and boss-specific instructions together in every language. */
+export function battleCopy(language: Language, kind: EncounterKind): TacticalMessages {
   /** Keep every new instruction complete in all supported languages. */
   const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
   const hint =
@@ -27,7 +23,28 @@ export function battleCopy(
           '巣を開き周囲の地雷に旗を立て、接近して破壊。残った巣は女王を回復・防護する。',
         )
   return {
-    ...base,
+    name:
+      kind === 'bastion'
+        ? t('Bastion Guardian', '堡垒守卫', '城塞の守護者')
+        : t('Brood Queen', '育巢女王', '育巣の女王'),
+    turn: t('Turn', '回合', 'ターン'),
+    points: t('Action points', '行动力', '行動力'),
+    armor: t('Defenses', '防御机关', '防御装置'),
+    exposed: t('Core exposed', '核心已暴露', 'コア露出'),
+    disabled: t('Control disabled', '机关已关闭', '装置停止'),
+    attack: t('Strike · 2 AP', '攻击 · 2 点', '攻撃 · 2'),
+    brace: t('Brace · 1 AP', '防御 · 1 点', '防御 · 1'),
+    end: t('End turn', '结束回合', 'ターン終了'),
+    excavation: t(
+      'Scout the nearest active objective with undiscovered information.',
+      '侦察最近仍有未知信息的活动机关或巢穴。',
+      '未確認情報のある最寄りの稼働装置や巣を偵察。',
+    ),
+    victory: t(
+      'Boss defeated · full health, +1 shield',
+      '首领已击败 · 生命全满，护盾 +1',
+      'ボス撃破 · 体力全回復、シールド+1',
+    ),
     hint,
     danger: t('Enemy attack forecast', '敌方攻击预告', '敵の攻撃予告'),
     pylon: t(
@@ -83,7 +100,7 @@ export function battleStatus(language: Language, encounter: TacticalEncounter): 
       `巣 ${encounter.nests.length}/3 · 防護 ${encounter.nests.length * 3} · 回復 ${encounter.nests.length * 3}`,
     )
   const active = encounter.pylons.filter((pylon) => pylon.active).length
-  const window = Math.max(0, (encounter.exposedUntil ?? 0) - encounter.turn + 1)
+  const window = Math.max(0, encounter.exposedUntil - encounter.turn + 1)
   return active
     ? battleText(language, `Controls ${active}/2`, `机关 ${active}/2`, `装置 ${active}/2`)
     : window
@@ -109,8 +126,8 @@ export function combatStatsTemplate(language: Language, run: Expedition): string
   )
   const sources = [
     ...equipment.map((item) => combatPurchaseCopy(language, item)),
-    ...(run.departure.training ?? []).map((item) => combatPurchaseCopy(language, item)),
-    ...run.relics.map((item) => relicCopy(language, item, true)),
+    ...run.departure.training.map((item) => combatPurchaseCopy(language, item)),
+    ...run.relics.map((item) => relicCopy(language, item)),
   ]
   const entries = sources
     .map((source) => `<li><strong>${source.name}</strong> · ${source.note}</li>`)

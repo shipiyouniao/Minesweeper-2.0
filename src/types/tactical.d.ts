@@ -53,9 +53,9 @@ export interface TacticalState {
 export interface BastionEncounter extends TacticalState {
   readonly kind: 'bastion'
   readonly pylons: readonly ShieldPylon[]
-  /** Present only in the revised encounter; controls open bounded core windows. */
-  readonly mechanisms?: readonly BattleMechanism[]
-  readonly exposedUntil?: number
+  /** Regional controls open bounded core windows. */
+  readonly mechanisms: readonly BattleMechanism[]
+  readonly exposedUntil: number
 }
 
 /** Eggs hatch only after their visible number of explicit end-turn actions. */
@@ -81,7 +81,7 @@ export interface BroodEncounter extends TacticalState {
   readonly orders: readonly BroodOrder[]
   readonly queenTargets: readonly number[]
   /** Destroyed nests stay on the board as inert landmarks and never produce replacements. */
-  readonly destroyedNests?: readonly number[]
+  readonly destroyedNests: readonly number[]
 }
 
 /** A finite encounter union keeps each boss's state and rules explicit. */

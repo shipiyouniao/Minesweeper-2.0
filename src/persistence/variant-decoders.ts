@@ -8,7 +8,8 @@ import {
 } from '../game/combat-build.js'
 import type { CombatTraining } from '../types/combat-build.js'
 import { encounterTier } from '../game/encounter-tiers.js'
-import { hasEncounters } from '../game/encounter-roster.js'
+import { EXPEDITION_RULES_REVISION, OLD_EXPEDITION_COMPENSATION } from './expedition-format.js'
+import type { ExpeditionLoad } from '../types/variants.js'
 import type { RelicPack } from '../types/relic-packs.js'
 import type { Config } from '../types/game.js'
 import { JsonObjectReader, parseJson } from './json-reader.js'
@@ -115,7 +116,7 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
   const completed = reader.number('completed')
   const values = reader.array('upgrades')
   if (
-    !integer(supplies, 1e9) ||
+    !integer(supplies, Number.MAX_SAFE_INTEGER) ||
     !integer(completed, 1e6) ||
     !values ||
     values.length > UPGRADES.length
@@ -132,93 +133,51 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
   return { supplies, completed, upgrades }
 }
 
-/** Capture departure options; application replay additionally checks camp authorization. */
+/** Decode only current departure options; obsolete runs never enter the game engine. */
 function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (!reader) return null
   const seed = reader.number('seed')
-  const rules = reader.value('rules')
-  const rewards = reader.value('rewards')
-  const professions = reader.value('professions')
-  const encounters = reader.value('encounters')
   const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const profession = parseProfession(reader.string('profession'))
   const archive = reader.value('archive')
+  const battleRelics = reader.value('battleRelics')
   const values = reader.array('equipment')
+  const trainingValues = reader.array('training')
+  const packValues = reader.array('packs')
   if (
     !integer(seed, 0xffffffff) ||
-    (encounters !== undefined &&
-      ((encounters !== 'bastion-v1' && encounters !== 'brood-v1' && encounters !== 'tactics-v2') ||
-        professions !== 'skills-v1' ||
-        rules !== 'relics-v1')) ||
-    (professions !== undefined && (professions !== 'skills-v1' || rules !== 'relics-v1')) ||
-    (profession !== 'explorer' &&
-      profession !== 'surveyor' &&
-      profession !== 'engineer' &&
-      professions !== 'skills-v1') ||
-    (rewards !== undefined && (rewards !== 'difficulty-v1' || rules !== 'relics-v1')) ||
-    (rules !== undefined &&
-      rules !== 'original' &&
-      rules !== 'scouting' &&
-      rules !== 'difficulty-v1' &&
-      rules !== 'health-v1' &&
-      rules !== 'relics-v1') ||
-    (rules === 'difficulty-v1' || rules === 'health-v1' || rules === 'relics-v1'
-      ? !difficulty
-      : reader.value('difficulty') !== undefined) ||
+    !difficulty ||
     !profession ||
     typeof archive !== 'boolean' ||
+    typeof battleRelics !== 'boolean' ||
     !values ||
-    values.length > 3
+    values.length > 3 ||
+    !trainingValues ||
+    trainingValues.length > 2 ||
+    !packValues ||
+    packValues.length > RELIC_PACKS.length
   )
     return null
+
   const equipment: Equipment[] = []
   const training: CombatTraining[] = []
-  if (encounters === 'tactics-v2') {
-    const values = reader.array('training')
-    if (!values || values.length > 2 || typeof reader.value('battleRelics') !== 'boolean')
-      return null
-    for (const value of values) {
-      const entry = parseCombatTraining(typeof value === 'string' ? value : null)
-      if (!entry || training.includes(entry)) return null
-      training.push(entry)
-    }
-  } else if (reader.value('training') !== undefined || reader.value('battleRelics') !== undefined)
-    return null
   const packs: RelicPack[] = []
-  if (rules === 'relics-v1') {
-    const packValues = reader.array('packs')
-    if (!packValues || packValues.length > RELIC_PACKS.length) return null
-    for (const value of packValues) {
-      const pack = parseRelicPack(typeof value === 'string' ? value : null)
-      if (!pack || packs.includes(pack)) return null
-      packs.push(pack)
-    }
-  } else if (reader.value('packs') !== undefined) return null
-
   for (const value of values) {
     const item = parseEquipment(typeof value === 'string' ? value : null)
     if (!item || equipment.includes(item)) return null
-    if (parseCombatEquipment(item) && encounters !== 'tactics-v2') return null
     equipment.push(item)
   }
-
-  return {
-    seed,
-    profession,
-    archive,
-    equipment,
-    rules: rules ?? 'original',
-    ...(rewards === 'difficulty-v1' ? { rewards } : {}),
-    ...(professions === 'skills-v1' ? { professions } : {}),
-    ...(encounters === 'bastion-v1' || encounters === 'brood-v1' || encounters === 'tactics-v2'
-      ? { encounters }
-      : {}),
-    ...(encounters === 'tactics-v2'
-      ? { training, battleRelics: reader.value('battleRelics') === true }
-      : {}),
-    ...(rules === 'relics-v1' ? { packs } : {}),
-    ...(difficulty ? { difficulty } : {}),
+  for (const value of trainingValues) {
+    const item = parseCombatTraining(typeof value === 'string' ? value : null)
+    if (!item || training.includes(item)) return null
+    training.push(item)
   }
+  for (const value of packValues) {
+    const item = parseRelicPack(typeof value === 'string' ? value : null)
+    if (!item || packs.includes(item)) return null
+    packs.push(item)
+  }
+  return { seed, difficulty, profession, archive, equipment, training, packs, battleRelics }
 }
 
 /** Decode the payload selected by each expedition command discriminant. */
@@ -236,8 +195,7 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
       const index = reader.number('index')
       return integer(index, config.width * config.height - 1) ? { type, index } : null
     }
-    case 'sweep':
-    case 'scan': {
+    case 'sweep': {
       const row = reader.number('row')
       return integer(row, config.height - 1) ? { type, row } : null
     }
@@ -259,13 +217,15 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
 
 /** Decode a bounded replay journal, rejecting the whole run when any intent is malformed. */
 function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | null {
-  if (!reader) return null
+  if (!reader || reader.number('rulesRevision') !== EXPEDITION_RULES_REVISION) return null
+  const returnSupplies = reader.number('returnSupplies')
+  if (!integer(returnSupplies, 10000)) return null
   const departure = decodeDeparture(reader.child('departure'))
   const values = reader.array('actions')
   if (!departure || !values || values.length > MAX_ACTIONS) return null
   const actions: ExpeditionAction[] = []
   const ordinary = expeditionConfig(departure, 1)
-  const arena = hasEncounters(departure) ? encounterTier(departure.difficulty).config : ordinary
+  const arena = encounterTier(departure.difficulty).config
   // Decode the broad dimension envelope; replay still validates each action against its actual room.
   const bounds = {
     ...ordinary,
@@ -279,7 +239,7 @@ function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | nul
     actions.push(action)
   }
 
-  return { departure, actions }
+  return { departure, actions, rulesRevision: EXPEDITION_RULES_REVISION, returnSupplies }
 }
 
 /** Retain a bounded list of fully valid records; no player-provided HTML is stored. */
@@ -320,21 +280,48 @@ function envelope(text: string | null, version = 1): JsonObjectReader | null {
   return reader?.number('version') === version ? reader : null
 }
 
-/** Decode camp and active run together because their settlement is one atomic transaction. */
-export function decodeExpeditionSave(text: string | null): ExpeditionSave | null {
-  const reader = envelope(text, 3) ?? envelope(text, 2) ?? envelope(text, 1)
+/** Normalize only the durable envelope; no retired generator or action replay is needed. */
+export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
+  const reader = envelope(text, 4) ?? envelope(text, 3) ?? envelope(text, 2) ?? envelope(text, 1)
   if (!reader) return null
-  const difficulty = parseVariantDifficulty(reader.string('difficulty'))
-  if (reader.value('difficulty') !== undefined && !difficulty) return null
   const camp = decodeCamp(reader.child('camp'))
   const records = decodeRecords(reader.array('records'))
-  // Movement and terrain changed the generator. Keep camp and results, never replay an old route on a new layout.
-  if (reader.number('version') !== 3)
-    return camp && records ? { version: 3, camp, records, journal: null } : null
-  const journal = decodeJournal(reader.child('journal'))
-  if (!camp || !records || (reader.value('journal') !== null && !journal)) return null
+  if (!camp || !records) return null
+  const difficulty = parseVariantDifficulty(reader.string('difficulty'))
+  const journalValue = reader.value('journal')
+  const raw = reader.child('journal')
+  const oldEnvelope = reader.number('version') !== 4
+  const revision = raw?.number('rulesRevision') ?? null
+  const oldRules =
+    !oldEnvelope && raw !== null && integer(revision, 1e6) && revision !== EXPEDITION_RULES_REVISION
+  let returnedSupplies: number | null = null
+  if (oldEnvelope && journalValue !== null && journalValue !== undefined)
+    returnedSupplies = OLD_EXPEDITION_COMPENSATION
+  else if (raw && oldRules) {
+    const checkpoint = raw.number('returnSupplies')
+    returnedSupplies = integer(checkpoint, 10000) ? checkpoint : 0
+  }
 
-  return { version: 3, camp, journal, records, ...(difficulty ? { difficulty } : {}) }
+  // Crediting a valid camp must never produce a balance that the next load rejects.
+  if (returnedSupplies !== null)
+    returnedSupplies = Math.min(returnedSupplies, Number.MAX_SAFE_INTEGER - camp.supplies)
+
+  const journal = oldEnvelope || oldRules ? null : decodeJournal(raw)
+  const recovered = returnedSupplies === null && journalValue !== null && !journal
+  const save: ExpeditionSave = {
+    version: 4,
+    camp:
+      returnedSupplies === null ? camp : { ...camp, supplies: camp.supplies + returnedSupplies },
+    journal,
+    records,
+    ...(difficulty ? { difficulty } : {}),
+  }
+  return { save, migrated: oldEnvelope || oldRules, recovered, returnedSupplies }
+}
+
+/** Expose normalized save data to callers that do not need recovery presentation metadata. */
+export function decodeExpeditionSave(text: string | null): ExpeditionSave | null {
+  return loadExpeditionSave(text)?.save ?? null
 }
 
 /** Decode paired board intents without accepting alternate board identifiers. */

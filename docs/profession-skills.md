@@ -1,5 +1,7 @@
 # Six professions and floor skills
 
+> Historical delivery notes: the [current combat table](tactical-builds.md) and [save policy](save-policy.md) supersede older numeric values and replay-compatibility statements below. Only the current expedition implementation is shipped.
+
 Expedition professions offer different ways to manage uncertainty. Ordinary floors remain free exploration. Each skill is an explicit, replayable action that can succeed **once per floor**. There is no real-time cooldown. All six professions have their own board portrait and a separate generated skill icon.
 
 ## Roster and tradeoffs

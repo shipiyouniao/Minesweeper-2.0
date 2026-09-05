@@ -3,14 +3,13 @@ import { adjacentSteps } from './variant-board.js'
 import { neighbors } from './engine.js'
 import { walkingPointCost } from './combat-relics.js'
 import { occupied } from './dungeon-occupancy.js'
-import { hasCombatBuild } from './combat-build.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 
 /** Use only public state when choosing whether a cell click means movement, a control, or attack. */
 export function tacticalCellAction(run: Expedition, index: number): ExpeditionAction {
   const encounter = run.encounter
-  if (hasCombatBuild(run.departure) && encounter) {
+  if (encounter) {
     if (
       encounter.kind === 'bastion' &&
       encounter.pylons.some((pylon) => pylon.index === index && pylon.active)
@@ -23,7 +22,7 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
       encounter.kind === 'bastion' &&
       index === encounter.boss &&
       !encounter.pylons.some((pylon) => pylon.active) &&
-      (encounter.exposedUntil ?? 0) < encounter.turn
+      encounter.exposedUntil < encounter.turn
     )
       return { type: 'interact', index }
     if (
@@ -71,63 +70,44 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       cost = 2
       if (encounter.kind === 'bastion' && encounter.pylons.some((pylon) => pylon.active))
         reason = 'armor'
-      else if (
-        hasCombatBuild(run.departure) &&
-        encounter.kind === 'bastion' &&
-        (encounter.exposedUntil ?? 0) < encounter.turn
-      )
+      else if (encounter.kind === 'bastion' && encounter.exposedUntil < encounter.turn)
         reason = 'window'
-      else if (
-        hasCombatBuild(run.departure) &&
-        encounter.kind === 'brood' &&
-        encounter.nests.length === 3
-      )
-        reason = 'nests'
+      else if (encounter.kind === 'brood' && encounter.nests.length === 3) reason = 'nests'
       else if (!adjacentSteps(run.game, run.player).includes(encounter.boss)) reason = 'adjacent'
       break
     case 'interact': {
-      if (hasCombatBuild(run.departure)) {
-        const core = encounter.kind === 'bastion' && action.index === encounter.boss
-        const objective =
-          encounter.kind === 'bastion'
-            ? encounter.pylons.some((pylon) => pylon.index === action.index && pylon.active)
-            : encounter.nests.includes(action.index)
-        if (core) {
-          if (encounter.pylons.some((pylon) => pylon.active)) reason = 'armor'
-          else if ((encounter.exposedUntil ?? 0) >= encounter.turn) reason = 'used'
-          else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
-          break
-        }
-        if (objective) {
-          if (run.game.cells[action.index]?.visibility !== 'revealed') reason = 'path'
-          else if (
-            run.player !== action.index &&
-            !adjacentSteps(run.game, run.player).includes(action.index)
-          )
-            reason = 'adjacent'
-          else if (
-            neighbors(run.game.config, action.index).filter(
-              (index) => run.game.cells[index]?.visibility === 'flagged',
-            ).length !== run.game.cells[action.index]?.adjacent
-          )
-            reason = 'flags'
-          break
-        }
+      const core = encounter.kind === 'bastion' && action.index === encounter.boss
+      const objective =
+        encounter.kind === 'bastion'
+          ? encounter.pylons.some((pylon) => pylon.index === action.index && pylon.active)
+          : encounter.nests.includes(action.index)
+      if (core) {
+        if (encounter.pylons.some((pylon) => pylon.active)) reason = 'armor'
+        else if (encounter.exposedUntil >= encounter.turn) reason = 'used'
+        else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
+        break
+      }
+      if (objective) {
+        if (run.game.cells[action.index]?.visibility !== 'revealed') reason = 'path'
+        else if (
+          run.player !== action.index &&
+          !adjacentSteps(run.game, run.player).includes(action.index)
+        )
+          reason = 'adjacent'
+        else if (
+          neighbors(run.game.config, action.index).filter(
+            (index) => run.game.cells[index]?.visibility === 'flagged',
+          ).length !== run.game.cells[action.index]?.adjacent
+        )
+          reason = 'flags'
+        break
       }
       if (encounter.kind === 'brood') {
         if (!occupied(run, action.index) || run.walls.includes(action.index)) reason = 'used'
         else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
         break
       }
-      const pylon = encounter.pylons.find((entry) => entry.index === action.index && entry.active)
-      if (!pylon) reason = 'used'
-      else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
-      else if (
-        neighbors(run.game.config, action.index).filter(
-          (index) => run.game.cells[index]?.visibility === 'flagged',
-        ).length !== run.game.cells[action.index]?.adjacent
-      )
-        reason = 'flags'
+      reason = 'used'
       break
     }
     case 'brace':

@@ -1,3 +1,4 @@
+import { CURRENT_DEPARTURE } from './helpers.js'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
@@ -10,15 +11,13 @@ import {
 import { applyTreasureRelics } from '../src/game/relic-effects.js'
 import { RELIC_PACKS, ownedRelicPacks, relicPool } from '../src/game/relic-packs.js'
 import { probeArea } from '../src/game/dungeon-discovery.js'
-import { decodeExpeditionSave } from '../src/persistence/variant-decoders.js'
-import { ExpeditionSession } from '../src/application/expedition-session.js'
-import { VariantRepository } from '../src/persistence/variant-repository.js'
+
 import { expansionRelicCopy, relicPackCopy } from '../src/ui/relic-expansion-copy.js'
-import { FakeRuntime, MemoryStorage } from './helpers.js'
+
 import type { Departure, Expedition, ExpeditionAction, Relic } from '../src/types/variants.js'
 
 const departure: Departure = {
-  rules: 'relics-v1',
+  ...CURRENT_DEPARTURE,
   difficulty: 'standard',
   seed: 42,
   profession: 'explorer',
@@ -67,66 +66,7 @@ test('theme purchases preserve old ownership and add affordable intermediate cho
   )
   assert.equal(relicPool(departure).length, 14)
   assert.equal(new Set(relicPool(departure)).size, 14)
-  assert.equal(relicPool({ ...departure, rules: 'health-v1' }).length, 6)
   assert.equal(relicPool({ ...departure, packs: [] }).length, 6)
-})
-
-test('new journals snapshot licensed themes; old journals retain their original pool', () => {
-  const storage = new MemoryStorage()
-  const camp = {
-    supplies: 12,
-    upgrades: ['surveyor', 'engineer', 'workshop', 'archive', ...departure.packs!],
-    completed: 3,
-  }
-  storage.setItem(
-    'minesweeper.variants.v1.expedition',
-    JSON.stringify({ version: 3, camp, journal: null, records: [] }),
-  )
-  let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
-  assert.ok(session.start('explorer', []))
-  assert.deepEqual(session.run?.departure.packs, departure.packs)
-  assert.equal(session.run?.health, 10)
-  assert.equal(session.run?.game.config.width, 11)
-  const expected = session.run
-  session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
-  assert.deepEqual(session.run, expected)
-  assert.equal(session.purchase('survey-notes'), false)
-  const old = { ...departure, rules: 'health-v1' as const, packs: undefined }
-  const save = { version: 3, camp, journal: { departure: old, actions: [] }, records: [] }
-  assert.equal(decodeExpeditionSave(JSON.stringify(save))?.journal?.departure.rules, 'health-v1')
-  assert.equal(
-    decodeExpeditionSave(
-      JSON.stringify({
-        ...save,
-        journal: { departure: { ...old, packs: ['survey-notes'] }, actions: [] },
-      }),
-    ),
-    null,
-  )
-  assert.equal(
-    decodeExpeditionSave(
-      JSON.stringify({
-        ...save,
-        journal: {
-          departure: { ...departure, packs: ['survey-notes', 'survey-notes'] },
-          actions: [],
-        },
-      }),
-    ),
-    null,
-  )
-  // Possession is checked again during replay, independently from valid catalog IDs.
-  storage.setItem(
-    'minesweeper.variants.v1.expedition',
-    JSON.stringify({
-      ...save,
-      camp: { ...camp, upgrades: ['archive'] },
-      journal: { departure, actions: [] },
-    }),
-  )
-  session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
-  assert.equal(session.run, null)
-  assert.equal(session.camp.supplies, 12)
 })
 
 test('survey reactions reward fresh information once and cannot be farmed by repeated probing', () => {
@@ -164,14 +104,14 @@ test('shield reconnaissance keeps mines locked and the rescue ribbon grants only
   })
   assert.ok(shielded.floorTriggers.includes('reactive-shell'))
   assert.ok(shielded.surveyedCells.length > 0)
-  assert.equal(shielded.health, 2)
+  assert.equal(shielded.health, 10)
   assert.equal(shielded.shields, 0)
   for (const index of shielded.confirmedMines) {
     assert.ok(shielded.game.cells[index]?.mine)
     assert.equal(shielded.game.cells[index]?.visibility, 'flagged')
   }
   const rescued = hitMine({ ...createExpedition(departure), relics: ['rescue-ribbon'] })
-  assert.equal(rescued.health, 1)
+  assert.equal(rescued.health, 5)
   assert.equal(rescued.shields, 1)
   assert.deepEqual(rescued.runTriggers, ['rescue-ribbon'])
   const consumed = hitMine(rescued)
@@ -185,7 +125,7 @@ test('second wind prevents one loss without exposing the board and survives floo
     health: 1,
     relics: ['second-wind', 'rescue-ribbon'],
   })
-  assert.equal(revived.health, 1)
+  assert.equal(revived.health, 5)
   assert.equal(revived.shields, 0)
   assert.equal(revived.phase, 'exploring')
   assert.notEqual(revived.game.phase, 'lost')
@@ -208,7 +148,7 @@ test('chest effects grant healing, scans and full-clear protection once per floo
     relics: ['field-dressing', 'supply-cache', 'cache-guard'] as readonly Relic[],
   }
   const first = applyTreasureRelics(before, { ...before, collected: [before.treasures[0]!] })
-  assert.equal(first.health, 2)
+  assert.equal(first.health, 6)
   assert.equal(first.scans, 1)
   assert.equal(first.shields, 0)
   assert.equal(applyTreasureRelics(first, first), first)
@@ -220,12 +160,12 @@ test('chest effects grant healing, scans and full-clear protection once per floo
     ...before,
     scans: 4,
     shields: 2,
-    health: 2,
+    health: 10,
     collected: before.treasures,
   })
   assert.equal(capped.scans, 4)
   assert.equal(capped.shields, 2)
-  assert.equal(capped.health, 2)
+  assert.equal(capped.health, 10)
   assert.equal(third.loot, before.loot)
 })
 

@@ -1,23 +1,18 @@
 import { available, claim } from './relic-effects.js'
 import { walkingPath } from './dungeon-path.js'
-import { combatStats, hasCombatBuild } from './combat-build.js'
+import { combatStats } from './combat-build.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 
 /** The first multi-step walk each turn saves one point; a single step still costs one. */
 export function walkingPointCost(run: Expedition, distance: number): number {
   const boots =
-    run.relics.includes('marching-boots') &&
-    run.departure.rules === 'relics-v1' &&
-    !run.encounter?.turnTriggers.includes('marching-boots')
+    run.relics.includes('marching-boots') && !run.encounter?.turnTriggers.includes('marching-boots')
   return Math.max(1, distance - Number(boots && distance >= 2))
 }
 
 /** The opening strike gains a bounded bonus; it never bypasses an active shield pylon. */
 export function strikeDamage(run: Expedition): number {
-  return (
-    combatStats(run).attack +
-    (available(run, 'duelist-edge') ? (hasCombatBuild(run.departure) ? 4 : 2) : 0)
-  )
+  return combatStats(run).attack + (available(run, 'duelist-edge') ? 4 : 0)
 }
 
 /** Apply combat rewards after charging an accepted action, before floor victory is settled. */
@@ -57,7 +52,7 @@ export function applyCombatRelics(
       ...result,
       encounter: {
         ...after.encounter,
-        points: Math.min(hasCombatBuild(before.departure) ? 5 : 4, after.encounter.points + 1),
+        points: Math.min(5, after.encounter.points + 1),
       },
     }
   }
@@ -74,7 +69,7 @@ export function applyCombatRelics(
       ...result,
       encounter: {
         ...after.encounter,
-        points: hasCombatBuild(before.departure) ? Math.min(5, after.encounter.points + 1) : 4,
+        points: Math.min(5, after.encounter.points + 1),
       },
     }
   }

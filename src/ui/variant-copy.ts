@@ -40,9 +40,9 @@ export function variantCopy(language: Language): VariantMessages {
     ),
     rowMines: t('mines total', '地雷总数', '地雷合計'),
     controls: t(
-      'Arrows / Home / End: move focus. Enter / Space: reveal. F or right-click: flag. On touch, choose Reveal or Flag before tapping a cell.',
-      '方向键 / Home / End 移动光标；Enter / 空格翻开；F 或右键插旗。触屏先选择翻开或插旗，再点击格子。',
-      '矢印 / Home / End で移動、Enter / Space で開く、F または右クリックで旗。タッチでは開く・旗を選んでからマスをタップ。',
+      'Arrows / Home / End: move focus. Enter / Space: reveal. F, right-click or touch-and-hold: flag. You can also choose Flag before tapping a cell.',
+      '方向键 / Home / End 移动光标；Enter / 空格翻开；F、右键或触屏长按插旗。也可选择插旗模式后点击格子。',
+      '矢印 / Home / End で移動、Enter / Space で開く。F・右クリック・長押しで旗。旗モードを選んでからタップすることもできます。',
     ),
     modes: t('Game mode', '玩法模式', 'ゲームモード'),
     classic: t('Classic', '标准扫雷', 'クラシック'),
@@ -73,21 +73,6 @@ export function variantCopy(language: Language): VariantMessages {
     probes: t('Probes', '探针', '探針'),
     scans: t('Scans', '扫描', '走査'),
     health: t('Health', '生命', '体力'),
-    healthHint: t(
-      'Mines cost 1 HP. Shields absorb first. Reach the exit to recover 1 HP.',
-      '踩雷扣 1 点生命，护盾优先抵挡；抵达出口恢复 1 点生命。',
-      '地雷で体力−1。シールドが優先して防御。出口で体力+1。',
-    ),
-    healthHelp: t(
-      'Start with 2 HP. Mines deal 1 damage, consuming a shield first. At zero HP the expedition ends. Reaching each exit restores 1 HP, up to your maximum. Survived mines receive locked gold flags and remain impassable. Health and up to 2 shields carry between floors.',
-      '初始 2 点生命。踩雷受到 1 点伤害，优先消耗护盾；生命归零则远征结束。每层抵达出口恢复 1 点生命，不超过上限。存活后踩中的雷会标上锁定金旗，无法通行。生命与护盾跨层保留，护盾上限 2。',
-      '初期体力は2。地雷で1ダメージ、シールドを先に消費し、体力0で遠征終了。各階の出口で体力が1回復し、上限は超えません。生き残ると地雷は固定の金の旗になり通行不可。体力とシールドは次の階へ引き継ぎ、シールド上限は2。',
-    ),
-    legacyHealth: t(
-      'Saved run: one unshielded mine ends the expedition. No exit healing.',
-      '此存档沿用旧规则：无护盾踩雷即结束，出口不回血。',
-      '旧保存ルール：シールドなしで地雷を踏むと終了。出口での回復なし。',
-    ),
     shields: t('Shields', '护盾', 'シールド'),
     probe: t('Probe 3×3 area', '探测 3×3 区域', '3×3範囲を探査'),
     scan: t('Scan a row', '扫描一行', '行を走査'),
@@ -257,57 +242,7 @@ export function professionCopy(language: Language, profession: Profession): Vari
 }
 
 /** Explain each temporary relic's exact effect and resource cap. */
-export function relicCopy(language: Language, relic: Relic, revised = false): VariantDescription {
-  if (revised && relic === 'reserve-watch')
-    return {
-      name: localized(language, 'Reserve watch', '储备怀表', '予備の懐中時計'),
-      note: localized(
-        language,
-        'Once per floor, end a turn with at least 1 AP left to add 1 AP next turn, up to 5.',
-        '每层一次，结束回合时保留至少 1 点行动力，下一回合额外 +1，总上限 5。',
-        '各階1回、行動力を1以上残して終了すると次のターン+1、上限5。',
-      ),
-    }
-  if (revised && relic === 'duelist-edge')
-    return {
-      name: localized(language, 'Duelist edge', '决斗锋刃', '決闘の刃'),
-      note: localized(
-        language,
-        'First strike each floor: +4 damage.',
-        '每层首次攻击伤害 +4。',
-        '各階の初撃ダメージ+4。',
-      ),
-    }
-  if (revised && relic === 'field-dressing')
-    return {
-      name: localized(language, 'Field dressing', '野战绷带', '野戦包帯'),
-      note: localized(
-        language,
-        'First chest each floor restores 5 health.',
-        '每层首个宝箱恢复 5 点生命。',
-        '各階の最初の宝箱で体力5回復。',
-      ),
-    }
-  if (revised && relic === 'second-wind')
-    return {
-      name: localized(language, 'Second wind', '绝境重生', '再起'),
-      note: localized(
-        language,
-        'Once per expedition, survive lethal damage with 5 health.',
-        '每局一次，受到致命伤害后以 5 点生命存活。',
-        '遠征中1回、致命傷を体力5で耐える。',
-      ),
-    }
-  if (revised && relic === 'breach-sigil')
-    return {
-      name: localized(language, 'Breach sigil', '破阵印记', '突破の印'),
-      note: localized(
-        language,
-        'First pylon disabled each floor refunds 1 AP, up to 5.',
-        '每层首次关闭机关返还 1 点行动力，总上限 5。',
-        '各階最初の装置停止で行動力1回復、上限5。',
-      ),
-    }
+export function relicCopy(language: Language, relic: Relic): VariantDescription {
   switch (relic) {
     case 'lantern':
       return {
@@ -418,18 +353,33 @@ export function equipmentCopy(language: Language, equipment: Equipment): Variant
   switch (equipment) {
     case 'probe':
       return {
-        name: localized(language, 'Probe kit · 1 pt', '探针包 · 1 点', '探針キット · 1 pt'),
-        note: localized(language, '+1 starting probe', '初始 +1 探针', '初期探針+1'),
+        name: localized(language, 'Probe kit', '探针包', '探針キット'),
+        note: localized(
+          language,
+          '1 loadout point. Starting probes +1.',
+          '装备预算 1 点。初始探针 +1。',
+          '装備1ポイント。初期探針+1。',
+        ),
       }
     case 'scanner':
       return {
-        name: localized(language, 'Scanner · 1 pt', '扫描仪 · 1 点', '走査器 · 1 pt'),
-        note: localized(language, '+1 starting scan', '初始 +1 扫描', '初期走査+1'),
+        name: localized(language, 'Scanner', '扫描仪', '走査器'),
+        note: localized(
+          language,
+          '1 loadout point. Starting scans +1.',
+          '装备预算 1 点。初始扫描 +1。',
+          '装備1ポイント。初期走査+1。',
+        ),
       }
     case 'guard':
       return {
-        name: localized(language, 'Guard · 2 pts', '护盾 · 2 点', '防護 · 2 pt'),
-        note: localized(language, '+1 starting shield', '初始 +1 护盾', '初期シールド+1'),
+        name: localized(language, 'Guard', '护盾', '防護'),
+        note: localized(
+          language,
+          '2 loadout points. Starting shields +1.',
+          '装备预算 2 点。初始护盾 +1。',
+          '装備2ポイント。初期シールド+1。',
+        ),
       }
     default:
       return combatPurchaseCopy(language, equipment)
@@ -452,4 +402,14 @@ export function difficultyCopy(language: Language, difficulty?: VariantDifficult
     default:
       return variantCopy(language).legacyDifficulty
   }
+}
+
+/** Explain update extraction without exposing storage versions or implementation details. */
+export function returnedToCampCopy(language: Language, supplies: number): string {
+  return localized(
+    language,
+    `Game updated. Your expedition returned to camp with ${supplies} supplies. Camp progress is preserved.`,
+    `游戏已更新，远征已返回营地，带回 ${supplies} 物资。营地成长已保留。`,
+    `ゲーム更新により遠征から帰還し、物資${supplies}を持ち帰りました。キャンプの成長は保持されています。`,
+  )
 }

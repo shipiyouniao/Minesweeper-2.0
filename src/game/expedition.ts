@@ -1,7 +1,7 @@
 import { upgradeCost } from './camp-progression.js'
 import { enterEncounter, isEncounterFloor } from './encounter-roster.js'
 import { occupied } from './dungeon-occupancy.js'
-import { actTacticalEncounter } from './tactical-encounter.js'
+import { actBattle } from './battle-turns.js'
 import { professionResources, professionOfferCount } from './professions.js'
 import { useProfessionSkill } from './profession-skills.js'
 import {
@@ -14,11 +14,9 @@ import {
   COMBAT_EQUIPMENT,
   damageExpedition,
   healExpedition,
-  hasCombatBuild,
   startingHealth,
   parseCombatEquipment,
 } from './combat-build.js'
-import { hasExpeditionHealth } from './expedition-rules.js'
 import { relicPool } from './relic-packs.js'
 import { applyDiscoveryRelics, applyDamageRelics, applyTreasureRelics } from './relic-effects.js'
 import { applyToolRelics, recordTravel } from './exploration-relics.js'
@@ -86,13 +84,7 @@ export function buyUpgrade(camp: Camp, upgrade: Upgrade): Camp {
 function createFloor(departure: Departure, floor: number): Expedition {
   const seed = (departure.seed + Math.imul(floor, 0x9e3779b9)) >>> 0
   const config = expeditionConfig(departure, floor)
-  const layout = generateDungeon(
-    seed,
-    config.mines,
-    departure.rules === 'original' ? 'compact' : 'flood',
-    config.width,
-    config.height,
-  )
+  const layout = generateDungeon(seed, config.mines, config.width, config.height)
   return {
     ...layout,
     encounter: null,
@@ -113,16 +105,8 @@ function createFloor(departure: Departure, floor: number): Expedition {
     probeReport: null,
     probes: 0,
     scans: 0,
-    health: hasCombatBuild(departure)
-      ? startingHealth(departure)
-      : hasExpeditionHealth(departure)
-        ? 2
-        : 1,
-    maxHealth: hasCombatBuild(departure)
-      ? startingHealth(departure)
-      : hasExpeditionHealth(departure)
-        ? 2
-        : 1,
+    health: startingHealth(departure),
+    maxHealth: startingHealth(departure),
     shields: 0,
     loot: 0,
     steps: 0,
@@ -224,12 +208,11 @@ function revealFrontier(run: Expedition, index: number): Expedition {
   const approached = collectTreasures({ ...run, player: path.at(-1) ?? run.player }, path)
 
   if (cell.mine) {
-    const vitality = damageExpedition(approached, hasCombatBuild(run.departure) ? 5 : 1)
+    const vitality = damageExpedition(approached, 5)
     const reacted = applyDamageRelics(approached, { ...approached, ...vitality }, index)
     const survived = reacted.health > 0
 
     // Survival confirms the hazard, never erases it or moves the player onto it.
-    // Historical departures have one HP, preserving their original lethal-hit behavior.
     return {
       ...reacted,
       game: survived
@@ -281,7 +264,7 @@ function completeFloor(run: Expedition): Expedition {
   return {
     ...run,
     // Leaving exploration makes this recovery a one-time reward, including the final exit.
-    health: hasExpeditionHealth(run.departure) ? healExpedition(run, 1).health : run.health,
+    health: healExpedition(run, 1).health,
     loot: run.loot + EXIT_SUPPLIES,
     phase: run.floor === expeditionFloors(run.departure) ? 'won' : 'reward',
     offers: relicOffers(run),
@@ -312,13 +295,7 @@ function advanceFloor(run: Expedition, relic?: Relic): Expedition {
     shields: Math.min(2, run.shields + Number(relic === 'aegis')),
   }
 
-  // Old journals keep their original visibility so later recorded flag/reveal actions remain valid.
-  if (relics.includes('compass')) {
-    result =
-      run.departure.rules === 'original'
-        ? { ...result, game: revealDungeon(result, result.exit) }
-        : scoutExit(result)
-  }
+  if (relics.includes('compass')) result = scoutExit(result)
 
   return result
 }
@@ -346,22 +323,6 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
     }
     case 'sweep':
       return scanDungeon(run, action.row)
-    // Replay historical count-only scans exactly, so subsequent old flag actions stay valid.
-    case 'scan':
-      if (
-        !Number.isInteger(action.row) ||
-        action.row < 0 ||
-        action.row >= run.game.config.height ||
-        run.scans === 0 ||
-        run.scannedRows.includes(action.row)
-      )
-        return run
-      return {
-        ...run,
-        scans: run.scans - 1,
-        scannedRows: [...run.scannedRows, action.row],
-        steps: run.steps + 1,
-      }
     case 'probe':
       return probeDungeon(run, action.index)
     default:
@@ -373,7 +334,7 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
 export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
   let next =
     run.phase === 'boss'
-      ? actTacticalEncounter(run, action, transitionExpedition)
+      ? actBattle(run, action, transitionExpedition)
       : transitionExpedition(run, action)
 
   // Combat completion is the only way to collect the guarded floor's ordinary exit reward.

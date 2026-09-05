@@ -1,5 +1,7 @@
 # Purchasable relic themes
 
+> Historical delivery notes: the [current combat table](tactical-builds.md) and [save policy](save-policy.md) supersede older numeric values and replay-compatibility statements below. Only the current expedition implementation is shipped.
+
 Ten theme licenses now provide twenty expansion effects, for seventeen camp purchases and a complete twenty-six-relic pool. This document records the original four themes; the remaining six are specified in [Journey and tactical relics](journey-relics.md). Seven gameplay purchases remain toward the minimum of twenty-four in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1).
 
 ## Purchases

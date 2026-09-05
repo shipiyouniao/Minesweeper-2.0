@@ -103,13 +103,6 @@ export function professionSkillStatus(language: Language, status: SkillAvailabil
         '这里没有新信息 · 移动或继续探索',
         '新情報なし · 移動または探索を続ける',
       )
-    case 'legacy':
-      return text(
-        language,
-        'Available on your next expedition',
-        '下次出征可用',
-        '次の遠征から利用可能',
-      )
     case 'inactive':
       return text(language, 'Available during exploration', '探索时可用', '探索中に使用可能')
   }

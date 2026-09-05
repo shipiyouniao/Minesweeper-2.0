@@ -1,3 +1,4 @@
+import { CURRENT_DEPARTURE } from './helpers.js'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createExpedition, frontierCells } from '../src/game/expedition.js'
@@ -6,13 +7,12 @@ import { difficultyRewardPercent, expeditionReward } from '../src/game/expeditio
 import { VARIANT_TIERS } from '../src/game/variant-difficulty.js'
 import { ExpeditionSession } from '../src/application/expedition-session.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
-import { decodeExpeditionSave } from '../src/persistence/variant-decoders.js'
+
 import type { Departure } from '../src/types/variants.js'
 import { FakeRuntime, MemoryStorage } from './helpers.js'
 
 const departure: Departure = {
-  rules: 'relics-v1',
-  rewards: 'difficulty-v1',
+  ...CURRENT_DEPARTURE,
   packs: [],
   difficulty: 'relaxed',
   seed: 0,
@@ -48,56 +48,10 @@ test('difficulty scales wins, extraction and retained defeat loot without paying
   }
 })
 
-test('reward revisions preserve historical journals and reject unsupported saved combinations', () => {
-  const { rewards: _rewards, ...historical } = departure
-  const run = createExpedition(historical)
-  const legacy = createExpedition({ ...departure, rules: 'health-v1' })
-  assert.equal(expeditionReward({ ...legacy, phase: 'won', loot: 11 }).total, 41)
-  assert.deepEqual(expeditionReward({ ...run, phase: 'won', loot: 11 }), {
-    base: 41,
-    bonus: 0,
-    total: 41,
-    percent: 100,
-  })
-  const save = {
-    version: 3,
-    camp: { supplies: 25, completed: 1, upgrades: ['archive'] },
-    journal: { departure, actions: [] },
-    records: [],
-  }
-  assert.equal(
-    decodeExpeditionSave(JSON.stringify(save))?.journal?.departure.rewards,
-    'difficulty-v1',
-  )
-  for (const rewards of ['future', null, 200]) {
-    assert.equal(
-      decodeExpeditionSave(
-        JSON.stringify({ ...save, journal: { departure: { ...departure, rewards }, actions: [] } }),
-      ),
-      null,
-    )
-  }
-  assert.equal(
-    decodeExpeditionSave(
-      JSON.stringify({
-        ...save,
-        journal: { departure: { ...departure, rules: 'health-v1', packs: undefined }, actions: [] },
-      }),
-    ),
-    null,
-  )
-  const decoded = decodeExpeditionSave(
-    JSON.stringify({ ...save, journal: { departure: historical, actions: [] } }),
-  )
-  assert.equal(decoded?.journal?.departure.rewards, undefined)
-  assert.deepEqual(decoded?.camp, save.camp)
-})
-
 test('session recovery keeps the captured reward rate and banks the bonus exactly once', () => {
   const storage = new MemoryStorage()
   let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.ok(session.start('explorer', [], 'abyss'))
-  assert.equal(session.run?.departure.rewards, 'difficulty-v1')
   for (let step = 0; step < 400 && session.run?.phase === 'exploring'; step++) {
     const run = session.run
     if (walkingPath(run, run.exit)) session.dispatch({ type: 'move', index: run.exit })

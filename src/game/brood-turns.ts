@@ -1,7 +1,7 @@
 import { neighbors } from './engine.js'
 import { adjacentSteps } from './variant-board.js'
 import { shuffled } from './variant-board.js'
-import { combatStats, hasCombatBuild } from './combat-build.js'
+import { combatStats } from './combat-build.js'
 import type { Expedition } from '../types/variants.js'
 import type { BroodEncounter, BroodOrder } from '../types/tactical.js'
 
@@ -13,14 +13,9 @@ function hatchlingStep(run: Expedition, origin: number, reserved: ReadonlySet<nu
   const queue = [origin]
   for (const current of queue) {
     if (adjacentSteps(run.game, current).includes(run.player)) {
-      if (hasCombatBuild(run.departure)) {
-        const path = [current]
-        while (path[0] !== origin) path.unshift(parents.get(path[0]!) ?? origin)
-        return path[Math.min(2, path.length - 1)]!
-      }
-      let next = current
-      while (parents.get(next) !== origin && next !== origin) next = parents.get(next) ?? origin
-      return next
+      const path = [current]
+      while (path[0] !== origin) path.unshift(parents.get(path[0]!) ?? origin)
+      return path[Math.min(2, path.length - 1)]!
     }
     for (const index of adjacentSteps(run.game, current)) {
       const cell = run.game.cells[index]
@@ -29,7 +24,7 @@ function hatchlingStep(run: Expedition, origin: number, reserved: ReadonlySet<nu
         reserved.has(index) ||
         index === run.player ||
         run.walls.includes(index) ||
-        (hasCombatBuild(run.departure) && encounter.nests.includes(index)) ||
+        encounter.nests.includes(index) ||
         encounter.webs.includes(index) ||
         encounter.eggs.some((egg) => egg.index === index) ||
         (encounter.hatchlings.includes(index) && index !== origin) ||
@@ -57,7 +52,7 @@ export function broodIntent(encounter: BroodEncounter): BroodEncounter {
   ]
   return {
     ...encounter,
-    intent: { kind: 'swarm', targets, damage: encounter.destroyedNests ? 5 : 1 },
+    intent: { kind: 'swarm', targets, damage: 5 },
   }
 }
 
@@ -76,7 +71,7 @@ export function forecastBrood(run: Expedition): Expedition {
     }
   })
   const queenTargets =
-    encounter.turn % (hasCombatBuild(run.departure) && encounter.nests.length === 0 ? 2 : 3) === 0
+    encounter.turn % (encounter.nests.length === 0 ? 2 : 3) === 0
       ? [run.player, ...neighbors(run.game.config, run.player)].filter(
           (index) => !run.walls.includes(index),
         )
@@ -99,19 +94,17 @@ export function advanceBrood(run: Expedition): Expedition {
   }
   // At most three living creatures plus eggs. Occupied nests never displace the player or another entity.
   if (encounter.turn % 3 === 0) {
-    const sites = hasCombatBuild(run.departure)
-      ? shuffled(
-          [...new Set(encounter.nests.flatMap((nest) => neighbors(run.game.config, nest)))].filter(
-            (index) =>
-              run.game.cells[index]?.visibility === 'revealed' &&
-              !run.game.cells[index]?.mine &&
-              !run.walls.includes(index) &&
-              !encounter.webs.includes(index) &&
-              !encounter.nests.includes(index),
-          ),
-          run.departure.seed ^ encounter.turn,
-        )
-      : encounter.nests
+    const sites = shuffled(
+      [...new Set(encounter.nests.flatMap((nest) => neighbors(run.game.config, nest)))].filter(
+        (index) =>
+          run.game.cells[index]?.visibility === 'revealed' &&
+          !run.game.cells[index]?.mine &&
+          !run.walls.includes(index) &&
+          !encounter.webs.includes(index) &&
+          !encounter.nests.includes(index),
+      ),
+      run.departure.seed ^ encounter.turn,
+    )
     for (const index of sites) {
       if (eggs.length + hatchlings.length >= 3) break
       if (
@@ -132,16 +125,14 @@ export function advanceBrood(run: Expedition): Expedition {
       points: 3,
       braced: false,
       turnTriggers: [],
-      ...(hasCombatBuild(run.departure)
-        ? { health: Math.min(encounter.maxHealth, encounter.health + encounter.nests.length * 3) }
-        : {}),
+      health: Math.min(encounter.maxHealth, encounter.health + encounter.nests.length * 3),
     },
   }
   return forecastBrood({
     ...result,
     encounter: {
       ...result.encounter!,
-      points: hasCombatBuild(run.departure) ? combatStats(result).actions : 3,
+      points: combatStats(result).actions,
     },
   })
 }

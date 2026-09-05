@@ -1,3 +1,4 @@
+import { CURRENT_DEPARTURE } from './helpers.js'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { actExpedition, createExpedition, frontierCells } from '../src/game/expedition.js'
@@ -39,7 +40,13 @@ test('entrances and stairs vary, with fully expanded blank openings and useful b
   const exits = new Set<number>()
   const directions = new Set<string>()
   for (let seed = 0; seed < 200; seed++) {
-    const run = createExpedition({ seed, profession: 'explorer', equipment: [], archive: false })
+    const run = createExpedition({
+      ...CURRENT_DEPARTURE,
+      seed,
+      profession: 'explorer',
+      equipment: [],
+      archive: false,
+    })
     entrances.add(run.entrance)
     exits.add(run.exit)
     directions.add(
@@ -74,7 +81,13 @@ test('entrances and stairs vary, with fully expanded blank openings and useful b
 })
 
 test('area probes clip correctly, mark every mine and safe tile, and never teleport or change clues', () => {
-  const run = createExpedition({ seed: 31, profession: 'explorer', equipment: [], archive: false })
+  const run = createExpedition({
+    ...CURRENT_DEPARTURE,
+    seed: 31,
+    profession: 'explorer',
+    equipment: [],
+    archive: false,
+  })
   for (let center = 0; center < 81; center++) {
     const area = run.game.cells.flatMap((_, index) =>
       Math.abs((index % 9) - (center % 9)) <= 1 &&
@@ -124,7 +137,13 @@ test('area probes clip correctly, mark every mine and safe tile, and never telep
 })
 
 test('probe corrects false flags and upgrades true guesses; ordinary flags still toggle', () => {
-  let run = createExpedition({ seed: 9, profession: 'explorer', equipment: [], archive: false })
+  let run = createExpedition({
+    ...CURRENT_DEPARTURE,
+    seed: 9,
+    profession: 'explorer',
+    equipment: [],
+    archive: false,
+  })
   const safe = run.game.cells.findIndex(
     (cell, index) => !cell.mine && cell.visibility === 'hidden' && !run.walls.includes(index),
   )
@@ -150,7 +169,7 @@ test('shield and probe confirmations survive replay and all flag commands remain
   storage.setItem(
     'minesweeper.variants.v1.expedition',
     JSON.stringify({
-      version: 3,
+      version: 4,
       camp: { supplies: 0, completed: 0, upgrades: ['engineer'] },
       records: [],
       journal: null,

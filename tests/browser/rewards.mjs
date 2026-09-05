@@ -1,3 +1,4 @@
+import { EXPEDITION_RULES_REVISION } from '../../.native/tests/src/persistence/expedition-format.js'
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { mkdir } from 'node:fs/promises'
@@ -19,27 +20,30 @@ const output = new URL('../../.native/reward-ui/', import.meta.url)
 const storageKey = 'minesweeper.variants.v1.expedition'
 
 /** Build real accepted journals; only the fixture driver uses mine truth to reach an exit. */
-function fixture(profession = 'explorer', floor = 1, encounters = 'brood-v1', phase = 'reward') {
+function fixture(profession = 'explorer', floor = 1, phase = 'reward') {
   const departure = {
     seed: 43,
     difficulty: 'abyss',
-    rules: 'relics-v1',
-    professions: 'skills-v1',
-    rewards: 'difficulty-v1',
     profession,
     equipment: [],
     archive: false,
     packs: [],
-    ...(encounters ? { encounters } : {}),
+    training: [],
+    battleRelics: false,
   }
   let run = createExpedition(departure)
   const actions = []
   /** Snapshot the accepted prefix so the final action can be played through the browser. */
   const save = () => ({
-    version: 3,
+    version: 4,
     camp: { supplies: 0, completed: 0, upgrades: profession === 'explorer' ? [] : [profession] },
     records: [],
-    journal: { departure, actions: [...actions] },
+    journal: {
+      rulesRevision: EXPEDITION_RULES_REVISION,
+      returnSupplies: expeditionEarnings({ ...run, phase: 'retreated' }),
+      departure,
+      actions: [...actions],
+    },
   })
   let previous = save()
   for (let step = 0; step < 5000; step++) {
@@ -81,9 +85,9 @@ function fixture(profession = 'explorer', floor = 1, encounters = 'brood-v1', ph
 const regular = fixture()
 const archaeologist = fixture('archaeologist')
 const boss = fixture('explorer', 4)
-const exhausted = fixture('explorer', 7, null)
-const victory = fixture('explorer', 12, 'brood-v1', 'won')
-const defeat = fixture('explorer', 1, 'brood-v1', 'lost')
+const exhausted = fixture('explorer', 7)
+const victory = fixture('explorer', 12, 'won')
+const defeat = fixture('explorer', 1, 'lost')
 assert.equal(exhausted.run.offers.length, 0)
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({

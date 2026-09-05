@@ -1,15 +1,10 @@
+import { EXPEDITION_RULES_REVISION } from '../../.native/tests/src/persistence/expedition-format.js'
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { mkdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
-import {
-  actExpedition,
-  createExpedition,
-  frontierCells,
-  UPGRADES,
-} from '../../.native/tests/src/game/expedition.js'
-import { walkingPath } from '../../.native/tests/src/game/dungeon-path.js'
-import { defeatBattle } from '../../.native/tests/tests/battle-helpers.js'
+import { UPGRADES } from '../../.native/tests/src/game/expedition.js'
+import { battleFixture } from './battle-fixtures.mjs'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
@@ -17,69 +12,7 @@ const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
 const key = 'minesweeper.variants.v1.expedition'
 const output = new URL('../../.native/battle-ui/', import.meta.url)
 
-/** Reach an actual checkpoint with legal actions, then retain critical public-player prefixes. */
-function fixture(seed) {
-  const departure = {
-    seed,
-    difficulty: 'standard',
-    profession: 'explorer',
-    equipment: [],
-    archive: false,
-    rules: 'relics-v1',
-    professions: 'skills-v1',
-    encounters: 'tactics-v2',
-    rewards: 'difficulty-v1',
-    packs: [],
-    training: [],
-    battleRelics: false,
-  }
-  let run = createExpedition(departure)
-  const actions = []
-  const camp = { supplies: 0, upgrades: [], completed: 0 }
-  /** Copy the coherent journal before a real browser action. */
-  const save = () => ({
-    version: 3,
-    camp,
-    records: [],
-    journal: { departure, actions: [...actions] },
-  })
-  for (let count = 0; run.phase !== 'boss' && count < 1500; count++) {
-    const action =
-      run.phase === 'reward'
-        ? { type: 'relic', relic: run.offers[0] }
-        : walkingPath(run, run.exit)
-          ? { type: 'move', index: run.exit }
-          : {
-              type: 'reveal',
-              index: [...frontierCells(run)].find((index) => !run.game.cells[index].mine),
-            }
-    const next = actExpedition(run, action)
-    assert.notEqual(next, run)
-    actions.push(action)
-    run = next
-  }
-  assert.equal(run.phase, 'boss')
-  const entered = { run, save: save() }
-  let objective
-  let prime
-  let last
-  for (const action of defeatBattle(run)) {
-    const next = actExpedition(run, action)
-    if (
-      !objective &&
-      (next.encounter.event === 'disabled' || next.encounter.event === 'nest-destroyed')
-    )
-      objective = { save: save(), action, run, next }
-    if (!prime && next.encounter.event === 'window-opened')
-      prime = { save: save(), action, run, next }
-    if (next.phase !== 'boss') last = { save: save(), action, run, next }
-    actions.push(action)
-    run = next
-  }
-  return { entered, objective, prime, last }
-}
-
-const fixtures = [fixture(42), fixture(43)]
+const fixtures = [battleFixture(42), battleFixture(43)]
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || undefined,
@@ -182,7 +115,7 @@ try {
   }
   await seed(
     {
-      version: 3,
+      version: 4,
       camp: { supplies: 6000, upgrades: ['workshop', 'steel-blade', 'medical-kit'], completed: 0 },
       journal: null,
       records: [],
@@ -198,7 +131,7 @@ try {
   await page.locator('[data-control="start"]').click()
   assert.match(await page.locator('.vitality-heading').innerText(), /13\/13/)
   const started = await journal()
-  assert.equal(started.departure.encounters, 'tactics-v2')
+  assert.equal(started.rulesRevision, EXPEDITION_RULES_REVISION)
   assert.deepEqual(started.departure.training, ['vitality-training', 'weapon-training'])
   assert.deepEqual(started.departure.equipment, ['steel-blade', 'medical-kit'])
   await page.reload()

@@ -1,5 +1,6 @@
+import { returnedToCampCopy } from './variant-copy.js'
 import { battleText } from './combat-build-copy.js'
-import { hasCombatBuild, battleThreat } from '../game/combat-build.js'
+import { battleThreat } from '../game/combat-build.js'
 import { frontierCells } from '../game/expedition.js'
 import { probeArea } from '../game/dungeon-discovery.js'
 import { translations } from '../i18n.js'
@@ -161,17 +162,20 @@ export class VariantView {
     paused: boolean,
     atMoveLimit: boolean,
     migrated = false,
+    returnedSupplies: number | null = null,
   ): void {
     const common = translations[this.language]
     this.status.textContent = atMoveLimit
       ? variantCopy(this.language).journalLimit
-      : !available
-        ? common.storageOff
-        : recovered
-          ? variantCopy(this.language).recovered
-          : migrated
-            ? variantCopy(this.language).migrated
-            : ''
+      : returnedSupplies !== null && available
+        ? returnedToCampCopy(this.language, returnedSupplies)
+        : !available
+          ? common.storageOff
+          : recovered
+            ? variantCopy(this.language).recovered
+            : migrated
+              ? variantCopy(this.language).migrated
+              : ''
     const button = this.root.querySelector<HTMLButtonElement>('[data-control="sound"]')
     if (button) {
       button.innerHTML = icon(sound ? 'volume' : 'volumeOff')
@@ -267,14 +271,14 @@ export class VariantView {
     if (hint)
       hint.textContent = plan
         ? tacticalPlanCopy(this.language, plan)
-        : tacticalCopy(this.language, run.encounter?.kind, hasCombatBuild(run.departure)).hint
+        : tacticalCopy(this.language, run.encounter?.kind).hint
   }
 
   /** Overlay public mechanisms and frozen attack warnings without exposing covered clues. */
   private markTactical(run: Expedition): void {
     const encounter = run.encounter
     if (!encounter) return
-    const t = tacticalCopy(this.language, encounter.kind, hasCombatBuild(run.departure))
+    const t = tacticalCopy(this.language, encounter.kind)
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-cell]')) {
       const index = Number(cell.dataset['cell'])
       const pylon =
@@ -326,9 +330,7 @@ export class VariantView {
 
       if (run.phase === 'boss' && encounter.intent.targets.includes(index)) {
         cell.classList.add('tactical-danger')
-        const danger = hasCombatBuild(run.departure)
-          ? `${t.danger} · ${battleThreat(encounter, index)}`
-          : t.danger
+        const danger = `${t.danger} · ${battleThreat(encounter, index)}`
         cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${danger}`)
         cell.title = danger
       }

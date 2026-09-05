@@ -1,3 +1,5 @@
+import { EXPEDITION_RULES_REVISION } from '../src/persistence/expedition-format.js'
+import { CURRENT_DEPARTURE } from './helpers.js'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
@@ -14,12 +16,12 @@ import { professionSkillArea, professionSkillAvailability } from '../src/game/pr
 import { inspectArea } from '../src/game/dungeon-discovery.js'
 import { ExpeditionSession } from '../src/application/expedition-session.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
-import { decodeExpeditionSave } from '../src/persistence/variant-decoders.js'
+
 import { professionSkillCopy, professionSkillStatus } from '../src/ui/profession-skill-copy.js'
 import { professionSprite, professionSkillSprite } from '../src/ui/profession-presentation.js'
 import { parseVariantCommand } from '../src/ui/variant-input.js'
 import { FakeRuntime, MemoryStorage } from './helpers.js'
-import type { Departure, Expedition, Profession } from '../src/types/variants.js'
+import type { Expedition, Profession } from '../src/types/variants.js'
 import type { VariantDifficulty } from '../src/types/variant-difficulty.js'
 
 /** Use real shuffled layouts and current revision markers throughout the skill fixtures. */
@@ -29,9 +31,7 @@ function start(
   seed = 42,
 ): Expedition {
   return createExpedition({
-    rules: 'relics-v1',
-    professions: 'skills-v1',
-    rewards: 'difficulty-v1',
+    ...CURRENT_DEPARTURE,
     packs: [],
     difficulty,
     seed,
@@ -101,7 +101,7 @@ test('new allocations trade tools for protection without wasting a guard at the 
   for (const entry of PROFESSIONS) {
     const run = start(entry)
     assert.ok(run.probes <= 2 && run.scans <= 2 && run.shields <= 2)
-    assert.equal(run.health, 2)
+    assert.equal(run.health, 10)
   }
   const camp = { ...EMPTY_CAMP, upgrades: UPGRADES }
   assert.deepEqual(
@@ -300,7 +300,7 @@ test('new career journals restore skill expenditure and settlement remains atomi
     storage.setItem(
       'minesweeper.variants.v1.expedition',
       JSON.stringify({
-        version: 3,
+        version: 4,
         camp: { supplies: 27, upgrades: UPGRADES, completed: 2 },
         journal: null,
         records: [],
@@ -308,7 +308,6 @@ test('new career journals restore skill expenditure and settlement remains atomi
     )
     let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
     assert.equal(session.start(entry, []), true)
-    assert.equal(session.run?.departure.professions, 'skills-v1')
     for (let step = 0; step < 300; step++) {
       const run: Expedition | null = session.run
       assert.ok(run)
@@ -332,58 +331,17 @@ test('new career journals restore skill expenditure and settlement remains atomi
   }
 })
 
-test('historical journals retain three-role offers and reject new skill actions during replay', () => {
-  const current = start('explorer').departure
-  const old: Departure = {
-    rules: 'relics-v1',
-    rewards: 'difficulty-v1',
-    packs: [],
-    difficulty: 'standard',
-    seed: 42,
-    profession: 'explorer',
-    equipment: [],
-    archive: false,
-  }
-  const run = createExpedition(old)
-  assert.equal(professionSkillAvailability(run), 'legacy')
-  assert.equal(actExpedition(run, { type: 'skill' }), run)
-  assert.equal(clearFloor(run).offers.length, 3)
-  const save = {
-    version: 3,
-    camp: { ...EMPTY_CAMP, upgrades: UPGRADES },
-    journal: { departure: old, actions: [] },
-    records: [],
-  }
-  assert.ok(decodeExpeditionSave(JSON.stringify(save)))
-  for (const departure of [
-    { ...old, professions: 'future' },
-    { ...old, profession: 'archaeologist' },
-    { ...current, rules: 'health-v1', packs: undefined },
-  ]) {
-    assert.equal(
-      decodeExpeditionSave(JSON.stringify({ ...save, journal: { departure, actions: [] } })),
-      null,
-    )
-  }
-  const storage = new MemoryStorage()
-  storage.setItem(
-    'minesweeper.variants.v1.expedition',
-    JSON.stringify({ ...save, journal: { departure: old, actions: [{ type: 'skill' }] } }),
-  )
-  const repository = new VariantRepository(storage)
-  assert.equal(new ExpeditionSession(repository, new FakeRuntime()).run, null)
-  assert.equal(repository.recovered, true)
-})
-
 test('new career ownership is checked during replay and repeated saved skills invalidate the journal', () => {
   for (const authorized of [true, false]) {
     const storage = new MemoryStorage()
     storage.setItem(
       'minesweeper.variants.v1.expedition',
       JSON.stringify({
-        version: 3,
+        version: 4,
         camp: { supplies: 99, upgrades: authorized ? ['alchemist'] : [], completed: 0 },
         journal: {
+          rulesRevision: EXPEDITION_RULES_REVISION,
+          returnSupplies: 0,
           departure: start('alchemist').departure,
           actions: authorized ? [{ type: 'skill' }, { type: 'skill' }] : [],
         },
@@ -406,14 +364,7 @@ test('all careers have distinct pawn and skill artwork, translated copy and fini
       const copy = professionSkillCopy(language, entry)
       assert.ok(copy.name.length > 0 && copy.note.length > 10)
     }
-    for (const status of [
-      'ready',
-      'used',
-      'legacy',
-      'inactive',
-      'no-information',
-      'resources',
-    ] as const) {
+    for (const status of ['ready', 'used', 'inactive', 'no-information', 'resources'] as const) {
       assert.ok(professionSkillStatus(language, status).length > 0)
     }
   }

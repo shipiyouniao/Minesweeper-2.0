@@ -1,13 +1,11 @@
 import { inspectArea, probeArea } from './dungeon-discovery.js'
-import { healExpedition, hasCombatBuild } from './combat-build.js'
+import { healExpedition } from './combat-build.js'
 import type { Expedition, ExpeditionAction, Relic } from '../types/variants.js'
 
-/** Each charge belongs to a floor or run, and old journals never activate new effects. */
+/** Each charge belongs to a floor or run and can be claimed only once. */
 export function available(run: Expedition, relic: Relic, wholeRun = false): boolean {
   return (
-    run.departure.rules === 'relics-v1' &&
-    run.relics.includes(relic) &&
-    !(wholeRun ? run.runTriggers : run.floorTriggers).includes(relic)
+    run.relics.includes(relic) && !(wholeRun ? run.runTriggers : run.floorTriggers).includes(relic)
   )
 }
 
@@ -28,7 +26,7 @@ export function applyDamageRelics(
   if (result.health === 0 && available(result, 'second-wind', true)) {
     result = {
       ...claim(result, 'second-wind', true),
-      health: hasCombatBuild(result.departure) ? 5 : 1,
+      health: 5,
     }
   }
   if (result.health === 0) return result

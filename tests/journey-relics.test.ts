@@ -1,3 +1,6 @@
+import { EXPEDITION_RULES_REVISION } from '../src/persistence/expedition-format.js'
+import { solveBattle } from '../src/game/battle-arena.js'
+import { CURRENT_DEPARTURE } from './helpers.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
@@ -7,7 +10,7 @@ import {
   EMPTY_CAMP,
   buyUpgrade,
 } from '../src/game/expedition.js'
-import { enterBastion } from '../src/game/bastion-arena.js'
+import { enterBattle } from '../src/game/battle-arena.js'
 import { recordTravel } from '../src/game/exploration-relics.js'
 import { walkingPath } from '../src/game/dungeon-path.js'
 import { inspectArea, probeArea } from '../src/game/dungeon-discovery.js'
@@ -25,16 +28,13 @@ import {
 import { ExpeditionSession } from '../src/application/expedition-session.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
 import { MemoryStorage, FakeRuntime } from './helpers.js'
-import { defeatBastion } from './bastion-helpers.js'
+import { defeatBattle as defeatBastion } from './battle-helpers.js'
 import type { Departure, Expedition, ExpeditionAction, Relic } from '../src/types/variants.js'
 
 const departure: Departure = {
+  ...CURRENT_DEPARTURE,
   seed: 42,
   difficulty: 'abyss',
-  rules: 'relics-v1',
-  encounters: 'bastion-v1',
-  professions: 'skills-v1',
-  rewards: 'difficulty-v1',
   profession: 'explorer',
   equipment: [],
   archive: true,
@@ -43,7 +43,7 @@ const departure: Departure = {
 
 /** Supply an owned build to an isolated arena rule test, without altering terrain or intentions. */
 function arena(relics: readonly Relic[] = []): Expedition {
-  return enterBastion({ ...createExpedition(departure), floor: 4, relics })
+  return enterTestBastion({ ...createExpedition(departure), floor: 4, relics })
 }
 
 /** Position a rule fixture adjacent to a public mechanism and retain the original mine layout. */
@@ -51,7 +51,7 @@ function calibratedArena(relics: readonly Relic[]): Expedition {
   const run = arena(relics)
   assert.ok(run.encounter?.kind === 'bastion')
   const pylon = run.encounter!.pylons[0]!.index
-  return { ...inspectArea(run, probeArea(run.game.config, pylon)), player: pylon - 1 }
+  return { ...inspectArea(run, probeArea(run.game.config, pylon)), player: pylon }
 }
 
 test('six themes add twelve distinct choices with a stepped price table and complete locale coverage', () => {
@@ -84,9 +84,9 @@ test('six themes add twelve distinct choices with a stepped price table and comp
   assert.equal(buyUpgrade(camp, 'cartographer-charts'), camp)
 })
 
-test('historical pack snapshots keep their fourteen-entry pool and order', () => {
-  const old = { ...departure, packs: RELIC_PACKS.slice(0, 4).map((pack) => pack.id) }
-  assert.deepEqual(relicPool(old), [
+test('owned theme subsets keep their deterministic catalog pool and order', () => {
+  const subset = { ...departure, packs: RELIC_PACKS.slice(0, 4).map((pack) => pack.id) }
+  assert.deepEqual(relicPool(subset), [
     'lantern',
     'lens',
     'aegis',
@@ -102,7 +102,7 @@ test('historical pack snapshots keep their fourteen-entry pool and order', () =>
     'supply-cache',
     'cache-guard',
   ])
-  assert.deepEqual(relicPool({ ...old, packs: [] }), [
+  assert.deepEqual(relicPool({ ...subset, packs: [] }), [
     'lantern',
     'lens',
     'aegis',
@@ -120,7 +120,7 @@ test('travel thread counts unique safe squares, preserves room totals and never 
   const travelled = recordTravel({ ...run, scans: 0 }, path)
   assert.equal(travelled.scans, 1)
   assert.equal(recordTravel(travelled, [...path].reverse()).scans, 1)
-  const again = enterBastion(travelled)
+  const again = enterTestBastion(travelled)
   assert.equal(again.priorTravel, 12)
   assert.equal(recordTravel(again, [again.player]).scans, 1)
   assert.equal(recordTravel({ ...run, scans: 4 }, path).scans, 4)
@@ -154,7 +154,6 @@ test('one walk surveys the first physical chest even when treasure storage has t
   }
   const expected = inspectArea(run, probeArea(run.game.config, first))
   const moved = actExpedition(run, { type: 'move', index: target })
-
   assert.deepEqual(moved.collected, [first, target])
   assert.deepEqual(moved.confirmedMines, expected.confirmedMines)
   assert.deepEqual(moved.surveyedCells, expected.surveyedCells)
@@ -260,7 +259,7 @@ test('shelter cloak requires ending outside the warning and grants one shield pe
   assert.equal(stationary.shields, 0)
   const escaped = actExpedition(run, { type: 'move', index: run.player - run.game.config.width })
   const protectedRun = actExpedition(escaped, { type: 'end-turn' })
-  assert.equal(protectedRun.health, 2)
+  assert.equal(protectedRun.health, 10)
   assert.equal(protectedRun.shields, 1)
   assert.ok(protectedRun.floorTriggers.includes('shelter-cloak'))
   const safe = { ...protectedRun, player: protectedRun.player - 1 }
@@ -290,19 +289,20 @@ test('duelist edge cannot bypass armor, improves the first strike and reports ac
     encounter: {
       ...run.encounter!,
       pylons: run.encounter!.pylons.map((p) => ({ ...p, active: false })),
+      exposedUntil: 999,
     },
   }
   const first = actExpedition(ready, { type: 'attack' })
-  assert.equal(first.encounter!.health, 4)
-  assert.equal(first.encounter!.lastDamage, 4)
+  assert.equal(first.encounter!.health, run.encounter!.health - 9)
+  assert.equal(first.encounter!.lastDamage, 9)
   for (const language of ['en', 'zh', 'ja'] as const)
-    assert.ok(tacticalEventCopy(language, first.encounter!).includes('4'))
+    assert.ok(tacticalEventCopy(language, first.encounter!).includes('9'))
   const second = actExpedition(
     { ...first, encounter: { ...first.encounter!, points: 3 } },
     { type: 'attack' },
   )
-  assert.equal(second.encounter!.health, 2)
-  assert.equal(second.encounter!.lastDamage, 2)
+  assert.equal(second.encounter!.health, first.encounter!.health - 5)
+  assert.equal(second.encounter!.lastDamage, 5)
 })
 
 test('reserve watch carries one spare point once and AP display shows the bonus', () => {
@@ -381,10 +381,10 @@ test('new themes persist ownership and replay real reward choices through a comp
     run.relics.some((id) => RELIC_PACKS.slice(4).some((p) => p.relics.some((r) => r === id))),
   )
   const save = {
-    version: 3,
+    version: 4,
     camp: { supplies: 123, completed: 8, upgrades: UPGRADES },
     records: [],
-    journal: { departure, actions },
+    journal: { rulesRevision: EXPEDITION_RULES_REVISION, returnSupplies: 0, departure, actions },
   }
   assert.ok(decodeExpeditionSave(JSON.stringify(save)))
   storage.setItem('minesweeper.variants.v1.expedition', JSON.stringify(save))
@@ -397,3 +397,9 @@ test('new themes persist ownership and replay real reward choices through a comp
   assert.equal(restored.camp.supplies, bank)
   assert.equal(restored.run, null)
 })
+
+/** Construct the current guardian for relic interaction scenarios. */
+function enterTestBastion(run: Expedition): Expedition {
+  const battle = enterBattle(run, 'bastion')
+  return { ...battle, game: solveBattle(battle.game, battle.walls, battle.entrance) }
+}

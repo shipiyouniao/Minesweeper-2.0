@@ -1,5 +1,7 @@
 # Journey and tactical relic themes
 
+> Historical delivery notes: the [current combat table](tactical-builds.md) and [save policy](save-policy.md) supersede older numeric values and replay-compatibility statements below. Only the current expedition implementation is shipped.
+
 Six new theme licenses extend the camp from eleven to **seventeen gameplay purchases** and the complete reward pool from fourteen to **twenty-six relics**. They fill the remaining six themes proposed in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). The seven remaining purchases are equipment licenses and the refit bench; they are not implemented by this batch.
 
 Buying a theme permanently adds two options to future expedition reward offers. It does not grant both relics immediately, increase the number of relics taken per floor, or change a departure already in progress. Theme order is canonical, independent of purchase order. Currency and existing ownership are preserved.

@@ -31,6 +31,7 @@ Open [the local game](http://127.0.0.1:5173/Minesweeper-2.0/). The default compi
 - Use objects to own session state, clocks, DOM elements, and listener lifetimes. Release timers and listeners when an object is disposed.
 - Declare named interfaces and type aliases in module-scoped `src/types/*.d.ts` files and consume them with `import type`.
 - Use concrete object models and small unions. Use a discriminated union when a command kind determines its payload. Application code should not introduce `any`, `unknown`, mapped types, or conditional types.
+- When changing expedition replay behavior, bump `EXPEDITION_RULES_REVISION` and follow the [save policy](docs/save-policy.md). Retire old runs at the persistence boundary; remove obsolete game-rule branches. Preserve camp progress and checkpoint extraction in the same write.
 - Parse stored JSON and browser input at their boundaries. Construct validated domain values; do not cast arbitrary input to a domain interface.
 - Give named functions, methods, and lifecycle callbacks a documentation comment explaining their purpose. Add internal comments for decisions and invariants, and blank lines between validation, calculation, effects, and return values.
 - Keep the interface minimal and keyboard accessible. Preserve covered-cell privacy in both visible markup and accessibility labels. Update all three translations when changing message contracts.

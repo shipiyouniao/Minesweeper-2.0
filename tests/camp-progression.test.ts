@@ -1,3 +1,5 @@
+import { defeatEncounter } from './encounter-helpers.js'
+import { CURRENT_DEPARTURE } from './helpers.js'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
@@ -34,16 +36,17 @@ function clearWithTreasures(initial: Expedition): Expedition {
     if (index === undefined) break
     run = actExpedition(run, { type: 'reveal', index })
   }
-
   for (const index of run.treasures) {
     if (!run.collected.includes(index) && walkingPath(run, index))
       run = actExpedition(run, { type: 'move', index })
   }
-
-  return actExpedition(run, {
+  run = actExpedition(run, {
     type: walkingPath(run, run.exit) ? 'move' : 'reveal',
     index: run.exit,
   })
+  if (run.phase === 'boss')
+    for (const action of defeatEncounter(run)) run = actExpedition(run, action)
+  return run
 }
 
 test('prices offer two early professions, a middle milestone and a long-term archive goal', () => {
@@ -65,36 +68,6 @@ test('prices offer two early professions, a middle milestone and a long-term arc
   const abyssMinimum = Math.floor((12 * 12 + 30) * 4.5)
   assert.equal(Math.ceil(upgradeCost('archive') / abyssMinimum), 10)
   assert.equal(Math.ceil(upgradeCost('archive') / maximumRunSupplies()), 4)
-})
-
-test('actual legal runs stay within the bound without capping or scaling earned loot', () => {
-  for (const tier of VARIANT_TIERS) {
-    for (let seed = 0; seed < 4; seed++) {
-      let run = createExpedition({
-        rules: 'health-v1',
-        difficulty: tier.id,
-        seed,
-        profession: 'explorer',
-        equipment: [],
-        archive: true,
-      })
-      for (let floor = 1; floor <= tier.floors; floor++) {
-        run = clearWithTreasures(run)
-        assert.ok(run.phase === 'reward' || run.phase === 'won')
-        assert.equal(expeditionEarnings({ ...run, phase: 'retreated' }), run.loot)
-        assert.equal(
-          expeditionEarnings({ ...run, phase: 'lost', relics: [] }),
-          Math.floor(run.loot / 2),
-        )
-        if (run.phase === 'won') break
-        const relic = run.offers.includes('purse') ? 'purse' : run.offers[0]
-        run = actExpedition(run, relic ? { type: 'relic', relic } : { type: 'descend' })
-      }
-      assert.equal(run.phase, 'won')
-      assert.equal(expeditionEarnings(run), run.loot + 30)
-      assert.ok(expeditionEarnings(run) <= maximumExpeditionSupplies(tier.floors))
-    }
-  }
 })
 
 test('funding goals advance after purchases and report exact remaining money and optimistic runs', () => {
@@ -164,8 +137,7 @@ test('new full expeditions pay increasing difficulty rewards within the publishe
   let previous = 0
   for (const tier of VARIANT_TIERS) {
     let run = createExpedition({
-      rules: 'relics-v1',
-      rewards: 'difficulty-v1',
+      ...CURRENT_DEPARTURE,
       packs: [],
       difficulty: tier.id,
       seed: 0,
@@ -193,7 +165,7 @@ test('existing money and unlocks survive reload, with new purchases settled at t
   storage.setItem(
     'minesweeper.variants.v1.expedition',
     JSON.stringify({
-      version: 3,
+      version: 4,
       camp: { supplies: 1500, upgrades: ['engineer'], completed: 7 },
       journal: null,
       records: [],

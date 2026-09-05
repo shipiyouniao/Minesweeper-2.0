@@ -1,12 +1,9 @@
+import { EXPEDITION_RULES_REVISION } from '../src/persistence/expedition-format.js'
+import { CURRENT_DEPARTURE } from './helpers.js'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { damageVitality, healVitality } from '../src/game/vitality.js'
 import { actExpedition, createExpedition, frontierCells } from '../src/game/expedition.js'
-import {
-  expeditionConfig,
-  expeditionFloors,
-  VARIANT_TIERS,
-} from '../src/game/variant-difficulty.js'
 import { approachPath, walkingPath } from '../src/game/dungeon-path.js'
 import { ExpeditionSession } from '../src/application/expedition-session.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
@@ -17,7 +14,7 @@ import type { Departure, Expedition, ExpeditionAction } from '../src/types/varia
 import { FakeRuntime, MemoryStorage } from './helpers.js'
 
 const departure: Departure = {
-  rules: 'health-v1',
+  ...CURRENT_DEPARTURE,
   difficulty: 'standard',
   seed: 31,
   profession: 'explorer',
@@ -31,7 +28,6 @@ function hazardAction(run: Expedition): ExpeditionAction {
   const frontier = [...frontierCells(run)].filter((index) => index !== run.exit)
   const index = frontier.find((candidate) => run.game.cells[candidate]?.mine) ?? frontier[0]
   assert.notEqual(index, undefined, 'a hazard must be reachable in this fixture')
-
   return { type: 'reveal', index: index ?? -1 }
 }
 
@@ -44,7 +40,6 @@ function hitMine(initial: Expedition): Expedition {
     assert.equal(next.phase, 'exploring')
     run = next
   }
-
   throw new Error('No hazard reached')
 }
 
@@ -57,7 +52,6 @@ function clearFloor(initial: Expedition): Expedition {
     assert.notEqual(index, undefined)
     run = actExpedition(run, { type: 'reveal', index: index ?? -1 })
   }
-
   assert.notEqual(run.phase, 'exploring')
   return run
 }
@@ -65,7 +59,7 @@ function clearFloor(initial: Expedition): Expedition {
 test('damage spends shields first, spills into HP, and cannot underflow or resurrect', () => {
   const initial = { health: 2, maxHealth: 2, shields: 2 }
   assert.deepEqual(damageVitality(initial, 1), { health: 2, maxHealth: 2, shields: 1 })
-  assert.deepEqual(damageVitality(initial, 3), { health: 1, maxHealth: 2, shields: 0 })
+  assert.deepEqual(damageVitality(initial, 11), { health: 1, maxHealth: 2, shields: 0 })
   const dead = damageVitality(initial, 100)
   assert.deepEqual(dead, { health: 0, maxHealth: 2, shields: 0 })
   assert.equal(damageVitality(dead, 1), dead)
@@ -85,26 +79,14 @@ test('healing caps at the current maximum and preserves shields', () => {
   assert.equal(healVitality(healed, 1), healed)
 })
 
-test('all five health departures preserve difficulty geometry and floor counts', () => {
-  for (const tier of VARIANT_TIERS) {
-    const current: Departure = { ...departure, difficulty: tier.id }
-    const previous: Departure = { ...current, rules: 'difficulty-v1' }
-    assert.equal(expeditionFloors(current), tier.floors)
-    for (let floor = 1; floor <= tier.floors; floor++)
-      assert.deepEqual(expeditionConfig(current, floor), expeditionConfig(previous, floor))
-    assert.deepEqual(createExpedition(current).game, createExpedition(previous).game)
-    assert.equal(createExpedition(current).health, 2)
-  }
-})
-
 test('surviving mines spend shields then HP and keep truthful locked flags and a safe player', () => {
   let run = createExpedition({ ...departure, profession: 'engineer' })
   const terrain = run.game.cells.map((cell) => [cell.mine, cell.adjacent])
   run = hitMine(run)
-  assert.equal(run.health, 2)
+  assert.equal(run.health, 10)
   assert.equal(run.shields, 0)
   run = hitMine(run)
-  assert.equal(run.health, 1)
+  assert.equal(run.health, 5)
   assert.equal(run.phase, 'exploring')
   assert.equal(run.confirmedMines.length, 2)
   assert.equal(run.game.cells[run.player]?.mine, false)
@@ -113,7 +95,6 @@ test('surviving mines spend shields then HP and keep truthful locked flags and a
     run.game.cells.map((cell) => [cell.mine, cell.adjacent]),
     terrain,
   )
-
   for (const index of run.confirmedMines) {
     assert.equal(run.game.cells[index]?.visibility, 'flagged')
     assert.equal(approachPath(run, index), null)
@@ -129,17 +110,16 @@ test('surviving mines spend shields then HP and keep truthful locked flags and a
 
 test('each exit heals once, then health carries through relic and empty-catalog descent', () => {
   let run = hitMine(createExpedition(departure))
-  assert.equal(run.health, 1)
+  assert.equal(run.health, 5)
   const reward = clearFloor(run)
-  assert.equal(reward.health, 2)
+  assert.equal(reward.health, 10)
   assert.equal(reward.phase, 'reward')
   assert.equal(actExpedition(reward, { type: 'move', index: reward.exit }), reward)
   const relic = reward.offers[0]
   assert.ok(relic)
   run = actExpedition(reward, { type: 'relic', relic })
-  assert.equal(run.health, 2)
-  assert.equal(run.maxHealth, 2)
-
+  assert.equal(run.health, 10)
+  assert.equal(run.maxHealth, 10)
   // Reward fixtures also guard against an accidental full heal during floor construction.
   const woundedReward: Expedition = { ...reward, health: 1, offers: [] }
   const descended = actExpedition(woundedReward, { type: 'descend' })
@@ -150,32 +130,7 @@ test('each exit heals once, then health carries through relic and empty-catalog 
     1,
   )
   assert.equal(actExpedition(woundedReward, { type: 'retreat' }).health, 1)
-  assert.equal(clearFloor(createExpedition(departure)).health, 2)
-  const final = clearFloor({ ...hitMine(createExpedition(departure)), floor: 5 })
-  assert.equal(final.phase, 'won')
-  assert.equal(final.health, 2)
-})
-
-test('all historical rules keep one-hit death, shield behavior, and no exit healing', () => {
-  for (const rules of [undefined, 'original', 'scouting', 'difficulty-v1'] as const) {
-    const old: Departure = {
-      seed: departure.seed,
-      profession: 'explorer',
-      equipment: [],
-      archive: false,
-      ...(rules ? { rules } : {}),
-      ...(rules === 'difficulty-v1' ? { difficulty: 'standard' as const } : {}),
-    }
-    const run = createExpedition(old)
-    assert.equal(run.health, 1)
-    assert.equal(run.maxHealth, 1)
-    assert.equal(hitMine(run).phase, 'lost')
-    const shielded = hitMine(createExpedition({ ...old, profession: 'engineer' }))
-    assert.equal(shielded.health, 1)
-    assert.equal(shielded.shields, 0)
-    assert.equal(shielded.phase, 'exploring')
-    assert.equal(clearFloor({ ...run, maxHealth: 2 }).health, 1)
-  }
+  assert.equal(clearFloor(createExpedition(departure)).health, 10)
 })
 
 test('journal replay restores damage and locks, then settles death exactly once', () => {
@@ -183,7 +138,6 @@ test('journal replay restores damage and locks, then settles death exactly once'
   const runtime = new FakeRuntime()
   let session = new ExpeditionSession(new VariantRepository(storage), runtime)
   assert.ok(session.start('explorer', []))
-  assert.equal(session.run?.departure.rules, 'relics-v1')
   for (let step = 0; step < 121 && session.run?.health === 10; step++)
     assert.ok(session.dispatch(hazardAction(session.run)))
   assert.equal(session.run?.health, 5)
@@ -206,14 +160,21 @@ test('journal replay restores damage and locks, then settles death exactly once'
 test('health journals require a tier and reconstruct resources instead of trusting snapshots', () => {
   const storage = new MemoryStorage()
   const save = {
-    version: 3,
+    version: 4,
     camp: { supplies: 9, upgrades: [], completed: 0 },
     records: [],
-    journal: { departure, actions: [], health: 999, shields: 999 },
+    journal: {
+      rulesRevision: EXPEDITION_RULES_REVISION,
+      returnSupplies: 0,
+      departure,
+      actions: [],
+      health: 999,
+      shields: 999,
+    },
   }
   storage.setItem(saveKey, JSON.stringify(save))
   const session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
-  assert.equal(session.run?.health, 2)
+  assert.equal(session.run?.health, 10)
   assert.equal(session.run?.shields, 0)
   for (const difficulty of [undefined, 'custom', 9])
     assert.equal(
@@ -221,11 +182,13 @@ test('health journals require a tier and reconstruct resources instead of trusti
         JSON.stringify({
           ...save,
           journal: {
+            rulesRevision: EXPEDITION_RULES_REVISION,
+            returnSupplies: 0,
             departure: { ...departure, difficulty },
             actions: [],
           },
         }),
-      ),
+      )?.journal,
       null,
     )
   assert.equal(
@@ -233,7 +196,6 @@ test('health journals require a tier and reconstruct resources instead of trusti
       JSON.stringify({
         version: 1,
         seed: 31,
-        rules: 'health-v1',
         difficulty: 'standard',
         actions: [],
         records: [],
@@ -251,7 +213,6 @@ test('exit recovery replays once and carries into the next floor after refresh',
   for (let step = 0; step < 121 && session.run?.health === 10; step++)
     session.dispatch(hazardAction(session.run))
   assert.equal(session.run?.health, 5)
-
   for (let step = 0; step < 121; step++) {
     const run = session.run
     assert.ok(run)
@@ -281,49 +242,11 @@ test('exit recovery replays once and carries into the next floor after refresh',
   assert.equal(session.run?.health, 10)
 })
 
-test('historical shield-hit journals resume without converting to the health rules', () => {
-  for (const rules of ['original', 'scouting', 'difficulty-v1'] as const) {
-    const storage = new MemoryStorage()
-    storage.setItem(
-      saveKey,
-      JSON.stringify({
-        version: 3,
-        camp: { supplies: 9, upgrades: ['engineer'], completed: 0 },
-        records: [],
-        journal: {
-          departure: {
-            rules,
-            seed: 31,
-            profession: 'engineer',
-            equipment: [],
-            archive: false,
-            ...(rules === 'difficulty-v1' ? { difficulty: 'standard' } : {}),
-          },
-          actions: [],
-        },
-      }),
-    )
-    let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
-    for (let step = 0; step < 121 && session.run?.shields === 1; step++)
-      assert.ok(session.dispatch(hazardAction(session.run)))
-    assert.equal(session.run?.health, 1)
-    assert.equal(session.run?.shields, 0)
-    const expected = session.run
-    session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
-    assert.deepEqual(session.run, expected)
-    assert.equal(session.run?.departure.rules, rules)
-    for (let step = 0; step < 121 && session.run?.phase === 'exploring'; step++)
-      session.dispatch(hazardAction(session.run))
-    assert.equal(session.run?.health, 0)
-    assert.equal(session.records[0]?.outcome, 'lost')
-  }
-})
-
 test('resource cues describe only visible changes and use distinct bounded sound plans', () => {
   const before = { health: 2, maxHealth: 2, shields: 1 }
   assert.equal(cueForVitality(before, before), null)
   assert.equal(cueForVitality(before, damageVitality(before, 1)), 'shield')
-  const wounded = damageVitality(before, 2)
+  const wounded = damageVitality(before, 6)
   assert.equal(cueForVitality(before, wounded), 'damage')
   assert.equal(cueForVitality(wounded, healVitality(wounded, 1)), 'heal')
   assert.equal(cueForVitality(wounded, damageVitality(wounded, 1)), 'loss')
@@ -331,16 +254,12 @@ test('resource cues describe only visible changes and use distinct bounded sound
   assert.notDeepEqual(notesForCue('heal'), notesForCue('shield'))
 })
 
-test('health markup exposes HP and shields together and distinguishes historical rules in every locale', () => {
+test('health markup exposes HP and shields together in every locale', () => {
   for (const language of ['en', 'zh', 'ja'] as const) {
-    const markup = vitalityTemplate(language, { health: 2, maxHealth: 2, shields: 1 }, false)
+    const markup = vitalityTemplate(language, { health: 2, maxHealth: 2, shields: 1 })
     assert.ok(markup.includes('2/2<span class="vitality-shields"> (+1)</span>'))
     assert.ok(markup.includes('max="2" value="2"'))
-    assert.notEqual(
-      markup,
-      vitalityTemplate(language, { health: 2, maxHealth: 2, shields: 1 }, true),
-    )
-    const dead = vitalityTemplate(language, { health: 0, maxHealth: 2, shields: 0 }, false)
+    const dead = vitalityTemplate(language, { health: 0, maxHealth: 2, shields: 0 })
     assert.ok(dead.includes('max="2" value="0"'))
     assert.ok(!dead.includes('(+0)'))
   }

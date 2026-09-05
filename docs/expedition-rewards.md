@@ -1,5 +1,7 @@
 # Expedition difficulty rewards
 
+> Historical delivery notes: the [current combat table](tactical-builds.md) and [save policy](save-policy.md) supersede older numeric values and replay-compatibility statements below. Only the current expedition implementation is shipped.
+
 Harder expeditions pay more both because they have more floors and because their final settlement receives a difficulty multiplier. The opening balance target is around 200 supplies for a reference Relaxed clear; later tiers increase the reward for larger boards and longer runs.
 
 ## Income scenarios

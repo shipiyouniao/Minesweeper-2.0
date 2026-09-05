@@ -38,6 +38,11 @@ export class DungeonToolController {
     return performance.now() < this.suppressUntil
   }
 
+  /** Give an explicitly selected tool priority over a cell's touch-hold gesture. */
+  get armed(): boolean {
+    return this.selected !== null
+  }
+
   /** Consume a tap or native keyboard activation as an explicit cell target. */
   activate(index: number): boolean {
     if (!this.selected) return false

@@ -34,7 +34,6 @@ import { spriteImage } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
 import type { DungeonSprite, DungeonTool } from '../types/dungeon-ui.js'
 import { campProgressTemplate } from './camp-progress-template.js'
-import { hasExpeditionHealth } from '../game/expedition-rules.js'
 import { parseRelicPack } from '../game/relic-packs.js'
 import { relicSprite } from './relic-presentation.js'
 import {
@@ -47,7 +46,7 @@ import { escapeHtml } from './presentation.js'
 import { tacticalTemplate } from './tactical-template.js'
 import { tacticalCopy } from './tactical-copy.js'
 import { combatSprite, battleHealthCopy } from './combat-build-copy.js'
-import { hasCombatBuild, parseCombatPurchase } from '../game/combat-build.js'
+import { parseCombatPurchase } from '../game/combat-build.js'
 import { icon } from '../icons.js'
 
 /** Render one accessible choice card; its ID is a finite catalog value. */
@@ -172,7 +171,7 @@ export function expeditionTemplate(
                 : t.exploring
   const relics = run.relics
     .map((relic) => {
-      const description = relicCopy(language, relic, hasCombatBuild(run.departure))
+      const description = relicCopy(language, relic)
       let used = ''
 
       if (run.runTriggers.includes(relic)) used = t.relicUsedRun
@@ -186,7 +185,7 @@ export function expeditionTemplate(
 
   return `<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
     <p class="variant-note reward-rate">${t.rewardRate} ×${rate}</p>
-    ${vitalityTemplate(language, run, !hasExpeditionHealth(run.departure), !run.encounter && !hasCombatBuild(run.departure))}${hasCombatBuild(run.departure) && !run.encounter ? `<p class="variant-note">${battleHealthCopy(language)}</p>` : ''}
+    ${vitalityTemplate(language, run)}${!run.encounter ? `<p class="variant-note">${battleHealthCopy(language)}</p>` : ''}
     ${tacticalTemplate(language, run)}
     ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
@@ -213,13 +212,7 @@ export function relicRewardTemplate(language: Language, run: Expedition): string
   const t = variantCopy(language)
   const choices = run.offers
     .map((relic) =>
-      choice(
-        `relic:${relic}`,
-        relicCopy(language, relic, hasCombatBuild(run.departure)),
-        false,
-        false,
-        relicSprite(relic),
-      ),
+      choice(`relic:${relic}`, relicCopy(language, relic), false, false, relicSprite(relic)),
     )
     .join('')
 
