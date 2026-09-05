@@ -1,9 +1,10 @@
 import type { Expedition, ExpeditionAction, Relic } from './variants.js'
 import type { Config } from './game.js'
 import type { BattleMechanism, CombatEquipment } from './combat-build.js'
+import type { MirrorEncounter } from './mirror.js'
 
 /** Released encounter families have independent rules and artwork. */
-export type EncounterKind = 'bastion' | 'brood'
+export type EncounterKind = 'bastion' | 'brood' | 'mirror'
 
 /** A public control protects one armor section until its surrounding flags are calibrated. */
 export interface ShieldPylon {
@@ -47,6 +48,8 @@ export interface TacticalState {
     | 'hatchling-cleared'
     | 'nest-destroyed'
     | 'window-opened'
+    | 'shifted'
+    | 'twin-fallen'
 }
 
 /** Armor controls belong to the guardian's encounter variant. */
@@ -85,7 +88,7 @@ export interface BroodEncounter extends TacticalState {
 }
 
 /** A finite encounter union keeps each boss's state and rules explicit. */
-export type TacticalEncounter = BastionEncounter | BroodEncounter
+export type TacticalEncounter = BastionEncounter | BroodEncounter | MirrorEncounter
 
 /** Difficulty changes arena scale and boss endurance without changing action costs. */
 export interface EncounterTier {
@@ -106,6 +109,8 @@ export type TacticalReason =
   | 'used'
   | 'window'
   | 'nests'
+  | 'mirror-seal'
+  | 'reflection'
 
 /** A known route and its cost, before committing any animation or game state. */
 export interface TacticalPlan {

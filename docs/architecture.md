@@ -130,3 +130,7 @@ Expedition envelope version 4 separates the current replay journal from permanen
 `battle-presentation.ts` renders current combat help, stats and build sources. The view owns cell overlays and input lifetimes. `combat-build.d.ts` declares the concrete contracts; no serialized combat snapshot is trusted. See the [rules and balance table](tactical-builds.md).
 
 `VariantInput` captures the original cell for a 450 ms touch/pen hold. Movement, scrolling, pointer cancellation, multitouch and teardown cancel pending flags; release clicks and native context menus cannot double-apply a completed hold. An armed inventory tool keeps priority. Touch-induced focus updates the roving tab stop without replacing the above-board route description, so its height cannot shift the tapped row. Mouse hover and keyboard navigation still preview routes. Browser panning remains enabled.
+
+### Mirror room ownership
+
+`mirror-generation.ts` accepts connected pairs through a public two-board solver. `mirror-battle.ts` implements the twin-specific state transitions and frozen forecasts; common AP, damage and build effects stay in the tactical orchestrator. `mirror-state.ts` snapshots only room-local terrain, discoveries and position. It counts both realms for discovery/travel thresholds and propagates confirmed mine-exclusion knowledge. Shared resources and trigger limits never enter the parked snapshot. Contracts live in `src/types/mirror.d.ts`; the comparison board derives a read-only view. See [Mirror Twins](mirror-twins.md).

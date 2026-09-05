@@ -3,6 +3,7 @@ import { adjacentSteps } from './variant-board.js'
 import { neighbors } from './engine.js'
 import { walkingPointCost } from './combat-relics.js'
 import { occupied } from './dungeon-occupancy.js'
+import { oppositeMirror } from './mirror-state.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 
@@ -10,6 +11,14 @@ import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 export function tacticalCellAction(run: Expedition, index: number): ExpeditionAction {
   const encounter = run.encounter
   if (encounter) {
+    if (
+      encounter.kind === 'mirror' &&
+      encounter[encounter.active].seal.active &&
+      encounter[encounter.active].seal.index === index &&
+      run.game.cells[index]?.visibility === 'revealed' &&
+      (run.player === index || adjacentSteps(run.game, run.player).includes(index))
+    )
+      return { type: 'interact', index }
     if (
       encounter.kind === 'bastion' &&
       encounter.pylons.some((pylon) => pylon.index === index && pylon.active)
@@ -68,7 +77,19 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
     }
     case 'attack':
       cost = 2
-      if (encounter.kind === 'bastion' && encounter.pylons.some((pylon) => pylon.active))
+      if (encounter.kind === 'mirror' && encounter[encounter.active].health === 0) reason = 'used'
+      else if (
+        encounter.kind === 'mirror' &&
+        encounter[oppositeMirror(encounter.active)].seal.active
+      )
+        reason = 'mirror-seal'
+      else if (
+        encounter.kind === 'mirror' &&
+        encounter[oppositeMirror(encounter.active)].health > 0 &&
+        encounter.lastStruck === encounter.active
+      )
+        reason = 'reflection'
+      else if (encounter.kind === 'bastion' && encounter.pylons.some((pylon) => pylon.active))
         reason = 'armor'
       else if (encounter.kind === 'bastion' && encounter.exposedUntil < encounter.turn)
         reason = 'window'
@@ -80,7 +101,10 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       const objective =
         encounter.kind === 'bastion'
           ? encounter.pylons.some((pylon) => pylon.index === action.index && pylon.active)
-          : encounter.nests.includes(action.index)
+          : encounter.kind === 'brood'
+            ? encounter.nests.includes(action.index)
+            : encounter[encounter.active].seal.active &&
+              encounter[encounter.active].seal.index === action.index
       if (core) {
         if (encounter.pylons.some((pylon) => pylon.active)) reason = 'armor'
         else if (encounter.exposedUntil >= encounter.turn) reason = 'used'
@@ -112,6 +136,9 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
     }
     case 'brace':
       if (encounter.braced) reason = 'used'
+      break
+    case 'shift':
+      if (encounter.kind !== 'mirror') reason = 'inactive'
       break
     case 'flag':
     case 'end-turn':

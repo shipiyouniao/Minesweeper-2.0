@@ -1,5 +1,6 @@
 import { inspectArea, probeArea } from './dungeon-discovery.js'
 import { healExpedition } from './combat-build.js'
+import { roomDiscoveries } from './mirror-state.js'
 import type { Expedition, ExpeditionAction, Relic } from '../types/variants.js'
 
 /** Each charge belongs to a floor or run and can be claimed only once. */
@@ -79,10 +80,10 @@ export function applyDiscoveryRelics(
     (after.phase !== 'exploring' && after.phase !== 'boss')
   )
     return after
-  const discoveries = after.confirmedMines.length - before.confirmedMines.length
+  const discoveries = roomDiscoveries(after) - roomDiscoveries(before)
   if (discoveries <= 0) return after
   let result = after
-  const floorDiscoveries = result.confirmedMines.length + (result.encounter?.priorDiscoveries ?? 0)
+  const floorDiscoveries = roomDiscoveries(result) + (result.encounter?.priorDiscoveries ?? 0)
   if (floorDiscoveries >= 3 && available(result, 'field-notes')) {
     result = { ...claim(result, 'field-notes'), probes: Math.min(4, result.probes + 1) }
   }

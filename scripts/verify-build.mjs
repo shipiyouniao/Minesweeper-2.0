@@ -23,6 +23,10 @@ for (const file of [
 ])
   await stat(file)
 for (const sprite of [
+  'mirror-dawn',
+  'mirror-dusk',
+  'mirror-seal',
+  'mirror-rift',
   'bastion',
   'brood-queen',
   'brood-defeated',

@@ -2,6 +2,8 @@
 
 The current tactical encounters connect mine deduction, regional objectives and a bounded character build. Incompatible saved expeditions return to camp under the [save policy](save-policy.md); historical combat engines are no longer shipped.
 
+The third family, [Mirror Twins](mirror-twins.md), shares these stats and reactions while adding two realms, crossed seals and alternating attacks. Its generation and turn rhythm are documented separately.
+
 ## Design goals
 
 - Mine clues must matter to victory. The player reveals each objective, identifies its neighboring mines and calibrates it from the same or an adjacent square.
@@ -95,4 +97,4 @@ The automated acceptance player reads public clues and forecasts, derives safe c
 
 ![Revised guardian encounter](screenshots/tactical-bastion-desktop.png)
 
-Further human feedback may change timing and prices in a new rules revision. Refit, the other three boss families and broader mode expansion remain separate future work.
+Further human feedback may change timing and prices in a new rules revision. Refit, the remaining two boss families and broader mode expansion remain separate future work.

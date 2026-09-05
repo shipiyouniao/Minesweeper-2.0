@@ -2,6 +2,8 @@
 
 The game supports **one current expedition implementation**. When a rules update invalidates an active expedition, the explorer returns to camp. Permanent supplies, purchases, completion counts and records are preserved. Old generators, combat resolvers, reward tables and localized rule variants are removed instead of retained for replay.
 
+The Mirror Twins release uses rules revision **2**. Revision-1 version-4 journals bank their recorded extraction checkpoint and return to camp without replay.
+
 ## This transition
 
 Envelope versions 1–3 do not store an independent extraction value. Each active journal in these formats is retired with **200 supplies of compensation**. This includes the most recently released `tactics-v2` journals. A present, non-null journal receives compensation even if its obsolete payload is malformed; its contents are never replayed. A camp-only or already-settled save receives no compensation. Retirement does not count as a victory or defeat and does not add a fabricated result.

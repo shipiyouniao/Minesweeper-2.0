@@ -41,10 +41,8 @@ export function applyCombatRelics(
     result = claim(result, 'duelist-edge')
   if (
     action.type === 'interact' &&
-    after.encounter.kind === 'bastion' &&
-    before.encounter.kind === 'bastion' &&
-    after.encounter.pylons.filter((pylon) => pylon.active).length <
-      before.encounter.pylons.filter((pylon) => pylon.active).length &&
+    after.encounter.event === 'disabled' &&
+    (after.encounter.kind === 'bastion' || after.encounter.kind === 'mirror') &&
     available(result, 'breach-sigil')
   ) {
     result = claim(result, 'breach-sigil')

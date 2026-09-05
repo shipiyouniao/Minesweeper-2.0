@@ -20,6 +20,7 @@ export type VariantCommand =
         | 'attack'
         | 'brace'
         | 'end-turn'
+        | 'shift'
         | 'help'
         | 'records'
         | 'retreat'

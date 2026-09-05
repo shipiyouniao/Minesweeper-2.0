@@ -2,6 +2,7 @@ import { upgradeCost } from './camp-progression.js'
 import { enterEncounter, isEncounterFloor } from './encounter-roster.js'
 import { occupied } from './dungeon-occupancy.js'
 import { actBattle } from './battle-turns.js'
+import { shareMirrorKnowledge } from './mirror-state.js'
 import { professionResources, professionOfferCount } from './professions.js'
 import { useProfessionSkill } from './profession-skills.js'
 import {
@@ -345,7 +346,7 @@ export function actExpedition(run: Expedition, action: ExpeditionAction): Expedi
       shields: Math.min(2, next.shields + 1),
     })
   }
-  return applyDiscoveryRelics(run, applyToolRelics(run, next, action), action)
+  return shareMirrorKnowledge(applyDiscoveryRelics(run, applyToolRelics(run, next, action), action))
 }
 
 /** Settle secured loot: success/extraction retain everything, defeat retains a bounded fraction. */

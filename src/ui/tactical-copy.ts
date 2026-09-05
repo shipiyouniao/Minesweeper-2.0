@@ -8,6 +8,18 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
   const zh = language === 'zh'
   const ja = language === 'ja'
   switch (plan.reason) {
+    case 'mirror-seal':
+      return zh
+        ? '先关闭另一侧镜域的封印'
+        : ja
+          ? '先に反対側の封印を停止'
+          : 'Disable the seal in the opposite realm first'
+    case 'reflection':
+      return zh
+        ? '反射中 · 切换镜域，攻击另一位双子'
+        : ja
+          ? '反射中 · 転移してもう一方を攻撃'
+          : 'Reflection active · shift and strike the other twin'
     case 'window':
       return zh
         ? '靠近并点击核心，花 1 点启动'
@@ -78,6 +90,18 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
         ? '調整失敗 · 5ダメージ'
         : 'Calibration failed · 5 damage'
   switch (encounter.event) {
+    case 'shifted':
+      return zh
+        ? '已切换镜域 · 继续本回合'
+        : ja
+          ? '転移完了 · 同じターンを続行'
+          : 'Realm shifted · the turn continues'
+    case 'twin-fallen':
+      return zh
+        ? '一位双子已倒下 · 幸存者后续攻击增强'
+        : ja
+          ? '片方を撃破 · 生存者の次の攻撃が強化'
+          : 'One twin defeated · the survivor’s future attacks intensify'
     case 'nest-destroyed':
       return zh
         ? '巢穴已摧毁 · 停止补卵，女王护甲与回血降低'

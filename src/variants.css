@@ -330,6 +330,105 @@ html:has(.expedition-dialog[open]) {
   gap: 24px;
   margin: 24px 0;
 }
+.mirror-boards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  min-width: 0;
+}
+.mirror-active,
+.mirror-comparison {
+  min-width: 0;
+}
+.mirror-playbar {
+  position: sticky;
+  top: 8px;
+  z-index: 8;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 4px 18px #182c3510;
+}
+.mirror-playbar > span {
+  font-size: 0.8em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.mirror-active .variant-board-panel {
+  border-color: #bd944a;
+}
+.mirror-active[data-realm='dusk'] .variant-board-panel {
+  border-color: #7199ba;
+}
+.mirror-comparison .variant-board-panel {
+  border-style: dashed;
+}
+.mirror-heading {
+  grid-column: 1 / -1;
+}
+.mirror-heading h3 {
+  margin: 0 0 12px;
+}
+.mirror-enemies {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.mirror-enemy {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.mirror-enemy.is-active {
+  border-color: #bd944a;
+}
+.mirror-enemy.is-active[data-realm='dusk'] {
+  border-color: #7199ba;
+}
+.mirror-enemy > img {
+  width: clamp(48px, 4vw, 80px);
+  height: clamp(48px, 4vw, 80px);
+}
+.mirror-enemy p {
+  color: var(--muted);
+  font-size: 0.85em;
+  margin: 5px 0 0;
+}
+.mirror-fallen > .dungeon-sprite,
+.mirror-inert > .dungeon-sprite,
+.mirror-enemy.is-defeated > img {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+.mirror-parked {
+  position: relative;
+}
+.mirror-parked .landmark-player {
+  opacity: 0.65;
+}
+@media (min-width: 1450px) {
+  .mirror-boards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mirror-boards .board-viewport {
+    padding: 16px;
+  }
+}
+@media (max-width: 480px) {
+  .mirror-enemies {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .variant-board-panel {
   border: 1px solid var(--line);
   border-radius: 16px;
