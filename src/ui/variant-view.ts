@@ -1,3 +1,5 @@
+import { battleText } from './combat-build-copy.js'
+import { hasCombatBuild, battleThreat } from '../game/combat-build.js'
 import { frontierCells } from '../game/expedition.js'
 import { probeArea } from '../game/dungeon-discovery.js'
 import { translations } from '../i18n.js'
@@ -265,14 +267,14 @@ export class VariantView {
     if (hint)
       hint.textContent = plan
         ? tacticalPlanCopy(this.language, plan)
-        : tacticalCopy(this.language, run.encounter?.kind).hint
+        : tacticalCopy(this.language, run.encounter?.kind, hasCombatBuild(run.departure)).hint
   }
 
   /** Overlay public mechanisms and frozen attack warnings without exposing covered clues. */
   private markTactical(run: Expedition): void {
     const encounter = run.encounter
     if (!encounter) return
-    const t = tacticalCopy(this.language, encounter.kind)
+    const t = tacticalCopy(this.language, encounter.kind, hasCombatBuild(run.departure))
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-cell]')) {
       const index = Number(cell.dataset['cell'])
       const pylon =
@@ -287,16 +289,48 @@ export class VariantView {
         cell.setAttribute('aria-label', `${t.name}, ${encounter.health} / ${encounter.maxHealth}`)
       } else if (pylon) {
         cell.classList.add('landmark-cell', 'pylon-cell')
-        cell.innerHTML = `${spriteImage(pylon.active ? 'bastion-pylon' : 'bastion-pylon-off')}<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>`
+        const mechanism =
+          encounter.kind === 'bastion'
+            ? encounter.mechanisms?.find((entry) => entry.index === index)
+            : null
+        if (mechanism) {
+          cell.classList.add(mechanism.effect === 'weaken' ? 'mechanism-amber' : 'mechanism-blue')
+          cell.title =
+            mechanism.effect === 'weaken'
+              ? battleText(
+                  this.language,
+                  'Suppressor · lowers future attacks to 3',
+                  '抑制机关 · 后续攻击降至 3 点',
+                  '抑制装置 · 以後の攻撃を3に軽減',
+                )
+              : battleText(
+                  this.language,
+                  'Resonator · four-turn core windows',
+                  '共鸣机关 · 核心窗口延长至 4 回合',
+                  '共鳴装置 · コア露出を4ターンに延長',
+                )
+        }
+
+        cell.innerHTML = `${spriteImage(pylon.active ? 'bastion-pylon' : 'bastion-pylon-off')}${run.game.cells[index]?.visibility === 'revealed' ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
         cell.setAttribute(
           'aria-label',
           `${cell.getAttribute('aria-label')}, ${pylon.active ? t.pylon : t.disabled}`,
         )
       }
       markBroodCell(this.language, run, cell, index)
+      if (index === run.player && cell.classList.contains('landmark-cell'))
+        cell.insertAdjacentHTML(
+          'beforeend',
+          `<span class="landmark-player">${spriteImage(professionSprite(run.departure.profession))}</span>`,
+        )
+
       if (run.phase === 'boss' && encounter.intent.targets.includes(index)) {
         cell.classList.add('tactical-danger')
-        cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${t.danger}`)
+        const danger = hasCombatBuild(run.departure)
+          ? `${t.danger} · ${battleThreat(encounter, index)}`
+          : t.danger
+        cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${danger}`)
+        cell.title = danger
       }
     }
   }

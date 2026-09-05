@@ -1,4 +1,5 @@
 import { VARIANT_TIERS } from './variant-difficulty.js'
+import { COMBAT_PURCHASES, parseCombatPurchase, combatPurchaseCost } from './combat-build.js'
 import type { Camp, Upgrade } from '../types/variants.js'
 import type { CampFunding, CampStage } from '../types/camp-progression.js'
 import type { VariantTier } from '../types/variant-difficulty.js'
@@ -29,6 +30,7 @@ export const UPGRADES: readonly Upgrade[] = [
   'duelist-marks',
   'chronologist-dials',
   'archive',
+  ...COMBAT_PURCHASES,
 ]
 
 /** Offer early role variety, then a loadout milestone and a long-term relic-pool goal. */
@@ -68,11 +70,14 @@ export function upgradeCost(upgrade: Upgrade): number {
       return 900
     case 'sentinel':
       return 1800
+    default:
+      return combatPurchaseCost(upgrade)
   }
 }
 
 /** Name a facility's progression stage without imposing a mandatory purchase order. */
 function upgradeStage(upgrade: Upgrade): CampStage {
+  if (parseCombatPurchase(upgrade)) return upgradeCost(upgrade) >= 1800 ? 'late' : 'middle'
   switch (upgrade) {
     case 'surveyor':
     case 'engineer':
@@ -95,6 +100,8 @@ function upgradeStage(upgrade: Upgrade): CampStage {
     case 'duelist-marks':
     case 'chronologist-dials':
       return 'late'
+    default:
+      return 'middle'
   }
 }
 

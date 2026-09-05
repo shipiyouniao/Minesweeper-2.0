@@ -10,7 +10,14 @@ import {
   EXIT_SUPPLIES,
   expeditionReward,
 } from './expedition-rewards.js'
-import { damageVitality, healVitality } from './vitality.js'
+import {
+  COMBAT_EQUIPMENT,
+  damageExpedition,
+  healExpedition,
+  hasCombatBuild,
+  startingHealth,
+  parseCombatEquipment,
+} from './combat-build.js'
 import { hasExpeditionHealth } from './expedition-rules.js'
 import { relicPool } from './relic-packs.js'
 import { applyDiscoveryRelics, applyDamageRelics, applyTreasureRelics } from './relic-effects.js'
@@ -36,11 +43,16 @@ import type {
 export { upgradeCost, UPGRADES } from './camp-progression.js'
 
 export const EMPTY_CAMP: Camp = { supplies: 0, upgrades: [], completed: 0 }
-export const EQUIPMENT: readonly Equipment[] = ['probe', 'scanner', 'guard']
+export const EQUIPMENT: readonly Equipment[] = ['probe', 'scanner', 'guard', ...COMBAT_EQUIPMENT]
 
-/** A shield costs two loadout points; information tools cost one each. */
+/** Reserve two points for shields and heavy combat gear; other equipment costs one. */
 export function equipmentCost(equipment: Equipment): number {
-  return equipment === 'guard' ? 2 : 1
+  return equipment === 'guard' ||
+    equipment === 'steel-blade' ||
+    equipment === 'plated-vest' ||
+    equipment === 'field-boots'
+    ? 2
+    : 1
 }
 
 /** Check departure choices against actual camp unlocks and the shared three-point budget. */
@@ -53,6 +65,9 @@ export function allowedDeparture(
     (profession === 'explorer' || camp.upgrades.includes(profession)) &&
     (equipment.length === 0 || camp.upgrades.includes('workshop')) &&
     new Set(equipment).size === equipment.length &&
+    equipment.every(
+      (item) => !parseCombatEquipment(item) || camp.upgrades.includes(parseCombatEquipment(item)!),
+    ) &&
     // Do not spend loadout points on protection already at the departure cap.
     (!equipment.includes('guard') || professionResources(profession).shields < 2) &&
     equipment.reduce((total, item) => total + equipmentCost(item), 0) <= 3
@@ -98,8 +113,16 @@ function createFloor(departure: Departure, floor: number): Expedition {
     probeReport: null,
     probes: 0,
     scans: 0,
-    health: hasExpeditionHealth(departure) ? 2 : 1,
-    maxHealth: hasExpeditionHealth(departure) ? 2 : 1,
+    health: hasCombatBuild(departure)
+      ? startingHealth(departure)
+      : hasExpeditionHealth(departure)
+        ? 2
+        : 1,
+    maxHealth: hasCombatBuild(departure)
+      ? startingHealth(departure)
+      : hasExpeditionHealth(departure)
+        ? 2
+        : 1,
     shields: 0,
     loot: 0,
     steps: 0,
@@ -201,7 +224,7 @@ function revealFrontier(run: Expedition, index: number): Expedition {
   const approached = collectTreasures({ ...run, player: path.at(-1) ?? run.player }, path)
 
   if (cell.mine) {
-    const vitality = damageVitality(approached, 1)
+    const vitality = damageExpedition(approached, hasCombatBuild(run.departure) ? 5 : 1)
     const reacted = applyDamageRelics(approached, { ...approached, ...vitality }, index)
     const survived = reacted.health > 0
 
@@ -258,7 +281,7 @@ function completeFloor(run: Expedition): Expedition {
   return {
     ...run,
     // Leaving exploration makes this recovery a one-time reward, including the final exit.
-    health: hasExpeditionHealth(run.departure) ? healVitality(run, 1).health : run.health,
+    health: hasExpeditionHealth(run.departure) ? healExpedition(run, 1).health : run.health,
     loot: run.loot + EXIT_SUPPLIES,
     phase: run.floor === expeditionFloors(run.departure) ? 'won' : 'reward',
     offers: relicOffers(run),

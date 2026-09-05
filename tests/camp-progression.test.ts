@@ -53,7 +53,7 @@ test('prices offer two early professions, a middle milestone and a long-term arc
     [138, 216, 294, 372, 489],
   )
   assert.deepEqual(
-    UPGRADES.map(upgradeCost),
+    UPGRADES.slice(0, 17).map(upgradeCost),
     [40, 60, 100, 250, 350, 450, 500, 650, 900, 900, 1200, 1500, 1800, 2200, 3200, 4500, 7500],
   )
   assert.deepEqual(VARIANT_TIERS.map(maximumDifficultySupplies), [276, 540, 882, 1302, 2200])

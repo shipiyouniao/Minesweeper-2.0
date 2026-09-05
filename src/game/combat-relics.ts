@@ -1,5 +1,6 @@
 import { available, claim } from './relic-effects.js'
 import { walkingPath } from './dungeon-path.js'
+import { combatStats, hasCombatBuild } from './combat-build.js'
 import type { Expedition, ExpeditionAction } from '../types/variants.js'
 
 /** The first multi-step walk each turn saves one point; a single step still costs one. */
@@ -13,7 +14,10 @@ export function walkingPointCost(run: Expedition, distance: number): number {
 
 /** The opening strike gains a bounded bonus; it never bypasses an active shield pylon. */
 export function strikeDamage(run: Expedition): number {
-  return available(run, 'duelist-edge') ? 4 : 2
+  return (
+    combatStats(run).attack +
+    (available(run, 'duelist-edge') ? (hasCombatBuild(run.departure) ? 4 : 2) : 0)
+  )
 }
 
 /** Apply combat rewards after charging an accepted action, before floor victory is settled. */
@@ -51,7 +55,10 @@ export function applyCombatRelics(
     result = claim(result, 'breach-sigil')
     result = {
       ...result,
-      encounter: { ...after.encounter, points: Math.min(4, after.encounter.points + 1) },
+      encounter: {
+        ...after.encounter,
+        points: Math.min(hasCombatBuild(before.departure) ? 5 : 4, after.encounter.points + 1),
+      },
     }
   }
   if (action.type !== 'end-turn') return result
@@ -63,7 +70,13 @@ export function applyCombatRelics(
     result = { ...claim(result, 'shelter-cloak'), shields: Math.min(2, result.shields + 1) }
   if (before.encounter.points >= 1 && available(result, 'reserve-watch')) {
     result = claim(result, 'reserve-watch')
-    result = { ...result, encounter: { ...after.encounter, points: 4 } }
+    result = {
+      ...result,
+      encounter: {
+        ...after.encounter,
+        points: hasCombatBuild(before.departure) ? Math.min(5, after.encounter.points + 1) : 4,
+      },
+    }
   }
   if (before.encounter.turn === 3 && available(result, 'second-hand'))
     result = {

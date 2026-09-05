@@ -1,5 +1,6 @@
 import { spriteImage } from './dungeon-sprites.js'
 import { broodCellLabel } from './brood-copy.js'
+import { battleText } from './combat-build-copy.js'
 import type { Expedition } from '../types/variants.js'
 import type { Language } from '../types/localization.js'
 
@@ -12,6 +13,20 @@ export function markBroodCell(
 ): void {
   const encounter = run.encounter
   if (encounter?.kind !== 'brood' || run.phase !== 'boss') return
+  if (
+    encounter.destroyedNests &&
+    (encounter.nests.includes(index) || encounter.destroyedNests.includes(index))
+  ) {
+    const destroyed = encounter.destroyedNests.includes(index)
+    const revealed = run.game.cells[index]?.visibility === 'revealed'
+    cell.classList.add('landmark-cell', 'nest-cell')
+    cell.classList.toggle('nest-destroyed', destroyed)
+    cell.innerHTML = `${spriteImage('brood-nest')}${revealed ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
+    cell.setAttribute(
+      'aria-label',
+      `${cell.getAttribute('aria-label')}, ${destroyed ? battleText(language, 'Nest destroyed', '巢穴已摧毁', '巣は破壊済み') : battleText(language, 'Nest · reveal and flag nearby mines to destroy', '巢穴 · 揭开并标出周围地雷后摧毁', '巣 · 開いて周囲の地雷に旗を立てて破壊')}`,
+    )
+  }
   const egg = encounter.eggs.find((entry) => entry.index === index)
   const web = encounter.webs.includes(index)
   const hatchling = encounter.hatchlings.includes(index)

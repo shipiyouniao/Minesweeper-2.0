@@ -241,7 +241,7 @@ test('new sessions replay arena coordinates, combat and settlement; old journals
     assert.equal(session.run, null)
     assert.equal(session.camp.supplies, supplies)
     const { encounters, ...old } = before.departure
-    assert.equal(encounters, 'brood-v1')
+    assert.equal(encounters, 'tactics-v2')
     assert.equal(isBastionFloor({ ...before, departure: old }), false)
     const invalid = {
       version: 3,

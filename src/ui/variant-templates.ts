@@ -46,6 +46,8 @@ import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
 import { tacticalTemplate } from './tactical-template.js'
 import { tacticalCopy } from './tactical-copy.js'
+import { combatSprite, battleHealthCopy } from './combat-build-copy.js'
+import { hasCombatBuild, parseCombatPurchase } from '../game/combat-build.js'
 import { icon } from '../icons.js'
 
 /** Render one accessible choice card; its ID is a finite catalog value. */
@@ -101,14 +103,14 @@ export function campTemplate(
   const careers = PROFESSIONS
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
 
-  return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${t.healthHint}</p>
+  return `<section class="camp-panel"><p class="eyebrow">EXPEDITION / BASE CAMP</p><h1 tabindex="-1">${t.camp}</h1><p class="variant-intro">${t.campHelp}</p><p class="variant-note">${battleHealthCopy(language)}</p>
     <div class="variant-metrics">${metric(t.supplies, number.format(camp.supplies))}${metric(t.departures, camp.completed)}</div>
     ${difficultyTemplate(language, difficulty, true)}
     <p class="variant-note reward-rate">${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p>
     <h2>${t.profession}</h2><div class="choice-grid">${careers.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career), professionSprite(career))).join('')}</div>
     ${professionPreviewTemplate(language, profession)}
     <h2>${t.equipment} <small>${spent} / 3</small></h2>
-    ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && !allowedDeparture(camp, profession, [...equipment, item]), item === 'guard' ? 'shield' : item)).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
+    ${camp.upgrades.includes('workshop') ? `<div class="choice-grid">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && !allowedDeparture(camp, profession, [...equipment, item]), combatSprite(item))).join('')}</div>` : `<p class="variant-note">${t.locked} · ${upgradeCopy(language, 'workshop').name}</p>`}
     <button class="primary-button" data-control="start">${t.start} ↗</button>
     <h2>${t.facilities}</h2>${campProgressTemplate(language, camp)}<div class="choice-grid facilities">${UPGRADES.map(
       (upgrade) => {
@@ -129,7 +131,9 @@ export function campTemplate(
             ? professionSprite(upgrade)
             : upgrade === 'workshop' || upgrade === 'archive'
               ? upgrade
-              : parseRelicPack(upgrade),
+              : parseCombatPurchase(upgrade)
+                ? combatSprite(parseCombatPurchase(upgrade)!)
+                : parseRelicPack(upgrade),
         )
       },
     ).join('')}</div></section>`
@@ -168,7 +172,7 @@ export function expeditionTemplate(
                 : t.exploring
   const relics = run.relics
     .map((relic) => {
-      const description = relicCopy(language, relic)
+      const description = relicCopy(language, relic, hasCombatBuild(run.departure))
       let used = ''
 
       if (run.runTriggers.includes(relic)) used = t.relicUsedRun
@@ -182,7 +186,7 @@ export function expeditionTemplate(
 
   return `<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
     <p class="variant-note reward-rate">${t.rewardRate} ×${rate}</p>
-    ${vitalityTemplate(language, run, !hasExpeditionHealth(run.departure), !run.encounter)}
+    ${vitalityTemplate(language, run, !hasExpeditionHealth(run.departure), !run.encounter && !hasCombatBuild(run.departure))}${hasCombatBuild(run.departure) && !run.encounter ? `<p class="variant-note">${battleHealthCopy(language)}</p>` : ''}
     ${tacticalTemplate(language, run)}
     ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
@@ -209,7 +213,13 @@ export function relicRewardTemplate(language: Language, run: Expedition): string
   const t = variantCopy(language)
   const choices = run.offers
     .map((relic) =>
-      choice(`relic:${relic}`, relicCopy(language, relic), false, false, relicSprite(relic)),
+      choice(
+        `relic:${relic}`,
+        relicCopy(language, relic, hasCombatBuild(run.departure)),
+        false,
+        false,
+        relicSprite(relic),
+      ),
     )
     .join('')
 

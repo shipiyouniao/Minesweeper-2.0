@@ -46,5 +46,7 @@ export function relicPool(departure: Departure): Relic[] {
     for (const pack of RELIC_PACKS)
       if (departure.packs?.includes(pack.id)) base.push(...pack.relics)
   }
+  if (departure.encounters === 'tactics-v2' && departure.battleRelics)
+    base.push('tempered-edge', 'layered-armor', 'tactics-hourglass')
   return base
 }

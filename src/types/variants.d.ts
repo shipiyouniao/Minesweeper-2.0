@@ -2,6 +2,12 @@ import type { VariantDifficulty } from './variant-difficulty.js'
 import type { TacticalEncounter } from './tactical.js'
 import type { Vitality } from './vitality.js'
 import type { Game } from './game.js'
+import type {
+  CombatEquipment,
+  CombatPurchase,
+  CombatRelic,
+  CombatTraining,
+} from './combat-build.js'
 import type { RelicPack, ExpansionRelic } from './relic-packs.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
@@ -15,10 +21,11 @@ export type Profession =
   'explorer' | 'surveyor' | 'engineer' | 'archaeologist' | 'alchemist' | 'sentinel'
 
 /** Camp equipment consumes a three-point departure budget. */
-export type Equipment = 'probe' | 'scanner' | 'guard'
+export type Equipment = 'probe' | 'scanner' | 'guard' | CombatEquipment
 
 /** Relics persist only within the current expedition. */
-export type Relic = 'lantern' | 'lens' | 'aegis' | 'purse' | 'compass' | 'salvage' | ExpansionRelic
+export type Relic =
+  'lantern' | 'lens' | 'aegis' | 'purse' | 'compass' | 'salvage' | ExpansionRelic | CombatRelic
 
 /** Progression purchases unlock options rather than unlimited stat increases. */
 export type Upgrade =
@@ -30,6 +37,7 @@ export type Upgrade =
   | 'workshop'
   | 'archive'
   | RelicPack
+  | CombatPurchase
 
 /** Persistent camp progress, updated atomically with run settlement. */
 export interface Camp {
@@ -41,7 +49,10 @@ export interface Camp {
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
   /** Encounter rules are opt-in snapshots; historical journals keep exploration-only exits. */
-  readonly encounters?: 'bastion-v1' | 'brood-v1'
+  readonly encounters?: 'bastion-v1' | 'brood-v1' | 'tactics-v2'
+  /** Combat training and relic licenses are captured only by tactics-v2 departures. */
+  readonly training?: readonly CombatTraining[]
+  readonly battleRelics?: boolean
   /** Missing career revision preserves historical tools, offers and action availability. */
   readonly professions?: 'skills-v1'
   /** Missing reward revision preserves historical settlement amounts. */

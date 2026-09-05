@@ -12,7 +12,7 @@ A playable Minesweeper game and a practical testbed for the **TypeScript 7 nativ
 
 [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [License](LICENSE)
 
-**Tactical encounters:** new expeditions alternate between [Bastion Guardian](docs/bastion-encounters.md) and [Brood Queen](docs/brood-queen.md), starting from a seeded choice. Deduce pylon mines to break the guardian's armor, or clear webs, destroy eggs and intercept hatchlings to approach the queen. Both use three action points and visible attack forecasts; victory restores health and grants a shield. Ordinary floors keep free exploration and existing saves keep their original roster. Wide-screen play uses a more compact board and proportional sidebar.
+**Tactical encounters:** [revised Bastion Guardian and Brood Queen](docs/tactical-builds.md) combine fully deducible minefields with regional controls, timed core openings and permanently destroyable nests. Attack, defense and action-point builds connect six equipment licenses, three combat relics and two capped, one-time trainings. The catalog contains 24 distinct gameplay purchases plus those two trainings. Ordinary floors retain free exploration, and historical journals retain their original rules.
 
 ## Why this project exists
 

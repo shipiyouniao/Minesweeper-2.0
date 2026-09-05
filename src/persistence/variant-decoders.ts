@@ -1,6 +1,12 @@
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
 import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
 import { UPGRADES } from '../game/camp-progression.js'
+import {
+  parseCombatEquipment,
+  parseCombatPurchase,
+  parseCombatTraining,
+} from '../game/combat-build.js'
+import type { CombatTraining } from '../types/combat-build.js'
 import { encounterTier } from '../game/encounter-tiers.js'
 import { hasEncounters } from '../game/encounter-roster.js'
 import type { RelicPack } from '../types/relic-packs.js'
@@ -39,9 +45,11 @@ export function parseProfession(value: string | null): Profession | null {
   }
 }
 
-/** Accept only the three concrete equipment choices. */
+/** Accept only the declared exploration tools and combat equipment. */
 export function parseEquipment(value: string | null): Equipment | null {
-  return value === 'probe' || value === 'scanner' || value === 'guard' ? value : null
+  return value === 'probe' || value === 'scanner' || value === 'guard'
+    ? value
+    : parseCombatEquipment(value)
 }
 
 /** Accept only defined permanent camp purchases. */
@@ -54,7 +62,7 @@ export function parseUpgrade(value: string | null): Upgrade | null {
     value === 'workshop' ||
     value === 'archive'
     ? value
-    : parseRelicPack(value)
+    : (parseRelicPack(value) ?? parseCombatPurchase(value))
 }
 
 /** Decode relic IDs without allowing arbitrary catalog keys. */
@@ -86,6 +94,9 @@ export function parseRelic(value: string | null): Relic | null {
     case 'duelist-edge':
     case 'reserve-watch':
     case 'second-hand':
+    case 'tempered-edge':
+    case 'layered-armor':
+    case 'tactics-hourglass':
       return value
     default:
       return null
@@ -136,7 +147,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (
     !integer(seed, 0xffffffff) ||
     (encounters !== undefined &&
-      ((encounters !== 'bastion-v1' && encounters !== 'brood-v1') ||
+      ((encounters !== 'bastion-v1' && encounters !== 'brood-v1' && encounters !== 'tactics-v2') ||
         professions !== 'skills-v1' ||
         rules !== 'relics-v1')) ||
     (professions !== undefined && (professions !== 'skills-v1' || rules !== 'relics-v1')) ||
@@ -161,6 +172,18 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   )
     return null
   const equipment: Equipment[] = []
+  const training: CombatTraining[] = []
+  if (encounters === 'tactics-v2') {
+    const values = reader.array('training')
+    if (!values || values.length > 2 || typeof reader.value('battleRelics') !== 'boolean')
+      return null
+    for (const value of values) {
+      const entry = parseCombatTraining(typeof value === 'string' ? value : null)
+      if (!entry || training.includes(entry)) return null
+      training.push(entry)
+    }
+  } else if (reader.value('training') !== undefined || reader.value('battleRelics') !== undefined)
+    return null
   const packs: RelicPack[] = []
   if (rules === 'relics-v1') {
     const packValues = reader.array('packs')
@@ -175,6 +198,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   for (const value of values) {
     const item = parseEquipment(typeof value === 'string' ? value : null)
     if (!item || equipment.includes(item)) return null
+    if (parseCombatEquipment(item) && encounters !== 'tactics-v2') return null
     equipment.push(item)
   }
 
@@ -186,7 +210,12 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     rules: rules ?? 'original',
     ...(rewards === 'difficulty-v1' ? { rewards } : {}),
     ...(professions === 'skills-v1' ? { professions } : {}),
-    ...(encounters === 'bastion-v1' || encounters === 'brood-v1' ? { encounters } : {}),
+    ...(encounters === 'bastion-v1' || encounters === 'brood-v1' || encounters === 'tactics-v2'
+      ? { encounters }
+      : {}),
+    ...(encounters === 'tactics-v2'
+      ? { training, battleRelics: reader.value('battleRelics') === true }
+      : {}),
     ...(rules === 'relics-v1' ? { packs } : {}),
     ...(difficulty ? { difficulty } : {}),
   }

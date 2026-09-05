@@ -1,13 +1,11 @@
 import type { Language } from '../types/localization.js'
 import type { TacticalMessages } from '../types/tactical-ui.js'
 import type { TacticalPlan, TacticalEncounter, EncounterKind } from '../types/tactical.js'
+import { battleCopy } from './battle-presentation.js'
 import { broodCopy } from './brood-copy.js'
 
 /** Keep each language's combat vocabulary and instructions complete and independently readable. */
-export function tacticalCopy(
-  language: Language,
-  kind: EncounterKind = 'bastion',
-): TacticalMessages {
+function legacyTacticalCopy(language: Language, kind: EncounterKind = 'bastion'): TacticalMessages {
   if (kind === 'brood') return broodCopy(language)
   if (language === 'zh')
     return {
@@ -84,6 +82,18 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
   const zh = language === 'zh'
   const ja = language === 'ja'
   switch (plan.reason) {
+    case 'window':
+      return zh
+        ? '靠近并点击核心，花 1 点启动'
+        : ja
+          ? '隣接してコアを1行動力で起動'
+          : 'Approach and click the core to prime it for 1 AP'
+    case 'nests':
+      return zh
+        ? '先推理并摧毁巢穴，削弱女王护甲'
+        : ja
+          ? '巣を推理して破壊し女王の防護を弱める'
+          : 'Deduce and destroy nests to weaken the queen first'
     case 'ready':
       return zh
         ? `消耗 ${plan.cost} 点行动力`
@@ -110,10 +120,10 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
           : 'Move next to the target first'
     case 'flags':
       return zh
-        ? '先标出机关周围的两颗雷'
+        ? '先标出目标周围的全部地雷'
         : ja
-          ? '装置周囲の地雷2個をマーク'
-          : 'Flag the two mines around this pylon first'
+          ? '対象周囲の全地雷をマーク'
+          : 'Flag all mines around the target first'
     case 'used':
       return zh
         ? '该操作已完成，或目标已清除'
@@ -129,7 +139,33 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
 export function tacticalEventCopy(language: Language, encounter: TacticalEncounter): string {
   const zh = language === 'zh'
   const ja = language === 'ja'
+  const revised =
+    encounter.kind === 'bastion' ? Boolean(encounter.mechanisms) : Boolean(encounter.destroyedNests)
+  if (revised && encounter.event === 'braced')
+    return zh
+      ? '已防御 · 本回合敌方伤害减少 3'
+      : ja
+        ? '防御中 · 敵のダメージを3軽減'
+        : 'Braced · reduce enemy damage by 3 this turn'
+  if (revised && encounter.event === 'misfire')
+    return zh
+      ? '校准错误 · 受到 5 点伤害'
+      : ja
+        ? '調整失敗 · 5ダメージ'
+        : 'Calibration failed · 5 damage'
   switch (encounter.event) {
+    case 'nest-destroyed':
+      return zh
+        ? '巢穴已摧毁 · 停止补卵，女王护甲与回血降低'
+        : ja
+          ? '巣を破壊 · 補充停止、女王の防護と回復減少'
+          : 'Nest destroyed · supply stopped, queen armor and regeneration reduced'
+    case 'window-opened':
+      return zh
+        ? '核心已启动 · 破甲窗口开启'
+        : ja
+          ? 'コア起動 · 露出開始'
+          : 'Core primed · strike window open'
     case 'braced':
       return zh
         ? '已防御 · 本回合攻击减伤 1'
@@ -171,6 +207,22 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
           ? '幼体を撃破 · 予告取消'
           : 'Hatchling intercepted · attack cancelled'
     default:
-      return tacticalCopy(language, encounter.kind).hint
+      if (revised)
+        return zh
+          ? '战斗进行中 · 留意攻击预告'
+          : ja
+            ? '戦闘中 · 攻撃予告を確認'
+            : 'Battle in progress · watch the attack forecast'
+      return tacticalCopy(language, encounter.kind, revised).hint
   }
+}
+
+/** Select the exact instruction set captured by the current departure. */
+export function tacticalCopy(
+  language: Language,
+  kind: EncounterKind = 'bastion',
+  revised = false,
+): TacticalMessages {
+  const base = legacyTacticalCopy(language, kind)
+  return revised ? battleCopy(language, kind, base) : base
 }

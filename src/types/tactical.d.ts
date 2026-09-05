@@ -1,5 +1,6 @@
 import type { Expedition, ExpeditionAction, Relic } from './variants.js'
 import type { Config } from './game.js'
+import type { BattleMechanism, CombatEquipment } from './combat-build.js'
 
 /** Released encounter families have independent rules and artwork. */
 export type EncounterKind = 'bastion' | 'brood'
@@ -29,7 +30,7 @@ export interface TacticalState {
   readonly points: number
   readonly braced: boolean
   /** Reset only at explicit end-turn; previews never spend a relic's use. */
-  readonly turnTriggers: readonly Relic[]
+  readonly turnTriggers: readonly (Relic | CombatEquipment)[]
   readonly intent: TacticalIntent
   readonly event:
     | 'entered'
@@ -44,12 +45,17 @@ export interface TacticalState {
     | 'web-cut'
     | 'egg-crushed'
     | 'hatchling-cleared'
+    | 'nest-destroyed'
+    | 'window-opened'
 }
 
 /** Armor controls belong to the guardian's encounter variant. */
 export interface BastionEncounter extends TacticalState {
   readonly kind: 'bastion'
   readonly pylons: readonly ShieldPylon[]
+  /** Present only in the revised encounter; controls open bounded core windows. */
+  readonly mechanisms?: readonly BattleMechanism[]
+  readonly exposedUntil?: number
 }
 
 /** Eggs hatch only after their visible number of explicit end-turn actions. */
@@ -74,6 +80,8 @@ export interface BroodEncounter extends TacticalState {
   readonly nests: readonly number[]
   readonly orders: readonly BroodOrder[]
   readonly queenTargets: readonly number[]
+  /** Destroyed nests stay on the board as inert landmarks and never produce replacements. */
+  readonly destroyedNests?: readonly number[]
 }
 
 /** A finite encounter union keeps each boss's state and rules explicit. */
@@ -88,7 +96,16 @@ export interface EncounterTier {
 
 /** A public action preview uses known paths, visible flags, resources and action points only. */
 export type TacticalReason =
-  'ready' | 'points' | 'path' | 'armor' | 'adjacent' | 'flags' | 'inactive' | 'used'
+  | 'ready'
+  | 'points'
+  | 'path'
+  | 'armor'
+  | 'adjacent'
+  | 'flags'
+  | 'inactive'
+  | 'used'
+  | 'window'
+  | 'nests'
 
 /** A known route and its cost, before committing any animation or game state. */
 export interface TacticalPlan {
