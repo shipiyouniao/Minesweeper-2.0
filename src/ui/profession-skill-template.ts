@@ -1,3 +1,4 @@
+import { escapeHtml } from './presentation.js'
 import { professionSkillAvailability } from '../game/profession-skills.js'
 import type { Expedition, Profession } from '../types/variants.js'
 import type { Language } from '../types/localization.js'
@@ -41,5 +42,13 @@ export function professionSkillTemplate(language: Language, run: Expedition): st
           )
           .join('')}</div>`
       : ''
-  return `<section class="profession-skill" data-control="skill-panel" tabindex="-1" aria-label="${copy.name}"><div class="profession-skill-heading">${rift ? spriteImage(professionSkillSprite(run.departure.profession)) : `<button class="inventory-tool skill-button" data-control="skill" aria-label="${copy.name}" aria-describedby="skill-description skill-status" ${ready ? '' : 'disabled'}>${spriteImage(professionSkillSprite(run.departure.profession))}</button>`}<strong>${copy.name}</strong></div><p id="skill-description">${note}</p>${state}${targets}<p id="skill-status" role="status">${professionSkillStatus(language, status)}</p></section>`
+  const reason =
+    status === 'ready' && !ready
+      ? t(
+          'Not enough action points · end your turn first',
+          '行动点不足，先结束回合',
+          '行動力不足。先にターンを終了',
+        )
+      : professionSkillStatus(language, status)
+  return `<div class="dock-skill"><button class="dock-slot inventory-tool skill-button" data-control="skill" ${rift ? 'data-select-target="true"' : ''} aria-disabled="${!ready}" aria-label="${copy.name}" aria-describedby="skill-tooltip">${spriteImage(professionSkillSprite(run.departure.profession))}<strong>${copy.name}</strong></button><div class="skill-bubble" id="skill-tooltip" role="tooltip">${escapeHtml(ready ? note : reason)}</div><div class="dock-skill-panel" hidden><section class="profession-skill" data-control="skill-panel" tabindex="-1" aria-label="${copy.name}"><strong>${copy.name}</strong><p id="skill-description">${note}</p>${state}${targets}<p role="status">${reason}</p></section></div></div>`
 }

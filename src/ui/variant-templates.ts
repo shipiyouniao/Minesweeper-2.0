@@ -18,7 +18,6 @@ import { vitalityTemplate } from './vitality-template.js'
 import { escapeHtml } from './presentation.js'
 import { tacticalTemplate, tacticalControlsTemplate } from './tactical-template.js'
 import { tacticalCopy } from './tactical-copy.js'
-import { battleHealthCopy } from './combat-build-copy.js'
 import { icon } from '../icons.js'
 import { mirrorBoardLabel } from './mirror-board.js'
 import { magneticPlaybar } from './magnetic-board.js'
@@ -64,8 +63,8 @@ function recordList(
 }
 
 /** Render the common board frame; BoardView owns the actual grid cells. */
-export function boardFrame(side: 'a' | 'b', label: string): string {
-  return `<section class="variant-board-panel" aria-label="${label}"><h2>${label}</h2><div class="board-viewport"><div class="board" data-side="${side}" role="grid" aria-label="${label}"></div></div></section>`
+export function boardFrame(side: 'a' | 'b', label: string, controls = ''): string {
+  return `<section class="variant-board-panel" aria-label="${label}"><div class="board-frame-heading"><h2>${label}</h2>${controls}</div><div class="board-viewport"><div class="board" data-side="${side}" role="grid" aria-label="${label}"></div></div></section>`
 }
 
 /** Render expedition resources, inter-floor choices, and the active board placeholder. */
@@ -108,26 +107,26 @@ export function expeditionTemplate(
     })
     .join('')
 
-  return `<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
-    <p class="variant-note reward-rate">${t.rewardRate} ×${rate}</p>
-    ${vitalityTemplate(language, run)}${!run.encounter ? `<p class="variant-note">${battleHealthCopy(language)}</p>` : ''}
-    ${tacticalTemplate(language, run)}
+  return `
     ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
-    ${run.phase === 'reward' ? `<button class="primary-button" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="text-button" data-control="retreat">${t.retreat}</button>` : ''}
-    ${boardZoomTemplate(language)}<div class="board-play-area">${run.phase === 'exploring' || run.phase === 'boss' ? boardControlsTemplate(language, inputMode, 'data-control') : ''}<div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards">${run.phase === 'boss' ? `<div class="mirror-playbar">${tacticalControlsTemplate(language, run)}<span>${tacticalCopy(language, 'mirror').points} ${run.encounter.points}</span></div>` : ''}<div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${run.phase === 'boss' ? `<div class="clock-playbar">${tacticalControlsTemplate(language, run)}</div>` : ''}${boardFrame('a', `${t.floor} ${run.floor}`)}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`)}</div>` : boardFrame('a', `${t.floor} ${run.floor}`)}<aside class="run-sidebar">
+    ${run.phase === 'reward' ? `<button class="primary-button" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="secondary-button retreat-button" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button>` : ''}
+    <div class="board-play-area"><div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards"><div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true), boardZoomTemplate(language))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}<aside class="run-sidebar"><section class="run-overview"><p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
+    <p class="variant-note reward-rate">${t.rewardRate} ×${rate}</p>
+    ${vitalityTemplate(language, run)}</section>${tacticalTemplate(language, run)}
       ${
         run.phase === 'exploring' || run.phase === 'boss'
-          ? `<div class="variant-toolbar">
-      <p class="variant-note tool-hint" role="status">${t.toolHint}</p>
-      <div class="dungeon-inventory" role="group" aria-label="${t.equipment}">${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}</div>
-      ${professionSkillTemplate(language, run)}
+          ? `<div class="variant-toolbar"><div class="action-dock expedition-dock" aria-label="${t.equipment}">
+      <p class="dock-target-hint tool-hint" role="status"></p>
+      ${run.phase === 'boss' ? tacticalControlsTemplate(language, run) : ''}
+      ${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}
+      ${professionSkillTemplate(language, run)}${boardControlsTemplate(language, inputMode, 'data-control')}</div>
       ${run.probeReport ? `<p class="probe-result" role="status">${t.probeResult.replace('{count}', String(run.probeReport.mines))}</p>` : ''}
-      <button class="text-button" data-control="retreat">${t.retreat}</button></div>`
+      <button class="secondary-button retreat-button" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button></div>`
           : ''
       }
-      <h3>${t.relics}</h3>${relics ? `<ul class="relic-list">${relics}</ul>` : `<p class="variant-note">${t.noRelics}</p>`}
-      ${run.encounter ? '' : `<div class="dungeon-legend"><span>${spriteImage('entrance')}${t.entrance}</span><span>${spriteImage('exit')}${t.exit}</span><span>${spriteImage('treasure')}${t.treasure}</span><span>${spriteImage('wall')}${t.wall}</span></div>`}
+      <details class="relic-menu" data-relic-menu><summary><span>${spriteImage('treasure')}${t.relics}</span><strong>${run.relics.length}</strong></summary>${relics ? `<ul class="relic-list">${relics}</ul>` : `<p class="variant-note">${t.noRelics}</p>`}</details>
+
       <ul class="scan-results">${run.scannedRows.map((row) => `<li>${common.row} ${row + 1}: <strong>${run.game.cells.slice(row * run.game.config.width, (row + 1) * run.game.config.width).filter((cell) => cell.mine).length}</strong> ${t.rowMines}</li>`).join('')}</ul>
     </aside></div></div>`
 }
@@ -180,12 +179,12 @@ export function twinTemplate(language: Language, state: Twin, inputMode: BoardIn
     <p class="variant-status" role="status" tabindex="-1">${status}</p>
     <div class="twin-tools"><button class="secondary-button" data-control="restart">${common.restart}</button></div>
     ${state.a.phase === 'won' || state.b.phase === 'won' ? `<p class="variant-note">${t.safePartner}</p>` : ''}
-    ${boardZoomTemplate(language)}<div class="board-play-area">${boardControlsTemplate(language, inputMode, 'data-control')}<div class="twin-layout">${boardFrame('a', 'A')}${boardFrame('b', 'B')}</div></div>`
+    <div class="board-play-area"><div class="action-dock compact-dock">${boardControlsTemplate(language, inputMode, 'data-control')}</div><div class="twin-layout">${boardFrame('a', 'A', boardZoomTemplate(language))}${boardFrame('b', 'B')}</div></div>`
 }
 
 /** Render a square, explicitly targeted inventory button with a persistent charge badge. */
 function toolButton(tool: DungeonTool, label: string, count: number): string {
-  return `<button class="inventory-tool" data-control="${tool}" data-tool="${tool}" aria-label="${label}: ${count}" title="${label}" aria-pressed="false" ${count === 0 ? 'disabled' : ''}>${spriteImage(tool === 'scan' ? 'scanner' : 'probe')}<span class="tool-count">${count}</span><span class="tool-label">${label}</span></button>`
+  return `<button class="inventory-tool dock-slot" data-control="${tool}" data-tool="${tool}" aria-label="${label}: ${count}" title="${label}" aria-pressed="false" ${count === 0 ? 'disabled' : ''}>${spriteImage(tool === 'scan' ? 'scanner' : 'probe')}<span class="tool-count">${count}</span><span class="tool-label">${label}</span></button>`
 }
 
 /** Keep results in distinct tier sections so unlike board sizes are never presented as peers. */
@@ -229,5 +228,7 @@ export function difficultyTemplate(
 /** Keep zoom outside the grid so touch and keyboard users can choose usable target sizes. */
 function boardZoomTemplate(language: Language): string {
   const t = variantCopy(language)
-  return `<div class="board-zoom"><button class="text-button" data-control="zoom" aria-pressed="false">${t.zoom}</button><span class="variant-note zoom-hint" hidden>${t.zoomHint}</span></div>`
+  const lens =
+    '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>'
+  return `<div class="board-zoom"><button class="zoom-icon" data-control="zoom" aria-label="${t.zoom}" title="${t.zoom}" aria-pressed="false">${lens}<span aria-hidden="true">+</span></button></div>`
 }

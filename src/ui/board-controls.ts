@@ -47,18 +47,31 @@ export function boardControlHint(language: Language, mode: BoardInputMode): stri
         : copy.chord
 }
 
-/** Present the same four visible pointer controls immediately above every board area. */
+/** Cycle one visible control while retaining mouse shortcuts and direct keyboard commands. */
+export function nextBoardMode(mode: BoardInputMode): BoardInputMode {
+  return mode === 'reveal'
+    ? 'flag'
+    : mode === 'flag'
+      ? 'mark-safe'
+      : mode === 'mark-safe'
+        ? 'chord'
+        : 'reveal'
+}
+
 export function boardControlsTemplate(
   language: Language,
   mode: BoardInputMode,
   attribute: BoardControlAttribute,
 ): string {
   const t = translations[language]
-  const copy = controlsCopy(language)
-  return `<div class="board-controls"><div class="input-mode" role="group" aria-label="${copy.label}">
-    <button ${attribute}="reveal-mode" aria-pressed="${mode === 'reveal'}">${icon('pointer')}<span>${t.reveal}</span></button>
-    <button ${attribute}="flag-mode" aria-pressed="${mode === 'flag'}">${icon('flag')}<span>${t.flag}</span></button>
-    <button ${attribute}="safe-mode" aria-pressed="${mode === 'mark-safe'}">${icon('check')}<span>${t.markSafe}</span></button>
-    <button ${attribute}="chord-mode" aria-pressed="${mode === 'chord'}">${icon('pointer')}<span>${t.quickReveal}</span></button>
-    </div><p class="board-mode-hint" role="status">${boardControlHint(language, mode)}</p><p class="board-gesture-hint">${copy.gestures}</p></div>`
+  const label =
+    mode === 'reveal'
+      ? t.reveal
+      : mode === 'flag'
+        ? t.flag
+        : mode === 'mark-safe'
+          ? t.markSafe
+          : t.quickReveal
+  const cycle = language === 'zh' ? '点按切换' : language === 'ja' ? '押して切替' : 'Tap to cycle'
+  return `<button class="dock-slot mode-cycle" ${attribute}="cycle-mode" data-mode="${mode}" aria-label="${label} · ${cycle}" title="${boardControlHint(language, mode)}">${icon(mode === 'flag' ? 'flag' : mode === 'mark-safe' ? 'check' : 'pointer')}<strong>${label}</strong><small>${cycle} ↻</small></button>`
 }

@@ -1,0 +1,137 @@
+import { bossScript } from './boss-scripts.js'
+import { spriteImage } from './dungeon-sprites.js'
+import { professionSprite } from './profession-presentation.js'
+import { battleText } from './combat-build-copy.js'
+import type { Expedition } from '../types/variants.js'
+import type { Language } from '../types/localization.js'
+import type { PrologueScript } from '../types/guidance.js'
+
+/** Presentation-only arrival scenes never mutate a turn, AP, clues, rewards or the game journal. */
+export class BossPrologue {
+  private dialog: HTMLDialogElement | null = null
+  private events: AbortController | null = null
+  private readonly seen = new Set<string>()
+  private beat = 0
+
+  present(
+    root: HTMLElement,
+    run: Expedition | null,
+    language: Language,
+    blocked: boolean,
+    force = false,
+  ): void {
+    if (!run?.encounter || run.phase !== 'boss' || this.dialog?.open || blocked) return
+    const key = `minesweeper.prologue:${run.departure.seed}:${run.floor}:${run.encounter.kind}`
+    let stored = false
+    try {
+      stored = sessionStorage.getItem(key) === 'seen'
+    } catch {
+      /* Storage is optional for presentation. */
+    }
+    if (!force && (run.encounter.turn > 1 || this.seen.has(key) || stored)) return
+    this.dispose()
+    this.beat = 0
+    const script = bossScript(run.encounter.kind, language)
+    const dialog = document.createElement('dialog')
+    dialog.className = 'prologue-dialog'
+    dialog.dataset['prologue'] = script.kind
+    dialog.setAttribute('aria-labelledby', 'prologue-title')
+    root.append(dialog)
+    this.dialog = dialog
+    this.events = new AbortController()
+    const signal = this.events.signal
+    const close = (): void => {
+      this.seen.add(key)
+      try {
+        sessionStorage.setItem(key, 'seen')
+      } catch {
+        /* The in-memory set still prevents repeated arrivals. */
+      }
+      dialog.close()
+    }
+    dialog.addEventListener(
+      'click',
+      (event) => {
+        event.stopPropagation()
+        const button =
+          event.target instanceof Element ? event.target.closest<HTMLElement>('[data-scene]') : null
+        if (!button) return
+        const action = button.dataset['scene']
+        if (action === 'skip' || (action === 'next' && this.beat === script.beats.length - 1)) {
+          close()
+          return
+        }
+        if (action === 'previous') this.beat = Math.max(0, this.beat - 1)
+        if (action === 'next') this.beat = Math.min(script.beats.length - 1, this.beat + 1)
+        this.render(run, script, language)
+        dialog.querySelector<HTMLElement>('[data-scene="next"]')?.focus({ preventScroll: true })
+      },
+      { signal },
+    )
+    dialog.addEventListener(
+      'keydown',
+      (event) => {
+        event.stopPropagation()
+      },
+      { signal },
+    )
+    dialog.addEventListener(
+      'cancel',
+      (event) => {
+        event.preventDefault()
+        close()
+      },
+      { signal },
+    )
+    dialog.addEventListener(
+      'close',
+      () => {
+        this.seen.add(key)
+        this.dispose()
+        root.querySelector<HTMLElement>('[data-control="end-turn"]')?.focus({ preventScroll: true })
+      },
+      { signal },
+    )
+    this.render(run, script, language)
+    dialog.showModal()
+    dialog.querySelector<HTMLElement>('[data-scene="next"]')?.focus({ preventScroll: true })
+  }
+
+  dispose(): void {
+    this.events?.abort()
+    this.events = null
+    this.dialog?.remove()
+    this.dialog = null
+  }
+
+  private render(run: Expedition, script: PrologueScript, language: Language): void {
+    if (!this.dialog || !run.encounter) return
+    const beat = script.beats[this.beat]!
+    const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
+    const e = run.encounter
+    const objectives =
+      e.kind === 'magnetic'
+        ? e.anchors.map((a) => a.index)
+        : e.kind === 'clock'
+          ? e.hourglasses.map((a) => a.index)
+          : e.kind === 'bastion'
+            ? e.pylons.map((p) => p.index)
+            : e.kind === 'brood'
+              ? e.nests
+              : [e[e.active].seal.index]
+    const speaker =
+      beat.speaker === 'boss'
+        ? script.title
+        : beat.speaker === 'player'
+          ? ''
+          : t('At the threshold', '门扉之间', '境界にて')
+    this.dialog.dataset['focus'] = beat.focus
+    const line =
+      beat.speaker === 'player'
+        ? language === 'en'
+          ? `(${beat.line})`
+          : `（${beat.line}）`
+        : beat.line
+    this.dialog.innerHTML = `<header class="prologue-header"><div><span class="guidance-eyebrow">ENCOUNTER / ${String(['bastion', 'brood', 'mirror', 'magnetic', 'clock'].indexOf(script.kind) + 1).padStart(2, '0')}</span><h2 id="prologue-title">${script.title}</h2><p>${script.subtitle}</p></div><button class="text-button" data-scene="skip">${t('Skip arrival', '跳过开场', '登場をスキップ')} ↗</button></header><div class="prologue-stage"><div class="scene-aura"></div><div class="scene-portrait scene-hero">${spriteImage(professionSprite(run.departure.profession))}<span>${t('Explorer', '来访者', '訪問者')}</span></div><div class="scene-map" style="--scene-columns:${run.game.config.width}">${run.game.cells.map((cell, index) => `<span class="scene-tile ${index === e.boss ? 'scene-boss' : index === run.player ? 'scene-player' : objectives.includes(index) ? 'scene-objective' : ''} ${cell.visibility === 'revealed' ? 'scene-open' : ''}">${index === e.boss ? spriteImage(script.sprite) : index === run.player ? spriteImage(professionSprite(run.departure.profession)) : objectives.includes(index) ? spriteImage(script.prop) : cell.visibility === 'revealed' && cell.adjacent ? cell.adjacent : ''}</span>`).join('')}</div><div class="scene-portrait scene-enemy">${spriteImage(script.sprite)}<span>${script.title}</span></div></div><section class="prologue-dialogue" data-speaker="${beat.speaker}"><div class="dialogue-portrait">${spriteImage(beat.speaker === 'player' ? professionSprite(run.departure.profession) : beat.speaker === 'boss' ? script.sprite : script.prop)}</div><div>${speaker ? `<strong>${speaker}</strong>` : ''}<p role="status">${line}</p></div></section><footer class="prologue-footer"><button class="text-button" data-scene="previous" ${this.beat === 0 ? 'disabled' : ''}>← ${t('Previous', '上一段', '戻る')}</button><span>${String(this.beat + 1).padStart(2, '0')} <i>/ ${script.beats.length}</i></span><button class="primary-button" data-scene="next">${this.beat === script.beats.length - 1 ? t('Enter battle', '进入战斗', '戦闘へ') : t('Continue', '继续', '次へ')} →</button></footer>`
+  }
+}

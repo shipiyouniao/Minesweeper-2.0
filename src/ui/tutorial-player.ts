@@ -1,0 +1,408 @@
+import { act, neighbors } from '../game/engine.js'
+import { approachPath } from '../game/dungeon-path.js'
+import { placedBoard } from '../game/variant-board.js'
+import { createExpedition, actExpedition } from '../game/expedition.js'
+import { nextBoardMode, boardControlsTemplate } from './board-controls.js'
+import { tutorialLesson } from './tutorial-lessons.js'
+import { battleText } from './combat-build-copy.js'
+import { spriteImage } from './dungeon-sprites.js'
+import type { Language } from '../types/localization.js'
+import type { Expedition, Ruleset } from '../types/variants.js'
+import type { Game } from '../types/game.js'
+import type { BoardInputMode } from '../types/ui.js'
+import type { TutorialDefinition } from '../types/guidance.js'
+
+const players = new WeakMap<HTMLDialogElement, TutorialPlayer>()
+
+/** Reuse the application's modal pause/focus lifecycle and isolate all practice state in memory. */
+export function startTutorial(dialog: HTMLDialogElement, mode: Ruleset, language: Language): void {
+  players.get(dialog)?.dispose()
+  const player = new TutorialPlayer(dialog, mode, language)
+  players.set(dialog, player)
+}
+
+/** A lesson advances only after the requested real rule transition succeeds. */
+class TutorialPlayer {
+  private readonly events = new AbortController()
+  private readonly lesson: TutorialDefinition
+  private a: Game
+  private b: Game
+  private run: Expedition
+  private step = 0
+  private completed = false
+  private mode: BoardInputMode = 'reveal'
+  private tool: 'probe' | 'scan' | null = null
+  private message = ''
+  private hold: ReturnType<typeof setTimeout> | null = null
+  private held = false
+  private moving = false
+  private movement: Animation | null = null
+
+  private readonly originalMarkup: string
+  private disposed = false
+  private readonly originalLabel: string | null
+  private readonly dialog: HTMLDialogElement
+  private readonly ruleset: Ruleset
+  private readonly language: Language
+
+  constructor(dialog: HTMLDialogElement, ruleset: Ruleset, language: Language) {
+    this.originalMarkup = dialog.innerHTML
+    this.originalLabel = dialog.getAttribute('aria-labelledby')
+    this.dialog = dialog
+    this.ruleset = ruleset
+    this.language = language
+    this.lesson = tutorialLesson(ruleset, language)
+    const board = placedBoard({ width: 5, height: 5, mines: 3 }, new Set([4, 16, 22]), 7, 0)
+    this.a = { ...board, cells: board.cells.map((cell) => ({ ...cell, visibility: 'hidden' })) }
+    this.b = placedBoard(board.config, new Set([6, 18, 24]), 8, 0)
+    const base = createExpedition({
+      seed: 7,
+      difficulty: 'relaxed',
+      profession: 'explorer',
+      equipment: [],
+      packs: [],
+      training: [],
+      archive: false,
+      battleRelics: false,
+    })
+    this.run = {
+      ...base,
+      game: board,
+      entrance: 0,
+      exit: 24,
+      player: 0,
+      walls: [],
+      treasures: [13],
+      collected: [],
+      travelled: [0],
+      confirmedMines: [],
+      surveyedCells: [],
+      triggeredMines: [],
+      scannedRows: [],
+      shields: 1,
+    }
+    dialog.classList.add('guidance-dialog')
+    dialog.dataset['tutorial'] = ruleset
+    dialog.setAttribute('aria-labelledby', 'tutorial-title')
+    dialog.addEventListener('click', this.click, { signal: this.events.signal })
+    dialog.addEventListener('keydown', this.key, { signal: this.events.signal })
+    dialog.addEventListener('contextmenu', this.secondary, { signal: this.events.signal })
+    dialog.addEventListener('pointerdown', this.pointerDown, { signal: this.events.signal })
+    dialog.addEventListener('pointerup', this.clearHold, { signal: this.events.signal })
+    dialog.addEventListener('pointercancel', this.clearHold, { signal: this.events.signal })
+    dialog.addEventListener('pointermove', this.clearHold, { signal: this.events.signal })
+    dialog.addEventListener('close', () => this.dispose(), {
+      once: true,
+      signal: this.events.signal,
+    })
+    this.render()
+    if (!dialog.open) dialog.showModal()
+    this.focusTarget()
+  }
+
+  dispose(): void {
+    if (this.disposed) return
+    this.disposed = true
+    this.movement?.cancel()
+    delete this.dialog.dataset['practiceMoving']
+    this.clearHold()
+    this.events.abort()
+    this.dialog.classList.remove('guidance-dialog')
+    delete this.dialog.dataset['tutorial']
+    this.dialog.innerHTML = this.originalMarkup
+    if (this.originalLabel) this.dialog.setAttribute('aria-labelledby', this.originalLabel)
+  }
+
+  private t(en: string, zh: string, ja: string): string {
+    return battleText(this.language, en, zh, ja)
+  }
+
+  private board(game: Game, side: 'a' | 'b'): string {
+    const step = this.lesson.steps[this.step]
+    const ring = step?.action === 'inspect' ? neighbors(game.config, step.index) : []
+    return `<section class="practice-board-wrap"><h3>${this.ruleset === 'twin' ? side.toUpperCase() : this.t('Practice field', '练习雷区', '練習盤面')}</h3><div class="practice-board" role="grid" aria-label="${side.toUpperCase()}" aria-rowcount="5" aria-colcount="5">${game.cells
+      .map((cell, index) => {
+        const target =
+          step?.side === side &&
+          (step.index === index || (step.action === 'scan' && Math.floor(index / 5) === 4))
+        const known = cell.visibility === 'revealed'
+        const flag = cell.visibility === 'flagged'
+        const player = this.ruleset === 'expedition' && this.run.player === index
+        const label = `${this.t('Row', '行', '行')} ${Math.floor(index / 5) + 1}, ${this.t('column', '列', '列')} ${(index % 5) + 1}, ${flag ? this.t('flag', '旗', '旗') : known ? cell.adjacent : this.t('covered', '未开', '未開封')}`
+        const entity =
+          this.ruleset === 'expedition'
+            ? player
+              ? spriteImage('player')
+              : index === 24
+                ? spriteImage('exit')
+                : index === 13 && !this.run.collected.includes(13)
+                  ? spriteImage('treasure')
+                  : ''
+            : ''
+        return `<button class="practice-cell ${known ? 'open' : ''} ${flag ? 'flagged' : ''} ${target ? 'practice-target' : ''} ${ring.includes(index) ? 'practice-neighbor' : ''}" data-practice-cell="${index}" data-practice-side="${side}" aria-label="${label}${target ? ', ' + this.t('Try here', '试试这里', 'ここを操作') : ''}" tabindex="${target && step?.index === index ? '0' : '-1'}">${entity || (flag ? '⚑' : known && cell.adjacent ? cell.adjacent : '')}${this.ruleset === 'expedition' && this.run.surveyedCells.includes(index) && !known && !flag ? '<span class="practice-safe">✓</span>' : ''}</button>`
+      })
+      .join('')}</div></section>`
+  }
+
+  private render(): void {
+    const step = this.lesson.steps[this.step]
+    const done = !step
+    this.dialog.innerHTML = `<header class="guidance-header"><div><span class="guidance-eyebrow">FIELD NOTES / ${this.t('LEARN BY DOING', '亲手试一试', '実際に練習')}</span><h2 id="tutorial-title">${this.lesson.title}</h2></div><button class="guidance-close" data-practice="close" aria-label="${this.t('Exit practice', '退出练习', '練習を終了')}">×</button></header><div class="lesson-progress" aria-label="${this.step + 1} / ${this.lesson.steps.length}">${this.lesson.steps.map((_, i) => `<span class="${i < this.step ? 'done' : i === this.step ? 'current' : ''}"></span>`).join('')}</div><div class="guidance-layout"><article class="lesson-note"><span class="lesson-number">${done ? '✓' : String(this.step + 1).padStart(2, '0')}</span><h3>${step?.title ?? this.t('Ready for the field', '可以正式出发了', '本番へ進もう')}</h3><p>${step?.text ?? this.lesson.ending}</p><p class="lesson-feedback" role="status">${this.message || (this.completed ? this.t('Good. Continue when you are ready.', '完成了。准备好后再继续。', 'できました。準備ができたら次へ。') : '')}</p>${this.ruleset === 'expedition' ? `<div class="practice-vitals">♥ ${this.run.health}/${this.run.maxHealth} · ◇ ${this.run.shields} · ${this.t('Chests', '宝箱', '宝箱')} ${this.run.collected.length}/1</div>` : ''}</article><div class="lesson-workspace ${this.ruleset === 'twin' ? 'practice-twins' : ''}">${this.board(this.ruleset === 'expedition' ? this.run.game : this.a, 'a')}${this.ruleset === 'twin' ? this.board(this.b, 'b') : ''}<div class="practice-dock">${this.ruleset === 'expedition' ? `<button class="practice-tool ${this.tool === 'probe' ? 'selected' : ''}" data-practice="probe">${spriteImage('probe')}<span>${this.t('Probe', '探针', '探針')} · ${this.run.probes}</span></button><button class="practice-tool ${this.tool === 'scan' ? 'selected' : ''}" data-practice="scan">${spriteImage('scanner')}<span>${this.t('Scan', '扫描器', '走査器')} · ${this.run.scans}</span></button><button class="practice-tool" data-practice="skill" ${this.run.skillUsed ? 'disabled' : ''}>${spriteImage('skill-explorer')}<span>${this.t('Light', '探路灯', '灯り')}</span></button>` : ''}${boardControlsTemplate(this.language, this.mode, 'data-action').replace('data-action="cycle-mode"', 'data-practice="cycle"')}</div></div></div><footer class="guidance-footer"><button class="text-button" data-practice="restart">${this.t('Start again', '重新练习', '最初から')}</button><span>${this.t('Click / tap · arrows + Enter', '点击 / 轻触 · 方向键 + 回车', 'クリック / タップ · 矢印 + Enter')}</span><button class="primary-button" data-practice="${done ? 'close' : 'next'}" ${!done && !this.completed ? 'disabled' : ''}>${done ? this.t('Back to game', '返回游戏', 'ゲームへ') : this.t('Continue', '继续', '次へ')} →</button></footer>`
+  }
+
+  private focusTarget(): void {
+    const step = this.lesson.steps[this.step]
+    const selector = this.completed
+      ? '[data-practice="next"]'
+      : step?.action === 'mode'
+        ? '[data-practice="cycle"]'
+        : step?.action === 'skill'
+          ? '[data-practice="skill"]'
+          : step?.action === 'probe' || step?.action === 'scan'
+            ? `[data-practice="${step.action}"]`
+            : '.practice-target'
+    this.dialog.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true })
+  }
+
+  private reject(): void {
+    this.message = this.t(
+      'Try the highlighted action first. Nothing was spent.',
+      '先试试发光提示的操作。这次没有消耗任何资源。',
+      'まず光る操作を試してください。何も消費していません。',
+    )
+    const feedback = this.dialog.querySelector('.lesson-feedback')
+    if (feedback) feedback.textContent = this.message
+  }
+
+  private applyCell(index: number, side: 'a' | 'b', secondary = false): void {
+    const step = this.lesson.steps[this.step]
+    if (!step || this.completed || this.moving) return
+    if (
+      step.side !== side ||
+      (step.action === 'scan' ? Math.floor(index / 5) !== 4 : step.index !== index)
+    ) {
+      this.reject()
+      return
+    }
+    if (step.action === 'inspect') this.completed = true
+    else if (this.ruleset === 'expedition') {
+      const before = this.run
+      if (step.action === 'probe' && this.tool === 'probe')
+        this.run = actExpedition(before, { type: 'probe', index })
+      else if (step.action === 'scan' && this.tool === 'scan')
+        this.run = actExpedition(before, { type: 'sweep', row: Math.floor(index / 5) })
+      else if (step.action === 'cell' && this.mode === 'reveal')
+        this.run = actExpedition(before, {
+          type: before.game.cells[index]?.visibility === 'revealed' ? 'move' : 'reveal',
+          index,
+        })
+      const next = this.run
+      this.tool = null
+      if (
+        next !== before &&
+        step.action === 'cell' &&
+        next.player !== before.player &&
+        !matchMedia('(prefers-reduced-motion: reduce)').matches
+      ) {
+        this.run = before
+        void this.walk(before, next, index)
+        return
+      }
+      this.completed = next !== before
+    } else if (step.action === 'cell') {
+      const type = secondary ? 'flag' : this.mode
+      const expected = step.mode ?? 'reveal'
+      if (type !== expected) {
+        this.reject()
+        return
+      }
+      const before = side === 'a' ? this.a : this.b
+      const next = act(before, { type, index })
+      if (side === 'a') this.a = next
+      else this.b = next
+      this.completed = next !== before
+    }
+    if (!this.completed) {
+      this.reject()
+      return
+    }
+    this.message = ''
+    this.render()
+    this.focusTarget()
+  }
+
+  /** Follow the same safe approach as a real move, then reveal or collect on arrival. */
+  private async walk(before: Expedition, next: Expedition, destination: number): Promise<void> {
+    const path = approachPath(before, destination) ?? [before.player]
+    if (path[path.length - 1] !== next.player) path.push(next.player)
+    const source = this.dialog.querySelector<HTMLElement>(`[data-practice-cell="${before.player}"]`)
+    const sprite = source?.querySelector('img')
+    this.moving = true
+    this.dialog.dataset['practiceMoving'] = 'true'
+    if (source) source.style.zIndex = '3'
+    try {
+      if (source && sprite) {
+        const origin = source.getBoundingClientRect()
+        const frames = path.map((index) => {
+          const cell = this.dialog.querySelector<HTMLElement>(`[data-practice-cell="${index}"]`)!
+          const rect = cell.getBoundingClientRect()
+          return { transform: `translate(${rect.x - origin.x}px, ${rect.y - origin.y}px)` }
+        })
+        this.movement = sprite.animate(frames, {
+          duration: (path.length - 1) * 190,
+          easing: 'linear',
+          fill: 'forwards',
+        })
+        await this.movement.finished
+      }
+      if (this.disposed) return
+      this.run = next
+      this.completed = true
+      this.message = ''
+      this.render()
+      this.focusTarget()
+    } catch {
+      // Closing or restarting cancels the old lesson without advancing its replacement.
+    } finally {
+      this.movement?.cancel()
+      this.movement = null
+      this.moving = false
+      if (!this.disposed) delete this.dialog.dataset['practiceMoving']
+    }
+  }
+
+  private readonly click = (event: MouseEvent): void => {
+    event.stopPropagation()
+    if (this.held) {
+      this.held = false
+      return
+    }
+    const target =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>('[data-practice],[data-practice-cell]')
+        : null
+    if (!target) return
+    if (target.dataset['practiceCell'] !== undefined) {
+      this.applyCell(
+        Number(target.dataset['practiceCell']),
+        target.dataset['practiceSide'] === 'b' ? 'b' : 'a',
+      )
+      return
+    }
+    const command = target.dataset['practice'],
+      step = this.lesson.steps[this.step]
+    if (command === 'close') {
+      this.dispose()
+      this.dialog.close()
+      return
+    }
+    if (command === 'restart') {
+      startTutorial(this.dialog, this.ruleset, this.language)
+      return
+    }
+    if (this.moving) return
+    if (command === 'next' && this.completed) {
+      this.step++
+      this.completed = false
+      this.message = ''
+      this.render()
+      this.focusTarget()
+      return
+    }
+    if (this.completed || !step) return
+    if (command === 'cycle') {
+      this.mode = nextBoardMode(this.mode)
+      this.completed = step.action === 'mode' && this.mode === step.mode
+      this.message = ''
+      this.render()
+      this.focusTarget()
+    } else if (command === 'skill' && step.action === 'skill') {
+      const next = actExpedition(this.run, { type: 'skill' })
+      this.completed = next !== this.run
+      this.run = next
+      this.message = ''
+      this.render()
+      this.focusTarget()
+    } else if ((command === 'probe' || command === 'scan') && step.action === command) {
+      this.tool = command
+      this.message = ''
+      this.render()
+      this.dialog.querySelector<HTMLElement>('.practice-target')?.focus({ preventScroll: true })
+    } else this.reject()
+  }
+
+  private readonly key = (event: KeyboardEvent): void => {
+    event.stopPropagation()
+    const target =
+      event.target instanceof HTMLElement
+        ? event.target.closest<HTMLElement>('[data-practice-cell]')
+        : null
+    if (!target) return
+    const index = Number(target.dataset['practiceCell']),
+      side = target.dataset['practiceSide'] === 'b' ? 'b' : 'a'
+    const offset =
+      event.key === 'ArrowLeft' || event.key === 'h'
+        ? -1
+        : event.key === 'ArrowRight' || event.key === 'l'
+          ? 1
+          : event.key === 'ArrowUp' || event.key === 'k'
+            ? -5
+            : event.key === 'ArrowDown' || event.key === 'j'
+              ? 5
+              : 0
+    if (offset) {
+      event.preventDefault()
+      this.dialog
+        .querySelector<HTMLElement>(
+          `[data-practice-side="${side}"][data-practice-cell="${Math.max(0, Math.min(24, index + offset))}"]`,
+        )
+        ?.focus()
+    }
+    if (event.key.toLowerCase() === 'f') {
+      event.preventDefault()
+      this.applyCell(index, side, true)
+    }
+    if (event.key.toLowerCase() === 'c' && this.lesson.steps[this.step]?.mode === 'chord') {
+      event.preventDefault()
+      this.mode = 'chord'
+      this.applyCell(index, side)
+    }
+  }
+
+  private readonly secondary = (event: MouseEvent): void => {
+    event.preventDefault()
+    event.stopPropagation()
+    const cell =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>('[data-practice-cell]')
+        : null
+    if (cell)
+      this.applyCell(
+        Number(cell.dataset['practiceCell']),
+        cell.dataset['practiceSide'] === 'b' ? 'b' : 'a',
+        true,
+      )
+  }
+
+  private readonly pointerDown = (event: PointerEvent): void => {
+    event.stopPropagation()
+    this.held = false
+    const cell =
+      event.target instanceof Element
+        ? event.target.closest<HTMLElement>('[data-practice-cell]')
+        : null
+    if (event.pointerType !== 'touch' || !cell) return
+    this.hold = setTimeout(() => {
+      this.held = true
+      this.applyCell(
+        Number(cell.dataset['practiceCell']),
+        cell.dataset['practiceSide'] === 'b' ? 'b' : 'a',
+        true,
+      )
+    }, 500)
+  }
+  private readonly clearHold = (): void => {
+    if (this.hold !== null) clearTimeout(this.hold)
+    this.hold = null
+  }
+}

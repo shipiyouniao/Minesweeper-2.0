@@ -39,7 +39,7 @@ export class GameRouter implements MountedGame {
     this.repository = repository
     this.variants = variants
     this.language = language
-    root.innerHTML = '<nav class="ruleset-tabs"></nav><div class="ruleset-host"></div>'
+    root.innerHTML = `<nav class="ruleset-tabs"></nav><div class="ruleset-host"></div>`
     const navigation = root.querySelector<HTMLElement>('.ruleset-tabs')
     const host = root.querySelector<HTMLElement>('.ruleset-host')
     if (!navigation || !host) throw new Error('Ruleset router markup is incomplete')

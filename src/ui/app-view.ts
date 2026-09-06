@@ -11,7 +11,7 @@ import { BoardView } from './board-view.js'
 import { LanguageMenu } from './language-menu.js'
 import { formatTime, statusText } from './presentation.js'
 import { appTemplate } from './templates.js'
-import { boardControlHint } from './board-controls.js'
+import { boardControlsTemplate } from './board-controls.js'
 
 /** Owns application DOM updates and modal presentation, without changing game state. */
 export class AppView {
@@ -103,23 +103,14 @@ export class AppView {
     pauseButton.innerHTML = icon(paused ? 'play' : 'pause')
     pauseButton.setAttribute('aria-label', paused ? messages.resume : messages.pause)
 
-    this.element('[data-action="reveal-mode"]').setAttribute(
-      'aria-pressed',
-      String(inputMode === 'reveal'),
+    const cycleFocused =
+      document.activeElement === this.root.querySelector('[data-action="cycle-mode"]')
+    this.element('.action-dock').innerHTML = boardControlsTemplate(
+      language,
+      inputMode,
+      'data-action',
     )
-    this.element('[data-action="flag-mode"]').setAttribute(
-      'aria-pressed',
-      String(inputMode === 'flag'),
-    )
-    this.element('[data-action="safe-mode"]').setAttribute(
-      'aria-pressed',
-      String(inputMode === 'mark-safe'),
-    )
-    this.element('[data-action="chord-mode"]').setAttribute(
-      'aria-pressed',
-      String(inputMode === 'chord'),
-    )
-    this.element('.board-mode-hint').textContent = boardControlHint(language, inputMode)
+    if (cycleFocused) this.element('[data-action="cycle-mode"]').focus({ preventScroll: true })
     this.renderTime(state.elapsed, storageAvailable)
   }
 

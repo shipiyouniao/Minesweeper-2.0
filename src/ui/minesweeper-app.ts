@@ -1,3 +1,5 @@
+import { nextBoardMode } from './board-controls.js'
+import { startTutorial } from './tutorial-player.js'
 import type { BoardInputMode } from '../types/ui.js'
 import type { Difficulty, RankedDifficulty } from '../types/game.js'
 import type { InteractionCue, SoundEffects } from '../types/audio.js'
@@ -112,6 +114,18 @@ export class MinesweeperApp implements InputActions {
         this.repository.setPreference({ key: 'sound', value: this.sounds.enabled })
         this.sounds.play('tap')
         this.render()
+        break
+      case 'cycle-mode':
+        this.inputMode = nextBoardMode(this.inputMode)
+        this.render()
+        break
+      case 'tutorial':
+        this.showDialog('<h2 id="dialog-title"></h2>')
+        startTutorial(
+          document.querySelector<HTMLDialogElement>('#dialog')!,
+          'classic',
+          this.language,
+        )
         break
       case 'help':
         this.showDialog(helpTemplate(this.language))
