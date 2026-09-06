@@ -18,6 +18,7 @@ const fixture = {
   camp: {
     ...EMPTY_CAMP,
     completed: 3,
+    upgrades: ['workshop'],
     milestones: { ...milestoneProgress(EMPTY_CAMP), travel: 20, skills: 3, floors: 5, wins: 3 },
   },
   journal: null,
@@ -68,7 +69,7 @@ try {
     if (language === 'zh')
       await page.screenshot({ path: '.native/milestone-ui/overview.png', fullPage: true })
     await page.locator('[data-control="camp-page:missions"]').click()
-    assert.equal(await page.locator('.milestone-card').count(), 5)
+    assert.equal(await page.locator('.milestone-card').count(), 15)
     assert.ok(await page.locator('[data-control="claim-milestone:first-boss"]').isDisabled())
     await page.locator('[data-control="claim-milestone:first-steps"]').focus()
     await page.keyboard.press('Enter')
@@ -89,7 +90,7 @@ try {
     }
     await page.setViewportSize({ width: 1440, height: 1000 })
     await page.locator('[data-control="camp-page:achievements"]').click()
-    assert.equal(await page.locator('.milestone-card').count(), 5)
+    assert.equal(await page.locator('.milestone-card').count(), 15)
     if (language === 'zh')
       await page.screenshot({ path: '.native/milestone-ui/achievements.png', fullPage: true })
     await page.locator('[data-control="claim-milestone:veteran"]').click()
@@ -100,7 +101,7 @@ try {
     await page.locator('[data-control="camp-page:overview"]').click()
     await page.locator('[data-control="start"]').click()
     const departure = (await saved(page)).journal.departure
-    assert.deepEqual(departure.milestoneRelics, ['trail-heart'])
+    assert.deepEqual(departure.milestoneRelics, ['pulse-coil', 'trail-heart'])
     assert.deepEqual(departure.equipment, ['field-radio'])
     assert.equal(departure.difficulty, 'expert')
     await context.close()

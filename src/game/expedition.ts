@@ -1,5 +1,6 @@
 import { upgradeCost } from './camp-progression.js'
-import { hasFieldRadio } from './milestones.js'
+import { hasFieldRadio, ownsProfession } from './milestones.js'
+import { walkingNeighbors } from './mobility-skills.js'
 import { enterEncounter, isEncounterFloor } from './encounter-roster.js'
 import { occupied } from './dungeon-occupancy.js'
 import { actBattle } from './battle-turns.js'
@@ -70,7 +71,7 @@ export function allowedDeparture(
   equipment: readonly Equipment[],
 ): boolean {
   return (
-    (profession === 'explorer' || camp.upgrades.includes(profession)) &&
+    ownsProfession(camp, profession) &&
     (equipment.length === 0 || camp.upgrades.includes('workshop')) &&
     new Set(equipment).size === equipment.length &&
     (!equipment.includes('field-radio') || hasFieldRadio(camp)) &&
@@ -148,7 +149,7 @@ export function reachableCells(run: Expedition): Set<number> {
     const index = queue[cursor]
     if (index === undefined) continue
 
-    for (const other of adjacentSteps(run.game, index)) {
+    for (const other of walkingNeighbors(run, index)) {
       const cell = run.game.cells[other]
       if (
         !found.has(other) &&
@@ -320,8 +321,10 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
   if (run.phase !== 'exploring') return run
 
   switch (action.type) {
-    case 'skill':
-      return useProfessionSkill(run)
+    case 'skill': {
+      const used = useProfessionSkill(run, action.index)
+      return used.player !== run.player ? collectTreasures(used, [used.player]) : used
+    }
     case 'reveal':
       return revealFrontier(run, action.index)
     case 'move':

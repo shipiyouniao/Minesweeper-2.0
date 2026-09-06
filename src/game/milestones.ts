@@ -1,6 +1,6 @@
 import { roomTravel } from './mirror-state.js'
 import { approachPath } from './dungeon-path.js'
-import type { Camp, Expedition } from '../types/variants.js'
+import type { Camp, Expedition, Profession } from '../types/variants.js'
 import type {
   MilestoneDefinition,
   MilestoneId,
@@ -23,7 +23,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'chests',
     target: 3,
     supplies: 250,
-    reward: { kind: 'upgrade', id: 'surveyor' },
+    reward: { kind: 'relic', id: 'chest-beacon' },
   },
   {
     id: 'field-practice',
@@ -31,7 +31,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'skills',
     target: 3,
     supplies: 350,
-    reward: { kind: 'upgrade', id: 'workshop' },
+    reward: { kind: 'relic', id: 'pulse-coil' },
   },
   {
     id: 'floor-runner',
@@ -47,7 +47,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'bosses',
     target: 1,
     supplies: 800,
-    reward: { kind: 'upgrade', id: 'engineer' },
+    reward: { kind: 'relic', id: 'last-bastion' },
   },
   {
     id: 'veteran',
@@ -71,7 +71,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'bosses',
     target: 10,
     supplies: 2500,
-    reward: { kind: 'upgrade', id: 'battle-manual' },
+    reward: { kind: 'relic', id: 'hunter-seal' },
   },
   {
     id: 'four-legends',
@@ -79,7 +79,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'bossKinds',
     target: 4,
     supplies: 3000,
-    reward: { kind: 'upgrade', id: 'sentinel' },
+    reward: { kind: 'relic', id: 'fault-map' },
   },
   {
     id: 'abyss-clear',
@@ -87,7 +87,167 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'abyssWins',
     target: 1,
     supplies: 5000,
-    reward: { kind: 'upgrade', id: 'archaeologist' },
+    reward: { kind: 'relic', id: 'abyss-hourglass' },
+  },
+  {
+    id: 'trail-apprentice',
+    kind: 'missions',
+    metric: 'travel',
+    target: 60,
+    supplies: 250,
+    reward: null,
+  },
+  {
+    id: 'trail-guide',
+    kind: 'missions',
+    metric: 'travel',
+    target: 150,
+    supplies: 500,
+    reward: null,
+  },
+  {
+    id: 'cache-runner',
+    kind: 'missions',
+    metric: 'chests',
+    target: 10,
+    supplies: 650,
+    reward: null,
+  },
+  {
+    id: 'cache-seeker',
+    kind: 'missions',
+    metric: 'chests',
+    target: 25,
+    supplies: 1000,
+    reward: null,
+  },
+  {
+    id: 'skill-student',
+    kind: 'missions',
+    metric: 'skills',
+    target: 10,
+    supplies: 700,
+    reward: null,
+  },
+  {
+    id: 'skill-adept',
+    kind: 'missions',
+    metric: 'skills',
+    target: 25,
+    supplies: 1100,
+    reward: null,
+  },
+  {
+    id: 'deep-route',
+    kind: 'missions',
+    metric: 'floors',
+    target: 12,
+    supplies: 900,
+    reward: { kind: 'profession', id: 'waymarker' },
+  },
+  {
+    id: 'deep-descent',
+    kind: 'missions',
+    metric: 'floors',
+    target: 25,
+    supplies: 1400,
+    reward: null,
+  },
+  {
+    id: 'boss-challenger',
+    kind: 'missions',
+    metric: 'bosses',
+    target: 3,
+    supplies: 1200,
+    reward: null,
+  },
+  {
+    id: 'first-victory',
+    kind: 'missions',
+    metric: 'wins',
+    target: 1,
+    supplies: 1000,
+    reward: null,
+  },
+  {
+    id: 'long-road',
+    kind: 'achievements',
+    metric: 'travel',
+    target: 500,
+    supplies: 1600,
+    reward: null,
+  },
+  {
+    id: 'world-walker',
+    kind: 'achievements',
+    metric: 'travel',
+    target: 1500,
+    supplies: 3500,
+    reward: null,
+  },
+  {
+    id: 'treasure-vault',
+    kind: 'achievements',
+    metric: 'chests',
+    target: 75,
+    supplies: 2200,
+    reward: null,
+  },
+  {
+    id: 'treasure-legend',
+    kind: 'achievements',
+    metric: 'chests',
+    target: 200,
+    supplies: 4500,
+    reward: null,
+  },
+  {
+    id: 'skill-master',
+    kind: 'achievements',
+    metric: 'skills',
+    target: 75,
+    supplies: 2400,
+    reward: null,
+  },
+  {
+    id: 'skill-legend',
+    kind: 'achievements',
+    metric: 'skills',
+    target: 200,
+    supplies: 5000,
+    reward: null,
+  },
+  {
+    id: 'depth-pioneer',
+    kind: 'achievements',
+    metric: 'floors',
+    target: 50,
+    supplies: 3000,
+    reward: { kind: 'profession', id: 'riftwalker' },
+  },
+  {
+    id: 'depth-legend',
+    kind: 'achievements',
+    metric: 'floors',
+    target: 150,
+    supplies: 6000,
+    reward: null,
+  },
+  {
+    id: 'relic-museum',
+    kind: 'achievements',
+    metric: 'relics',
+    target: 20,
+    supplies: 4000,
+    reward: null,
+  },
+  {
+    id: 'abyss-veteran',
+    kind: 'achievements',
+    metric: 'abyssWins',
+    target: 5,
+    supplies: 8000,
+    reward: null,
   },
 ]
 
@@ -178,12 +338,9 @@ export function claimMilestone(camp: Camp, id: MilestoneId): Camp {
   const progress = milestoneProgress(camp)
   if (!entry || progress.claimed.includes(id) || milestoneValue(camp, entry) < entry.target)
     return camp
-  const upgrade = entry.reward?.kind === 'upgrade' ? entry.reward.id : null
   return {
     ...camp,
     supplies: Math.min(Number.MAX_SAFE_INTEGER, camp.supplies + entry.supplies),
-    upgrades:
-      upgrade && !camp.upgrades.includes(upgrade) ? [...camp.upgrades, upgrade] : camp.upgrades,
     milestones: { ...progress, claimed: [...progress.claimed, id] },
   }
 }
@@ -199,4 +356,30 @@ export function ownedMilestoneRelics(camp: Camp): MilestoneRelic[] {
       ? [entry.reward.id]
       : [],
   )
+}
+
+/** Reward careers are licenses, never purchasable camp upgrades. */
+export function ownsProfession(camp: Camp, profession: Profession): boolean {
+  if (profession === 'waymarker' || profession === 'riftwalker')
+    return MILESTONES.some(
+      (entry) =>
+        entry.reward?.kind === 'profession' &&
+        entry.reward.id === profession &&
+        milestoneProgress(camp).claimed.includes(entry.id),
+    )
+  return profession === 'explorer' || camp.upgrades.includes(profession)
+}
+
+export const MILESTONE_RELICS: readonly MilestoneRelic[] = [
+  'trail-heart',
+  'survey-token',
+  'chest-beacon',
+  'pulse-coil',
+  'last-bastion',
+  'hunter-seal',
+  'fault-map',
+  'abyss-hourglass',
+]
+export function parseMilestoneRelic(value: string | null): MilestoneRelic | null {
+  return MILESTONE_RELICS.find((id) => id === value) ?? null
 }

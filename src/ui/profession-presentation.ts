@@ -10,6 +10,8 @@ export function professionSprite(profession: Profession): DungeonSprite {
       return 'surveyor'
     case 'engineer':
       return 'engineer'
+    case 'waymarker':
+    case 'riftwalker':
     case 'archaeologist':
     case 'alchemist':
     case 'sentinel':
@@ -20,6 +22,10 @@ export function professionSprite(profession: Profession): DungeonSprite {
 /** Each career owns a distinct generated skill icon, independent from its walking portrait. */
 export function professionSkillSprite(profession: Profession): DungeonSprite {
   switch (profession) {
+    case 'waymarker':
+      return 'skill-waymarker'
+    case 'riftwalker':
+      return 'skill-riftwalker'
     case 'explorer':
       return 'skill-explorer'
     case 'surveyor':

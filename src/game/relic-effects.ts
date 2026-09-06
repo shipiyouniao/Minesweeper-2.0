@@ -1,5 +1,6 @@
 import { inspectArea, probeArea } from './dungeon-discovery.js'
 import { healExpedition } from './combat-build.js'
+import { healVitality } from './vitality.js'
 import { roomDiscoveries } from './mirror-state.js'
 import type { Expedition, ExpeditionAction, Relic } from '../types/variants.js'
 
@@ -30,7 +31,21 @@ export function applyDamageRelics(
       health: 5,
     }
   }
+  if (result.health === 0 && available(result, 'abyss-hourglass', true)) {
+    result = inspectArea(
+      { ...claim(result, 'abyss-hourglass', true), health: 3 },
+      probeArea(result.game.config, result.player),
+    )
+  }
   if (result.health === 0) return result
+
+  if (
+    damaged.health > 0 &&
+    damaged.health < before.health &&
+    damaged.health <= 2 &&
+    available(result, 'last-bastion', true)
+  )
+    result = { ...claim(result, 'last-bastion', true), shields: 2 }
 
   if (index !== null && before.shields > damaged.shields && available(result, 'reactive-shell')) {
     result = inspectArea(claim(result, 'reactive-shell'), probeArea(result.game.config, index))
@@ -50,6 +65,11 @@ export function applyDamageRelics(
 export function applyTreasureRelics(before: Expedition, collected: Expedition): Expedition {
   if (collected.collected.length <= before.collected.length) return collected
   let result = collected
+  if (available(result, 'chest-beacon')) {
+    const target = result.treasures.find((index) => !result.collected.includes(index))
+    if (target !== undefined)
+      result = inspectArea(claim(result, 'chest-beacon'), probeArea(result.game.config, target))
+  }
   if (available(result, 'field-dressing')) {
     result = { ...claim(result, 'field-dressing'), health: healExpedition(result, 1).health }
   }
@@ -86,6 +106,10 @@ export function applyDiscoveryRelics(
   if (discoveries <= 0) return after
   let result = after
   const floorDiscoveries = roomDiscoveries(result) + (result.encounter?.priorDiscoveries ?? 0)
+  if (floorDiscoveries >= 4 && available(result, 'fault-map'))
+    result = inspectArea(claim(result, 'fault-map'), probeArea(result.game.config, result.exit))
+  if (floorDiscoveries >= 8 && available(result, 'hunter-seal'))
+    result = { ...claim(result, 'hunter-seal'), health: healVitality(result, 2).health }
   if (floorDiscoveries >= 3 && available(result, 'field-notes')) {
     result = { ...claim(result, 'field-notes'), probes: Math.min(4, result.probes + 1) }
   }

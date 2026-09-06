@@ -14,6 +14,26 @@ export function professionSkillCopy(
   profession: Profession,
 ): VariantDescription {
   switch (profession) {
+    case 'waymarker':
+      return {
+        name: text(language, 'Return anchor', '归途锚点', '帰還の錨'),
+        note: text(
+          language,
+          'First use places an anchor at your position. Use again from elsewhere to return. Each use costs an action; one return per floor. Same room only; occupied anchors cannot be used.',
+          '首次在脚下放置锚点，再次使用回到锚点。两次操作各消耗一次行动，每层可回撤一次；仅当前房间有效，落点被占用时不可回撤。',
+          '最初に足元へ錨を設置し、別の場所から再使用すると帰還。各操作1行動、各階1回帰還。同じ部屋のみ、占有中は帰還不可。',
+        ),
+      }
+    case 'riftwalker':
+      return {
+        name: text(language, 'Open rift', '开辟裂隙', '裂け目を開く'),
+        note: text(
+          language,
+          'Choose a revealed safe landing two squares away across one confirmed mine or wall. Cross in one action, once per floor. A two-way rift remains in this room for ordinary walking. Mines stay intact; cannot cross boss bodies.',
+          '选择隔着一格已确认地雷或墙、两格外已揭开的安全落点，消耗一次行动穿越，每层一次。双向裂隙在当前房间保留，可正常往返；不改雷和数字，不能穿过 BOSS 本体。',
+          '確定地雷か壁1マスを挟む2マス先の公開済み安全地点へ1行動で移動。各階1回。双方向の裂け目は同じ部屋で歩行に使える。地雷と数字は変化せず、ボス本体は越えられない。',
+        ),
+      }
     case 'explorer':
       return {
         name: text(language, 'Trail light', '探路灯', '道しるべ'),
@@ -80,6 +100,20 @@ export function professionSkillCopy(
 /** Present a short actionable availability message using only public resources and knowledge. */
 export function professionSkillStatus(language: Language, status: SkillAvailability): string {
   switch (status) {
+    case 'no-passage':
+      return text(
+        language,
+        'Reveal a safe landing across a confirmed mine or wall, two squares away',
+        '先揭开隔着一格已确认地雷或墙的安全落点（两格外）',
+        '確定地雷か壁を挟んだ2マス先の安全地点を開こう',
+      )
+    case 'blocked-anchor':
+      return text(
+        language,
+        'Move away from the anchor; its landing must be unoccupied',
+        '先离开锚点；回撤落点须未被占用',
+        '錨から離れ、帰還点の占有を解消しよう',
+      )
     case 'ready':
       return text(language, 'Use · once per floor', '使用 · 每层一次', '使用 · 各階1回')
     case 'used':

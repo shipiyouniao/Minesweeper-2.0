@@ -361,6 +361,9 @@ export class VariantApp implements VariantInputActions {
       case 'descend':
         this.expedition({ type: 'descend' })
         break
+      case 'skill-target':
+        this.expedition({ type: 'skill', index: command.value })
+        break
       case 'skill':
         this.expedition({ type: 'skill' })
         break

@@ -16,6 +16,7 @@ import { professionCopy, variantCopy } from './variant-copy.js'
 import { icon } from '../icons.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
+import { currentWaymark, skillRoom, riftLandings } from '../game/mobility-skills.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
 import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import { tacticalCopy, tacticalPlanCopy } from './tactical-copy.js'
@@ -159,7 +160,7 @@ export class VariantView {
           : null
     let target = selector ? this.content.querySelector<HTMLElement>(selector) : null
     // A completed purchase becomes disabled; retain focus on the inspected item's tile.
-    if (target?.hasAttribute('disabled') && fallback)
+    if ((!target || target.hasAttribute('disabled')) && fallback)
       target = this.content.querySelector<HTMLElement>(`[data-control="${CSS.escape(fallback)}"]`)
     if (target && !target.hasAttribute('disabled')) target.focus({ preventScroll: true })
     else if (active)
@@ -579,6 +580,40 @@ export class VariantView {
         cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + t.frontier)
     }
     const grid = this.content.querySelector<HTMLElement>(`[data-side="${side}"]`)
+    if (side === 'a') {
+      const marker = (index: number, className: string, label: string): void => {
+        const cell = grid?.querySelector<HTMLElement>(`[data-cell="${index}"]`)
+        cell?.classList.add(className)
+        if (cell) {
+          cell.title = [cell.title, label].filter(Boolean).join(' · ')
+          cell.setAttribute(
+            'aria-label',
+            [cell.getAttribute('aria-label'), label].filter(Boolean).join(', '),
+          )
+        }
+      }
+      const anchor = currentWaymark(run)
+      if (anchor !== null)
+        marker(
+          anchor,
+          'mobility-anchor',
+          battleText(this.language, 'Return anchor', '回撤锚点', '帰還の錨'),
+        )
+      if (run.rift?.room === skillRoom(run))
+        for (const index of [run.rift.from, run.rift.to])
+          marker(
+            index,
+            'mobility-rift',
+            battleText(this.language, 'Two-way rift', '双向裂隙', '双方向の裂け目'),
+          )
+      if (run.departure.profession === 'riftwalker' && !run.skillUsed)
+        for (const index of riftLandings(run))
+          marker(
+            index,
+            'mobility-landing',
+            battleText(this.language, 'Rift landing', '裂隙落点', '裂け目の着地点'),
+          )
+    }
     const current = grid?.querySelector<HTMLElement>(`[data-cell="${run.player}"]`)
     if (side === 'b') {
       current?.classList.add('mirror-parked')

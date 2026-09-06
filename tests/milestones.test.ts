@@ -92,7 +92,7 @@ test('claims grant finite supplies and actual unlocks exactly once, including ac
   assert.equal(session.camp.supplies, 250)
   assert.ok(session.claim('floor-runner'))
   assert.ok(session.claim('veteran'))
-  assert.deepEqual(ownedMilestoneRelics(session.camp), ['trail-heart'])
+  assert.deepEqual(ownedMilestoneRelics(session.camp), ['chest-beacon', 'trail-heart'])
   assert.ok(!allowedDeparture(EMPTY_CAMP, 'explorer', ['field-radio']))
   assert.ok(!allowedDeparture({ ...session.camp, upgrades: [] }, 'explorer', ['field-radio']))
   assert.ok(
@@ -220,11 +220,12 @@ test('a complete accepted expedition records each floor, boss and victory once a
   const restored = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.deepEqual(restored.camp, session.camp)
   assert.ok(restored.claim('first-boss'))
-  assert.ok(restored.camp.upgrades.includes('engineer'))
+  assert.ok(ownedMilestoneRelics(restored.camp).includes('last-bastion'))
+  assert.ok(!restored.camp.upgrades.includes('engineer'))
 })
 
 test('milestone IDs, translations and command boundaries remain finite and complete', () => {
-  assert.equal(new Set(MILESTONES.map((item) => item.id)).size, 10)
+  assert.equal(new Set(MILESTONES.map((item) => item.id)).size, 30)
   for (const language of ['en', 'zh', 'ja'] as const) {
     for (const entry of MILESTONES) {
       assert.ok(milestoneCopy(language, entry.id).name)

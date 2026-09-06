@@ -1,4 +1,4 @@
-import type { Upgrade, Relic } from './variants.js'
+import type { Relic } from './variants.js'
 import type { EncounterKind } from './tactical.js'
 
 export type MilestoneId =
@@ -12,7 +12,36 @@ export type MilestoneId =
   | 'boss-slayer'
   | 'four-legends'
   | 'abyss-clear'
-export type MilestoneRelic = 'trail-heart' | 'survey-token'
+  | 'trail-apprentice'
+  | 'trail-guide'
+  | 'cache-runner'
+  | 'cache-seeker'
+  | 'skill-student'
+  | 'skill-adept'
+  | 'deep-route'
+  | 'deep-descent'
+  | 'boss-challenger'
+  | 'first-victory'
+  | 'long-road'
+  | 'world-walker'
+  | 'treasure-vault'
+  | 'treasure-legend'
+  | 'skill-master'
+  | 'skill-legend'
+  | 'depth-pioneer'
+  | 'depth-legend'
+  | 'relic-museum'
+  | 'abyss-veteran'
+export type RewardProfession = 'waymarker' | 'riftwalker'
+export type MilestoneRelic =
+  | 'trail-heart'
+  | 'survey-token'
+  | 'chest-beacon'
+  | 'pulse-coil'
+  | 'last-bastion'
+  | 'hunter-seal'
+  | 'fault-map'
+  | 'abyss-hourglass'
 export type MilestoneMetric =
   | 'travel'
   | 'chests'
@@ -24,7 +53,7 @@ export type MilestoneMetric =
   | 'relics'
   | 'bossKinds'
 export type MilestoneReward =
-  | { readonly kind: 'upgrade'; readonly id: Upgrade }
+  | { readonly kind: 'profession'; readonly id: RewardProfession }
   | { readonly kind: 'equipment'; readonly id: 'field-radio' }
   | { readonly kind: 'relic'; readonly id: MilestoneRelic }
 
