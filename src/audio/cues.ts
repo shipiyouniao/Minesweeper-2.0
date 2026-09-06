@@ -38,6 +38,11 @@ function note(frequency: number, delay = 0, duration = 0.09): Tone {
 /** Compose original, lightweight cues without recordings, downloads, or runtime randomness. */
 export function notesForCue(cue: SoundCue): readonly Tone[] {
   switch (cue) {
+    case 'sonar-pulse':
+      return [
+        { ...note(1040, 0, 0.34), endFrequency: 780, gain: 0.045 },
+        { ...note(780, 0.22, 0.28), endFrequency: 640, gain: 0.022 },
+      ]
     case 'magnet-pull':
       return [{ ...note(180, 0, 0.3), endFrequency: 740, gain: 0.045 }, note(880, 0.24, 0.12)]
     case 'magnet-push':
@@ -94,6 +99,7 @@ export function cuePriority(cue: SoundCue): number {
     case 'magnet-push':
     case 'magnet-charge':
     case 'heal':
+    case 'sonar-pulse':
     case 'confirm':
     case 'reveal':
     case 'flag':

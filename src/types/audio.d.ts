@@ -15,6 +15,7 @@ export type SoundCue =
   | 'magnet-pull'
   | 'magnet-push'
   | 'magnet-charge'
+  | 'sonar-pulse'
 
 /** A short oscillator envelope, expressed in seconds and hertz. */
 export interface Tone {
