@@ -291,6 +291,10 @@ export class VariantApp implements VariantInputActions {
     if (command.type !== 'probe' && command.type !== 'scan') this.cancelMovement()
 
     switch (command.type) {
+      case 'claim-milestone':
+        if (this.session instanceof ExpeditionSession)
+          this.result(this.session.claim(command.value))
+        break
       case 'camp-page':
       case 'shop-category':
       case 'shop-item':

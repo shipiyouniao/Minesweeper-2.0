@@ -2,6 +2,8 @@ import { EXPEDITION_RULES_REVISION } from '../persistence/expedition-format.js'
 import { addVariantRecord } from '../game/variant-difficulty.js'
 import { ownedRelicPacks } from '../game/relic-packs.js'
 import { ownedCombatTraining } from '../game/combat-build.js'
+import { advanceMilestones, claimMilestone, ownedMilestoneRelics } from '../game/milestones.js'
+import type { MilestoneId } from '../types/milestones.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import {
   actExpedition,
@@ -53,6 +55,9 @@ export class ExpeditionSession {
       journal.departure.archive === this.save.camp.upgrades.includes('archive') &&
       journal.departure.packs.every((pack) => this.save.camp.upgrades.includes(pack)) &&
       journal.departure.training.every((training) => this.save.camp.upgrades.includes(training)) &&
+      (journal.departure.milestoneRelics ?? []).every((relic) =>
+        ownedMilestoneRelics(this.camp).includes(relic),
+      ) &&
       (!journal.departure.battleRelics || this.save.camp.upgrades.includes('battle-manual'))
     ) {
       let run = createExpedition(journal.departure)
@@ -120,6 +125,7 @@ export class ExpeditionSession {
       training: ownedCombatTraining(this.camp),
       battleRelics: this.camp.upgrades.includes('battle-manual'),
       packs: ownedRelicPacks(this.camp),
+      milestoneRelics: ownedMilestoneRelics(this.camp),
       difficulty,
       seed: this.runtime.randomSeed(),
       profession,
@@ -156,6 +162,7 @@ export class ExpeditionSession {
     this.current = next
     this.save = {
       ...this.save,
+      camp: advanceMilestones(this.camp, run, next),
       journal: {
         ...journal,
         actions: [...journal.actions, action],
@@ -202,6 +209,16 @@ export class ExpeditionSession {
   purchase(upgrade: Upgrade): boolean {
     if (this.current) return false
     const camp = buyUpgrade(this.camp, upgrade)
+    if (camp === this.camp) return false
+    this.save = { ...this.save, camp }
+    this.persist()
+    return true
+  }
+
+  /** Claim only at camp so new unlocks cannot rewrite a departure snapshot. */
+  claim(id: MilestoneId): boolean {
+    if (this.current) return false
+    const camp = claimMilestone(this.camp, id)
     if (camp === this.camp) return false
     this.save = { ...this.save, camp }
     this.persist()

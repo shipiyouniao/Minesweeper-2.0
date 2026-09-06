@@ -2,7 +2,9 @@
 
 # Minesweeper 2.0 — A TypeScript 7 Experiment
 
-**Play three modes:** Classic Minesweeper, mine-exclusive **Twin boards**, and a 3–12-floor **Expedition** across five difficulty tiers. Expedition combines connected dungeon exploration, six professions with [once-per-floor skills](docs/profession-skills.md), a shared health/shield system, bounded equipment and 29 possible relics. The camp offers 24 distinct gameplay unlocks plus two one-time trainings, with a stepped [pricing curve](docs/camp-progression.md).
+**Play three modes:** Classic Minesweeper, mine-exclusive **Twin boards**, and a 3–12-floor **Expedition** across five difficulty tiers. Expedition combines connected dungeon exploration, six professions with [once-per-floor skills](docs/profession-skills.md), a shared health/shield system, bounded equipment and up to 31 possible relics. The camp offers 24 distinct gameplay purchases plus two one-time trainings, with a stepped [pricing curve](docs/camp-progression.md).
+
+**[Missions and achievements](docs/milestones.md):** select difficulty directly on the camp overview, then pursue ten permanent goals for supplies, profession/facility unlocks, exclusive Field radio equipment and two exclusive relics. Progress persists across runs; each reward can be claimed once.
 
 **New boss: [Magnetic Knight](docs/magnetic-knight.md).** Read animated pull/push arrows and projected landings, ground yourself against magnetic pulses, then lure the knight along cleared routes into anchors to expose its core. Charges have dedicated movement and impact effects; reduced-motion mode retains the full static forecast. [Mirror Twins](docs/mirror-twins.md), Bastion Guardian and Brood Queen remain in the four-family roster. Read the [mode design](docs/game-modes.md) and [expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1) for current rules and planned modes.
 

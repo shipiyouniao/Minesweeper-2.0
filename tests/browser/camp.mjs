@@ -79,7 +79,7 @@ try {
     const page = await context.newPage()
     page.on('pageerror', (error) => errors.push(error.message))
     await page.goto(`${base}?ruleset=expedition&lang=${language}`)
-    assert.equal(await page.locator('.camp-destinations button').count(), 4)
+    assert.equal(await page.locator('.camp-destinations button').count(), 5)
     assert.equal(
       await page
         .locator(
@@ -139,9 +139,10 @@ try {
     await page.locator('[data-control="equipment:steel-blade"]').click()
     await page.locator('[data-control="equipment:medical-kit"]').click()
     assert.ok(await page.locator('[data-control="equipment:probe"]').isDisabled())
-    await page.locator('[data-control="camp-page:route"]').click()
-    await page.locator('[data-control="difficulty:advanced"]').click()
     await page.locator('[data-control="camp-page:overview"]').click()
+    assert.equal(await page.locator('[data-control^="difficulty:"]').count(), 5)
+    assert.equal(await page.locator('[data-control="camp-page:route"]').count(), 0)
+    await page.locator('[data-control="difficulty:advanced"]').click()
     assert.equal(await page.locator('.camp-loadout-summary li').count(), 2)
     assert.ok((await page.locator('.camp-route-summary').innerText()).includes('13 × 13'))
 

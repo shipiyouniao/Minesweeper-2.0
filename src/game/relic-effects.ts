@@ -53,6 +53,8 @@ export function applyTreasureRelics(before: Expedition, collected: Expedition): 
   if (available(result, 'field-dressing')) {
     result = { ...claim(result, 'field-dressing'), health: healExpedition(result, 1).health }
   }
+  if (available(result, 'trail-heart'))
+    result = { ...claim(result, 'trail-heart'), shields: Math.min(2, result.shields + 1) }
   if (available(result, 'supply-cache')) {
     result = { ...claim(result, 'supply-cache'), scans: Math.min(4, result.scans + 1) }
   }
@@ -87,6 +89,12 @@ export function applyDiscoveryRelics(
   if (floorDiscoveries >= 3 && available(result, 'field-notes')) {
     result = { ...claim(result, 'field-notes'), probes: Math.min(4, result.probes + 1) }
   }
+  if (floorDiscoveries >= 5 && available(result, 'survey-token'))
+    result = {
+      ...claim(result, 'survey-token'),
+      probes: Math.min(4, result.probes + 1),
+      scans: Math.min(4, result.scans + 1),
+    }
   if (action.type === 'probe' && discoveries >= 2 && available(result, 'rangefinder')) {
     result = { ...claim(result, 'rangefinder'), scans: Math.min(4, result.scans + 1) }
   }

@@ -9,6 +9,7 @@ import type {
   CombatTraining,
 } from './combat-build.js'
 import type { RelicPack, ExpansionRelic } from './relic-packs.js'
+import type { MilestoneProgress, MilestoneRelic } from './milestones.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
 export type Ruleset = 'classic' | 'expedition' | 'twin'
@@ -21,11 +22,19 @@ export type Profession =
   'explorer' | 'surveyor' | 'engineer' | 'archaeologist' | 'alchemist' | 'sentinel'
 
 /** Camp equipment consumes a three-point departure budget. */
-export type Equipment = 'probe' | 'scanner' | 'guard' | CombatEquipment
+export type Equipment = 'probe' | 'scanner' | 'guard' | 'field-radio' | CombatEquipment
 
 /** Relics persist only within the current expedition. */
 export type Relic =
-  'lantern' | 'lens' | 'aegis' | 'purse' | 'compass' | 'salvage' | ExpansionRelic | CombatRelic
+  | 'lantern'
+  | 'lens'
+  | 'aegis'
+  | 'purse'
+  | 'compass'
+  | 'salvage'
+  | ExpansionRelic
+  | CombatRelic
+  | MilestoneRelic
 
 /** Progression purchases unlock options rather than unlimited stat increases. */
 export type Upgrade =
@@ -41,6 +50,7 @@ export type Upgrade =
 
 /** Persistent camp progress, updated atomically with run settlement. */
 export interface Camp {
+  readonly milestones?: MilestoneProgress
   readonly supplies: number
   readonly upgrades: readonly Upgrade[]
   readonly completed: number
@@ -48,6 +58,7 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  readonly milestoneRelics?: readonly MilestoneRelic[]
   readonly training: readonly CombatTraining[]
   readonly battleRelics: boolean
   readonly packs: readonly RelicPack[]

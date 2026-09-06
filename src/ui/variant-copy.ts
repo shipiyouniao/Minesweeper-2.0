@@ -234,6 +234,26 @@ export function professionCopy(language: Language, profession: Profession): Vari
 /** Explain each temporary relic's exact effect and resource cap. */
 export function relicCopy(language: Language, relic: Relic): VariantDescription {
   switch (relic) {
+    case 'trail-heart':
+      return {
+        name: localized(language, 'Trail heart', '远行之心', '旅路の心'),
+        note: localized(
+          language,
+          'Achievement exclusive. The first chest collected each floor grants 1 shield, cap 2.',
+          '成就专属。每层首次拾取宝箱获得 1 层护盾，上限 2。',
+          '実績限定。各階で最初の宝箱を拾うとシールド+1、上限2。',
+        ),
+      }
+    case 'survey-token':
+      return {
+        name: localized(language, 'Survey token', '勘探信物', '探査のお守り'),
+        note: localized(
+          language,
+          'Achievement exclusive. Confirm 5 unique mines in a floor to gain 1 probe and 1 scan, once per floor; each cap 4.',
+          '成就专属。每层确认 5 颗不同的雷后，获得 1 探针和 1 扫描，每层一次，各上限 4。',
+          '実績限定。各階で異なる地雷5個を確定すると探針と走査+1、各上限4、各階1回。',
+        ),
+      }
     case 'lantern':
       return {
         name: localized(language, 'Lantern', '提灯', 'ランタン'),
@@ -341,6 +361,16 @@ export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescri
 /** Describe equipment costs and starting bonuses. */
 export function equipmentCopy(language: Language, equipment: Equipment): VariantDescription {
   switch (equipment) {
+    case 'field-radio':
+      return {
+        name: localized(language, 'Field radio', '野战电台', '野戦無線機'),
+        note: localized(
+          language,
+          'Mission exclusive · 1 loadout point. A successful profession skill restores 1 probe, cap 4; once per floor.',
+          '任务专属 · 装备预算 1 点。成功使用职业技能后补充 1 探针，上限 4，每层一次。',
+          'ミッション限定・装備1ポイント。職業スキル成功で探針+1、上限4、各階1回。',
+        ),
+      }
     case 'probe':
       return {
         name: localized(language, 'Probe kit', '探针包', '探針キット'),

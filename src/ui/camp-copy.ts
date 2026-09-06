@@ -13,8 +13,10 @@ export function campPageName(language: Language, page: CampPage): string {
       return t.profession
     case 'equipment':
       return battleText(language, 'Loadout', '出发装备', '出発装備')
-    case 'route':
-      return battleText(language, 'Route', '远征路线', '遠征ルート')
+    case 'missions':
+      return battleText(language, 'Missions', '任务', 'ミッション')
+    case 'achievements':
+      return battleText(language, 'Achievements', '成就', '実績')
     case 'shop':
       return battleText(language, 'Shop', '商店', 'ショップ')
   }

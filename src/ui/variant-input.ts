@@ -1,4 +1,5 @@
 import { BoardRightClick } from './board-right-click.js'
+import { parseMilestone } from '../game/milestones.js'
 import { parseCampPage, parseShopCategory } from './camp-navigation.js'
 import { parseVariantDifficulty } from '../game/variant-difficulty.js'
 import {
@@ -23,6 +24,10 @@ export function parseVariantCommand(value: string): VariantCommand | null {
   if (parts.length > 2) return null
   const [type, id] = parts
   switch (type) {
+    case 'claim-milestone': {
+      const parsed = parseMilestone(id)
+      return parsed ? { type, value: parsed } : null
+    }
     case 'descend':
     case 'rewards':
     case 'result':

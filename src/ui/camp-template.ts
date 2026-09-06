@@ -10,7 +10,8 @@ import type { Language } from '../types/localization.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { campLabel, campPageName, shopCategoryName } from './camp-copy.js'
 import { shopCategory, shopItems, shopSprite } from './camp-navigation.js'
-import { battleHealthCopy, combatSprite } from './combat-build-copy.js'
+import { battleText, combatSprite } from './combat-build-copy.js'
+import { milestoneReadyCount, milestonesTemplate } from './milestone-template.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
 import { professionPreviewTemplate } from './profession-skill-template.js'
@@ -24,7 +25,13 @@ import {
 import { choice, difficultyTemplate } from './variant-templates.js'
 import { escapeHtml } from './presentation.js'
 
-const DESTINATIONS: readonly CampPage[] = ['professions', 'equipment', 'route', 'shop']
+const DESTINATIONS: readonly CampPage[] = [
+  'professions',
+  'equipment',
+  'shop',
+  'missions',
+  'achievements',
+]
 const CATEGORIES: readonly ShopCategory[] = ['all', 'professions', 'equipment', 'relics', 'camp']
 
 /** Give the four navigation entries recognizable existing artwork. */
@@ -34,8 +41,10 @@ function destinationSprite(page: CampPage): DungeonSprite {
       return 'player'
     case 'equipment':
       return 'workshop'
-    case 'route':
-      return 'exit'
+    case 'missions':
+      return 'survey-notes'
+    case 'achievements':
+      return 'guardian-crests'
     default:
       return 'treasure'
   }
@@ -48,8 +57,20 @@ function destinationNote(language: Language, page: CampPage): string {
       return campLabel(language, 'professionHelp')
     case 'equipment':
       return campLabel(language, 'equipmentHelp')
-    case 'route':
-      return campLabel(language, 'routeHelp')
+    case 'missions':
+      return battleText(
+        language,
+        'Explore, complete goals, claim exclusive gear.',
+        '完成探索目标，领取物资与专属装备',
+        '探索目標を達成し、物資と限定装備を獲得',
+      )
+    case 'achievements':
+      return battleText(
+        language,
+        'Long-term milestones with lasting rewards.',
+        '挑战长期目标，解锁遗物与职业',
+        '長期目標に挑み、遺物と職業を解放',
+      )
     default:
       return campLabel(language, 'shopHelp')
   }
@@ -75,7 +96,7 @@ function overviewTemplate(
   const tier = variantTier(difficulty)
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
 
-  return `<div class="camp-overview">
+  return `<section class="camp-difficulty">${difficultyTemplate(language, difficulty, true)}</section><div class="camp-overview">
     <section class="camp-departure" aria-label="${campLabel(language, 'current')}">
       <p class="eyebrow">${campLabel(language, 'current')}</p>
       <div class="camp-current-profession">${spriteImage(professionSprite(profession))}<div><span>${t.profession}</span><h2>${career.name}</h2><p>${career.note}</p></div></div>
@@ -84,7 +105,7 @@ function overviewTemplate(
       <div class="camp-route-summary"><div><span>${t.difficulty}</span><strong>${difficultyCopy(language, difficulty)}</strong></div><p>${tier.size} × ${tier.size} · ${campLabel(language, 'floors').replace('{count}', String(tier.floors))}<br>${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p></div>
       <button class="primary-button" data-control="start">${t.start} ↗</button>
     </section>
-    <nav class="camp-destinations" aria-label="${t.camp}">${DESTINATIONS.map((page) => `<button class="camp-destination" data-control="camp-page:${page}">${spriteImage(destinationSprite(page))}<span><strong>${campPageName(language, page)}</strong><small>${destinationNote(language, page)}</small></span><span aria-hidden="true">↗</span></button>`).join('')}</nav>
+    <nav class="camp-destinations" aria-label="${t.camp}">${DESTINATIONS.map((page) => `<button class="camp-destination" data-control="camp-page:${page}">${spriteImage(destinationSprite(page))}<span><strong>${campPageName(language, page)}${(page === 'missions' || page === 'achievements') && milestoneReadyCount(camp, page) ? ` <span class="milestone-badge">${milestoneReadyCount(camp, page)} ${battleText(language, 'ready', '可领取', '受領可能')}</span>` : ''}</strong><small>${destinationNote(language, page)}</small></span><span aria-hidden="true">↗</span></button>`).join('')}</nav>
   </div><p class="camp-history-summary">${t.departures} ${camp.completed} · ${campLabel(language, 'ownedCount').replace('{count}', String(camp.upgrades.length))}</p>`
 }
 
@@ -180,8 +201,9 @@ export function campTemplate(
     case 'equipment':
       content = equipmentTemplate(language, camp, profession, equipment)
       break
-    case 'route':
-      content = `<p class="variant-intro">${campLabel(language, 'routeHelp')}</p>${difficultyTemplate(language, difficulty, true)}<p class="variant-note reward-rate">${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p><p class="variant-intro">${t.campHelp}</p><p class="variant-intro">${battleHealthCopy(language)}</p>`
+    case 'missions':
+    case 'achievements':
+      content = milestonesTemplate(language, camp, screen.page)
       break
     case 'shop':
       content = shopTemplate(language, camp, screen)

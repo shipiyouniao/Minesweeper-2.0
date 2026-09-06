@@ -137,6 +137,8 @@ export function combatRelicCopy(language: Language, relic: CombatRelic): Variant
 /** Reuse the matching project-owned inventory artwork for each tactical equipment role. */
 export function combatSprite(item: CombatPurchase | Equipment | CombatRelic): DungeonSprite {
   switch (item) {
+    case 'field-radio':
+      return 'mechanist-gears'
     case 'steel-blade':
     case 'weapon-training':
     case 'tempered-edge':
