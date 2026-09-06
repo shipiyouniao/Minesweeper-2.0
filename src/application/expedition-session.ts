@@ -220,7 +220,7 @@ export class ExpeditionSession {
     return true
   }
 
-  /** Claim only at camp so new unlocks cannot rewrite a departure snapshot. */
+  /** Persist a cosmetic title choice without changing the active departure or paying a reward. */
   equipTitle(id: MilestoneId | null): boolean {
     const camp = equipTitle(this.camp, id)
     if (camp === this.camp) return false
@@ -229,6 +229,7 @@ export class ExpeditionSession {
     return true
   }
 
+  /** Claim only at camp so new unlocks cannot rewrite an active departure snapshot. */
   claim(id: MilestoneId): boolean {
     if (this.current) return false
     const camp = claimMilestone(this.camp, id)

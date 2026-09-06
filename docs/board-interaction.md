@@ -32,7 +32,7 @@ Revealing or reaching the exit during a quick-open batch does not finish the flo
 - **Enter/Space** activates the selected mode. **F** flags, **S** toggles a safe note, **C** quick-opens neighbors.
 - Mouse right-click applies the mark cycle or quick-open on release. Movement beyond eight CSS pixels cancels the whole press, including a drag that returns to its origin. A new right-click works immediately after cancellation.
 - Touch/pen long presses keep their existing original-cell capture and scroll cancellation. Right-mouse handling does not replace touch scrolling.
-- All four mode buttons sit above the board area, remain available while scrolling through it, and have at least 44 px-high touch targets. A short hint explains the selected action.
+- One visible mode button cycles through Reveal, Flag, Safe note and Quick open. The fixed action dock remains available below the scrollable game area, with touch targets at least 44 px high. Its label and hint describe the selected action.
 - After **C** in Expedition, the roving keyboard focus follows the character's final square, including when an unreachable/no-op command leaves the character in place. Pointer actions retain their own focus; terminal dialogs keep focus ownership.
 
 The board captures cancelable right-pointer events and their compatibility mouse events. It also consumes the trailing context menu so one press produces at most one action, even when a slow render delays that menu. Fresh pointer input or a deliberate keyboard menu request starts a new sequence; unrelated keys do not release delayed-menu suppression. Gestures beginning outside game cells remain outside this handler. Listener teardown, page blur and replacement boards discard pending presses.

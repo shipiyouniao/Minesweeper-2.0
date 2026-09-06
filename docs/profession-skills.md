@@ -1,12 +1,12 @@
-# Six professions and floor skills
+# Eight professions and floor skills
 
-> Historical delivery notes: the [current combat table](tactical-builds.md) and [save policy](save-policy.md) supersede older numeric values and replay-compatibility statements below. Only the current expedition implementation is shipped.
+> The six starting/shop careers are described here. The two exclusive mobility careers have additional [room and portal rules](reward-professions.md). The [combat table](tactical-builds.md) and [save policy](save-policy.md) define current vitality and replay behavior.
 
-Expedition professions offer different ways to manage uncertainty. Ordinary floors remain free exploration. Each skill is an explicit, replayable action that can succeed **once per floor**. There is no real-time cooldown. All six professions have their own board portrait and a separate generated skill icon.
+Expedition professions offer different ways to manage uncertainty. Ordinary floors remain free exploration. Each skill is an explicit, replayable action that can succeed **once per floor**. There is no real-time cooldown. All eight professions have their own board portrait and a separate generated skill icon. Waymarker places a return anchor and later recalls to it; Riftwalker opens a bidirectional crossing over a known obstacle. Their licenses come from the 12-floor mission and 50-floor achievement, respectively.
 
 ## Roster and tradeoffs
 
-All professions start with 2/2 HP. These resources precede optional workshop equipment.
+All professions start with 10/10 HP. These resources precede optional workshop equipment.
 
 | Profession    | Unlock | Probes | Scans | Shields | Skill                                                                                                     | Intended decision                                                              |
 | ------------- | -----: | -----: | ----: | ------: | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
@@ -34,21 +34,21 @@ Six professions, four theme packs, Workshop and Archive make **11 purchases** to
 
 ## Interface
 
-The camp shows six profession cards and the selected profession's skill explanation. During exploration, a square skill button sits beside its name, effect and short availability message in the inventory sidebar. It uses ordinary button keyboard activation, touch and pointer input, with mute-aware feedback. Using a skill cancels any selected probe/scanner and its target outline. The button becomes unavailable after successful use; its text explains that it refreshes next floor. English, Chinese and Japanese use the same rule data.
+The camp shows eight profession cards and the selected profession's skill explanation. During exploration and combat, the square skill button sits in the action dock. Hover or focus shows its description; an unavailable skill explains its reason, and Riftwalker opens a target chooser before crossing. Keyboard, touch and pointer input share the same actions and mute-aware feedback. Using a skill clears any selected probe/scanner and target outline. English, Chinese and Japanese consume the same rule data.
 
 ## Rules, persistence and architecture
 
-New departures retain the existing `relics-v1` terrain/relic rules and `difficulty-v1` rewards, and additionally snapshot `professions: "skills-v1"`. The independent marker avoids changing past offers or inputs. Departures without this marker keep their historical starting tools and three-option offer behavior, have no skill UI and cannot execute a skill intent. Only the new revision accepts the three new roles. Unknown revisions or a skill revision on incompatible terrain rules are rejected at the storage boundary.
+Departures snapshot owned careers, equipment and relic licenses. Only the current rules engine is replayed; incompatible expeditions return to camp under the [save policy](save-policy.md). A newly claimed license affects future departures rather than modifying an active run.
 
-`Profession`, `ProfessionResources` and `SkillAvailability` are concrete contracts in `.d.ts` modules. `professions.ts` owns starting allocations and the revision gate. `profession-skills.ts` owns footprints, public eligibility and pure skill transitions. `ExpeditionSession` captures legal departure choices, replays accepted intents and settles money atomically. The view owns no skill charges: `skillUsed` is reconstructed from the action journal, reset by floor creation, and never trusted from serialized state.
+`Profession`, `ProfessionResources` and `SkillAvailability` are concrete contracts in `.d.ts` modules. `professions.ts` owns starting allocations; `mobility-skills.ts` owns room identity and shared portal edges. `profession-skills.ts` owns footprints, public eligibility and pure skill transitions. `ExpeditionSession` captures legal departure choices, replays accepted intents and settles money atomically. The view owns no skill charges: `skillUsed` is reconstructed from the action journal, reset by floor creation, and never trusted from serialized state.
 
-Invalid repeated skill intents invalidate the active journal without charging or deleting camp ownership. Replay also checks that a new role was purchased. Historical valid saves remain usable and receive the new skill rules on their next departure.
+Invalid repeated skill intents invalidate the active journal without charging or deleting camp ownership. Replay also checks that the selected role was purchased or its exclusive milestone reward was claimed. Camp ownership survives retirement of an incompatible expedition.
 
 ## Acceptance
 
 Behavior coverage exercises every profession on all five difficulty tiers, clipped square/column footprints, locked flags, false-flag correction, unchanged mine/clue layout, resource caps, no-op actions, chest scouting without remote payment, four-choice offers, skill reset, relic interactions, old/new revision decoding, unauthorized roles, duplicate journal actions, reload and exactly-once settlement. Browser acceptance covers new purchases, all six role sprites and skills, incompatible equipment switching, selected-tool cancellation, native keyboard activation, three locales and narrow layouts.
 
-Boss rooms and the remaining equipment licenses are separate Roadmap deliveries. These exploration skills are complete playable mechanics; they do not introduce a partial combat interface or promise that every future boss uses identical action costs.
+All five boss families use the same bounded AP rules for career skills. The closure regression matrix checks placement, return, targeted crossing, empty-AP rejection and room boundaries for both mobility careers in Standard and Abyss arenas. This controlled interaction test is separate from the public-state encounter clear audit.
 
 ## Reward careers
 

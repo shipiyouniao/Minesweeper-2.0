@@ -91,7 +91,7 @@ function endTurn(run: Expedition): Expedition {
   if (!encounter) return run
   if (encounter.kind === 'clock') return advanceClock({ ...run, encounter })
   if (encounter.kind === 'magnetic') return advanceMagnetic({ ...run, encounter })
-  const damage = incomingCombatDamage(run, battleThreat(encounter, run.player))
+  const damage = incomingCombatDamage(run, battleThreat(encounter, run.player, run.game.config))
   const next = damage > 0 ? injure(run, damage) : run
   const advanced: Expedition = {
     ...next,

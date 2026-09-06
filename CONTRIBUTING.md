@@ -36,7 +36,7 @@ Open [the local game](http://127.0.0.1:5173/Minesweeper-2.0/). The default compi
 - Give named functions, methods, and lifecycle callbacks a documentation comment explaining their purpose. Add internal comments for decisions and invariants, and blank lines between validation, calculation, effects, and return values.
 - Keep the interface minimal and keyboard accessible. Preserve covered-cell privacy in both visible markup and accessibility labels. Update all three translations when changing message contracts.
 
-Run `npm run format` to apply the pinned formatter. Keep unrelated formatting, dependency updates, and generated files out of your change. The intentionally complex synthetic compiler workloads live separately from application code.
+Text files use LF on every platform through `.gitattributes`. Run `npm run format` to apply the pinned formatter. Keep unrelated formatting, dependency updates, and generated files out of your change. The intentionally complex synthetic compiler workloads live separately from application code.
 
 ## Validate a change
 

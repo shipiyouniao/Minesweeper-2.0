@@ -185,7 +185,7 @@ export class MagneticBoard {
           ? magneticStatus(this.language, run.encounter)
           : magneticLandingCopy(this.language, projection)
       target.setAttribute('aria-description', label)
-      target.title = label
+      target.title = this.landingTitle ? `${label}; ${this.landingTitle}` : label
     }
     if (forecast.kind === 'field' && projection.anchored)
       this.cell(run.player)?.classList.add('magnetic-grounded')

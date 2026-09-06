@@ -37,7 +37,7 @@ export function choice(
 
 /** Render a compact statistic with a readable label. */
 function metric(label: string, value: number | string): string {
-  return `<div><span>${label}</span><strong>${value}</strong></div>`
+  return `<div class="variant-metric"><span>${label}</span><strong>${value}</strong></div>`
 }
 
 /** Render recent local results, preserving the separate ruleset's units. */

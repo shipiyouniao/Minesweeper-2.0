@@ -87,7 +87,7 @@ export function redirectClock(run: ClockExpedition, index: number): Expedition {
 export function advanceClock(run: ClockExpedition): Expedition {
   const e = run.encounter
   const due = e.spells.filter((spell) => spell.resolvesOn === e.turn)
-  const raw = battleThreat(e, run.player)
+  const raw = battleThreat(e, run.player, run.game.config)
   const damaged = raw
     ? applyDamageRelics(
         run,

@@ -375,10 +375,12 @@ export function milestoneProgress(camp: Camp): MilestoneProgress {
   )
 }
 
+/** Accept only identifiers from the authored goal catalog at input boundaries. */
 export function parseMilestone(value: string | undefined): MilestoneId | null {
   return MILESTONES.find((entry) => entry.id === value)?.id ?? null
 }
 
+/** Read the counter or recorded challenge matching this goal without changing progress. */
 export function milestoneValue(camp: Camp, entry: MilestoneDefinition): number {
   const progress = milestoneProgress(camp)
   if (entry.metric === 'bossKill')
@@ -513,6 +515,7 @@ export function claimMilestone(camp: Camp, id: MilestoneId): Camp {
   }
 }
 
+/** Require the claimed mission license before offering the exclusive equipment. */
 export function hasFieldRadio(camp: Camp): boolean {
   return milestoneProgress(camp).claimed.includes('floor-runner')
 }
@@ -548,6 +551,7 @@ export const MILESTONE_RELICS: readonly MilestoneRelic[] = [
   'fault-map',
   'abyss-hourglass',
 ]
+/** Decode a reward license from the finite set of supported exclusive relics. */
 export function parseMilestoneRelic(value: string | null): MilestoneRelic | null {
   return MILESTONE_RELICS.find((id) => id === value) ?? null
 }
@@ -558,6 +562,7 @@ export function ownedTitles(camp: Camp): MilestoneId[] {
     (entry) => entry.kind === 'achievements' && milestoneProgress(camp).claimed.includes(entry.id),
   ).map((entry) => entry.id)
 }
+/** Change only the displayed owned title; equipping never grants a reward again. */
 export function equipTitle(camp: Camp, id: MilestoneId | null): Camp {
   if (id !== null && !ownedTitles(camp).includes(id)) return camp
   if ((milestoneProgress(camp).title ?? null) === id) return camp

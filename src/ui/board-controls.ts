@@ -58,6 +58,7 @@ export function nextBoardMode(mode: BoardInputMode): BoardInputMode {
         : 'reveal'
 }
 
+/** Render the shared pointer and touch mode switch with its current accessible label. */
 export function boardControlsTemplate(
   language: Language,
   mode: BoardInputMode,

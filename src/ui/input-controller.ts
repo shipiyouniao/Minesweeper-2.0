@@ -74,6 +74,13 @@ export class InputController {
       if (!this.suppressTouchClick()) {
         this.actions.play(Number(cell))
       }
+    } else if (action) {
+      // The operation cycle also displays data-mode; its explicit command takes precedence.
+      const command = parseCommand(action)
+
+      if (command) {
+        this.actions.command(command)
+      }
     } else if (mode) {
       const difficulty = parseDifficulty(mode)
 
@@ -85,12 +92,6 @@ export class InputController {
 
       if (difficulty && difficulty !== 'custom') {
         this.actions.selectRecords(difficulty)
-      }
-    } else if (action) {
-      const command = parseCommand(action)
-
-      if (command) {
-        this.actions.command(command)
       }
     }
   }

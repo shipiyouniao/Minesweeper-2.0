@@ -555,16 +555,30 @@ body {
 }
 .run-overview .variant-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   margin: 10px 0;
-  padding: 8px 0 12px;
+  padding: 4px 0;
+}
+.run-overview .variant-metric {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+}
+.run-overview .variant-metric + .variant-metric {
+  border-top: 1px solid #e7e9e0;
 }
 .run-overview .variant-metrics strong {
-  font-size: 19px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .run-overview .variant-metrics span {
-  font-size: 10px;
+  font-size: 12px;
 }
 .variant-main:has(.expedition-layout) .run-overview .vitality-panel {
   width: 100%;

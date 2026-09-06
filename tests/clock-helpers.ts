@@ -54,7 +54,7 @@ export function defeatClock(initial: Expedition): ExpeditionAction[] {
           break
         }
         assert.ok(state.encounter?.kind === 'clock')
-        if (battleThreat(state.encounter, state.player) === 0) {
+        if (battleThreat(state.encounter, state.player, state.game.config) === 0) {
           const ended = actExpedition(state, { type: 'end-turn' })
           if (!best || score(ended) > score(best.run))
             best = { run: ended, actions: [...plan.actions, { type: 'end-turn' }] }

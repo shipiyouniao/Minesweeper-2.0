@@ -123,7 +123,7 @@ Expedition envelope version 4 separates the current replay journal from permanen
 
 ### Profession skills
 
-`professions.ts` owns the six-role resource catalog. Pure `profession-skills.ts` functions derive footprints and public eligibility, then apply bounded exploration effects. The expedition transition dispatches one `skill` intent and resets its used marker only on floor entry. `ExpeditionSession` persists departure ownership and accepted intents; replay rebuilds skill expenditure. Presentation modules own localized descriptions, generated icon selection and accessible controls. See [the full profession design](profession-skills.md) and [artwork provenance](profession-artwork.md).
+`professions.ts` owns the eight-role resource catalog. `mobility-skills.ts` owns room-scoped anchors and public rift destinations; shared pathfinding consumes its bidirectional walking links. Pure `profession-skills.ts` functions derive footprints and public eligibility, then apply bounded exploration effects. The expedition transition dispatches one `skill` intent and resets its used marker only on floor entry. `ExpeditionSession` persists departure ownership and accepted intents; replay rebuilds skill expenditure. Presentation modules own localized descriptions, generated icon selection and accessible controls. See [the full profession design](profession-skills.md) and [artwork provenance](profession-artwork.md).
 
 ## Revised tactical rules
 

@@ -137,7 +137,7 @@
   font-size: calc(12 * var(--play-unit));
 }
 .variant-main:has(.expedition-layout) .variant-metrics strong {
-  font-size: calc(24 * var(--play-unit));
+  font-size: clamp(18px, calc(18 * var(--play-unit)), 24px);
 }
 .variant-main:has(.expedition-layout) .variant-heading h1 {
   font-size: calc(28 * var(--play-unit));

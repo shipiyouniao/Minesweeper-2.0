@@ -171,6 +171,8 @@ try {
         fixture,
       )
       await page.reload()
+      const arrival = page.locator('dialog[data-prologue][open] [data-scene="skip"]')
+      if (await arrival.count()) await tap(arrival)
       const resume = page.locator('#pause-cover:not([hidden]) [data-action="pause"]')
       if (await resume.count()) await tap(resume)
     }
@@ -179,6 +181,14 @@ try {
     async function tap(locator) {
       if (mobile) await locator.tap()
       else await locator.click()
+    }
+
+    /** Reach each mode through the same visible cycle button available to players. */
+    async function selectMode(mode) {
+      const button = page.locator('.mode-cycle')
+      for (let count = 0; count < 4 && (await button.getAttribute('data-mode')) !== mode; count++)
+        await tap(button)
+      assert.equal(await button.getAttribute('data-mode'), mode)
     }
 
     /** Hold a captured screen coordinate through a DOM redraw and verify no scroll jump. */
@@ -207,7 +217,6 @@ try {
 
     for (const fixture of cases) {
       const grid = fixture.side ? `[data-side="${fixture.side}"]` : '#board'
-      const attribute = fixture.side ? 'data-control' : 'data-action'
       const target = fixture.game.cells.findIndex(
         (cell, index) =>
           cell.visibility === 'hidden' &&
@@ -221,11 +230,9 @@ try {
       assert.ok(target >= 0)
       const cell = page.locator(`${grid} [data-cell="${target}"]`)
       await seed(fixture)
-      const modes = page.locator('.board-controls')
-      const board = page.locator(grid)
-      assert.ok((await modes.boundingBox()).y < (await board.boundingBox()).y)
-      for (const button of await modes.locator('button').all())
-        assert.ok((await button.boundingBox()).height >= 44)
+      const mode = page.locator('.mode-cycle')
+      assert.ok(await mode.isVisible())
+      assert.ok((await mode.boundingBox()).height >= 44)
 
       // The complete mark cycle must work without touching mode buttons or a keyboard.
       await secondary(cell)
@@ -245,7 +252,7 @@ try {
       assert.doesNotMatch(await cell.getAttribute('class'), /suspected-safe|flagged/)
 
       // Explicit selection remains a complete click/tap workflow, including removing a note.
-      await tap(page.locator(`[${attribute}="safe-mode"]`))
+      await selectMode('mark-safe')
       await tap(cell)
       assert.match(
         await cell.getAttribute('class'),
@@ -259,7 +266,7 @@ try {
         await seed(fixture)
         const number = page.locator(`${grid} [data-cell="${fixture.index}"]`)
         if (gesture === 'mode') {
-          await tap(page.locator(`[${attribute}="chord-mode"]`))
+          await selectMode('chord')
           await tap(number)
         } else await secondary(number)
         if (gesture === 'mode')
