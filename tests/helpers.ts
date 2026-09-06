@@ -50,6 +50,7 @@ export class FakeRuntime implements SessionRuntime {
 
 /** Complete current-rule fixture; individual tests override only their relevant choices. */
 export const CURRENT_DEPARTURE: Departure = {
+  title: null,
   seed: 31,
   profession: 'explorer',
   difficulty: 'relaxed',

@@ -57,6 +57,7 @@ class TutorialPlayer {
     this.a = { ...board, cells: board.cells.map((cell) => ({ ...cell, visibility: 'hidden' })) }
     this.b = placedBoard(board.config, new Set([6, 18, 24]), 8, 0)
     const base = createExpedition({
+      title: null,
       seed: 7,
       difficulty: 'relaxed',
       profession: 'explorer',

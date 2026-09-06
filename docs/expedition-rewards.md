@@ -30,7 +30,7 @@ The game shows the departure multiplier in camp and during exploration. Final re
 
 ## Versioning and implementation
 
-Each departure captures its difficulty. The current engine applies that tier's multiplier throughout the run; changing the camp selection cannot change an active run's reward rate. Rules revision 8 and the version-4 envelope govern replay. Incompatible journals return to camp with their extraction checkpoint under the [save policy](save-policy.md).
+Each departure captures its difficulty. The current engine applies that tier's multiplier throughout the run; changing the camp selection cannot change an active run's reward rate. Rules revision 9 and the version-4 envelope govern replay. Incompatible journals return to camp with their extraction checkpoint under the [save policy](save-policy.md).
 
 Only departure choices and accepted intents are persisted. The pure reward module reconstructs base, bonus and total; `ExpeditionSession` banks the total and clears the journal atomically. Reload cannot apply the multiplier or grant supplies twice. Existing currency and purchased unlocks remain unchanged.
 

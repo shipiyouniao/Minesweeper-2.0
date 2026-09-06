@@ -17,7 +17,7 @@ The skill panel lists Riftwalker landing buttons using one-based row/column coor
 
 ## Persistence
 
-Licenses are derived from claimed milestone IDs and are checked on departure and replay. No old profession is added to `Camp.upgrades`. The action journal records placement/return and an optional finite target index for the rift skill. Anchor/portal geometry is rebuilt from these accepted intents, never trusted as saved board state. Existing revision-7 departures contain neither new career nor new relic IDs, so their replay remains compatible; this additive release does not retire them.
+Licenses are derived from claimed milestone IDs and are checked on departure and replay. No old profession is added to `Camp.upgrades`. The action journal records placement/return and an optional finite target index for the rift skill. Anchor/portal geometry is rebuilt from these accepted intents, never trusted as saved board state. This career release was originally additive to revision 7. Current title builds use revision 9; older runs now return to camp under the shared save policy.
 
 ## Artwork provenance
 

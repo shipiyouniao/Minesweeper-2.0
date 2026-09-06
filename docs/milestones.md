@@ -4,40 +4,52 @@ All five expedition difficulties are selectable on the camp overview. The Missio
 
 ## Reward catalog: 20 missions and 22 achievements
 
-| Kind        | Goal                                 | Supplies | Additional unlock               |
-| ----------- | ------------------------------------ | -------: | ------------------------------- |
-| Mission     | Walk 20 new safe squares             |      120 | —                               |
-| Mission     | Collect 3 chests                     |      250 | Exclusive Chest beacon relic    |
-| Mission     | Successfully use 3 profession skills |      350 | Exclusive Pulse coil relic      |
-| Mission     | Clear 5 floors                       |      600 | Exclusive Field radio equipment |
-| Mission     | Defeat 1 boss                        |      800 | Exclusive Last bastion relic    |
-| Achievement | Win 3 expeditions                    |    1,200 | Exclusive Trail heart relic     |
-| Achievement | Acquire 8 different relics           |    1,500 | Exclusive Survey token relic    |
-| Achievement | Defeat 10 bosses                     |    2,500 | Exclusive Hunter seal relic     |
-| Achievement | Defeat any 4 boss families           |    3,000 | Exclusive Fault map relic       |
-| Achievement | Win on Abyss                         |    5,000 | Exclusive Abyss hourglass relic |
-| Mission     | Trail apprentice: 60 travel          |      250 | —                               |
-| Mission     | Trail guide: 150 travel              |      500 | —                               |
-| Mission     | Cache runner: 10 chests              |      650 | —                               |
-| Mission     | Cache seeker: 25 chests              |    1,000 | —                               |
-| Mission     | Skill student: 10 skills             |      700 | —                               |
-| Mission     | Skill adept: 25 skills               |    1,100 | —                               |
-| Mission     | Return route: 12 floors              |      900 | Exclusive Waymarker profession  |
-| Mission     | Deep descent: 25 floors              |    1,400 | —                               |
-| Mission     | Boss challenger: 3 bosses            |    1,200 | —                               |
-| Mission     | Homeward bound: 1 win                |    1,000 | —                               |
-| Achievement | Long road: 500 travel                |    1,600 | —                               |
-| Achievement | World walker: 1500 travel            |    3,500 | —                               |
-| Achievement | Treasure vault: 75 chests            |    2,200 | —                               |
-| Achievement | Treasure legend: 200 chests          |    4,500 | —                               |
-| Achievement | Skill master: 75 skills              |    2,400 | —                               |
-| Achievement | Skill legend: 200 skills             |    5,000 | —                               |
-| Achievement | Rift pioneer: 50 floors              |    3,000 | Exclusive Riftwalker profession |
-| Achievement | Depth legend: 150 floors             |    6,000 | —                               |
-| Achievement | Relic museum: 20 relics              |    4,000 | —                               |
-| Achievement | Abyss veteran: 5 abyssWins           |    8,000 | —                               |
+| Kind        | Goal                                                                                                                          | Supplies | Additional unlock                     |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------- | -------: | ------------------------------------- |
+| Achievement | Untouched bulwark: Defeat the bastion without losing health. Revival counts as damage.                                        |      400 | Title ability                         |
+| Achievement | Beyond the mirror: Defeat both twins without losing health. Revival counts as damage.                                         |      400 | Title ability                         |
+| Achievement | Against the clock: Defeat the clock boss without using any hourglass.                                                         |      400 | Title ability                         |
+| Achievement | Demolition expert: Lure a charge into at least one mine, then defeat the magnetic boss.                                       |      400 | Title ability                         |
+| Achievement | Into the nest: Defeat the queen while leaving at least one nest intact.                                                       |      400 | Title ability                         |
+| Mission     | Break the bastion: Defeat this boss once.                                                                                     |      100 | —                                     |
+| Mission     | Queen hunt: Defeat this boss once.                                                                                            |      100 | —                                     |
+| Mission     | Twin hunt: Defeat this boss once.                                                                                             |      100 | —                                     |
+| Mission     | Magnet hunt: Defeat this boss once.                                                                                           |      100 | —                                     |
+| Mission     | Clock hunt: Defeat this boss once.                                                                                            |      100 | —                                     |
+| Achievement | Web walker: Defeat the Brood Queen without clearing any webs during the fight.                                                |      300 | Title ability                         |
+| Achievement | Master of magnetism: Defeat the magnetic boss without being pushed or pulled onto a mine. Shields do not excuse mine contact. |      300 | Title ability                         |
+| Mission     | First footsteps: Visit 20 new safe squares across expeditions. Backtracking does not count.                                   |       30 | —                                     |
+| Mission     | Treasure scout: Collect 3 treasure chests across expeditions.                                                                 |       60 | relic: chest-beacon                   |
+| Mission     | Field practice: Successfully use a profession skill 3 times.                                                                  |       60 | relic: pulse-coil                     |
+| Mission     | Beyond the entrance: Clear 5 floors across expeditions.                                                                       |      100 | equipment: field-radio                |
+| Mission     | First challenger: Defeat your first boss.                                                                                     |      100 | relic: last-bastion                   |
+| Achievement | Seasoned explorer: Win 3 expeditions. Existing camp victories count.                                                          |      200 | Title ability; relic: trail-heart     |
+| Achievement | Relic curator: Acquire 8 different relics across expeditions. Offers alone do not count.                                      |      250 | Title ability; relic: survey-token    |
+| Achievement | Boss hunter: Defeat 10 bosses across expeditions.                                                                             |      350 | Title ability; relic: hunter-seal     |
+| Achievement | Four legends: Defeat four different boss families.                                                                            |      400 | Title ability; relic: fault-map       |
+| Achievement | Into the abyss: Win an expedition on Abyss difficulty.                                                                        |      500 | Title ability; relic: abyss-hourglass |
+| Mission     | Trail apprentice: Total: 60 new safe squares visited.                                                                         |       40 | —                                     |
+| Mission     | Trail guide: Total: 150 new safe squares visited.                                                                             |       80 | —                                     |
+| Mission     | Cache runner: Total: 10 chests collected.                                                                                     |      100 | —                                     |
+| Mission     | Cache seeker: Total: 25 chests collected.                                                                                     |      160 | —                                     |
+| Mission     | Skill student: Total: 10 successful profession skills.                                                                        |      100 | —                                     |
+| Mission     | Skill adept: Total: 25 successful profession skills.                                                                          |      160 | —                                     |
+| Mission     | Return route: Total: 12 floors cleared.                                                                                       |      150 | profession: waymarker                 |
+| Mission     | Deep descent: Total: 25 floors cleared.                                                                                       |      250 | —                                     |
+| Mission     | Boss challenger: Total: 3 bosses defeated.                                                                                    |      150 | —                                     |
+| Mission     | Homeward bound: Total: 1 expedition victory.                                                                                  |      150 | —                                     |
+| Achievement | Long road: Total: 500 new safe squares visited.                                                                               |      250 | Title ability                         |
+| Achievement | World walker: Total: 1500 new safe squares visited.                                                                           |      450 | Title ability                         |
+| Achievement | Treasure vault: Total: 75 chests collected.                                                                                   |      300 | Title ability                         |
+| Achievement | Treasure legend: Total: 200 chests collected.                                                                                 |      550 | Title ability                         |
+| Achievement | Skill master: Total: 75 successful profession skills.                                                                         |      300 | Title ability                         |
+| Achievement | Skill legend: Total: 200 successful profession skills.                                                                        |      600 | Title ability                         |
+| Achievement | Rift pioneer: Total: 50 floors cleared.                                                                                       |      400 | Title ability; profession: riftwalker |
+| Achievement | Depth legend: Total: 150 floors cleared.                                                                                      |      700 | Title ability                         |
+| Achievement | Relic museum: Total: 20 different relics acquired.                                                                            |      500 | Title ability                         |
+| Achievement | Abyss veteran: Total: 5 Abyss victories.                                                                                      |      800 | Title ability                         |
 
-These are generous, finite authored rewards, not measured final economy tuning. Non-currency rewards are exclusive new content, never an old shop profession or facility. Players who claimed the first catalog retain their old purchases/unlocks and automatically own the replacement relic license through the unchanged claim ID, with no repeated supply payout. Claims add supplies directly, without a second difficulty multiplier. Exclusive careers are selectable after claiming their own license. Field radio still requires a purchased Workshop; task claims no longer grant that old facility.
+The complete catalog awards 2,190 mission supplies and 9,150 achievement supplies. Rewards now emphasize licenses and title abilities; the [balance table](milestone-balance.md) records the reduced currency budget and progression scenarios. Non-currency rewards are exclusive new content, never an old shop profession or facility. Players who claimed the first catalog retain their old purchases/unlocks and automatically own the replacement relic license through the unchanged claim ID, with no repeated supply payout. Claims add supplies directly, without a second difficulty multiplier. Exclusive careers are selectable after claiming their own license. Field radio still requires a purchased Workshop; task claims no longer grant that old facility.
 
 - **Field radio:** mission-only license, absent from the shop. Costs 1 of the existing 3 loadout points and requires the Workshop. A successful profession skill restores 1 probe, capped at 4; the skill remains once per floor, including its boss room. Rejected skills do not restore probes.
 - **Trail heart:** achievement-only relic. The first chest collected each floor grants 1 shield, capped at 2.
@@ -57,7 +69,7 @@ Claimed relics join future expeditions' reward pools; they are not equipped imme
 
 Travel counts newly visited squares within each floor, including mirrored rooms and forced movement, but not backtracking. Chests count physical collection; relics count unique acquired IDs, not offers. Boss kills count a completed encounter, not an armor break or one twin. Victories count completed expeditions, with an additional Abyss counter. Each run can contribute; starting or retreating alone grants no progress.
 
-Camp progress is additive to the version-4 envelope. Old camps retain money, purchases and completed-run totals; only those existing victory totals can be backfilled. Unrecorded past floors, bosses and discoveries are not invented. Invalid new counter fields are recovered independently from valid money and ownership, and valid claim IDs are retained to prevent paying the same reward twice. The original milestone release introduced rule revision **7**. This expansion remains additive: existing revision-7 departure snapshots retain their exact reward pool and can replay without retirement. New departures snapshot unlocked milestone relics and verify all exclusive equipment/relic ownership when loading.
+Camp progress is additive to the version-4 envelope. Old camps retain money, purchases and completed-run totals; only those existing victory totals can be backfilled. Unrecorded past floors, bosses and discoveries are not invented. Invalid new counter fields are recovered independently from valid money and ownership, and valid claim IDs are retained to prevent paying the same reward twice. Rules revision **9** snapshots the selected title as well as unlocked milestone relics. Loading verifies all title, equipment and relic ownership. Older expeditions return to camp with checkpointed extraction under the [save policy](save-policy.md); the current engine does not replay older rules. Previous claims retain their licenses and gain title abilities without another currency payment.
 
 ## Acceptance and future content
 
@@ -67,20 +79,20 @@ Two exclusive reward professions now ship in this expansion: Waymarker and Riftw
 
 ## Boss challenges and titles
 
-Each of the five boss families has a one-time kill mission worth 1,000 supplies. Previously recorded boss kinds count toward these missions.
+Each of the five boss families has a one-time kill mission worth 100 supplies. Previously recorded boss kinds count toward these missions.
 
 Seven additional achievements award titles and supplies:
 
-- Web walker: defeat the Brood Queen without clearing any webs (2,500).
-- Master of magnetism: defeat the magnetic boss without field-induced mine contact, including shield-absorbed contact (2,500).
-- Untouched bulwark: defeat the bastion without losing health (3,000).
-- Beyond the mirror: defeat both twins without losing health; switching realms is allowed (3,000).
-- Against the clock: defeat the clock boss without using arena hourglasses (3,000).
-- Demolition expert: cause a magnetic charge to detonate at least one mine, then defeat the boss (3,000).
-- Into the nest: defeat the Brood Queen with at least one nest intact (3,000).
+- Web walker: defeat the Brood Queen without clearing any webs (300).
+- Master of magnetism: defeat the magnetic boss without field-induced mine contact, including shield-absorbed contact (300).
+- Untouched bulwark: defeat the bastion without losing health (400).
+- Beyond the mirror: defeat both twins without losing health; switching realms is allowed (400).
+- Against the clock: defeat the clock boss without using arena hourglasses (400).
+- Demolition expert: cause a magnetic charge to detonate at least one mine, then defeat the boss (400).
+- Into the nest: defeat the Brood Queen with at least one nest intact (400).
 
 Revival counts as health loss. Challenge evidence is recorded from encounter entry and persists with accepted actions. Old in-progress encounters without complete evidence do not award conditional achievements.
 
-Every achievement grants its namesake title in addition to its existing rewards. Ownership derives from claimed achievement IDs, so previous claims automatically grant titles without paying supplies twice. Players select a title in the camp character card or expedition sidebar. Titles are cosmetic and the equipped selection persists.
+Every achievement grants its namesake title in addition to its existing rewards. Ownership derives from claimed achievement IDs, so previous claims automatically grant titles without paying supplies twice. Players select a title in the camp character card or expedition sidebar. Each title now has a bounded gameplay ability. One title is frozen at departure; changing the selection during a run affects the next departure only. The sidebar retains the current title and its effect when the future selection differs. See the [22-title build table](title-builds.md).
 
 Top-of-screen cards announce halfway and completion crossings, showing a progress bar and k/n. Completion uses green styling. Multiple notices play sequentially for approximately 4.5 seconds each; dialogs and hidden tabs pause their display. Loading existing progress and claiming rewards do not replay notifications.

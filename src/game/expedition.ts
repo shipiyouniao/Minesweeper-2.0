@@ -1,4 +1,11 @@
 import { upgradeCost } from './camp-progression.js'
+import {
+  applyTitleEntry,
+  applyTitleSkill,
+  applyTitleTreasure,
+  titleHealth,
+  titleOfferBonus,
+} from './title-effects.js'
 import { hasFieldRadio, ownsProfession } from './milestones.js'
 import { walkingNeighbors } from './mobility-skills.js'
 import { enterEncounter, isEncounterFloor } from './encounter-roster.js'
@@ -116,6 +123,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
     relics: [],
     floorTriggers: [],
     runTriggers: [],
+    titleProgress: { chests: 0, floorChest: false },
     skillUsed: false,
     offers: [],
     scannedRows: [],
@@ -125,8 +133,8 @@ function createFloor(departure: Departure, floor: number): Expedition {
     probeReport: null,
     probes: 0,
     scans: 0,
-    health: startingHealth(departure),
-    maxHealth: startingHealth(departure),
+    health: startingHealth(departure, floor),
+    maxHealth: startingHealth(departure, floor),
     shields: 0,
     loot: 0,
     steps: 0,
@@ -141,8 +149,18 @@ export function createExpedition(departure: Departure): Expedition {
 
   return {
     ...run,
-    probes: resources.probes + Number(departure.equipment.includes('probe')),
-    scans: resources.scans + Number(departure.equipment.includes('scanner')),
+    probes: Math.min(
+      4,
+      resources.probes +
+        Number(departure.equipment.includes('probe')) +
+        Number(departure.title === 'field-unscathed'),
+    ),
+    scans: Math.min(
+      4,
+      resources.scans +
+        Number(departure.equipment.includes('scanner')) +
+        Number(departure.title === 'depth-pioneer'),
+    ),
     shields: Math.min(2, resources.shields + Number(departure.equipment.includes('guard'))),
   }
 }
@@ -194,16 +212,19 @@ function collectTreasures(run: Expedition, path: readonly number[]): Expedition 
   ]
   const fresh = collected.filter((index) => !run.collected.includes(index)).length
 
-  return applyTreasureRelics(
+  return applyTitleTreasure(
     run,
-    recordTravel(
-      {
-        ...run,
-        collected,
-        loot:
-          run.loot + fresh * (run.relics.includes('purse') ? PURSE_SUPPLIES : TREASURE_SUPPLIES),
-      },
-      path,
+    applyTreasureRelics(
+      run,
+      recordTravel(
+        {
+          ...run,
+          collected,
+          loot:
+            run.loot + fresh * (run.relics.includes('purse') ? PURSE_SUPPLIES : TREASURE_SUPPLIES),
+        },
+        path,
+      ),
     ),
   )
 }
@@ -215,7 +236,7 @@ function relicOffers(run: Expedition): Relic[] {
   return shuffled(
     pool.filter((relic) => !run.relics.includes(relic)),
     run.departure.seed ^ run.floor,
-  ).slice(0, professionOfferCount(run.departure))
+  ).slice(0, Math.min(5, professionOfferCount(run.departure) + titleOfferBonus(run)))
 }
 
 /** Approach a frontier and resolve damage without changing the mine layout or safe route. */
@@ -273,7 +294,7 @@ function movePlayer(run: Expedition, index: number): Expedition {
 /** Commit an exit reward only for a living explorer that actually reached the stairs. */
 function finishAtExit(run: Expedition): Expedition {
   if (run.phase !== 'exploring' || run.player !== run.exit) return run
-  if (!run.encounter && isEncounterFloor(run)) return enterEncounter(run)
+  if (!run.encounter && isEncounterFloor(run)) return applyTitleEntry(enterEncounter(run))
   return completeFloor(run)
 }
 
@@ -300,12 +321,14 @@ function takeRelic(run: Expedition, relic: Relic): Expedition {
 function advanceFloor(run: Expedition, relic?: Relic): Expedition {
   const relics = relic ? [...run.relics, relic] : run.relics
   const next = createFloor(run.departure, run.floor + 1)
+  const growth = titleHealth(run.departure, next.floor) - titleHealth(run.departure, run.floor)
   let result: Expedition = {
     ...next,
     relics,
     runTriggers: run.runTriggers,
-    health: run.health,
-    maxHealth: run.maxHealth,
+    titleProgress: { ...run.titleProgress, floorChest: false },
+    health: run.health + growth,
+    maxHealth: run.maxHealth + growth,
     loot: run.loot,
     steps: run.steps,
     probes: Math.min(4, run.probes + Number(relics.includes('lantern'))),
@@ -395,7 +418,11 @@ function applyExpedition(
       shields: Math.min(2, next.shields + 1),
     })
   }
-  return shareMirrorKnowledge(applyDiscoveryRelics(run, applyToolRelics(run, next, action), action))
+  return applyTitleSkill(
+    run,
+    shareMirrorKnowledge(applyDiscoveryRelics(run, applyToolRelics(run, next, action), action)),
+    action,
+  )
 }
 
 /** Settle secured loot: success/extraction retain everything, defeat retains a bounded fraction. */

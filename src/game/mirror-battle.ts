@@ -150,14 +150,18 @@ export function strikeMirror(run: MirrorExpedition, damage: number): Expedition 
 
 /** Refill shared AP only at explicit end turn, then announce both future attacks. */
 export function advanceMirror(run: MirrorExpedition): Expedition {
-  return forecastMirror({
+  const next: MirrorExpedition = {
     ...run,
     encounter: {
       ...run.encounter,
       turn: run.encounter.turn + 1,
-      points: combatStats(run).actions,
       braced: false,
       turnTriggers: [],
     },
+  }
+  // Conditional AP belongs to the incoming turn, including boots and title bonuses.
+  return forecastMirror({
+    ...next,
+    encounter: { ...next.encounter, points: combatStats(next).actions },
   })
 }

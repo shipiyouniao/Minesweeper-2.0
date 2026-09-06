@@ -86,8 +86,31 @@ try {
       const hostBefore = await page.locator('.ruleset-host').evaluate((host) => host.scrollTop)
       await menu.hover()
       await page.mouse.wheel(0, 500)
-      await page.waitForTimeout(150)
-      assert.ok(await menu.evaluate((element) => element.scrollTop > 0))
+      await page.waitForFunction(
+        () => document.querySelector('.title-options')?.scrollTop > 0,
+        null,
+        { timeout: 2000 },
+      )
+      assert.ok(
+        await menu.evaluate((element) => element.scrollTop > 0),
+        JSON.stringify({
+          language,
+          width,
+          bounds,
+          menu: await menu.evaluate((element) => ({
+            height: element.clientHeight,
+            scroll: element.scrollHeight,
+            top: element.scrollTop,
+            visible: !element.hidden,
+            hit: document
+              .elementFromPoint(
+                element.getBoundingClientRect().x + element.clientWidth / 2,
+                element.getBoundingClientRect().y + element.clientHeight / 2,
+              )
+              ?.outerHTML.slice(0, 180),
+          })),
+        }),
+      )
       assert.equal(
         await page.locator('.ruleset-host').evaluate((host) => host.scrollTop),
         hostBefore,

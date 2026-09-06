@@ -4,6 +4,31 @@
   max-width: 360px;
   color: #4e513f;
 }
+.title-choice {
+  position: relative;
+}
+.title-effect,
+.active-title p {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.title-effect small,
+.title-options small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: #737866;
+}
+.active-title {
+  margin-top: 10px;
+  padding: 10px;
+  border-left: 2px solid #9c804b;
+  background: #f5f3e9;
+  font-size: 0.8rem;
+}
 .title-label {
   display: block;
   margin: 0 0 7px;
@@ -72,7 +97,7 @@
 }
 .title-options.opens-up {
   top: auto;
-  bottom: calc(100% - 18px);
+  bottom: calc(100% + 6px);
 }
 .title-options button {
   display: flex;

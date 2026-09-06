@@ -22,6 +22,7 @@ const storageKey = 'minesweeper.variants.v1.expedition'
 /** Build real accepted journals; only the fixture driver uses mine truth to reach an exit. */
 function fixture(profession = 'explorer', floor = 1, phase = 'reward') {
   const departure = {
+    title: null,
     seed: 43,
     difficulty: 'abyss',
     profession,

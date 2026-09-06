@@ -98,6 +98,7 @@ function fixtures() {
     { action: { type: 'probe', index: 30 }, index: 19, opened: 31 },
   ]) {
     const departure = {
+      title: null,
       seed: 42,
       difficulty: 'standard',
       profession: 'explorer',

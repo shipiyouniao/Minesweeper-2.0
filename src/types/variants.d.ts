@@ -10,6 +10,7 @@ import type {
 } from './combat-build.js'
 import type { RelicPack, ExpansionRelic } from './relic-packs.js'
 import type { MilestoneProgress, MilestoneRelic } from './milestones.js'
+import type { TitleId, TitleProgress } from './titles.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
 export type Ruleset = 'classic' | 'expedition' | 'twin' | 'sonar'
@@ -65,6 +66,7 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  readonly title: TitleId | null
   readonly milestoneRelics?: readonly MilestoneRelic[]
   readonly training: readonly CombatTraining[]
   readonly battleRelics: boolean
@@ -78,6 +80,7 @@ export interface Departure {
 
 /** A complete floor state; reachability is derived from revealed safe cells. */
 export interface Expedition extends Vitality {
+  readonly titleProgress: TitleProgress
   readonly encounter: TacticalEncounter | null
   /** Rebuilt from accepted skill intents; reset only on entering another floor. */
   readonly waymark?: { readonly index: number; readonly room: string } | undefined
