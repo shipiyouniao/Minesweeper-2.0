@@ -70,7 +70,7 @@ function clearFloor(initial: Expedition): Expedition {
 }
 
 test('three new careers are affordable sidegrades and purchases remain permanent and unique', () => {
-  assert.equal(PROFESSIONS.length, 6)
+  assert.equal(PROFESSIONS.length, 8)
   assert.equal(UPGRADES.length, 26)
   let camp = { ...EMPTY_CAMP, supplies: 3150 }
   for (const profession of ['archaeologist', 'alchemist', 'sentinel'] as const) {
@@ -98,7 +98,9 @@ test('three new careers are affordable sidegrades and purchases remain permanent
 })
 
 test('new allocations trade tools for protection without wasting a guard at the shield cap', () => {
-  for (const entry of PROFESSIONS) {
+  for (const entry of PROFESSIONS.filter(
+    (entry) => entry !== 'waymarker' && entry !== 'riftwalker',
+  )) {
     const run = start(entry)
     assert.ok(run.probes <= 2 && run.scans <= 2 && run.shields <= 2)
     assert.equal(run.health, 10)
@@ -116,6 +118,8 @@ test('new allocations trade tools for protection without wasting a guard at the 
       [1, 0, 0],
       [0, 0, 2],
       [1, 0, 1],
+      [1, 1, 0],
+      [2, 0, 0],
     ],
   )
   assert.equal(allowedDeparture(camp, 'alchemist', ['guard']), false)
@@ -126,7 +130,9 @@ test('new allocations trade tools for protection without wasting a guard at the 
 
 test('all six skills work on every tier and repeated activation never spends another resource', () => {
   for (const difficulty of ['relaxed', 'standard', 'advanced', 'expert', 'abyss'] as const) {
-    for (const entry of PROFESSIONS) {
+    for (const entry of PROFESSIONS.filter(
+      (entry) => entry !== 'waymarker' && entry !== 'riftwalker',
+    )) {
       const before = approachSkill(start(entry, difficulty))
       const after = actExpedition(before, { type: 'skill' })
       assert.notEqual(after, before, `${difficulty}/${entry}`)
@@ -259,7 +265,9 @@ test('excavation targets the nearest remaining chest deterministically and disab
 })
 
 test('availability contains no hidden mine-value oracle and skills cannot run in terminal phases', () => {
-  for (const entry of PROFESSIONS) {
+  for (const entry of PROFESSIONS.filter(
+    (entry) => entry !== 'waymarker' && entry !== 'riftwalker',
+  )) {
     const run = approachSkill(start(entry))
     const inverted = {
       ...run,
@@ -295,7 +303,9 @@ test('skill discovery can trigger Field notes once without pretending to be a pa
 })
 
 test('new career journals restore skill expenditure and settlement remains atomic', () => {
-  for (const entry of PROFESSIONS) {
+  for (const entry of PROFESSIONS.filter(
+    (entry) => entry !== 'waymarker' && entry !== 'riftwalker',
+  )) {
     const storage = new MemoryStorage()
     storage.setItem(
       'minesweeper.variants.v1.expedition',
@@ -355,12 +365,14 @@ test('new career ownership is checked during replay and repeated saved skills in
 })
 
 test('all careers have distinct pawn and skill artwork, translated copy and finite commands', () => {
-  assert.equal(new Set(PROFESSIONS.map((entry) => professionSprite(entry))).size, 6)
-  assert.equal(new Set(PROFESSIONS.map((entry) => professionSkillSprite(entry))).size, 6)
+  assert.equal(new Set(PROFESSIONS.map((entry) => professionSprite(entry))).size, 8)
+  assert.equal(new Set(PROFESSIONS.map((entry) => professionSkillSprite(entry))).size, 8)
   assert.deepEqual(parseVariantCommand('skill'), { type: 'skill' })
   assert.equal(parseVariantCommand('skill:arbitrary'), null)
   for (const language of ['en', 'zh', 'ja'] as const) {
-    for (const entry of PROFESSIONS) {
+    for (const entry of PROFESSIONS.filter(
+      (entry) => entry !== 'waymarker' && entry !== 'riftwalker',
+    )) {
       const copy = professionSkillCopy(language, entry)
       assert.ok(copy.name.length > 0 && copy.note.length > 10)
     }

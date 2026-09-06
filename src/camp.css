@@ -572,3 +572,29 @@
     padding: 20px;
   }
 }
+.skill-landings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.profession-skill-heading > .dungeon-sprite {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+}
+
+.mobility-anchor {
+  outline: 2px solid #138f96;
+  outline-offset: -3px;
+}
+
+.mobility-rift {
+  outline: 3px solid #8652b8;
+  outline-offset: -4px;
+}
+
+.mobility-landing {
+  outline: 2px dashed #8652b8;
+  outline-offset: -3px;
+}

@@ -24,6 +24,16 @@ export function parseVariantCommand(value: string): VariantCommand | null {
   if (parts.length > 2) return null
   const [type, id] = parts
   switch (type) {
+    case 'skill-target': {
+      const index = Number(id)
+      return id !== undefined &&
+        /^\d+$/.test(id) &&
+        Number.isSafeInteger(index) &&
+        index >= 0 &&
+        index < 10000
+        ? { type, value: index }
+        : null
+    }
     case 'claim-milestone': {
       const parsed = parseMilestone(id)
       return parsed ? { type, value: parsed } : null

@@ -8,11 +8,17 @@ export const PROFESSIONS: readonly Profession[] = [
   'archaeologist',
   'alchemist',
   'sentinel',
+  'waymarker',
+  'riftwalker',
 ]
 
 /** Read a closed roster; every profession has exactly one declared starting allocation. */
 export function professionResources(profession: Profession): ProfessionResources {
   switch (profession) {
+    case 'waymarker':
+      return { probes: 1, scans: 1, shields: 0 }
+    case 'riftwalker':
+      return { probes: 2, scans: 0, shields: 0 }
     case 'explorer':
       return { probes: 2, scans: 1, shields: 0 }
     case 'surveyor':

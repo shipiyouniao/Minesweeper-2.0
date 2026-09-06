@@ -1,3 +1,5 @@
+import { currentWaymark, mobilityReady, riftLandings, useMobilitySkill } from './mobility-skills.js'
+import { available, claim } from './relic-effects.js'
 import { inspectArea } from './dungeon-discovery.js'
 import { neighbors } from './engine.js'
 import { revealDungeon } from './dungeon-reveal.js'
@@ -42,6 +44,8 @@ function excavationTarget(run: Expedition): number | null {
 /** Derive a clipped footprint from the pawn; keyboard focus never selects the skill's origin. */
 export function professionSkillArea(run: Expedition): number[] {
   const profession = run.departure.profession
+  if (profession === 'riftwalker') return riftLandings(run)
+  if (profession === 'waymarker') return [currentWaymark(run) ?? run.player]
   if (profession === 'engineer' || profession === 'alchemist') return []
   const center = profession === 'archaeologist' ? excavationTarget(run) : run.player
   if (center === null) return []
@@ -78,6 +82,12 @@ function hasSkillInformation(run: Expedition): boolean {
 export function professionSkillAvailability(run: Expedition): SkillAvailability {
   if (run.phase !== 'exploring' && run.phase !== 'boss') return 'inactive'
   if (run.skillUsed) return 'used'
+  if (run.departure.profession === 'waymarker' || run.departure.profession === 'riftwalker')
+    return mobilityReady(run)
+      ? 'ready'
+      : run.departure.profession === 'waymarker'
+        ? 'blocked-anchor'
+        : 'no-passage'
 
   switch (run.departure.profession) {
     case 'engineer':
@@ -92,36 +102,51 @@ export function professionSkillAvailability(run: Expedition): SkillAvailability 
   return hasSkillInformation(run) ? 'ready' : 'no-information'
 }
 
-/** Resolve one career action, without moving the pawn, collecting chests or altering mines. */
-export function useProfessionSkill(run: Expedition): Expedition {
+/** Resolve one career action; the expedition transition handles physical landing rewards. */
+export function useProfessionSkill(run: Expedition, index?: number): Expedition {
+  if (index !== undefined && run.departure.profession !== 'riftwalker') return run
   if (professionSkillAvailability(run) !== 'ready') return run
   let result = run
+  if (run.departure.profession === 'waymarker' || run.departure.profession === 'riftwalker') {
+    result = useMobilitySkill(run, index)
+    if (result === run || !result.skillUsed) return result
+  } else
+    switch (run.departure.profession) {
+      case 'engineer':
+        result = { ...run, scans: run.scans - 1, shields: run.shields + 1 }
+        break
+      case 'alchemist':
+        result = { ...run, shields: run.shields - 1, probes: run.probes + 1, scans: run.scans + 1 }
+        break
+      default: {
+        const area = professionSkillArea(run)
+        result = inspectArea(run, area)
 
-  switch (run.departure.profession) {
-    case 'engineer':
-      result = { ...run, scans: run.scans - 1, shields: run.shields + 1 }
-      break
-    case 'alchemist':
-      result = { ...run, shields: run.shields - 1, probes: run.probes + 1, scans: run.scans + 1 }
-      break
-    default: {
-      const area = professionSkillArea(run)
-      result = inspectArea(run, area)
-
-      if (run.departure.profession === 'archaeologist') {
-        let game = result.game
-        for (const index of area) {
-          if (!run.walls.includes(index) && !game.cells[index]?.mine) {
-            game = revealDungeon({ ...result, game }, index)
+        if (run.departure.profession === 'archaeologist') {
+          let game = result.game
+          for (const index of area) {
+            if (!run.walls.includes(index) && !game.cells[index]?.mine) {
+              game = revealDungeon({ ...result, game }, index)
+            }
           }
+          result = { ...result, game }
         }
-        result = { ...result, game }
+
+        if (run.departure.profession === 'sentinel')
+          result = { ...result, shields: run.shields - 1 }
       }
-
-      if (run.departure.profession === 'sentinel') result = { ...result, shields: run.shields - 1 }
     }
-  }
 
+  if (available(result, 'pulse-coil')) {
+    const row = Math.floor(result.player / result.game.config.width)
+    result = inspectArea(
+      claim(result, 'pulse-coil'),
+      Array.from(
+        { length: result.game.config.width },
+        (_, x) => row * result.game.config.width + x,
+      ),
+    )
+  }
   return {
     ...result,
     probes: Math.min(4, result.probes + Number(run.departure.equipment.includes('field-radio'))),

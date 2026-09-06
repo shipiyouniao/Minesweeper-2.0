@@ -2,7 +2,7 @@
 
 # Minesweeper 2.0 — A TypeScript 7 Experiment
 
-**Play three modes:** Classic Minesweeper, mine-exclusive **Twin boards**, and a 3–12-floor **Expedition** across five difficulty tiers. Expedition combines connected dungeon exploration, six professions with [once-per-floor skills](docs/profession-skills.md), a shared health/shield system, bounded equipment and up to 31 possible relics. The camp offers 24 distinct gameplay purchases plus two one-time trainings, with a stepped [pricing curve](docs/camp-progression.md).
+**Play three modes:** Classic Minesweeper, mine-exclusive **Twin boards**, and a 3–12-floor **Expedition** across five difficulty tiers. Expedition combines connected dungeon exploration, eight professions with [once-per-floor skills](docs/profession-skills.md), including two [exclusive mobility careers](docs/reward-professions.md), a shared health/shield system, bounded equipment and up to 37 possible relics. The camp offers 24 distinct gameplay purchases plus two one-time trainings, with a stepped [pricing curve](docs/camp-progression.md).
 
 **[Missions and achievements](docs/milestones.md):** select difficulty directly on the camp overview, then pursue ten permanent goals for supplies, profession/facility unlocks, exclusive Field radio equipment and two exclusive relics. Progress persists across runs; each reward can be claimed once.
 

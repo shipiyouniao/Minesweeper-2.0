@@ -1,5 +1,6 @@
 import { adjacentSteps } from './variant-board.js'
 import { occupied } from './dungeon-occupancy.js'
+import { walkingNeighbors } from './mobility-skills.js'
 import type { Game } from '../types/game.js'
 import type { Expedition } from '../types/variants.js'
 
@@ -35,7 +36,7 @@ export function walkingPath(run: Expedition, destination: number): number[] | nu
     if (index === undefined) continue
     if (index === destination) break
 
-    for (const neighbor of adjacentSteps(run.game, index)) {
+    for (const neighbor of walkingNeighbors(run, index)) {
       const cell = run.game.cells[neighbor]
       if (
         !parent.has(neighbor) &&

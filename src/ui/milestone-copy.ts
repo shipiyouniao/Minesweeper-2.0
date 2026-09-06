@@ -7,6 +7,142 @@ import type { VariantDescription } from '../types/variant-ui.js'
 export function milestoneCopy(language: Language, id: MilestoneId): VariantDescription {
   const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
   switch (id) {
+    case 'trail-apprentice':
+      return {
+        name: t('Trail apprentice', '行路学徒', '旅の見習い'),
+        note: t(
+          'Total: 60 new safe squares visited.',
+          '累计 60 个新的安全格（同层重复不计）。',
+          '累計60個の新しい安全マス（同階の往復は除く）。',
+        ),
+      }
+    case 'trail-guide':
+      return {
+        name: t('Trail guide', '探路向导', '道案内'),
+        note: t(
+          'Total: 150 new safe squares visited.',
+          '累计 150 个新的安全格（同层重复不计）。',
+          '累計150個の新しい安全マス（同階の往復は除く）。',
+        ),
+      }
+    case 'cache-runner':
+      return {
+        name: t('Cache runner', '宝箱快递员', '宝箱回収係'),
+        note: t('Total: 10 chests collected.', '累计 10 个宝箱。', '累計10個の宝箱。'),
+      }
+    case 'cache-seeker':
+      return {
+        name: t('Cache seeker', '寻宝好手', '宝探し名人'),
+        note: t('Total: 25 chests collected.', '累计 25 个宝箱。', '累計25個の宝箱。'),
+      }
+    case 'skill-student':
+      return {
+        name: t('Skill student', '熟能生巧', '技の修練'),
+        note: t(
+          'Total: 10 successful profession skills.',
+          '累计 10 次成功的职业技能。',
+          '累計10回の職業スキル成功。',
+        ),
+      }
+    case 'skill-adept':
+      return {
+        name: t('Skill adept', '实战达人', '実戦の達人'),
+        note: t(
+          'Total: 25 successful profession skills.',
+          '累计 25 次成功的职业技能。',
+          '累計25回の職業スキル成功。',
+        ),
+      }
+    case 'deep-route':
+      return {
+        name: t('Return route', '归途有记', '帰路の記録'),
+        note: t('Total: 12 floors cleared.', '累计 12 层地牢。', '累計12階の突破。'),
+      }
+    case 'deep-descent':
+      return {
+        name: t('Deep descent', '向下深入', '深く潜る'),
+        note: t('Total: 25 floors cleared.', '累计 25 层地牢。', '累計25階の突破。'),
+      }
+    case 'boss-challenger':
+      return {
+        name: t('Boss challenger', '迎战强敌', '強敵への挑戦'),
+        note: t('Total: 3 bosses defeated.', '累计 3 个 BOSS。', '累計3体のボス討伐。'),
+      }
+    case 'first-victory':
+      return {
+        name: t('Homeward bound', '凯旋归来', '凱旋'),
+        note: t('Total: 1 expedition victory.', '累计 1 次远征通关。', '累計1回の遠征クリア。'),
+      }
+    case 'long-road':
+      return {
+        name: t('Long road', '漫漫长路', '長い旅路'),
+        note: t(
+          'Total: 500 new safe squares visited.',
+          '累计 500 个新的安全格（同层重复不计）。',
+          '累計500個の新しい安全マス（同階の往復は除く）。',
+        ),
+      }
+    case 'world-walker':
+      return {
+        name: t('World walker', '行遍地下', '地下を歩く者'),
+        note: t(
+          'Total: 1500 new safe squares visited.',
+          '累计 1500 个新的安全格（同层重复不计）。',
+          '累計1500個の新しい安全マス（同階の往復は除く）。',
+        ),
+      }
+    case 'treasure-vault':
+      return {
+        name: t('Treasure vault', '满载而归', '宝の蔵'),
+        note: t('Total: 75 chests collected.', '累计 75 个宝箱。', '累計75個の宝箱。'),
+      }
+    case 'treasure-legend':
+      return {
+        name: t('Treasure legend', '寻宝传奇', '宝探しの伝説'),
+        note: t('Total: 200 chests collected.', '累计 200 个宝箱。', '累計200個の宝箱。'),
+      }
+    case 'skill-master':
+      return {
+        name: t('Skill master', '技艺精通', '技の達人'),
+        note: t(
+          'Total: 75 successful profession skills.',
+          '累计 75 次成功的职业技能。',
+          '累計75回の職業スキル成功。',
+        ),
+      }
+    case 'skill-legend':
+      return {
+        name: t('Skill legend', '千锤百炼', '百戦錬磨'),
+        note: t(
+          'Total: 200 successful profession skills.',
+          '累计 200 次成功的职业技能。',
+          '累計200回の職業スキル成功。',
+        ),
+      }
+    case 'depth-pioneer':
+      return {
+        name: t('Rift pioneer', '裂隙先驱', '裂け目の先駆者'),
+        note: t('Total: 50 floors cleared.', '累计 50 层地牢。', '累計50階の突破。'),
+      }
+    case 'depth-legend':
+      return {
+        name: t('Depth legend', '地底传说', '地底の伝説'),
+        note: t('Total: 150 floors cleared.', '累计 150 层地牢。', '累計150階の突破。'),
+      }
+    case 'relic-museum':
+      return {
+        name: t('Relic museum', '移动博物馆', '移動博物館'),
+        note: t(
+          'Total: 20 different relics acquired.',
+          '累计 20 种实际获得的不同遗物。',
+          '累計20種類の獲得した遺物。',
+        ),
+      }
+    case 'abyss-veteran':
+      return {
+        name: t('Abyss veteran', '深渊常客', '深淵の熟練者'),
+        note: t('Total: 5 Abyss victories.', '累计 5 次深渊难度通关。', '累計5回の深淵クリア。'),
+      }
     case 'first-steps':
       return {
         name: t('First footsteps', '踏上旅途', '旅の第一歩'),

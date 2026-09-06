@@ -5,6 +5,8 @@ import { spriteImage } from './dungeon-sprites.js'
 import { professionSkillSprite } from './profession-presentation.js'
 import { professionSkillCopy, professionSkillStatus } from './profession-skill-copy.js'
 import { tacticalCopy } from './tactical-copy.js'
+import { currentWaymark, riftLandings } from '../game/mobility-skills.js'
+import { battleText } from './combat-build-copy.js'
 
 /** Show the selected career's active effect before committing to a departure. */
 export function professionPreviewTemplate(language: Language, profession: Profession): string {
@@ -20,5 +22,24 @@ export function professionSkillTemplate(language: Language, run: Expedition): st
       ? tacticalCopy(language, run.encounter.kind).excavation
       : copy.note
   const status = professionSkillAvailability(run)
-  return `<section class="profession-skill" aria-label="${copy.name}"><div class="profession-skill-heading"><button class="inventory-tool skill-button" data-control="skill" aria-label="${copy.name}" aria-describedby="skill-description skill-status" ${status === 'ready' && (!run.encounter || run.encounter.points > 0) ? '' : 'disabled'}>${spriteImage(professionSkillSprite(run.departure.profession))}</button><strong>${copy.name}</strong></div><p id="skill-description">${note}</p><p id="skill-status" role="status">${professionSkillStatus(language, status)}</p></section>`
+  const rift = run.departure.profession === 'riftwalker'
+  const ready = status === 'ready' && (!run.encounter || run.encounter.points > 0)
+  const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
+  const coordinate = (index: number): string =>
+    `${Math.floor(index / run.game.config.width) + 1}, ${(index % run.game.config.width) + 1}`
+  const anchor = currentWaymark(run)
+  const state =
+    run.departure.profession === 'waymarker' && !run.skillUsed
+      ? `<p>${anchor === null ? t('Next use: place anchor', '下次使用：放置锚点', '次の操作：錨を設置') : `${t('Return anchor (row, column)', '回撤锚点（行，列）', '帰還点（行、列）')}：${coordinate(anchor)}`}</p>`
+      : ''
+  const targets =
+    rift && !run.skillUsed
+      ? `<div class="skill-landings">${riftLandings(run)
+          .map(
+            (index) =>
+              `<button class="text-button" data-control="skill-target:${index}" data-focus-fallback="skill-panel" ${ready ? '' : 'disabled'}>${t('Cross to', '穿越至', '移動先')} (${coordinate(index)})</button>`,
+          )
+          .join('')}</div>`
+      : ''
+  return `<section class="profession-skill" data-control="skill-panel" tabindex="-1" aria-label="${copy.name}"><div class="profession-skill-heading">${rift ? spriteImage(professionSkillSprite(run.departure.profession)) : `<button class="inventory-tool skill-button" data-control="skill" aria-label="${copy.name}" aria-describedby="skill-description skill-status" ${ready ? '' : 'disabled'}>${spriteImage(professionSkillSprite(run.departure.profession))}</button>`}<strong>${copy.name}</strong></div><p id="skill-description">${note}</p>${state}${targets}<p id="skill-status" role="status">${professionSkillStatus(language, status)}</p></section>`
 }

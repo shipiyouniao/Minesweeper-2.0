@@ -17,9 +17,16 @@ export type Ruleset = 'classic' | 'expedition' | 'twin'
 /** The board receiving a twin-board action. */
 export type BoardSide = 'a' | 'b'
 
-/** Career choices exchange information tools for limited protection. */
+/** Career choices include information, protection and milestone-exclusive movement skills. */
 export type Profession =
-  'explorer' | 'surveyor' | 'engineer' | 'archaeologist' | 'alchemist' | 'sentinel'
+  | 'explorer'
+  | 'surveyor'
+  | 'engineer'
+  | 'archaeologist'
+  | 'alchemist'
+  | 'sentinel'
+  | 'waymarker'
+  | 'riftwalker'
 
 /** Camp equipment consumes a three-point departure budget. */
 export type Equipment = 'probe' | 'scanner' | 'guard' | 'field-radio' | CombatEquipment
@@ -73,6 +80,8 @@ export interface Departure {
 export interface Expedition extends Vitality {
   readonly encounter: TacticalEncounter | null
   /** Rebuilt from accepted skill intents; reset only on entering another floor. */
+  readonly waymark?: { readonly index: number; readonly room: string } | undefined
+  readonly rift?: { readonly from: number; readonly to: number; readonly room: string }
   readonly skillUsed: boolean
   readonly departure: Departure
   readonly floor: number
@@ -113,7 +122,8 @@ export type ExpeditionAction =
     }
   | { readonly type: 'sweep'; readonly row: number }
   | { readonly type: 'relic'; readonly relic: Relic }
-  | { readonly type: 'retreat' | 'descend' | 'skill' | 'attack' | 'brace' | 'end-turn' | 'shift' }
+  | { readonly type: 'skill'; readonly index?: number }
+  | { readonly type: 'retreat' | 'descend' | 'attack' | 'brace' | 'end-turn' | 'shift' }
 
 /** Both layouts are generated together, excluding overlapping mines. */
 export interface Twin {

@@ -8,6 +8,18 @@ export function relicSprite(relic: Relic): DungeonSprite {
   const pack = RELIC_PACKS.find((entry) => entry.relics.some((candidate) => candidate === relic))
   if (pack) return pack.id
   switch (relic) {
+    case 'chest-beacon':
+      return 'prospector-seals'
+    case 'pulse-coil':
+      return 'mechanist-gears'
+    case 'last-bastion':
+      return 'guardian-crests'
+    case 'hunter-seal':
+      return 'duelist-marks'
+    case 'fault-map':
+      return 'cartographer-charts'
+    case 'abyss-hourglass':
+      return 'chronologist-dials'
     case 'trail-heart':
       return 'wayfarer-tokens'
     case 'survey-token':

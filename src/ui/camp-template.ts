@@ -111,7 +111,7 @@ function overviewTemplate(
 
 /** Present profession selection and its active skill on a dedicated screen. */
 function professionsTemplate(language: Language, camp: Camp, profession: Profession): string {
-  return `<p class="variant-intro">${campLabel(language, 'professionHelp')}</p><div class="choice-grid camp-professions">${PROFESSIONS.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, career !== 'explorer' && !camp.upgrades.includes(career), professionSprite(career))).join('')}</div>${professionPreviewTemplate(language, profession)}`
+  return `<p class="variant-intro">${campLabel(language, 'professionHelp')}</p><div class="choice-grid camp-professions">${PROFESSIONS.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, !allowedDeparture(camp, career, []), professionSprite(career))).join('')}</div>${professionPreviewTemplate(language, profession)}`
 }
 
 /** Keep the same bounded loadout rules while moving their controls out of the overview. */

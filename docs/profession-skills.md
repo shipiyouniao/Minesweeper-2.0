@@ -49,3 +49,7 @@ Invalid repeated skill intents invalidate the active journal without charging or
 Behavior coverage exercises every profession on all five difficulty tiers, clipped square/column footprints, locked flags, false-flag correction, unchanged mine/clue layout, resource caps, no-op actions, chest scouting without remote payment, four-choice offers, skill reset, relic interactions, old/new revision decoding, unauthorized roles, duplicate journal actions, reload and exactly-once settlement. Browser acceptance covers new purchases, all six role sprites and skills, incompatible equipment switching, selected-tool cancellation, native keyboard activation, three locales and narrow layouts.
 
 Boss rooms and the remaining equipment licenses are separate Roadmap deliveries. These exploration skills are complete playable mechanics; they do not introduce a partial combat interface or promise that every future boss uses identical action costs.
+
+## Reward careers
+
+The six shop/base careers above are joined by the milestone-exclusive [Waymarker and Riftwalker](reward-professions.md). Their placement/return and targeted bidirectional-passage rules are described separately because they move the pawn rather than exchange tools or scout in place.

@@ -1,7 +1,7 @@
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
 import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
 import { UPGRADES } from '../game/camp-progression.js'
-import { parseMilestone } from '../game/milestones.js'
+import { parseMilestone, parseMilestoneRelic, MILESTONE_RELICS } from '../game/milestones.js'
 import type { MilestoneProgress, MilestoneRelic } from '../types/milestones.js'
 import type { EncounterKind } from '../types/tactical.js'
 import {
@@ -37,6 +37,8 @@ export const MAX_ACTIONS = 20000
 /** Decode finite identifiers once at the external boundary. */
 export function parseProfession(value: string | null): Profession | null {
   switch (value) {
+    case 'waymarker':
+    case 'riftwalker':
     case 'explorer':
     case 'surveyor':
     case 'engineer':
@@ -72,6 +74,12 @@ export function parseUpgrade(value: string | null): Upgrade | null {
 /** Decode relic IDs without allowing arbitrary catalog keys. */
 export function parseRelic(value: string | null): Relic | null {
   switch (value) {
+    case 'chest-beacon':
+    case 'pulse-coil':
+    case 'last-bastion':
+    case 'hunter-seal':
+    case 'fault-map':
+    case 'abyss-hourglass':
     case 'trail-heart':
     case 'survey-token':
     case 'lantern':
@@ -228,11 +236,11 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   const milestoneRelics: MilestoneRelic[] = []
   if (rawMilestones !== undefined) {
     const values = reader.array('milestoneRelics')
-    if (!values || values.length > 2) return null
+    if (!values || values.length > MILESTONE_RELICS.length) return null
     for (const value of values) {
-      if ((value !== 'trail-heart' && value !== 'survey-token') || milestoneRelics.includes(value))
-        return null
-      milestoneRelics.push(value)
+      const relic = parseMilestoneRelic(typeof value === 'string' ? value : null)
+      if (!relic || milestoneRelics.includes(relic)) return null
+      milestoneRelics.push(relic)
     }
   }
   return {
@@ -269,8 +277,12 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
       const row = reader.number('row')
       return integer(row, config.height - 1) ? { type, row } : null
     }
+    case 'skill': {
+      if (reader.value('index') === undefined) return { type }
+      const index = reader.number('index')
+      return integer(index, config.width * config.height - 1) ? { type, index } : null
+    }
     case 'descend':
-    case 'skill':
     case 'attack':
     case 'brace':
     case 'end-turn':

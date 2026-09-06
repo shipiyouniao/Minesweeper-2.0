@@ -178,6 +178,26 @@ export function variantCopy(language: Language): VariantMessages {
 /** Describe career tradeoffs with exact starting resources. */
 export function professionCopy(language: Language, profession: Profession): VariantDescription {
   switch (profession) {
+    case 'waymarker':
+      return {
+        name: localized(language, 'Waymarker', '锚行者', '道標使い'),
+        note: localized(
+          language,
+          'Mission exclusive: clear 12 floors and claim Return route. Starts with 1 probe and 1 scan.',
+          '任务专属：通过 12 层后领取「归途有记」。初始 1 探针、1 扫描。',
+          '任務限定：12階突破し「帰路の記録」を受領。初期探針1、走査1。',
+        ),
+      }
+    case 'riftwalker':
+      return {
+        name: localized(language, 'Riftwalker', '裂隙师', '裂け目使い'),
+        note: localized(
+          language,
+          'Achievement exclusive: clear 50 floors and claim Rift pioneer. Starts with 2 probes.',
+          '成就专属：通过 50 层后领取「裂隙先驱」。初始 2 探针。',
+          '実績限定：50階突破し「裂け目の先駆者」を受領。初期探針2。',
+        ),
+      }
     case 'archaeologist':
       return {
         name: localized(language, 'Archaeologist', '考古学家', '考古学者'),
@@ -234,6 +254,66 @@ export function professionCopy(language: Language, profession: Profession): Vari
 /** Explain each temporary relic's exact effect and resource cap. */
 export function relicCopy(language: Language, relic: Relic): VariantDescription {
   switch (relic) {
+    case 'chest-beacon':
+      return {
+        name: localized(language, 'Chest beacon', '寻宝信标', '宝箱ビーコン'),
+        note: localized(
+          language,
+          'Collect a chest to scout the next uncollected chest\u2019s 3\u00d73 area, once per floor. Does not collect it.',
+          '拾取宝箱后侦察下一个未拾取宝箱周围 3×3，每层一次；不自动拾取。',
+          '宝箱を拾うと次の未回収宝箱の周囲3×3を偵察。各階1回、自動回収なし。',
+        ),
+      }
+    case 'pulse-coil':
+      return {
+        name: localized(language, 'Pulse coil', '脉冲线圈', 'パルスコイル'),
+        note: localized(
+          language,
+          'Completing a profession skill scouts your landing row, once per floor. Placing a return anchor does not trigger it.',
+          '完成职业技能后侦察落点所在整行，每层一次；仅放置回撤锚点不触发。',
+          '職業スキル完了時に着地点の横一列を偵察。各階1回。帰還点設置時は発動しない。',
+        ),
+      }
+    case 'last-bastion':
+      return {
+        name: localized(language, 'Last bastion', '绝境壁垒', '最後の砦'),
+        note: localized(
+          language,
+          'Survive health damage with 2 HP or less to set shields to 2, once per expedition. Does not revive.',
+          '承受生命伤害后存活且生命不超过 2，护盾补至 2；每局一次，不提供复活。',
+          '体力ダメージ後に生存してHP2以下ならシールドを2に。遠征1回、復活なし。',
+        ),
+      }
+    case 'hunter-seal':
+      return {
+        name: localized(language, 'Hunter seal', '猎手印记', '狩人の印'),
+        note: localized(
+          language,
+          'Confirm 8 distinct mines in a floor to heal 2 HP, up to maximum health, once per floor.',
+          '每层确认 8 颗不同地雷后回复 2 点生命，不超过生命上限，每层一次。',
+          '各階で異なる地雷8個を確定するとHPを2回復。最大体力まで、各階1回。',
+        ),
+      }
+    case 'fault-map':
+      return {
+        name: localized(language, 'Fault map', '断层图谱', '断層地図'),
+        note: localized(
+          language,
+          'Confirm 4 distinct mines in a floor to scout the exit\u2019s 3\u00d73 area, once per floor. It does not open the exit or defeat its guardian.',
+          '每层确认 4 颗不同地雷后侦察出口周围 3×3，每层一次；不会开启出口或跳过守卫。',
+          '各階で異なる地雷4個を確定すると出口周囲3×3を偵察。各階1回、出口や守護者を無視しない。',
+        ),
+      }
+    case 'abyss-hourglass':
+      return {
+        name: localized(language, 'Abyss hourglass', '深渊沙漏', '深淵の砂時計'),
+        note: localized(
+          language,
+          'Revive at 3 HP and scout your surrounding 3\u00d73, once per expedition. Second wind takes priority and preserves this charge.',
+          '致命伤害后以 3 点生命复起，并侦察周围 3×3，每局一次；已有回生符优先触发，保留沙漏次数。',
+          '致命傷でHP3で復活し周囲3×3を偵察。遠征1回。セカンドウィンドが優先し砂時計は温存。',
+        ),
+      }
     case 'trail-heart':
       return {
         name: localized(language, 'Trail heart', '远行之心', '旅路の心'),
