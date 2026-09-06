@@ -60,9 +60,9 @@ function fixture(profession: Profession): Expedition {
   }
 }
 
-test('all thirty rewards avoid old unlocks; claimed v1 milestones grant replacement relic licenses without another payment', () => {
-  assert.equal(MILESTONES.filter((entry) => entry.kind === 'missions').length, 15)
-  assert.equal(MILESTONES.filter((entry) => entry.kind === 'achievements').length, 15)
+test('all rewards avoid old unlocks; claimed v1 milestones grant replacement relic licenses without another payment', () => {
+  assert.equal(MILESTONES.filter((entry) => entry.kind === 'missions').length, 20)
+  assert.equal(MILESTONES.filter((entry) => entry.kind === 'achievements').length, 22)
   const old: Camp = {
     ...EMPTY_CAMP,
     supplies: 2345,

@@ -2,7 +2,7 @@
 
 All five expedition difficulties are selectable on the camp overview. The Missions and Achievements pages show goals, cumulative progress, full reward effects and a one-time claim button. Completed entries stay visible after claiming. Progress persists after defeat or extraction; there are no daily deadlines or repeatable permanent-stat rewards.
 
-## Expanded reward catalog: 15 missions and 15 achievements
+## Reward catalog: 20 missions and 22 achievements
 
 | Kind        | Goal                                 | Supplies | Additional unlock               |
 | ----------- | ------------------------------------ | -------: | ------------------------------- |
@@ -64,3 +64,23 @@ Camp progress is additive to the version-4 envelope. Old camps retain money, pur
 Behavioral tests cover actual accepted runs, journal reload, settlement, claims, malformed progress, ownership gates, bounded equipment/relic effects and translations. Browser tests cover difficulty on the overview, reward previews, keyboard/touch claims, saved selection and layout at 320–3840 CSS pixels in English, Chinese and Japanese.
 
 Two exclusive reward professions now ship in this expansion: Waymarker and Riftwalker. Their [skill rules, unlocks and original artwork](reward-professions.md) introduce placement, return and temporary path choices instead of tool conversion. Further content remains tracked in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1).
+
+## Boss challenges and titles
+
+Each of the five boss families has a one-time kill mission worth 1,000 supplies. Previously recorded boss kinds count toward these missions.
+
+Seven additional achievements award titles and supplies:
+
+- Web walker: defeat the Brood Queen without clearing any webs (2,500).
+- Master of magnetism: defeat the magnetic boss without field-induced mine contact, including shield-absorbed contact (2,500).
+- Untouched bulwark: defeat the bastion without losing health (3,000).
+- Beyond the mirror: defeat both twins without losing health; switching realms is allowed (3,000).
+- Against the clock: defeat the clock boss without using arena hourglasses (3,000).
+- Demolition expert: cause a magnetic charge to detonate at least one mine, then defeat the boss (3,000).
+- Into the nest: defeat the Brood Queen with at least one nest intact (3,000).
+
+Revival counts as health loss. Challenge evidence is recorded from encounter entry and persists with accepted actions. Old in-progress encounters without complete evidence do not award conditional achievements.
+
+Every achievement grants its namesake title in addition to its existing rewards. Ownership derives from claimed achievement IDs, so previous claims automatically grant titles without paying supplies twice. Players select a title in the camp character card or expedition sidebar. Titles are cosmetic and the equipped selection persists.
+
+Top-of-screen cards announce halfway and completion crossings, showing a progress bar and k/n. Completion uses green styling. Multiple notices play sequentially for approximately 4.5 seconds each; dialogs and hidden tabs pause their display. Loading existing progress and claiming rewards do not replay notifications.

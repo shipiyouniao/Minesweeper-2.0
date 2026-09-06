@@ -9,6 +9,7 @@ import type { MilestoneId } from './milestones.js'
 /** Commands decoded from finite button attributes at the UI boundary. */
 export type VariantCommand =
   | CampCommand
+  | { readonly type: 'equip-title'; readonly value: MilestoneId | null }
   | { readonly type: 'claim-milestone'; readonly value: MilestoneId }
   | {
       readonly type:

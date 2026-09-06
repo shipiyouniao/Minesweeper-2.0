@@ -1,4 +1,10 @@
-import { EQUIPMENT, allowedDeparture, equipmentCost } from '../game/expedition.js'
+import {
+  EQUIPMENT,
+  allowedDeparture,
+  equipmentCost,
+  equipmentPurchaseLocked,
+} from '../game/expedition.js'
+import { titleTemplate } from './title-template.js'
 import { upgradeCost } from '../game/camp-progression.js'
 import { PROFESSIONS } from '../game/professions.js'
 import { variantTier } from '../game/variant-difficulty.js'
@@ -97,7 +103,7 @@ function overviewTemplate(
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
 
   return `<section class="camp-difficulty">${difficultyTemplate(language, difficulty, true)}</section><div class="camp-overview">
-    <section class="camp-departure" aria-label="${campLabel(language, 'current')}">
+    <section class="camp-departure" aria-label="${campLabel(language, 'current')}">${titleTemplate(language, camp)}
       <p class="eyebrow">${campLabel(language, 'current')}</p>
       <div class="camp-current-profession">${spriteImage(professionSprite(profession))}<div><span>${t.profession}</span><h2>${career.name}</h2><p>${career.note}</p></div></div>
       <div class="camp-summary-heading"><h3>${campPageName(language, 'equipment')}</h3><span>${spent} / 3</span></div>
@@ -142,14 +148,15 @@ function shopDetail(
   const price = upgradeCost(item)
   const number = new Intl.NumberFormat(language)
   const remaining = Math.max(0, price - camp.supplies)
+  const locked = equipmentPurchaseLocked(camp, item)
   const profession = PROFESSIONS.find((career) => career === item)
 
   return `<aside class="shop-detail" id="shop-detail" aria-labelledby="shop-detail-title" style="--shop-rows:${Math.ceil(count / 6)};--compact-rows:${Math.ceil(count / 4)};--detail-row:${Math.floor(index / 3) + 2}">
     <p class="eyebrow">${shopCategoryName(language, shopCategory(item))}</p>${spriteImage(shopSprite(item))}
     <h2 id="shop-detail-title">${description.name}</h2><p class="shop-effect">${description.note}</p>
     ${profession ? professionPreviewTemplate(language, profession) : ''}
-    ${shopCategory(item) === 'equipment' && !camp.upgrades.includes('workshop') ? `<p class="variant-note">${campLabel(language, 'workshopRequired')}</p>` : ''}
-    <div class="shop-purchase"><p><strong>${number.format(price)}</strong> ${t.supplies}</p><button class="primary-button" data-control="upgrade:${item}" data-focus-fallback="shop-item:${item}" ${owned || remaining > 0 ? 'disabled' : ''}>${owned ? t.owned : campLabel(language, 'buy')}</button></div>
+    ${locked ? `<p class="variant-note">${campLabel(language, 'workshopRequired')}</p>` : ''}
+    <div class="shop-purchase"><p><strong>${number.format(price)}</strong> ${t.supplies}</p><button class="primary-button" data-control="upgrade:${item}" data-focus-fallback="shop-item:${item}" ${owned || locked || remaining > 0 ? 'disabled' : ''}>${owned ? t.owned : campLabel(language, 'buy')}</button></div>
     <p class="shop-purchase-status" role="status">${owned ? t.owned : remaining ? campLabel(language, 'missing').replace('{count}', number.format(remaining)) : ''}</p>
   </aside>`
 }

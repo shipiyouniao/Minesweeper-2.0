@@ -10,6 +10,109 @@ import type {
 
 export const MILESTONES: readonly MilestoneDefinition[] = [
   {
+    id: 'bastion-flawless',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 3000,
+    reward: null,
+  },
+  {
+    id: 'mirror-flawless',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 3000,
+    reward: null,
+  },
+  {
+    id: 'clock-no-glass',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 3000,
+    reward: null,
+  },
+  {
+    id: 'magnetic-demolition',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 3000,
+    reward: null,
+  },
+  {
+    id: 'brood-nest-spared',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 3000,
+    reward: null,
+  },
+
+  {
+    id: 'hunt-bastion',
+    kind: 'missions',
+    metric: 'bossKill',
+    bossKind: 'bastion',
+    target: 1,
+    supplies: 1000,
+    reward: null,
+  },
+  {
+    id: 'hunt-brood',
+    kind: 'missions',
+    metric: 'bossKill',
+    bossKind: 'brood',
+    target: 1,
+    supplies: 1000,
+    reward: null,
+  },
+  {
+    id: 'hunt-mirror',
+    kind: 'missions',
+    metric: 'bossKill',
+    bossKind: 'mirror',
+    target: 1,
+    supplies: 1000,
+    reward: null,
+  },
+  {
+    id: 'hunt-magnetic',
+    kind: 'missions',
+    metric: 'bossKill',
+    bossKind: 'magnetic',
+    target: 1,
+    supplies: 1000,
+    reward: null,
+  },
+  {
+    id: 'hunt-clock',
+    kind: 'missions',
+    metric: 'bossKill',
+    bossKind: 'clock',
+    target: 1,
+    supplies: 1000,
+    reward: null,
+  },
+  {
+    id: 'web-untouched',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 2500,
+    reward: null,
+  },
+  {
+    id: 'field-unscathed',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 2500,
+    reward: null,
+  },
+
+  {
     id: 'first-steps',
     kind: 'missions',
     metric: 'travel',
@@ -255,6 +358,9 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
 export function milestoneProgress(camp: Camp): MilestoneProgress {
   return (
     camp.milestones ?? {
+      title: null,
+      attempt: undefined,
+      challenges: [],
       travel: 0,
       chests: 0,
       floors: 0,
@@ -275,6 +381,9 @@ export function parseMilestone(value: string | undefined): MilestoneId | null {
 
 export function milestoneValue(camp: Camp, entry: MilestoneDefinition): number {
   const progress = milestoneProgress(camp)
+  if (entry.metric === 'bossKill')
+    return Number(entry.bossKind !== undefined && progress.bossKinds.includes(entry.bossKind))
+  if (entry.metric === 'challenge') return Number(progress.challenges?.includes(entry.id) === true)
   if (entry.metric === 'wins') return Math.max(camp.completed, progress.wins)
   const value = progress[entry.metric]
   return typeof value === 'number' ? value : value.length
@@ -300,6 +409,62 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
   const won = after.phase === 'won' && before.phase !== 'won'
   // Entering a boss replaces room-local chests, but the accepted walk to its stairs can collect one.
   const enteringBoss = sameFloor && !before.encounter && after.encounter !== null
+  let attempt =
+    enteringBoss && after.encounter
+      ? {
+          seed: after.departure.seed,
+          floor: after.floor,
+          kind: after.encounter.kind,
+          failed: false,
+          hurt: false,
+          glass: false,
+          blasted: false,
+        }
+      : progress.attempt
+  const known =
+    attempt &&
+    attempt.seed === before.departure.seed &&
+    attempt.floor === before.floor &&
+    attempt.kind === before.encounter?.kind
+  if (known && attempt) {
+    const a = before.encounter
+    const b = after.encounter
+    const cut =
+      a?.kind === 'brood' && b?.kind === 'brood' && a.webs.some((cell) => !b.webs.includes(cell))
+    const hit =
+      a?.kind === 'magnetic' &&
+      b?.kind === 'magnetic' &&
+      a.forecast.kind === 'field' &&
+      b.turn > a.turn &&
+      b.resolution?.impact != null &&
+      before.game.cells[b.resolution.impact]?.mine === true
+    attempt = {
+      ...attempt,
+      failed: attempt.failed || cut || hit,
+      hurt:
+        attempt.hurt ||
+        after.health < before.health ||
+        after.runTriggers.some(
+          (id) =>
+            (id === 'second-wind' || id === 'abyss-hourglass') && !before.runTriggers.includes(id),
+        ),
+      glass: attempt.glass || (b?.kind === 'clock' && b.hourglasses.some((item) => item.used)),
+      blasted:
+        attempt.blasted ||
+        (b?.kind === 'magnetic' && (b.resolution?.detonatedMines.length ?? 0) > 0),
+    }
+  }
+  const earned: MilestoneId[] = []
+  if (boss && known && attempt) {
+    if (boss === 'brood' && !attempt.failed) earned.push('web-untouched')
+    if (boss === 'magnetic' && !attempt.failed) earned.push('field-unscathed')
+    if (boss === 'bastion' && !attempt.hurt) earned.push('bastion-flawless')
+    if (boss === 'mirror' && !attempt.hurt) earned.push('mirror-flawless')
+    if (boss === 'clock' && !attempt.glass) earned.push('clock-no-glass')
+    if (boss === 'magnetic' && attempt.blasted) earned.push('magnetic-demolition')
+    if (after.encounter?.kind === 'brood' && after.encounter.nests.length > 0)
+      earned.push('brood-nest-spared')
+  }
   const stairsPath = enteringBoss ? approachPath(before, before.exit) : null
   const chests = enteringBoss
     ? before.treasures.filter(
@@ -314,6 +479,9 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
     ...camp,
     milestones: {
       ...progress,
+      title: progress.title ?? null,
+      attempt,
+      challenges: [...new Set([...(progress.challenges ?? []), ...earned])],
       travel: add(
         progress.travel,
         sameFloor
@@ -382,4 +550,16 @@ export const MILESTONE_RELICS: readonly MilestoneRelic[] = [
 ]
 export function parseMilestoneRelic(value: string | null): MilestoneRelic | null {
   return MILESTONE_RELICS.find((id) => id === value) ?? null
+}
+
+/** Titles derive from claims, including saves made before titles existed. */
+export function ownedTitles(camp: Camp): MilestoneId[] {
+  return MILESTONES.filter(
+    (entry) => entry.kind === 'achievements' && milestoneProgress(camp).claimed.includes(entry.id),
+  ).map((entry) => entry.id)
+}
+export function equipTitle(camp: Camp, id: MilestoneId | null): Camp {
+  if (id !== null && !ownedTitles(camp).includes(id)) return camp
+  if ((milestoneProgress(camp).title ?? null) === id) return camp
+  return { ...camp, milestones: { ...milestoneProgress(camp), title: id } }
 }

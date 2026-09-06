@@ -1,0 +1,182 @@
+.title-cabinet {
+  margin: 0 0 18px;
+  border: 1px solid #d7c79f;
+  border-radius: 14px;
+  background: linear-gradient(120deg, #faf5e8, #fffdf7);
+  color: #554526;
+}
+.title-cabinet summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+.title-cabinet summary::-webkit-details-marker {
+  display: none;
+}
+.title-cabinet summary > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.title-cabinet small,
+.title-cabinet strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.title-cabinet small {
+  color: #81704e;
+  font-size: 0.7rem;
+  margin-bottom: 3px;
+}
+.title-emblem {
+  font-size: 1.6rem;
+  color: #a27b30;
+}
+.title-options {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 280px;
+  overflow: auto;
+}
+.title-options p {
+  width: 100%;
+  font-size: 0.8rem;
+  margin: 0 0 4px;
+}
+.title-options button {
+  border: 1px solid #d7c79f;
+  border-radius: 9px;
+  padding: 9px 12px;
+  background: #fffdf8;
+  color: #554526;
+  cursor: pointer;
+}
+.title-options button:hover,
+.title-options button[aria-pressed='true'] {
+  background: #eadbb8;
+  border-color: #a27b30;
+}
+.title-reward {
+  display: block;
+  width: fit-content;
+  background: #f2e8cf;
+  color: #6a5023;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.milestone-toast {
+  position: fixed;
+  z-index: 100;
+  top: max(16px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(440px, calc(100vw - 24px));
+  box-sizing: border-box;
+  padding: 17px;
+  border: 1px solid #d9cba9;
+  border-radius: 16px;
+  background: #fffdf6;
+  color: #443c2c;
+  box-shadow: 0 12px 40px #28352b26;
+  animation: notice-arrive 0.2s ease-out;
+}
+.milestone-toast[hidden] {
+  display: none;
+}
+.toast-symbol {
+  font-size: 1.6rem;
+  color: #98722a;
+}
+.toast-content {
+  flex: 1;
+  min-width: 0;
+}
+.toast-content small {
+  display: block;
+  color: #81714f;
+  margin-bottom: 4px;
+}
+.toast-content strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.toast-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.toast-progress progress {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 7px;
+  border: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  accent-color: #b98b37;
+}
+.toast-progress progress::-webkit-progress-bar {
+  background: #e9e4d8;
+  border-radius: 5px;
+}
+.toast-progress progress::-webkit-progress-value {
+  background: #b98b37;
+  border-radius: 5px;
+}
+.toast-progress span {
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.milestone-toast button {
+  align-self: flex-start;
+  border: 0;
+  background: transparent;
+  color: #80745a;
+  cursor: pointer;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 7px;
+  font-size: 1.25rem;
+}
+.milestone-toast button:hover {
+  background: #eee5d2;
+}
+.milestone-toast.is-complete {
+  background: #f5fcf7;
+  border-color: #b3d4bf;
+}
+.is-complete .toast-symbol,
+.is-complete .toast-content small {
+  color: #327b54;
+}
+.is-complete progress {
+  accent-color: #3c9466;
+}
+.is-complete progress::-webkit-progress-value {
+  background: #3c9466;
+}
+@keyframes notice-arrive {
+  from {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .milestone-toast {
+    animation: none;
+  }
+}
