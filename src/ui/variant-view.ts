@@ -160,6 +160,8 @@ export class VariantView {
     const side = active?.closest<HTMLElement>('[data-side]')?.dataset['side']
     const control = active?.dataset['control']
     const fallback = active?.dataset['focusFallback']
+    const titleOpen =
+      this.content.querySelector<HTMLDetailsElement>('.title-cabinet')?.open ?? false
     const relicOpen =
       this.content.querySelector<HTMLDetailsElement>('[data-relic-menu]')?.open ?? false
     const heading = this.root.querySelector<HTMLElement>('.variant-heading')
@@ -170,6 +172,8 @@ export class VariantView {
       if (overview) overview.prepend(heading)
       else this.content.before(heading)
     }
+    const titleMenu = this.content.querySelector<HTMLDetailsElement>('.title-cabinet')
+    if (titleMenu) titleMenu.open = titleOpen
     const relicMenu = this.content.querySelector<HTMLDetailsElement>('[data-relic-menu]')
     if (relicMenu) relicMenu.open = relicOpen
     this.a = this.board('a', a, this.focusA)

@@ -1,3 +1,4 @@
+import { MILESTONES } from '../game/milestones.js'
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
 import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
 import { UPGRADES } from '../game/camp-progression.js'
@@ -148,7 +149,45 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
       !bossKinds.includes(value)
     )
       bossKinds.push(value)
+  const rawAttempt = JsonObjectReader.from(reader?.value('attempt'))
+  const kind = rawAttempt?.string('kind')
+  const seed = rawAttempt?.number('seed') ?? null
+  const floor = rawAttempt?.number('floor') ?? null
+  const failed = rawAttempt?.value('failed')
+  const attempt: MilestoneProgress['attempt'] =
+    rawAttempt &&
+    integer(seed, 0xffffffff) &&
+    integer(floor, 1000) &&
+    typeof failed === 'boolean' &&
+    (kind === 'bastion' ||
+      kind === 'brood' ||
+      kind === 'mirror' ||
+      kind === 'magnetic' ||
+      kind === 'clock')
+      ? {
+          seed,
+          floor,
+          kind,
+          failed,
+          hurt: rawAttempt.value('hurt') !== false,
+          glass: rawAttempt.value('glass') !== false,
+          blasted: rawAttempt.value('blasted') === true,
+        }
+      : undefined
+  const title = parseMilestone(reader?.string('title') ?? undefined)
+  const challenges = (reader?.array('challenges') ?? []).flatMap((value) => {
+    const entry = MILESTONES.find((item) => item.id === value && item.metric === 'challenge')
+    return entry ? [entry.id] : []
+  })
   return {
+    attempt,
+    challenges,
+    title:
+      title &&
+      claimed.includes(title) &&
+      MILESTONES.some((entry) => entry.id === title && entry.kind === 'achievements')
+        ? title
+        : null,
     travel: count('travel'),
     chests: count('chests'),
     floors: count('floors'),

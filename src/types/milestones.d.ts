@@ -2,6 +2,18 @@ import type { Relic } from './variants.js'
 import type { EncounterKind } from './tactical.js'
 
 export type MilestoneId =
+  | 'bastion-flawless'
+  | 'mirror-flawless'
+  | 'clock-no-glass'
+  | 'magnetic-demolition'
+  | 'brood-nest-spared'
+  | 'hunt-bastion'
+  | 'hunt-brood'
+  | 'hunt-mirror'
+  | 'hunt-magnetic'
+  | 'hunt-clock'
+  | 'web-untouched'
+  | 'field-unscathed'
   | 'first-steps'
   | 'treasure-scout'
   | 'field-practice'
@@ -43,6 +55,8 @@ export type MilestoneRelic =
   | 'fault-map'
   | 'abyss-hourglass'
 export type MilestoneMetric =
+  | 'bossKill'
+  | 'challenge'
   | 'travel'
   | 'chests'
   | 'floors'
@@ -61,6 +75,7 @@ export type MilestoneReward =
 export interface MilestoneDefinition {
   readonly id: MilestoneId
   readonly kind: 'missions' | 'achievements'
+  readonly bossKind?: EncounterKind
   readonly metric: MilestoneMetric
   readonly target: number
   readonly supplies: number
@@ -69,6 +84,19 @@ export interface MilestoneDefinition {
 
 /** Cumulative accepted play, stored in the same envelope as the action journal. */
 export interface MilestoneProgress {
+  readonly challenges?: readonly MilestoneId[]
+  readonly attempt?:
+    | undefined
+    | {
+        readonly seed: number
+        readonly floor: number
+        readonly kind: EncounterKind
+        readonly failed: boolean
+        readonly hurt: boolean
+        readonly glass: boolean
+        readonly blasted: boolean
+      }
+  readonly title?: MilestoneId | null
   readonly travel: number
   readonly chests: number
   readonly floors: number

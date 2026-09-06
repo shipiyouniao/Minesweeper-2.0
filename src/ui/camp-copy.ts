@@ -63,9 +63,9 @@ export function campLabel(language: Language, label: CampLabel): string {
       )
     case 'workshopRequired':
       return t(
-        'Unlock the Workshop to equip this on departure.',
-        '需要解锁工坊，才能在出发时携带。',
-        '出発時に装備するには工房の解放が必要です。',
+        'Unlock the Workshop before buying and equipping departure gear.',
+        '先解锁工坊，才能购买和携带出发装备。',
+        '出発装備を購入・携帯するには、先に工房を解放してください。',
       )
     case 'professionHelp':
       return t('Choose your explorer and skill.', '选择角色与职业技能', '冒険者とスキルを選ぶ')

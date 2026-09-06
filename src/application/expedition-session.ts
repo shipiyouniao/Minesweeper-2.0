@@ -2,7 +2,12 @@ import { EXPEDITION_RULES_REVISION } from '../persistence/expedition-format.js'
 import { addVariantRecord } from '../game/variant-difficulty.js'
 import { ownedRelicPacks } from '../game/relic-packs.js'
 import { ownedCombatTraining } from '../game/combat-build.js'
-import { advanceMilestones, claimMilestone, ownedMilestoneRelics } from '../game/milestones.js'
+import {
+  advanceMilestones,
+  claimMilestone,
+  ownedMilestoneRelics,
+  equipTitle,
+} from '../game/milestones.js'
 import type { MilestoneId } from '../types/milestones.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import {
@@ -216,6 +221,14 @@ export class ExpeditionSession {
   }
 
   /** Claim only at camp so new unlocks cannot rewrite a departure snapshot. */
+  equipTitle(id: MilestoneId | null): boolean {
+    const camp = equipTitle(this.camp, id)
+    if (camp === this.camp) return false
+    this.save = { ...this.save, camp }
+    this.persist()
+    return true
+  }
+
   claim(id: MilestoneId): boolean {
     if (this.current) return false
     const camp = claimMilestone(this.camp, id)

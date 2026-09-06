@@ -84,10 +84,17 @@ export function allowedDeparture(
   )
 }
 
+/** Equipment licenses require the workshop; training and other unlocks remain independent. */
+export function equipmentPurchaseLocked(camp: Camp, upgrade: Upgrade): boolean {
+  return parseCombatEquipment(upgrade) !== null && !camp.upgrades.includes('workshop')
+}
+
 /** Purchase an unowned camp facility without modifying the original camp. */
 export function buyUpgrade(camp: Camp, upgrade: Upgrade): Camp {
   const cost = upgradeCost(upgrade)
-  return camp.upgrades.includes(upgrade) || camp.supplies < cost
+  return equipmentPurchaseLocked(camp, upgrade) ||
+    camp.upgrades.includes(upgrade) ||
+    camp.supplies < cost
     ? camp
     : { ...camp, supplies: camp.supplies - cost, upgrades: [...camp.upgrades, upgrade] }
 }

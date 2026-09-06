@@ -34,6 +34,10 @@ export function parseVariantCommand(value: string): VariantCommand | null {
         ? { type, value: index }
         : null
     }
+    case 'equip-title': {
+      const parsed = parseMilestone(id)
+      return id === 'none' ? { type, value: null } : parsed ? { type, value: parsed } : null
+    }
     case 'claim-milestone': {
       const parsed = parseMilestone(id)
       return parsed ? { type, value: parsed } : null

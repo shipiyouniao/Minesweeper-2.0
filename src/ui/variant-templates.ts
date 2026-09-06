@@ -1,3 +1,4 @@
+import { titleTemplate } from './title-template.js'
 import type { BoardInputMode } from '../types/ui.js'
 import { boardControlsTemplate } from './board-controls.js'
 import { reachableCells } from '../game/expedition.js'
@@ -7,7 +8,7 @@ import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { stats } from '../game/engine.js'
 import { translations } from '../i18n.js'
 import type { Language } from '../types/localization.js'
-import type { Expedition, Twin, VariantRecord } from '../types/variants.js'
+import type { Camp, Expedition, Twin, VariantRecord } from '../types/variants.js'
 import type { VariantDescription } from '../types/variant-ui.js'
 import { difficultyCopy, relicCopy, variantCopy } from './variant-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
@@ -73,6 +74,7 @@ export function expeditionTemplate(
   run: Expedition,
   earned: number,
   inputMode: BoardInputMode,
+  camp?: Camp,
 ): string {
   const t = variantCopy(language)
   const common = translations[language]
@@ -111,7 +113,7 @@ export function expeditionTemplate(
     ${run.phase === 'boss' ? '' : `<p class="variant-status" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
     ${run.phase === 'reward' ? `<button class="primary-button" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="secondary-button retreat-button" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button>` : ''}
-    <div class="board-play-area"><div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards"><div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true), boardZoomTemplate(language))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}<aside class="run-sidebar"><section class="run-overview"><p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
+    <div class="board-play-area"><div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards"><div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true), boardZoomTemplate(language))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}<aside class="run-sidebar"><section class="run-overview">${camp ? titleTemplate(language, camp) : ''}<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
     <p class="variant-note reward-rate">${t.rewardRate} ×${rate}</p>
     ${vitalityTemplate(language, run)}</section>${tacticalTemplate(language, run)}
       ${

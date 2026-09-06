@@ -1,3 +1,4 @@
+import { MilestoneNotices } from './milestone-notices.js'
 import { battleGuide } from './battle-guide.js'
 import { nextBoardMode } from './board-controls.js'
 import { startTutorial } from './tutorial-player.js'
@@ -51,6 +52,7 @@ export class VariantApp implements VariantInputActions {
   private moving = false
   private magneticPerformance = false
   private walkGeneration = 0
+  private readonly notices = new MilestoneNotices()
   private readonly prologue = new BossPrologue()
 
   /** Wire one active mode, sharing only browser preferences and the sound port. */
@@ -295,6 +297,10 @@ export class VariantApp implements VariantInputActions {
     if (command.type !== 'probe' && command.type !== 'scan') this.cancelMovement()
 
     switch (command.type) {
+      case 'equip-title':
+        if (this.session instanceof ExpeditionSession)
+          this.result(this.session.equipTitle(command.value))
+        break
       case 'claim-milestone':
         if (this.session instanceof ExpeditionSession)
           this.result(this.session.claim(command.value))
@@ -564,6 +570,7 @@ export class VariantApp implements VariantInputActions {
     this.input.dispose()
     this.view.dispose()
     this.prologue.dispose()
+    this.notices.dispose()
     this.sounds.dispose()
   }
 
@@ -584,7 +591,13 @@ export class VariantApp implements VariantInputActions {
       const run = this.session.run
       this.view.render(
         run
-          ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.inputMode)
+          ? expeditionTemplate(
+              this.language,
+              run,
+              expeditionEarnings(run),
+              this.inputMode,
+              this.session.camp,
+            )
           : campTemplate(
               this.language,
               this.session.camp,
@@ -598,6 +611,7 @@ export class VariantApp implements VariantInputActions {
         run,
       )
       this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
+      this.notices.observe(this.session.camp, this.language)
     } else {
       const state = this.session.state
       const a = state.phase === 'lost' ? { ...state.a, phase: 'lost' as const } : state.a

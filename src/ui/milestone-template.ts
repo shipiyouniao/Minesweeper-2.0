@@ -54,7 +54,7 @@ export function milestonesTemplate(
         return `<article class="milestone-card ${done ? 'is-claimed' : ready ? 'is-ready' : ''}" data-milestone="${entry.id}">
         <div class="milestone-heading">${spriteImage(sprite)}<div><p class="eyebrow">${done ? t('Claimed', '已领取', '受領済み') : ready ? t('Completed', '已完成', '達成') : t('In progress', '进行中', '進行中')}</p><h2>${copy.name}</h2></div></div>
         <p>${copy.note}</p><div class="milestone-progress"><progress max="${entry.target}" value="${value}" aria-label="${copy.name}"></progress><span>${number.format(value)} / ${number.format(entry.target)}</span></div>
-        <div class="milestone-reward"><strong>+${number.format(entry.supplies)} ${variantCopy(language).supplies}</strong>${description ? `<h3>${description.name}</h3><p>${description.note}</p>` : ''}</div>
+        <div class="milestone-reward">${entry.kind === 'achievements' ? `<span class="title-reward">✦ ${t('Title', '称号', '称号')} · ${copy.name}</span>` : ''}<strong>+${number.format(entry.supplies)} ${variantCopy(language).supplies}</strong>${description ? `<h3>${description.name}</h3><p>${description.note}</p>` : ''}</div>
         <button class="${ready && !done ? 'primary-button' : 'text-button'}" data-control="claim-milestone:${entry.id}" data-focus-fallback="camp-page:${kind}" ${done || !ready ? 'disabled' : ''}>${done ? t('Claimed', '已领取', '受領済み') : ready ? t('Claim reward', '领取奖励', '報酬を受け取る') : t('Keep exploring', '继续探索', '探索を続けよう')}</button>
       </article>`
       })

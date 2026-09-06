@@ -7,6 +7,96 @@ import type { VariantDescription } from '../types/variant-ui.js'
 export function milestoneCopy(language: Language, id: MilestoneId): VariantDescription {
   const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
   switch (id) {
+    case 'bastion-flawless':
+      return {
+        name: t('Untouched bulwark', '不动如山', '不動の砦'),
+        note: t(
+          'Defeat the bastion without losing health. Revival counts as damage.',
+          '整场战斗不损失生命，击败壁垒守卫。触发复活也算受伤。',
+          'HPを失わず砦を倒す。復活も被弾に含む。',
+        ),
+      }
+    case 'mirror-flawless':
+      return {
+        name: t('Beyond the mirror', '镜外之人', '鏡の向こう'),
+        note: t(
+          'Defeat both twins without losing health. Revival counts as damage.',
+          '整场战斗不损失生命，击败镜像双子。触发复活也算受伤。',
+          'HPを失わず双子を倒す。復活も被弾に含む。',
+        ),
+      }
+    case 'clock-no-glass':
+      return {
+        name: t('Against the clock', '逆时而行', '時に抗う者'),
+        note: t(
+          'Defeat the clock boss without using any hourglass.',
+          '不使用场上任何沙漏，击败时钟 BOSS。',
+          '砂時計を使わず時計ボスを倒す。',
+        ),
+      }
+    case 'magnetic-demolition':
+      return {
+        name: t('Demolition expert', '爆破专家', '爆破の達人'),
+        note: t(
+          'Lure a charge into at least one mine, then defeat the magnetic boss.',
+          '引诱磁力 BOSS 冲撞引爆至少一枚地雷，并击败它。',
+          '突進で地雷を爆破させ、磁力ボスを倒す。',
+        ),
+      }
+    case 'brood-nest-spared':
+      return {
+        name: t('Into the nest', '虎口拔牙', '巣への挑戦'),
+        note: t(
+          'Defeat the queen while leaving at least one nest intact.',
+          '保留至少一座巢穴，击败育巢女王。',
+          '巣を一つ以上残して女王を倒す。',
+        ),
+      }
+
+    case 'hunt-bastion':
+      return {
+        name: t('Break the bastion', '攻破壁垒', '砦を崩せ'),
+        note: t('Defeat this boss once.', '击败该 BOSS 一次。', 'このボスを1回倒す。'),
+      }
+    case 'hunt-brood':
+      return {
+        name: t('Queen hunt', '猎杀育巢女王', '女王討伐'),
+        note: t('Defeat this boss once.', '击败该 BOSS 一次。', 'このボスを1回倒す。'),
+      }
+    case 'hunt-mirror':
+      return {
+        name: t('Twin hunt', '击败镜像双子', '双子討伐'),
+        note: t('Defeat this boss once.', '击败该 BOSS 一次。', 'このボスを1回倒す。'),
+      }
+    case 'hunt-magnetic':
+      return {
+        name: t('Magnet hunt', '击败磁力守卫', '磁力討伐'),
+        note: t('Defeat this boss once.', '击败该 BOSS 一次。', 'このボスを1回倒す。'),
+      }
+    case 'hunt-clock':
+      return {
+        name: t('Clock hunt', '击败时钟守卫', '時計討伐'),
+        note: t('Defeat this boss once.', '击败该 BOSS 一次。', 'このボスを1回倒す。'),
+      }
+    case 'web-untouched':
+      return {
+        name: t('Web walker', '蛛网漫步者', '蜘蛛の巣を歩む者'),
+        note: t(
+          'Defeat the Brood Queen without clearing any webs during the fight.',
+          '整场战斗不清理任何蛛网，击败育巢女王。',
+          '戦闘中に蜘蛛の巣を一切除去せず女王を倒す。',
+        ),
+      }
+    case 'field-unscathed':
+      return {
+        name: t('Master of magnetism', '磁场掌控者', '磁場の使い手'),
+        note: t(
+          'Defeat the magnetic boss without being pushed or pulled onto a mine. Shields do not excuse mine contact.',
+          '整场战斗不被磁场推拉到地雷上，并击败磁力 BOSS。护盾挡住伤害也算碰雷。',
+          '磁場で地雷に触れず磁力ボスを倒す。盾で防いでも接触は失敗。',
+        ),
+      }
+
     case 'trail-apprentice':
       return {
         name: t('Trail apprentice', '行路学徒', '旅の見習い'),

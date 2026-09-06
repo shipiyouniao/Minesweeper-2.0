@@ -1,3 +1,4 @@
+import { COMBAT_EQUIPMENT } from '../src/game/combat-build.js'
 import { defeatEncounter } from './encounter-helpers.js'
 import { CURRENT_DEPARTURE } from './helpers.js'
 import { test } from 'node:test'
@@ -185,4 +186,32 @@ test('existing money and unlocks survive reload, with new purchases settled at t
   assert.equal(session.purchase('surveyor'), false)
   const restored = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.deepEqual(restored.run, session.run)
+})
+
+test('workshop gates equipment purchases without spending supplies; unlocking enables them', () => {
+  const storage = new MemoryStorage()
+  storage.setItem(
+    'minesweeper.variants.v1.expedition',
+    JSON.stringify({
+      version: 4,
+      camp: { ...EMPTY_CAMP, supplies: 100000 },
+      journal: null,
+      records: [],
+    }),
+  )
+  const session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
+  const before = JSON.stringify(session.camp)
+  for (const item of COMBAT_EQUIPMENT) assert.equal(session.purchase(item), false)
+  assert.equal(JSON.stringify(session.camp), before)
+  assert.equal(session.purchase('weapon-training'), true)
+  assert.equal(session.purchase('workshop'), true)
+  for (const item of COMBAT_EQUIPMENT) {
+    const supplies = session.camp.supplies
+    assert.equal(session.purchase(item), true)
+    assert.equal(session.camp.supplies, supplies - upgradeCost(item))
+  }
+  assert.deepEqual(
+    new ExpeditionSession(new VariantRepository(storage), new FakeRuntime()).camp,
+    session.camp,
+  )
 })
