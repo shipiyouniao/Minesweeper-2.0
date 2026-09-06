@@ -13,6 +13,7 @@ export class BossPrologue {
   private readonly seen = new Set<string>()
   private beat = 0
 
+  /** Open an unseen arrival scene, or replay it on request, without advancing the encounter. */
   present(
     root: HTMLElement,
     run: Expedition | null,
@@ -97,6 +98,7 @@ export class BossPrologue {
     dialog.querySelector<HTMLElement>('[data-scene="next"]')?.focus({ preventScroll: true })
   }
 
+  /** Release the scene dialog and its listeners when closing or replacing the view. */
   dispose(): void {
     this.events?.abort()
     this.events = null
@@ -104,6 +106,7 @@ export class BossPrologue {
     this.dialog = null
   }
 
+  /** Present the current dialogue beat and public arena landmarks for the selected language. */
   private render(run: Expedition, script: PrologueScript, language: Language): void {
     if (!this.dialog || !run.encounter) return
     const beat = script.beats[this.beat]!

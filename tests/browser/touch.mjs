@@ -11,6 +11,7 @@ const fixtures = [
   battleFixture(46).entered,
   battleFixture(47).entered,
   battleFixture(48).entered,
+  battleFixture(49).entered,
 ]
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || undefined,
@@ -40,6 +41,8 @@ async function seed(save, language) {
   await page.goto(`${base}?ruleset=expedition&lang=${language}`)
   await page.evaluate((save) => sessionStorage.setItem('touch-fixture', JSON.stringify(save)), save)
   await page.reload()
+  const arrival = page.locator('dialog[data-prologue][open] [data-scene="skip"]')
+  if (await arrival.count()) await arrival.tap()
 }
 
 /** Observe accepted public input through the persisted action log. */
@@ -69,6 +72,7 @@ async function geometry() {
       top: board.getBoundingClientRect().top,
       left: board.parentElement.scrollLeft,
       inner: board.parentElement.scrollTop,
+      host: document.querySelector('.ruleset-host').scrollTop,
     }
   })
 }
@@ -128,7 +132,10 @@ try {
         ])
 
         await seed(fixture.save, language)
-        await page.locator('[data-control="flag-mode"]').tap()
+        const mode = page.locator('.mode-cycle')
+        for (let count = 0; count < 4 && (await mode.getAttribute('data-mode')) !== 'flag'; count++)
+          await mode.tap()
+        assert.equal(await mode.getAttribute('data-mode'), 'flag')
         const tap = await target()
         const tapGeometry = await geometry()
         await page.touchscreen.tap(tap.x, tap.y)
@@ -147,11 +154,14 @@ try {
         await page.waitForTimeout(550)
         assert.deepEqual(await actions(), original, 'swiping must not flag or reveal')
         assert.ok(
-          (await geometry()).page > scrollBefore.page + 30,
-          'board swipe must scroll the page',
+          (await geometry()).host > scrollBefore.host + 30 ||
+            (await geometry()).inner > scrollBefore.inner + 30 ||
+            (await geometry()).page > scrollBefore.page + 30,
+          'board swipe must scroll its viewport or the page',
         )
       }
     }
+    console.log(`Completed native touch checks: ${fixture.run.encounter.kind}`)
   }
 
   // Enlarged boards must still pan horizontally and hand vertical scrolling to the page.
@@ -186,7 +196,7 @@ try {
   console.log(
     JSON.stringify({
       passed: true,
-      bosses: 4,
+      bosses: fixtures.length,
       languages: 3,
       widths: [320, 390],
       nativeTouch: true,

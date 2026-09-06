@@ -98,7 +98,7 @@ test('hourglass redirects the earliest deadline for one AP once, stays walkable 
   assert.ok(next.encounter?.kind === 'clock')
   assert.equal(next.encounter.points, 2)
   assert.equal(next.encounter.spells[0]?.resolvesOn, 2)
-  assert.equal(battleThreat(next.encounter, index), 0)
+  assert.equal(battleThreat(next.encounter, index, next.game.config), 0)
   assert.ok(walkingPath(next, index))
   assert.equal(actExpedition(next, { type: 'interact', index }), next)
   const end = actExpedition(next, { type: 'end-turn' })

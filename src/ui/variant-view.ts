@@ -11,6 +11,7 @@ import type { InteractionCue } from '../types/audio.js'
 import type { NavigationKey, NavigationResult } from '../types/ui.js'
 import { BoardView } from './board-view.js'
 import { LanguageMenu } from './language-menu.js'
+import { TitleMenu } from './title-menu.js'
 import { siteHeaderTemplate } from './templates.js'
 import { professionCopy, variantCopy } from './variant-copy.js'
 import { icon } from '../icons.js'
@@ -38,6 +39,8 @@ export class VariantView {
   private readonly expeditionDialog: ExpeditionDialog
   private readonly magnetic: MagneticBoard
   private readonly menu: LanguageMenu
+  private titleMenu: TitleMenu | null = null
+  private readonly feedback: (cue: InteractionCue) => void
   private a: BoardView | null = null
   private b: BoardView | null = null
   private focusA = 0
@@ -61,6 +64,7 @@ export class VariantView {
     feedback: (cue: InteractionCue) => void,
   ) {
     this.root = root
+    this.feedback = feedback
     this.language = language
     const t = variantCopy(language)
     const common = translations[language]
@@ -160,20 +164,20 @@ export class VariantView {
     const side = active?.closest<HTMLElement>('[data-side]')?.dataset['side']
     const control = active?.dataset['control']
     const fallback = active?.dataset['focusFallback']
-    const titleOpen =
-      this.content.querySelector<HTMLDetailsElement>('.title-cabinet')?.open ?? false
+    const titleFocused = active?.matches('.title-trigger') ?? false
     const relicOpen =
       this.content.querySelector<HTMLDetailsElement>('[data-relic-menu]')?.open ?? false
     const heading = this.root.querySelector<HTMLElement>('.variant-heading')
     heading?.remove()
+    this.titleMenu?.dispose()
     this.content.innerHTML = html
     if (heading) {
       const overview = this.content.querySelector('.run-overview')
       if (overview) overview.prepend(heading)
       else this.content.before(heading)
     }
-    const titleMenu = this.content.querySelector<HTMLDetailsElement>('.title-cabinet')
-    if (titleMenu) titleMenu.open = titleOpen
+    const titlePicker = this.content.querySelector<HTMLElement>('.title-cabinet')
+    this.titleMenu = titlePicker ? new TitleMenu(titlePicker, this.feedback) : null
     const relicMenu = this.content.querySelector<HTMLDetailsElement>('[data-relic-menu]')
     if (relicMenu) relicMenu.open = relicOpen
     this.a = this.board('a', a, this.focusA)
@@ -200,9 +204,11 @@ export class VariantView {
     const selector =
       cell !== undefined && (side === 'a' || side === 'b')
         ? `[data-side="${side}"] [data-cell="${CSS.escape(cell)}"]`
-        : control
-          ? `[data-control="${CSS.escape(control)}"]`
-          : null
+        : titleFocused
+          ? '.title-trigger'
+          : control
+            ? `[data-control="${CSS.escape(control)}"]`
+            : null
     let target = selector ? this.content.querySelector<HTMLElement>(selector) : null
     // A completed purchase becomes disabled; retain focus on the inspected item's tile.
     if ((!target || target.hasAttribute('disabled')) && fallback)
@@ -417,7 +423,7 @@ export class VariantView {
         (encounter.kind !== 'magnetic' || encounter.forecast.kind === 'charge')
       ) {
         cell.classList.add('tactical-danger')
-        const danger = `${t.danger} · ${battleThreat(encounter, index)}`
+        const danger = `${t.danger} · ${battleThreat(encounter, index, run.game.config)}`
         cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${danger}`)
         cell.title = encounter.kind === 'clock' ? `${cell.title}; ${danger}` : danger
       }
@@ -545,6 +551,7 @@ export class VariantView {
     this.listeners.abort()
     this.magnetic.dispose()
     this.menu.dispose()
+    this.titleMenu?.dispose()
     this.expeditionDialog.dispose()
     this.dialog.close()
     this.root.replaceChildren()

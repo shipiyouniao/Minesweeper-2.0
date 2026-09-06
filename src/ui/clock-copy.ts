@@ -15,6 +15,7 @@ export function clockDeadline(language: Language, remaining: number): string {
       )
 }
 
+/** Describe a frozen spell footprint and its deadline relative to the current turn. */
 export function clockSpellCopy(language: Language, spell: ClockSpell, turn: number): string {
   const name = spell.redirected
     ? battleText(
@@ -29,6 +30,7 @@ export function clockSpellCopy(language: Language, spell: ClockSpell, turn: numb
   return `#${spell.id} · ${name} · ${clockDeadline(language, spell.resolvesOn - turn + 1)}`
 }
 
+/** Summarize remaining hourglasses and the active casting or recovery phase. */
 export function clockStatus(language: Language, encounter: ClockEncounter): string {
   const count = encounter.hourglasses.filter((glass) => !glass.used).length
   const phase =
@@ -45,6 +47,7 @@ export function clockStatus(language: Language, encounter: ClockEncounter): stri
   return `${phase} · ${battleText(language, `Hourglasses ${count}/3`, `沙漏 ${count}/3`, `砂時計 ${count}/3`)}`
 }
 
+/** Supply localized Clock Mage controls and rules through the shared tactical contract. */
 export function clockCopy(language: Language, base: TacticalMessages): TacticalMessages {
   const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
   const hint = t(

@@ -8,10 +8,12 @@ export function skillRoom(run: Expedition): string {
   return `${run.floor}:${encounter?.kind ?? 'floor'}:${encounter?.kind === 'mirror' ? encounter.active : ''}`
 }
 
+/** Expose an anchor only inside the floor, encounter and realm where it was placed. */
 export function currentWaymark(run: Expedition): number | null {
   return run.waymark?.room === skillRoom(run) ? run.waymark.index : null
 }
 
+/** Require an exposed safe destination free of terrain and encounter occupants. */
 function clearLanding(run: Expedition, index: number): boolean {
   const cell = run.game.cells[index]
   return Boolean(
@@ -50,6 +52,7 @@ export function riftLandings(run: Expedition): number[] {
   return targets
 }
 
+/** Derive whether the current room offers a legal placement, return or rift landing. */
 export function mobilityReady(run: Expedition): boolean {
   if (run.departure.profession === 'riftwalker') return riftLandings(run).length > 0
   const mark = currentWaymark(run)

@@ -8,6 +8,7 @@ import { professionSprite } from './profession-presentation.js'
 import type { Camp } from '../types/variants.js'
 import type { Language } from '../types/localization.js'
 
+/** Count completed unclaimed goals for the selected camp navigation badge. */
 export function milestoneReadyCount(camp: Camp, kind: 'missions' | 'achievements'): number {
   return MILESTONES.filter(
     (entry) =>
@@ -26,8 +27,7 @@ export function milestonesTemplate(
   const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
   const claimed = milestoneProgress(camp).claimed
   const number = new Intl.NumberFormat(language)
-  return `<p class="variant-intro">${t('Progress carries across expeditions, including defeat and extraction. Claim each reward once at camp. Exclusive relics join future reward offers; equipment goes to your loadout; exclusive careers appear in Professions.', '进度跨局保留，失败或撤离也不会清空。回营后每项奖励可领取一次。专属遗物加入之后远征的候选池，装备在出发装备中搭配，专属新职业在职业页选择。', '進捗は敗北・撤退後も残ります。報酬はキャンプで各1回受領。限定遺物は以後の候補に、装備は出発装備に、限定職業は職業ページに追加。')}</p>
-    <p class="milestone-summary" role="status">${t('Ready to claim', '可领取', '受領可能')} · ${milestoneReadyCount(camp, kind)}</p>
+  return `<p class="milestone-summary" role="status">${t('Ready to claim', '可领取', '受領可能')} · ${milestoneReadyCount(camp, kind)}</p>
     <div class="milestone-grid">${MILESTONES.filter((entry) => entry.kind === kind)
       .map((entry) => {
         const copy = milestoneCopy(language, entry.id)

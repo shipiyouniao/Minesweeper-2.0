@@ -14,6 +14,7 @@ export class MilestoneNotices {
   private timer: ReturnType<typeof setTimeout> | null = null
   private remaining = 0
 
+  /** Queue newly crossed goal thresholds while retaining the previous camp snapshot. */
   observe(camp: Camp, language: Language): void {
     this.language = language
     if (this.previous) this.queue.push(...milestoneNotices(this.previous, camp))
@@ -21,6 +22,7 @@ export class MilestoneNotices {
     if (this.queue.length && this.timer === null) this.tick()
   }
 
+  /** Display one queued notice at a time and suspend its lifetime while the game is obscured. */
   private tick(): void {
     this.timer = null
     const paused = document.hidden || document.querySelector('dialog[open]') !== null
@@ -54,6 +56,7 @@ export class MilestoneNotices {
     if (this.card || this.queue.length) this.timer = setTimeout(() => this.tick(), 250)
   }
 
+  /** Cancel the pending tick and remove transient notices when their owner is disposed. */
   dispose(): void {
     if (this.timer !== null) clearTimeout(this.timer)
     this.card?.remove()

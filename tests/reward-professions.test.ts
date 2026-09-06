@@ -24,6 +24,11 @@ import { professionSkillAvailability } from '../src/game/profession-skills.js'
 import { walkingPath } from '../src/game/dungeon-path.js'
 import { placedBoard } from '../src/game/variant-board.js'
 import { enterBattle } from '../src/game/battle-arena.js'
+import { enterMirror } from '../src/game/mirror-battle.js'
+import { enterMagnetic } from '../src/game/magnetic-battle.js'
+import { enterClock } from '../src/game/clock-battle.js'
+import { encounterTier } from '../src/game/encounter-tiers.js'
+import { shareMirrorKnowledge } from '../src/game/mirror-state.js'
 import {
   applyDamageRelics,
   applyDiscoveryRelics,
@@ -210,6 +215,79 @@ test('rift and return skills respect boss bodies, action points and guarded floo
     assert.deepEqual(riftLandings({ ...run, encounter: { ...run.encounter!, boss } }), [])
   const atExit = actExpedition({ ...fixture('riftwalker'), exit: 13 }, { type: 'skill', index: 13 })
   assert.equal(atExit.phase, 'exploring', 'Landing on stairs still requires explicit entry')
+})
+
+test('mobility skills obey AP and preserve room-local return paths across all five boss families', () => {
+  for (const difficulty of ['standard', 'abyss'] as const) {
+    for (const profession of ['waymarker', 'riftwalker'] as const) {
+      const before = {
+        ...createExpedition({ ...CURRENT_DEPARTURE, profession, difficulty, seed: 43 }),
+        floor: encounterTier(difficulty).floors[0]!,
+      }
+      const arenas = [
+        enterBattle(before, 'bastion'),
+        enterBattle(before, 'brood'),
+        enterMirror(before),
+        enterMagnetic(before),
+        enterClock(before),
+      ]
+      for (const arena of arenas) {
+        assert.ok(arena.encounter)
+        // Expose the generated terrain only for this interaction test, not the public-play audit.
+        let run: Expedition = {
+          ...arena,
+          game: {
+            ...arena.game,
+            cells: arena.game.cells.map((cell) => ({
+              ...cell,
+              visibility: cell.mine ? 'flagged' : 'revealed',
+            })),
+          },
+          confirmedMines: arena.game.cells.flatMap((cell, index) => (cell.mine ? [index] : [])),
+        }
+        run = shareMirrorKnowledge(run)
+        if (profession === 'waymarker') {
+          const origin = run.player
+          const placed = actExpedition(run, { type: 'skill' })
+          assert.equal(placed.encounter!.points, run.encounter!.points - 1)
+          assert.equal(currentWaymark(placed), origin)
+          const target = walkingNeighbors(placed, origin).find((index) =>
+            walkingPath(placed, index),
+          )
+          assert.notEqual(target, undefined)
+          run = actExpedition(placed, { type: 'move', index: target! })
+          assert.notEqual(run.player, origin)
+          const empty = { ...run, encounter: { ...run.encounter!, points: 0 } }
+          assert.equal(actExpedition(empty, { type: 'skill' }), empty)
+          const returned = actExpedition(run, { type: 'skill' })
+          assert.equal(returned.player, origin)
+          assert.equal(returned.encounter!.points, run.encounter!.points - 1)
+          assert.equal(returned.skillUsed, true)
+        } else {
+          const origin = [...reachableCells(run)].find(
+            (player) => riftLandings({ ...run, player }).length,
+          )
+          assert.notEqual(origin, undefined)
+          run = { ...run, player: origin!, encounter: { ...run.encounter!, points: 1 } }
+          const index = riftLandings(run)[0]!
+          const empty = { ...run, encounter: { ...run.encounter!, points: 0 } }
+          assert.equal(actExpedition(empty, { type: 'skill', index }), empty)
+          const crossed = actExpedition(run, { type: 'skill', index })
+          assert.equal(crossed.player, index)
+          assert.equal(crossed.encounter!.points, 0)
+          assert.equal(crossed.skillUsed, true)
+          assert.deepEqual(walkingPath(crossed, origin!), [index, origin])
+          assert.equal(actExpedition(crossed, { type: 'move', index: origin! }), crossed)
+          assert.ok(
+            !walkingNeighbors(
+              { ...crossed, rift: { ...crossed.rift!, room: 'another-room' } },
+              index,
+            ).includes(origin!),
+          )
+        }
+      }
+    }
+  }
 })
 
 test('all eight exclusive relics and both new careers survive future-departure reload while old departure pools stay frozen', () => {

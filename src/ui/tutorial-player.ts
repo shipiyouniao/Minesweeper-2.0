@@ -45,6 +45,7 @@ class TutorialPlayer {
   private readonly ruleset: Ruleset
   private readonly language: Language
 
+  /** Create isolated practice state and bind input for the lifetime of this lesson dialog. */
   constructor(dialog: HTMLDialogElement, ruleset: Ruleset, language: Language) {
     this.originalMarkup = dialog.innerHTML
     this.originalLabel = dialog.getAttribute('aria-labelledby')
@@ -100,6 +101,7 @@ class TutorialPlayer {
     this.focusTarget()
   }
 
+  /** Cancel practice motion and input, then restore the dialog owned by the main game. */
   dispose(): void {
     if (this.disposed) return
     this.disposed = true
@@ -113,10 +115,12 @@ class TutorialPlayer {
     if (this.originalLabel) this.dialog.setAttribute('aria-labelledby', this.originalLabel)
   }
 
+  /** Choose lesson text using the language captured when practice was opened. */
   private t(en: string, zh: string, ja: string): string {
     return battleText(this.language, en, zh, ja)
   }
 
+  /** Render practice cells using public clues, the lesson target and expedition landmarks. */
   private board(game: Game, side: 'a' | 'b'): string {
     const step = this.lesson.steps[this.step]
     const ring = step?.action === 'inspect' ? neighbors(game.config, step.index) : []
@@ -144,12 +148,14 @@ class TutorialPlayer {
       .join('')}</div></section>`
   }
 
+  /** Refresh lesson instructions, controls and progress from the current practice state. */
   private render(): void {
     const step = this.lesson.steps[this.step]
     const done = !step
     this.dialog.innerHTML = `<header class="guidance-header"><div><span class="guidance-eyebrow">FIELD NOTES / ${this.t('LEARN BY DOING', '亲手试一试', '実際に練習')}</span><h2 id="tutorial-title">${this.lesson.title}</h2></div><button class="guidance-close" data-practice="close" aria-label="${this.t('Exit practice', '退出练习', '練習を終了')}">×</button></header><div class="lesson-progress" aria-label="${this.step + 1} / ${this.lesson.steps.length}">${this.lesson.steps.map((_, i) => `<span class="${i < this.step ? 'done' : i === this.step ? 'current' : ''}"></span>`).join('')}</div><div class="guidance-layout"><article class="lesson-note"><span class="lesson-number">${done ? '✓' : String(this.step + 1).padStart(2, '0')}</span><h3>${step?.title ?? this.t('Ready for the field', '可以正式出发了', '本番へ進もう')}</h3><p>${step?.text ?? this.lesson.ending}</p><p class="lesson-feedback" role="status">${this.message || (this.completed ? this.t('Good. Continue when you are ready.', '完成了。准备好后再继续。', 'できました。準備ができたら次へ。') : '')}</p>${this.ruleset === 'expedition' ? `<div class="practice-vitals">♥ ${this.run.health}/${this.run.maxHealth} · ◇ ${this.run.shields} · ${this.t('Chests', '宝箱', '宝箱')} ${this.run.collected.length}/1</div>` : ''}</article><div class="lesson-workspace ${this.ruleset === 'twin' ? 'practice-twins' : ''}">${this.board(this.ruleset === 'expedition' ? this.run.game : this.a, 'a')}${this.ruleset === 'twin' ? this.board(this.b, 'b') : ''}<div class="practice-dock">${this.ruleset === 'expedition' ? `<button class="practice-tool ${this.tool === 'probe' ? 'selected' : ''}" data-practice="probe">${spriteImage('probe')}<span>${this.t('Probe', '探针', '探針')} · ${this.run.probes}</span></button><button class="practice-tool ${this.tool === 'scan' ? 'selected' : ''}" data-practice="scan">${spriteImage('scanner')}<span>${this.t('Scan', '扫描器', '走査器')} · ${this.run.scans}</span></button><button class="practice-tool" data-practice="skill" ${this.run.skillUsed ? 'disabled' : ''}>${spriteImage('skill-explorer')}<span>${this.t('Light', '探路灯', '灯り')}</span></button>` : ''}${boardControlsTemplate(this.language, this.mode, 'data-action').replace('data-action="cycle-mode"', 'data-practice="cycle"')}</div></div></div><footer class="guidance-footer"><button class="text-button" data-practice="restart">${this.t('Start again', '重新练习', '最初から')}</button><span>${this.t('Click / tap · arrows + Enter', '点击 / 轻触 · 方向键 + 回车', 'クリック / タップ · 矢印 + Enter')}</span><button class="primary-button" data-practice="${done ? 'close' : 'next'}" ${!done && !this.completed ? 'disabled' : ''}>${done ? this.t('Back to game', '返回游戏', 'ゲームへ') : this.t('Continue', '继续', '次へ')} →</button></footer>`
   }
 
+  /** Focus the next required action without scrolling the page underneath the lesson. */
   private focusTarget(): void {
     const step = this.lesson.steps[this.step]
     const selector = this.completed
@@ -164,6 +170,7 @@ class TutorialPlayer {
     this.dialog.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true })
   }
 
+  /** Explain an out-of-sequence practice action without spending resources or advancing. */
   private reject(): void {
     this.message = this.t(
       'Try the highlighted action first. Nothing was spent.',
@@ -174,6 +181,7 @@ class TutorialPlayer {
     if (feedback) feedback.textContent = this.message
   }
 
+  /** Accept only the requested lesson interaction and advance its isolated game state. */
   private applyCell(index: number, side: 'a' | 'b', secondary = false): void {
     const step = this.lesson.steps[this.step]
     if (!step || this.completed || this.moving) return
@@ -271,6 +279,7 @@ class TutorialPlayer {
     }
   }
 
+  /** Route lesson buttons and cell clicks while keeping real game handlers isolated. */
   private readonly click = (event: MouseEvent): void => {
     event.stopPropagation()
     if (this.held) {
@@ -331,6 +340,7 @@ class TutorialPlayer {
     } else this.reject()
   }
 
+  /** Provide keyboard cell navigation and activation inside the practice dialog. */
   private readonly key = (event: KeyboardEvent): void => {
     event.stopPropagation()
     const target =
@@ -369,6 +379,7 @@ class TutorialPlayer {
     }
   }
 
+  /** Translate a practice right-click into the same secondary action used by touch. */
   private readonly secondary = (event: MouseEvent): void => {
     event.preventDefault()
     event.stopPropagation()
@@ -384,6 +395,7 @@ class TutorialPlayer {
       )
   }
 
+  /** Schedule the practice secondary action for a touch hold on a target cell. */
   private readonly pointerDown = (event: PointerEvent): void => {
     event.stopPropagation()
     this.held = false
@@ -401,6 +413,7 @@ class TutorialPlayer {
       )
     }, 500)
   }
+  /** Cancel any pending touch hold before it can act on a released or replaced target. */
   private readonly clearHold = (): void => {
     if (this.hold !== null) clearTimeout(this.hold)
     this.hold = null

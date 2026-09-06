@@ -4,6 +4,7 @@ import { CURRENT_DEPARTURE } from './helpers.js'
 import { createExpedition, actExpedition, frontierCells } from '../src/game/expedition.js'
 import { enterMagnetic } from '../src/game/magnetic-battle.js'
 import { blastMagnetic } from '../src/game/magnetic-blast.js'
+import { battleThreat } from '../src/game/combat-build.js'
 import { generateMagnetic } from '../src/game/magnetic-generation.js'
 import {
   magneticForecast,
@@ -87,6 +88,33 @@ test('anchor blast opens a bypass, destroys locked mines and terrain, and update
     crashed,
     'Blast replay is deterministic',
   )
+})
+
+test('charge forecasts include overlapping blast hits and match the unmitigated resolution', () => {
+  const lured = actExpedition(corridor(), { type: 'interact', index: 8 })
+  assert.ok(lured.encounter?.kind === 'magnetic')
+  const ready = actExpedition(lured, { type: 'end-turn' })
+  assert.ok(ready.encounter?.kind === 'magnetic')
+
+  // The route is [5, 6, 7, 8]; 7 overlaps the blast, 8 blocks it, and 9 is blast-only.
+  for (const [index, expected] of [
+    [6, 5],
+    [7, 10],
+    [8, 5],
+    [9, 5],
+    [10, 0],
+  ] as const) {
+    assert.equal(battleThreat(lured.encounter, index, lured.game.config), 0)
+    assert.equal(battleThreat(ready.encounter, index, ready.game.config), expected)
+    const ended = actExpedition({ ...ready, player: index }, { type: 'end-turn' })
+    assert.equal(ready.health - ended.health, expected)
+    assert.equal(ended.phase === 'lost', index === 7)
+  }
+
+  const protectedRun = { ...ready, player: 7, shields: 1 }
+  assert.equal(actExpedition(protectedRun, { type: 'end-turn' }).health, 5)
+  const braced = actExpedition({ ...ready, player: 7 }, { type: 'brace' })
+  assert.equal(actExpedition(braced, { type: 'end-turn' }).health, 6)
 })
 
 test('an isolated player can reveal adjacent frontier even when the entrance is disconnected', () => {

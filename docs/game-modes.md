@@ -1,6 +1,6 @@
 # Game modes: design and implementation plan
 
-Every mode in this document is approved for development. The first delivery implements **Expedition** and **Twin boards**. **Sonar**, **Survey**, and **Tides** are planned, not playable menu entries yet. Classic Minesweeper retains its existing difficulties, saves, and records.
+Every mode in this document is approved for development. **Expedition** and **Twin boards** are playable. **Sonar**, **Survey**, and **Tides** are planned, not playable menu entries yet. Classic Minesweeper retains its existing difficulties, saves, and records.
 
 Relic Dungeon is part of Expedition, not a separate mode: it describes the multi-floor run, randomized relic choices, and permanent camp progression. With its permanent unlocks, Expedition is a **roguelite**.
 
@@ -21,7 +21,7 @@ Relic Dungeon is part of Expedition, not a separate mode: it describes the multi
 
 Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → defeat the boss on guarded floors → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
 
-[Bastion Guardian and Brood Queen](tactical-builds.md) and [Mirror Twins](mirror-twins.md) provide separate tactical rooms with a shared health/build system. Bastion uses calibrated controls and core windows; the queen has permanently destroyable nests and interceptable creatures; the twins use two mine-exclusive realms, crossed seals and alternating attacks. Only End turn resolves enemy attacks. The seeded roster rotates across the selected difficulty's checkpoints. Incompatible journals return to camp under the [save policy](save-policy.md).
+[Bastion Guardian and Brood Queen](tactical-builds.md), [Mirror Twins](mirror-twins.md), [Magnetic Knight](magnetic-knight.md) and [Clock Mage](clock-mage.md) provide separate tactical rooms with a shared health/build system. Bastion uses calibrated controls and core windows; the queen has permanently destroyable nests and interceptable creatures; the twins use two mine-exclusive realms, crossed seals and alternating attacks. The knight uses projected magnetic fields and delayed charges; the mage uses frozen spell deadlines and echo follow-ups. Only End turn resolves enemy attacks. The seeded roster rotates across the selected difficulty's checkpoints. Incompatible journals return to camp under the [save policy](save-policy.md).
 
 ### Floor rules
 
@@ -45,14 +45,16 @@ The shared health bar displays protection as **10/10 (+1)**. Health and shields 
 
 ### Professions and tools
 
-| Profession    | Starting resources        | Unlock              |
-| ------------- | ------------------------- | ------------------- |
-| Explorer      | 2 probes, 1 scan          | Initially available |
-| Surveyor      | 1 probe, 2 scans          | 40 supplies         |
-| Engineer      | 1 probe, 1 scan, 1 shield | 60 supplies         |
-| Archaeologist | 1 probe                   | 450 supplies        |
-| Alchemist     | 2 shields                 | 900 supplies        |
-| Sentinel      | 1 probe, 1 shield         | 1,800 supplies      |
+| Profession    | Starting resources        | Unlock                         |
+| ------------- | ------------------------- | ------------------------------ |
+| Explorer      | 2 probes, 1 scan          | Initially available            |
+| Surveyor      | 1 probe, 2 scans          | 40 supplies                    |
+| Engineer      | 1 probe, 1 scan, 1 shield | 60 supplies                    |
+| Archaeologist | 1 probe                   | 450 supplies                   |
+| Alchemist     | 2 shields                 | 900 supplies                   |
+| Sentinel      | 1 probe, 1 shield         | 1,800 supplies                 |
+| Waymarker     | 1 probe, 1 scan           | Claim the 12-floor mission     |
+| Riftwalker    | 2 probes                  | Claim the 50-floor achievement |
 
 **Probe:** drag its square inventory button to a cell. Inspect the centered 3×3 neighborhood, clipped at board edges. Every mine receives a locked gold flag, including mines previously flagged by the player. Non-mine cells receive a persistent green safe marker while their clue stays covered; an incorrect ordinary flag there is cleared. Walls are ignored. The player does not move and treasures are not collected. A visible report includes the total mine count, including zero and already confirmed mines.
 
@@ -66,9 +68,9 @@ The probe previews a 3×3 square; the scanner previews its entire target row. Ke
 
 ### Relic build
 
-Four [purchasable theme packs](relic-packs.md) add eight bounded effects to new `relics-v1` runs, for fourteen possible relics. They reward new discoveries, shield reactions, survival and physical chest collection. The sidebar marks consumed floor/run triggers. Historical journals retain the original pool described below: four base relics, or six with the archive.
+The full pool contains up to **37 relics**: four base relics, two archive relics, twenty from ten purchased [exploration](relic-packs.md) and [journey/combat](journey-relics.md) themes, three from the Battle manual and eight [milestone rewards](reward-professions.md). Only licenses owned at departure join that run's pool. The sidebar marks consumed floor/run triggers; unlocking a theme adds choices, not immediate power.
 
-After each non-final floor, offer up to three distinct unowned relics (up to four for the new Archaeologist). Choose one and enter the next floor. Offers are deterministic for seed/floor; reload cannot reroll. The initial pool contains four relics, so late choices may have fewer than three options. The archive expands it to six. Once the pool is exhausted, continue to the next floor without adding another relic.
+After each non-final floor, a dismissible modal offers up to three distinct unowned relics (up to four for the Archaeologist). Choose one and enter the next floor, or close the modal to inspect the completed room. Offers are deterministic for seed/floor; reload cannot reroll. The initial pool contains four relics, so late choices may have fewer than three options. The archive expands it to six. Once the pool is exhausted, continue to the next floor without adding another relic.
 
 | Relic          | Effect                                                                                                            |
 | -------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -83,7 +85,7 @@ Charges/relics carry between floors and disappear when the run ends. Scanned row
 
 ### Profession skills
 
-[Six professions](profession-skills.md) now each have a once-per-floor active skill. Explorer scouts nearby, Surveyor scouts a column, Engineer repairs shields, Archaeologist scouts chests and expands relic choices, Alchemist converts protection into tools, and Sentinel performs a wide reconnaissance. Each has its own portrait and skill icon. Historical departures keep their original career rules.
+[Eight professions](profession-skills.md) each have a once-per-floor active skill. Explorer scouts nearby, Surveyor scouts a column, Engineer repairs shields, Archaeologist scouts chests and expands relic choices, Alchemist converts protection into tools, and Sentinel performs a wide reconnaissance. The [Waymarker and Riftwalker](reward-professions.md) add a return anchor and a bidirectional passage across a known obstacle. Anchors and passages belong to their current room, including the active mirror realm. Each profession has its own portrait and skill icon. Incompatible rule revisions return to camp instead of retaining an older career engine.
 
 ### Permanent camp growth
 
@@ -101,11 +103,11 @@ Charges/relics carry between floors and disappear when the run ends. Scanned row
 | Survival charms   | 500   | Add Field dressing and Second wind                 |
 | Prospector seals  | 900   | Add Supply cache and Cache guard                   |
 
-Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
+The table above highlights early facilities; the [complete price-sorted catalog](camp-progression.md) contains 24 distinct gameplay purchases and two finite trainings. Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Six purchased [combat equipment licenses](tactical-builds.md) and the milestone Field radio share this budget. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
 
 Prices form a stepped curve: both early professions cost 100 supplies together and can be bought after one rewarding expedition; the workshop is a middle milestone; the 7,500-supply archive is affordable within ten successful Abyss clears even without optional chests. New departures receive [difficulty-scaled settlement rewards](expedition-rewards.md), with roughly 200 supplies on the reference Relaxed route. The camp shows savings, remaining cost and percentage. Existing currency and purchased facilities are preserved. See [the pricing model and its limitations](camp-progression.md).
 
-This first progression set is finite. Surplus supplies remain visible after all unlocks but have no additional spending sink yet. Biomes, branching events, and more professions can extend the system later; they are not implemented content. There is no uncapped permanent health upgrade or monetized currency.
+Permanent progression is finite. Twenty missions and twenty-two achievements add one-time supplies, exclusive licenses and titles; these payments are separate from expedition settlement. The [economy acceptance notes](closure-acceptance.md) quantify their effect on the purchase curve. Surplus supplies remain visible after all unlocks but have no additional spending sink yet. Biomes and branching events remain planned; they are not implemented content. There is no uncapped permanent health upgrade or monetized currency.
 
 ### Persistence and acceptance
 
@@ -117,7 +119,7 @@ The inventory begins with one short usage prompt. Selecting a tool replaces it w
 
 Tests also compare shortest paths against an independent coordinate oracle and verify all retained safe cells across 600 generated floors, complete blank expansion, inert walls, area and row targeting, compass scouting, movement replay and older-version migration.
 
-Tests cover exact mines and connected routes across many seeds/all five floors; frontier restrictions; repeat scan/treasure/relic rejection; charge depletion; shield clue preservation; deterministic inter-floor replay; purchases/loadout budgets; extraction/defeat/victory settlement; and unavailable storage.
+Tests cover exact mines and connected routes across many seeds and all five difficulty tiers; frontier restrictions; repeat scan/treasure/relic rejection; charge depletion; shield clue preservation; deterministic inter-floor replay; purchases/loadout budgets; extraction/defeat/victory settlement; and unavailable storage.
 
 ### Presentation and motion
 

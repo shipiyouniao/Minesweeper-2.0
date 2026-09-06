@@ -1,4 +1,6 @@
 import { damageVitality, healVitality } from './vitality.js'
+import { neighbors } from './engine.js'
+import type { Config } from '../types/game.js'
 import type { Camp, Departure, Expedition } from '../types/variants.js'
 import type { Vitality } from '../types/vitality.js'
 import type { TacticalEncounter } from '../types/tactical.js'
@@ -126,7 +128,17 @@ export function incomingCombatDamage(run: Expedition, raw: number): number {
 }
 
 /** Add only the frozen attack sources covering this square; interception removes its source. */
-export function battleThreat(encounter: TacticalEncounter, index: number): number {
+export function battleThreat(encounter: TacticalEncounter, index: number, config: Config): number {
+  if (encounter.kind === 'magnetic') {
+    const forecast = encounter.forecast
+    if (forecast.kind !== 'charge' || forecast.resolvesOn !== encounter.turn) return 0
+
+    const charge = forecast.path.slice(1).includes(index) ? 5 : 0
+    // Standing on the anchor blocks the crash; otherwise route and blast hits both apply.
+    const blast = index !== forecast.anchor && neighbors(config, forecast.anchor).includes(index)
+    return charge + (blast ? 5 : 0)
+  }
+
   if (encounter.kind === 'clock')
     return (
       encounter.spells.filter(

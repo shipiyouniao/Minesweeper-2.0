@@ -1,12 +1,10 @@
 # Expedition difficulty rewards
 
-> Historical delivery notes: the [current combat table](tactical-builds.md) and [save policy](save-policy.md) supersede older numeric values and replay-compatibility statements below. Only the current expedition implementation is shipped.
-
 Harder expeditions pay more both because they have more floors and because their final settlement receives a difficulty multiplier. The opening balance target is around 200 supplies for a reference Relaxed clear; later tiers increase the reward for larger boards and longer runs.
 
 ## Income scenarios
 
-Three explicit scenarios guide pricing:
+Three explicit scenarios describe repeatable expedition settlement. They exclude one-time [milestone rewards](milestones.md), whose impact is measured in the [economy audit](closure-acceptance.md#economy):
 
 - **Completion floor:** finish every floor, collect no optional chest, and obtain no currency relic. This is a guaranteed lower bound for a successful clear.
 - **Reference route:** finish every floor and collect two chests per floor without Treasure pouch. This is a planning assumption, not a measured average.
@@ -32,10 +30,10 @@ The game shows the departure multiplier in camp and during exploration. Final re
 
 ## Versioning and implementation
 
-New `relics-v1` departures capture `rewards: difficulty-v1`. A missing reward revision means the original 1× settlement, including older `relics-v1` runs. Decoders reject unknown revisions and reject the new marker on historical terrain rules. Changing the selected camp difficulty cannot alter an active run's captured rate.
+Each departure captures its difficulty. The current engine applies that tier's multiplier throughout the run; changing the camp selection cannot change an active run's reward rate. Rules revision 8 and the version-4 envelope govern replay. Incompatible journals return to camp with their extraction checkpoint under the [save policy](save-policy.md).
 
 Only departure choices and accepted intents are persisted. The pure reward module reconstructs base, bonus and total; `ExpeditionSession` banks the total and clears the journal atomically. Reload cannot apply the multiplier or grant supplies twice. Existing currency and purchased unlocks remain unchanged.
 
-`src/types/expedition-rewards.d.ts` defines the concrete settlement contract. `expedition-rewards.ts` owns constants, rates and rounding; the progression module uses those same values for affordability bounds. Both compilers test legal clears, terminal outcomes, historical saves, malformed revisions, replay and exactly-once banking.
+`src/types/expedition-rewards.d.ts` defines the concrete settlement contract. `expedition-rewards.ts` owns constants, rates and rounding; the progression module uses those same values for affordability bounds. Both compilers test legal clears, terminal outcomes, retired saves, malformed journals, replay and exactly-once banking.
 
 Future tuning should use observed clear rates, route collection and supplies per minute. This table is the initial authored balance, with explicit assumptions rather than inferred player statistics.

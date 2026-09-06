@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module'
+import { MILESTONES } from '../../.native/tests/src/game/milestones.js'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
 import assert from 'node:assert/strict'
@@ -15,49 +16,75 @@ for (const width of [390, 1280]) {
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', (e) => errors.push(e.message))
-  await page.addInitScript(() => {
-    if (!sessionStorage.getItem('seeded')) {
-      localStorage.setItem(
-        'minesweeper.variants.v1.expedition',
-        JSON.stringify({
-          version: 4,
-          camp: {
-            supplies: 3000,
-            upgrades: [],
-            completed: 3,
-            milestones: {
-              claimed: ['veteran', 'web-untouched', 'field-unscathed'],
-              bossKinds: [],
-              relics: [],
+  await page.addInitScript(
+    (titles) => {
+      if (!sessionStorage.getItem('seeded')) {
+        localStorage.setItem(
+          'minesweeper.variants.v1.expedition',
+          JSON.stringify({
+            version: 4,
+            camp: {
+              supplies: 3000,
+              upgrades: [],
+              completed: 3,
+              milestones: {
+                claimed: titles,
+                bossKinds: [],
+                relics: [],
+              },
             },
-          },
-          journal: null,
-          records: [],
-        }),
-      )
-      sessionStorage.setItem('seeded', '1')
-    }
-  })
+            journal: null,
+            records: [],
+          }),
+        )
+        sessionStorage.setItem('seeded', '1')
+      }
+    },
+    MILESTONES.filter((entry) => entry.kind === 'achievements').map((entry) => entry.id),
+  )
   await page.goto(`${base}?ruleset=expedition&lang=zh`)
-  await page.locator('.title-cabinet summary').click()
+  const trigger = page.locator('.title-trigger')
+  const pickerHeight = (await page.locator('.title-cabinet').boundingBox()).height
+  await trigger.click()
+  assert.equal((await page.locator('.title-cabinet').boundingBox()).height, pickerHeight)
+  assert.ok(
+    await page.locator('.title-options').evaluate((menu) => menu.scrollHeight > menu.clientHeight),
+  )
   await page.locator('[data-control="equip-title:web-untouched"]').focus()
   await page.keyboard.press('Enter')
-  assert.equal(await page.locator('.title-cabinet').evaluate((menu) => menu.open), true)
+  assert.equal(await trigger.getAttribute('aria-expanded'), 'false')
+  assert.ok(await trigger.evaluate((button) => button === document.activeElement))
+  await page.keyboard.press('ArrowDown')
   assert.equal(
-    await page.evaluate(() => document.activeElement?.getAttribute('data-control')),
-    'equip-title:web-untouched',
+    await page.locator('[data-control="equip-title:web-untouched"]').getAttribute('aria-checked'),
+    'true',
   )
-  await page.keyboard.press('Tab')
-  assert.equal(
-    await page.evaluate(() => document.activeElement?.getAttribute('data-control')),
-    'equip-title:field-unscathed',
-  )
+  await page.keyboard.press('End')
+  assert.ok(await page.locator('.title-options').evaluate((menu) => menu.scrollTop > 0))
+  await page.keyboard.press('Escape')
+  assert.match(await trigger.innerText(), /蛛网漫步者/)
   await page.keyboard.press('Enter')
-  assert.equal(await page.locator('.title-cabinet').evaluate((menu) => menu.open), true)
+  await page.screenshot({ path: `.native/title-picker-${width}.png`, fullPage: true })
+  await page.keyboard.press('Tab')
+  assert.equal(await trigger.getAttribute('aria-expanded'), 'false')
+  assert.ok(await trigger.evaluate((button) => button !== document.activeElement))
+  await trigger.click()
+  await page.locator('.camp-panel h1').click()
+  assert.equal(await trigger.getAttribute('aria-expanded'), 'false')
+  await trigger.click()
+  await page.locator('[data-control="equip-title:none"]').click()
+  assert.equal(await trigger.getAttribute('aria-expanded'), 'false')
+  await trigger.click()
   await page.locator('[data-control="equip-title:web-untouched"]').click()
-  assert.match(await page.locator('.title-cabinet summary').innerText(), /蛛网漫步者/)
+  assert.match(await trigger.innerText(), /蛛网漫步者/)
   await page.reload()
-  assert.match(await page.locator('.title-cabinet summary').innerText(), /蛛网漫步者/)
+  assert.match(await trigger.innerText(), /蛛网漫步者/)
+  assert.equal(
+    await page.evaluate(
+      () => JSON.parse(localStorage.getItem('minesweeper.variants.v1.expedition')).camp.supplies,
+    ),
+    3000,
+  )
   await page.evaluate(async () => {
     const { MilestoneNotices } =
       await import('/Minesweeper-2.0/.native/app/ui/milestone-notices.js')

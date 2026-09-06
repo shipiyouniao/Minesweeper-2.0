@@ -117,6 +117,14 @@ try {
             path: `.native/reward-profession-ui/${profession}-${width}.png`,
             fullPage: true,
           })
+        if (profession === 'riftwalker') {
+          if (width === 390) await page.locator('[data-control="skill"]').tap()
+          else {
+            await page.locator('[data-control="skill"]').focus()
+            await page.keyboard.press('Enter')
+          }
+          assert.ok(await page.locator('.dock-skill-panel').isVisible())
+        }
         if (width === 390) await page.locator(selector).tap()
         else {
           await page.locator(selector).focus()
@@ -140,7 +148,11 @@ try {
               document.querySelector('.player-cell')?.getAttribute('data-cell') === String(origin),
             fixture.origin,
           )
-        } else assert.ok(await page.locator('[data-control="skill"]').isDisabled())
+        } else
+          assert.equal(
+            await page.locator('[data-control="skill"]').getAttribute('aria-disabled'),
+            'true',
+          )
         await context.close()
       }
   assert.deepEqual(errors, [])
