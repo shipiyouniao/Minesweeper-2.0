@@ -1,4 +1,5 @@
 import { upgradeCost } from './camp-progression.js'
+import { hasFieldRadio } from './milestones.js'
 import { enterEncounter, isEncounterFloor } from './encounter-roster.js'
 import { occupied } from './dungeon-occupancy.js'
 import { actBattle } from './battle-turns.js'
@@ -44,7 +45,13 @@ import type {
 export { upgradeCost, UPGRADES } from './camp-progression.js'
 
 export const EMPTY_CAMP: Camp = { supplies: 0, upgrades: [], completed: 0 }
-export const EQUIPMENT: readonly Equipment[] = ['probe', 'scanner', 'guard', ...COMBAT_EQUIPMENT]
+export const EQUIPMENT: readonly Equipment[] = [
+  'probe',
+  'scanner',
+  'guard',
+  ...COMBAT_EQUIPMENT,
+  'field-radio',
+]
 
 /** Reserve two points for shields and heavy combat gear; other equipment costs one. */
 export function equipmentCost(equipment: Equipment): number {
@@ -66,6 +73,7 @@ export function allowedDeparture(
     (profession === 'explorer' || camp.upgrades.includes(profession)) &&
     (equipment.length === 0 || camp.upgrades.includes('workshop')) &&
     new Set(equipment).size === equipment.length &&
+    (!equipment.includes('field-radio') || hasFieldRadio(camp)) &&
     equipment.every(
       (item) => !parseCombatEquipment(item) || camp.upgrades.includes(parseCombatEquipment(item)!),
     ) &&

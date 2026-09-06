@@ -2,7 +2,7 @@ import { mirrorCopy, mirrorDefense } from './mirror-copy.js'
 import { magneticCopy, magneticStatus } from './magnetic-copy.js'
 import { battleText, combatPurchaseCopy } from './combat-build-copy.js'
 import { combatStats } from '../game/combat-build.js'
-import { relicCopy } from './variant-copy.js'
+import { equipmentCopy, relicCopy } from './variant-copy.js'
 import type { Language } from '../types/localization.js'
 import type { TacticalMessages } from '../types/tactical-ui.js'
 import type { EncounterKind, TacticalEncounter } from '../types/tactical.js'
@@ -134,7 +134,7 @@ export function combatStatsTemplate(language: Language, run: Expedition): string
     (item) => item !== 'probe' && item !== 'scanner' && item !== 'guard',
   )
   const sources = [
-    ...equipment.map((item) => combatPurchaseCopy(language, item)),
+    ...equipment.map((item) => equipmentCopy(language, item)),
     ...run.departure.training.map((item) => combatPurchaseCopy(language, item)),
     ...run.relics.map((item) => relicCopy(language, item)),
   ]

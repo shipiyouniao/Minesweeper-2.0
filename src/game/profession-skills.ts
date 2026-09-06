@@ -122,5 +122,10 @@ export function useProfessionSkill(run: Expedition): Expedition {
     }
   }
 
-  return { ...result, skillUsed: true, steps: run.steps + 1 }
+  return {
+    ...result,
+    probes: Math.min(4, result.probes + Number(run.departure.equipment.includes('field-radio'))),
+    skillUsed: true,
+    steps: run.steps + 1,
+  }
 }

@@ -14,7 +14,8 @@ export function parseCampPage(value: string | undefined): CampPage | null {
     case 'overview':
     case 'professions':
     case 'equipment':
-    case 'route':
+    case 'missions':
+    case 'achievements':
     case 'shop':
       return value
     default:

@@ -64,7 +64,7 @@ Clearing safe routes has a direct combat purpose. Both anchors sit behind number
 
 Focus lens refunds the first successful calibration in a turn; Breach sigil refunds the first calibration in a floor, within their existing caps. Reusing an anchor cannot farm either effect. Archaeologist excavation scouts uncalibrated anchors. Other profession skills and tools keep their ordinary costs and shared once-per-floor/resource limits. Forced safe travel uses the existing unique-travel accounting.
 
-The single expedition rules revision is **6** because delayed charges, destructive blasts and player-origin exploration change replay behavior. Older version-4 journals return their checkpointed extraction supplies to camp; legacy envelopes retain their one-time 200-supply retirement rule. Camp purchases, balances and records remain intact. No old encounter implementation is retained. See [save maintenance](save-policy.md).
+Delayed charges, destructive blasts and player-origin exploration shipped in rules revision **6**. The current revision is **7**, adding [milestone reward snapshots](milestones.md). Older version-4 journals return their checkpointed extraction supplies to camp; legacy envelopes retain their one-time 200-supply retirement rule. Camp purchases, balances and records remain intact. No old encounter implementation is retained. See [save maintenance](save-policy.md).
 
 ## Ownership and acceptance
 

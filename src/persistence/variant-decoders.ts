@@ -1,6 +1,9 @@
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
 import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
 import { UPGRADES } from '../game/camp-progression.js'
+import { parseMilestone } from '../game/milestones.js'
+import type { MilestoneProgress, MilestoneRelic } from '../types/milestones.js'
+import type { EncounterKind } from '../types/tactical.js'
 import {
   parseCombatEquipment,
   parseCombatPurchase,
@@ -48,7 +51,7 @@ export function parseProfession(value: string | null): Profession | null {
 
 /** Accept only the declared exploration tools and combat equipment. */
 export function parseEquipment(value: string | null): Equipment | null {
-  return value === 'probe' || value === 'scanner' || value === 'guard'
+  return value === 'probe' || value === 'scanner' || value === 'guard' || value === 'field-radio'
     ? value
     : parseCombatEquipment(value)
 }
@@ -69,6 +72,8 @@ export function parseUpgrade(value: string | null): Upgrade | null {
 /** Decode relic IDs without allowing arbitrary catalog keys. */
 export function parseRelic(value: string | null): Relic | null {
   switch (value) {
+    case 'trail-heart':
+    case 'survey-token':
     case 'lantern':
     case 'lens':
     case 'aegis':
@@ -109,6 +114,42 @@ function integer(value: number | null, maximum: number): value is number {
   return value !== null && Number.isInteger(value) && value >= 0 && value <= maximum
 }
 
+/** Recover additive progress fields independently; valid camp money and claims survive damage. */
+function decodeMilestones(value: JsonValue, completed: number): MilestoneProgress {
+  const reader = JsonObjectReader.from(value)
+  const count = (key: string): number => {
+    const value = reader?.number(key) ?? null
+    return integer(value, 1e9) ? value : 0
+  }
+  const claimed = (reader?.array('claimed') ?? []).flatMap((value) => {
+    const id = parseMilestone(typeof value === 'string' ? value : undefined)
+    return id ? [id] : []
+  })
+  const relics = (reader?.array('relics') ?? []).flatMap((value) => {
+    const id = parseRelic(typeof value === 'string' ? value : null)
+    return id ? [id] : []
+  })
+  const bossKinds: EncounterKind[] = []
+  for (const value of reader?.array('bossKinds') ?? [])
+    if (
+      (value === 'bastion' || value === 'brood' || value === 'mirror' || value === 'magnetic') &&
+      !bossKinds.includes(value)
+    )
+      bossKinds.push(value)
+  return {
+    travel: count('travel'),
+    chests: count('chests'),
+    floors: count('floors'),
+    bosses: count('bosses'),
+    skills: count('skills'),
+    wins: Math.max(completed, count('wins')),
+    abyssWins: count('abyssWins'),
+    claimed: [...new Set(claimed)],
+    relics: [...new Set(relics)],
+    bossKinds,
+  }
+}
+
 /** Build a camp value from currency, ownership and successful expedition count. */
 function decodeCamp(reader: JsonObjectReader | null): Camp | null {
   if (!reader) return null
@@ -130,7 +171,13 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
     upgrades.push(upgrade)
   }
 
-  return { supplies, completed, upgrades }
+  const progress = reader.value('milestones')
+  return {
+    supplies,
+    completed,
+    upgrades,
+    ...(progress === undefined ? {} : { milestones: decodeMilestones(progress, completed) }),
+  }
 }
 
 /** Decode only current departure options; obsolete runs never enter the game engine. */
@@ -177,7 +224,28 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     if (!item || packs.includes(item)) return null
     packs.push(item)
   }
-  return { seed, difficulty, profession, archive, equipment, training, packs, battleRelics }
+  const rawMilestones = reader.value('milestoneRelics')
+  const milestoneRelics: MilestoneRelic[] = []
+  if (rawMilestones !== undefined) {
+    const values = reader.array('milestoneRelics')
+    if (!values || values.length > 2) return null
+    for (const value of values) {
+      if ((value !== 'trail-heart' && value !== 'survey-token') || milestoneRelics.includes(value))
+        return null
+      milestoneRelics.push(value)
+    }
+  }
+  return {
+    seed,
+    difficulty,
+    profession,
+    archive,
+    equipment,
+    training,
+    packs,
+    battleRelics,
+    ...(rawMilestones === undefined ? {} : { milestoneRelics }),
+  }
 }
 
 /** Decode the payload selected by each expedition command discriminant. */

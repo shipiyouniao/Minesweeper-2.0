@@ -1,6 +1,6 @@
 # Camp navigation and shop
 
-The expedition landing screen shows the selected profession, departure equipment, route, supplies and a **Depart** button. Four entries open separate screens for professions, loadouts, routes and the shop. Each screen has a **Back to camp** action and navigation to the other sections. Changing screens preserves the current departure choices.
+The expedition landing screen places all five difficulty choices directly above the selected profession, departure equipment, route summary, supplies and **Depart** button. Difficulty is saved immediately and remains selected after reload. Five entries open professions, loadouts, the shop, missions and achievements; there is no Route submenu. Missions and achievements show ready-to-claim counts on their entry cards. Each screen has **Back to camp** and navigation to the other sections. Changing screens preserves current departure choices.
 
 ## Browsing and purchasing
 
@@ -20,6 +20,6 @@ Desktop screens show details beside the item grid. Narrow screens insert details
 
 ## Implementation boundaries
 
-`CampScreen` and its finite command unions live in `src/types/camp-navigation.d.ts`. `VariantApp` owns transient navigation state; `navigateCamp` derives the next screen and reconciles selection with category changes. `camp-template.ts` and `camp-copy.ts` render one screen with complete English, Chinese and Japanese copy. Domain purchases remain in `ExpeditionSession`, and game rules and stored expedition journals do not change.
+`CampScreen` and its finite command unions live in `src/types/camp-navigation.d.ts`. `VariantApp` owns transient navigation state; `navigateCamp` derives the next screen and reconciles selection with category changes. `camp-template.ts` and `camp-copy.ts` render one screen with complete English, Chinese and Japanese copy. `ExpeditionSession` owns purchases and one-time milestone claims. See [missions and achievements](milestones.md) for persistent progress, exclusive rewards and the departure ownership boundary.
 
 Browser acceptance in `tests/browser/camp.mjs` covers category ordering, inspection without spending, keyboard purchases, persistence, loadout and route retention, starting a matching expedition, narrow layouts and touch navigation. Set `CAPTURE_SCREENSHOTS=1` to refresh the checked-in UI images deliberately.

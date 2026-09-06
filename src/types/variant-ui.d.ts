@@ -4,10 +4,12 @@ import type { NavigationKey } from './ui.js'
 import type { InteractionCue } from './audio.js'
 import type { DungeonTool } from './dungeon-ui.js'
 import type { CampCommand } from './camp-navigation.js'
+import type { MilestoneId } from './milestones.js'
 
 /** Commands decoded from finite button attributes at the UI boundary. */
 export type VariantCommand =
   | CampCommand
+  | { readonly type: 'claim-milestone'; readonly value: MilestoneId }
   | {
       readonly type:
         | 'start'

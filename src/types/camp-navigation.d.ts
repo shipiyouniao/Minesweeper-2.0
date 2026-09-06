@@ -1,7 +1,8 @@
 import type { Upgrade } from './variants.js'
 
 /** Camp screens are transient presentation state, separate from expedition saves. */
-export type CampPage = 'overview' | 'professions' | 'equipment' | 'route' | 'shop'
+export type CampPage =
+  'overview' | 'professions' | 'equipment' | 'missions' | 'achievements' | 'shop'
 
 /** Every purchase belongs to one browsing category; All combines them by price. */
 export type ShopCategory = 'all' | 'professions' | 'equipment' | 'relics' | 'camp'
