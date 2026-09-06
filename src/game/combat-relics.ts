@@ -44,7 +44,8 @@ export function applyCombatRelics(
     after.encounter.event === 'disabled' &&
     (after.encounter.kind === 'bastion' ||
       after.encounter.kind === 'mirror' ||
-      after.encounter.kind === 'magnetic') &&
+      after.encounter.kind === 'magnetic' ||
+      after.encounter.kind === 'clock') &&
     available(result, 'breach-sigil')
   ) {
     result = claim(result, 'breach-sigil')

@@ -25,6 +25,7 @@ import { markBroodCell } from './brood-board.js'
 import { ExpeditionDialog } from './expedition-dialog.js'
 import { mirrorPreview, markMirrorCell } from './mirror-board.js'
 import { mirrorName } from './mirror-copy.js'
+import { markClockCell } from './clock-board.js'
 import { MagneticBoard, markMagneticCell } from './magnetic-board.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
@@ -48,6 +49,7 @@ export class VariantView {
   private floorIdentity: string | null = null
   private expedition: Expedition | null = null
   private targetingTool = false
+  private animateClock = false
   private readonly listeners = new AbortController()
 
   /** Mount the stable shell once; only its mode content changes after an action. */
@@ -104,6 +106,14 @@ export class VariantView {
   /** Replace content and restore a still-existing control or cell focus after repaint. */
   render(html: string, a: Game | null, b: Game | null, expedition: Expedition | null): void {
     this.resize?.disconnect()
+    const previous = this.expedition
+    this.animateClock = Boolean(
+      previous?.encounter?.kind === 'clock' &&
+      expedition?.encounter?.kind === 'clock' &&
+      previous.departure.seed === expedition.departure.seed &&
+      previous.floor === expedition.floor &&
+      expedition.encounter.turn === previous.encounter.turn + 1,
+    )
     this.config = a?.config ?? null
     this.expedition = expedition
     this.targetingTool = false
@@ -359,6 +369,7 @@ export class VariantView {
       markBroodCell(this.language, run, cell, index)
       markMirrorCell(this.language, run, cell, index)
       markMagneticCell(this.language, run, cell, index)
+      markClockCell(this.language, run, cell, index, this.animateClock)
       if (index === run.player && cell.classList.contains('landmark-cell'))
         cell.insertAdjacentHTML(
           'beforeend',
@@ -373,7 +384,7 @@ export class VariantView {
         cell.classList.add('tactical-danger')
         const danger = `${t.danger} · ${battleThreat(encounter, index)}`
         cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${danger}`)
-        cell.title = danger
+        cell.title = encounter.kind === 'clock' ? `${cell.title}; ${danger}` : danger
       }
     }
   }

@@ -1,3 +1,4 @@
+import { defeatClock } from './clock-helpers.js'
 import { defeatMagnetic } from './magnetic-helpers.js'
 import { defeatMirror } from './mirror-helpers.js'
 import assert from 'node:assert/strict'
@@ -100,6 +101,7 @@ function choices(run: Expedition, knownSafe: ReadonlySet<number>): ExpeditionAct
 
 /** Play complete turns with a bounded beam, proving wins through accepted public-state actions. */
 export function defeatBattle(initial: Expedition): ExpeditionAction[] {
+  if (initial.encounter?.kind === 'clock') return defeatClock(initial)
   if (initial.encounter?.kind === 'mirror') return defeatMirror(initial)
   if (initial.encounter?.kind === 'magnetic') return defeatMagnetic(initial)
   let run = initial

@@ -3,6 +3,7 @@ import { createRequire } from 'node:module'
 import { mkdir } from 'node:fs/promises'
 import { battleFixture } from './battle-fixtures.mjs'
 import { actExpedition, createExpedition } from '../../.native/tests/src/game/expedition.js'
+import { neighbors } from '../../.native/tests/src/game/engine.js'
 import { withChord } from './annotation-fixtures.mjs'
 import { tacticalPlan } from '../../.native/tests/src/game/tactical-planning.js'
 import { EXPEDITION_RULES_REVISION } from '../../.native/tests/src/persistence/expedition-format.js'
@@ -11,7 +12,7 @@ const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
 const key = 'minesweeper.variants.v1.expedition'
-const fixtures = [44, 45, 46, 47].map((seed) => battleFixture(seed).entered)
+const fixtures = [45, 46, 47, 48, 49].map((seed) => battleFixture(seed).entered)
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || undefined,
   headless: true,
@@ -214,10 +215,29 @@ try {
 
   // Real C presses must show mine damage or the spent shield, including after a saved restore.
   for (const profession of ['explorer', 'engineer']) {
-    const departure = { ...fixtures[0].save.journal.departure, profession }
+    const departure = { ...fixtures[0].save.journal.departure, seed: 44, profession }
     let run = createExpedition(departure)
-    const flags = [{ type: 'flag', index: 5 }]
-    run = actExpedition(run, flags[0])
+    let mistake
+    for (let center = 0; center < run.game.cells.length && !mistake; center++) {
+      if (run.game.cells[center].visibility !== 'revealed') continue
+      for (const index of neighbors(run.game.config, center)) {
+        if (run.game.cells[index].mine || run.game.cells[index].visibility !== 'hidden') continue
+        const action = { type: 'flag', index }
+        const flagged = actExpedition(run, action)
+        const result = actExpedition(flagged, { type: 'chord', index: center })
+        if (
+          result.triggeredMines.length === 1 &&
+          result.health === (profession === 'explorer' ? 5 : 10) &&
+          result.shields === 0
+        ) {
+          mistake = { action, center, flagged }
+          break
+        }
+      }
+    }
+    assert.ok(mistake, 'Need a current legal incorrect-flag chord')
+    const flags = [mistake.action]
+    run = mistake.flagged
     const fixture = {
       run,
       save: {
@@ -235,17 +255,17 @@ try {
         },
       },
     }
-    const expected = actExpedition(run, { type: 'chord', index: 4 })
+    const expected = actExpedition(run, { type: 'chord', index: mistake.center })
     assert.equal(expected.triggeredMines.length, 1)
     assert.equal(expected.health, profession === 'explorer' ? 5 : 10)
     assert.equal(expected.shields, 0)
     await seed(fixture, 'zh')
-    await page.locator('[data-side="a"] [data-cell="4"]').focus()
+    await page.locator(`[data-side="a"] [data-cell="${mistake.center}"]`).focus()
     await page.keyboard.press('c')
     assert.equal(Number(await page.locator('.vitality-bar').getAttribute('value')), expected.health)
     assert.equal(await page.locator('.vitality-shields').innerText(), '')
     assert.equal(await page.locator('.triggered-mine').count(), 1)
-    assert.deepEqual(await actions(), [...flags, { type: 'chord', index: 4 }])
+    assert.deepEqual(await actions(), [...flags, { type: 'chord', index: mistake.center }])
     await page.reload()
     assert.equal(Number(await page.locator('.vitality-bar').getAttribute('value')), expected.health)
   }
@@ -328,7 +348,7 @@ try {
   console.log(
     JSON.stringify({
       passed: true,
-      bosses: 4,
+      bosses: fixtures.length,
       languages: 3,
       widths: [320, 390, 1280, 3840],
       notes: true,

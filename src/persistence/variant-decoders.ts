@@ -140,7 +140,11 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
   const bossKinds: EncounterKind[] = []
   for (const value of reader?.array('bossKinds') ?? [])
     if (
-      (value === 'bastion' || value === 'brood' || value === 'mirror' || value === 'magnetic') &&
+      (value === 'bastion' ||
+        value === 'brood' ||
+        value === 'mirror' ||
+        value === 'magnetic' ||
+        value === 'clock') &&
       !bossKinds.includes(value)
     )
       bossKinds.push(value)

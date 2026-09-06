@@ -189,4 +189,8 @@ No new compiler performance figures are claimed. Historical TS6/TS7 A/B reports 
 
 ### Magnetic Knight encounter
 
-The fourth released boss family adds visible push/pull fields, projected landings, grounding and reusable numbered anchors. A known route lets the player lure the knight into an anchor, with physical charge and impact effects, then strike during three turns of core exposure. The seeded roster now contains Bastion Guardian, Brood Queen, Mirror Twins and Magnetic Knight; checkpoint floors and rewards are unchanged. Read [the full rules, values and acceptance](magnetic-knight.md).
+The fourth released boss family adds visible push/pull fields, projected landings, grounding and reusable numbered anchors. A known route lets the player lure the knight into an anchor, with physical charge and impact effects, then strike during three turns of core exposure. The seeded roster now contains Bastion Guardian, Brood Queen, Mirror Twins, Magnetic Knight and Clock Mage; checkpoint floors and rewards are unchanged. Read [the full rules, values and acceptance](magnetic-knight.md).
+
+## Clock Mage
+
+The fifth boss freezes multi-turn attack deadlines and lets a first-strike echo follow up after retreat. Three optional hourglasses return the earliest spell without changing its deadline. The central safe ring and public-route forecast checks preserve escape choices. See [rules, save revision 8 and acceptance](clock-mage.md).

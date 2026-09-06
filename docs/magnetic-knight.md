@@ -4,7 +4,7 @@ Magnetic Knight is the fourth Expedition boss family. Its arena combines mine de
 
 ## Encounter schedule and values
 
-The first boss is selected by `seed % 4`: Bastion Guardian, Brood Queen, Mirror Twins, Magnetic Knight. Each later checkpoint advances one place, without an immediate repeat. Every family can appear in a short expedition; the checkpoint floors and rewards are unchanged.
+The first boss is selected by `seed % 5`: Bastion Guardian, Brood Queen, Mirror Twins, Magnetic Knight, [Clock Mage](clock-mage.md). Each later checkpoint advances one place, without an immediate repeat. Every family can appear in a short expedition; the checkpoint floors and rewards are unchanged.
 
 | Difficulty | Checkpoint floors | Arena   | Mines | Knight health |
 | ---------- | ----------------- | ------- | ----- | ------------- |

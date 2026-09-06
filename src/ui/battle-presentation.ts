@@ -1,3 +1,4 @@
+import { clockCopy, clockStatus } from './clock-copy.js'
 import { mirrorCopy, mirrorDefense } from './mirror-copy.js'
 import { magneticCopy, magneticStatus } from './magnetic-copy.js'
 import { battleText, combatPurchaseCopy } from './combat-build-copy.js'
@@ -90,6 +91,7 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
       ),
     ],
   }
+  if (kind === 'clock') return clockCopy(language, copy)
   return kind === 'magnetic'
     ? magneticCopy(language, copy)
     : kind === 'mirror'
@@ -99,6 +101,7 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
 
 /** Summarize the actual remaining objectives and core window, rather than a generic boss phase. */
 export function battleStatus(language: Language, encounter: TacticalEncounter): string {
+  if (encounter.kind === 'clock') return clockStatus(language, encounter)
   if (encounter.kind === 'magnetic') return magneticStatus(language, encounter)
   if (encounter.kind === 'mirror') return mirrorDefense(language, encounter, encounter.active)
   if (encounter.kind === 'brood')
