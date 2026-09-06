@@ -1,3 +1,7 @@
+import { battleGuide } from './battle-guide.js'
+import { nextBoardMode } from './board-controls.js'
+import { startTutorial } from './tutorial-player.js'
+import { BossPrologue } from './boss-prologue.js'
 import type { BoardInputMode } from '../types/ui.js'
 import { boardHelpTemplate } from './board-help.js'
 import { battleHealthCopy } from './combat-build-copy.js'
@@ -8,7 +12,6 @@ import { TwinSession } from '../application/twin-session.js'
 import { allowedDeparture, expeditionEarnings } from '../game/expedition.js'
 import { approachPath } from '../game/dungeon-path.js'
 import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
-import { tacticalCopy } from './tactical-copy.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
 import { translations } from '../i18n.js'
 import type { SoundEffects, InteractionCue } from '../types/audio.js'
@@ -48,6 +51,7 @@ export class VariantApp implements VariantInputActions {
   private moving = false
   private magneticPerformance = false
   private walkGeneration = 0
+  private readonly prologue = new BossPrologue()
 
   /** Wire one active mode, sharing only browser preferences and the sound port. */
   constructor(
@@ -308,14 +312,31 @@ export class VariantApp implements VariantInputActions {
       case 'result':
         this.view.showExpeditionDialog()
         return
+      case 'cycle-mode':
+        this.inputMode = nextBoardMode(this.inputMode)
+        break
+      case 'prologue':
+        if (this.session instanceof ExpeditionSession)
+          this.prologue.present(this.root, this.session.run, this.language, false, true)
+        return
+      case 'tutorial':
+        this.view.showInformation('', '')
+        startTutorial(
+          this.root.querySelector<HTMLDialogElement>('dialog[open]')!,
+          this.session instanceof ExpeditionSession ? 'expedition' : 'twin',
+          this.language,
+        )
+        return
       case 'help': {
         const t = variantCopy(this.language)
         if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
           this.view.showInformation(
-            translations[this.language].how,
-            tacticalCopy(this.language, this.session.run.encounter?.kind)
-              .help.map((paragraph) => `<p>${paragraph}</p>`)
-              .join('') + boardHelpTemplate(this.language, true),
+            this.language === 'zh'
+              ? '战斗说明'
+              : this.language === 'ja'
+                ? '戦闘の手引き'
+                : 'Battle reference',
+            battleGuide(this.language, this.session.run),
           )
           return
         }
@@ -364,9 +385,28 @@ export class VariantApp implements VariantInputActions {
       case 'skill-target':
         this.expedition({ type: 'skill', index: command.value })
         break
-      case 'skill':
+      case 'skill': {
+        const button = this.root.querySelector<HTMLElement>('.dock-skill [data-control="skill"]')
+        if (button?.getAttribute('aria-disabled') === 'true') {
+          button.parentElement?.toggleAttribute('data-skill-tip')
+          return
+        }
+        if (button?.hasAttribute('data-select-target')) {
+          const panel = this.root.querySelector<HTMLElement>('.dock-skill-panel')
+          if (panel) {
+            panel.hidden = !panel.hidden
+            if (!panel.hidden)
+              panel
+                .querySelector<HTMLElement>(
+                  '[data-control="skill-target"], .skill-landings button, [data-control="skill-panel"]',
+                )
+                ?.focus({ preventScroll: true })
+          }
+          return
+        }
         this.expedition({ type: 'skill' })
         break
+      }
       case 'attack':
         if (this.session instanceof ExpeditionSession && this.session.run?.encounter)
           this.expedition(tacticalCellAction(this.session.run, this.session.run.encounter.boss))
@@ -523,6 +563,7 @@ export class VariantApp implements VariantInputActions {
     this.session.persist()
     this.input.dispose()
     this.view.dispose()
+    this.prologue.dispose()
     this.sounds.dispose()
   }
 
@@ -556,6 +597,7 @@ export class VariantApp implements VariantInputActions {
         run?.encounter?.kind === 'mirror' ? run.encounter.other.game : null,
         run,
       )
+      this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
     } else {
       const state = this.session.state
       const a = state.phase === 'lost' ? { ...state.a, phase: 'lost' as const } : state.a

@@ -4,12 +4,11 @@ import { magneticLandingCopy, magneticStatus } from './magnetic-copy.js'
 import { battleText } from './combat-build-copy.js'
 import { spriteImage, spriteUrl } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
-import { tacticalControlsTemplate } from './tactical-template.js'
 import type { Expedition } from '../types/variants.js'
 import type { MagneticExpedition } from '../types/magnetic.js'
 import type { Language } from '../types/localization.js'
 
-/** Keep end-turn controls and a compact visual phase key directly above this arena. */
+/** Keep a compact visual phase key directly above this arena. */
 export function magneticPlaybar(language: Language, run: Expedition): string {
   if (run.encounter?.kind !== 'magnetic' || run.phase !== 'boss') return ''
   const forecast = run.encounter.forecast
@@ -21,7 +20,7 @@ export function magneticPlaybar(language: Language, run: Expedition): string {
         : forecast.polarity === 'pull'
           ? '→│←'
           : '←│→'
-  return `<div class="magnetic-playbar">${tacticalControlsTemplate(language, run)}<div class="magnetic-key" data-polarity="${forecast.kind === 'field' ? forecast.polarity : forecast.kind}"><span class="magnetic-symbol ${forecast.kind === 'field' && forecast.axis === 'vertical' ? 'vertical' : ''}" aria-hidden="true">${symbol}</span><strong>${magneticStatus(language, run.encounter)}</strong></div></div>`
+  return `<div class="magnetic-playbar"><div class="magnetic-key" data-polarity="${forecast.kind === 'field' ? forecast.polarity : forecast.kind}"><span class="magnetic-symbol ${forecast.kind === 'field' && forecast.axis === 'vertical' ? 'vertical' : ''}" aria-hidden="true">${symbol}</span><strong>${magneticStatus(language, run.encounter)}</strong></div></div>`
 }
 
 /** Decorate advertised anchors without leaking their covered clue numbers. */

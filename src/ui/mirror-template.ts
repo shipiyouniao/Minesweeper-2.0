@@ -11,7 +11,7 @@ export function mirrorHeader(language: Language, encounter: MirrorEncounter): st
   )
     .map(
       (side) =>
-        `<div class="mirror-enemy ${encounter.active === side ? 'is-active' : ''} ${encounter[side].health === 0 ? 'is-defeated' : ''}" data-realm="${side}">${spriteImage(side === 'dawn' ? 'mirror-dawn' : 'mirror-dusk')}<div><strong>${mirrorName(language, side)} · ${encounter[side].health}/${encounter[side].maxHealth}</strong><p>${mirrorDefense(language, encounter, side)}</p></div></div>`,
+        `<div class="mirror-enemy ${encounter.active === side ? 'is-active' : ''} ${encounter[side].health === 0 ? 'is-defeated' : ''}" data-realm="${side}">${spriteImage(side === 'dawn' ? 'mirror-dawn' : 'mirror-dusk')}<div><strong class="mirror-enemy-name">${mirrorName(language, side)}</strong><span class="mirror-enemy-health">${encounter[side].health}/${encounter[side].maxHealth}</span><p>${mirrorDefense(language, encounter, side)}</p></div></div>`,
     )
     .join(
       '',

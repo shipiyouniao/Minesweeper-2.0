@@ -59,6 +59,9 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     case 'reveal-mode':
     case 'safe-mode':
     case 'chord-mode':
+    case 'cycle-mode':
+    case 'tutorial':
+    case 'prologue':
     case 'sound':
     case 'pause':
     case 'confirm':

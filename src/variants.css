@@ -833,16 +833,17 @@ dialog > p {
   margin: 12px 0;
 }
 .variant-board-panel .board {
-  --cell: min(
+  --fit-cell: min(
     var(--cell-max),
     calc((100cqi - (var(--columns) - 1) * var(--gap) - 1px) / var(--columns))
   );
+  --cell: var(--fit-cell);
 }
 .enlarged-boards .board-viewport {
   max-height: 70vh;
 }
 .enlarged-boards .board {
-  --cell: 44px;
+  --cell: max(44px, calc(var(--fit-cell) * 1.4));
 }
 
 .tactical-panel {

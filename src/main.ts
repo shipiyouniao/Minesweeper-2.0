@@ -12,7 +12,8 @@ function bootstrap(): GameRouter {
     throw new Error('App root is missing')
   }
 
-  const repository = new Repository(new BrowserStorage())
+  const storage = new BrowserStorage()
+  const repository = new Repository(storage)
   repository.migrateLegacy()
 
   const params = new URLSearchParams(location.search)
@@ -22,7 +23,8 @@ function bootstrap(): GameRouter {
     preferences.language,
     navigator.languages[0] ?? navigator.language,
   )
-  return new GameRouter(root, repository, new VariantRepository(new BrowserStorage()), language)
+  const variants = new VariantRepository(storage)
+  return new GameRouter(root, repository, variants, language)
 }
 
 const app = bootstrap()

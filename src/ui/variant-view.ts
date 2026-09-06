@@ -81,11 +81,31 @@ export class VariantView {
     this.magnetic = new MagneticBoard(root, language)
     this.menu = new LanguageMenu(picker, onLanguage, feedback)
     dialog.addEventListener('cancel', () => feedback('dismiss'), { signal: this.listeners.signal })
+    root.addEventListener(
+      'pointerdown',
+      (event) => {
+        if (!(event.target instanceof Element) || event.target.closest('.dock-skill')) return
+        root.querySelector('[data-skill-tip]')?.removeAttribute('data-skill-tip')
+      },
+      { signal: this.listeners.signal },
+    )
+    root.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key === 'Escape')
+          root.querySelector('[data-skill-tip]')?.removeAttribute('data-skill-tip')
+      },
+      { signal: this.listeners.signal },
+    )
   }
 
   /** Expose modal state to application guards, including native Escape dismissal. */
   get dialogOpen(): boolean {
-    return this.dialog.open || this.expeditionDialog.open
+    return (
+      this.dialog.open ||
+      this.expeditionDialog.open ||
+      Boolean(this.root.querySelector('dialog[data-prologue][open]'))
+    )
   }
 
   /** Distinguish reward selection from help and destructive-action confirmation. */
@@ -140,7 +160,18 @@ export class VariantView {
     const side = active?.closest<HTMLElement>('[data-side]')?.dataset['side']
     const control = active?.dataset['control']
     const fallback = active?.dataset['focusFallback']
+    const relicOpen =
+      this.content.querySelector<HTMLDetailsElement>('[data-relic-menu]')?.open ?? false
+    const heading = this.root.querySelector<HTMLElement>('.variant-heading')
+    heading?.remove()
     this.content.innerHTML = html
+    if (heading) {
+      const overview = this.content.querySelector('.run-overview')
+      if (overview) overview.prepend(heading)
+      else this.content.before(heading)
+    }
+    const relicMenu = this.content.querySelector<HTMLDetailsElement>('[data-relic-menu]')
+    if (relicMenu) relicMenu.open = relicOpen
     this.a = this.board('a', a, this.focusA)
     this.b = this.board('b', b, this.focusB)
     this.applyZoom()
@@ -398,14 +429,16 @@ export class VariantView {
   /** Restore the chosen zoom after every content repaint. */
   private applyZoom(): void {
     this.content.classList.toggle('enlarged-boards', this.enlarged)
-    const button = this.content.querySelector<HTMLElement>('[data-control="zoom"]')
-    const hint = this.content.querySelector<HTMLElement>('.zoom-hint')
-    const t = variantCopy(this.language)
+    const button = this.content.querySelector<HTMLButtonElement>('[data-control="zoom"]')
     if (button) {
-      button.textContent = this.enlarged ? t.fit : t.zoom
+      const copy = variantCopy(this.language)
+      const label = this.enlarged ? copy.fit : copy.zoom
+      button.setAttribute('aria-label', label)
+      button.setAttribute('title', label)
       button.setAttribute('aria-pressed', String(this.enlarged))
+      const symbol = button.querySelector('span')
+      if (symbol) symbol.textContent = this.enlarged ? '−' : '+'
     }
-    if (hint) hint.hidden = !this.enlarged
   }
 
   /** Animate a known safe path before committing the destination action. */

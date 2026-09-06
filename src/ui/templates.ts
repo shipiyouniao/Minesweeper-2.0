@@ -83,7 +83,9 @@ export function siteHeaderTemplate(
         </span>
       </a>
       <nav aria-label="${t.play}">
-        <button class="text-button" ${attribute}="help">${t.how}</button>
+        <button class="text-button tutorial-entry" ${attribute}="tutorial">
+          ${language === 'zh' ? '新手教学' : language === 'ja' ? 'はじめての練習' : 'Learn to play'}
+        </button>
         <button class="text-button" ${attribute}="records">${t.records}</button>
         ${languageMenuTemplate(language)}
       </nav>
@@ -136,9 +138,6 @@ export function appTemplate(
             >
               ${icon('volume')}
             </button>
-            <button class="icon-button" data-action="help" aria-label="${t.how}">
-              ${icon('help')}
-            </button>
           </div>
         </div>
         <div class="difficulty-tabs" role="group" aria-label="${t.difficulty}">
@@ -160,7 +159,9 @@ export function appTemplate(
             </div>
           </div>
           <div class="board-play-area">
-            ${boardControlsTemplate(language, inputMode, 'data-action')}
+            <div class="action-dock compact-dock">
+              ${boardControlsTemplate(language, inputMode, 'data-action')}
+            </div>
             <div class="board-shell">
               <div class="board-viewport" tabindex="-1">
                 <div

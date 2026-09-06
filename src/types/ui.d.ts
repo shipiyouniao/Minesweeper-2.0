@@ -12,6 +12,8 @@ export type UiCommand =
   | 'reveal-mode'
   | 'safe-mode'
   | 'chord-mode'
+  | 'cycle-mode'
+  | 'tutorial'
   | 'restart-confirmed'
   | 'new'
   | 'toggle-sound'
