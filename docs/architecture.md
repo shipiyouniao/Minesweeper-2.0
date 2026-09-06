@@ -144,3 +144,7 @@ Expedition envelope version 4 separates the current replay journal from permanen
 `magnetic-generation.ts` adds safe anchor occupancy checks to the existing shuffled, publicly deducible arenas. `magnetic-field.ts` owns public geometric forecasts and known-route planning, while `magnetic-battle.ts` owns grounding, collision damage, delayed lures and exposure. `magnetic-blast.ts` destroys mines and terrain around an anchor, updates clues and retains walkable craters without changing ordinary player mine collisions. `magnetic.d.ts` declares their finite state and result contracts. The tactical orchestrator still charges AP and applies the shared build effects.
 
 `MagneticBoard` owns the board forecast layer, resize observer and temporary animation actors. `VariantApp` commits a magnetic turn before playing its interruptible performance; cancellation reveals the committed state. The view never dispatches actions, and replay does not replay animations or sounds. Reduced motion retains directional arrows, routes and landing markers. See [Magnetic Knight](magnetic-knight.md).
+
+## Sonar information mode
+
+Sonar has its own pure rule module, SonarSession and SonarRepository. SonarApp, SonarInput and SonarView own its instrument, gestures and public overlays while reusing BoardView, shared mine placement, right-click protection and audio ports. Explicit contracts live in sonar.d.ts and sonar-ui.d.ts. Overlap comparisons accept published readings and geometry only. See [Sonar](sonar.md) for storage, scoring and input boundaries.

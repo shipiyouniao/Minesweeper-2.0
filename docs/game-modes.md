@@ -1,12 +1,12 @@
 # Game modes: design and implementation plan
 
-Every mode in this document is approved for development. **Expedition** and **Twin boards** are playable. **Sonar**, **Survey**, and **Tides** are planned, not playable menu entries yet. Classic Minesweeper retains its existing difficulties, saves, and records.
+Every mode in this document is approved for development. **Expedition**, **Twin boards** and **Sonar** are playable. **Survey** and **Tides** are planned, not playable menu entries yet. Classic Minesweeper retains its existing difficulties, saves, and records.
 
 Relic Dungeon is part of Expedition, not a separate mode: it describes the multi-floor run, randomized relic choices, and permanent camp progression. With its permanent unlocks, Expedition is a **roguelite**.
 
 ## Shared design
 
-- Rulesets and difficulty are separate. The existing `mode` URL parameter still means classic difficulty. The new `ruleset` parameter accepts `classic`, `expedition`, or `twin`.
+- Rulesets and difficulty are separate. The existing `mode` URL parameter still means classic difficulty. The new `ruleset` parameter accepts `classic`, `expedition`, `twin`, or `sonar`.
 - All mine placement uses seeded Fisher–Yates shuffling with unbiased bounded indices and exact mine counts. Apply generation constraints before placement; never roll independently for each cell.
 - Pure immutable functions own rules and derived information. Session objects own progress/settlement; repositories own serialization; input and view objects own browser event and DOM lifetimes.
 - Named contracts live in module-scoped `.d.ts` files. Commands use concrete unions. No business `any`, `unknown`, mapped types, or conditional types.
@@ -123,7 +123,7 @@ Tests cover exact mines and connected routes across many seeds and all five diff
 
 ### Presentation and motion
 
-Classic, Expedition and Twin boards share the same header template, language flyout, help/records entries and icon controls. Help opens in a focus-trapping modal. Expedition uses generated transparent artwork for professions, landmarks, inventory and relic themes; see the [dungeon artwork](dungeon-artwork.md) and [theme artwork](relic-pack-artwork.md) records for exact prompts. Clues, row results and accessible labels remain text. Movement animation is cancelled before pause, backgrounding, language remount or mode disposal; reduced-motion preferences skip animation while retaining identical rules. Resizing reanchors the player to its cell.
+Classic, Expedition, Twin boards and Sonar share the same header template, language flyout, help/records entries and icon controls. Help opens in a focus-trapping modal. Expedition uses generated transparent artwork for professions, landmarks, inventory and relic themes; see the [dungeon artwork](dungeon-artwork.md) and [theme artwork](relic-pack-artwork.md) records for exact prompts. Clues, row results and accessible labels remain text. Movement animation is cancelled before pause, backgrounding, language remount or mode disposal; reduced-motion preferences skip animation while retaining identical rules. Resizing reanchors the player to its cell.
 
 ## Twin boards — implemented
 
@@ -143,9 +143,9 @@ Two equally sized boards use the selected [difficulty preset](variant-difficulti
 
 A separate twin envelope stores the seed, validated actions, settled state, and up to ten recent results per difficulty. Replay reconstructs both boards together. Test exact disjoint mine sets, correct clues, symmetric opening safety, false flag semantics, play after one side completes, paired defeat/full victory, and exactly-once records across reload.
 
-## Sonar — approved, planned
+## Sonar — implemented
 
-**Identity:** spend limited information to resolve the most valuable uncertainty.
+**Identity:** spend limited information to resolve the most valuable uncertainty. See [complete Sonar rules, controls and acceptance](sonar.md).
 
 - Start with a classic board and three scan charges. After the first safe opening, choose a cell as the center of a 3 × 3 scan region; clip at board edges. Reveal that region's total mines, including flagged mines.
 - Scans do not reveal individual identities or move mines. Keep regions/totals for reference; revisiting an identical scan does not consume another charge.
@@ -182,10 +182,10 @@ Tides is the highest-risk design because its generator preserves a system of con
 ## Delivery order and limits
 
 1. **Delivered:** ruleset routing, separate saves, configurable Expedition/camp progression, Twin boards, localization and regression coverage.
-2. **Next:** the [tracked expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1), followed by Sonar and Survey with accessible information overlays and independent records.
+2. **Next:** the [tracked expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1), followed by the Sonar-derived encounter and Survey with accessible information overlays and independent records.
 3. **Then:** Tides constraint solver/worker, replay compatibility and transition feedback.
 
-Saves are local and disappear when browser storage is cleared. They are not an anti-cheat system. One active run per special ruleset is supported; simultaneous edits to one ruleset in multiple tabs use last-write-wins browser storage. Journals are bounded at 20,000 accepted actions to limit recovery work; Expedition can still extract at its limit and Twin can restart. Storage failures are shown while in-memory play continues.
+Saves are local and disappear when browser storage is cleared. They are not an anti-cheat system. One active run per special ruleset is supported; simultaneous edits to one ruleset in multiple tabs use last-write-wins browser storage. Journals are bounded at 20,000 accepted actions to limit recovery work; Expedition can still extract at its limit and Twin/Sonar can restart. Storage failures are shown while in-memory play continues.
 
 No new compiler performance figures are claimed. Historical TS6/TS7 A/B reports remain tied to their measured commits.
 

@@ -12,7 +12,7 @@ import type { RelicPack, ExpansionRelic } from './relic-packs.js'
 import type { MilestoneProgress, MilestoneRelic } from './milestones.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
-export type Ruleset = 'classic' | 'expedition' | 'twin'
+export type Ruleset = 'classic' | 'expedition' | 'twin' | 'sonar'
 
 /** The board receiving a twin-board action. */
 export type BoardSide = 'a' | 'b'
