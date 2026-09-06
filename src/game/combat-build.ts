@@ -1,4 +1,5 @@
 import { damageVitality, healVitality } from './vitality.js'
+import { titleCombatStats, titleHealth } from './title-effects.js'
 import { neighbors } from './engine.js'
 import type { Config } from '../types/game.js'
 import type { Camp, Departure, Expedition } from '../types/variants.js'
@@ -83,30 +84,36 @@ export function ownedCombatTraining(camp: Camp): CombatTraining[] {
 }
 
 /** New health uses a five-point damage scale, allowing small non-dominant stat increments. */
-export function startingHealth(departure: Departure): number {
+export function startingHealth(departure: Departure, floor = 1): number {
   return (
     10 +
     Number(departure.training.includes('vitality-training')) +
-    2 * Number(departure.equipment.includes('medical-kit'))
+    2 * Number(departure.equipment.includes('medical-kit')) +
+    titleHealth(departure, floor)
   )
 }
 
 /** Derive effective stats from the current build; action bonuses never exceed five. */
 export function combatStats(run: Expedition): CombatStats {
   const equipment = run.departure.equipment
+  const title = titleCombatStats(run)
   return {
     attack:
       5 +
       Number(run.departure.training.includes('weapon-training')) +
       2 * Number(equipment.includes('steel-blade')) +
-      3 * Number(run.relics.includes('tempered-edge')),
+      3 * Number(run.relics.includes('tempered-edge')) +
+      title.attack,
     defense:
-      Number(equipment.includes('plated-vest')) + Number(run.relics.includes('layered-armor')),
+      Number(equipment.includes('plated-vest')) +
+      Number(run.relics.includes('layered-armor')) +
+      title.defense,
     actions: Math.min(
       5,
       3 +
         Number(run.relics.includes('tactics-hourglass')) +
-        Number(equipment.includes('field-boots') && (run.encounter?.turn ?? 1) % 2 === 0),
+        Number(equipment.includes('field-boots') && (run.encounter?.turn ?? 1) % 2 === 0) +
+        title.actions,
     ),
   }
 }

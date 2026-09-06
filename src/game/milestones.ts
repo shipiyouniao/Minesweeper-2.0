@@ -1,4 +1,6 @@
 import { roomTravel } from './mirror-state.js'
+import { parseTitle, TITLES } from './title-effects.js'
+import type { TitleId } from '../types/titles.js'
 import { approachPath } from './dungeon-path.js'
 import type { Camp, Expedition, Profession } from '../types/variants.js'
 import type {
@@ -14,7 +16,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'challenge',
     target: 1,
-    supplies: 3000,
+    supplies: 400,
     reward: null,
   },
   {
@@ -22,7 +24,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'challenge',
     target: 1,
-    supplies: 3000,
+    supplies: 400,
     reward: null,
   },
   {
@@ -30,7 +32,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'challenge',
     target: 1,
-    supplies: 3000,
+    supplies: 400,
     reward: null,
   },
   {
@@ -38,7 +40,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'challenge',
     target: 1,
-    supplies: 3000,
+    supplies: 400,
     reward: null,
   },
   {
@@ -46,7 +48,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'challenge',
     target: 1,
-    supplies: 3000,
+    supplies: 400,
     reward: null,
   },
 
@@ -56,7 +58,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'bossKill',
     bossKind: 'bastion',
     target: 1,
-    supplies: 1000,
+    supplies: 100,
     reward: null,
   },
   {
@@ -65,7 +67,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'bossKill',
     bossKind: 'brood',
     target: 1,
-    supplies: 1000,
+    supplies: 100,
     reward: null,
   },
   {
@@ -74,7 +76,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'bossKill',
     bossKind: 'mirror',
     target: 1,
-    supplies: 1000,
+    supplies: 100,
     reward: null,
   },
   {
@@ -83,7 +85,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'bossKill',
     bossKind: 'magnetic',
     target: 1,
-    supplies: 1000,
+    supplies: 100,
     reward: null,
   },
   {
@@ -92,7 +94,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     metric: 'bossKill',
     bossKind: 'clock',
     target: 1,
-    supplies: 1000,
+    supplies: 100,
     reward: null,
   },
   {
@@ -100,7 +102,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'challenge',
     target: 1,
-    supplies: 2500,
+    supplies: 300,
     reward: null,
   },
   {
@@ -108,7 +110,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'challenge',
     target: 1,
-    supplies: 2500,
+    supplies: 300,
     reward: null,
   },
 
@@ -117,7 +119,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'travel',
     target: 20,
-    supplies: 120,
+    supplies: 30,
     reward: null,
   },
   {
@@ -125,7 +127,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'chests',
     target: 3,
-    supplies: 250,
+    supplies: 60,
     reward: { kind: 'relic', id: 'chest-beacon' },
   },
   {
@@ -133,7 +135,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'skills',
     target: 3,
-    supplies: 350,
+    supplies: 60,
     reward: { kind: 'relic', id: 'pulse-coil' },
   },
   {
@@ -141,7 +143,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'floors',
     target: 5,
-    supplies: 600,
+    supplies: 100,
     reward: { kind: 'equipment', id: 'field-radio' },
   },
   {
@@ -149,7 +151,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'bosses',
     target: 1,
-    supplies: 800,
+    supplies: 100,
     reward: { kind: 'relic', id: 'last-bastion' },
   },
   {
@@ -157,7 +159,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'wins',
     target: 3,
-    supplies: 1200,
+    supplies: 200,
     reward: { kind: 'relic', id: 'trail-heart' },
   },
   {
@@ -165,7 +167,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'relics',
     target: 8,
-    supplies: 1500,
+    supplies: 250,
     reward: { kind: 'relic', id: 'survey-token' },
   },
   {
@@ -173,7 +175,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'bosses',
     target: 10,
-    supplies: 2500,
+    supplies: 350,
     reward: { kind: 'relic', id: 'hunter-seal' },
   },
   {
@@ -181,7 +183,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'bossKinds',
     target: 4,
-    supplies: 3000,
+    supplies: 400,
     reward: { kind: 'relic', id: 'fault-map' },
   },
   {
@@ -189,7 +191,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'abyssWins',
     target: 1,
-    supplies: 5000,
+    supplies: 500,
     reward: { kind: 'relic', id: 'abyss-hourglass' },
   },
   {
@@ -197,7 +199,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'travel',
     target: 60,
-    supplies: 250,
+    supplies: 40,
     reward: null,
   },
   {
@@ -205,7 +207,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'travel',
     target: 150,
-    supplies: 500,
+    supplies: 80,
     reward: null,
   },
   {
@@ -213,7 +215,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'chests',
     target: 10,
-    supplies: 650,
+    supplies: 100,
     reward: null,
   },
   {
@@ -221,7 +223,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'chests',
     target: 25,
-    supplies: 1000,
+    supplies: 160,
     reward: null,
   },
   {
@@ -229,7 +231,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'skills',
     target: 10,
-    supplies: 700,
+    supplies: 100,
     reward: null,
   },
   {
@@ -237,7 +239,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'skills',
     target: 25,
-    supplies: 1100,
+    supplies: 160,
     reward: null,
   },
   {
@@ -245,7 +247,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'floors',
     target: 12,
-    supplies: 900,
+    supplies: 150,
     reward: { kind: 'profession', id: 'waymarker' },
   },
   {
@@ -253,7 +255,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'floors',
     target: 25,
-    supplies: 1400,
+    supplies: 250,
     reward: null,
   },
   {
@@ -261,7 +263,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'bosses',
     target: 3,
-    supplies: 1200,
+    supplies: 150,
     reward: null,
   },
   {
@@ -269,7 +271,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'missions',
     metric: 'wins',
     target: 1,
-    supplies: 1000,
+    supplies: 150,
     reward: null,
   },
   {
@@ -277,7 +279,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'travel',
     target: 500,
-    supplies: 1600,
+    supplies: 250,
     reward: null,
   },
   {
@@ -285,7 +287,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'travel',
     target: 1500,
-    supplies: 3500,
+    supplies: 450,
     reward: null,
   },
   {
@@ -293,7 +295,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'chests',
     target: 75,
-    supplies: 2200,
+    supplies: 300,
     reward: null,
   },
   {
@@ -301,7 +303,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'chests',
     target: 200,
-    supplies: 4500,
+    supplies: 550,
     reward: null,
   },
   {
@@ -309,7 +311,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'skills',
     target: 75,
-    supplies: 2400,
+    supplies: 300,
     reward: null,
   },
   {
@@ -317,7 +319,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'skills',
     target: 200,
-    supplies: 5000,
+    supplies: 600,
     reward: null,
   },
   {
@@ -325,7 +327,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'floors',
     target: 50,
-    supplies: 3000,
+    supplies: 400,
     reward: { kind: 'profession', id: 'riftwalker' },
   },
   {
@@ -333,7 +335,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'floors',
     target: 150,
-    supplies: 6000,
+    supplies: 700,
     reward: null,
   },
   {
@@ -341,7 +343,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'relics',
     target: 20,
-    supplies: 4000,
+    supplies: 500,
     reward: null,
   },
   {
@@ -349,7 +351,7 @@ export const MILESTONES: readonly MilestoneDefinition[] = [
     kind: 'achievements',
     metric: 'abyssWins',
     target: 5,
-    supplies: 8000,
+    supplies: 800,
     reward: null,
   },
 ]
@@ -557,14 +559,13 @@ export function parseMilestoneRelic(value: string | null): MilestoneRelic | null
 }
 
 /** Titles derive from claims, including saves made before titles existed. */
-export function ownedTitles(camp: Camp): MilestoneId[] {
-  return MILESTONES.filter(
-    (entry) => entry.kind === 'achievements' && milestoneProgress(camp).claimed.includes(entry.id),
-  ).map((entry) => entry.id)
+export function ownedTitles(camp: Camp): TitleId[] {
+  return TITLES.filter((id) => milestoneProgress(camp).claimed.includes(id))
 }
-/** Change only the displayed owned title; equipping never grants a reward again. */
+/** Select an owned title for future departures; equipping never pays a claim again. */
 export function equipTitle(camp: Camp, id: MilestoneId | null): Camp {
-  if (id !== null && !ownedTitles(camp).includes(id)) return camp
-  if ((milestoneProgress(camp).title ?? null) === id) return camp
-  return { ...camp, milestones: { ...milestoneProgress(camp), title: id } }
+  const title = parseTitle(id)
+  if (id !== null && (title === null || !ownedTitles(camp).includes(title))) return camp
+  if ((milestoneProgress(camp).title ?? null) === title) return camp
+  return { ...camp, milestones: { ...milestoneProgress(camp), title } }
 }

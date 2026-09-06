@@ -6,6 +6,8 @@ import {
   advanceMilestones,
   claimMilestone,
   ownedMilestoneRelics,
+  ownedTitles,
+  milestoneProgress,
   equipTitle,
 } from '../game/milestones.js'
 import type { MilestoneId } from '../types/milestones.js'
@@ -57,6 +59,8 @@ export class ExpeditionSession {
 
     if (
       allowedDeparture(this.save.camp, journal.departure.profession, journal.departure.equipment) &&
+      (journal.departure.title === null ||
+        ownedTitles(this.camp).includes(journal.departure.title)) &&
       journal.departure.archive === this.save.camp.upgrades.includes('archive') &&
       journal.departure.packs.every((pack) => this.save.camp.upgrades.includes(pack)) &&
       journal.departure.training.every((training) => this.save.camp.upgrades.includes(training)) &&
@@ -127,6 +131,7 @@ export class ExpeditionSession {
   ): boolean {
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
     const departure: Departure = {
+      title: milestoneProgress(this.camp).title ?? null,
       training: ownedCombatTraining(this.camp),
       battleRelics: this.camp.upgrades.includes('battle-manual'),
       packs: ownedRelicPacks(this.camp),
@@ -220,7 +225,7 @@ export class ExpeditionSession {
     return true
   }
 
-  /** Persist a cosmetic title choice without changing the active departure or paying a reward. */
+  /** Persist the next departure's title without changing the active build or paying a reward. */
   equipTitle(id: MilestoneId | null): boolean {
     const camp = equipTitle(this.camp, id)
     if (camp === this.camp) return false

@@ -1,5 +1,6 @@
 import type { Relic } from './variants.js'
 import type { EncounterKind } from './tactical.js'
+import type { TitleId } from './titles.js'
 
 export type MilestoneId =
   | 'bastion-flawless'
@@ -96,7 +97,7 @@ export interface MilestoneProgress {
         readonly glass: boolean
         readonly blasted: boolean
       }
-  readonly title?: MilestoneId | null
+  readonly title?: TitleId | null
   readonly travel: number
   readonly chests: number
   readonly floors: number

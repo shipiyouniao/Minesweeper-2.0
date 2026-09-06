@@ -12,6 +12,7 @@ import { defeatBattle } from '../../.native/tests/tests/battle-helpers.js'
 /** Reach an actual checkpoint with legal actions, then retain critical public-player prefixes. */
 export function battleFixture(seed) {
   const departure = {
+    title: null,
     seed,
     difficulty: 'standard',
     profession: 'explorer',

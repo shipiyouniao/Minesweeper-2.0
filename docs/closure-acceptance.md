@@ -1,5 +1,7 @@
 # Expedition closure audit — September 7, 2026
 
+Historical snapshot: the subsequent [milestone balance pass](milestone-balance.md) supersedes the payout values below, and [title builds](title-builds.md) use rules revision 9. The audit's original calculations are retained for comparison.
+
 This acceptance pass covers the six deliveries after Magnetic Knight through achievement titles: PRs #26–#31, ending at `44de01cc5b3abf703c74bec46d1ca344db634483`. It checks the existing game before starting Sonar. No new mode, price change or additional gameplay compatibility engine is included.
 
 ## Correctness and interaction

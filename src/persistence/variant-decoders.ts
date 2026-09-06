@@ -1,4 +1,5 @@
 import { MILESTONES } from '../game/milestones.js'
+import { parseTitle } from '../game/title-effects.js'
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
 import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
 import { UPGRADES } from '../game/camp-progression.js'
@@ -174,7 +175,7 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
           blasted: rawAttempt.value('blasted') === true,
         }
       : undefined
-  const title = parseMilestone(reader?.string('title') ?? undefined)
+  const title = parseTitle(reader?.string('title'))
   const challenges = (reader?.array('challenges') ?? []).flatMap((value) => {
     const entry = MILESTONES.find((item) => item.id === value && item.metric === 'challenge')
     return entry ? [entry.id] : []
@@ -234,6 +235,9 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
 /** Decode only current departure options; obsolete runs never enter the game engine. */
 function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (!reader) return null
+  const rawTitle = reader.value('title')
+  const title = parseTitle(reader.string('title'))
+  if (rawTitle !== null && title === null) return null
   const seed = reader.number('seed')
   const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const profession = parseProfession(reader.string('profession'))
@@ -288,6 +292,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   }
   return {
     seed,
+    title,
     difficulty,
     profession,
     archive,
