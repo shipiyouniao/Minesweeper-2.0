@@ -215,9 +215,9 @@ export function milestoneCopy(language: Language, id: MilestoneId): VariantDescr
       return {
         name: t('Four legends', '四大强敌', '四つの伝説'),
         note: t(
-          'Defeat Bastion Guardian, Brood Queen, Mirror Twins and Magnetic Knight.',
-          '分别击败堡垒守卫、虫群女王、镜像双子和磁力骑士。',
-          '要塞の守護者、群れの女王、鏡の双子、磁力の騎士をそれぞれ倒す。',
+          'Defeat four different boss families.',
+          '击败任意四种不同的首领。',
+          '異なる4種類のボスを倒す。',
         ),
       }
     case 'abyss-clear':

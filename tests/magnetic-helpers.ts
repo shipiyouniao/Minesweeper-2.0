@@ -61,6 +61,7 @@ export function defeatMagnetic(initial: Expedition): ExpeditionAction[] {
       .filter((entry) => entry.path)
     candidates.sort((a, b) => a.path!.length - b.path!.length || a.index - b.index)
     const target = candidates[0]
+    if (!target && deduction.mines.length) continue
     if (!target) break
     walk(target.path!.at(-1)!)
     if (budget() < 1) end()
@@ -88,7 +89,7 @@ export function defeatMagnetic(initial: Expedition): ExpeditionAction[] {
       const route = magneticLurePath(current, anchor.index)
       if (!route) return []
       return adjacentSteps(run.game, anchor.index)
-        .filter((index) => !route.includes(index) && walkingPath(run, index))
+        .filter((index) => walkingPath(run, index))
         .map((position) => ({ index: anchor.index, position }))
     })
     targets.sort(
@@ -97,7 +98,7 @@ export function defeatMagnetic(initial: Expedition): ExpeditionAction[] {
         (walkingPath(run, b.position)?.length ?? 1000),
     )
     const target = targets[0]
-    assert.ok(target, 'No public lure and off-route attack position')
+    assert.ok(target, 'No public lure and adjacent approach')
     walk(target.position)
     if (budget() < 1) end()
     apply({ type: 'interact', index: target.index })

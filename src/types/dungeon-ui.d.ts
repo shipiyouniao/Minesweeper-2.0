@@ -1,5 +1,7 @@
 /** Generated raster assets used by terrain, landmarks, character and tool controls. */
 export type DungeonSprite =
+  | 'clock-mage'
+  | 'clock-hourglass'
   | 'magnetic-knight'
   | 'magnetic-anchor'
   | 'mirror-dawn'

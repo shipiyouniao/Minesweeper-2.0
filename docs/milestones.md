@@ -14,7 +14,7 @@ All five expedition difficulties are selectable on the camp overview. The Missio
 | Achievement | Win 3 expeditions                    |    1,200 | Exclusive Trail heart relic     |
 | Achievement | Acquire 8 different relics           |    1,500 | Exclusive Survey token relic    |
 | Achievement | Defeat 10 bosses                     |    2,500 | Exclusive Hunter seal relic     |
-| Achievement | Defeat all 4 boss families           |    3,000 | Exclusive Fault map relic       |
+| Achievement | Defeat any 4 boss families           |    3,000 | Exclusive Fault map relic       |
 | Achievement | Win on Abyss                         |    5,000 | Exclusive Abyss hourglass relic |
 | Mission     | Trail apprentice: 60 travel          |      250 | —                               |
 | Mission     | Trail guide: 150 travel              |      500 | —                               |

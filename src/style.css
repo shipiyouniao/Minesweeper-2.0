@@ -3,6 +3,7 @@
 @import url('./play-scale.css');
 @import url('./camp.css');
 @import url('./magnetic.css');
+@import url('./clock.css');
 
 * {
   box-sizing: border-box;

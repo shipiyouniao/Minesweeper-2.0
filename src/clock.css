@@ -1,0 +1,108 @@
+.clock-queue {
+  padding: 12px;
+  border: 1px solid #9eacb9;
+  border-radius: 12px;
+  background: #eaf2f7;
+  color: #253e57;
+  font-size: 12px;
+}
+.clock-queue ul {
+  padding-left: 18px;
+  margin: 8px 0 0;
+}
+.clock-queue li + li {
+  margin-top: 6px;
+}
+.board .cell.clock-mark {
+  box-shadow: inset 0 0 0 2px #b7904b;
+}
+.clock-countdowns {
+  position: absolute;
+  left: 1px;
+  top: 1px;
+  display: flex;
+  gap: 1px;
+  z-index: 6;
+  pointer-events: none;
+}
+.clock-countdowns b {
+  font: 700 10px/13px system-ui;
+  min-width: 13px;
+  border-radius: 4px;
+  background: #fff0ca;
+  color: #614012;
+  text-align: center;
+}
+.clock-countdowns b.due {
+  color: #fff;
+  background: #a52c36;
+}
+.clock-countdowns b.returned {
+  color: #fff;
+  background: #146e84;
+}
+.clock-echo {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 40%;
+  height: 55%;
+  opacity: 0.48;
+  pointer-events: none;
+  filter: sepia(1) saturate(2) hue-rotate(140deg);
+  z-index: 4;
+}
+.clock-echo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.clock-used > img {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+.clock-recovery > img {
+  filter: drop-shadow(0 0 5px #5ee4ff);
+}
+.clock-defeated > img {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+.clock-impact::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border: 2px solid #e7b450;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: clock-impact 0.55s ease-out both;
+  z-index: 7;
+}
+@keyframes clock-impact {
+  from {
+    transform: scale(0.3);
+    opacity: 1;
+  }
+  to {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clock-impact::after {
+    animation: none;
+    display: none;
+  }
+}
+
+.clock-stage {
+  min-width: 0;
+}
+.clock-playbar {
+  margin-bottom: 10px;
+}
+.clock-playbar .tactical-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

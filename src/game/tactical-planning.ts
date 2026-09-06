@@ -13,6 +13,15 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
   const encounter = run.encounter
   if (encounter) {
     if (
+      encounter.kind === 'clock' &&
+      encounter.hourglasses.some((glass) => glass.index === index && !glass.used) &&
+      encounter.spells.some((spell) => !spell.redirected) &&
+      run.game.cells[index]?.visibility === 'revealed' &&
+      (run.player === index || adjacentSteps(run.game, run.player).includes(index))
+    )
+      return { type: 'interact', index }
+
+    if (
       encounter.kind === 'magnetic' &&
       index !== encounter.boss &&
       encounter.anchors.some(
@@ -111,6 +120,20 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       else if (!adjacentSteps(run.game, run.player).includes(encounter.boss)) reason = 'adjacent'
       break
     case 'interact': {
+      if (encounter.kind === 'clock') {
+        if (
+          !encounter.hourglasses.some((glass) => glass.index === action.index && !glass.used) ||
+          !encounter.spells.some((spell) => !spell.redirected)
+        )
+          reason = 'used'
+        else if (run.game.cells[action.index]?.visibility !== 'revealed') reason = 'path'
+        else if (
+          run.player !== action.index &&
+          !adjacentSteps(run.game, run.player).includes(action.index)
+        )
+          reason = 'adjacent'
+        break
+      }
       const core = encounter.kind === 'bastion' && action.index === encounter.boss
       if (encounter.kind === 'magnetic') {
         const anchor = encounter.anchors.find((entry) => entry.index === action.index)

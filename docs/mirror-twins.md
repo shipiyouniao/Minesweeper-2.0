@@ -4,7 +4,7 @@ Mirror Twins is the third Expedition boss family. Its two minefields share coord
 
 ## Encounter schedule
 
-Boss checkpoints keep the selected difficulty's existing schedule. The first encounter is selected by `seed % 4`: Bastion Guardian, Brood Queen, Mirror Twins or [Magnetic Knight](magnetic-knight.md). Each later checkpoint advances one place, without an immediate repeat. Short runs can encounter any family.
+Boss checkpoints keep the selected difficulty's existing schedule. The first encounter is selected by `seed % 5`: Bastion Guardian, Brood Queen, Mirror Twins, [Magnetic Knight](magnetic-knight.md) or [Clock Mage](clock-mage.md). Each later checkpoint advances one place, without an immediate repeat. Short runs can encounter any family.
 
 | Difficulty | Checkpoint floors | Each realm | Mines per realm | Health per twin |
 | ---------- | ----------------- | ---------- | --------------- | --------------- |

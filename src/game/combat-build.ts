@@ -127,6 +127,13 @@ export function incomingCombatDamage(run: Expedition, raw: number): number {
 
 /** Add only the frozen attack sources covering this square; interception removes its source. */
 export function battleThreat(encounter: TacticalEncounter, index: number): number {
+  if (encounter.kind === 'clock')
+    return (
+      encounter.spells.filter(
+        (spell) =>
+          !spell.redirected && spell.resolvesOn === encounter.turn && spell.targets.includes(index),
+      ).length * 3
+    )
   if (encounter.kind !== 'brood')
     return encounter.intent.targets.includes(index) ? encounter.intent.damage : 0
   return (

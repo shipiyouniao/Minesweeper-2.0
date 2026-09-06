@@ -2,10 +2,11 @@ import type { Expedition, ExpeditionAction, Relic } from './variants.js'
 import type { Config } from './game.js'
 import type { BattleMechanism, CombatEquipment } from './combat-build.js'
 import type { MirrorEncounter } from './mirror.js'
+import type { ClockEncounter } from './clock.js'
 import type { MagneticEncounter } from './magnetic.js'
 
 /** Released encounter families have independent rules and artwork. */
-export type EncounterKind = 'bastion' | 'brood' | 'mirror' | 'magnetic'
+export type EncounterKind = 'bastion' | 'brood' | 'mirror' | 'magnetic' | 'clock'
 
 /** A public control protects one armor section until its surrounding flags are calibrated. */
 export interface ShieldPylon {
@@ -93,7 +94,7 @@ export interface BroodEncounter extends TacticalState {
 
 /** A finite encounter union keeps each boss's state and rules explicit. */
 export type TacticalEncounter =
-  BastionEncounter | BroodEncounter | MirrorEncounter | MagneticEncounter
+  BastionEncounter | BroodEncounter | MirrorEncounter | MagneticEncounter | ClockEncounter
 
 /** Difficulty changes arena scale and boss endurance without changing action costs. */
 export interface EncounterTier {
