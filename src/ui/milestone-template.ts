@@ -1,3 +1,5 @@
+import { progressionStyles } from './progression-styles.js'
+import { campStyles } from './camp-styles.js'
 import { MILESTONES, milestoneProgress, milestoneValue } from '../game/milestones.js'
 import { parseTitle } from '../game/title-effects.js'
 import { message } from '../i18n.js'
@@ -30,7 +32,9 @@ export function milestonesTemplate(
   const claimed = milestoneProgress(camp).claimed
   const number = new Intl.NumberFormat(language)
   return `<p class="milestone-summary" role="status">${message(language, 'milestone-template.ready-to-claim')} · ${milestoneReadyCount(camp, kind)}</p>
-    <div class="milestone-grid">${MILESTONES.filter((entry) => entry.kind === kind)
+    <div class="milestone-grid ${campStyles['milestone-grid']}">${MILESTONES.filter(
+      (entry) => entry.kind === kind,
+    )
       .map((entry) => {
         const copy = milestoneCopy(language, entry.id)
         const value = Math.min(entry.target, milestoneValue(camp, entry))
@@ -54,10 +58,10 @@ export function milestonesTemplate(
               : reward
                 ? relicSprite(reward.id)
                 : 'treasure'
-        return `<article class="milestone-card ${done ? 'is-claimed' : ready ? 'is-ready' : ''}" data-milestone="${entry.id}">
-        <div class="milestone-heading">${spriteImage(sprite)}<div><p class="eyebrow">${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.completed') : message(language, 'milestone-template.in-progress')}</p><h2>${copy.name}</h2></div></div>
-        <p>${copy.note}</p><div class="milestone-progress"><progress max="${entry.target}" value="${value}" aria-label="${copy.name}"></progress><span>${number.format(value)} / ${number.format(entry.target)}</span></div>
-        <div class="milestone-reward">${title ? `<span class="title-reward">✦ ${message(language, 'milestone-template.title')} · ${copy.name}</span><p class="title-reward-effect">${titleEffectCopy(language, title)}</p>` : ''}<strong>+${number.format(entry.supplies)} ${variantCopy(language).supplies}</strong>${description ? `<h3>${description.name}</h3><p>${description.note}</p>` : ''}</div>
+        return `<article class="milestone-card ${campStyles['milestone-card']} ${done ? 'is-claimed' : ready ? 'is-ready' : ''}" data-milestone="${entry.id}">
+        <div class="milestone-heading ${campStyles['milestone-heading']}">${spriteImage(sprite)}<div><p class="eyebrow">${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.completed') : message(language, 'milestone-template.in-progress')}</p><h2>${copy.name}</h2></div></div>
+        <p>${copy.note}</p><div class="milestone-progress ${campStyles['milestone-progress']}"><progress max="${entry.target}" value="${value}" aria-label="${copy.name}"></progress><span>${number.format(value)} / ${number.format(entry.target)}</span></div>
+        <div class="milestone-reward ${campStyles['milestone-reward']}">${title ? `<span class="title-reward ${progressionStyles['title-reward']}">✦ ${message(language, 'milestone-template.title')} · ${copy.name}</span><p class="title-reward-effect">${titleEffectCopy(language, title)}</p>` : ''}<strong>+${number.format(entry.supplies)} ${variantCopy(language).supplies}</strong>${description ? `<h3>${description.name}</h3><p>${description.note}</p>` : ''}</div>
         <button class="${ready && !done ? 'primary-button' : 'text-button'}" data-control="claim-milestone:${entry.id}" data-focus-fallback="camp-page:${kind}" ${done || !ready ? 'disabled' : ''}>${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.claim-reward') : message(language, 'milestone-template.keep-exploring')}</button>
       </article>`
       })

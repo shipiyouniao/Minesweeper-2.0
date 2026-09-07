@@ -22,6 +22,16 @@ async function layout(page, width) {
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
   const selected = page.locator('.shop-tile[aria-pressed="true"]')
   if (!(await selected.count())) return
+  assert.equal(await selected.evaluate((tile) => getComputedStyle(tile).borderTopWidth), '1px')
+  assert.match(await selected.evaluate((tile) => getComputedStyle(tile).boxShadow), /inset/)
+  assert.deepEqual(
+    await page.locator('.shop-detail > img').evaluate((icon) => {
+      const rect = icon.getBoundingClientRect()
+      return [rect.width, rect.height]
+    }),
+    [88, 88],
+    'product artwork retains its dimensions above shared sprite defaults',
+  )
   const tile = await selected.boundingBox()
   const detail = await page.locator('.shop-detail').boundingBox()
   assert.ok(tile && detail)
@@ -89,13 +99,13 @@ try {
       0,
     )
     await page.locator('[data-control="camp-page:shop"]').click()
-    assert.equal(await page.locator('.shop-tile').count(), 26)
+    assert.equal(await page.locator('.shop-tile').count(), 27)
     assert.equal(await page.locator('[data-control^="upgrade:"]').count(), 1)
 
     for (const [category, count] of [
-      ['all', 26],
+      ['all', 27],
       ['professions', 5],
-      ['equipment', 6],
+      ['equipment', 7],
       ['relics', 12],
       ['camp', 3],
     ]) {
@@ -199,7 +209,7 @@ try {
       languages: 3,
       widths: [320, 390, 900, 1024, 1440, 3840],
       categories: 5,
-      purchases: 26,
+      purchases: 27,
       inspectWithoutSpending: true,
       purchasePersistence: true,
       keyboardPurchase: true,
