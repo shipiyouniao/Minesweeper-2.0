@@ -33,8 +33,14 @@ export class BrowserSoundEffects implements SoundEffects {
 
   /** Resume if necessary, discarding delayed playback after muting or backgrounding. */
   play(cue: SoundCue): void {
-    const context = this.contextForGesture()
-    if (!context) return
+    // Timed speech never creates a context or queues audio behind autoplay restrictions.
+    const speech = cue.startsWith('dialogue-')
+    const context = speech
+      ? this.active && !this.disposed
+        ? this.context
+        : null
+      : this.contextForGesture()
+    if (!context || (speech && context.state !== 'running')) return
 
     const generation = this.generation
 
@@ -104,7 +110,7 @@ export class BrowserSoundEffects implements SoundEffects {
   private schedule(context: AudioContext, cue: SoundCue): void {
     const terminal = cue === 'win' || cue === 'loss'
 
-    if (context.currentTime - this.lastStart < 0.035) {
+    if (!cue.startsWith('dialogue-') && context.currentTime - this.lastStart < 0.035) {
       if (cuePriority(cue) <= cuePriority(this.lastCue)) return
 
       // An outside menu click can also reveal a cell: its gameplay cue must win.

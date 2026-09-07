@@ -1,3 +1,4 @@
+import { guidanceStyles } from './guidance-styles.js'
 import { approachPath } from '../game/dungeon-path.js'
 import { act, neighbors } from '../game/engine.js'
 import { actExpedition, createExpedition } from '../game/expedition.js'
@@ -42,6 +43,7 @@ class TutorialPlayer {
   private moving = false
   private movement: Animation | null = null
 
+  private readonly originalClassName: string
   private readonly originalMarkup: string
   private disposed = false
   private readonly originalLabel: string | null
@@ -51,6 +53,7 @@ class TutorialPlayer {
 
   /** Create isolated practice state and bind input for the lifetime of this lesson dialog. */
   constructor(dialog: HTMLDialogElement, ruleset: Ruleset, language: Language) {
+    this.originalClassName = dialog.className
     this.originalMarkup = dialog.innerHTML
     this.originalLabel = dialog.getAttribute('aria-labelledby')
     this.dialog = dialog
@@ -88,7 +91,7 @@ class TutorialPlayer {
       scannedRows: [],
       shields: 1,
     }
-    dialog.classList.add('guidance-dialog')
+    dialog.classList.add('guidance-dialog', ...guidanceStyles['guidance-dialog'].split(' '))
     dialog.dataset['tutorial'] = ruleset
     dialog.setAttribute('aria-labelledby', 'tutorial-title')
     dialog.addEventListener('click', this.click, { signal: this.events.signal })
@@ -115,7 +118,7 @@ class TutorialPlayer {
     delete this.dialog.dataset['practiceMoving']
     this.clearHold()
     this.events.abort()
-    this.dialog.classList.remove('guidance-dialog')
+    this.dialog.className = this.originalClassName
     delete this.dialog.dataset['tutorial']
     this.dialog.innerHTML = this.originalMarkup
     if (this.originalLabel) this.dialog.setAttribute('aria-labelledby', this.originalLabel)
@@ -157,7 +160,7 @@ class TutorialPlayer {
   private render(): void {
     const step = this.lesson.steps[this.step]
     const done = !step
-    this.dialog.innerHTML = `<header class="guidance-header"><div><span class="guidance-eyebrow">FIELD NOTES / ${message(this.language, 'tutorial-player.learn-by-doing')}</span><h2 id="tutorial-title">${this.lesson.title}</h2></div><button class="guidance-close" data-practice="close" aria-label="${message(this.language, 'tutorial-player.exit-practice')}">×</button></header><div class="lesson-progress" aria-label="${this.step + 1} / ${this.lesson.steps.length}">${this.lesson.steps.map((_, i) => `<span class="${i < this.step ? 'done' : i === this.step ? 'current' : ''}"></span>`).join('')}</div><div class="guidance-layout"><article class="lesson-note"><span class="lesson-number">${done ? '✓' : String(this.step + 1).padStart(2, '0')}</span><h3>${step?.title ?? message(this.language, 'tutorial-player.ready-for-the-field')}</h3><p>${step?.text ?? this.lesson.ending}</p><p class="lesson-feedback" role="status">${this.message || (this.completed ? message(this.language, 'tutorial-player.good-continue-when-you-are-ready') : '')}</p>${this.ruleset === 'expedition' ? `<div class="practice-vitals">♥ ${this.run.health}/${this.run.maxHealth} · ◇ ${this.run.shields} · ${message(this.language, 'tutorial-player.chests')} ${this.run.collected.length}/1</div>` : ''}</article><div class="lesson-workspace ${this.ruleset === 'twin' ? 'practice-twins' : ''}">${this.board(this.ruleset === 'expedition' ? this.run.game : this.a, 'a')}${this.ruleset === 'twin' ? this.board(this.b, 'b') : ''}<div class="practice-dock">${this.ruleset === 'sonar' ? `<button class="practice-tool" data-practice="scan">${spriteImage('scanner')}<span>${message(this.language, 'tutorial-player.sonar')} · ${sonarCharges(this.sonar)}</span></button>` : ''}${this.ruleset === 'expedition' ? `<button class="practice-tool ${this.tool === 'probe' ? 'selected' : ''}" data-practice="probe">${spriteImage('probe')}<span>${message(this.language, 'tutorial-player.probe')} · ${this.run.probes}</span></button><button class="practice-tool ${this.tool === 'scan' ? 'selected' : ''}" data-practice="scan">${spriteImage('scanner')}<span>${message(this.language, 'tutorial-player.scan')} · ${this.run.scans}</span></button><button class="practice-tool" data-practice="skill" ${this.run.skillUsed ? 'disabled' : ''}>${spriteImage('skill-explorer')}<span>${message(this.language, 'tutorial-player.light')}</span></button>` : ''}${boardControlsTemplate(this.language, this.mode, 'data-action').replace('data-action="cycle-mode"', 'data-practice="cycle"')}</div></div></div><footer class="guidance-footer"><button class="text-button" data-practice="restart">${message(this.language, 'tutorial-player.start-again')}</button><span>${message(this.language, 'tutorial-player.click-tap-arrows-enter')}</span><button class="primary-button" data-practice="${done ? 'close' : 'next'}" ${!done && !this.completed ? 'disabled' : ''}>${done ? message(this.language, 'tutorial-player.back-to-game') : message(this.language, 'tutorial-player.continue')} →</button></footer>`
+    this.dialog.innerHTML = `<header class="guidance-header ${guidanceStyles['guidance-header']}"><div><span class="guidance-eyebrow ${guidanceStyles['guidance-eyebrow']}">FIELD NOTES / ${message(this.language, 'tutorial-player.learn-by-doing')}</span><h2 id="tutorial-title">${this.lesson.title}</h2></div><button class="guidance-close ${guidanceStyles['guidance-close']}" data-practice="close" aria-label="${message(this.language, 'tutorial-player.exit-practice')}">×</button></header><div class="lesson-progress ${guidanceStyles['lesson-progress']}" aria-label="${this.step + 1} / ${this.lesson.steps.length}">${this.lesson.steps.map((_, i) => `<span class="${i < this.step ? 'done' : i === this.step ? 'current' : ''}"></span>`).join('')}</div><div class="guidance-layout ${guidanceStyles['guidance-layout']}"><article class="lesson-note ${guidanceStyles['lesson-note']}"><span class="lesson-number ${guidanceStyles['lesson-number']}">${done ? '✓' : String(this.step + 1).padStart(2, '0')}</span><h3>${step?.title ?? message(this.language, 'tutorial-player.ready-for-the-field')}</h3><p>${step?.text ?? this.lesson.ending}</p><p class="lesson-feedback ${guidanceStyles['lesson-feedback']}" role="status">${this.message || (this.completed ? message(this.language, 'tutorial-player.good-continue-when-you-are-ready') : '')}</p>${this.ruleset === 'expedition' ? `<div class="practice-vitals ${guidanceStyles['practice-vitals']}">♥ ${this.run.health}/${this.run.maxHealth} · ◇ ${this.run.shields} · ${message(this.language, 'tutorial-player.chests')} ${this.run.collected.length}/1</div>` : ''}</article><div class="lesson-workspace ${guidanceStyles['lesson-workspace']} ${this.ruleset === 'twin' ? 'practice-twins' : ''}">${this.board(this.ruleset === 'expedition' ? this.run.game : this.a, 'a')}${this.ruleset === 'twin' ? this.board(this.b, 'b') : ''}<div class="practice-dock ${guidanceStyles['practice-dock']}">${this.ruleset === 'sonar' ? `<button class="practice-tool" data-practice="scan">${spriteImage('scanner')}<span>${message(this.language, 'tutorial-player.sonar')} · ${sonarCharges(this.sonar)}</span></button>` : ''}${this.ruleset === 'expedition' ? `<button class="practice-tool ${this.tool === 'probe' ? 'selected' : ''}" data-practice="probe">${spriteImage('probe')}<span>${message(this.language, 'tutorial-player.probe')} · ${this.run.probes}</span></button><button class="practice-tool ${this.tool === 'scan' ? 'selected' : ''}" data-practice="scan">${spriteImage('scanner')}<span>${message(this.language, 'tutorial-player.scan')} · ${this.run.scans}</span></button><button class="practice-tool" data-practice="skill" ${this.run.skillUsed ? 'disabled' : ''}>${spriteImage('skill-explorer')}<span>${message(this.language, 'tutorial-player.light')}</span></button>` : ''}${boardControlsTemplate(this.language, this.mode, 'data-action').replace('data-action="cycle-mode"', 'data-practice="cycle"')}</div></div></div><footer class="guidance-footer ${guidanceStyles['guidance-footer']}"><button class="text-button" data-practice="restart">${message(this.language, 'tutorial-player.start-again')}</button><span>${message(this.language, 'tutorial-player.click-tap-arrows-enter')}</span><button class="primary-button" data-practice="${done ? 'close' : 'next'}" ${!done && !this.completed ? 'disabled' : ''}>${done ? message(this.language, 'tutorial-player.back-to-game') : message(this.language, 'tutorial-player.continue')} →</button></footer>`
   }
 
   /** Focus the next required action without scrolling the page underneath the lesson. */

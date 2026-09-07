@@ -52,7 +52,7 @@ export class VariantApp implements VariantInputActions {
   private magneticPerformance = false
   private walkGeneration = 0
   private readonly notices = new MilestoneNotices()
-  private readonly prologue = new BossPrologue()
+  private readonly prologue: BossPrologue
 
   /** Wire one active mode, sharing only browser preferences and the sound port. */
   constructor(
@@ -70,6 +70,7 @@ export class VariantApp implements VariantInputActions {
     this.preferences = preferences
     this.language = language
     this.sounds = sounds
+    this.prologue = new BossPrologue(sounds)
     this.onLanguage = onLanguage
     this.view = this.createView()
     this.input = new VariantInput(root, this)
