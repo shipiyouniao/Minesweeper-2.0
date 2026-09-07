@@ -1,3 +1,4 @@
+import { sharedStyles } from './shared-styles.js'
 import { gameplayStyles } from './gameplay-styles.js'
 import { DIFFICULTIES, RANKED_DIFFICULTIES } from '../game/difficulty.js'
 import { PRESETS } from '../game/engine.js'
@@ -17,7 +18,7 @@ function languageOption(language: Language, selected: Language): string {
   return /* HTML */ `
     <button
       type="button"
-      class="language-option"
+      class="language-option ${sharedStyles['language-option']}"
       role="menuitemradio"
       lang="${language === 'zh' ? 'zh-CN' : language}"
       data-language="${language}"
@@ -35,20 +36,28 @@ export function languageMenuTemplate(language: Language): string {
   const label = translations[language].language
 
   return /* HTML */ `
-    <div class="language-picker">
+    <div class="language-picker ${sharedStyles['language-picker']}">
       <button
         type="button"
-        class="language-trigger"
+        class="language-trigger ${sharedStyles['language-trigger']}"
         aria-label="${label}"
         aria-haspopup="menu"
         aria-expanded="false"
         aria-controls="language-menu"
       >
         ${icon('globe')}
-        <span class="language-current">${languageName(language)}</span>
+        <span class="language-current ${sharedStyles['language-current']}">
+          ${languageName(language)}
+        </span>
         ${icon('chevron')}
       </button>
-      <div id="language-menu" class="language-menu" role="menu" aria-label="${label}" hidden>
+      <div
+        id="language-menu"
+        class="language-menu ${sharedStyles['language-menu']}"
+        role="menu"
+        aria-label="${label}"
+        hidden
+      >
         ${languageOption('zh', language)}${languageOption('en', language)}${languageOption('ja', language)}
       </div>
     </div>
@@ -62,19 +71,24 @@ export function siteHeaderTemplate(
 ): string {
   const t = translations[language]
   return /* HTML */ `
-    <header class="site-header">
-      <a class="brand" href="./" aria-label="Minesweeper 2.0">
-        <span class="brand-mark">${icon('flag')}</span>
+    <header class="site-header ${sharedStyles['site-header']}">
+      <a class="brand ${sharedStyles['brand']}" href="./" aria-label="Minesweeper 2.0">
+        <span class="brand-mark ${sharedStyles['brand-mark']}">${icon('flag')}</span>
         <span>
           Minesweeper
-          <span class="brand-version">2.0</span>
+          <span class="brand-version ${sharedStyles['brand-version']}">2.0</span>
         </span>
       </a>
       <nav aria-label="${t.play}">
-        <button class="text-button tutorial-entry" ${attribute}="tutorial">
+        <button
+          class="text-button ${sharedStyles['text-button']} tutorial-entry ${sharedStyles['tutorial-entry']}"
+          ${attribute}="tutorial"
+        >
           ${message(language, 'templates.learn-to-play')}
         </button>
-        <button class="text-button" ${attribute}="records">${t.records}</button>
+        <button class="text-button ${sharedStyles['text-button']}" ${attribute}="records">
+          ${t.records}
+        </button>
         ${languageMenuTemplate(language)}
       </nav>
     </header>
@@ -92,34 +106,34 @@ export function appTemplate(
 
   return /* HTML */ `
     ${siteHeaderTemplate(language)}
-    <main class="layout">
-      <section class="introduction" aria-labelledby="intro-title">
-        <p class="eyebrow">
+    <main class="layout ${sharedStyles['layout']}">
+      <section class="introduction ${sharedStyles['introduction']}" aria-labelledby="intro-title">
+        <p class="eyebrow ${sharedStyles['eyebrow']}">
           <span></span>
           THE CLASSIC, REIMAGINED
         </p>
         <h1 id="intro-title">${t.tagline}</h1>
-        <p class="intro-copy">${t.intro}</p>
+        <p class="intro-copy ${sharedStyles['intro-copy']}">${t.intro}</p>
         <img
-          class="hero-art"
+          class="hero-art ${sharedStyles['hero-art']}"
           src="${import.meta.env.BASE_URL}assets/quiet-board.png"
           alt=""
           width="1254"
           height="1254"
           fetchpriority="low"
         />
-        <div class="intro-bottom">
-          <span class="tiny-rule"></span>
+        <div class="intro-bottom ${sharedStyles['intro-bottom']}">
+          <span class="tiny-rule ${sharedStyles['tiny-rule']}"></span>
           <p>${t.edition}</p>
         </div>
       </section>
-      <section class="game-section" aria-label="${t.title}">
-        <div class="game-heading">
+      <section class="game-section ${sharedStyles['game-section']}" aria-label="${t.title}">
+        <div class="game-heading ${sharedStyles['game-heading']}">
           <h2>${t.title}</h2>
-          <div class="game-heading-actions">
+          <div class="game-heading-actions ${sharedStyles['game-heading-actions']}">
             <button
               id="sound-button"
-              class="icon-button"
+              class="icon-button ${sharedStyles['icon-button']}"
               data-action="toggle-sound"
               aria-label="${t.sound}"
               aria-pressed="true"
@@ -128,11 +142,15 @@ export function appTemplate(
             </button>
           </div>
         </div>
-        <div class="difficulty-tabs" role="group" aria-label="${t.difficulty}">
+        <div
+          class="difficulty-tabs ${sharedStyles['difficulty-tabs']}"
+          role="group"
+          aria-label="${t.difficulty}"
+        >
           ${DIFFICULTIES.map((key) => difficultyButton(key, mode, t)).join('')}
         </div>
-        <div class="game-card">
-          <div class="score-strip">
+        <div class="game-card ${sharedStyles['game-card']}">
+          <div class="score-strip ${sharedStyles['score-strip']}">
             <div>
               <span>${icon('flag')}${t.mines}</span>
               <strong id="mine-count">010</strong>
@@ -163,48 +181,58 @@ export function appTemplate(
                   aria-colcount="${game.config.width}"
                 ></div>
               </div>
-              <div id="pause-cover" class="pause-cover" hidden>
-                <span class="pause-art">${icon('leaf')}</span>
+              <div id="pause-cover" class="pause-cover ${sharedStyles['pause-cover']}" hidden>
+                <span class="pause-art ${sharedStyles['pause-art']}">${icon('leaf')}</span>
                 <h3>${t.paused}</h3>
                 <p>${t.pausedNote}</p>
-                <button class="primary-button" data-action="pause">
+                <button
+                  class="primary-button ${sharedStyles['primary-button']}"
+                  data-action="pause"
+                >
                   ${icon('play')}${t.resume}
                 </button>
               </div>
             </div>
           </div>
-          <div class="status-line" role="status" aria-live="polite">
-            <span id="status-dot" class="status-dot"></span>
+          <div class="status-line ${sharedStyles['status-line']}" role="status" aria-live="polite">
+            <span id="status-dot" class="status-dot ${sharedStyles['status-dot']}"></span>
             <span id="status"></span>
             <span id="progress"></span>
           </div>
-          <div class="game-toolbar">
-            <div class="toolbar-right">
+          <div class="game-toolbar ${sharedStyles['game-toolbar']}">
+            <div class="toolbar-right ${sharedStyles['toolbar-right']}">
               <button
                 id="pause-button"
-                class="icon-button"
+                class="icon-button ${sharedStyles['icon-button']}"
                 data-action="pause"
                 aria-label="${t.pause}"
               >
                 ${icon('pause')}
               </button>
-              <button class="new-button" data-action="new">
+              <button class="new-button ${sharedStyles['new-button']}" data-action="new">
                 ${icon('reset')}
                 <span>${t.restart}</span>
               </button>
             </div>
           </div>
         </div>
-        <div class="under-board">
-          <p class="desktop-hint">${t.helpMouse}</p>
-          <p class="touch-hint">${t.helpTouch}</p>
+        <div class="under-board ${sharedStyles['under-board']}">
+          <p class="desktop-hint ${sharedStyles['desktop-hint']}">${t.helpMouse}</p>
+          <p class="touch-hint ${sharedStyles['touch-hint']}">${t.helpTouch}</p>
           <p>${t.helpChord}</p>
         </div>
-        <p class="scroll-hint" ${game.config.width <= 9 ? 'hidden' : ''}>${t.scrollHint}</p>
-        <p id="storage-note" class="storage-note" hidden>${t.storageOff}</p>
+        <p
+          class="scroll-hint ${sharedStyles['scroll-hint']}"
+          ${game.config.width <= 9 ? 'hidden' : ''}
+        >
+          ${t.scrollHint}
+        </p>
+        <p id="storage-note" class="storage-note ${sharedStyles['storage-note']}" hidden>
+          ${t.storageOff}
+        </p>
       </section>
     </main>
-    <footer class="site-footer">
+    <footer class="site-footer ${sharedStyles['site-footer']}">
       <span>${t.footer}</span>
       <div>
         <span>${icon('check')}${t.firstSafe}</span>
@@ -219,7 +247,11 @@ export function appTemplate(
       </div>
     </footer>
     <dialog id="dialog" aria-labelledby="dialog-title">
-      <button class="dialog-close icon-button" data-action="close" aria-label="${t.close}">
+      <button
+        class="dialog-close ${sharedStyles['dialog-close']} icon-button ${sharedStyles['icon-button']}"
+        data-action="close"
+        aria-label="${t.close}"
+      >
         ${icon('close')}
       </button>
       <div id="dialog-content"></div>
@@ -238,14 +270,14 @@ export function helpTemplate(language: Language): string {
   ]
 
   return /* HTML */ `
-    <p class="eyebrow">HOW TO PLAY</p>
+    <p class="eyebrow ${sharedStyles['eyebrow']}">HOW TO PLAY</p>
     <h2 id="dialog-title">${t.howTitle}</h2>
-    <p class="dialog-intro">${t.howIntro}</p>
-    <ol class="help-list">
+    <p class="dialog-intro ${sharedStyles['dialog-intro']}">${t.howIntro}</p>
+    <ol class="help-list ${sharedStyles['help-list']}">
       ${steps.map((step, index) => helpStep(step, index)).join('')}
     </ol>
     ${boardHelpTemplate(language)}
-    <p class="safe-note">${icon('check')}${t.readyNote}</p>
+    <p class="safe-note ${sharedStyles['safe-note']}">${icon('check')}${t.readyNote}</p>
   `
 }
 
@@ -258,10 +290,10 @@ export function recordsTemplate(
   const t = translations[language]
 
   return /* HTML */ `
-    <p class="eyebrow">PERSONAL RECORDS</p>
+    <p class="eyebrow ${sharedStyles['eyebrow']}">PERSONAL RECORDS</p>
     <h2 id="dialog-title">${t.records}</h2>
-    <p class="dialog-intro">${t.recordsNote}</p>
-    <div class="record-tabs">
+    <p class="dialog-intro ${sharedStyles['dialog-intro']}">${t.recordsNote}</p>
+    <div class="record-tabs ${sharedStyles['record-tabs']}">
       ${RANKED_DIFFICULTIES.map((key) => recordTab(key, recordMode, t)).join('')}
     </div>
     ${recordsTable(language, records, t)}
@@ -273,11 +305,11 @@ export function customTemplate(language: Language, config: Config): string {
   const t = translations[language]
 
   return /* HTML */ `
-    <p class="eyebrow">YOUR OWN LITTLE FIELD</p>
+    <p class="eyebrow ${sharedStyles['eyebrow']}">YOUR OWN LITTLE FIELD</p>
     <h2 id="dialog-title">${t.custom}</h2>
-    <p class="dialog-intro">${t.customHint}</p>
+    <p class="dialog-intro ${sharedStyles['dialog-intro']}">${t.customHint}</p>
     <form id="custom-form">
-      <div class="custom-fields">
+      <div class="custom-fields ${sharedStyles['custom-fields']}">
         <label>
           ${t.width}
           <input
@@ -315,8 +347,10 @@ export function customTemplate(language: Language, config: Config): string {
           />
         </label>
       </div>
-      <p id="custom-error" class="form-error" role="alert"></p>
-      <button class="primary-button" type="submit">${t.start}${icon('arrow')}</button>
+      <p id="custom-error" class="form-error ${sharedStyles['form-error']}" role="alert"></p>
+      <button class="primary-button ${sharedStyles['primary-button']}" type="submit">
+        ${t.start}${icon('arrow')}
+      </button>
     </form>
   `
 }
@@ -328,15 +362,20 @@ export function resultTemplate(language: Language, state: SessionState): string 
   const won = game.phase === 'won'
 
   return /* HTML */ `
-    <div class="result-symbol ${won ? 'win' : ''}">${icon(won ? 'flag' : 'mine')}</div>
+    <div class="result-symbol ${sharedStyles['result-symbol']} ${won ? 'win' : ''}">
+      ${icon(won ? 'flag' : 'mine')}
+    </div>
     <h2 id="dialog-title">${won ? t.won : t.lost}</h2>
-    <p class="dialog-intro">${won ? t.wonNote : t.lostNote}</p>
-    <p class="result-time">
+    <p class="dialog-intro ${sharedStyles['dialog-intro']}">${won ? t.wonNote : t.lostNote}</p>
+    <p class="result-time ${sharedStyles['result-time']}">
       ${formatTime(elapsed, true)}
       <span>${t.time}</span>
     </p>
     ${won && currentScore ? nameForm(currentScore, t) : ''}
-    <button class="primary-button result-restart" data-action="restart-confirmed">
+    <button
+      class="primary-button ${sharedStyles['primary-button']} result-restart ${sharedStyles['result-restart']}"
+      data-action="restart-confirmed"
+    >
       ${icon('reset')}${t.restart}
     </button>
   `
@@ -348,10 +387,17 @@ export function restartTemplate(language: Language): string {
 
   return /* HTML */ `
     <h2 id="dialog-title">${t.confirmTitle}</h2>
-    <p class="dialog-intro">${t.confirmNote}</p>
-    <div class="dialog-actions">
-      <button class="secondary-button" data-action="close">${t.cancel}</button>
-      <button class="primary-button" data-action="restart-confirmed">${t.restart}</button>
+    <p class="dialog-intro ${sharedStyles['dialog-intro']}">${t.confirmNote}</p>
+    <div class="dialog-actions ${sharedStyles['dialog-actions']}">
+      <button class="secondary-button ${sharedStyles['secondary-button']}" data-action="close">
+        ${t.cancel}
+      </button>
+      <button
+        class="primary-button ${sharedStyles['primary-button']}"
+        data-action="restart-confirmed"
+      >
+        ${t.restart}
+      </button>
     </div>
   `
 }
@@ -396,7 +442,7 @@ function recordTab(key: RankedDifficulty, selected: Difficulty, messages: Messag
 function recordsTable(language: Language, records: readonly Score[], messages: Messages): string {
   if (records.length === 0) {
     return /* HTML */ `
-      <div class="empty-records">
+      <div class="empty-records ${sharedStyles['empty-records']}">
         ${icon('trophy')}
         <p>${messages.noRecords}</p>
       </div>
@@ -404,7 +450,7 @@ function recordsTable(language: Language, records: readonly Score[], messages: M
   }
 
   return /* HTML */ `
-    <table class="records-table">
+    <table class="records-table ${sharedStyles['records-table']}">
       <thead>
         <tr>
           <th>#</th>
@@ -440,10 +486,12 @@ function recordRow(language: Language, score: Score, index: number): string {
 /** Render the editable name of the already-saved result, escaping its attribute value. */
 function nameForm(score: Score, messages: Messages): string {
   return /* HTML */ `
-    <p class="saved-label">${icon('check')}${messages.recordSaved}</p>
+    <p class="saved-label ${sharedStyles['saved-label']}">
+      ${icon('check')}${messages.recordSaved}
+    </p>
     <form id="name-form">
       <label for="player-name">${messages.name}</label>
-      <div class="name-field">
+      <div class="name-field ${sharedStyles['name-field']}">
         <input
           id="player-name"
           name="name"
@@ -451,7 +499,9 @@ function nameForm(score: Score, messages: Messages): string {
           value="${escapeHtml(score.name)}"
           autocomplete="nickname"
         />
-        <button class="secondary-button">${messages.save}</button>
+        <button class="secondary-button ${sharedStyles['secondary-button']}">
+          ${messages.save}
+        </button>
       </div>
     </form>
   `

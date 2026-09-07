@@ -1,3 +1,4 @@
+import { sharedStyles } from './shared-styles.js'
 import { neighbors } from '../game/engine.js'
 import { magneticProjection } from '../game/magnetic-field.js'
 import { message } from '../i18n.js'
@@ -21,7 +22,7 @@ export function magneticPlaybar(language: Language, run: Expedition): string {
         : forecast.polarity === 'pull'
           ? '→│←'
           : '←│→'
-  return `<div class="magnetic-playbar"><div class="magnetic-key" data-polarity="${forecast.kind === 'field' ? forecast.polarity : forecast.kind}"><span class="magnetic-symbol ${forecast.kind === 'field' && forecast.axis === 'vertical' ? 'vertical' : ''}" aria-hidden="true">${symbol}</span><strong>${magneticStatus(language, run.encounter)}</strong></div></div>`
+  return `<div class="magnetic-playbar ${sharedStyles['magnetic-playbar']}"><div class="magnetic-key ${sharedStyles['magnetic-key']}" data-polarity="${forecast.kind === 'field' ? forecast.polarity : forecast.kind}"><span class="magnetic-symbol ${sharedStyles['magnetic-symbol']} ${forecast.kind === 'field' && forecast.axis === 'vertical' ? 'vertical' : ''}" aria-hidden="true">${symbol}</span><strong>${magneticStatus(language, run.encounter)}</strong></div></div>`
 }
 
 /** Decorate advertised anchors without leaking their covered clue numbers. */

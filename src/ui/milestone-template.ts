@@ -1,3 +1,4 @@
+import { sharedStyles } from './shared-styles.js'
 import { progressionStyles } from './progression-styles.js'
 import { campStyles } from './camp-styles.js'
 import { MILESTONES, milestoneProgress, milestoneValue } from '../game/milestones.js'
@@ -59,10 +60,10 @@ export function milestonesTemplate(
                 ? relicSprite(reward.id)
                 : 'treasure'
         return `<article class="milestone-card ${campStyles['milestone-card']} ${done ? 'is-claimed' : ready ? 'is-ready' : ''}" data-milestone="${entry.id}">
-        <div class="milestone-heading ${campStyles['milestone-heading']}">${spriteImage(sprite)}<div><p class="eyebrow">${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.completed') : message(language, 'milestone-template.in-progress')}</p><h2>${copy.name}</h2></div></div>
+        <div class="milestone-heading ${campStyles['milestone-heading']}">${spriteImage(sprite)}<div><p class="eyebrow ${sharedStyles['eyebrow']}">${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.completed') : message(language, 'milestone-template.in-progress')}</p><h2>${copy.name}</h2></div></div>
         <p>${copy.note}</p><div class="milestone-progress ${campStyles['milestone-progress']}"><progress max="${entry.target}" value="${value}" aria-label="${copy.name}"></progress><span>${number.format(value)} / ${number.format(entry.target)}</span></div>
         <div class="milestone-reward ${campStyles['milestone-reward']}">${title ? `<span class="title-reward ${progressionStyles['title-reward']}">✦ ${message(language, 'milestone-template.title')} · ${copy.name}</span><p class="title-reward-effect">${titleEffectCopy(language, title)}</p>` : ''}<strong>+${number.format(entry.supplies)} ${variantCopy(language).supplies}</strong>${description ? `<h3>${description.name}</h3><p>${description.note}</p>` : ''}</div>
-        <button class="${ready && !done ? 'primary-button' : 'text-button'}" data-control="claim-milestone:${entry.id}" data-focus-fallback="camp-page:${kind}" ${done || !ready ? 'disabled' : ''}>${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.claim-reward') : message(language, 'milestone-template.keep-exploring')}</button>
+        <button class="${ready && !done ? `primary-button ${sharedStyles['primary-button']}` : `text-button ${sharedStyles['text-button']}`}" data-control="claim-milestone:${entry.id}" data-focus-fallback="camp-page:${kind}" ${done || !ready ? 'disabled' : ''}>${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.claim-reward') : message(language, 'milestone-template.keep-exploring')}</button>
       </article>`
       })
       .join('')}</div>`
