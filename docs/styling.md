@@ -14,7 +14,7 @@ The theme aliases the existing runtime palette in `src/tokens.css`: paper, surfa
 
 The expedition Sonar reading panel is the first migrated component: its shell, spacing, scrollable history and hover/focus/selected buttons use utilities. Semantic classes remain available for behavior and browser tests. Removed its duplicate custom CSS.
 
-Existing resets remain in place; Tailwind Preflight is deliberately omitted while the game relies on existing heading, button and image defaults. Generic border/background resets live in the `base` layer so utility hover/focus/selected states can override them. Existing unlayered component CSS still outranks layered utilities. When migrating another component, remove the corresponding legacy declarations rather than using `!important` to fight them. Borders should explicitly use `tw:border-solid` because Preflight is absent.
+Existing resets remain in place; Tailwind Preflight is deliberately omitted while the game relies on existing heading, button and image defaults. Generic border/background resets live in the `base` layer so utility hover/focus/selected states can override them. All legacy styles now share the `components` layer, below `utilities`, through the single `src/style.css` entry. Existing selector order is preserved within that layer. When migrating another component, remove the corresponding legacy declarations rather than using `!important` to fight them. Borders should explicitly use `tw:border-solid` because Preflight is absent.
 
 Keep board geometry, character movement, mine effects and encounter animations in their specialized CSS. Extract a reusable template helper when markup repeats; do not introduce another global selector for every new panel.
 
@@ -28,4 +28,12 @@ References: [Vite installation](https://tailwindcss.com/docs/installation/using-
 
 The relic menu shell and disclosure header also use utilities, including hover and keyboard-focus feedback. Its content layout and play-scale rules remain specialized CSS for a separate migration.
 
-The relic header icon retains a component CSS size override: the shared unlayered `.dungeon-sprite` dimensions outrank layered utilities. Browser acceptance checks its rendered 28px dimensions.
+The relic header icon retains its component CSS size override. New utility sizing can now override shared sprite defaults because of the explicit layer order. Browser acceptance checks its rendered 28px dimensions.
+
+## Camp and progression migration
+
+Camp overview, navigation, wallet, departure summary, locked equipment panel, shop filters/tiles/details, mission and achievement cards, and title selection use complete utility strings in `src/ui/camp-styles.ts` and `src/ui/progression-styles.ts`. Templates retain semantic classes and data attributes for interactions and accessibility. Responsive grid positions still use the existing runtime CSS variables; utilities reference their complete names.
+
+The single stylesheet entry imports the legacy sheets in their original order within `components`. `src/legacy.css` contains the previous general page styles; this is relocation, not a claim that those components have migrated. Do not also link an individual legacy sheet directly from HTML, which would bypass its layer. The reset remains in `base`; Preflight stays disabled. Board geometry, mobility effects, and notice animation/progress pseudo-elements remain specialized CSS.
+
+Run camp and milestone browser acceptance on the production preview, title/notice acceptance on the development server (it imports the notice controller for its fixture), and Echo acceptance on both. Camp coverage includes 320–3840px layouts, purchases, locked tools, keyboard/touch, persistence and selected states. Milestone coverage includes ready/claimed colors and icon sizing. For this migration, 28 before/after camp views at 390/900/1050/1440px matched computed geometry, typography and colors exactly.

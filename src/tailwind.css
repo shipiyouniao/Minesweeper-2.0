@@ -1,5 +1,5 @@
 /* Opt into utilities while retaining the existing game's reset and browser defaults. */
-@layer theme, base, utilities;
+@layer theme, base, components, utilities;
 @import 'tailwindcss/theme.css' layer(theme) prefix(tw);
 @import 'tailwindcss/utilities.css' layer(utilities) prefix(tw) source(none);
 @source './ui';

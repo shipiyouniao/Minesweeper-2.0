@@ -69,10 +69,34 @@ try {
     if (language === 'zh')
       await page.screenshot({ path: '.native/milestone-ui/overview.png', fullPage: true })
     await page.locator('[data-control="camp-page:missions"]').click()
-    assert.equal(await page.locator('.milestone-card').count(), 20)
+    assert.equal(await page.locator('.milestone-card').count(), 21)
+    assert.equal(
+      await page
+        .locator('[data-milestone="first-steps"]')
+        .evaluate((card) => getComputedStyle(card).borderTopColor),
+      'rgb(115, 159, 141)',
+      'completed unclaimed goals retain their ready border',
+    )
+    assert.deepEqual(
+      await page
+        .locator('.milestone-heading img')
+        .first()
+        .evaluate((icon) => {
+          const rect = icon.getBoundingClientRect()
+          return [rect.width, rect.height]
+        }),
+      [60, 60],
+    )
     assert.ok(await page.locator('[data-control="claim-milestone:first-boss"]').isDisabled())
     await page.locator('[data-control="claim-milestone:first-steps"]').focus()
     await page.keyboard.press('Enter')
+    assert.equal(
+      await page
+        .locator('[data-milestone="first-steps"]')
+        .evaluate((card) => getComputedStyle(card).backgroundColor),
+      'rgb(241, 244, 239)',
+      'claimed goals retain their distinct state',
+    )
     assert.equal((await saved(page)).camp.supplies, 30)
     assert.ok(await page.locator('[data-control="claim-milestone:first-steps"]').isDisabled())
     await page.reload()
@@ -90,7 +114,7 @@ try {
     }
     await page.setViewportSize({ width: 1440, height: 1000 })
     await page.locator('[data-control="camp-page:achievements"]').click()
-    assert.equal(await page.locator('.milestone-card').count(), 22)
+    assert.equal(await page.locator('.milestone-card').count(), 24)
     if (language === 'zh')
       await page.screenshot({ path: '.native/milestone-ui/achievements.png', fullPage: true })
     await page.locator('[data-control="claim-milestone:veteran"]').click()
