@@ -69,12 +69,12 @@ function leaveRoom(initial: Expedition): Expedition {
   return run
 }
 
-test('all 22 achievement titles have finite identities, complete copy and no currency on equip', () => {
+test('all 24 achievement titles have finite identities, complete copy and no currency on equip', () => {
   assert.deepEqual(
     new Set(TITLES),
     new Set(MILESTONES.filter((entry) => entry.kind === 'achievements').map((entry) => entry.id)),
   )
-  assert.equal(TITLES.length, 22)
+  assert.equal(TITLES.length, 24)
   assert.equal(parseTitle('first-boss'), null)
   assert.equal(parseTitle('invented'), null)
   const storage = new MemoryStorage()
@@ -350,11 +350,11 @@ test('authored goal budget supports stepped unlocks without funding the shop aft
       (total, entry) => total + entry.supplies,
       0,
     )
-  assert.equal(sum('missions'), 2190)
-  assert.equal(sum('achievements'), 9150)
+  assert.equal(sum('missions'), 2290)
+  assert.equal(sum('achievements'), 9950)
   assert.ok(MILESTONES.every((entry) => entry.supplies > 0 && entry.supplies <= 800))
   const shop = UPGRADES.reduce((total, item) => total + upgradeCost(item), 0)
-  assert.equal(shop, 39800)
+  assert.equal(shop, 41400)
   assert.ok(
     sum('missions') + sum('achievements') + 2 * maximumDifficultySupplies(variantTier('expert')) <
       shop / 2,

@@ -1,3 +1,5 @@
+import { advanceEcho, openEcho, strikeEcho } from './echo-battle.js'
+import { useExpeditionSonar } from './expedition-sonar.js'
 import { neighbors } from './engine.js'
 import { inspectArea } from './dungeon-discovery.js'
 import { applyDamageRelics } from './relic-effects.js'
@@ -35,6 +37,7 @@ function correctFlags(run: Expedition, index: number): boolean {
 function interact(run: Expedition, index: number): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+  if (encounter.kind === 'echo') return openEcho({ ...run, encounter }, index)
   if (encounter.kind === 'clock') return redirectClock({ ...run, encounter }, index)
   if (encounter.kind === 'magnetic') return lureMagnetic({ ...run, encounter }, index)
   if (encounter.kind === 'mirror') {
@@ -89,6 +92,7 @@ function interact(run: Expedition, index: number): Expedition {
 function endTurn(run: Expedition): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+  if (encounter.kind === 'echo') return advanceEcho({ ...run, encounter })
   if (encounter.kind === 'clock') return advanceClock({ ...run, encounter })
   if (encounter.kind === 'magnetic') return advanceMagnetic({ ...run, encounter })
   const damage = incomingCombatDamage(run, battleThreat(encounter, run.player, run.game.config))
@@ -146,6 +150,9 @@ export function actBattle(
   else if (action.type === 'interact') next = interact(run, action.index)
   else if (action.type === 'shift' && encounter.kind === 'mirror')
     next = shiftMirror({ ...run, encounter })
+  else if (action.type === 'sonar') next = useExpeditionSonar(run, action.index)
+  else if (action.type === 'attack' && encounter.kind === 'echo')
+    next = strikeEcho({ ...run, encounter }, strikeDamage(run))
   else if (action.type === 'attack' && encounter.kind === 'mirror')
     next = strikeMirror({ ...run, encounter }, strikeDamage(run))
   else if (action.type === 'attack') {

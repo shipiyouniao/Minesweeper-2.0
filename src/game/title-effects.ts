@@ -7,6 +7,8 @@ export const TITLES: readonly TitleId[] = [
   'bastion-flawless',
   'mirror-flawless',
   'clock-no-glass',
+  'echo-flawless',
+  'echo-precise',
   'magnetic-demolition',
   'brood-nest-spared',
   'web-untouched',
@@ -47,6 +49,9 @@ export function titleCombatStats(run: Expedition): CombatStats {
   let attack = 0
   let defense = 0
   let actions = 0
+  if (title === 'echo-flawless' && boss && run.health === run.maxHealth) defense = 1
+  if (title === 'echo-precise' && boss?.kind === 'echo' && boss.exposedUntil >= boss.turn)
+    attack = 1
 
   if (title === 'boss-slayer' && boss && boss.health * 2 <= boss.maxHealth) attack = 1
   if (title === 'abyss-clear' && run.health * 2 <= run.maxHealth) attack = 1

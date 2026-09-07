@@ -1,5 +1,46 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'echo.shifted': string
+  readonly 'echo.phase-break': string
+  readonly 'echo.rhythm': string
+
+  readonly 'echo.hunt': string
+  readonly 'echo.hunt-note': string
+  readonly 'echo.flawless': string
+  readonly 'echo.flawless-note': string
+  readonly 'echo.precise': string
+  readonly 'echo.precise-note': string
+  readonly 'echo.flawless-effect': string
+  readonly 'echo.precise-effect': string
+
+  readonly 'echo.scene-0': string
+  readonly 'echo.scene-1': string
+  readonly 'echo.scene-2': string
+  readonly 'echo.scene-3': string
+  readonly 'echo.scene-4': string
+  readonly 'echo.scene-5': string
+  readonly 'echo.scene-6': string
+  readonly 'echo.scene-7': string
+  readonly 'echo.scene-8': string
+
+  readonly 'echo.locate': string
+  readonly 'echo.shell': string
+  readonly 'echo.fight': string
+  readonly 'echo.loan': string
+  readonly 'echo.body': string
+  readonly 'echo.candidates': string
+  readonly 'echo.obscured': string
+  readonly 'echo.reading': string
+  readonly 'echo.present': string
+  readonly 'echo.absent': string
+  readonly 'echo.stale': string
+  readonly 'echo.phase-note': string
+
+  readonly 'sonar-equipment.name': string
+  readonly 'sonar-equipment.note': string
+  readonly 'echo.name': string
+  readonly 'echo.status': string
+
   readonly 'battle-guide.approach-a-revealed-hourglass-and-return-a': string
   readonly 'battle-guide.approach-the-core-and-activate-it-to': string
   readonly 'battle-guide.clear-eggs-before-they-hatch-and-avoid': string

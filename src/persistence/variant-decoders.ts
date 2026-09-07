@@ -55,7 +55,11 @@ export function parseProfession(value: string | null): Profession | null {
 
 /** Accept only the declared exploration tools and combat equipment. */
 export function parseEquipment(value: string | null): Equipment | null {
-  return value === 'probe' || value === 'scanner' || value === 'guard' || value === 'field-radio'
+  return value === 'sonar' ||
+    value === 'probe' ||
+    value === 'scanner' ||
+    value === 'guard' ||
+    value === 'field-radio'
     ? value
     : parseCombatEquipment(value)
 }
@@ -67,6 +71,7 @@ export function parseUpgrade(value: string | null): Upgrade | null {
     value === 'archaeologist' ||
     value === 'alchemist' ||
     value === 'sentinel' ||
+    value === 'sonar' ||
     value === 'workshop' ||
     value === 'archive'
     ? value
@@ -146,7 +151,8 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
         value === 'brood' ||
         value === 'mirror' ||
         value === 'magnetic' ||
-        value === 'clock') &&
+        value === 'clock' ||
+        value === 'echo') &&
       !bossKinds.includes(value)
     )
       bossKinds.push(value)
@@ -164,7 +170,8 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
       kind === 'brood' ||
       kind === 'mirror' ||
       kind === 'magnetic' ||
-      kind === 'clock')
+      kind === 'clock' ||
+      kind === 'echo')
       ? {
           seed,
           floor,
@@ -313,6 +320,7 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
   switch (type) {
     case 'reveal':
     case 'move':
+    case 'sonar':
     case 'probe':
     case 'interact':
     case 'mark-safe':

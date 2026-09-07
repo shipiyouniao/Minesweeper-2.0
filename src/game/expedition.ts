@@ -1,3 +1,10 @@
+import {
+  EMPTY_EXPEDITION_SONAR,
+  useExpeditionSonar,
+  rechargeExpeditionSonar,
+  echoObscured,
+  refreshExpeditionReadings,
+} from './expedition-sonar.js'
 import { upgradeCost } from './camp-progression.js'
 import {
   applyTitleEntry,
@@ -59,6 +66,7 @@ export const EQUIPMENT: readonly Equipment[] = [
   'guard',
   ...COMBAT_EQUIPMENT,
   'field-radio',
+  'sonar',
 ]
 
 /** Reserve two points for shields and heavy combat gear; other equipment costs one. */
@@ -81,6 +89,7 @@ export function allowedDeparture(
     ownsProfession(camp, profession) &&
     (equipment.length === 0 || camp.upgrades.includes('workshop')) &&
     new Set(equipment).size === equipment.length &&
+    (!equipment.includes('sonar') || camp.upgrades.includes('sonar')) &&
     (!equipment.includes('field-radio') || hasFieldRadio(camp)) &&
     equipment.every(
       (item) => !parseCombatEquipment(item) || camp.upgrades.includes(parseCombatEquipment(item)!),
@@ -93,7 +102,10 @@ export function allowedDeparture(
 
 /** Equipment licenses require the workshop; training and other unlocks remain independent. */
 export function equipmentPurchaseLocked(camp: Camp, upgrade: Upgrade): boolean {
-  return parseCombatEquipment(upgrade) !== null && !camp.upgrades.includes('workshop')
+  return (
+    (upgrade === 'sonar' || parseCombatEquipment(upgrade) !== null) &&
+    !camp.upgrades.includes('workshop')
+  )
 }
 
 /** Purchase an unowned camp facility without modifying the original camp. */
@@ -114,6 +126,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
   return {
     ...layout,
     encounter: null,
+    sonar: { ...EMPTY_EXPEDITION_SONAR, charges: departure.equipment.includes('sonar') ? 2 : 0 },
     departure,
     floor,
     player: layout.entrance,
@@ -325,6 +338,7 @@ function advanceFloor(run: Expedition, relic?: Relic): Expedition {
   let result: Expedition = {
     ...next,
     relics,
+    sonar: { ...run.sonar, loan: 0, loanProgress: 0, readings: [] },
     runTriggers: run.runTriggers,
     titleProgress: { ...run.titleProgress, floorChest: false },
     health: run.health + growth,
@@ -370,6 +384,8 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
       const game = act(run.game, { type: action.type, index: action.index })
       return game === run.game ? run : { ...run, game, steps: run.steps + 1 }
     }
+    case 'sonar':
+      return useExpeditionSonar(run, action.index)
     case 'sweep':
       return scanDungeon(run, action.row)
     case 'probe':
@@ -381,8 +397,12 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
 
 /** Apply the accepted intent, then process each newly earned discovery reaction once. */
 export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
-  if (action.type === 'chord') return chordExpedition(run, action.index, revealForBatch)
-  return applyExpedition(run, action, 'enter')
+  if (action.type === 'chord' && echoObscured(run, action.index)) return run
+  const next =
+    action.type === 'chord'
+      ? chordExpedition(run, action.index, revealForBatch)
+      : applyExpedition(run, action, 'enter')
+  return rechargeExpeditionSonar(run, refreshExpeditionReadings(run, next), action)
 }
 
 /** Retain normal movement, damage and discovery while requiring an explicit stair entry. */
@@ -407,8 +427,18 @@ function applyExpedition(
     next !== run &&
     (action.type === 'move' || action.type === 'reveal') &&
     action.index === run.exit
-  )
+  ) {
+    // Credit the old room before a boss entry replaces its cells and starts a separate loan.
+    // The outer recharge rejects room changes, so this excavation cannot be counted twice.
+    if (
+      !next.encounter &&
+      next.phase === 'exploring' &&
+      next.player === next.exit &&
+      isEncounterFloor(next)
+    )
+      next = rechargeExpeditionSonar(run, next, action)
     next = finishAtExit(next)
+  }
 
   // Combat completion is the only way to collect the guarded floor's ordinary exit reward.
   if (next.phase === 'boss' && next.encounter?.health === 0) {

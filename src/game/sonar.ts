@@ -111,7 +111,7 @@ export function compareSonar(
 export function sonarCharges(state: Sonar): number {
   return SONAR_CHARGES + Math.floor(state.excavations / 4) - state.readings.length
 }
-/** Mask layout depends only on public position and seed; scans permanently clarify their center. */
+/** Mask layout depends only on public position and seed; scans permanently clarify their entire region. */
 export function sonarObscured(state: Sonar, index: number): boolean {
   const cell = state.game.cells[index]
   return (
@@ -119,6 +119,8 @@ export function sonarObscured(state: Sonar, index: number): boolean {
     cell?.visibility === 'revealed' &&
     cell.adjacent > 0 &&
     ((Math.imul(index + 1, 2654435761) ^ state.game.seed) >>> 0) % 4 !== 0 &&
-    !state.readings.some((reading) => reading.center === index)
+    !state.readings.some((reading) =>
+      sonarRegion(state.game.config, reading.center).includes(index),
+    )
   )
 }

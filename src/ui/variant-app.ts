@@ -254,9 +254,11 @@ export class VariantApp implements VariantInputActions {
     if (!run || this.paused || this.moving || this.view.dialogOpen) return
 
     this.expedition(
-      tool === 'probe'
-        ? { type: 'probe', index }
-        : { type: 'sweep', row: Math.floor(index / run.game.config.width) },
+      tool === 'sonar'
+        ? { type: 'sonar', index }
+        : tool === 'probe'
+          ? { type: 'probe', index }
+          : { type: 'sweep', row: Math.floor(index / run.game.config.width) },
     )
     this.render()
   }
@@ -480,6 +482,7 @@ export class VariantApp implements VariantInputActions {
         if (this.session instanceof ExpeditionSession)
           this.result(this.session.purchase(command.value))
         break
+      case 'sonar':
       case 'probe':
       case 'scan':
         this.input.selectTool(command.type)

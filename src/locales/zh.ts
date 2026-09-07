@@ -2,6 +2,48 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'echo.shifted': '真身换位了。旧的真身读数已失效，重新扫描。',
+  'echo.phase-break': '这一段外壳已击破，回合结束后真身换位。',
+  'echo.rhythm': '破绽持续 3 回合。每第 3 回合声波停歇，抓紧走位或攻击。',
+
+  'echo.hunt': '讨伐回声守卫',
+  'echo.hunt-note': '击败回声守卫。',
+  'echo.flawless': '踏音无痕',
+  'echo.flawless-note': '全程不损失生命，击败回声守卫。',
+  'echo.precise': '一听即中',
+  'echo.precise-note': '总计使用不超过 6 次声呐，击败回声守卫。',
+  'echo.flawless-effect': '满生命时，防御 +1。',
+  'echo.precise-effect': '回声守卫外壳打开时，攻击 +1。',
+
+  'echo.scene-0': '三道回声，一颗心脏',
+  'echo.scene-1': '三尊铜像一动不动。脚步声从三个方向传回来，震得地板上的刻痕都看不清了。',
+  'echo.scene-2': '选吧。我的另外两个身体，也在等你的刀。',
+  'echo.scene-3': '声音一模一样……可回声停下来的时候，好像还有一处在响。',
+  'echo.scene-4': '台阶上的仪器忽然响了一声。几条泛绿的地缝从脚边延伸进房间。',
+  'echo.scene-5': '这东西能听见。扫过的这一片要是没动静，就能排除一边，再试另一边。',
+  'echo.scene-6': '听得太入神，下一声就会穿过你的身体。',
+  'echo.scene-7': '一条地缝亮成了红色。三尊铜像同时吸入一口长气。',
+  'echo.scene-8': '找到还在响的那个，靠近，撬开它。声波过来之前，得给自己留条退路。',
+
+  'echo.locate': '扫描各个共鸣体，排除假身。',
+  'echo.shell': '找出真身后，靠近并点击它，打开外壳。',
+  'echo.fight': '趁破绽攻击，结束回合前离开红色声波区域。',
+  'echo.loan': '临时声呐 · {charges}/3 · 充能 {progress}/4',
+  'echo.body': '共鸣体 {body}',
+  'echo.candidates': '可能的真身：{bodies}',
+  'echo.obscured': '模糊数字',
+  'echo.reading': '第 {row} 行 {column} 列 · {mines} 雷',
+  'echo.present': '区域内有真身',
+  'echo.absent': '区域内无真身',
+  'echo.stale': '上个阶段',
+  'echo.phase-note': '打掉一段血量后真身换位，临时声呐补足 2 次。旧的真身读数失效。',
+
+  'sonar-equipment.name': '声呐',
+  'sonar-equipment.note':
+    '1 点配装 · 初始 2 次，安全挖开 12 次恢复 1 次，上限 3 次。扫描 3×3 雷数，范围内数字永久清晰，只翻开中心格。',
+  'echo.name': '回声守卫',
+  'echo.status': '阶段 {phase}/3 · 破绽剩余 {window} 回合',
+
   'battle-guide.approach-a-revealed-hourglass-and-return-a':
     '靠近已揭开的沙漏，转送法术，解除首领护罩。',
   'battle-guide.approach-the-core-and-activate-it-to': '靠近核心并启动，打开攻击窗口。',
@@ -595,7 +637,7 @@ export const zhMessages: MessageCatalog = {
   'sonar-copy.sonar': '声呐',
   'sonar-copy.spend-a-pulse': '发出回声',
   'sonar-copy.start-with-three-pulses-four-safe-excavation':
-    '开局三次扫描，每安全挖开四次补一次；点击选点或拖入声呐，揭开中心格，地雷变成金旗，周围保持模糊。重复选取同一中心只调出旧读数。Q 瞄准，Enter / 空格扫描，Esc 取消；F 插旗，S 标记疑似安全，C 快速开格，右键或长按循环标记。扫描次数与棋盘操作数分开记录。',
+    '开局三次扫描，每安全挖开四次补一次；点击选点或拖入声呐，揭开中心格，地雷变成金旗。扫描范围内的数字永久清晰，其他格子仍需自己挖开。重复选取同一中心只调出旧读数。Q 瞄准，Enter / 空格扫描，Esc 取消；F 插旗，S 标记疑似安全，C 快速开格，右键或长按循环标记。扫描次数与棋盘操作数分开记录。',
   'sonar-copy.the-first-opening-and-its-neighbors-are':
     '第一格及相邻区域安全。挖开所有安全格即可获胜。',
   'sonar-copy.the-saved-puzzle-could-not-be-restored': '这张旧棋盘无法恢复，已保留有效纪录。',
@@ -703,7 +745,7 @@ export const zhMessages: MessageCatalog = {
   'tutorial-lessons.leave-a-reliable-mark': '把推理结果记下来',
   'tutorial-lessons.make-a-second-deduction': '再推理一次',
   'tutorial-lessons.most-numbered-squares-are-obscured-select-sonar':
-    '多数数字被模糊标记遮住。先点声呐，再点发光格：中心格会直接揭开；若是地雷则变成金旗，不会引爆，同时得到周围 3 × 3 的总雷数。',
+    '多数数字被模糊标记遮住。先点声呐，再点发光格：中心格会直接揭开；若是地雷则变成金旗，不会引爆，同时得到周围 3 × 3 的总雷数。范围内的数字会永久清晰，未翻开的其他格子仍需自己挖开。',
   'tutorial-lessons.move-to-the-glowing-open-square-your':
     '点击发光的已开格，走过去。角色只能沿已知安全路线移动。普通楼层没有回合倒计时，也不消耗行动点。',
   'tutorial-lessons.one-button-four-actions': '一个按钮，切换操作',

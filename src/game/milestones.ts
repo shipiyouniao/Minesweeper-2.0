@@ -12,6 +12,31 @@ import type {
 
 export const MILESTONES: readonly MilestoneDefinition[] = [
   {
+    id: 'hunt-echo',
+    kind: 'missions',
+    metric: 'bossKill',
+    bossKind: 'echo',
+    target: 1,
+    supplies: 100,
+    reward: null,
+  },
+  {
+    id: 'echo-flawless',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 400,
+    reward: null,
+  },
+  {
+    id: 'echo-precise',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 400,
+    reward: null,
+  },
+  {
     id: 'bastion-flawless',
     kind: 'achievements',
     metric: 'challenge',
@@ -460,6 +485,9 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
   }
   const earned: MilestoneId[] = []
   if (boss && known && attempt) {
+    if (boss === 'echo' && !attempt.hurt) earned.push('echo-flawless')
+    if (boss === 'echo' && after.encounter?.kind === 'echo' && after.encounter.pulsesUsed <= 6)
+      earned.push('echo-precise')
     if (boss === 'brood' && !attempt.failed) earned.push('web-untouched')
     if (boss === 'magnetic' && !attempt.failed) earned.push('field-unscathed')
     if (boss === 'bastion' && !attempt.hurt) earned.push('bastion-flawless')

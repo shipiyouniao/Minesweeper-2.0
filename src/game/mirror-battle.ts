@@ -65,6 +65,7 @@ export function enterMirror(run: Expedition): Expedition {
   const health = 10 + tier.health
   return forecastMirror({
     ...run,
+    sonar: { ...run.sonar, readings: [], loan: 0, loanProgress: 0 },
     ...layout.dawn,
     entrance: layout.entrance,
     exit: layout.boss,

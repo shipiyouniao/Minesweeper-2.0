@@ -17,6 +17,18 @@ export function milestoneCopy(language: Language, id: MilestoneId): VariantDescr
         name: message(language, 'milestone-copy.beyond-the-mirror'),
         note: message(language, 'milestone-copy.defeat-both-twins-without-losing-health-revival'),
       }
+    case 'hunt-echo':
+      return { name: message(language, 'echo.hunt'), note: message(language, 'echo.hunt-note') }
+    case 'echo-flawless':
+      return {
+        name: message(language, 'echo.flawless'),
+        note: message(language, 'echo.flawless-note'),
+      }
+    case 'echo-precise':
+      return {
+        name: message(language, 'echo.precise'),
+        note: message(language, 'echo.precise-note'),
+      }
     case 'clock-no-glass':
       return {
         name: message(language, 'milestone-copy.against-the-clock'),

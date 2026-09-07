@@ -21,6 +21,7 @@ export function enterClock(run: Expedition): Expedition {
   const health = 20 + tier.health * 2
   return forecastClock({
     ...run,
+    sonar: { ...run.sonar, readings: [], loan: 0, loanProgress: 0 },
     game: layout.game,
     walls: layout.walls,
     entrance: layout.entrance,

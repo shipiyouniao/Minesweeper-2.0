@@ -10,6 +10,10 @@ export function titleEffectCopy(language: Language, title: TitleId): string {
       return message(language, 'title-copy.defense-1-while-braced')
     case 'mirror-flawless':
       return message(language, 'title-copy.gain-1-shield-when-entering-a-boss')
+    case 'echo-flawless':
+      return message(language, 'echo.flawless-effect')
+    case 'echo-precise':
+      return message(language, 'echo.precise-effect')
     case 'clock-no-glass':
       return message(language, 'title-copy.every-third-boss-turn-starts-with-1')
     case 'magnetic-demolition':

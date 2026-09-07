@@ -1,3 +1,5 @@
+import { expeditionReadings } from './echo-board.js'
+import { expeditionSonarCharges } from '../game/expedition-sonar.js'
 import { message } from '../i18n.js'
 import { titleTemplate } from './title-template.js'
 import type { BoardInputMode } from '../types/ui.js'
@@ -116,13 +118,13 @@ export function expeditionTemplate(
     ${run.phase === 'reward' ? `<button class="primary-button" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="secondary-button retreat-button" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button>` : ''}
     <div class="board-play-area"><div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards"><div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true), boardZoomTemplate(language))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}<aside class="run-sidebar"><section class="run-overview">${camp ? titleTemplate(language, camp, run.departure.title) : ''}<p class="variant-note">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
     <p class="variant-note reward-rate">${t.rewardRate} ×${rate}</p>
-    ${vitalityTemplate(language, run)}</section>${tacticalTemplate(language, run)}
+    ${vitalityTemplate(language, run)}</section>${tacticalTemplate(language, run)}${expeditionReadings(language, run)}
       ${
         run.phase === 'exploring' || run.phase === 'boss'
           ? `<div class="variant-toolbar"><div class="action-dock expedition-dock" aria-label="${t.equipment}">
       <p class="dock-target-hint tool-hint" role="status"></p>
       ${run.phase === 'boss' ? tacticalControlsTemplate(language, run) : ''}
-      ${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}
+      ${run.departure.equipment.includes('sonar') || run.encounter?.kind === 'echo' ? toolButton('sonar', message(language, 'sonar-equipment.name'), expeditionSonarCharges(run)) : ''}${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}
       ${professionSkillTemplate(language, run)}${boardControlsTemplate(language, inputMode, 'data-control')}</div>
       ${run.probeReport ? `<p class="probe-result" role="status">${message(language, 'variant-copy.probe-found-count-mines', { count: run.probeReport.mines })}</p>` : ''}
       <button class="secondary-button retreat-button" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button></div>`
@@ -187,7 +189,7 @@ export function twinTemplate(language: Language, state: Twin, inputMode: BoardIn
 
 /** Render a square, explicitly targeted inventory button with a persistent charge badge. */
 function toolButton(tool: DungeonTool, label: string, count: number): string {
-  return `<button class="inventory-tool dock-slot" data-control="${tool}" data-tool="${tool}" aria-label="${label}: ${count}" title="${label}" aria-pressed="false" ${count === 0 ? 'disabled' : ''}>${spriteImage(tool === 'scan' ? 'scanner' : 'probe')}<span class="tool-count">${count}</span><span class="tool-label">${label}</span></button>`
+  return `<button class="inventory-tool dock-slot" data-control="${tool}" data-tool="${tool}" aria-label="${label}: ${count}" title="${label}" aria-pressed="false" ${count === 0 ? 'disabled' : ''}>${spriteImage(tool === 'scan' ? 'scanner' : tool)}<span class="tool-count">${count}</span><span class="tool-label">${label}</span></button>`
 }
 
 /** Keep results in distinct tier sections so unlike board sizes are never presented as peers. */

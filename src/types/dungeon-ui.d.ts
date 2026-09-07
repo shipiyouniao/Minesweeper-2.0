@@ -55,11 +55,13 @@ export type DungeonSprite =
   | 'wall'
   | 'probe'
   | 'scanner'
+  | 'sonar'
+  | 'echo-warden'
   | 'shield'
   | 'mine'
 
 /** Tools with an explicit area or row target; no implicit focus-derived target exists. */
-export type DungeonTool = 'probe' | 'scan'
+export type DungeonTool = 'probe' | 'scan' | 'sonar'
 
 /** One owned pointer drag, independent from a keyboard-selected tool. */
 export interface ToolDrag {

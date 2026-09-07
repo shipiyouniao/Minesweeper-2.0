@@ -2,6 +2,8 @@
 export type TitleId =
   | 'bastion-flawless'
   | 'mirror-flawless'
+  | 'echo-flawless'
+  | 'echo-precise'
   | 'clock-no-glass'
   | 'magnetic-demolition'
   | 'brood-nest-spared'

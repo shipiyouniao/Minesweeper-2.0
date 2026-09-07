@@ -30,12 +30,15 @@ export const UPGRADES: readonly Upgrade[] = [
   'duelist-marks',
   'chronologist-dials',
   'archive',
+  'sonar',
   ...COMBAT_PURCHASES,
 ]
 
 /** Offer early role variety, then a loadout milestone and a long-term relic-pool goal. */
 export function upgradeCost(upgrade: Upgrade): number {
   switch (upgrade) {
+    case 'sonar':
+      return 1600
     case 'cartographer-charts':
       return 350
     case 'salvager-kit':
@@ -87,6 +90,7 @@ function upgradeStage(upgrade: Upgrade): CampStage {
     case 'survival-charms':
     case 'prospector-seals':
     case 'workshop':
+    case 'sonar':
     case 'cartographer-charts':
     case 'salvager-kit':
     case 'mechanist-gears':

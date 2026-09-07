@@ -192,6 +192,7 @@ export function enterBattle(run: Expedition, kind: 'bastion' | 'brood'): Expedit
   }
   const result: Expedition = {
     ...run,
+    sonar: { ...run.sonar, readings: [], loan: 0, loanProgress: 0 },
     game: layout.game,
     walls: layout.walls,
     entrance: layout.entrance,
