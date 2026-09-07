@@ -27,7 +27,7 @@ const errors = []
 page.on('pageerror', (e) => errors.push(e.message))
 await mkdir('.native/playtest-ui', { recursive: true })
 async function openBoss(kind) {
-  const seed = 45 + ['bastion', 'brood', 'mirror', 'magnetic', 'clock'].indexOf(kind)
+  const seed = { bastion: 48, brood: 49, mirror: 50, magnetic: 45, clock: 46 }[kind]
   const fixture = battleFixture(seed).entered.save
   await page.goto(`${base}?ruleset=expedition&lang=zh`)
   await page.evaluate((save) => {

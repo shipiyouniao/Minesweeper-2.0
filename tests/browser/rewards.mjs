@@ -160,6 +160,14 @@ try {
     await seed(regular.previous)
     await page.locator(`[data-side="a"] [data-cell="${regular.last.index}"]`).click()
     await modal.waitFor()
+    assert.deepEqual(
+      await modal.locator('h2').evaluate((heading) => ({
+        focused: document.activeElement === heading,
+        outline: getComputedStyle(heading).outlineStyle,
+      })),
+      { focused: true, outline: 'none' },
+      'reward title receives focus without an action-style focus ring',
+    )
     assert.equal(await modal.locator('[data-control^="relic:"]').count(), 3)
     assert.equal(await page.locator('.variant-content [data-control^="relic:"]').count(), 0)
     const pending = await journal()
@@ -216,10 +224,13 @@ try {
     await page.screenshot({
       path: fileURLToPath(new URL('mobile.png', output)),
     })
-    const background = await page.evaluate(() => scrollY)
+    const background = await page.evaluate(() => document.querySelector('.ruleset-host').scrollTop)
     await wheelOver(modal, 400)
     assert.ok(await modal.evaluate((el) => el.scrollTop > 0))
-    assert.equal(await page.evaluate(() => scrollY), background)
+    assert.equal(
+      await page.evaluate(() => document.querySelector('.ruleset-host').scrollTop),
+      background,
+    )
     await modal.locator('[data-control="cancel"]').click()
     await page.locator('.variant-heading [data-control="pause"]').click()
     assert.equal(await modal.count(), 0)
@@ -243,6 +254,14 @@ try {
       if (finished.last.type === 'attack') await page.locator('[data-control="attack"]').click()
       else await page.locator(`[data-side="a"] [data-cell="${finished.last.index}"]`).click()
       await result.waitFor()
+      assert.deepEqual(
+        await result.locator('h2').evaluate((heading) => ({
+          focused: document.activeElement === heading,
+          outline: getComputedStyle(heading).outlineStyle,
+        })),
+        { focused: true, outline: 'none' },
+        'settlement title receives focus without an action-style focus ring',
+      )
       const settled = await settledSave()
       assert.equal(settled.journal, null)
       assert.equal(settled.camp.supplies, expeditionEarnings(finished.run))
@@ -290,10 +309,13 @@ try {
       await page.setViewportSize({ width: 375, height: 420 })
       const viewport = page.locator('.board-viewport').first()
       await viewport.scrollIntoViewIfNeeded()
-      const start = await page.evaluate(() => scrollY)
+      const start = await page.evaluate(() => document.querySelector('.ruleset-host').scrollTop)
       await wheelOver(viewport, 250)
       assert.ok(
-        await page.evaluate((value) => scrollY > value, start),
+        await page.evaluate(
+          (value) => document.querySelector('.ruleset-host').scrollTop > value,
+          start,
+        ),
         `${mode} must scroll the page`,
       )
     }
@@ -312,16 +334,26 @@ try {
     await viewport.evaluate((el) => {
       el.scrollTop = el.scrollHeight
     })
-    const bottom = await page.evaluate(() => scrollY)
+    const bottom = await page.evaluate(() => document.querySelector('.ruleset-host').scrollTop)
     await wheelOver(viewport, 200)
-    assert.ok(await page.evaluate((value) => scrollY > value, bottom))
+    assert.ok(
+      await page.evaluate(
+        (value) => document.querySelector('.ruleset-host').scrollTop > value,
+        bottom,
+      ),
+    )
     await viewport.scrollIntoViewIfNeeded()
     await viewport.evaluate((el) => {
       el.scrollTop = 0
     })
-    const top = await page.evaluate(() => scrollY)
+    const top = await page.evaluate(() => document.querySelector('.ruleset-host').scrollTop)
     await wheelOver(viewport, -150)
-    assert.ok(await page.evaluate((value) => scrollY < value, top))
+    assert.ok(
+      await page.evaluate(
+        (value) => document.querySelector('.ruleset-host').scrollTop < value,
+        top,
+      ),
+    )
     assert.deepEqual(errors, [])
     console.log(
       JSON.stringify({

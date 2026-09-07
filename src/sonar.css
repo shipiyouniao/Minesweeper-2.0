@@ -287,24 +287,6 @@
   gap: 12px;
   font: 20px var(--mono);
 }
-.sonar-dock .sonar-mode {
-  display: contents;
-}
-.sonar-dock .sonar-scan {
-  color: #237a77;
-}
-.sonar-dock .sonar-scan[aria-pressed='true'] {
-  border-color: #237a77;
-  background: #dfeee5;
-  box-shadow: 0 0 0 2px #237a7725;
-}
-.sonar-target-hint {
-  max-width: 380px;
-  font-size: 12px;
-  line-height: 1.6;
-  color: var(--muted);
-  margin: 0 0 0 16px;
-}
 .sonar-pause {
   position: absolute;
   inset: 0;
@@ -447,11 +429,6 @@
   .sonar-heading .eyebrow {
     display: none;
   }
-  .sonar-target-hint {
-    max-width: 150px;
-    font-size: 10px;
-    margin-left: 4px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .sonar-pulse {
@@ -484,11 +461,6 @@
 .sonar-log {
   max-height: 360px;
   overflow: auto;
-}
-
-.sonar-dock [data-control='scan'] {
-  touch-action: none;
-  user-select: none;
 }
 
 .cell.sonar-confirmed-mine {

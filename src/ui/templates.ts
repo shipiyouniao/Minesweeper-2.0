@@ -1,3 +1,4 @@
+import { gameplayStyles } from './gameplay-styles.js'
 import { DIFFICULTIES, RANKED_DIFFICULTIES } from '../game/difficulty.js'
 import { PRESETS } from '../game/engine.js'
 import { languageName, message, translations } from '../i18n.js'
@@ -146,7 +147,9 @@ export function appTemplate(
             </div>
           </div>
           <div class="board-play-area">
-            <div class="action-dock compact-dock">
+            <div
+              class="action-dock ${gameplayStyles['action-dock']} compact-dock ${gameplayStyles['compact-dock']}"
+            >
               ${boardControlsTemplate(language, inputMode, 'data-action')}
             </div>
             <div class="board-shell">

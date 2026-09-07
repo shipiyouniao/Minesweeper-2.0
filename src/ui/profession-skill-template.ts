@@ -1,3 +1,4 @@
+import { gameplayStyles } from './gameplay-styles.js'
 import { currentWaymark, riftLandings } from '../game/mobility-skills.js'
 import { professionSkillAvailability } from '../game/profession-skills.js'
 import { message } from '../i18n.js'
@@ -46,5 +47,5 @@ export function professionSkillTemplate(language: Language, run: Expedition): st
     status === 'ready' && !ready
       ? message(language, 'profession-skill-template.not-enough-action-points-end-your-turn')
       : professionSkillStatus(language, status)
-  return `<div class="dock-skill"><button class="dock-slot inventory-tool skill-button" data-control="skill" ${rift ? 'data-select-target="true"' : ''} aria-disabled="${!ready}" aria-label="${copy.name}" aria-describedby="skill-tooltip">${spriteImage(professionSkillSprite(run.departure.profession))}<strong>${copy.name}</strong></button><div class="skill-bubble" id="skill-tooltip" role="tooltip">${escapeHtml(ready ? note : reason)}</div><div class="dock-skill-panel" hidden><section class="profession-skill" data-control="skill-panel" tabindex="-1" aria-label="${copy.name}"><strong>${copy.name}</strong><p id="skill-description">${note}</p>${state}${targets}<p role="status">${reason}</p></section></div></div>`
+  return `<div class="dock-skill ${gameplayStyles['dock-skill']}"><button class="dock-slot inventory-tool skill-button" data-control="skill" ${rift ? 'data-select-target="true"' : ''} aria-disabled="${!ready}" aria-label="${copy.name}" aria-describedby="skill-tooltip">${spriteImage(professionSkillSprite(run.departure.profession))}<strong>${copy.name}</strong></button><div class="skill-bubble ${gameplayStyles['skill-bubble']}" id="skill-tooltip" role="tooltip">${escapeHtml(ready ? note : reason)}</div><div class="dock-skill-panel ${gameplayStyles['dock-skill-panel']}" hidden><section class="profession-skill" data-control="skill-panel" tabindex="-1" aria-label="${copy.name}"><strong>${copy.name}</strong><p id="skill-description">${note}</p>${state}${targets}<p role="status">${reason}</p></section></div></div>`
 }

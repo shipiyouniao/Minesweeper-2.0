@@ -88,72 +88,6 @@
 html:has(.expedition-dialog[open]) {
   overflow: hidden;
 }
-.relic-dialog {
-  width: min(820px, calc(100vw - 28px));
-  overscroll-behavior: contain;
-}
-.relic-dialog .choice-grid {
-  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
-  margin-bottom: 0;
-}
-.relic-dialog .choice-grid:has(> :nth-child(4)) {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.expedition-dialog h2:focus {
-  /* Initial focus announces the title; it is not an actionable choice. */
-  outline: none;
-}
-.expedition-result-dialog {
-  overscroll-behavior: contain;
-}
-.expedition-result-dialog > .primary-button {
-  width: 100%;
-}
-.settlement-total {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
-  margin: 28px 0;
-}
-.settlement-total .dungeon-sprite {
-  width: 96px;
-  height: 96px;
-}
-.settlement-total span {
-  color: var(--muted);
-}
-.settlement-total strong {
-  color: var(--blue);
-  font: 600 40px var(--mono);
-}
-.relic-dialog .choice-card {
-  align-items: center;
-  text-align: center;
-}
-.relic-dialog .choice-card .dungeon-sprite {
-  width: 88px;
-  height: 88px;
-  margin: 0 auto 8px;
-}
-@media (max-width: 520px) {
-  .relic-dialog .choice-grid,
-  .relic-dialog .choice-grid:has(> :nth-child(4)) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .relic-dialog .choice-card {
-    display: grid;
-    grid-template-columns: 56px minmax(0, 1fr);
-    text-align: left;
-    gap: 6px 12px;
-    padding: 16px;
-  }
-  .relic-dialog .choice-card .dungeon-sprite {
-    width: 56px;
-    height: 56px;
-    grid-row: span 2;
-    margin: 0;
-  }
-}
 .choice-card {
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -209,20 +143,6 @@ html:has(.expedition-dialog[open]) {
   color: var(--blue);
   font-size: 15px;
   margin: 22px 0;
-}
-.relic-trigger {
-  display: inline-block;
-  width: fit-content;
-  margin-top: 6px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  color: var(--blue);
-  background: #eef2ff;
-}
-.relic-list .dungeon-sprite {
-  width: 32px;
-  height: 32px;
-  margin-bottom: 6px;
 }
 .vitality-panel {
   max-width: 360px;
@@ -430,9 +350,6 @@ html:has(.expedition-dialog[open]) {
   gap: 12px;
   flex-wrap: wrap;
 }
-.run-sidebar {
-  padding: 8px 0;
-}
 .profession-preview {
   display: flex;
   align-items: center;
@@ -486,32 +403,10 @@ html:has(.expedition-dialog[open]) {
   height: 54px;
   object-fit: contain;
 }
-.run-sidebar h3 {
-  font-size: 14px;
-  margin: 26px 0 12px;
-}
 .variant-note {
   font-size: 12px;
   line-height: 1.8;
   color: var(--muted);
-}
-.relic-list {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.relic-list li {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 13px;
-}
-.relic-list span {
-  color: var(--muted);
-  line-height: 1.6;
-  font-size: 12px;
 }
 .scan-results {
   list-style: none;
@@ -845,85 +740,6 @@ dialog > p {
 .enlarged-boards .board {
   --cell: max(44px, calc(var(--fit-cell) * 1.4));
 }
-
-.tactical-panel {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 18px;
-  margin: 18px 0;
-  background: var(--surface);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px 24px;
-}
-.tactical-heading {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.tactical-heading > img {
-  width: 76px;
-  height: 76px;
-  object-fit: contain;
-}
-.tactical-heading h3,
-.tactical-heading p {
-  margin: 4px 0;
-}
-.tactical-heading p,
-.tactical-event,
-.tactical-plan {
-  font-size: 13px;
-  line-height: 1.6;
-}
-.tactical-counters {
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-}
-.tactical-counters span {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 12px;
-}
-.tactical-counters strong {
-  font-size: 22px;
-}
-.tactical-controls {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.tactical-controls button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 12px;
-}
-.tactical-controls img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-}
-.tactical-event,
-.tactical-plan {
-  margin: 0;
-}
-.tactical-plan {
-  grid-column: 1 / -1;
-  color: var(--muted);
-}
-.tactical-victory {
-  padding: 14px;
-  background: #eaf4ef;
-  border-radius: 10px;
-}
 .board .cell.tactical-danger {
   background-image: repeating-linear-gradient(
     135deg,
@@ -952,48 +768,6 @@ dialog > p {
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-@media (max-width: 650px) {
-  .tactical-panel {
-    grid-template-columns: minmax(0, 1fr);
-    padding: 14px;
-  }
-  .tactical-counters {
-    justify-content: flex-start;
-  }
-  .tactical-controls button {
-    flex: 1 1 auto;
-    justify-content: center;
-  }
-}
-
-/* Combat totals scale with the sidebar; source details remain optional. */
-.combat-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  padding: 12px 0;
-}
-.combat-stats span {
-  display: grid;
-  gap: 4px;
-  font-size: 0.85em;
-}
-.combat-stats strong {
-  font-size: 1.4em;
-}
-.combat-sources {
-  margin-bottom: 12px;
-  font-size: 0.85em;
-}
-.combat-sources summary {
-  cursor: pointer;
-}
-.combat-sources ul {
-  padding-inline-start: 18px;
-}
-.combat-sources li {
-  margin-block: 8px;
 }
 .nest-destroyed > .dungeon-sprite {
   opacity: 0.3;
