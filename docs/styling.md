@@ -25,3 +25,7 @@ Use plain CSS imports in the shared entry (`@import './tailwind.css'`). Mixing T
 Run `npm run check`, `node scripts/verify-build.mjs`, and both A–B build routes when changing integration. Run browser checks against development and the built preview: `tests/browser/echo.mjs` checks actual computed panel padding, border and radius, plus reading-button hover, keyboard focus and selected colors as well as mouse/touch targeting across locales and viewport sizes.
 
 References: [Vite installation](https://tailwindcss.com/docs/installation/using-vite), [disabling Preflight](https://tailwindcss.com/docs/preflight#disabling-preflight), [explicit source detection](https://tailwindcss.com/docs/detecting-classes-in-source-files).
+
+The relic menu shell and disclosure header also use utilities, including hover and keyboard-focus feedback. Its content layout and play-scale rules remain specialized CSS for a separate migration.
+
+The relic header icon retains a component CSS size override: the shared unlayered `.dungeon-sprite` dimensions outrank layered utilities. Browser acceptance checks its rendered 28px dimensions.
