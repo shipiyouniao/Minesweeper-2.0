@@ -1,3 +1,4 @@
+import { sharedStyles } from './shared-styles.js'
 import { message } from '../i18n.js'
 import { clockSpellCopy } from './clock-copy.js'
 
@@ -86,5 +87,5 @@ export function clockQueue(language: Language, run: Expedition): string {
           p1: e.resolution.reflectedDamage,
         })
       : ''
-  return `<div class="clock-queue"><strong>${echo}</strong>${result ? `<p>${result}</p>` : ''}<ul>${e.spells.map((spell) => `<li>${clockSpellCopy(language, spell, e.turn)}</li>`).join('')}</ul></div>`
+  return `<div class="clock-queue ${sharedStyles['clock-queue']}"><strong>${echo}</strong>${result ? `<p>${result}</p>` : ''}<ul>${e.spells.map((spell) => `<li>${clockSpellCopy(language, spell, e.turn)}</li>`).join('')}</ul></div>`
 }

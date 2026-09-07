@@ -15,13 +15,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-.ruleset-tabs {
-  flex: 0 0 auto;
-  margin: 0 auto;
-  padding: 12px 20px;
-  width: 100%;
-  max-width: 1440px;
-}
 .ruleset-host {
   flex: 1 1 auto;
   min-height: 0;
@@ -32,35 +25,9 @@ body {
 #app:has(.action-dock) .ruleset-host {
   margin-bottom: var(--dock-space);
 }
-.site-header {
-  padding: 16px 0;
-  margin-bottom: 24px;
-}
-.site-header nav {
-  gap: 14px;
-}
 .variant-main {
   max-width: 1260px;
   padding-bottom: 32px;
-}
-.variant-heading {
-  margin-bottom: 12px;
-}
-.variant-metrics {
-  display: flex;
-  gap: 28px;
-  margin: 14px 0;
-  padding: 12px 0;
-  border-bottom: 1px solid #dfe3df;
-}
-.variant-metrics .variant-metric {
-  min-width: 0;
-}
-.variant-metrics strong {
-  font-size: 23px;
-}
-.variant-note.reward-rate {
-  display: none;
 }
 .expedition-layout {
   gap: 20px;
@@ -82,42 +49,6 @@ body {
 .relic-menu[open] > summary > strong::after {
   content: ' −';
 }
-.tutorial-entry {
-  color: #355d42;
-  font-weight: 600;
-}
-@media (max-width: 650px) {
-  .ruleset-tabs {
-    padding: 8px 12px;
-    gap: 4px;
-    font-size: 11px;
-  }
-  .ruleset-tabs > span {
-    display: none;
-  }
-  .site-header {
-    margin-bottom: 16px;
-    padding: 10px 0;
-    gap: 8px;
-  }
-  .site-header .brand > span:last-child {
-    font-size: 12px;
-  }
-  .site-header nav {
-    gap: 8px;
-  }
-  .site-header nav .text-button {
-    font-size: 10px;
-    white-space: nowrap;
-  }
-  .site-header nav > [data-control='records'],
-  .site-header nav > [data-action='records'] {
-    display: none;
-  }
-  .variant-metrics {
-    gap: 22px;
-  }
-}
 @media (min-width: 901px) {
   .expedition-layout {
     grid-template-columns: minmax(0, 1fr) 280px;
@@ -135,72 +66,9 @@ body {
 .variant-main:has(.expedition-layout) .run-overview .vitality-heading strong {
   font-size: 17px;
 }
-.board-zoom {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 10px;
-}
-.board-zoom .zoom-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: 56px;
-  height: 40px;
-  border: 1px solid #d2dbcf;
-  border-radius: 10px;
-  background: #fffef9;
-  color: #365740;
-  cursor: pointer;
-}
-.board-zoom .zoom-icon svg {
-  width: 20px;
-  height: 20px;
-}
-.board-zoom .zoom-icon span {
-  font-size: 19px;
-  line-height: 1;
-}
-.board-zoom .zoom-icon:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-@media (max-width: 900px) {
-  .board-zoom .zoom-icon {
-    height: 44px;
-  }
-}
-
-.board-frame-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
 .variant-board-panel .board-frame-heading h2 {
   margin: 0;
   min-width: 0;
-}
-.board-frame-heading .board-zoom {
-  flex-shrink: 0;
-  margin: 0;
-}
-.board-frame-heading .board-zoom .zoom-icon {
-  width: 44px;
-  height: 36px;
-  gap: 2px;
-  background: #f4f7ee;
-}
-.board-frame-heading .board-zoom .zoom-icon svg {
-  width: 17px;
-  height: 17px;
-}
-@media (max-width: 900px) {
-  .board-frame-heading .board-zoom .zoom-icon {
-    height: 44px;
-  }
 }
 .skill-bubble::after {
   content: '';

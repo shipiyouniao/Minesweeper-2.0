@@ -10,7 +10,7 @@
 
 Difficulty-based expedition income and authored balance scenarios are documented in [the reward table](docs/expedition-rewards.md).
 
-**UI styling:** [Tailwind utilities](docs/styling.md) share the existing palette for new interface components. Migration is gradual; board geometry and effects retain dedicated styles.
+**UI styling:** [Tailwind utilities](docs/styling.md) style interface components using the existing palette. Native element defaults, board geometry and effects retain dedicated styles.
 
 **Camp interface:** a compact departure overview opens separate profession, loadout, route and [shop screens](docs/camp-interface.md). Browse square item tiles by category, inspect effects in a detail panel, and purchase with a separate button. All 27 purchases are sorted by price; mobile details expand below the selected row.
 

@@ -1,25 +1,3 @@
-.ruleset-tabs {
-  max-width: 1160px;
-  margin: 18px auto 0;
-  padding: 0 24px;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 13px;
-}
-.ruleset-tabs > span {
-  color: var(--muted);
-  margin-right: 12px;
-}
-.ruleset-tabs button {
-  border-radius: 8px;
-  padding: 10px 16px;
-  border: 1px solid transparent;
-}
-.ruleset-tabs button[aria-pressed='true'] {
-  color: var(--blue);
-  background: var(--surface);
-  border-color: var(--line);
-}
 .variant-main {
   max-width: 1160px;
   padding: 32px 32px 72px;
@@ -32,117 +10,9 @@
   width: 100%;
   padding-inline: clamp(16px, 3vw, 80px);
 }
-.variant-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-.variant-heading h1,
-.camp-panel h1 {
-  font-size: clamp(28px, 5vw, 42px);
-  margin: 10px 0;
-  letter-spacing: -1.5px;
-}
-.variant-records {
-  padding: 18px 0;
-  border-top: 1px solid var(--line);
-}
-.variant-intro {
-  max-width: 820px;
-  line-height: 1.85;
-  font-size: 14px;
-  color: var(--muted);
-}
-.variant-storage:empty {
-  display: none;
-}
-.variant-storage {
-  color: var(--blue);
-  font-size: 13px;
-}
-.camp-panel {
-  margin-top: 28px;
-}
-.camp-panel h2 {
-  margin: 32px 0 14px;
-  font-size: 17px;
-  font-weight: 600;
-}
-.camp-panel h2 small {
-  font-size: 12px;
-  color: var(--muted);
-  margin-left: 12px;
-}
-.camp-panel > .primary-button {
-  margin-top: 24px;
-}
-.choice-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin: 16px 0 24px;
-}
 /* Keep rewards in the top layer and let long descriptions scroll inside a short window. */
 html:has(.expedition-dialog[open]) {
   overflow: hidden;
-}
-.choice-card {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: left;
-  background: var(--surface);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  line-height: 1.6;
-}
-.choice-card strong {
-  font-size: 15px;
-  font-weight: 600;
-}
-.choice-card span {
-  color: var(--muted);
-  font-size: 13px;
-}
-.choice-card[aria-pressed='true'] {
-  border-color: var(--blue);
-  box-shadow: inset 0 0 0 1px var(--blue);
-}
-.choice-card:not(:disabled):hover {
-  border-color: var(--blue);
-}
-.choice-card:disabled {
-  opacity: 0.65;
-}
-.variant-metrics {
-  display: flex;
-  gap: 28px;
-  flex-wrap: wrap;
-  padding: 22px 0;
-  border-bottom: 1px solid var(--line);
-}
-.variant-metrics div {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 64px;
-}
-.variant-metrics span {
-  font-size: 12px;
-  color: var(--muted);
-}
-.variant-metrics strong {
-  font-size: 24px;
-  font-family: var(--mono);
-  font-weight: 500;
-}
-.variant-status {
-  color: var(--blue);
-  font-size: 15px;
-  margin: 22px 0;
 }
 .vitality-panel {
   max-width: 360px;
@@ -211,27 +81,6 @@ html:has(.expedition-dialog[open]) {
 .mirror-comparison {
   min-width: 0;
 }
-.mirror-playbar {
-  position: sticky;
-  top: 8px;
-  z-index: 8;
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 10px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  box-shadow: 0 4px 18px #182c3510;
-}
-.mirror-playbar > span {
-  font-size: 0.8em;
-  color: var(--muted);
-  white-space: nowrap;
-}
 .mirror-active .variant-board-panel {
   border-color: #bd944a;
 }
@@ -241,46 +90,12 @@ html:has(.expedition-dialog[open]) {
 .mirror-comparison .variant-board-panel {
   border-style: dashed;
 }
-.mirror-heading {
-  grid-column: 1 / -1;
-}
-.mirror-heading h3 {
-  margin: 0 0 12px;
-}
-.mirror-enemies {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.mirror-enemy {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-}
-.mirror-enemy.is-active {
-  border-color: #bd944a;
-}
-.mirror-enemy.is-active[data-realm='dusk'] {
-  border-color: #7199ba;
-}
-.mirror-enemy > img {
-  width: clamp(48px, 4vw, 80px);
-  height: clamp(48px, 4vw, 80px);
-}
-.mirror-enemy p {
-  color: var(--muted);
-  font-size: 0.85em;
-  margin: 5px 0 0;
-}
 .mirror-fallen > .dungeon-sprite,
-.mirror-inert > .dungeon-sprite,
-.mirror-enemy.is-defeated > img {
+.mirror-inert > .dungeon-sprite {
   filter: grayscale(1);
   opacity: 0.45;
 }
+
 .mirror-parked {
   position: relative;
 }
@@ -293,11 +108,6 @@ html:has(.expedition-dialog[open]) {
   }
   .mirror-boards .board-viewport {
     padding: 16px;
-  }
-}
-@media (max-width: 480px) {
-  .mirror-enemies {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 .variant-board-panel {
@@ -338,117 +148,11 @@ html:has(.expedition-dialog[open]) {
 .variant-board-panel .cell.paired-focus {
   box-shadow: inset 0 0 0 2px var(--blue);
 }
-.variant-toolbar {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-}
-.twin-tools {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.profession-preview {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px;
-  margin-top: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--surface);
-}
-.profession-preview > img {
-  width: 56px;
-  height: 56px;
-  flex: 0 0 56px;
-  object-fit: contain;
-}
-.profession-preview p,
-.profession-skill p {
-  margin: 6px 0 0;
-  font-size: 12px;
-  line-height: 1.8;
-  color: var(--muted);
-}
-.profession-preview small,
 #skill-status {
   color: var(--blue);
   font-size: 11px;
 }
-.profession-skill {
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 14px;
-  background: var(--surface);
-}
-.profession-skill-heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.profession-skill .skill-button {
-  display: grid;
-  place-items: center;
-  flex: 0 0 64px;
-  width: 64px;
-  height: 64px;
-  min-width: 64px;
-  padding: 4px;
-}
-.profession-skill .skill-button img {
-  width: 54px;
-  height: 54px;
-  object-fit: contain;
-}
-.variant-note {
-  font-size: 12px;
-  line-height: 1.8;
-  color: var(--muted);
-}
-.scan-results {
-  list-style: none;
-  padding: 0;
-  font-size: 13px;
-  line-height: 1.8;
-}
-.result-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px;
-  margin-bottom: 24px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  gap: 16px;
-}
-.variant-records {
-  margin-top: 32px;
-}
-.variant-records ol {
-  list-style: none;
-  padding: 0;
-}
-.variant-records li {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--line);
-  padding: 12px 0;
-  font-size: 12px;
-  color: var(--muted);
-}
-.variant-pause {
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
+
 .dungeon-sprite {
   display: block;
   object-fit: contain;
@@ -559,83 +263,6 @@ html:has(.expedition-dialog[open]) {
 .variant-board-panel .cell.walk-route {
   background-color: #e5ebfc;
 }
-.dungeon-inventory {
-  display: flex;
-  gap: 12px;
-}
-.inventory-tool {
-  position: relative;
-  width: 82px;
-  height: 82px;
-  flex: 0 0 82px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--surface);
-  padding: 6px 12px 23px;
-}
-.inventory-tool {
-  touch-action: none;
-  user-select: none;
-  cursor: grab;
-}
-.inventory-tool:active {
-  cursor: grabbing;
-}
-.inventory-tool:hover:not(:disabled):not([aria-pressed='true']) {
-  background: var(--surface-alt);
-}
-.inventory-tool:focus-visible {
-  outline: 2px dashed var(--muted);
-  outline-offset: 4px;
-}
-.inventory-tool[aria-pressed='true'] {
-  border-color: var(--blue);
-  background: #eef2ff;
-  box-shadow: 0 0 0 1px var(--blue);
-}
-.inventory-tool:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-.tool-count {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  background: var(--surface);
-  border-radius: 6px;
-  padding: 1px 4px;
-  color: var(--blue);
-  font: 12px var(--mono);
-}
-.tool-label {
-  position: absolute;
-  bottom: 7px;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 11px;
-}
-.dungeon-legend {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 8px;
-  margin-top: 24px;
-  color: var(--muted);
-  font-size: 11px;
-}
-.dungeon-legend span {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.dungeon-legend img {
-  width: 28px;
-  height: 28px;
-}
-.choice-card > .dungeon-sprite {
-  width: 48px;
-  height: 48px;
-}
 .variant-main dialog p,
 dialog > p {
   line-height: 1.8;
@@ -648,84 +275,9 @@ dialog > p {
   .twin-layout {
     grid-template-columns: minmax(0, 1fr);
   }
-  .choice-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .choice-card {
-    padding: 16px;
-  }
-  .variant-metrics {
-    gap: 16px;
-  }
-  .variant-metrics strong {
-    font-size: 21px;
-  }
-  .variant-heading {
-    gap: 12px;
-  }
-  .ruleset-tabs {
-    padding: 0 16px;
-    gap: 4px;
-  }
-  .ruleset-tabs > span {
-    display: none;
-  }
-  .ruleset-tabs button {
-    padding: 10px 12px;
-  }
   .variant-board-panel .board-viewport {
     padding: 22px 12px;
   }
-  .result-banner {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-.variant-difficulty {
-  border: 0;
-  padding: 0;
-  margin: 24px 0;
-  min-width: 0;
-}
-.variant-difficulty legend {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-.variant-difficulty > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.variant-difficulty button {
-  display: flex;
-  flex: 1 1 120px;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
-}
-.variant-difficulty button span {
-  font-size: 11px;
-  color: var(--muted);
-}
-.variant-difficulty button strong {
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 500;
-}
-.variant-difficulty button[aria-pressed='true'] {
-  border-color: var(--blue);
-  background: #eef2ff;
-}
-.board-zoom {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin: 12px 0;
 }
 .variant-board-panel .board {
   --fit-cell: min(

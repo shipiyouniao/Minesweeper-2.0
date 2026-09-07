@@ -1,3 +1,4 @@
+import { sharedStyles } from './shared-styles.js'
 import { sonarRegion } from '../game/sonar.js'
 import { markEchoCell } from './echo-board.js'
 import { echoObscured } from '../game/expedition-sonar.js'
@@ -74,9 +75,9 @@ export class VariantView {
     const common = translations[language]
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
     root.innerHTML = `${siteHeaderTemplate(language, 'data-control')}
-      <main class="variant-main ${mode}"><div class="game-heading variant-heading"><h2>${mode === 'expedition' ? t.expedition : t.twin}</h2><div class="game-heading-actions"><button class="icon-button" data-control="sound" aria-label="${common.sound}" aria-pressed="true">${icon('volume')}</button><button class="icon-button" data-control="pause" aria-label="${common.pause}">${icon('pause')}</button></div></div>
-      <p class="variant-storage" role="status"></p><div class="variant-pause" hidden><p>${common.paused}</p><button class="primary-button" data-control="pause">${common.resume}</button></div><div class="variant-content"></div></main>
-      <dialog aria-labelledby="variant-dialog-title"><h2 id="variant-dialog-title">${common.confirmTitle}</h2><p></p><div class="dialog-actions"><button class="secondary-button" data-control="cancel">${common.cancel}</button><button class="primary-button" data-control="confirm">${common.start}</button></div></dialog>`
+      <main class="variant-main ${mode}"><div class="game-heading ${sharedStyles['game-heading']} variant-heading ${sharedStyles['variant-heading']}"><h2>${mode === 'expedition' ? t.expedition : t.twin}</h2><div class="game-heading-actions ${sharedStyles['game-heading-actions']}"><button class="icon-button ${sharedStyles['icon-button']}" data-control="sound" aria-label="${common.sound}" aria-pressed="true">${icon('volume')}</button><button class="icon-button ${sharedStyles['icon-button']}" data-control="pause" aria-label="${common.pause}">${icon('pause')}</button></div></div>
+      <p class="variant-storage ${sharedStyles['variant-storage']}" role="status"></p><div class="variant-pause ${sharedStyles['variant-pause']}" hidden><p>${common.paused}</p><button class="primary-button ${sharedStyles['primary-button']}" data-control="pause">${common.resume}</button></div><div class="variant-content"></div></main>
+      <dialog aria-labelledby="variant-dialog-title"><h2 id="variant-dialog-title">${common.confirmTitle}</h2><p></p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="cancel">${common.cancel}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="confirm">${common.start}</button></div></dialog>`
     const content = root.querySelector<HTMLElement>('.variant-content')
     const status = root.querySelector<HTMLElement>('.variant-storage')
     const dialog = root.querySelector<HTMLDialogElement>('dialog')
@@ -302,7 +303,7 @@ export class VariantView {
 
   /** Show an application-owned confirmation using the browser's focus-trapping dialog. */
   confirm(message: string, label: string): void {
-    this.dialog.innerHTML = `<h2 id="variant-dialog-title">${translations[this.language].confirmTitle}</h2><p></p><div class="dialog-actions"><button class="secondary-button" data-control="cancel">${translations[this.language].cancel}</button><button class="primary-button" data-control="confirm"></button></div>`
+    this.dialog.innerHTML = `<h2 id="variant-dialog-title">${translations[this.language].confirmTitle}</h2><p></p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="cancel">${translations[this.language].cancel}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="confirm"></button></div>`
     const paragraph = this.dialog.querySelector('p')
     if (paragraph) paragraph.textContent = message
     const button = this.dialog.querySelector<HTMLButtonElement>('[data-control="confirm"]')
@@ -312,7 +313,7 @@ export class VariantView {
 
   /** Open help or records in the same native modal presentation used by classic mode. */
   showInformation(title: string, content: string): void {
-    this.dialog.innerHTML = `<button class="dialog-close icon-button" data-control="cancel" aria-label="${translations[this.language].close}">${icon('close')}</button><h2 id="variant-dialog-title">${title}</h2>${content}`
+    this.dialog.innerHTML = `<button class="dialog-close ${sharedStyles['dialog-close']} icon-button ${sharedStyles['icon-button']}" data-control="cancel" aria-label="${translations[this.language].close}">${icon('close')}</button><h2 id="variant-dialog-title">${title}</h2>${content}`
     this.dialog.showModal()
   }
 

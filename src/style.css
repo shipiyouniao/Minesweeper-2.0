@@ -5,7 +5,7 @@
 @import './camp.css' layer(components);
 @import './magnetic.css' layer(components);
 @import './clock.css' layer(components);
-@import './legacy.css' layer(components);
+@import './base.css' layer(components);
 @import './gameplay.css' layer(components);
 @import './guidance.css' layer(components);
 @import './progression.css' layer(components);

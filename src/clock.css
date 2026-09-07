@@ -1,18 +1,3 @@
-.clock-queue {
-  padding: 12px;
-  border: 1px solid #9eacb9;
-  border-radius: 12px;
-  background: #eaf2f7;
-  color: #253e57;
-  font-size: 12px;
-}
-.clock-queue ul {
-  padding-left: 18px;
-  margin: 8px 0 0;
-}
-.clock-queue li + li {
-  margin-top: 6px;
-}
 .board .cell.clock-mark {
   box-shadow: inset 0 0 0 2px #b7904b;
 }
@@ -97,14 +82,6 @@
 
 .clock-stage {
   min-width: 0;
-}
-.clock-playbar {
-  margin-bottom: 10px;
-}
-.clock-playbar .tactical-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
 }
 
 .clock-echo.echo-charged {

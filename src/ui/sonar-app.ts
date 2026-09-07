@@ -1,3 +1,4 @@
+import { sharedStyles } from './shared-styles.js'
 import { SonarSession } from '../application/sonar-session.js'
 import { cueForMove } from '../audio/cues.js'
 import { sonarCharges } from '../game/sonar.js'
@@ -166,7 +167,7 @@ export class SonarApp implements SonarInputActions {
           command.type === 'difficulty' ? command.value : this.session.state.difficulty
         if (this.session.state.game.phase === 'playing') {
           this.showDialog(
-            `<h2 id="sonar-dialog-title" tabindex="-1">${t.confirmTitle}</h2><p>${t.confirmNote}</p><div class="dialog-actions"><button class="secondary-button" data-control="close">${t.cancel}</button><button class="primary-button" data-control="confirm">${t.start}</button></div>`,
+            `<h2 id="sonar-dialog-title" tabindex="-1">${t.confirmTitle}</h2><p>${t.confirmNote}</p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="close">${t.cancel}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="confirm">${t.start}</button></div>`,
           )
           return
         }
@@ -301,7 +302,7 @@ export class SonarApp implements SonarInputActions {
       const t = translations[this.language]
       const s = sonarCopy(this.language)
       this.showDialog(
-        `<h2 id="sonar-dialog-title" tabindex="-1">${after.phase === 'won' ? s.win : s.loss}</h2><p>${s.moves}: ${this.session.state.moves} · ${s.scans}: ${this.session.state.readings.length}</p><div class="dialog-actions"><button class="secondary-button" data-control="close">${t.close}</button><button class="primary-button" data-control="new">${t.restart}</button></div>`,
+        `<h2 id="sonar-dialog-title" tabindex="-1">${after.phase === 'won' ? s.win : s.loss}</h2><p>${s.moves}: ${this.session.state.moves} · ${s.scans}: ${this.session.state.readings.length}</p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="close">${t.close}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="new">${t.restart}</button></div>`,
       )
     }
   }

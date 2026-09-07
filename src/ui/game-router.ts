@@ -1,3 +1,4 @@
+import { sharedStyles } from './shared-styles.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { GameSession } from '../application/game-session.js'
 import { TwinSession } from '../application/twin-session.js'
@@ -46,7 +47,7 @@ export class GameRouter implements MountedGame {
     this.variants = variants
     this.sonar = sonar
     this.language = language
-    root.innerHTML = `<nav class="ruleset-tabs"></nav><div class="ruleset-host"></div>`
+    root.innerHTML = `<nav class="ruleset-tabs ${sharedStyles['ruleset-tabs']}"></nav><div class="ruleset-host"></div>`
     const navigation = root.querySelector<HTMLElement>('.ruleset-tabs')
     const host = root.querySelector<HTMLElement>('.ruleset-host')
     if (!navigation || !host) throw new Error('Ruleset router markup is incomplete')

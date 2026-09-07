@@ -1,3 +1,4 @@
+import { sharedStyles } from './shared-styles.js'
 import { milestoneNotices } from '../game/milestone-notices.js'
 import { message } from '../i18n.js'
 import { milestoneCopy } from './milestone-copy.js'
@@ -40,10 +41,10 @@ export class MilestoneNotices {
           const done = value === entry.target
 
           this.card = document.createElement('section')
-          this.card.className = `milestone-toast${done ? ' is-complete' : ''}`
+          this.card.className = `milestone-toast ${sharedStyles['milestone-toast']}${done ? ' is-complete' : ''}`
           this.card.setAttribute('role', 'status')
           this.card.setAttribute('aria-live', 'polite')
-          this.card.innerHTML = `<div class="toast-symbol" aria-hidden="true">${done ? '✓' : '✦'}</div><div class="toast-content"><small>${entry.kind === 'missions' ? message(this.language, 'milestone-notices.mission') : message(this.language, 'milestone-notices.achievement')} · ${done ? message(this.language, 'milestone-notices.completed') : message(this.language, 'milestone-notices.halfway-there')}</small><strong>${milestoneCopy(this.language, entry.id).name}</strong><div class="toast-progress"><progress max="${entry.target}" value="${value}" aria-label="${milestoneCopy(this.language, entry.id).name}"></progress><span>${value} / ${entry.target}</span></div></div><button aria-label="${message(this.language, 'milestone-notices.dismiss')}">×</button>`
+          this.card.innerHTML = `<div class="toast-symbol ${sharedStyles['toast-symbol']}" aria-hidden="true">${done ? '✓' : '✦'}</div><div class="toast-content ${sharedStyles['toast-content']}"><small>${entry.kind === 'missions' ? message(this.language, 'milestone-notices.mission') : message(this.language, 'milestone-notices.achievement')} · ${done ? message(this.language, 'milestone-notices.completed') : message(this.language, 'milestone-notices.halfway-there')}</small><strong>${milestoneCopy(this.language, entry.id).name}</strong><div class="toast-progress ${sharedStyles['toast-progress']}"><progress max="${entry.target}" value="${value}" aria-label="${milestoneCopy(this.language, entry.id).name}"></progress><span>${value} / ${entry.target}</span></div></div><button aria-label="${message(this.language, 'milestone-notices.dismiss')}">×</button>`
           this.card.querySelector('button')?.addEventListener('click', () => {
             this.remaining = 0
           })

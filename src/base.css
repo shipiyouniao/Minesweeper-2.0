@@ -1,0 +1,375 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+  color: inherit;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 4px;
+}
+[hidden] {
+  display: none !important;
+}
+.icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+#sound-button[aria-pressed='true'] {
+  color: var(--blue);
+}
+h1 {
+  font-size: 49px;
+  line-height: 1.17;
+  font-weight: 550;
+  letter-spacing: -2.3px;
+  margin: 0 0 24px;
+  white-space: pre-line;
+}
+:lang(zh-CN) h1,
+:lang(ja) h1 {
+  font-size: 42px;
+  line-height: 1.4;
+  letter-spacing: -1.3px;
+}
+#mine-count {
+  color: var(--blue);
+}
+#best {
+  color: #787d7e;
+}
+.board-shell {
+  position: relative;
+  background: #fafaf7;
+  min-height: 260px;
+}
+.board-viewport {
+  /* Size cells against usable space, excluding the viewport's padding. */
+  container-type: inline-size;
+  overflow: auto;
+  /* Keep horizontal panning local while allowing vertical scroll to reach the page. */
+  overscroll-behavior: contain auto;
+  padding: 28px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: #c9cdc8 transparent;
+}
+.board-viewport.obscured {
+  visibility: hidden;
+}
+.board {
+  --cell-max: 40px;
+  --gap: 4px;
+  --cell: clamp(
+    18px,
+    calc((100cqi - (var(--columns) - 1) * var(--gap) - 1px) / var(--columns)),
+    var(--cell-max)
+  );
+  width: max-content;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  isolation: isolate;
+  user-select: none;
+}
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), var(--cell));
+  gap: var(--gap);
+}
+.board.dense {
+  --cell-max: 32px;
+  --gap: 2px;
+}
+.cell {
+  position: relative;
+  width: var(--cell);
+  height: var(--cell);
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  background: #e5e8e3;
+  border: 1px solid #dfe3dc;
+  border-bottom: 3px solid #d8ddd4;
+  color: var(--blue);
+  font: 600 clamp(11px, calc(var(--cell) * 0.48), 17px) var(--mono);
+  scroll-margin: 8px;
+  touch-action: pan-x pan-y;
+  -webkit-touch-callout: none;
+  transition: background 0.12s;
+}
+.cell:focus-visible {
+  /* Paint above later cells and rows so every side of the focus ring stays visible. */
+  z-index: 2;
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+  box-shadow: 0 0 0 1px var(--surface);
+}
+.cell.hidden:hover {
+  background: #d8dfd3;
+}
+.cell.hidden:active {
+  border-bottom-width: 1px;
+  transform: translateY(1px);
+}
+.cell.revealed {
+  background: #f0f1ec;
+  border: 1px solid #e9ebe5;
+  cursor: default;
+}
+.cell.flagged {
+  color: var(--blue);
+  background: #e4e8f1;
+  border-color: #d7deef;
+}
+.cell.flagged .icon {
+  fill: #3457db15;
+  width: min(21px, calc(var(--cell) * 0.65));
+  height: min(21px, calc(var(--cell) * 0.65));
+}
+.cell.mine {
+  color: #686e6b;
+}
+.cell.exploded {
+  background: #f4d9d0;
+  border-color: #eac4b8;
+  color: #a64735;
+}
+.cell.wrong {
+  color: #a64735;
+  background: #f7e9e3;
+  border-color: #e8d8d1;
+}
+.cell[data-number='1'],
+.dungeon-player[data-number='1'] {
+  --clue-color: #355ecc;
+  color: var(--clue-color);
+}
+.cell[data-number='2'],
+.dungeon-player[data-number='2'] {
+  --clue-color: #368473;
+  color: var(--clue-color);
+}
+.cell[data-number='3'],
+.dungeon-player[data-number='3'] {
+  --clue-color: #b95648;
+  color: var(--clue-color);
+}
+.cell[data-number='4'],
+.dungeon-player[data-number='4'] {
+  --clue-color: #7860aa;
+  color: var(--clue-color);
+}
+.cell[data-number='5'],
+.dungeon-player[data-number='5'] {
+  --clue-color: #9e6d35;
+  color: var(--clue-color);
+}
+.cell[data-number='6'],
+.dungeon-player[data-number='6'] {
+  --clue-color: #368292;
+  color: var(--clue-color);
+}
+.cell[data-number='7'],
+.dungeon-player[data-number='7'],
+.cell[data-number='8'],
+.dungeon-player[data-number='8'] {
+  --clue-color: #555b65;
+  color: var(--clue-color);
+}
+.board.dense .cell {
+  border-radius: 3px;
+}
+.board.dense .icon {
+  width: min(18px, calc(var(--cell) * 0.65));
+  height: min(18px, calc(var(--cell) * 0.65));
+}
+#progress {
+  margin-left: auto;
+  white-space: nowrap;
+  color: #a2a6a2;
+  font: 10px var(--mono);
+}
+
+/* Notes keep the covered-square surface and use an outline, distinct from verified green dots. */
+.cell.suspected-safe .icon {
+  color: #248290;
+  border: 1px dashed currentColor;
+  border-radius: 50%;
+  padding: 2px;
+}
+
+/* Keep mouse/touch modes beside the board while the page itself remains scrollable. */
+.board-play-area {
+  position: relative;
+  min-width: 0;
+}
+.board-play-area .cell {
+  scroll-margin-block-start: 190px;
+}
+dialog {
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 18px;
+  width: min(530px, calc(100vw - 28px));
+  padding: 40px;
+  max-height: calc(100dvh - 40px);
+  box-shadow: 0 24px 100px #161e2630;
+}
+dialog::backdrop {
+  background: #222d3145;
+  backdrop-filter: blur(5px);
+}
+dialog h2 {
+  font-size: 27px;
+  font-weight: 550;
+  letter-spacing: -0.7px;
+  margin: 8px 0 14px;
+}
+dialog .eyebrow {
+  font-size: 9px;
+  margin-bottom: 17px;
+}
+input {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 7px;
+  padding: 12px;
+  color: var(--ink);
+}
+#name-form {
+  margin-top: 24px;
+}
+#name-form label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+@media (max-width: 1000px) {
+  h1,
+  :lang(zh-CN) h1,
+  :lang(ja) h1 {
+    font-size: 36px;
+  }
+}
+@media (min-width: 801px) and (max-height: 850px) {
+  .board {
+    --cell-max: 32px;
+    --gap: 3px;
+  }
+  .board-viewport {
+    padding-block: 16px;
+  }
+}
+@media (max-width: 800px) {
+  nav {
+    gap: 18px;
+  }
+  h1,
+  :lang(zh-CN) h1,
+  :lang(ja) h1 {
+    font-size: 31px;
+    letter-spacing: -0.8px;
+    margin: 9px 0 12px;
+    line-height: 1.45;
+  }
+}
+@media (max-width: 480px) {
+  nav {
+    gap: 13px;
+  }
+  nav .text-button {
+    font-size: 11px;
+  }
+  nav .text-button[data-action='help'] {
+    display: none;
+  }
+  h1,
+  :lang(zh-CN) h1,
+  :lang(ja) h1 {
+    font-size: 26px;
+    line-height: 1.4;
+    margin: 4px 0 9px;
+  }
+  .board {
+    --gap: 3px;
+  }
+  .board-viewport {
+    padding: 23px 8px;
+  }
+  .board.dense {
+    --gap: 1px;
+  }
+  .cell {
+    border-radius: 4px;
+  }
+  .cell .icon {
+    width: min(18px, calc(var(--cell) * 0.65));
+    height: min(18px, calc(var(--cell) * 0.65));
+  }
+  #progress {
+    font-size: 9px;
+  }
+  dialog {
+    padding: 30px 24px;
+  }
+  dialog h2 {
+    font-size: 24px;
+  }
+}
+/* Give wide boards the full row before their cells reach the minimum size. */
+@media (min-width: 801px) and (max-width: 1250px) {
+  .wide-board .introduction {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

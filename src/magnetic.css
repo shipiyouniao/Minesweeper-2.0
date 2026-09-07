@@ -2,56 +2,6 @@
 .magnetic-stage {
   min-width: 0;
 }
-.magnetic-playbar {
-  display: grid;
-  gap: 12px;
-  margin: 0 0 12px;
-}
-.magnetic-playbar .tactical-controls {
-  position: sticky;
-  top: 8px;
-  z-index: 12;
-  background: var(--surface);
-  border-radius: 12px;
-  padding: 6px;
-  box-shadow: 0 2px 12px #1e344710;
-}
-.magnetic-key {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
-  border: 1px solid #b8d6df;
-  background: #f0f8fa;
-  border-radius: 12px;
-  color: #297287;
-  font-size: 0.85em;
-}
-.magnetic-key[data-polarity='push'] {
-  color: #a8533e;
-  border-color: #e2bcaf;
-  background: #fcf3ee;
-}
-.magnetic-key[data-polarity='charge'] {
-  color: #926017;
-  border-color: #ddc795;
-  background: #fbf6e8;
-}
-.magnetic-key[data-polarity='recovery'] {
-  color: var(--muted);
-  border-color: var(--line);
-  background: var(--surface);
-}
-.magnetic-symbol {
-  font-size: 1.6em;
-  white-space: nowrap;
-  min-width: 2.8em;
-  text-align: center;
-  line-height: 1.4;
-}
-.magnetic-symbol.vertical {
-  transform: rotate(90deg);
-}
 .board[data-magnetic] {
   --magnet-color: #438fa8;
 }

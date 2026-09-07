@@ -3,18 +3,6 @@
   padding-inline: clamp(16px, 3vw, 56px);
 }
 
-.skill-landings {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.profession-skill-heading > .dungeon-sprite {
-  width: 64px;
-  height: 64px;
-  flex: 0 0 64px;
-}
-
 .mobility-anchor {
   outline: 2px solid #138f96;
   outline-offset: -3px;
