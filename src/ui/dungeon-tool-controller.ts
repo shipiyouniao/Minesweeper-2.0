@@ -4,7 +4,7 @@ import type { VariantInputActions } from '../types/variant-ui.js'
 /** Decode only inventory controls that support explicit cell or row targeting. */
 function toolOf(element: Element | null): DungeonTool | null {
   const value = element?.closest<HTMLElement>('[data-tool]')?.dataset['tool']
-  return value === 'probe' || value === 'scan' ? value : null
+  return value === 'sonar' || value === 'probe' || value === 'scan' ? value : null
 }
 
 /** Own drag gestures and tap-to-target state for mouse, touch and keyboard alike. */

@@ -2,6 +2,51 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'echo.shifted': '本体が移動した。古い本体の観測は無効。再スキャンしよう。',
+  'echo.phase-break': '殻を破壊した。ターン終了時に本体が移動する。',
+  'echo.rhythm': '隙は3ターン。3ターンごとに音波が止むので、移動や攻撃の好機。',
+
+  'echo.hunt': '残響討伐',
+  'echo.hunt-note': '残響の番人を倒す。',
+  'echo.flawless': '無音の足取り',
+  'echo.flawless-note': '体力を失わずに残響の番人を倒す。',
+  'echo.precise': '絶対音感',
+  'echo.precise-note': 'ソナーを6回以内で残響の番人を倒す。',
+  'echo.flawless-effect': '体力が満タンの間、防御+1。',
+  'echo.precise-effect': '残響の番人の殻が開いている間、攻撃+1。',
+
+  'echo.scene-0': '三つの声、一つの鼓動',
+  'echo.scene-1': '三体の銅像が静止している。足音が三方向から響き、床の刻印まで揺らいで見える。',
+  'echo.scene-2': '選べ。ほかの二つの体も、お前の刃を待っている。',
+  'echo.scene-3': 'どれも同じ音だ……でも残響が止む間に、一か所だけまだ鳴っている。',
+  'echo.scene-4':
+    '踊り場の小さな装置が澄んだ音を返した。淡い緑の継ぎ目が足元から部屋へ伸びている。',
+  'echo.scene-5': 'これなら聞き分けられる。調べた側が静かなら候補から外して、もう一方を試せる。',
+  'echo.scene-6': '聞き入っていると、次の音はお前の体を貫くぞ。',
+  'echo.scene-7': '床の継ぎ目が赤く光る。三体が同時に大きく息を吸い込んだ。',
+  'echo.scene-8':
+    '鳴り続ける本体を探し、近づいてこじ開けよう。音波が来る前に逃げ道も確保しないと。',
+
+  'echo.locate': '共鳴体をスキャンして本体を絞り込もう。',
+  'echo.shell': '本体を特定し、近づいてクリックすると殻が開く。',
+  'echo.fight': '隙を狙って攻撃し、ターン終了前に赤い音波の範囲から逃れよう。',
+  'echo.loan': '貸出ソナー · {charges}/3 · 充電 {progress}/4',
+  'echo.body': '共鳴体 {body}',
+  'echo.candidates': '本体の候補：{bodies}',
+  'echo.obscured': '不鮮明な数字',
+  'echo.reading': '{row}行{column}列 · 地雷{mines}個',
+  'echo.present': '範囲内に本体あり',
+  'echo.absent': '範囲内に本体なし',
+  'echo.stale': '過去の段階',
+  'echo.phase-note':
+    '体力の区切りごとに本体が移動し、貸出ソナーは最低2回に補充。古い本体の観測は無効。',
+
+  'sonar-equipment.name': 'ソナー',
+  'sonar-equipment.note':
+    '装備枠1 · 初期2回、安全な掘削12回で1回回復（上限3）。3×3の地雷総数と数字を明らかにし、中心だけを開く。',
+  'echo.name': '残響の番人',
+  'echo.status': '段階 {phase}/3 · 隙はあと{window}ターン',
+
   'battle-guide.approach-a-revealed-hourglass-and-return-a':
     '開いた砂時計に接近。術を返送して障壁を解除。',
   'battle-guide.approach-the-core-and-activate-it-to': 'コアに接近して起動し、攻撃の隙を作る。',
@@ -611,7 +656,7 @@ export const jaMessages: MessageCatalog = {
   'sonar-copy.sonar': 'ソナー',
   'sonar-copy.spend-a-pulse': 'パルスを送る',
   'sonar-copy.start-with-three-pulses-four-safe-excavation':
-    '最初は3回、安全な掘削4回で1回補充。クリックかドラッグで走査し、中心を開き、地雷は金の旗に可能に。同じ中心は無料で結果を再表示。Qで照準、Enter/Spaceで実行、Escで取消。Fで旗、Sで安全メモ、Cで周囲を開き、右クリックや長押しで印を切替。パルスと盤面操作は別々に数えます。',
+    '最初は3回、安全な掘削4回で1回補充。クリックかドラッグで走査し、中心だけを開き、地雷は金の旗になります。範囲内の数字は以後はっきり見えますが、ほかのマスは自分で開きます。同じ中心は無料で結果を再表示。Qで照準、Enter/Spaceで実行、Escで取消。Fで旗、Sで安全メモ、Cで周囲を開き、右クリックや長押しで印を切替。パルスと盤面操作は別々に数えます。',
   'sonar-copy.the-first-opening-and-its-neighbors-are':
     '最初のマスと周囲は安全です。安全なマスをすべて開くと勝利です。',
   'sonar-copy.the-saved-puzzle-could-not-be-restored':
@@ -718,7 +763,7 @@ export const jaMessages: MessageCatalog = {
   'tutorial-lessons.leave-a-reliable-mark': '推理を旗に残す',
   'tutorial-lessons.make-a-second-deduction': 'もう一度推理',
   'tutorial-lessons.most-numbered-squares-are-obscured-select-sonar':
-    '数字の多くは不鮮明。ソナーを選び光るマスへ。中心だけ開き、地雷は金の旗になり、3 × 3 内の地雷数も分かります。',
+    '数字の多くは不鮮明。ソナーを選び光るマスへ。中心だけ開き、地雷は金の旗になり、3 × 3 内の地雷数も分かります。範囲内の数字は以後鮮明になり、ほかのマスは自分で開きます。',
   'tutorial-lessons.move-to-the-glowing-open-square-your':
     '光る開いたマスへ移動。探検家は既知の安全な道を歩きます。通常階にターン制限や行動力消費はありません。',
   'tutorial-lessons.one-button-four-actions': 'ボタン1つで操作切替',

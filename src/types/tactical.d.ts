@@ -1,3 +1,4 @@
+import type { EchoEncounter } from './echo.js'
 import type { Expedition, ExpeditionAction, Relic } from './variants.js'
 import type { Config } from './game.js'
 import type { BattleMechanism, CombatEquipment } from './combat-build.js'
@@ -6,7 +7,7 @@ import type { ClockEncounter } from './clock.js'
 import type { MagneticEncounter } from './magnetic.js'
 
 /** Released encounter families have independent rules and artwork. */
-export type EncounterKind = 'bastion' | 'brood' | 'mirror' | 'magnetic' | 'clock'
+export type EncounterKind = 'bastion' | 'brood' | 'mirror' | 'magnetic' | 'clock' | 'echo'
 
 /** A public control protects one armor section until its surrounding flags are calibrated. */
 export interface ShieldPylon {
@@ -50,6 +51,7 @@ export interface TacticalState {
     | 'hatchling-cleared'
     | 'nest-destroyed'
     | 'window-opened'
+    | 'echo-shifted'
     | 'shifted'
     | 'twin-fallen'
     | 'magnet-lured'
@@ -94,7 +96,12 @@ export interface BroodEncounter extends TacticalState {
 
 /** A finite encounter union keeps each boss's state and rules explicit. */
 export type TacticalEncounter =
-  BastionEncounter | BroodEncounter | MirrorEncounter | MagneticEncounter | ClockEncounter
+  | EchoEncounter
+  | BastionEncounter
+  | BroodEncounter
+  | MirrorEncounter
+  | MagneticEncounter
+  | ClockEncounter
 
 /** Difficulty changes arena scale and boss endurance without changing action costs. */
 export interface EncounterTier {
@@ -117,6 +124,9 @@ export type TacticalReason =
   | 'nests'
   | 'mirror-seal'
   | 'reflection'
+  | 'echo-locate'
+  | 'echo-shell'
+  | 'echo-phase'
   | 'clock-seal'
   | 'magnet-armor'
   | 'magnet-route'

@@ -30,9 +30,11 @@ function excavationTarget(run: Expedition): number | null {
               .map((anchor) => anchor.index)
           : run.encounter?.kind === 'clock'
             ? run.encounter.hourglasses.filter((glass) => !glass.used).map((glass) => glass.index)
-            : run.encounter
-              ? run.encounter.pylons.filter((pylon) => pylon.active).map((pylon) => pylon.index)
-              : run.treasures.filter((index) => !run.collected.includes(index))
+            : run.encounter?.kind === 'echo'
+              ? [...run.encounter.bodies]
+              : run.encounter
+                ? run.encounter.pylons.filter((pylon) => pylon.active).map((pylon) => pylon.index)
+                : run.treasures.filter((index) => !run.collected.includes(index))
 
   remaining.sort((a, b) => {
     const first = Math.abs(Math.floor(a / width) - row) + Math.abs((a % width) - column)

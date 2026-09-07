@@ -53,6 +53,20 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
       message(language, 'battle-presentation.brace-reduces-this-turn-s-enemy-damage'),
     ],
   }
+  if (kind === 'echo')
+    return {
+      ...copy,
+      name: message(language, 'echo.name'),
+      hint: message(language, 'echo.locate'),
+      pylon: message(language, 'echo.shell'),
+      help: [
+        message(language, 'echo.locate'),
+        message(language, 'echo.shell'),
+        message(language, 'echo.fight'),
+        message(language, 'echo.phase-note'),
+        message(language, 'echo.rhythm'),
+      ],
+    }
   if (kind === 'clock') return clockCopy(language, copy)
   return kind === 'magnetic'
     ? magneticCopy(language, copy)
@@ -63,6 +77,11 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
 
 /** Summarize the actual remaining objectives and core window, rather than a generic boss phase. */
 export function battleStatus(language: Language, encounter: TacticalEncounter): string {
+  if (encounter.kind === 'echo')
+    return message(language, 'echo.status', {
+      phase: encounter.phase,
+      window: Math.max(0, encounter.exposedUntil - encounter.turn + 1),
+    })
   if (encounter.kind === 'clock') return clockStatus(language, encounter)
   if (encounter.kind === 'magnetic') return magneticStatus(language, encounter)
   if (encounter.kind === 'mirror') return mirrorDefense(language, encounter, encounter.active)

@@ -178,7 +178,7 @@ try {
       )
       await fourthReading.click()
       assert.equal(await fourthReading.getAttribute('aria-pressed'), 'false')
-      for (let seed = 0; seed < 5; seed++) {
+      for (let seed = 0; seed < 6; seed++) {
         const run = enterEncounter({
           ...createExpedition({
             seed,

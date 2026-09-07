@@ -221,6 +221,7 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
 
 /** Describe finite camp unlocks without hiding their actual gameplay consequence. */
 export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescription {
+  if (upgrade === 'sonar') return equipmentCopy(language, 'sonar')
   const combat = parseCombatPurchase(upgrade)
   if (combat) return combatPurchaseCopy(language, combat)
   if (
@@ -247,6 +248,11 @@ export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescri
 /** Describe equipment costs and starting bonuses. */
 export function equipmentCopy(language: Language, equipment: Equipment): VariantDescription {
   switch (equipment) {
+    case 'sonar':
+      return {
+        name: message(language, 'sonar-equipment.name'),
+        note: message(language, 'sonar-equipment.note'),
+      }
     case 'field-radio':
       return {
         name: message(language, 'variant-copy.field-radio'),

@@ -6,6 +6,24 @@ import type { EncounterKind } from '../types/tactical.js'
 
 /** Character dialogue hints at counterplay without prescribing a button sequence. */
 export function bossScript(kind: EncounterKind, language: Language): PrologueScript {
+  if (kind === 'echo')
+    return {
+      kind,
+      title: message(language, 'echo.name'),
+      subtitle: message(language, 'echo.scene-0'),
+      sprite: 'echo-warden',
+      prop: 'sonar',
+      beats: [
+        { speaker: 'scene', focus: 'field', line: message(language, 'echo.scene-1') },
+        { speaker: 'boss', focus: 'field', line: message(language, 'echo.scene-2') },
+        { speaker: 'player', focus: 'field', line: message(language, 'echo.scene-3') },
+        { speaker: 'scene', focus: 'field', line: message(language, 'echo.scene-4') },
+        { speaker: 'player', focus: 'field', line: message(language, 'echo.scene-5') },
+        { speaker: 'boss', focus: 'field', line: message(language, 'echo.scene-6') },
+        { speaker: 'scene', focus: 'field', line: message(language, 'echo.scene-7') },
+        { speaker: 'player', focus: 'field', line: message(language, 'echo.scene-8') },
+      ],
+    }
   if (kind === 'bastion')
     return {
       kind,

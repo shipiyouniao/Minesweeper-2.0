@@ -2,6 +2,54 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'echo.shifted': 'The core moved. Scan again; old core readings have expired.',
+  'echo.phase-break': 'Shell broken. The core moves at the end of this turn.',
+  'echo.rhythm': 'A 3-turn opening. Every third turn is quiet: reposition or strike.',
+
+  'echo.hunt': 'Echo hunt',
+  'echo.hunt-note': 'Defeat the Echo Warden.',
+  'echo.flawless': 'Silent Footsteps',
+  'echo.flawless-note': 'Defeat the Echo Warden without losing health.',
+  'echo.precise': 'Perfect Pitch',
+  'echo.precise-note': 'Defeat the Echo Warden using no more than 6 scans.',
+  'echo.flawless-effect': 'Defense +1 while at full health.',
+  'echo.precise-effect': 'Attack +1 against an exposed Echo Warden.',
+
+  'echo.scene-0': 'Three voices, one heartbeat',
+  'echo.scene-1':
+    'Three brass figures stand motionless. Every footstep returns three times, drowning the marks on the floor.',
+  'echo.scene-2': 'Choose. My other selves are waiting for your blade.',
+  'echo.scene-3':
+    'All three sound alike. But something inside one of them keeps beating between the echoes.',
+  'echo.scene-4':
+    'A small instrument on the landing answers with a clear ping. Thin green seams lead from it into the room.',
+  'echo.scene-5':
+    'It hears what I cannot. If this side stays silent, I can rule it out and try the other.',
+  'echo.scene-6': 'Listen too long, and the next note will go straight through you.',
+  'echo.scene-7': 'A red seam flares across the floor. The figures draw one long breath together.',
+  'echo.scene-8':
+    'Find the beating one, get close, pry it open. And keep a way out before that note lands.',
+
+  'echo.locate': 'Scan the bodies to narrow down the real core.',
+  'echo.shell': 'Locate the core, then approach and click it to break its shell.',
+  'echo.fight': 'Strike during the opening. Leave the red lane before ending your turn.',
+  'echo.loan': 'Loaner Sonar · {charges}/3 · Recharge {progress}/4',
+  'echo.body': 'Resonator {body}',
+  'echo.candidates': 'Possible cores: {bodies}',
+  'echo.obscured': 'Obscured clue',
+  'echo.reading': 'R{row} C{column} · {mines} mines',
+  'echo.present': 'Core detected',
+  'echo.absent': 'No core detected',
+  'echo.stale': 'Previous phase',
+  'echo.phase-note':
+    'At each health band, the core moves and your loaner refills to at least 2 pulses. Old core readings expire.',
+
+  'sonar-equipment.name': 'Sonar',
+  'sonar-equipment.note':
+    '1 loadout point · Start with 2 pulses; recharge 1 per 12 safe excavations, up to 3. Scan a 3×3 mine total, clarify its clues and uncover only its center.',
+  'echo.name': 'Echo Warden',
+  'echo.status': 'Phase {phase}/3 · {window} turns exposed',
+
   'battle-guide.approach-a-revealed-hourglass-and-return-a':
     'Approach a revealed hourglass and return a spell to break the barrier.',
   'battle-guide.approach-the-core-and-activate-it-to':
@@ -638,7 +686,7 @@ export const enMessages: MessageCatalog = {
   'sonar-copy.sonar': 'Sonar',
   'sonar-copy.spend-a-pulse': 'Spend a pulse',
   'sonar-copy.start-with-three-pulses-four-safe-excavation':
-    'Start with three pulses; four safe excavation actions recharge one. Click to target or drag Sonar onto a square. Only the center opens; a mine becomes a locked gold flag. Selecting a previous center recalls its reading for free. Q aims; Enter/Space scans; Esc cancels. F flags, S notes safety, C quick-opens; right-click or hold cycles marks. A scan counts separately from board moves.',
+    'Start with three pulses; four safe excavation actions recharge one. Click to target or drag Sonar onto a square. The scanned 3×3 region stays clear of obscured clues, including squares you uncover later. Only the center opens; a mine becomes a locked gold flag. Selecting a previous center recalls its reading for free. Q aims; Enter/Space scans; Esc cancels. F flags, S notes safety, C quick-opens; right-click or hold cycles marks. A scan counts separately from board moves.',
   'sonar-copy.the-first-opening-and-its-neighbors-are':
     'The first opening and its neighbors are safe. Reveal every safe square to win.',
   'sonar-copy.the-saved-puzzle-could-not-be-restored':
@@ -768,7 +816,7 @@ export const enMessages: MessageCatalog = {
   'tutorial-lessons.leave-a-reliable-mark': 'Leave a reliable mark',
   'tutorial-lessons.make-a-second-deduction': 'Make a second deduction',
   'tutorial-lessons.most-numbered-squares-are-obscured-select-sonar':
-    'Most numbered squares are obscured. Select Sonar, then the glowing square: only its center opens (mines become gold flags); the echo counts every mine in the 3 × 3 area.',
+    'Most numbered squares are obscured. Select Sonar, then the glowing square: only its center opens (mines become gold flags); the echo counts every mine in the 3 × 3 area and makes its clues permanently readable.',
   'tutorial-lessons.move-to-the-glowing-open-square-your':
     'Move to the glowing open square. Your explorer walks along known safe ground. Ordinary floors have no turn timer or action-point cost.',
   'tutorial-lessons.one-button-four-actions': 'One button, four actions',

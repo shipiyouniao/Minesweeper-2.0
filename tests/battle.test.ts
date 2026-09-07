@@ -258,11 +258,11 @@ test('small finite training, limited equipment and run relics derive bounded sta
   assert.equal(damageExpedition({ ...build, shields: 1 }, 7).health, 8)
 })
 
-test('the catalog contains 24 distinct gameplay choices plus two one-time trainings', () => {
-  assert.equal(UPGRADES.length, 26)
+test('the catalog contains 25 distinct gameplay choices plus two one-time trainings', () => {
+  assert.equal(UPGRADES.length, 27)
   assert.equal(
     UPGRADES.filter((item) => !COMBAT_TRAINING.some((training) => training === item)).length,
-    24,
+    25,
   )
   let camp: Camp = { supplies: 100000, upgrades: [...UPGRADES], completed: 0 }
   assert.ok(allowedDeparture(camp, 'explorer', ['steel-blade', 'medical-kit']))

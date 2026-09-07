@@ -270,7 +270,7 @@ test('obscured clues require a scan and cannot be probed through chord acceptanc
   assert.ok(
     sonarRegion(run.game.config, index)
       .filter((cell) => cell !== index)
-      .every((cell) => sonarObscured(scanned, cell) === sonarObscured(run, cell)),
+      .every((cell) => !sonarObscured(scanned, cell)),
   )
 })
 
@@ -321,4 +321,39 @@ test('a center scan opens only one square and can finish the last safe square', 
   const won = actSonar(almost, { type: 'scan', index })
   assert.equal(won.game.phase, 'won')
   assert.equal(won.excavations, almost.excavations)
+})
+
+test('regional scans keep neighbors covered and make their clues readable when excavated later', () => {
+  const run = actSonar(createSonar(31, 'expert'), { type: 'reveal', index: 0 })
+  const center = run.game.cells.findIndex(
+    (cell, index) =>
+      cell.visibility === 'hidden' &&
+      !cell.mine &&
+      sonarRegion(run.game.config, index).some(
+        (other) =>
+          other !== index &&
+          run.game.cells[other]?.visibility === 'hidden' &&
+          !run.game.cells[other]?.mine &&
+          run.game.cells[other]!.adjacent > 0,
+      ),
+  )
+  assert.ok(center >= 0)
+  const scanned = actSonar(run, { type: 'scan', index: center })
+  assert.equal(scanned.game.cells[center]?.visibility, 'revealed')
+  for (const index of sonarRegion(run.game.config, center)) {
+    if (index !== center)
+      assert.equal(scanned.game.cells[index]?.visibility, run.game.cells[index]?.visibility)
+    if (!scanned.game.cells[index]?.mine) {
+      const opened = {
+        ...scanned,
+        game: {
+          ...scanned.game,
+          cells: scanned.game.cells.map((cell, other) =>
+            other === index ? { ...cell, visibility: 'revealed' as const } : cell,
+          ),
+        },
+      }
+      assert.equal(sonarObscured(opened, index), false)
+    }
+  }
 })

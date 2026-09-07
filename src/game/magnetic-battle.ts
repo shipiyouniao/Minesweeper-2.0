@@ -59,6 +59,7 @@ export function enterMagnetic(run: Expedition): Expedition {
 
   return forecastRun({
     ...run,
+    sonar: { ...run.sonar, readings: [], loan: 0, loanProgress: 0 },
     game: layout.game,
     walls: layout.walls,
     entrance: layout.entrance,

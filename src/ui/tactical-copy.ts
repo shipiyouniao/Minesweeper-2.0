@@ -7,6 +7,12 @@ import { battleCopy } from './battle-presentation.js'
 /** Explain a public action preview without inspecting the mine layout. */
 export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string {
   switch (plan.reason) {
+    case 'echo-locate':
+      return message(language, 'echo.locate')
+    case 'echo-phase':
+      return message(language, 'echo.phase-break')
+    case 'echo-shell':
+      return message(language, 'echo.shell')
     case 'clock-seal':
       return message(language, 'tactical-copy.return-a-spell-with-an-hourglass-to')
     case 'magnet-armor':
@@ -61,6 +67,8 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
       return message(language, 'tactical-copy.one-twin-defeated-the-survivor-s-future')
     case 'nest-destroyed':
       return message(language, 'tactical-copy.nest-destroyed-supply-stopped-queen-armor-and')
+    case 'echo-shifted':
+      return message(language, 'echo.shifted')
     case 'window-opened':
       return message(language, 'tactical-copy.core-primed-strike-window-open')
     case 'disabled':

@@ -1,3 +1,4 @@
+import type { ExpeditionSonar } from './echo.js'
 import type { VariantDifficulty } from './variant-difficulty.js'
 import type { TacticalEncounter } from './tactical.js'
 import type { Vitality } from './vitality.js'
@@ -30,7 +31,7 @@ export type Profession =
   | 'riftwalker'
 
 /** Camp equipment consumes a three-point departure budget. */
-export type Equipment = 'probe' | 'scanner' | 'guard' | 'field-radio' | CombatEquipment
+export type Equipment = 'probe' | 'scanner' | 'guard' | 'field-radio' | 'sonar' | CombatEquipment
 
 /** Relics persist only within the current expedition. */
 export type Relic =
@@ -46,6 +47,7 @@ export type Relic =
 
 /** Progression purchases unlock options rather than unlimited stat increases. */
 export type Upgrade =
+  | 'sonar'
   | 'surveyor'
   | 'engineer'
   | 'archaeologist'
@@ -80,6 +82,7 @@ export interface Departure {
 
 /** A complete floor state; reachability is derived from revealed safe cells. */
 export interface Expedition extends Vitality {
+  readonly sonar: ExpeditionSonar
   readonly titleProgress: TitleProgress
   readonly encounter: TacticalEncounter | null
   /** Rebuilt from accepted skill intents; reset only on entering another floor. */
@@ -120,7 +123,8 @@ export interface Expedition extends Vitality {
 /** Explicit run intents; all effects can be replayed without browser state. */
 export type ExpeditionAction =
   | {
-      readonly type: 'reveal' | 'flag' | 'mark-safe' | 'chord' | 'move' | 'probe' | 'interact'
+      readonly type:
+        'reveal' | 'flag' | 'mark-safe' | 'chord' | 'move' | 'probe' | 'interact' | 'sonar'
       readonly index: number
     }
   | { readonly type: 'sweep'; readonly row: number }

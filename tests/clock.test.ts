@@ -227,7 +227,7 @@ test('starting profession defeats clock across all tiers using only public clues
 test('real clock journals replay every turn and retain exactly one boss-family milestone after victory', () => {
   const storage = new MemoryStorage(),
     runtime = new FakeRuntime()
-  runtime.seed = 59
+  runtime.seed = 58
   let session = new ExpeditionSession(new VariantRepository(storage), runtime)
   assert.ok(session.start('explorer', [], 'relaxed'))
   for (let count = 0; session.run?.phase !== 'boss' && count < 1000; count++) {

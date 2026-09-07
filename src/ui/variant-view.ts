@@ -1,3 +1,6 @@
+import { sonarRegion } from '../game/sonar.js'
+import { markEchoCell } from './echo-board.js'
+import { echoObscured } from '../game/expedition-sonar.js'
 import { message } from '../i18n.js'
 import { returnedToCampCopy } from './variant-copy.js'
 
@@ -79,6 +82,24 @@ export class VariantView {
     const dialog = root.querySelector<HTMLDialogElement>('dialog')
     const picker = root.querySelector<HTMLElement>('.language-picker')
     if (!content || !status || !dialog || !picker) throw new Error('Variant shell is incomplete')
+    root.addEventListener(
+      'click',
+      (event) => {
+        const button =
+          event.target instanceof Element
+            ? event.target.closest<HTMLElement>('[data-sonar-reading]')
+            : null
+        if (!button || !this.config) return
+        const region = sonarRegion(this.config, Number(button.dataset['sonarReading']))
+        for (const cell of this.content.querySelectorAll<HTMLElement>(
+          '[data-side="a"] [data-cell]',
+        ))
+          cell.classList.toggle('sonar-observed', region.includes(Number(cell.dataset['cell'])))
+        for (const entry of this.content.querySelectorAll<HTMLElement>('[data-sonar-reading]'))
+          entry.setAttribute('aria-pressed', String(entry === button))
+      },
+      { signal: this.listeners.signal },
+    )
     this.content = content
     this.status = status
     this.dialog = dialog
@@ -307,7 +328,7 @@ export class VariantView {
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
       cell.classList.toggle(
         'tool-target',
-        tool === 'probe'
+        tool === 'probe' || tool === 'sonar'
           ? area.includes(Number(cell.dataset['cell']))
           : tool === 'scan' &&
               index !== null &&
@@ -322,7 +343,12 @@ export class VariantView {
       return
     }
 
-    const description = tool === 'probe' ? copy.probeHint : copy.scanHint
+    const description =
+      tool === 'sonar'
+        ? message(this.language, 'sonar-equipment.note')
+        : tool === 'probe'
+          ? copy.probeHint
+          : copy.scanHint
     if (index === null) {
       hint.textContent = description
       return
@@ -332,7 +358,9 @@ export class VariantView {
     const row = `${common.row} ${Math.floor(index / config.width) + 1}`
     const column = `${common.column} ${(index % config.width) + 1}`
     hint.textContent =
-      tool === 'probe' ? `${description} · ${row} · ${column}` : `${description} · ${row}`
+      tool === 'probe' || tool === 'sonar'
+        ? `${description} · ${row} · ${column}`
+        : `${description} · ${row}`
   }
 
   /** Highlight only publicly walkable routes; tool targeting takes visual precedence. */
@@ -369,7 +397,7 @@ export class VariantView {
         encounter.kind === 'bastion'
           ? encounter.pylons.find((entry) => entry.index === index)
           : null
-      if (index === encounter.boss) {
+      if (encounter.kind !== 'echo' && index === encounter.boss) {
         cell.classList.remove('wall-cell')
         cell.classList.add('boss-cell')
         cell.removeAttribute('aria-disabled')
@@ -398,6 +426,7 @@ export class VariantView {
           `${cell.getAttribute('aria-label')}, ${pylon.active ? t.pylon : t.disabled}`,
         )
       }
+      markEchoCell(this.language, run, cell, index)
       markBroodCell(this.language, run, cell, index)
       markMirrorCell(this.language, run, cell, index)
       markMagneticCell(this.language, run, cell, index)
@@ -666,7 +695,7 @@ export class VariantView {
       )
       const player = document.createElement('div')
       player.className = 'dungeon-player'
-      const clue = run.game.cells[run.player]?.adjacent ?? 0
+      const clue = echoObscured(run, run.player) ? '≈' : (run.game.cells[run.player]?.adjacent ?? 0)
       player.dataset['number'] = String(clue)
       player.innerHTML = `${spriteImage(professionSprite(run.departure.profession))}${clue ? `<span class="landmark-clue">${clue}</span>` : ''}`
       player.style.width = `${current.offsetWidth}px`

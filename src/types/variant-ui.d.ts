@@ -19,6 +19,7 @@ export type VariantCommand =
         | 'result'
         | 'zoom'
         | 'camp'
+        | 'sonar'
         | 'probe'
         | 'scan'
         | 'skill'

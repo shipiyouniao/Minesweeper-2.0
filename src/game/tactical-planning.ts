@@ -1,3 +1,4 @@
+import { canUseExpeditionSonar, echoCandidates } from './expedition-sonar.js'
 import { approachPath, walkingPath } from './dungeon-path.js'
 import { adjacentSteps } from './variant-board.js'
 import { neighbors } from './engine.js'
@@ -11,6 +12,16 @@ import type { TacticalPlan, TacticalReason } from '../types/tactical.js'
 /** Use only public state when choosing whether a cell click means movement, a control, or attack. */
 export function tacticalCellAction(run: Expedition, index: number): ExpeditionAction {
   const encounter = run.encounter
+  if (encounter?.kind === 'echo' && encounter.bodies.includes(index))
+    return {
+      type:
+        encounter.exposedUntil >= encounter.turn &&
+        echoCandidates(run).length === 1 &&
+        echoCandidates(run)[0] === index
+          ? 'attack'
+          : 'interact',
+      index,
+    }
   if (encounter) {
     if (
       encounter.kind === 'clock' &&
@@ -95,8 +106,23 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       }
       break
     }
+    case 'sonar':
+      if (!canUseExpeditionSonar(run, action.index)) reason = 'used'
+      break
     case 'attack':
       cost = 2
+      if (
+        encounter.kind === 'echo' &&
+        encounter.phase < 3 &&
+        encounter.health <= Math.ceil((encounter.maxHealth * (3 - encounter.phase)) / 3)
+      ) {
+        reason = 'echo-phase'
+        break
+      }
+      if (encounter.kind === 'echo' && encounter.exposedUntil < encounter.turn) {
+        reason = 'echo-shell'
+        break
+      }
       if (encounter.kind === 'clock' && !encounter.hourglasses.some((glass) => glass.used))
         reason = 'clock-seal'
       else if (encounter.kind === 'magnetic' && encounter.exposedUntil < encounter.turn)
@@ -122,6 +148,13 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       else if (!adjacentSteps(run.game, run.player).includes(encounter.boss)) reason = 'adjacent'
       break
     case 'interact': {
+      if (encounter.kind === 'echo') {
+        const candidates = echoCandidates(run)
+        if (candidates.length !== 1 || candidates[0] !== action.index) reason = 'echo-locate'
+        else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
+        else if (encounter.exposedUntil >= encounter.turn) reason = 'used'
+        break
+      }
       if (encounter.kind === 'clock') {
         if (
           !encounter.hourglasses.some((glass) => glass.index === action.index && !glass.used) ||

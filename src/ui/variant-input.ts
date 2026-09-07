@@ -48,6 +48,7 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     case 'zoom':
     case 'start':
     case 'camp':
+    case 'sonar':
     case 'probe':
     case 'scan':
     case 'skill':

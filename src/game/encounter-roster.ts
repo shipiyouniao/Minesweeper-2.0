@@ -1,3 +1,4 @@
+import { enterEcho } from './echo-battle.js'
 import { encounterTier } from './encounter-tiers.js'
 import { enterBattle } from './battle-arena.js'
 import { enterMirror } from './mirror-battle.js'
@@ -10,10 +11,11 @@ export function isEncounterFloor(run: Expedition): boolean {
   return encounterTier(run.departure.difficulty).floors.includes(run.floor)
 }
 
-/** Rotate five distinct encounters from a seeded first boss without immediate repeats. */
+/** Rotate six distinct encounters from a seeded first boss without immediate repeats. */
 export function enterEncounter(run: Expedition): Expedition {
   const checkpoint = encounterTier(run.departure.difficulty).floors.indexOf(run.floor)
-  const slot = (run.departure.seed + checkpoint) % 5
+  const slot = (run.departure.seed + checkpoint) % 6
+  if (slot === 5) return enterEcho(run)
   if (slot === 4) return enterClock(run)
   if (slot === 3) return enterMagnetic(run)
   return slot === 2 ? enterMirror(run) : enterBattle(run, slot === 1 ? 'brood' : 'bastion')
