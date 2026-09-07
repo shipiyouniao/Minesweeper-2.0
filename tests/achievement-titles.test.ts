@@ -141,7 +141,7 @@ test('magnetic mine contact disqualifies even with unchanged health and previous
   assert.ok(milestoneProgress(success).challenges?.includes('magnetic-demolition'))
   assert.ok(milestoneProgress(success).challenges?.includes('field-unscathed'))
 })
-test('no-hourglass and flawless challenges track the entire fight, not only the killing action', () => {
+test('one-hourglass and flawless challenges track the entire fight, not only the killing action', () => {
   const before = createExpedition(CURRENT_DEPARTURE)
   const clock = enterClock(before)
   assert.equal(clock.encounter?.kind, 'clock')
@@ -161,8 +161,24 @@ test('no-hourglass and flawless challenges track the entire fight, not only the 
     ),
     false,
   )
-  assert.ok(
+  assert.equal(
     milestoneProgress(advanceMilestones(start, clock, killed(clock))).challenges?.includes(
+      'clock-no-glass',
+    ),
+    false,
+  )
+  const one = {
+    ...clock,
+    encounter: {
+      ...clock.encounter,
+      hourglasses: clock.encounter.hourglasses.map((glass, index) => ({
+        ...glass,
+        used: index === 0,
+      })),
+    },
+  }
+  assert.ok(
+    milestoneProgress(advanceMilestones(start, clock, killed(one))).challenges?.includes(
       'clock-no-glass',
     ),
   )

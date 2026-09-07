@@ -336,9 +336,9 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
       b(
         'player',
         'boss',
-        'Then let it find its owner. One strike, a step away, and watch which moment arrives first.',
-        '那就让它去找原来的主人。出手，离开，再看清究竟是哪一个时刻先到。',
-        'なら持ち主のもとへ返そう。一撃、そして退く。どの瞬間が先に来るか見極める。',
+        'Then send its spell back to shatter that barrier. Strike, step away, and let my echo strike again.',
+        '那就把法术送回去，打破它的护罩。再打一下撤开，让留下的残影补上一击。',
+        'なら術を返して障壁を壊そう。一撃を与えて退き、残像にもう一撃任せる。',
       ),
     ],
   }

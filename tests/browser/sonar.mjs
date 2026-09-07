@@ -33,7 +33,7 @@ try {
           localStorage.setItem(
             key,
             JSON.stringify({
-              version: 1,
+              version: 2,
               difficulty: 'easy',
               seed,
               actions: [],
@@ -207,7 +207,7 @@ try {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           difficulty: 'expert',
           seed,
           actions: [{ type: 'reveal', index: 0 }],
@@ -221,7 +221,8 @@ try {
   await mobilePage.locator('[data-control="zoom"]').tap()
   const cdp = await mobileContext.newCDPSession(mobilePage)
   const cell = mobilePage.locator('[data-cell="3"]')
-  await cell.scrollIntoViewIfNeeded()
+  await cell.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'center' }))
+  await mobilePage.waitForTimeout(100)
   const box = await cell.boundingBox()
   const point = { x: box.x + box.width / 2, y: box.y + box.height / 2, id: 1 }
   const beforeSwipe = await saved(mobilePage)
@@ -235,14 +236,21 @@ try {
   }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
   assert.deepEqual(await saved(mobilePage), beforeSwipe)
+  // Let native scroll momentum settle before starting a separate gesture.
+  await mobilePage.waitForTimeout(800)
   await mobilePage.locator('[data-control="scan"]').tap()
-  await cell.scrollIntoViewIfNeeded()
+  await cell.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'center' }))
+  await mobilePage.waitForTimeout(100)
   const aimBox = await cell.boundingBox()
   const aim = { x: aimBox.x + aimBox.width / 2, y: aimBox.y + aimBox.height / 2, id: 1 }
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [aim] })
   await mobilePage.waitForTimeout(550)
   assert.deepEqual(await saved(mobilePage), beforeSwipe)
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await mobilePage.waitForFunction(
+    (key) => JSON.parse(localStorage.getItem(key)).actions.at(-1)?.type === 'scan',
+    key,
+  )
   assert.deepEqual((await saved(mobilePage)).actions.at(-1), { type: 'scan', index: 3 })
   assert.equal(
     await mobilePage.locator('.sonar-pulse').evaluate((element) => element.getAnimations().length),
@@ -275,7 +283,7 @@ try {
       localStorage.setItem(
         key,
         JSON.stringify({
-          version: 1,
+          version: 2,
           difficulty: 'easy',
           seed,
           actions,

@@ -29,9 +29,9 @@ export function milestoneCopy(language: Language, id: MilestoneId): VariantDescr
       return {
         name: t('Against the clock', '逆时而行', '時に抗う者'),
         note: t(
-          'Defeat the clock boss without using any hourglass.',
-          '不使用场上任何沙漏，击败时钟 BOSS。',
-          '砂時計を使わず時計ボスを倒す。',
+          'Defeat the clock boss using exactly one arena hourglass.',
+          '整场只使用一座沙漏，击败时钟 BOSS。',
+          '砂時計をちょうど1つ使って時計ボスを倒す。',
         ),
       }
     case 'magnetic-demolition':

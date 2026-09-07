@@ -195,4 +195,4 @@ The fourth released boss family adds visible push/pull fields, projected landing
 
 ## Clock Mage
 
-The fifth boss freezes multi-turn attack deadlines and lets a first-strike echo follow up after retreat. Three optional hourglasses return the earliest spell without changing its deadline. The central safe ring and public-route forecast checks preserve escape choices. See [rules, save revision 8 and acceptance](clock-mage.md).
+The fifth boss freezes multi-turn attack deadlines and lets a first-strike echo follow up after retreat. An hourglass must return a spell to break the attack barrier. Subsequent hourglasses remain optional. An echo repeats full first-strike damage only after leaving its square. The central safe ring and public-route forecast checks preserve escape choices. See [rules, save revision 8 and acceptance](clock-mage.md).

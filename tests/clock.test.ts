@@ -119,22 +119,34 @@ test('echo records first accepted strike only, follows retreat, and settles once
     ...initial,
     player,
     game: solveBattle(initial.game, initial.walls, initial.entrance),
-    encounter: { ...initial.encounter, points: 5, spells: [], echo: { index: player, damage: 0 } },
+    encounter: {
+      ...initial.encounter,
+      points: 5,
+      hourglasses: initial.encounter.hourglasses.map((glass, index) => ({
+        ...glass,
+        used: index === 0,
+      })),
+      spells: [],
+      echo: { index: player, damage: 0 },
+    },
   }
   const struck = actExpedition(run, { type: 'attack' })
   assert.ok(struck.encounter?.kind === 'clock')
-  assert.equal(struck.encounter.echo.damage, 2)
+  assert.equal(struck.encounter.echo.damage, 5)
+  const stayed = actExpedition(struck, { type: 'end-turn' })
+  assert.ok(stayed.encounter?.kind === 'clock')
+  assert.equal(stayed.encounter.resolution?.echoDamage, 0, 'Echo requires leaving its square')
   const twice = actExpedition(struck, { type: 'attack' })
   assert.ok(twice.encounter?.kind === 'clock')
-  assert.equal(twice.encounter.echo.damage, 2)
+  assert.equal(twice.encounter.echo.damage, 5)
   const landing = adjacentSteps(twice.game, player).find((index) => walkingPath(twice, index))!
   const moved = actExpedition(twice, { type: 'move', index: landing })
   const ended = actExpedition(moved, { type: 'end-turn' })
   assert.ok(ended.encounter?.kind === 'clock')
-  assert.equal(ended.encounter.health, run.encounter.health - 12)
+  assert.equal(ended.encounter.health, run.encounter.health - 15)
   assert.equal(ended.encounter.echo.index, landing)
   assert.equal(ended.encounter.echo.damage, 0)
-  assert.equal(ended.encounter.resolution?.echoDamage, 2)
+  assert.equal(ended.encounter.resolution?.echoDamage, 5)
   assert.equal(ended.skillUsed, run.skillUsed)
 })
 
@@ -177,7 +189,11 @@ test('clock defeat cancels echo; surviving echo kills settle victory exactly onc
   assert.equal(dead.phase, 'lost')
   assert.equal(dead.encounter?.health, 2)
   const won = actExpedition(
-    { ...run, encounter: { ...run.encounter, spells: [] } },
+    {
+      ...run,
+      player: adjacentSteps(run.game, run.player)[0]!,
+      encounter: { ...run.encounter, spells: [] },
+    },
     { type: 'end-turn' },
   )
   assert.equal(won.phase, 'reward')
@@ -239,4 +255,18 @@ test('real clock journals replay every turn and retain exactly one boss-family m
   assert.deepEqual(restored.camp, session.camp)
   assert.equal(milestoneProgress(restored.camp).bosses, 1)
   assert.deepEqual(milestoneProgress(restored.camp).bossKinds, ['clock'])
+})
+
+test('clock barrier rejects direct attacks until an actual hourglass interaction returns a spell', () => {
+  const initial = arena()
+  const game = solveBattle(initial.game, initial.walls, initial.entrance)
+  const player = adjacentSteps(game, initial.encounter.boss)[0]!
+  const sealed = { ...initial, game, player }
+  assert.equal(actExpedition(sealed, { type: 'attack' }), sealed)
+  const index = initial.encounter.hourglasses[0]!.index
+  const returned = actExpedition({ ...sealed, player: index }, { type: 'interact', index })
+  assert.ok(returned.encounter?.kind === 'clock')
+  assert.ok(returned.encounter.hourglasses[0]?.used)
+  const ready = { ...returned, player }
+  assert.notEqual(actExpedition(ready, { type: 'attack' }), ready)
 })

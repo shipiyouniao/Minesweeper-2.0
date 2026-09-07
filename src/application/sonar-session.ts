@@ -17,7 +17,7 @@ export class SonarSession {
     this.runtime = runtime
     const saved = repository.load()
     this.saved = saved ?? {
-      version: 1,
+      version: 2,
       difficulty: 'easy',
       seed: runtime.randomSeed(),
       actions: [],

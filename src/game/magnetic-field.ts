@@ -20,9 +20,7 @@ export function magneticProjection(
   index = run.player,
 ): MagneticProjection {
   const { encounter, game } = run
-  const anchored =
-    (encounter.braced && index === run.player) ||
-    encounter.anchors.some((anchor) => anchor.index === index && anchor.calibrated)
+  const anchored = encounter.anchors.some((anchor) => anchor.index === index && anchor.calibrated)
   const result: MagneticProjection = {
     path: [index],
     direction: 'none',
@@ -44,7 +42,7 @@ export function magneticProjection(
   const direction = horizontal ? (sign < 0 ? 'left' : 'right') : sign < 0 ? 'up' : 'down'
   const path = [index]
   let collision = false
-  for (let step = 0; step < 2; step++) {
+  for (let step = 0; step < (encounter.braced && index === run.player ? 1 : 2); step++) {
     const current = path.at(-1)!
     // Attraction stops on the neutral axis instead of crossing it and oscillating.
     const currentCoordinate = horizontal ? current % width : Math.floor(current / width)

@@ -1,3 +1,5 @@
+import { actSonar, sonarCharges, sonarObscured } from '../game/sonar.js'
+import type { Sonar } from '../types/sonar.js'
 import { act, neighbors } from '../game/engine.js'
 import { approachPath } from '../game/dungeon-path.js'
 import { placedBoard } from '../game/variant-board.js'
@@ -26,6 +28,7 @@ class TutorialPlayer {
   private readonly events = new AbortController()
   private readonly lesson: TutorialDefinition
   private a: Game
+  private sonar: Sonar
   private b: Game
   private run: Expedition
   private step = 0
@@ -55,6 +58,7 @@ class TutorialPlayer {
     this.lesson = tutorialLesson(ruleset, language)
     const board = placedBoard({ width: 5, height: 5, mines: 3 }, new Set([4, 16, 22]), 7, 0)
     this.a = { ...board, cells: board.cells.map((cell) => ({ ...cell, visibility: 'hidden' })) }
+    this.sonar = { game: this.a, difficulty: 'easy', readings: [], moves: 0, excavations: 0 }
     this.b = placedBoard(board.config, new Set([6, 18, 24]), 8, 0)
     const base = createExpedition({
       title: null,
@@ -129,11 +133,13 @@ class TutorialPlayer {
       .map((cell, index) => {
         const target =
           step?.side === side &&
-          (step.index === index || (step.action === 'scan' && Math.floor(index / 5) === 4))
+          (step.index === index ||
+            (step.action === 'scan' && this.ruleset !== 'sonar' && Math.floor(index / 5) === 4))
+        const masked = this.ruleset === 'sonar' && sonarObscured(this.sonar, index)
         const known = cell.visibility === 'revealed'
         const flag = cell.visibility === 'flagged'
         const player = this.ruleset === 'expedition' && this.run.player === index
-        const label = `${this.t('Row', '行', '行')} ${Math.floor(index / 5) + 1}, ${this.t('column', '列', '列')} ${(index % 5) + 1}, ${flag ? this.t('flag', '旗', '旗') : known ? cell.adjacent : this.t('covered', '未开', '未開封')}`
+        const label = `${this.t('Row', '行', '行')} ${Math.floor(index / 5) + 1}, ${this.t('column', '列', '列')} ${(index % 5) + 1}, ${flag ? this.t('flag', '旗', '旗') : known ? (masked ? '≈' : cell.adjacent) : this.t('covered', '未开', '未開封')}`
         const entity =
           this.ruleset === 'expedition'
             ? player
@@ -144,7 +150,7 @@ class TutorialPlayer {
                   ? spriteImage('treasure')
                   : ''
             : ''
-        return `<button class="practice-cell ${known ? 'open' : ''} ${flag ? 'flagged' : ''} ${target ? 'practice-target' : ''} ${ring.includes(index) ? 'practice-neighbor' : ''}" data-practice-cell="${index}" data-practice-side="${side}" aria-label="${label}${target ? ', ' + this.t('Try here', '试试这里', 'ここを操作') : ''}" tabindex="${target && step?.index === index ? '0' : '-1'}">${entity || (flag ? '⚑' : known && cell.adjacent ? cell.adjacent : '')}${this.ruleset === 'expedition' && this.run.surveyedCells.includes(index) && !known && !flag ? '<span class="practice-safe">✓</span>' : ''}</button>`
+        return `<button class="practice-cell ${known ? 'open' : ''} ${flag ? 'flagged' : ''} ${target ? 'practice-target' : ''} ${ring.includes(index) ? 'practice-neighbor' : ''}" data-practice-cell="${index}" data-practice-side="${side}" aria-label="${label}${target ? ', ' + this.t('Try here', '试试这里', 'ここを操作') : ''}" tabindex="${target && step?.index === index ? '0' : '-1'}">${entity || (flag ? '⚑' : known && cell.adjacent ? (masked ? '≈' : cell.adjacent) : '')}${this.ruleset === 'expedition' && this.run.surveyedCells.includes(index) && !known && !flag ? '<span class="practice-safe">✓</span>' : ''}</button>`
       })
       .join('')}</div></section>`
   }
@@ -153,7 +159,7 @@ class TutorialPlayer {
   private render(): void {
     const step = this.lesson.steps[this.step]
     const done = !step
-    this.dialog.innerHTML = `<header class="guidance-header"><div><span class="guidance-eyebrow">FIELD NOTES / ${this.t('LEARN BY DOING', '亲手试一试', '実際に練習')}</span><h2 id="tutorial-title">${this.lesson.title}</h2></div><button class="guidance-close" data-practice="close" aria-label="${this.t('Exit practice', '退出练习', '練習を終了')}">×</button></header><div class="lesson-progress" aria-label="${this.step + 1} / ${this.lesson.steps.length}">${this.lesson.steps.map((_, i) => `<span class="${i < this.step ? 'done' : i === this.step ? 'current' : ''}"></span>`).join('')}</div><div class="guidance-layout"><article class="lesson-note"><span class="lesson-number">${done ? '✓' : String(this.step + 1).padStart(2, '0')}</span><h3>${step?.title ?? this.t('Ready for the field', '可以正式出发了', '本番へ進もう')}</h3><p>${step?.text ?? this.lesson.ending}</p><p class="lesson-feedback" role="status">${this.message || (this.completed ? this.t('Good. Continue when you are ready.', '完成了。准备好后再继续。', 'できました。準備ができたら次へ。') : '')}</p>${this.ruleset === 'expedition' ? `<div class="practice-vitals">♥ ${this.run.health}/${this.run.maxHealth} · ◇ ${this.run.shields} · ${this.t('Chests', '宝箱', '宝箱')} ${this.run.collected.length}/1</div>` : ''}</article><div class="lesson-workspace ${this.ruleset === 'twin' ? 'practice-twins' : ''}">${this.board(this.ruleset === 'expedition' ? this.run.game : this.a, 'a')}${this.ruleset === 'twin' ? this.board(this.b, 'b') : ''}<div class="practice-dock">${this.ruleset === 'expedition' ? `<button class="practice-tool ${this.tool === 'probe' ? 'selected' : ''}" data-practice="probe">${spriteImage('probe')}<span>${this.t('Probe', '探针', '探針')} · ${this.run.probes}</span></button><button class="practice-tool ${this.tool === 'scan' ? 'selected' : ''}" data-practice="scan">${spriteImage('scanner')}<span>${this.t('Scan', '扫描器', '走査器')} · ${this.run.scans}</span></button><button class="practice-tool" data-practice="skill" ${this.run.skillUsed ? 'disabled' : ''}>${spriteImage('skill-explorer')}<span>${this.t('Light', '探路灯', '灯り')}</span></button>` : ''}${boardControlsTemplate(this.language, this.mode, 'data-action').replace('data-action="cycle-mode"', 'data-practice="cycle"')}</div></div></div><footer class="guidance-footer"><button class="text-button" data-practice="restart">${this.t('Start again', '重新练习', '最初から')}</button><span>${this.t('Click / tap · arrows + Enter', '点击 / 轻触 · 方向键 + 回车', 'クリック / タップ · 矢印 + Enter')}</span><button class="primary-button" data-practice="${done ? 'close' : 'next'}" ${!done && !this.completed ? 'disabled' : ''}>${done ? this.t('Back to game', '返回游戏', 'ゲームへ') : this.t('Continue', '继续', '次へ')} →</button></footer>`
+    this.dialog.innerHTML = `<header class="guidance-header"><div><span class="guidance-eyebrow">FIELD NOTES / ${this.t('LEARN BY DOING', '亲手试一试', '実際に練習')}</span><h2 id="tutorial-title">${this.lesson.title}</h2></div><button class="guidance-close" data-practice="close" aria-label="${this.t('Exit practice', '退出练习', '練習を終了')}">×</button></header><div class="lesson-progress" aria-label="${this.step + 1} / ${this.lesson.steps.length}">${this.lesson.steps.map((_, i) => `<span class="${i < this.step ? 'done' : i === this.step ? 'current' : ''}"></span>`).join('')}</div><div class="guidance-layout"><article class="lesson-note"><span class="lesson-number">${done ? '✓' : String(this.step + 1).padStart(2, '0')}</span><h3>${step?.title ?? this.t('Ready for the field', '可以正式出发了', '本番へ進もう')}</h3><p>${step?.text ?? this.lesson.ending}</p><p class="lesson-feedback" role="status">${this.message || (this.completed ? this.t('Good. Continue when you are ready.', '完成了。准备好后再继续。', 'できました。準備ができたら次へ。') : '')}</p>${this.ruleset === 'expedition' ? `<div class="practice-vitals">♥ ${this.run.health}/${this.run.maxHealth} · ◇ ${this.run.shields} · ${this.t('Chests', '宝箱', '宝箱')} ${this.run.collected.length}/1</div>` : ''}</article><div class="lesson-workspace ${this.ruleset === 'twin' ? 'practice-twins' : ''}">${this.board(this.ruleset === 'expedition' ? this.run.game : this.a, 'a')}${this.ruleset === 'twin' ? this.board(this.b, 'b') : ''}<div class="practice-dock">${this.ruleset === 'sonar' ? `<button class="practice-tool" data-practice="scan">${spriteImage('scanner')}<span>${this.t('Sonar', '声呐', 'ソナー')} · ${sonarCharges(this.sonar)}</span></button>` : ''}${this.ruleset === 'expedition' ? `<button class="practice-tool ${this.tool === 'probe' ? 'selected' : ''}" data-practice="probe">${spriteImage('probe')}<span>${this.t('Probe', '探针', '探針')} · ${this.run.probes}</span></button><button class="practice-tool ${this.tool === 'scan' ? 'selected' : ''}" data-practice="scan">${spriteImage('scanner')}<span>${this.t('Scan', '扫描器', '走査器')} · ${this.run.scans}</span></button><button class="practice-tool" data-practice="skill" ${this.run.skillUsed ? 'disabled' : ''}>${spriteImage('skill-explorer')}<span>${this.t('Light', '探路灯', '灯り')}</span></button>` : ''}${boardControlsTemplate(this.language, this.mode, 'data-action').replace('data-action="cycle-mode"', 'data-practice="cycle"')}</div></div></div><footer class="guidance-footer"><button class="text-button" data-practice="restart">${this.t('Start again', '重新练习', '最初から')}</button><span>${this.t('Click / tap · arrows + Enter', '点击 / 轻触 · 方向键 + 回车', 'クリック / タップ · 矢印 + Enter')}</span><button class="primary-button" data-practice="${done ? 'close' : 'next'}" ${!done && !this.completed ? 'disabled' : ''}>${done ? this.t('Back to game', '返回游戏', 'ゲームへ') : this.t('Continue', '继续', '次へ')} →</button></footer>`
   }
 
   /** Focus the next required action without scrolling the page underneath the lesson. */
@@ -188,7 +194,9 @@ class TutorialPlayer {
     if (!step || this.completed || this.moving) return
     if (
       step.side !== side ||
-      (step.action === 'scan' ? Math.floor(index / 5) !== 4 : step.index !== index)
+      (step.action === 'scan' && this.ruleset !== 'sonar'
+        ? Math.floor(index / 5) !== 4
+        : step.index !== index)
     ) {
       this.reject()
       return
@@ -218,6 +226,12 @@ class TutorialPlayer {
         return
       }
       this.completed = next !== before
+    } else if (this.ruleset === 'sonar' && step.action === 'scan' && this.tool === 'scan') {
+      const next = actSonar(this.sonar, { type: 'scan', index })
+      this.completed = next !== this.sonar
+      this.sonar = next
+      this.a = next.game
+      this.tool = null
     } else if (step.action === 'cell') {
       const type = secondary ? 'flag' : this.mode
       const expected = step.mode ?? 'reveal'
@@ -226,7 +240,10 @@ class TutorialPlayer {
         return
       }
       const before = side === 'a' ? this.a : this.b
-      const next = act(before, { type, index })
+      const next =
+        this.ruleset === 'sonar'
+          ? (this.sonar = actSonar(this.sonar, { type, index })).game
+          : act(before, { type, index })
       if (side === 'a') this.a = next
       else this.b = next
       this.completed = next !== before

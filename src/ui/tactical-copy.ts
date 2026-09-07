@@ -8,6 +8,12 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
   const zh = language === 'zh'
   const ja = language === 'ja'
   switch (plan.reason) {
+    case 'clock-seal':
+      return zh
+        ? '先启动沙漏，转送一道法术，解除护罩'
+        : ja
+          ? '砂時計で術を返送して障壁を解除'
+          : 'Return a spell with an hourglass to break the barrier'
     case 'magnet-armor':
       return zh
         ? '启动锚点，牵引骑士撞击后破甲'

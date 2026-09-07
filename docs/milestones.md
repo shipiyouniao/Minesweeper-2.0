@@ -8,7 +8,7 @@ All five expedition difficulties are selectable on the camp overview. The Missio
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------- | -------: | ------------------------------------- |
 | Achievement | Untouched bulwark: Defeat the bastion without losing health. Revival counts as damage.                                        |      400 | Title ability                         |
 | Achievement | Beyond the mirror: Defeat both twins without losing health. Revival counts as damage.                                         |      400 | Title ability                         |
-| Achievement | Against the clock: Defeat the clock boss without using any hourglass.                                                         |      400 | Title ability                         |
+| Achievement | Against the clock: Defeat the clock boss using exactly one arena hourglass.                                                   |      400 | Title ability                         |
 | Achievement | Demolition expert: Lure a charge into at least one mine, then defeat the magnetic boss.                                       |      400 | Title ability                         |
 | Achievement | Into the nest: Defeat the queen while leaving at least one nest intact.                                                       |      400 | Title ability                         |
 | Mission     | Break the bastion: Defeat this boss once.                                                                                     |      100 | —                                     |
@@ -87,7 +87,7 @@ Seven additional achievements award titles and supplies:
 - Master of magnetism: defeat the magnetic boss without field-induced mine contact, including shield-absorbed contact (300).
 - Untouched bulwark: defeat the bastion without losing health (400).
 - Beyond the mirror: defeat both twins without losing health; switching realms is allowed (400).
-- Against the clock: defeat the clock boss without using arena hourglasses (400).
+- Against the clock: defeat the clock boss using exactly one arena hourglass (400).
 - Demolition expert: cause a magnetic charge to detonate at least one mine, then defeat the boss (400).
 - Into the nest: defeat the Brood Queen with at least one nest intact (400).
 

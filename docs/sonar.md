@@ -4,15 +4,15 @@ Sonar is a standalone information puzzle, available at `?ruleset=sonar`. It shar
 
 ## Rules
 
-| Preset | Board   | Mines | Pulses |
-| ------ | ------- | ----: | -----: |
-| Easy   | 9 × 9   |    10 |      3 |
-| Medium | 16 × 16 |    40 |      3 |
-| Expert | 30 × 16 |    99 |      3 |
+| Preset | Board   | Mines | Starting pulses |
+| ------ | ------- | ----: | --------------: |
+| Easy   | 9 × 9   |    10 |               3 |
+| Medium | 16 × 16 |    40 |               3 |
+| Expert | 30 × 16 |    99 |               3 |
 
-The first revealed square and its eight neighbors are safe. Placement uses the existing seeded, unbiased Fisher–Yates shuffle and remains fixed thereafter. Ordinary puzzles are not guaranteed to be solvable without guessing; three readings provide limited extra information.
+The first revealed square and its eight neighbors are safe. Placement uses the existing seeded, unbiased Fisher–Yates shuffle and remains fixed thereafter. Ordinary puzzles are not guaranteed to be solvable without guessing; most nonzero revealed clues are obscured until scanned. Roughly one in four positions retains its ordinary clue; blank zero cells remain readable.
 
-A scan is available after opening the board. Choose a center and measure its clipped 3 × 3 region, including the center. The result counts **all physical mines** in that region, including player-flagged mines. It never reveals individual identities, removes incorrect flags, validates safe notes or changes any cells. Zero is a valid reading and spends a pulse. Each new center consumes one of three pulses; revisiting an identical center selects its existing reading without spending or appending a journal action, including after all pulses have been used.
+A scan is available after opening the board. Choose a center and measure its clipped 3 × 3 region, including the center. The result counts **all physical mines** in that region, including player-flagged mines. It opens only the center square, replacing any guess there; a mine becomes a locked gold flag without exploding. Neighboring cells remain unchanged. Zero is a valid reading and spends a pulse. Each new center consumes one pulse and opens and permanently clarifies only its center; surrounding clues remain obscured. Start with three pulses and earn one per four successful safe excavation actions. Flood expansion counts once per action, not per cell. Repeated clicks, flags and scans never recharge. Credits may accumulate; the finite board bounds the total; revisiting an identical center selects its existing reading without spending or appending a journal action, including after all pulses have been used.
 
 Reveal all safe cells to win. A mine hit ends this standalone puzzle. Accepted reveal/flag/safe-note/quick-open commands count as board moves; paid scans are recorded separately. Rejected actions, hovering, changing the selected history entry, zoom, pause, language changes and dialogs count as neither.
 
@@ -48,3 +48,7 @@ Winning records rank by fewest board moves, then fewest pulses, retaining ten pe
 Domain tests cover coordinate-oracle clipped counts across 120 shuffled layouts, zero readings, duplicate/invalid/depleted scans, false flags and safe notes, immutable cells, public-only overlap subtraction, deterministic replay, exactly-once wins, loss behavior, malformed/incompatible journals, ranking order, the action bound and storage failures.
 
 `tests/browser/sonar.mjs` exercises the real production bundle in English, Chinese and Japanese at mobile/desktop widths: instrument selection, keyboard targeting/cancellation, native touch holds, readout/overlay state, depleted recall, modal/privacy ownership, mode switching, reload and every preset. Visual checks include 4K. The existing compiler and Pages workflows also build Sonar; historical compiler benchmark figures retain their original measured commits.
+
+The header now opens an opt-in interactive tutorial instead of the former help sheet. Practice covers obscured clues, scanning, reading a revealed number and flagging a proven mine; mouse, touch and keyboard share the same transitions. Obscured clues have neither their numeric text nor numeric metadata in the DOM. Chording an obscured clue is rejected by the rules, including keyboard and secondary actions.
+
+Save envelope version 2 retires old active journals when loaded, preserving recorded wins. The storage namespace remains unchanged. Replaying a v2 journal reconstructs credits and clarified centers; no derived clue or charge totals are trusted from storage.

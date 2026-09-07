@@ -3,7 +3,7 @@ import { actExpedition, frontierCells } from '../src/game/expedition.js'
 import { deduceMines } from '../src/game/mine-deduction.js'
 import { walkingPath, approachPath } from '../src/game/dungeon-path.js'
 import { tacticalPlan } from '../src/game/tactical-planning.js'
-import { magneticLurePath } from '../src/game/magnetic-field.js'
+import { magneticLurePath, magneticProjection } from '../src/game/magnetic-field.js'
 import { adjacentSteps } from '../src/game/variant-board.js'
 import { neighbors } from '../src/game/engine.js'
 import type { Expedition, ExpeditionAction } from '../src/types/variants.js'
@@ -13,6 +13,7 @@ export function defeatMagnetic(initial: Expedition): ExpeditionAction[] {
   let run = initial
   const actions: ExpeditionAction[] = []
   const safe = new Set<number>()
+  let goal: number | null = null
 
   /** Require every step to be accepted; this player never patches health, clues or AP. */
   function apply(action: ExpeditionAction): void {
@@ -29,21 +30,73 @@ export function defeatMagnetic(initial: Expedition): ExpeditionAction[] {
     assert.ok(run.encounter?.kind === 'magnetic')
     return (
       run.encounter.points -
-      Number(run.encounter.forecast.kind === 'field' && !run.encounter.braced)
+      3 * Number(run.encounter.forecast.kind === 'field' && !run.encounter.braced)
     )
   }
 
   /** Defense is a real accepted action and shares the same turn clock as player input. */
   function end(): void {
     assert.ok(run.encounter?.kind === 'magnetic')
-    if (run.encounter.forecast.kind === 'field' && !run.encounter.braced) apply({ type: 'brace' })
+    if (run.encounter.forecast.kind === 'field') {
+      const e = run.encounter
+      const choices = run.game.cells
+        .flatMap((_, index) => {
+          const path = walkingPath(run, index)
+          if (!path) return []
+          return [false, true].flatMap((brace) => {
+            if (path.length - 1 + Number(brace && !e.braced) > e.points) return []
+            const projection = magneticProjection({
+              ...run,
+              player: index,
+              encounter: { ...e, braced: e.braced || brace },
+            })
+            return projection.path.every(
+              (cell) => run.game.cells[cell]?.visibility === 'revealed' || safe.has(cell),
+            )
+              ? [
+                  {
+                    path,
+                    brace,
+                    collision: projection.collision,
+                    distance:
+                      goal === null
+                        ? 0
+                        : (walkingPath({ ...run, player: projection.path.at(-1)! }, goal)?.length ??
+                          1000),
+                  },
+                ]
+              : []
+          })
+        })
+        .sort(
+          (a, b) =>
+            Number(a.collision) * 10000 +
+            a.distance * 10 +
+            a.path.length +
+            Number(a.brace) -
+            Number(b.collision) * 10000 -
+            b.distance * 10 -
+            b.path.length -
+            Number(b.brace),
+        )
+      assert.ok(
+        choices[0],
+        `No public safe landing: ${JSON.stringify({ player: run.player, points: e.points, braced: e.braced, forecast: e.forecast, turn: e.turn, health: run.health, near: adjacentSteps(run.game, run.player).map((index) => ({ index, v: run.game.cells[index]?.visibility, wall: run.walls.includes(index) })) })}`,
+      )
+      for (const index of choices[0].path.slice(1)) apply({ type: 'move', index })
+      if (choices[0].brace && !e.braced) apply({ type: 'brace' })
+    }
     apply({ type: 'end-turn' })
   }
 
   /** Walk the known shortest route a cell at a time, preserving the grounding budget. */
   function walk(target: number): void {
+    goal = target
     while (run.player !== target) {
-      if (budget() < 1) end()
+      if (budget() < 1) {
+        end()
+        continue
+      }
       const path = walkingPath(run, target)
       assert.ok(path && path.length > 1, `No known path to ${target}`)
       apply({ type: 'move', index: path[1]! })
@@ -64,8 +117,12 @@ export function defeatMagnetic(initial: Expedition): ExpeditionAction[] {
     if (!target && deduction.mines.length) continue
     if (!target) break
     walk(target.path!.at(-1)!)
-    if (budget() < 1) end()
-    apply({ type: 'reveal', index: target.index })
+    while (budget() < 1) end()
+    if (
+      run.game.cells[target.index]?.visibility !== 'revealed' &&
+      tacticalPlan(run, { type: 'reveal', index: target.index }).allowed
+    )
+      apply({ type: 'reveal', index: target.index })
   }
   assert.ok(
     run.game.cells.every(
@@ -100,7 +157,10 @@ export function defeatMagnetic(initial: Expedition): ExpeditionAction[] {
     const target = targets[0]
     assert.ok(target, 'No public lure and adjacent approach')
     walk(target.position)
-    if (budget() < 1) end()
+    while (budget() < 1) {
+      end()
+      walk(target.position)
+    }
     apply({ type: 'interact', index: target.index })
     end()
     const danger = new Set([target.index, ...neighbors(run.game.config, target.index)])

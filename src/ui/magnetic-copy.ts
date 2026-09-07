@@ -30,9 +30,9 @@ export function magneticCopy(language: Language, common: TacticalMessages): Tact
         '矢印が次の磁力を示す。青は騎士の軸へ吸引、珊瑚色は外へ最大2マス反発。残像が予想着地点。琥珀の破線は未確認マスを通り、隠れた地雷は示さない。',
       ),
       t(
-        'Brace for 1 AP to resist the whole pulse. Calibrated anchors also ground you. A mine stops you before it and deals 5 damage ignoring defense. Wall or edge collisions deal 3 base damage, reduced by defense to a minimum of 1. Every third turn has no pulse.',
-        '花 1 点行动力进行防御，可抵抗整次脉冲，已校准的锚点也能稳住角色。遇雷会停在雷前并受到 5 点无视防御的伤害。撞墙或边界造成 3 点基础伤害，可被防御减免，最低 1 点。每第三回合没有脉冲。',
-        '1行動力の防御で磁力を無効化。調整済みの錨でも固定できる。地雷の手前で停止し、防御を無視する5ダメージ。壁や盤端への衝突は基礎3ダメージで、防護により最低1まで軽減。3ターンごとに磁力が休止。',
+        'Brace for 1 AP to reduce forced movement by one cell. Calibrated anchors also ground you. A mine stops you before it and deals 5 damage ignoring defense. Wall or edge collisions deal 3 base damage, reduced by defense to a minimum of 1. Every third turn has no pulse.',
+        '花 1 点行动力进行防御，使推拉距离减少 1 格，已校准的锚点也能稳住角色。遇雷会停在雷前并受到 5 点无视防御的伤害。撞墙或边界造成 3 点基础伤害，可被防御减免，最低 1 点。每第三回合没有脉冲。',
+        '1行動力の防御で強制移動が1マス減る。調整済みの錨でも固定できる。地雷の手前で停止し、防御を無視する5ダメージ。壁や盤端への衝突は基礎3ダメージで、防護により最低1まで軽減。3ターンごとに磁力が休止。',
       ),
       t(
         'Reveal an anchor and flag its surrounding mines. From it or an adjacent cell, click it for 1 AP. A known open route at least two cells long must connect it to the knight. Wrong calibration deals 5 damage. Later lures reuse the calibration.',

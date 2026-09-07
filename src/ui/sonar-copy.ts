@@ -10,9 +10,9 @@ export function sonarCopy(language: Language): SonarMessages {
     revealHint: t('Select a square to open it.', '点格子挖开。', 'マスを押して開きます。'),
     title: t('Sonar', '声呐', 'ソナー'),
     intro: t(
-      'Three pulses. A little more certainty.',
-      '三次回声，多一点把握。',
-      '3回の反響で、確信を少しずつ。',
+      'Scan to open the center; mines become gold flags. Every 4 safe excavations recharge a pulse.',
+      '拖入声呐测量区域雷数，揭开中心格，雷变金旗。每安全挖开 4 次，补充 1 次扫描。',
+      '走査で区域の地雷数を測り、中心を開き、地雷は金の旗に。安全な掘削4回で1回分を補充。',
     ),
     scan: t('Send pulse', '声呐扫描', 'パルスを送る'),
     charges: t('Pulses left', '剩余扫描', '残りパルス'),
@@ -33,7 +33,11 @@ export function sonarCopy(language: Language): SonarMessages {
       '已扫描，已选中这份读数',
       'スキャン済みの結果を選択しました',
     ),
-    exhausted: t('All three pulses used.', '三次扫描已用完。', '3回のパルスを使い切りました。'),
+    exhausted: t(
+      'No pulses left. Four safe excavations recharge one.',
+      '扫描已用完。每安全挖开 4 次可补 1 次。',
+      '残り0回。安全な掘削4回で1回分を補充。',
+    ),
     comparison: t('Compare echoes', '对照回声', '反響を比較'),
     compareHint: t(
       'Select two readings to compare their regions.',
@@ -51,7 +55,7 @@ export function sonarCopy(language: Language): SonarMessages {
     scans: t('Pulses used', '扫描次数', '使用パルス'),
     reading: t('Echo', '回声', '反響'),
     mines: t('mines', '颗雷', '個の地雷'),
-    help: t('How to play', '怎么玩', '遊び方'),
+    help: t('Tutorial', '新手教程', 'チュートリアル'),
     rankHint: t(
       'Fewest moves first; fewer pulses break ties.',
       '操作数越少越靠前，同分时比较扫描次数。',
@@ -109,9 +113,9 @@ export function sonarCopy(language: Language): SonarMessages {
       {
         title: t('Make each pulse count', '把回声用在关键处', 'パルスを大切に'),
         note: t(
-          'Three pulses per board. Selecting a previous center recalls its reading for free. Q aims; Enter/Space scans; Esc cancels. F flags, S notes safety, C quick-opens; right-click or hold cycles marks. A scan counts separately from board moves.',
-          '每张棋盘可扫描三次，重复选取同一中心只调出旧读数。Q 瞄准，Enter / 空格扫描，Esc 取消；F 插旗，S 标记疑似安全，C 快速开格，右键或长按循环标记。扫描次数与棋盘操作数分开记录。',
-          '1盤面に3回。同じ中心は無料で結果を再表示。Qで照準、Enter/Spaceで実行、Escで取消。Fで旗、Sで安全メモ、Cで周囲を開き、右クリックや長押しで印を切替。パルスと盤面操作は別々に数えます。',
+          'Start with three pulses; four safe excavation actions recharge one. Click to target or drag Sonar onto a square. Only the center opens; a mine becomes a locked gold flag. Selecting a previous center recalls its reading for free. Q aims; Enter/Space scans; Esc cancels. F flags, S notes safety, C quick-opens; right-click or hold cycles marks. A scan counts separately from board moves.',
+          '开局三次扫描，每安全挖开四次补一次；点击选点或拖入声呐，揭开中心格，地雷变成金旗，周围保持模糊。重复选取同一中心只调出旧读数。Q 瞄准，Enter / 空格扫描，Esc 取消；F 插旗，S 标记疑似安全，C 快速开格，右键或长按循环标记。扫描次数与棋盘操作数分开记录。',
+          '最初は3回、安全な掘削4回で1回補充。クリックかドラッグで走査し、中心を開き、地雷は金の旗に可能に。同じ中心は無料で結果を再表示。Qで照準、Enter/Spaceで実行、Escで取消。Fで旗、Sで安全メモ、Cで周囲を開き、右クリックや長押しで印を切替。パルスと盤面操作は別々に数えます。',
         ),
       },
     ],

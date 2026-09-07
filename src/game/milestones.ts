@@ -464,7 +464,12 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
     if (boss === 'magnetic' && !attempt.failed) earned.push('field-unscathed')
     if (boss === 'bastion' && !attempt.hurt) earned.push('bastion-flawless')
     if (boss === 'mirror' && !attempt.hurt) earned.push('mirror-flawless')
-    if (boss === 'clock' && !attempt.glass) earned.push('clock-no-glass')
+    if (
+      boss === 'clock' &&
+      after.encounter?.kind === 'clock' &&
+      after.encounter.hourglasses.filter((glass) => glass.used).length === 1
+    )
+      earned.push('clock-no-glass')
     if (boss === 'magnetic' && attempt.blasted) earned.push('magnetic-demolition')
     if (after.encounter?.kind === 'brood' && after.encounter.nests.length > 0)
       earned.push('brood-nest-spared')

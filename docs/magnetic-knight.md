@@ -14,21 +14,21 @@ The first boss is selected by `seed % 5`: Bastion Guardian, Brood Queen, Mirror 
 | Expert     | 3, 6, 9           | 13 × 11 | 24    | 32            |
 | Abyss      | 4, 8, 12          | 15 × 13 | 33    | 36            |
 
-| Action or effect                          | Cost or value                                                                          |
-| ----------------------------------------- | -------------------------------------------------------------------------------------- |
-| Move / reveal / attack                    | Shared costs: 1 AP per walked cell / 1 extra AP / 2 AP                                 |
-| Calibrate and lure                        | 1 AP, from the anchor or an orthogonally adjacent square                               |
-| Reuse a calibrated anchor                 | 1 AP; a new charge cannot start during a charge or exposure window                     |
-| Brace                                     | 1 AP; cancels field displacement and retains the shared 3-point enemy damage reduction |
-| Field displacement                        | Up to 2 orthogonal cells, stopping at the attraction axis or a calibrated anchor       |
-| Wall or arena edge collision              | 3 base damage; defense reduces it, to a minimum of 1                                   |
-| Mine / wrong calibration                  | 5 damage, ignoring armor; shields and survival reactions still apply                   |
-| Knight passing through the player         | 5 base damage; defense and bracing reduce it, to a minimum of 1                        |
-| Knight crashing into an unoccupied anchor | 6 boss damage + 1 per detonated mine, capped at 3 extra; leaves at least 1 health      |
-| Anchor blast                              | Reveals and clears the 3×3 area; player takes 5 base damage, reduced by defense        |
-| Charge delay                              | First End turn charges up; the next full turn is for escape, then End turn charges     |
-| Core exposure                             | The next 3 player turns, with no magnetic pulses                                       |
-| Victory                                   | Shared full healing, one shield up to the cap, and the ordinary floor reward once      |
+| Action or effect                          | Cost or value                                                                                      |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Move / reveal / attack                    | Shared costs: 1 AP per walked cell / 1 extra AP / 2 AP                                             |
+| Calibrate and lure                        | 1 AP, from the anchor or an orthogonally adjacent square                                           |
+| Reuse a calibrated anchor                 | 1 AP; a new charge cannot start during a charge or exposure window                                 |
+| Brace                                     | 1 AP; reduces field displacement by one cell and retains the shared 3-point enemy damage reduction |
+| Field displacement                        | Up to 2 orthogonal cells, stopping at the attraction axis or a calibrated anchor                   |
+| Wall or arena edge collision              | 3 base damage; defense reduces it, to a minimum of 1                                               |
+| Mine / wrong calibration                  | 5 damage, ignoring armor; shields and survival reactions still apply                               |
+| Knight passing through the player         | 5 base damage; defense and bracing reduce it, to a minimum of 1                                    |
+| Knight crashing into an unoccupied anchor | 6 boss damage + 1 per detonated mine, capped at 3 extra; leaves at least 1 health                  |
+| Anchor blast                              | Reveals and clears the 3×3 area; player takes 5 base damage, reduced by defense                    |
+| Charge delay                              | First End turn charges up; the next full turn is for escape, then End turn charges                 |
+| Core exposure                             | The next 3 player turns, with no magnetic pulses                                                   |
+| Victory                                   | Shared full healing, one shield up to the cap, and the ordinary floor reward once                  |
 
 No permanent stat upgrades or new purchases are required. Attack, defense, AP, movement discounts, survival reactions and profession skills use the existing build system.
 
@@ -38,7 +38,7 @@ The forecast is drawn on the board, not just described in a status sentence:
 
 - **Blue inward arrows** show attraction toward the knight's row or column axis. **Coral outward arrows** show repulsion. The glyph direction distinguishes the two without relying only on color.
 - A moving dashed line and a translucent explorer show the current projected route and endpoint. An amber route crosses unverified cells; it never reveals their hidden mine values. A confirmed mine stops the public projection at that known hazard.
-- Grounding has a distinct outline. Bracing cancels the entire pulse; standing on a calibrated anchor does the same. A pulse also stops if it reaches a calibrated anchor. Grounding does not cancel a knight's charge.
+- Grounding has a distinct outline. Bracing reduces forced movement by one cell; standing on a calibrated anchor cancels the pulse. A pulse also stops if it reaches a calibrated anchor. Grounding does not cancel a knight's charge.
 - A **gold route and knight ghost** announce an accepted lure. The outlined 3×3 area marks the blast zone without exposing hidden mines. The first End turn only charges up, granting one full escape turn. The following End turn launches the charge; leave both its route and blast zone.
 - During resolution, the magnetic core gathers energy, the explorer or knight visibly follows the actual path, and a ring marks the collision. A successful anchor crash adds an overload burst and a broken rotating core ring for the exposure window.
 
@@ -83,3 +83,5 @@ Browser coverage includes English, Chinese and Japanese at 320, 390, 900, 1440 a
 ![Magnetic direction and projected landing on a narrow screen](screenshots/magnetic-mobile.png)
 
 See [artwork prompts and provenance](magnetic-artwork.md).
+
+Brace now reduces the two-cell pulse to at most one cell. It does not ground the player: the remaining step can still cause mine contact or collision. Calibrated anchors retain their grounding effect. The same projection drives preview and resolution.
