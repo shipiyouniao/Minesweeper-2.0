@@ -1,3 +1,4 @@
+import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
 import type { BroodEncounter } from '../types/tactical.js'
 
@@ -9,20 +10,10 @@ export function broodCellLabel(
 ): string {
   const egg = encounter.eggs.find((entry) => entry.index === index)
   if (egg)
-    return language === 'zh'
-      ? `虫卵 · ${egg.turns} 回合后孵化 · 相邻清除 1 点`
-      : language === 'ja'
-        ? `卵 · 孵化まで${egg.turns}ターン · 隣接除去1`
-        : `Egg · hatches in ${egg.turns} turns · clear adjacent for 1 AP`
+    return message(language, 'brood-copy.egg-hatches-in-turns-clear-adjacent-for', {
+      p0: egg.turns,
+    })
   if (encounter.webs.includes(index))
-    return language === 'zh'
-      ? '蛛网 · 相邻清除 1 点'
-      : language === 'ja'
-        ? '巣網 · 隣接除去1'
-        : 'Web · clear adjacent for 1 AP'
-  return language === 'zh'
-    ? '幼虫 · 相邻消灭 1 点'
-    : language === 'ja'
-      ? '幼体 · 隣接撃破1'
-      : 'Hatchling · clear adjacent for 1 AP'
+    return message(language, 'brood-copy.web-clear-adjacent-for-1-ap')
+  return message(language, 'brood-copy.hatchling-clear-adjacent-for-1-ap')
 }

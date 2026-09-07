@@ -1,12 +1,10 @@
+import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
-import type { Profession } from '../types/variants.js'
-import type { VariantDescription } from '../types/variant-ui.js'
 import type { SkillAvailability } from '../types/profession.js'
+import type { VariantDescription } from '../types/variant-ui.js'
+import type { Profession } from '../types/variants.js'
 
 /** Pick one complete translation without dynamic dictionaries or fallback keys. */
-function text(language: Language, en: string, zh: string, ja: string): string {
-  return language === 'zh' ? zh : language === 'ja' ? ja : en
-}
 
 /** Explain the active skill separately from the concise starting-resource card. */
 export function professionSkillCopy(
@@ -16,83 +14,43 @@ export function professionSkillCopy(
   switch (profession) {
     case 'waymarker':
       return {
-        name: text(language, 'Return anchor', '归途锚点', '帰還の錨'),
-        note: text(
-          language,
-          'First use places an anchor at your position. Use again from elsewhere to return. Each use costs an action; one return per floor. Same room only; occupied anchors cannot be used.',
-          '首次在脚下放置锚点，再次使用回到锚点。两次操作各消耗一次行动，每层可回撤一次；仅当前房间有效，落点被占用时不可回撤。',
-          '最初に足元へ錨を設置し、別の場所から再使用すると帰還。各操作1行動、各階1回帰還。同じ部屋のみ、占有中は帰還不可。',
-        ),
+        name: message(language, 'profession-skill-copy.return-anchor'),
+        note: message(language, 'profession-skill-copy.first-use-places-an-anchor-at-your'),
       }
     case 'riftwalker':
       return {
-        name: text(language, 'Open rift', '开辟裂隙', '裂け目を開く'),
-        note: text(
-          language,
-          'Choose a revealed safe landing two squares away across one confirmed mine or wall. Cross in one action, once per floor. A two-way rift remains in this room for ordinary walking. Mines stay intact; cannot cross boss bodies.',
-          '选择隔着一格已确认地雷或墙、两格外已揭开的安全落点，消耗一次行动穿越，每层一次。双向裂隙在当前房间保留，可正常往返；不改雷和数字，不能穿过 BOSS 本体。',
-          '確定地雷か壁1マスを挟む2マス先の公開済み安全地点へ1行動で移動。各階1回。双方向の裂け目は同じ部屋で歩行に使える。地雷と数字は変化せず、ボス本体は越えられない。',
-        ),
+        name: message(language, 'profession-skill-copy.open-rift'),
+        note: message(language, 'profession-skill-copy.choose-a-revealed-safe-landing-two-squares'),
       }
     case 'explorer':
       return {
-        name: text(language, 'Trail light', '探路灯', '道しるべ'),
-        note: text(
-          language,
-          'Confirm mines and safe cells in the 3×3 area around your character.',
-          '侦察角色周围 3×3，标出地雷和安全格。',
-          'キャラクター周囲3×3の地雷と安全なマスを判定。',
-        ),
+        name: message(language, 'profession-skill-copy.trail-light'),
+        note: message(language, 'profession-skill-copy.confirm-mines-and-safe-cells-in-the'),
       }
     case 'surveyor':
       return {
-        name: text(language, 'Column survey', '纵向测绘', '縦列測量'),
-        note: text(
-          language,
-          'Confirm mines and safe cells in your character’s entire column.',
-          '侦察角色所在整列，标出地雷和安全格。',
-          'キャラクターがいる縦列全体の地雷と安全なマスを判定。',
-        ),
+        name: message(language, 'profession-skill-copy.column-survey'),
+        note: message(language, 'profession-skill-copy.confirm-mines-and-safe-cells-in-your'),
       }
     case 'engineer':
       return {
-        name: text(language, 'Field repair', '战地修护', '野外修理'),
-        note: text(
-          language,
-          'Spend 1 scan to gain 1 shield. Shield cap: 2.',
-          '消耗 1 次扫描，获得 1 点护盾；护盾上限 2。',
-          '走査1回を消費してシールド+1。上限2。',
-        ),
+        name: message(language, 'profession-skill-copy.field-repair'),
+        note: message(language, 'profession-skill-copy.spend-1-scan-to-gain-1-shield'),
       }
     case 'archaeologist':
       return {
-        name: text(language, 'Excavate', '寻宝发掘', '発掘'),
-        note: text(
-          language,
-          'Scout the nearest uncollected chest’s 3×3 area: open safe clues and mark mines. Walk there to collect it. Relic rewards offer up to 4 choices.',
-          '侦察最近未收集宝箱周围 3×3，揭开安全格并标雷。走到宝箱才能领取。遗物奖励最多四选一。',
-          '最寄りの未回収宝箱の周囲3×3を偵察し、安全なマスを開いて地雷をマーク。回収には移動が必要。遺物候補は最大4つ。',
-        ),
+        name: message(language, 'profession-skill-copy.excavate'),
+        note: message(language, 'profession-skill-copy.scout-the-nearest-uncollected-chest-s-3'),
       }
     case 'alchemist':
       return {
-        name: text(language, 'Transmute', '炼成', '錬成'),
-        note: text(
-          language,
-          'Spend 1 shield to gain 1 probe and 1 scan. Both tools need room below their cap of 4.',
-          '消耗 1 点护盾，获得 1 探针和 1 次扫描；两种道具都须低于上限 4。',
-          'シールド1を消費し、探針と走査を各+1。両方とも上限4未満が必要。',
-        ),
+        name: message(language, 'profession-skill-copy.transmute'),
+        note: message(language, 'profession-skill-copy.spend-1-shield-to-gain-1-probe'),
       }
     case 'sentinel':
       return {
-        name: text(language, 'Watchtower', '守望之眼', '見張りの眼'),
-        note: text(
-          language,
-          'Spend 1 shield to confirm mines and safe cells in the 5×5 area around your character.',
-          '消耗 1 点护盾，侦察角色周围 5×5，标出地雷和安全格。',
-          'シールド1を消費してキャラクター周囲5×5の地雷と安全なマスを判定。',
-        ),
+        name: message(language, 'profession-skill-copy.watchtower'),
+        note: message(language, 'profession-skill-copy.spend-1-shield-to-confirm-mines-and'),
       }
   }
 }
@@ -101,43 +59,21 @@ export function professionSkillCopy(
 export function professionSkillStatus(language: Language, status: SkillAvailability): string {
   switch (status) {
     case 'no-passage':
-      return text(
-        language,
-        'Reveal a safe landing across a confirmed mine or wall, two squares away',
-        '先揭开隔着一格已确认地雷或墙的安全落点（两格外）',
-        '確定地雷か壁を挟んだ2マス先の安全地点を開こう',
-      )
+      return message(language, 'profession-skill-copy.reveal-a-safe-landing-across-a-confirmed')
     case 'blocked-anchor':
-      return text(
-        language,
-        'Move away from the anchor; its landing must be unoccupied',
-        '先离开锚点；回撤落点须未被占用',
-        '錨から離れ、帰還点の占有を解消しよう',
-      )
+      return message(language, 'profession-skill-copy.move-away-from-the-anchor-its-landing')
     case 'ready':
-      return text(language, 'Use · once per floor', '使用 · 每层一次', '使用 · 各階1回')
+      return message(language, 'profession-skill-copy.use-once-per-floor')
     case 'used':
-      return text(
-        language,
-        'Used · refreshes next floor',
-        '本层已用 · 下一层恢复',
-        '使用済み · 次の階で回復',
-      )
+      return message(language, 'profession-skill-copy.used-refreshes-next-floor')
     case 'resources':
-      return text(
-        language,
-        'Check the cost and resource caps',
-        '资源不足或已达上限',
-        '必要資源と上限を確認',
-      )
+      return message(language, 'profession-skill-copy.check-the-cost-and-resource-caps')
     case 'no-information':
-      return text(
+      return message(
         language,
-        'No new information here · reposition or explore',
-        '这里没有新信息 · 移动或继续探索',
-        '新情報なし · 移動または探索を続ける',
+        'profession-skill-copy.no-new-information-here-reposition-or-explore',
       )
     case 'inactive':
-      return text(language, 'Available during exploration', '探索时可用', '探索中に使用可能')
+      return message(language, 'profession-skill-copy.available-during-exploration')
   }
 }

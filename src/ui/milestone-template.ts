@@ -1,14 +1,15 @@
 import { MILESTONES, milestoneProgress, milestoneValue } from '../game/milestones.js'
-import { battleText, combatSprite } from './combat-build-copy.js'
-import { milestoneCopy } from './milestone-copy.js'
 import { parseTitle } from '../game/title-effects.js'
-import { titleEffectCopy } from './title-copy.js'
-import { equipmentCopy, relicCopy, professionCopy, variantCopy } from './variant-copy.js'
-import { spriteImage } from './dungeon-sprites.js'
-import { relicSprite } from './relic-presentation.js'
-import { professionSprite } from './profession-presentation.js'
-import type { Camp } from '../types/variants.js'
+import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
+import type { Camp } from '../types/variants.js'
+import { combatSprite } from './combat-build-copy.js'
+import { spriteImage } from './dungeon-sprites.js'
+import { milestoneCopy } from './milestone-copy.js'
+import { professionSprite } from './profession-presentation.js'
+import { relicSprite } from './relic-presentation.js'
+import { titleEffectCopy } from './title-copy.js'
+import { equipmentCopy, professionCopy, relicCopy, variantCopy } from './variant-copy.js'
 
 /** Count completed unclaimed goals for the selected camp navigation badge. */
 export function milestoneReadyCount(camp: Camp, kind: 'missions' | 'achievements'): number {
@@ -26,10 +27,9 @@ export function milestonesTemplate(
   camp: Camp,
   kind: 'missions' | 'achievements',
 ): string {
-  const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
   const claimed = milestoneProgress(camp).claimed
   const number = new Intl.NumberFormat(language)
-  return `<p class="milestone-summary" role="status">${t('Ready to claim', '可领取', '受領可能')} · ${milestoneReadyCount(camp, kind)}</p>
+  return `<p class="milestone-summary" role="status">${message(language, 'milestone-template.ready-to-claim')} · ${milestoneReadyCount(camp, kind)}</p>
     <div class="milestone-grid">${MILESTONES.filter((entry) => entry.kind === kind)
       .map((entry) => {
         const copy = milestoneCopy(language, entry.id)
@@ -55,10 +55,10 @@ export function milestonesTemplate(
                 ? relicSprite(reward.id)
                 : 'treasure'
         return `<article class="milestone-card ${done ? 'is-claimed' : ready ? 'is-ready' : ''}" data-milestone="${entry.id}">
-        <div class="milestone-heading">${spriteImage(sprite)}<div><p class="eyebrow">${done ? t('Claimed', '已领取', '受領済み') : ready ? t('Completed', '已完成', '達成') : t('In progress', '进行中', '進行中')}</p><h2>${copy.name}</h2></div></div>
+        <div class="milestone-heading">${spriteImage(sprite)}<div><p class="eyebrow">${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.completed') : message(language, 'milestone-template.in-progress')}</p><h2>${copy.name}</h2></div></div>
         <p>${copy.note}</p><div class="milestone-progress"><progress max="${entry.target}" value="${value}" aria-label="${copy.name}"></progress><span>${number.format(value)} / ${number.format(entry.target)}</span></div>
-        <div class="milestone-reward">${title ? `<span class="title-reward">✦ ${t('Title', '称号', '称号')} · ${copy.name}</span><p class="title-reward-effect">${titleEffectCopy(language, title)}</p>` : ''}<strong>+${number.format(entry.supplies)} ${variantCopy(language).supplies}</strong>${description ? `<h3>${description.name}</h3><p>${description.note}</p>` : ''}</div>
-        <button class="${ready && !done ? 'primary-button' : 'text-button'}" data-control="claim-milestone:${entry.id}" data-focus-fallback="camp-page:${kind}" ${done || !ready ? 'disabled' : ''}>${done ? t('Claimed', '已领取', '受領済み') : ready ? t('Claim reward', '领取奖励', '報酬を受け取る') : t('Keep exploring', '继续探索', '探索を続けよう')}</button>
+        <div class="milestone-reward">${title ? `<span class="title-reward">✦ ${message(language, 'milestone-template.title')} · ${copy.name}</span><p class="title-reward-effect">${titleEffectCopy(language, title)}</p>` : ''}<strong>+${number.format(entry.supplies)} ${variantCopy(language).supplies}</strong>${description ? `<h3>${description.name}</h3><p>${description.note}</p>` : ''}</div>
+        <button class="${ready && !done ? 'primary-button' : 'text-button'}" data-control="claim-milestone:${entry.id}" data-focus-fallback="camp-page:${kind}" ${done || !ready ? 'disabled' : ''}>${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.claim-reward') : message(language, 'milestone-template.keep-exploring')}</button>
       </article>`
       })
       .join('')}</div>`

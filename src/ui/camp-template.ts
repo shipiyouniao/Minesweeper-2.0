@@ -1,26 +1,28 @@
+import { upgradeCost } from '../game/camp-progression.js'
+import { difficultyRewardPercent } from '../game/expedition-rewards.js'
 import {
   EQUIPMENT,
   allowedDeparture,
   equipmentCost,
   equipmentPurchaseLocked,
 } from '../game/expedition.js'
-import { titleTemplate } from './title-template.js'
-import { upgradeCost } from '../game/camp-progression.js'
 import { PROFESSIONS } from '../game/professions.js'
 import { variantTier } from '../game/variant-difficulty.js'
-import { difficultyRewardPercent } from '../game/expedition-rewards.js'
-import type { Camp, Equipment, Profession, Upgrade } from '../types/variants.js'
+import { message } from '../i18n.js'
 import type { CampPage, CampScreen, ShopCategory } from '../types/camp-navigation.js'
 import type { DungeonSprite } from '../types/dungeon-ui.js'
 import type { Language } from '../types/localization.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
+import type { Camp, Equipment, Profession, Upgrade } from '../types/variants.js'
 import { campLabel, campPageName, shopCategoryName } from './camp-copy.js'
 import { shopCategory, shopItems, shopSprite } from './camp-navigation.js'
-import { battleText, combatSprite } from './combat-build-copy.js'
-import { milestoneReadyCount, milestonesTemplate } from './milestone-template.js'
+import { combatSprite } from './combat-build-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
+import { milestoneReadyCount, milestonesTemplate } from './milestone-template.js'
+import { escapeHtml } from './presentation.js'
 import { professionSprite } from './profession-presentation.js'
 import { professionPreviewTemplate } from './profession-skill-template.js'
+import { titleTemplate } from './title-template.js'
 import {
   difficultyCopy,
   equipmentCopy,
@@ -29,7 +31,6 @@ import {
   variantCopy,
 } from './variant-copy.js'
 import { choice, difficultyTemplate } from './variant-templates.js'
-import { escapeHtml } from './presentation.js'
 
 const DESTINATIONS: readonly CampPage[] = [
   'professions',
@@ -64,19 +65,9 @@ function destinationNote(language: Language, page: CampPage): string {
     case 'equipment':
       return campLabel(language, 'equipmentHelp')
     case 'missions':
-      return battleText(
-        language,
-        'Explore, complete goals, claim exclusive gear.',
-        '完成探索目标，领取物资与专属装备',
-        '探索目標を達成し、物資と限定装備を獲得',
-      )
+      return message(language, 'camp-template.explore-complete-goals-claim-exclusive-gear')
     case 'achievements':
-      return battleText(
-        language,
-        'Long-term milestones with lasting rewards.',
-        '挑战长期目标，解锁遗物与职业',
-        '長期目標に挑み、遺物と職業を解放',
-      )
+      return message(language, 'camp-template.long-term-milestones-with-lasting-rewards')
     default:
       return campLabel(language, 'shopHelp')
   }
@@ -108,11 +99,11 @@ function overviewTemplate(
       <div class="camp-current-profession">${spriteImage(professionSprite(profession))}<div><span>${t.profession}</span><h2>${career.name}</h2><p>${career.note}</p></div></div>
       <div class="camp-summary-heading"><h3>${campPageName(language, 'equipment')}</h3><span>${spent} / 3</span></div>
       ${loadoutSummary(language, equipment)}
-      <div class="camp-route-summary"><div><span>${t.difficulty}</span><strong>${difficultyCopy(language, difficulty)}</strong></div><p>${tier.size} × ${tier.size} · ${campLabel(language, 'floors').replace('{count}', String(tier.floors))}<br>${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p></div>
+      <div class="camp-route-summary"><div><span>${t.difficulty}</span><strong>${difficultyCopy(language, difficulty)}</strong></div><p>${tier.size} × ${tier.size} · ${message(language, 'camp-copy.count-floors', { count: tier.floors })}<br>${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p></div>
       <button class="primary-button" data-control="start">${t.start} ↗</button>
     </section>
-    <nav class="camp-destinations" aria-label="${t.camp}">${DESTINATIONS.map((page) => `<button class="camp-destination" data-control="camp-page:${page}">${spriteImage(destinationSprite(page))}<span><strong>${campPageName(language, page)}${(page === 'missions' || page === 'achievements') && milestoneReadyCount(camp, page) ? ` <span class="milestone-badge">${milestoneReadyCount(camp, page)} ${battleText(language, 'ready', '可领取', '受領可能')}</span>` : ''}</strong><small>${destinationNote(language, page)}</small></span><span aria-hidden="true">↗</span></button>`).join('')}</nav>
-  </div><p class="camp-history-summary">${t.departures} ${camp.completed} · ${campLabel(language, 'ownedCount').replace('{count}', String(camp.upgrades.length))}</p>`
+    <nav class="camp-destinations" aria-label="${t.camp}">${DESTINATIONS.map((page) => `<button class="camp-destination" data-control="camp-page:${page}">${spriteImage(destinationSprite(page))}<span><strong>${campPageName(language, page)}${(page === 'missions' || page === 'achievements') && milestoneReadyCount(camp, page) ? ` <span class="milestone-badge">${milestoneReadyCount(camp, page)} ${message(language, 'camp-template.ready')}</span>` : ''}</strong><small>${destinationNote(language, page)}</small></span><span aria-hidden="true">↗</span></button>`).join('')}</nav>
+  </div><p class="camp-history-summary">${t.departures} ${camp.completed} · ${message(language, 'camp-copy.count-unlocked', { count: camp.upgrades.length })}</p>`
 }
 
 /** Present profession selection and its active skill on a dedicated screen. */
@@ -157,7 +148,7 @@ function shopDetail(
     ${profession ? professionPreviewTemplate(language, profession) : ''}
     ${locked ? `<p class="variant-note">${campLabel(language, 'workshopRequired')}</p>` : ''}
     <div class="shop-purchase"><p><strong>${number.format(price)}</strong> ${t.supplies}</p><button class="primary-button" data-control="upgrade:${item}" data-focus-fallback="shop-item:${item}" ${owned || locked || remaining > 0 ? 'disabled' : ''}>${owned ? t.owned : campLabel(language, 'buy')}</button></div>
-    <p class="shop-purchase-status" role="status">${owned ? t.owned : remaining ? campLabel(language, 'missing').replace('{count}', number.format(remaining)) : ''}</p>
+    <p class="shop-purchase-status" role="status">${owned ? t.owned : remaining ? message(language, 'camp-copy.need-count-more-supplies', { count: number.format(remaining) }) : ''}</p>
   </aside>`
 }
 

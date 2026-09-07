@@ -1,177 +1,90 @@
-import type { VariantDifficulty } from '../types/variant-difficulty.js'
-import { combatPurchaseCopy, combatRelicCopy } from './combat-build-copy.js'
 import { parseCombatPurchase } from '../game/combat-build.js'
 import { parseRelicPack } from '../game/relic-packs.js'
-import { expansionRelicCopy, relicPackCopy } from './relic-expansion-copy.js'
+import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
-import type { Equipment, Profession, Relic, Upgrade } from '../types/variants.js'
+import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import type { VariantDescription, VariantMessages } from '../types/variant-ui.js'
-
-/** Require all three translations at each catalog entry, with no computed translation keys. */
-function localized(language: Language, en: string, zh: string, ja: string): string {
-  return language === 'zh' ? zh : language === 'ja' ? ja : en
-}
+import type { Equipment, Profession, Relic, Upgrade } from '../types/variants.js'
+import { combatPurchaseCopy, combatRelicCopy } from './combat-build-copy.js'
+import { expansionRelicCopy, relicPackCopy } from './relic-expansion-copy.js'
 
 /** Supply complete, explicit labels for the special-mode UI. */
 export function variantCopy(language: Language): VariantMessages {
-  /** Bind the current locale while retaining all three required source strings. */
-  const t = (en: string, zh: string, ja: string): string => localized(language, en, zh, ja)
   return {
-    difficulty: t('Difficulty', '难度', '難易度'),
-    legacyDifficulty: t('Original rules', '原版规则', '旧ルール'),
-    nextFloor: t('Continue to next floor', '进入下一层', '次の階へ'),
-    zoom: t('Larger cells', '放大格子', 'マスを拡大'),
-    fit: t('Fit board', '适应面板', '盤面を全体表示'),
-    zoomHint: t(
-      'Scroll or swipe to explore the enlarged board.',
-      '滚动或滑动查看放大的棋盘。',
-      'スクロールやスワイプで拡大した盤面を移動。',
-    ),
-    confirmedMine: t(
-      'Confirmed mine · locked flag',
-      '确认有雷 · 标记已锁定',
-      '地雷確定 · 旗を固定',
-    ),
-    triggeredMine: t('Triggered mine', '已踩雷', '踏んだ地雷'),
-    confirmedSafe: t('Confirmed safe', '已确认安全', '安全確認済み'),
-    probeResult: t(
-      'Probe found {count} mines.',
-      '探测发现 {count} 枚雷。',
-      '探査で地雷{count}個を発見。',
-    ),
-    rowMines: t('mines total', '地雷总数', '地雷合計'),
-    controls: t(
-      'Arrows / Home / End: move focus. Enter / Space: reveal. F, right-click or touch-and-hold: flag. You can also choose Flag before tapping a cell.',
-      '方向键 / Home / End 移动光标；Enter / 空格翻开；F、右键或触屏长按插旗。也可选择插旗模式后点击格子。',
-      '矢印 / Home / End で移動、Enter / Space で開く。F・右クリック・長押しで旗。旗モードを選んでからタップすることもできます。',
-    ),
-    modes: t('Game mode', '玩法模式', 'ゲームモード'),
-    classic: t('Classic', '标准扫雷', 'クラシック'),
-    expedition: t('Expedition', '远征', '遠征'),
-    twin: t('Twin boards', '双生棋盘', '双子盤'),
-    camp: t('Base camp', '营地', 'キャンプ'),
-    supplies: t('Supplies', '物资', '物資'),
-    departures: t('Completed expeditions', '远征通关', '遠征クリア'),
-    start: t('Begin expedition', '出发远征', '遠征開始'),
-    profession: t('Profession', '职业', '職業'),
-    equipment: t('Loadout · 3 points', '出发装备 · 3 点预算', '装備 · 3 ポイント'),
-    facilities: t('Camp facilities', '营地建设', 'キャンプ施設'),
-    owned: t('Unlocked', '已解锁', '解放済み'),
-    locked: t('Unlock at camp', '需要营地解锁', 'キャンプで解放'),
-    floor: t('Floor', '层数', '階層'),
-    loot: t('Run loot', '本局战利品', '戦利品'),
-    probes: t('Probes', '探针', '探針'),
-    scans: t('Scans', '扫描', '走査'),
-    health: t('Health', '生命', '体力'),
-    shields: t('Shields', '护盾', 'シールド'),
-    probe: t('Probe 3×3 area', '探测 3×3 区域', '3×3範囲を探査'),
-    scan: t('Scan a row', '扫描一行', '行を走査'),
-    wall: t('Wall · impassable', '墙壁 · 无法通行', '壁 · 通行不可'),
-    player: t('Explorer', '探险者', '探検家'),
-    migrated: t(
-      'Camp and results preserved. The previous dungeon run was retired after the map update.',
-      '营地成长与成绩已保留；地图更新后，旧版未完成远征已返回营地。',
-      'キャンプと記録は保持しました。マップ更新により旧遠征は終了しました。',
-    ),
-    retreat: t('Extract to camp', '撤离回营地', 'キャンプへ帰還'),
-    retreatNote: t(
-      'End this expedition and bank all collected loot?',
-      '结束本次远征，带回全部已收集战利品？',
-      '遠征を終了し、集めた戦利品を持ち帰りますか？',
-    ),
-    chooseRelic: t('Choose a relic', '选择遗物', '遺物を選ぶ'),
-    floorCleared: t('Floor cleared', '本层已通关', 'フロアクリア'),
-    viewResult: t('View results', '查看结算', '結果を見る'),
-    reward: t(
-      'Choose one relic for the next floor',
-      '选择一件遗物，进入下一层',
-      '遺物を1つ選んで次の階へ',
-    ),
-    exit: t('Exit', '出口', '出口'),
-    entrance: t('Entrance', '入口', '入口'),
-    treasure: t('Treasure · safe', '宝箱 · 安全格', '宝箱 · 安全'),
-    collected: t('Collected', '已收集', '回収済み'),
-    frontier: t('Reachable frontier', '可探索前沿', '探索可能な境界'),
-    relics: t('Relic build', '遗物搭配', '遺物構成'),
-    relicUsedFloor: t('Used this floor', '本层已触发', 'この階で発動済み'),
-    relicUsedRun: t('Used this expedition', '本局已触发', 'この遠征で発動済み'),
-    relicUsedTurn: t('Used this turn', '本回合已触发', 'このターンで発動済み'),
-    noRelics: t(
-      'Find your first relic after floor one.',
-      '通过第一层后获得首件遗物。',
-      '第1階層を突破して遺物を入手。',
-    ),
-    earned: t('Banked supplies', '带回物资', '獲得物資'),
-    rewardRate: t('Difficulty reward', '难度奖励', '難易度報酬'),
-    rewardBase: t('Base settlement', '基础结算', '基本精算'),
-    rewardBonus: t('Difficulty bonus', '难度加成', '難易度ボーナス'),
-    won: t('Expedition complete', '远征通关', '遠征クリア'),
-    lost: t('Expedition ended', '远征失败', '遠征失敗'),
-    retreated: t('Safely extracted', '成功撤离', '帰還成功'),
-    steps: t('Moves', '操作数', '手数'),
-    records: t('Recent results · this mode', '近期记录 · 当前模式', '最近の結果 · このモード'),
-    noRecords: t('Your story starts here.', '从这里写下第一段旅程。', 'ここから冒険が始まる。'),
-    expeditionHelp: t(
-      'Click revealed floor to walk there along the shortest known safe route. Click a highlighted frontier cell to approach and reveal it. Visit treasure chests to collect them. Click the stairs to walk to the next floor entrance; reaching them opens the relic choice. All safe floor is connected; unreachable pockets become walls. Movement uses four directions, while clues count eight neighbors. Blue flags are guesses. Gold flags are confirmed mines and cannot be removed. Each floor chooses an interior entrance, with a small irregular opening and useful clues.',
-      '点击已揭示地板，角色沿已知安全路线自动寻路；点击高亮前沿，会先走近再探索。走到宝箱才能收取奖励。点击楼梯并抵达后，选择遗物进入下一层。所有安全地板上下左右连通，孤立区域会成为墙壁；数字仍统计周围八格。蓝旗是手动猜测，金旗是已确认的雷，无法取消。每层从变化的内圈入口出发，开局是带有效线索的小型不规则区域。',
-      '開いた床をクリックすると既知の安全な最短経路を歩きます。境界をクリックすると近づいて探索します。宝箱は訪れて回収。階段へ歩いて到着すると遺物を選び次の階へ。安全な床は上下左右につながり、孤立した場所は壁になります。数字は周囲8マスを数え、青い旗は推測、金の旗は確定地雷で解除不可。階ごとに内側の入口が変わり、小さな不規則な領域と有効な数字で始まります。',
-    ),
-    twinHelp: t(
-      'At each coordinate, at most one board has a mine. A mine you deduce on A guarantees safety on B, but two safe cells are also possible. Flags never prove safety. Clear every safe cell on both boards; hitting a mine on either ends the pair. The first reveal opens a safe neighborhood on both.',
-      '同一坐标最多只有一张棋盘有雷。在 A 盘推理确认有雷，就能确定 B 盘对应格安全；两边都安全也可能。插旗不等于证明。翻开两盘所有安全格获胜，任一盘踩雷整局结束。首次翻开会同时打开两盘的安全邻域。',
-      '同じ座標に地雷があるのは最大で片方のみ。A の地雷を推理できれば B の同じマスは安全ですが、両方安全な場合もあります。旗は証明ではありません。両盤の安全マスを全て開けば勝利、片方で踏めば終了。初手は両盤で安全な領域が開きます。',
-    ),
-    campHelp: t(
-      'Choose your difficulty and expedition length. Build a relic collection along the way. Bank all loot on extraction, half on defeat, and a completion bonus on victory. Unlock careers and a three-point equipment loadout with supplies. Growth opens choices; mines remain dangerous.',
-      '选择难度与远征层数，遗物逐层成型。撤离带回全部战利品，失败保留一半，通关另有奖励。用物资解锁职业与三点预算的初始装备。成长增加策略选择，地雷仍然危险。',
-      '難易度と階層数を選び、遺物構成を育てます。帰還で全戦利品、敗北で半分、クリアで追加報酬。物資で職業と3ポイントの初期装備を解放。成長は選択肢を増やし、地雷の危険は残ります。',
-    ),
-    ready: t(
-      'Choose the first opening on either board.',
-      '在任一棋盘选择首次翻开的位置。',
-      'どちらかの盤で初手を選びましょう。',
-    ),
-    exploring: t(
-      'Find a safe route to the exit.',
-      '推理出通往出口的安全路线。',
-      '出口への安全な道を探しましょう。',
-    ),
-    exitReady: t(
-      'Stairs reachable · click them when ready to leave.',
-      '楼梯已连通 · 准备好后点击楼梯前往下一层。',
-      '階段へ到達可能 · 出発するときにクリック。',
-    ),
-    partner: t('Matching coordinate', '对应坐标', '対応する座標'),
-    safePartner: t(
-      'Partner cleared: flagged mines there are now confirmed.',
-      '另一盘已完成：其中的雷标记现已确认。',
-      '相手盤クリア済み：その地雷印は確定です。',
-    ),
-    recovered: t(
-      'An incompatible or damaged save was ignored. Valid camp history is kept when recoverable.',
-      '已忽略不兼容或损坏的存档；可恢复的营地历史会保留。',
-      '非互換または破損した保存を無視しました。復元可能なキャンプ履歴は保持します。',
-    ),
-    journalLimit: t(
-      'This run reached the move limit. Extract or start a new pair.',
-      '本局已达操作上限，请撤离或重新开始双盘。',
-      '手数上限です。帰還するか双子盤を再開してください。',
-    ),
-    toolHint: t(
-      'Drag a tool onto the board, or select one and click a target.',
-      '将道具拖到棋盘，或选中后点击目标。',
-      '道具を盤面へドラッグ、または選んで対象をクリック。',
-    ),
-    probeHint: t(
-      'Inspect a 3×3 area: gold flags mark mines, green dots mark safe cells.',
-      '探测目标周围 3×3：金旗标记地雷，绿点标记安全格。',
-      '周囲3×3を探査：金の旗は地雷、緑の点は安全。',
-    ),
-    scanHint: t(
-      'Inspect a whole row: gold flags mark mines, green dots mark safe cells.',
-      '扫描整行：金旗标记地雷，绿点标记安全格。',
-      '行全体を走査：金の旗は地雷、緑の点は安全。',
-    ),
+    difficulty: message(language, 'variant-copy.difficulty'),
+    legacyDifficulty: message(language, 'variant-copy.original-rules'),
+    nextFloor: message(language, 'variant-copy.continue-to-next-floor'),
+    zoom: message(language, 'variant-copy.larger-cells'),
+    fit: message(language, 'variant-copy.fit-board'),
+    zoomHint: message(language, 'variant-copy.scroll-or-swipe-to-explore-the-enlarged'),
+    confirmedMine: message(language, 'variant-copy.confirmed-mine-locked-flag'),
+    triggeredMine: message(language, 'variant-copy.triggered-mine'),
+    confirmedSafe: message(language, 'variant-copy.confirmed-safe'),
+    rowMines: message(language, 'variant-copy.mines-total'),
+    controls: message(language, 'variant-copy.arrows-home-end-move-focus-enter-space'),
+    modes: message(language, 'variant-copy.game-mode'),
+    classic: message(language, 'variant-copy.classic'),
+    expedition: message(language, 'variant-copy.expedition'),
+    twin: message(language, 'variant-copy.twin-boards'),
+    camp: message(language, 'variant-copy.base-camp'),
+    supplies: message(language, 'variant-copy.supplies'),
+    departures: message(language, 'variant-copy.completed-expeditions'),
+    start: message(language, 'variant-copy.begin-expedition'),
+    profession: message(language, 'variant-copy.profession'),
+    equipment: message(language, 'variant-copy.loadout-3-points'),
+    facilities: message(language, 'variant-copy.camp-facilities'),
+    owned: message(language, 'variant-copy.unlocked'),
+    locked: message(language, 'variant-copy.unlock-at-camp'),
+    floor: message(language, 'variant-copy.floor'),
+    loot: message(language, 'variant-copy.run-loot'),
+    probes: message(language, 'variant-copy.probes'),
+    scans: message(language, 'variant-copy.scans'),
+    health: message(language, 'variant-copy.health'),
+    shields: message(language, 'variant-copy.shields'),
+    probe: message(language, 'variant-copy.probe-3-3-area'),
+    scan: message(language, 'variant-copy.scan-a-row'),
+    wall: message(language, 'variant-copy.wall-impassable'),
+    player: message(language, 'variant-copy.explorer'),
+    migrated: message(language, 'variant-copy.camp-and-results-preserved-the-previous-dungeon'),
+    retreat: message(language, 'variant-copy.extract-to-camp'),
+    retreatNote: message(language, 'variant-copy.end-this-expedition-and-bank-all-collected'),
+    chooseRelic: message(language, 'variant-copy.choose-a-relic'),
+    floorCleared: message(language, 'variant-copy.floor-cleared'),
+    viewResult: message(language, 'variant-copy.view-results'),
+    reward: message(language, 'variant-copy.choose-one-relic-for-the-next-floor'),
+    exit: message(language, 'variant-copy.exit'),
+    entrance: message(language, 'variant-copy.entrance'),
+    treasure: message(language, 'variant-copy.treasure-safe'),
+    collected: message(language, 'variant-copy.collected'),
+    frontier: message(language, 'variant-copy.reachable-frontier'),
+    relics: message(language, 'variant-copy.relic-build'),
+    relicUsedFloor: message(language, 'variant-copy.used-this-floor'),
+    relicUsedRun: message(language, 'variant-copy.used-this-expedition'),
+    relicUsedTurn: message(language, 'variant-copy.used-this-turn'),
+    noRelics: message(language, 'variant-copy.find-your-first-relic-after-floor-one'),
+    earned: message(language, 'variant-copy.banked-supplies'),
+    rewardRate: message(language, 'variant-copy.difficulty-reward'),
+    rewardBase: message(language, 'variant-copy.base-settlement'),
+    rewardBonus: message(language, 'variant-copy.difficulty-bonus'),
+    won: message(language, 'variant-copy.expedition-complete'),
+    lost: message(language, 'variant-copy.expedition-ended'),
+    retreated: message(language, 'variant-copy.safely-extracted'),
+    steps: message(language, 'variant-copy.moves'),
+    records: message(language, 'variant-copy.recent-results-this-mode'),
+    noRecords: message(language, 'variant-copy.your-story-starts-here'),
+    expeditionHelp: message(language, 'variant-copy.click-revealed-floor-to-walk-there-along'),
+    twinHelp: message(language, 'variant-copy.at-each-coordinate-at-most-one-board'),
+    campHelp: message(language, 'variant-copy.choose-your-difficulty-and-expedition-length-build'),
+    ready: message(language, 'variant-copy.choose-the-first-opening-on-either-board'),
+    exploring: message(language, 'variant-copy.find-a-safe-route-to-the-exit'),
+    exitReady: message(language, 'variant-copy.stairs-reachable-click-them-when-ready-to'),
+    partner: message(language, 'variant-copy.matching-coordinate'),
+    safePartner: message(language, 'variant-copy.partner-cleared-flagged-mines-there-are-now'),
+    recovered: message(language, 'variant-copy.an-incompatible-or-damaged-save-was-ignored'),
+    journalLimit: message(language, 'variant-copy.this-run-reached-the-move-limit-extract'),
+    toolHint: message(language, 'variant-copy.drag-a-tool-onto-the-board-or'),
+    probeHint: message(language, 'variant-copy.inspect-a-3-3-area-gold-flags'),
+    scanHint: message(language, 'variant-copy.inspect-a-whole-row-gold-flags-mark'),
   }
 }
 
@@ -180,73 +93,43 @@ export function professionCopy(language: Language, profession: Profession): Vari
   switch (profession) {
     case 'waymarker':
       return {
-        name: localized(language, 'Waymarker', '锚行者', '道標使い'),
-        note: localized(
-          language,
-          'Mission exclusive: clear 12 floors and claim Return route. Starts with 1 probe and 1 scan.',
-          '任务专属：通过 12 层后领取「归途有记」。初始 1 探针、1 扫描。',
-          '任務限定：12階突破し「帰路の記録」を受領。初期探針1、走査1。',
-        ),
+        name: message(language, 'variant-copy.waymarker'),
+        note: message(language, 'variant-copy.mission-exclusive-clear-12-floors-and-claim'),
       }
     case 'riftwalker':
       return {
-        name: localized(language, 'Riftwalker', '裂隙师', '裂け目使い'),
-        note: localized(
-          language,
-          'Achievement exclusive: clear 50 floors and claim Rift pioneer. Starts with 2 probes.',
-          '成就专属：通过 50 层后领取「裂隙先驱」。初始 2 探针。',
-          '実績限定：50階突破し「裂け目の先駆者」を受領。初期探針2。',
-        ),
+        name: message(language, 'variant-copy.riftwalker'),
+        note: message(language, 'variant-copy.achievement-exclusive-clear-50-floors-and-claim'),
       }
     case 'archaeologist':
       return {
-        name: localized(language, 'Archaeologist', '考古学家', '考古学者'),
-        note: localized(
-          language,
-          '1 probe · scout a chest each floor · up to 4 relic choices',
-          '1 探针 · 每层侦察一个宝箱 · 遗物最多四选一',
-          '探針1 · 各階で宝箱を偵察 · 遺物最大4択',
-        ),
+        name: message(language, 'variant-copy.archaeologist'),
+        note: message(language, 'variant-copy.1-probe-scout-a-chest-each-floor'),
       }
     case 'alchemist':
       return {
-        name: localized(language, 'Alchemist', '炼金术师', '錬金術師'),
-        note: localized(
-          language,
-          '2 shields · each floor: 1 shield → 1 probe + 1 scan',
-          '2 护盾 · 每层：1 护盾 → 1 探针 + 1 扫描',
-          'シールド2 · 各階：シールド1 → 探針1 + 走査1',
-        ),
+        name: message(language, 'variant-copy.alchemist'),
+        note: message(language, 'variant-copy.2-shields-each-floor-1-shield-1'),
       }
     case 'sentinel':
       return {
-        name: localized(language, 'Sentinel', '哨卫', '番人'),
-        note: localized(
-          language,
-          '1 probe · 1 shield · each floor: 1 shield → 5×5 scouting',
-          '1 探针 · 1 护盾 · 每层：1 护盾 → 5×5 侦察',
-          '探針1 · シールド1 · 各階：シールド1 → 5×5偵察',
-        ),
+        name: message(language, 'variant-copy.sentinel'),
+        note: message(language, 'variant-copy.1-probe-1-shield-each-floor-1'),
       }
     case 'explorer':
       return {
-        name: localized(language, 'Explorer', '探险家', '探検家'),
-        note: localized(language, '2 probes · 1 scan', '2 探针 · 1 扫描', '探針2 · 走査1'),
+        name: message(language, 'variant-copy.explorer-2'),
+        note: message(language, 'variant-copy.2-probes-1-scan'),
       }
     case 'surveyor':
       return {
-        name: localized(language, 'Surveyor', '测绘师', '測量士'),
-        note: localized(language, '1 probe · 2 scans', '1 探针 · 2 扫描', '探針1 · 走査2'),
+        name: message(language, 'variant-copy.surveyor'),
+        note: message(language, 'variant-copy.1-probe-2-scans'),
       }
     case 'engineer':
       return {
-        name: localized(language, 'Engineer', '工兵', '工兵'),
-        note: localized(
-          language,
-          '1 probe · 1 scan · 1 shield',
-          '1 探针 · 1 扫描 · 1 护盾',
-          '探針1 · 走査1 · シールド1',
-        ),
+        name: message(language, 'variant-copy.engineer'),
+        note: message(language, 'variant-copy.1-probe-1-scan-1-shield'),
       }
   }
 }
@@ -256,143 +139,76 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
   switch (relic) {
     case 'chest-beacon':
       return {
-        name: localized(language, 'Chest beacon', '寻宝信标', '宝箱ビーコン'),
-        note: localized(
-          language,
-          'Collect a chest to scout the next uncollected chest\u2019s 3\u00d73 area, once per floor. Does not collect it.',
-          '拾取宝箱后侦察下一个未拾取宝箱周围 3×3，每层一次；不自动拾取。',
-          '宝箱を拾うと次の未回収宝箱の周囲3×3を偵察。各階1回、自動回収なし。',
-        ),
+        name: message(language, 'variant-copy.chest-beacon'),
+        note: message(language, 'variant-copy.collect-a-chest-to-scout-the-next'),
       }
     case 'pulse-coil':
       return {
-        name: localized(language, 'Pulse coil', '脉冲线圈', 'パルスコイル'),
-        note: localized(
-          language,
-          'Completing a profession skill scouts your landing row, once per floor. Placing a return anchor does not trigger it.',
-          '完成职业技能后侦察落点所在整行，每层一次；仅放置回撤锚点不触发。',
-          '職業スキル完了時に着地点の横一列を偵察。各階1回。帰還点設置時は発動しない。',
-        ),
+        name: message(language, 'variant-copy.pulse-coil'),
+        note: message(language, 'variant-copy.completing-a-profession-skill-scouts-your-landing'),
       }
     case 'last-bastion':
       return {
-        name: localized(language, 'Last bastion', '绝境壁垒', '最後の砦'),
-        note: localized(
-          language,
-          'Survive health damage with 2 HP or less to set shields to 2, once per expedition. Does not revive.',
-          '承受生命伤害后存活且生命不超过 2，护盾补至 2；每局一次，不提供复活。',
-          '体力ダメージ後に生存してHP2以下ならシールドを2に。遠征1回、復活なし。',
-        ),
+        name: message(language, 'variant-copy.last-bastion'),
+        note: message(language, 'variant-copy.survive-health-damage-with-2-hp-or'),
       }
     case 'hunter-seal':
       return {
-        name: localized(language, 'Hunter seal', '猎手印记', '狩人の印'),
-        note: localized(
-          language,
-          'Confirm 8 distinct mines in a floor to heal 2 HP, up to maximum health, once per floor.',
-          '每层确认 8 颗不同地雷后回复 2 点生命，不超过生命上限，每层一次。',
-          '各階で異なる地雷8個を確定するとHPを2回復。最大体力まで、各階1回。',
-        ),
+        name: message(language, 'variant-copy.hunter-seal'),
+        note: message(language, 'variant-copy.confirm-8-distinct-mines-in-a-floor'),
       }
     case 'fault-map':
       return {
-        name: localized(language, 'Fault map', '断层图谱', '断層地図'),
-        note: localized(
-          language,
-          'Confirm 4 distinct mines in a floor to scout the exit\u2019s 3\u00d73 area, once per floor. It does not open the exit or defeat its guardian.',
-          '每层确认 4 颗不同地雷后侦察出口周围 3×3，每层一次；不会开启出口或跳过守卫。',
-          '各階で異なる地雷4個を確定すると出口周囲3×3を偵察。各階1回、出口や守護者を無視しない。',
-        ),
+        name: message(language, 'variant-copy.fault-map'),
+        note: message(language, 'variant-copy.confirm-4-distinct-mines-in-a-floor'),
       }
     case 'abyss-hourglass':
       return {
-        name: localized(language, 'Abyss hourglass', '深渊沙漏', '深淵の砂時計'),
-        note: localized(
-          language,
-          'Revive at 3 HP and scout your surrounding 3\u00d73, once per expedition. Second wind takes priority and preserves this charge.',
-          '致命伤害后以 3 点生命复起，并侦察周围 3×3，每局一次；已有回生符优先触发，保留沙漏次数。',
-          '致命傷でHP3で復活し周囲3×3を偵察。遠征1回。セカンドウィンドが優先し砂時計は温存。',
-        ),
+        name: message(language, 'variant-copy.abyss-hourglass'),
+        note: message(language, 'variant-copy.revive-at-3-hp-and-scout-your'),
       }
     case 'trail-heart':
       return {
-        name: localized(language, 'Trail heart', '远行之心', '旅路の心'),
-        note: localized(
+        name: message(language, 'variant-copy.trail-heart'),
+        note: message(
           language,
-          'Achievement exclusive. The first chest collected each floor grants 1 shield, cap 2.',
-          '成就专属。每层首次拾取宝箱获得 1 层护盾，上限 2。',
-          '実績限定。各階で最初の宝箱を拾うとシールド+1、上限2。',
+          'variant-copy.achievement-exclusive-the-first-chest-collected-each',
         ),
       }
     case 'survey-token':
       return {
-        name: localized(language, 'Survey token', '勘探信物', '探査のお守り'),
-        note: localized(
-          language,
-          'Achievement exclusive. Confirm 5 unique mines in a floor to gain 1 probe and 1 scan, once per floor; each cap 4.',
-          '成就专属。每层确认 5 颗不同的雷后，获得 1 探针和 1 扫描，每层一次，各上限 4。',
-          '実績限定。各階で異なる地雷5個を確定すると探針と走査+1、各上限4、各階1回。',
-        ),
+        name: message(language, 'variant-copy.survey-token'),
+        note: message(language, 'variant-copy.achievement-exclusive-confirm-5-unique-mines-in'),
       }
     case 'lantern':
       return {
-        name: localized(language, 'Lantern', '提灯', 'ランタン'),
-        note: localized(
-          language,
-          '+1 probe on each new floor, up to 4.',
-          '每次进入新层 +1 探针，上限 4。',
-          '新階層ごとに探針+1、上限4。',
-        ),
+        name: message(language, 'variant-copy.lantern'),
+        note: message(language, 'variant-copy.1-probe-on-each-new-floor-up'),
       }
     case 'lens':
       return {
-        name: localized(language, 'Survey lens', '测绘透镜', '測量レンズ'),
-        note: localized(
-          language,
-          '+1 scan on each new floor, up to 4.',
-          '每次进入新层 +1 扫描，上限 4。',
-          '新階層ごとに走査+1、上限4。',
-        ),
+        name: message(language, 'variant-copy.survey-lens'),
+        note: message(language, 'variant-copy.1-scan-on-each-new-floor-up'),
       }
     case 'aegis':
       return {
-        name: localized(language, 'Aegis', '庇护', '加護'),
-        note: localized(
-          language,
-          'Gain 1 shield, up to 2. Absorbs up to 5 damage; a mine hit leaves a locked red mine marker.',
-          '获得 1 层护盾，上限 2 层。抵挡最多 5 点伤害；踩中的雷留下不可取消的红色地雷标记。',
-          'シールドを1つ獲得、上限2。最大5ダメージを吸収。踏んだ地雷は解除できない赤い地雷印になります。',
-        ),
+        name: message(language, 'variant-copy.aegis'),
+        note: message(language, 'variant-copy.gain-1-shield-up-to-2-absorbs'),
       }
     case 'purse':
       return {
-        name: localized(language, 'Treasure pouch', '藏宝袋', '宝袋'),
-        note: localized(
-          language,
-          'Future treasures give 9 supplies instead of 6.',
-          '此后每个宝箱收益从 6 提升至 9。',
-          '以後の宝箱報酬が6から9に。',
-        ),
+        name: message(language, 'variant-copy.treasure-pouch'),
+        note: message(language, 'variant-copy.future-treasures-give-9-supplies-instead-of'),
       }
     case 'compass':
       return {
-        name: localized(language, 'Exit compass', '出口罗盘', '出口の羅針盤'),
-        note: localized(
-          language,
-          'Scout the exit’s 3×3 area each floor, revealing safe cells and marking mines.',
-          '每层侦察出口周围 3×3，揭开安全格并标记地雷。',
-          '各階の出口周囲3×3を偵察し、安全なマスを開き地雷をマーク。',
-        ),
+        name: message(language, 'variant-copy.exit-compass'),
+        note: message(language, 'variant-copy.scout-the-exit-s-3-3-area'),
       }
     case 'salvage':
       return {
-        name: localized(language, 'Salvage seal', '回收印记', '回収の印'),
-        note: localized(
-          language,
-          'Keep 75% of collected loot on defeat instead of 50%.',
-          '失败保留收益从 50% 提升至 75%。',
-          '敗北時の回収率が50%から75%に。',
-        ),
+        name: message(language, 'variant-copy.salvage-seal'),
+        note: message(language, 'variant-copy.keep-75-of-collected-loot-on-defeat'),
       }
     case 'tempered-edge':
     case 'layered-armor':
@@ -419,22 +235,12 @@ export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescri
   if (pack) return relicPackCopy(language, pack)
   return upgrade === 'workshop'
     ? {
-        name: localized(language, 'Workshop', '工坊', '工房'),
-        note: localized(
-          language,
-          'Unlock departure equipment. Choose up to 3 points each run.',
-          '解锁初始装备，每局最多携带 3 点。',
-          '初期装備を解放。毎回3ポイントまで。',
-        ),
+        name: message(language, 'variant-copy.workshop'),
+        note: message(language, 'variant-copy.unlock-departure-equipment-choose-up-to-3'),
       }
     : {
-        name: localized(language, 'Relic archive', '遗物档案馆', '遺物資料館'),
-        note: localized(
-          language,
-          'Add Exit compass and Salvage seal to future relic offers.',
-          '将出口罗盘与回收印记加入后续遗物池。',
-          '出口の羅針盤と回収の印を遺物候補に追加。',
-        ),
+        name: message(language, 'variant-copy.relic-archive'),
+        note: message(language, 'variant-copy.add-exit-compass-and-salvage-seal-to'),
       }
 }
 
@@ -443,43 +249,23 @@ export function equipmentCopy(language: Language, equipment: Equipment): Variant
   switch (equipment) {
     case 'field-radio':
       return {
-        name: localized(language, 'Field radio', '野战电台', '野戦無線機'),
-        note: localized(
-          language,
-          'Mission exclusive · 1 loadout point. A successful profession skill restores 1 probe, cap 4; once per floor.',
-          '任务专属 · 装备预算 1 点。成功使用职业技能后补充 1 探针，上限 4，每层一次。',
-          'ミッション限定・装備1ポイント。職業スキル成功で探針+1、上限4、各階1回。',
-        ),
+        name: message(language, 'variant-copy.field-radio'),
+        note: message(language, 'variant-copy.mission-exclusive-1-loadout-point-a-successful'),
       }
     case 'probe':
       return {
-        name: localized(language, 'Probe kit', '探针包', '探針キット'),
-        note: localized(
-          language,
-          '1 loadout point. Starting probes +1.',
-          '装备预算 1 点。初始探针 +1。',
-          '装備1ポイント。初期探針+1。',
-        ),
+        name: message(language, 'variant-copy.probe-kit'),
+        note: message(language, 'variant-copy.1-loadout-point-starting-probes-1'),
       }
     case 'scanner':
       return {
-        name: localized(language, 'Scanner', '扫描仪', '走査器'),
-        note: localized(
-          language,
-          '1 loadout point. Starting scans +1.',
-          '装备预算 1 点。初始扫描 +1。',
-          '装備1ポイント。初期走査+1。',
-        ),
+        name: message(language, 'variant-copy.scanner'),
+        note: message(language, 'variant-copy.1-loadout-point-starting-scans-1'),
       }
     case 'guard':
       return {
-        name: localized(language, 'Guard', '护盾', '防護'),
-        note: localized(
-          language,
-          '2 loadout points. Starting shields +1.',
-          '装备预算 2 点。初始护盾 +1。',
-          '装備2ポイント。初期シールド+1。',
-        ),
+        name: message(language, 'variant-copy.guard'),
+        note: message(language, 'variant-copy.2-loadout-points-starting-shields-1'),
       }
     default:
       return combatPurchaseCopy(language, equipment)
@@ -490,15 +276,15 @@ export function equipmentCopy(language: Language, equipment: Equipment): Variant
 export function difficultyCopy(language: Language, difficulty?: VariantDifficulty): string {
   switch (difficulty) {
     case 'relaxed':
-      return localized(language, 'Relaxed', '轻松', 'リラックス')
+      return message(language, 'variant-copy.relaxed')
     case 'standard':
-      return localized(language, 'Standard', '标准', 'スタンダード')
+      return message(language, 'variant-copy.standard')
     case 'advanced':
-      return localized(language, 'Advanced', '进阶', 'アドバンス')
+      return message(language, 'variant-copy.advanced')
     case 'expert':
-      return localized(language, 'Expert', '专家', 'エキスパート')
+      return message(language, 'variant-copy.expert')
     case 'abyss':
-      return localized(language, 'Abyss', '深渊', 'アビス')
+      return message(language, 'variant-copy.abyss')
     default:
       return variantCopy(language).legacyDifficulty
   }
@@ -506,10 +292,7 @@ export function difficultyCopy(language: Language, difficulty?: VariantDifficult
 
 /** Explain update extraction without exposing storage versions or implementation details. */
 export function returnedToCampCopy(language: Language, supplies: number): string {
-  return localized(
-    language,
-    `Game updated. Your expedition returned to camp with ${supplies} supplies. Camp progress is preserved.`,
-    `游戏已更新，远征已返回营地，带回 ${supplies} 物资。营地成长已保留。`,
-    `ゲーム更新により遠征から帰還し、物資${supplies}を持ち帰りました。キャンプの成長は保持されています。`,
-  )
+  return message(language, 'variant-copy.game-updated-your-expedition-returned-to-camp', {
+    p0: supplies,
+  })
 }

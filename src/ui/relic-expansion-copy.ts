@@ -1,106 +1,55 @@
+import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
 import type { ExpansionRelic, RelicPack } from '../types/relic-packs.js'
 import type { VariantDescription } from '../types/variant-ui.js'
 import { journeyPackCopy, journeyRelicCopy } from './journey-relic-copy.js'
 
-/** Require a complete name and effect in every supported language. */
-function description(
-  language: Language,
-  enName: string,
-  zhName: string,
-  jaName: string,
-  enNote: string,
-  zhNote: string,
-  jaNote: string,
-): VariantDescription {
-  if (language === 'zh') return { name: zhName, note: zhNote }
-  if (language === 'ja') return { name: jaName, note: jaNote }
-  return { name: enName, note: enNote }
-}
-
 /** Describe trigger conditions and limits where players select a relic. */
 export function expansionRelicCopy(language: Language, relic: ExpansionRelic): VariantDescription {
   switch (relic) {
     case 'field-notes':
-      return description(
-        language,
-        'Field notes',
-        '勘探笔记',
-        '調査ノート',
-        'Confirm 3 mines on a floor to gain 1 probe. Once per floor; cap 4.',
-        '每层确认 3 颗雷后，补充 1 根探针。每层一次，上限 4。',
-        '同じ階で地雷を3個確定すると探針+1。各階1回、上限4。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.field-notes'),
+        note: message(language, 'relic-expansion-copy.confirm-3-mines-on-a-floor-to'),
+      }
     case 'rangefinder':
-      return description(
-        language,
-        'Rangefinder',
-        '测距镜',
-        '測距器',
-        'A probe confirming 2 new mines grants 1 scan. Once per floor; cap 4.',
-        '一次探针新确认至少 2 颗雷，补充 1 次扫描。每层一次，上限 4。',
-        '探針1回で新たに地雷を2個確定すると走査+1。各階1回、上限4。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.rangefinder'),
+        note: message(language, 'relic-expansion-copy.a-probe-confirming-2-new-mines-grants'),
+      }
     case 'reactive-shell':
-      return description(
-        language,
-        'Reactive shell',
-        '反应甲片',
-        '反応装甲',
-        'The first shielded mine hit each floor surveys its surrounding 3×3 area.',
-        '每层首次用护盾挡雷时，侦察该雷周围 3×3 区域。',
-        '各階で最初に地雷をシールドで防ぐと、その周囲3×3を調査。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.reactive-shell'),
+        note: message(language, 'relic-expansion-copy.the-first-shielded-mine-hit-each-floor'),
+      }
     case 'rescue-ribbon':
-      return description(
-        language,
-        'Rescue ribbon',
-        '救援绶带',
-        '救援リボン',
-        'Survive health damage to gain 1 shield. Once per expedition; cap 2.',
-        '扣血后存活，获得 1 层护盾。每局一次，上限 2。',
-        'HPダメージを受けて生存するとシールド+1。遠征中1回、上限2。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.rescue-ribbon'),
+        note: message(language, 'relic-expansion-copy.survive-health-damage-to-gain-1-shield'),
+      }
     case 'field-dressing':
-      return description(
-        language,
-        'Field dressing',
-        '野战绷带',
-        '野戦包帯',
-        'First chest each floor restores 5 health.',
-        '每层首个宝箱恢复 5 点生命。',
-        '各階の最初の宝箱で体力5回復。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.field-dressing'),
+        note: message(language, 'relic-expansion-copy.first-chest-each-floor-restores-5-health'),
+      }
     case 'second-wind':
-      return description(
-        language,
-        'Second wind',
-        '绝境重生',
-        '再起',
-        'Once per expedition, survive lethal damage with 5 health.',
-        '每局一次，受到致命伤害后以 5 点生命存活。',
-        '遠征中1回、致命傷を体力5で耐える。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.second-wind'),
+        note: message(
+          language,
+          'relic-expansion-copy.once-per-expedition-survive-lethal-damage-with',
+        ),
+      }
     case 'supply-cache':
-      return description(
-        language,
-        'Supply cache',
-        '补给暗格',
-        '補給の隠し箱',
-        'The first chest collected each floor grants 1 scan, up to 4.',
-        '每层收集的第一个宝箱补充 1 次扫描，上限 4。',
-        '各階で最初に回収する宝箱で走査+1、上限4。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.supply-cache'),
+        note: message(language, 'relic-expansion-copy.the-first-chest-collected-each-floor-grants'),
+      }
     case 'cache-guard':
-      return description(
-        language,
-        'Cache guard',
-        '寻宝护印',
-        '宝探しの護符',
-        'Collect all 3 chests on a floor to gain 1 shield. Once per floor; cap 2.',
-        '收集本层全部 3 个宝箱后获得 1 层护盾。每层一次，上限 2。',
-        '同じ階の宝箱3個を全て回収するとシールド+1。各階1回、上限2。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.cache-guard'),
+        note: message(language, 'relic-expansion-copy.collect-all-3-chests-on-a-floor'),
+      }
     default:
       return journeyRelicCopy(language, relic)
   }
@@ -110,45 +59,25 @@ export function expansionRelicCopy(language: Language, relic: ExpansionRelic): V
 export function relicPackCopy(language: Language, pack: RelicPack): VariantDescription {
   switch (pack) {
     case 'survey-notes':
-      return description(
-        language,
-        'Surveyor notes',
-        '勘探手记包',
-        '調査手記パック',
-        'Add Field notes and Rangefinder to future offers: turn new discoveries into tools.',
-        '将勘探笔记、测距镜加入后续遗物池：利用新发现补充道具。',
-        '調査ノートと測距器を遺物候補に追加。新しい発見で道具を補充。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.surveyor-notes'),
+        note: message(language, 'relic-expansion-copy.add-field-notes-and-rangefinder-to-future'),
+      }
     case 'guardian-crests':
-      return description(
-        language,
-        'Guardian crests',
-        '守护纹章包',
-        '守護紋章パック',
-        'Add Reactive shell and Rescue ribbon: shield reconnaissance and emergency protection.',
-        '将反应甲片、救援绶带加入后续遗物池：护盾侦察与受伤保护。',
-        '反応装甲と救援リボンを追加。シールドで調査し、負傷時に防護。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.guardian-crests'),
+        note: message(language, 'relic-expansion-copy.add-reactive-shell-and-rescue-ribbon-shield'),
+      }
     case 'survival-charms':
-      return description(
-        language,
-        'Survival charms',
-        '生存护符包',
-        '生存護符パック',
-        'Add Field dressing and Second wind: chest healing and one lethal-hit recovery.',
-        '将行军绷带、余烬护符加入后续遗物池：宝箱治疗与一次绝境生还。',
-        '応急包帯と再起のお守りを追加。宝箱で回復し、致命傷に一度耐える。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.survival-charms'),
+        note: message(language, 'relic-expansion-copy.add-field-dressing-and-second-wind-chest'),
+      }
     case 'prospector-seals':
-      return description(
-        language,
-        'Prospector seals',
-        '寻宝印记包',
-        '採掘印章パック',
-        'Add Supply cache and Cache guard: recover scans and earn protection by collecting chests.',
-        '将补给暗格、寻宝护印加入后续遗物池：收集宝箱补充扫描和护盾。',
-        '補給の隠し箱と宝探しの護符を追加。宝箱の回収で走査と防護を獲得。',
-      )
+      return {
+        name: message(language, 'relic-expansion-copy.prospector-seals'),
+        note: message(language, 'relic-expansion-copy.add-supply-cache-and-cache-guard-recover'),
+      }
     default:
       return journeyPackCopy(language, pack)
   }

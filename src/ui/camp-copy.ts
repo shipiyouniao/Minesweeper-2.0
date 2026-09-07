@@ -1,6 +1,7 @@
+import { message } from '../i18n.js'
 import type { CampLabel, CampPage, ShopCategory } from '../types/camp-navigation.js'
 import type { Language } from '../types/localization.js'
-import { battleText } from './combat-build-copy.js'
+
 import { variantCopy } from './variant-copy.js'
 
 /** Name a destination consistently in its entry card, heading and navigation. */
@@ -12,13 +13,13 @@ export function campPageName(language: Language, page: CampPage): string {
     case 'professions':
       return t.profession
     case 'equipment':
-      return battleText(language, 'Loadout', '出发装备', '出発装備')
+      return message(language, 'camp-copy.loadout')
     case 'missions':
-      return battleText(language, 'Missions', '任务', 'ミッション')
+      return message(language, 'camp-copy.missions')
     case 'achievements':
-      return battleText(language, 'Achievements', '成就', '実績')
+      return message(language, 'camp-copy.achievements')
     case 'shop':
-      return battleText(language, 'Shop', '商店', 'ショップ')
+      return message(language, 'camp-copy.shop')
   }
 }
 
@@ -26,13 +27,13 @@ export function campPageName(language: Language, page: CampPage): string {
 export function shopCategoryName(language: Language, category: ShopCategory): string {
   switch (category) {
     case 'all':
-      return battleText(language, 'All', '全部', 'すべて')
+      return message(language, 'camp-copy.all')
     case 'professions':
       return variantCopy(language).profession
     case 'equipment':
-      return battleText(language, 'Equipment', '装备', '装備')
+      return message(language, 'camp-copy.equipment')
     case 'relics':
-      return battleText(language, 'Relics', '遗物', '遺物')
+      return message(language, 'camp-copy.relics')
     case 'camp':
       return variantCopy(language).facilities
   }
@@ -40,52 +41,28 @@ export function shopCategoryName(language: Language, category: ShopCategory): st
 
 /** Supply concise instructions and feedback at the point where they are needed. */
 export function campLabel(language: Language, label: CampLabel): string {
-  /** Require all supported translations for each line of copy. */
-  const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
   switch (label) {
     case 'back':
-      return t('Back to camp', '返回营地', 'キャンプへ戻る')
+      return message(language, 'camp-copy.back-to-camp')
     case 'current':
-      return t('Ready for departure', '出发准备', '出発の準備')
+      return message(language, 'camp-copy.ready-for-departure')
     case 'empty':
-      return t('No equipment selected', '尚未携带装备', '装備未選択')
-    case 'floors':
-      return t('{count} floors', '{count} 层', '{count}階')
+      return message(language, 'camp-copy.no-equipment-selected')
     case 'buy':
-      return t('Purchase', '购买', '購入')
-    case 'missing':
-      return t('Need {count} more supplies', '还差 {count} 物资', '物資があと{count}必要')
+      return message(language, 'camp-copy.purchase')
     case 'purchaseHelp':
-      return t(
-        'Select an item to see its effect.',
-        '选择商品查看效果。',
-        '商品を選ぶと効果を確認できます。',
-      )
+      return message(language, 'camp-copy.select-an-item-to-see-its-effect')
     case 'workshopRequired':
-      return t(
-        'Unlock the Workshop before buying and equipping departure gear.',
-        '先解锁工坊，才能购买和携带出发装备。',
-        '出発装備を購入・携帯するには、先に工房を解放してください。',
-      )
+      return message(language, 'camp-copy.unlock-the-workshop-before-buying-and-equipping')
     case 'professionHelp':
-      return t('Choose your explorer and skill.', '选择角色与职业技能', '冒険者とスキルを選ぶ')
+      return message(language, 'camp-copy.choose-your-explorer-and-skill')
     case 'equipmentHelp':
-      return t('Build a three-point loadout.', '搭配 3 点出发装备', '3ポイントで装備を組む')
+      return message(language, 'camp-copy.build-a-three-point-loadout')
     case 'routeHelp':
-      return t(
-        'Choose board size and expedition length.',
-        '选择难度、棋盘与层数',
-        '難易度と階層数を選ぶ',
-      )
+      return message(language, 'camp-copy.choose-board-size-and-expedition-length')
     case 'shopHelp':
-      return t(
-        'Unlock careers, equipment and relics.',
-        '解锁职业、装备与遗物',
-        '職業・装備・遺物を解放',
-      )
-    case 'ownedCount':
-      return t('{count} unlocked', '已解锁 {count} 项', '{count}点を解放済み')
+      return message(language, 'camp-copy.unlock-careers-equipment-and-relics')
     case 'loadoutBudget':
-      return t('Loadout points', '装备预算', '装備ポイント')
+      return message(language, 'camp-copy.loadout-points')
   }
 }

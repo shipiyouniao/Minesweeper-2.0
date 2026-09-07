@@ -1,9 +1,10 @@
 import { oppositeMirror } from '../game/mirror-state.js'
+import { message } from '../i18n.js'
 import { mirrorName } from './mirror-copy.js'
-import { battleText } from './combat-build-copy.js'
-import { spriteImage } from './dungeon-sprites.js'
-import type { Expedition } from '../types/variants.js'
+
 import type { Language } from '../types/localization.js'
+import type { Expedition } from '../types/variants.js'
+import { spriteImage } from './dungeon-sprites.js'
 
 /** Derive a read-only view of the parked room without dispatching a shift or spending AP. */
 export function mirrorPreview(run: Expedition): Expedition | null {
@@ -26,8 +27,8 @@ export function mirrorBoardLabel(language: Language, run: Expedition, active: bo
   if (encounter?.kind !== 'mirror') return ''
   const side = active ? encounter.active : oppositeMirror(encounter.active)
   const purpose = active
-    ? battleText(language, 'Explore here', '当前镜域', '探索中')
-    : battleText(language, 'Compare · shift to play', '对照 · 切换后操作', '比較 · 転移して操作')
+    ? message(language, 'mirror-board.explore-here')
+    : message(language, 'mirror-board.compare-shift-to-play')
   return `${mirrorName(language, side)} · ${purpose}`
 }
 
@@ -46,13 +47,8 @@ export function markMirrorCell(
   cell.classList.add('landmark-cell', 'mirror-seal')
   cell.classList.toggle('mirror-inert', !twin.seal.active)
   const label = twin.seal.active
-    ? battleText(
-        language,
-        'Seal · protects the opposite twin',
-        '封印 · 保护另一侧的双子',
-        '封印 · 反対側の双子を防護',
-      )
-    : battleText(language, 'Seal disabled', '封印已关闭', '封印停止')
+    ? message(language, 'mirror-board.seal-protects-the-opposite-twin')
+    : message(language, 'mirror-board.seal-disabled')
   const revealed = run.game.cells[index]?.visibility === 'revealed'
   cell.innerHTML = `${spriteImage('mirror-seal')}${revealed ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
   cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)

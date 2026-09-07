@@ -1,3 +1,4 @@
+import { message } from '../i18n.js'
 import { titleTemplate } from './title-template.js'
 import type { BoardInputMode } from '../types/ui.js'
 import { boardControlsTemplate } from './board-controls.js'
@@ -123,7 +124,7 @@ export function expeditionTemplate(
       ${run.phase === 'boss' ? tacticalControlsTemplate(language, run) : ''}
       ${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}
       ${professionSkillTemplate(language, run)}${boardControlsTemplate(language, inputMode, 'data-control')}</div>
-      ${run.probeReport ? `<p class="probe-result" role="status">${t.probeResult.replace('{count}', String(run.probeReport.mines))}</p>` : ''}
+      ${run.probeReport ? `<p class="probe-result" role="status">${message(language, 'variant-copy.probe-found-count-mines', { count: run.probeReport.mines })}</p>` : ''}
       <button class="secondary-button retreat-button" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button></div>`
           : ''
       }
