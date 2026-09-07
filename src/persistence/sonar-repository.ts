@@ -1,5 +1,5 @@
 import { PRESETS } from '../game/engine.js'
-import { SONAR_ACTION_LIMIT, SONAR_CHARGES } from '../game/sonar.js'
+import { SONAR_ACTION_LIMIT } from '../game/sonar.js'
 import { RANKED_DIFFICULTIES } from '../game/difficulty.js'
 import type { RankedDifficulty } from '../types/game.js'
 import type { JsonValue } from '../types/json.js'
@@ -38,7 +38,7 @@ function decodeRecords(values: readonly JsonValue[] | null): readonly SonarRecor
       !Number.isFinite(Date.parse(date)) ||
       !difficulty ||
       !integer(moves, 1, SONAR_ACTION_LIMIT) ||
-      !integer(scans, 0, SONAR_CHARGES) ||
+      !integer(scans, 0, 480) ||
       records.some((record) => record.id === id)
     )
       continue
@@ -115,7 +115,7 @@ export class SonarRepository {
     const settled = reader.value('settled')
     const values = reader.array('actions')
     if (
-      reader.number('version') !== 1 ||
+      reader.number('version') !== 2 ||
       !difficulty ||
       !integer(seed, 0, 0xffffffff) ||
       typeof settled !== 'boolean' ||
@@ -132,7 +132,7 @@ export class SonarRepository {
       actions.push(action)
     }
     this.recovered = false
-    return { version: 1, difficulty, seed, actions, settled, records: this.records }
+    return { version: 2, difficulty, seed, actions, settled, records: this.records }
   }
 
   /** Progress and newly earned records become durable in one write. */

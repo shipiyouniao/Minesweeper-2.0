@@ -5,6 +5,8 @@ import {
   compareSonar,
   createSonar,
   sonarRegion,
+  sonarCharges,
+  sonarObscured,
   SONAR_ACTION_LIMIT,
 } from '../src/game/sonar.js'
 import { SonarSession } from '../src/application/sonar-session.js'
@@ -34,7 +36,14 @@ test('Sonar clips each scan by coordinate geometry and reports fixed physical to
         )
         const scanned = actSonar(state, { type: 'scan', index: center })
         assert.equal(scanned.readings[0]?.mines, expected.filter((cell) => cell.mine).length)
-        assert.equal(scanned.game, state.game, 'measuring must not mutate any cells')
+        assert.deepEqual(
+          scanned.game.cells.filter((_, index) => index !== center),
+          state.game.cells.filter((_, index) => index !== center),
+        )
+        assert.equal(
+          scanned.game.cells[center]?.visibility,
+          state.game.cells[center]?.mine ? 'flagged' : 'revealed',
+        )
         assert.equal(scanned.moves, state.moves)
       }
     }
@@ -64,8 +73,7 @@ test('wrong flags and safe notes do not affect scan truth or become certified by
   state = actSonar(state, { type: 'flag', index: safe })
   state = actSonar(state, { type: 'mark-safe', index: mine })
   const scanned = actSonar(state, { type: 'scan', index: safe })
-  assert.equal(scanned.game, state.game)
-  assert.equal(scanned.game.cells[safe]?.visibility, 'flagged')
+  assert.equal(scanned.game.cells[safe]?.visibility, 'revealed')
   assert.ok(scanned.game.safeMarks.includes(mine))
   assert.equal(
     scanned.readings[0]?.mines,
@@ -160,7 +168,7 @@ test('malformed and impossible journals reset once while retaining separately va
     scans: 2,
   }
   const base: SonarSave = {
-    version: 1,
+    version: 2,
     difficulty: 'easy',
     seed: 31,
     actions: [],
@@ -234,7 +242,7 @@ test('unavailable browser storage still permits in-memory scan and board play', 
 test('bounded journals stop accepting input but retain a working restart', () => {
   const storage = new MemoryStorage()
   const save: SonarSave = {
-    version: 1,
+    version: 2,
     difficulty: 'easy',
     seed: 31,
     settled: false,
@@ -248,4 +256,69 @@ test('bounded journals stop accepting input but retain a working restart', () =>
   session.restart()
   assert.equal(session.atMoveLimit, false)
   assert.equal(session.dispatch({ type: 'reveal', index: 0 }), true)
+})
+
+test('obscured clues require a scan and cannot be probed through chord acceptance', () => {
+  const run = actSonar(createSonar(31), { type: 'reveal', index: 0 })
+  const index = run.game.cells.findIndex((_, index) => sonarObscured(run, index))
+  assert.ok(index >= 0)
+  assert.equal(actSonar(run, { type: 'chord', index }), run)
+  assert.equal(actSonar(run, { type: 'reveal', index }), run)
+  const scanned = actSonar(run, { type: 'scan', index })
+  assert.equal(sonarObscured(scanned, index), false)
+  assert.deepEqual(scanned.game, run.game)
+  assert.ok(
+    sonarRegion(run.game.config, index)
+      .filter((cell) => cell !== index)
+      .every((cell) => sonarObscured(scanned, cell) === sonarObscured(run, cell)),
+  )
+})
+
+test('four new safe excavation actions recharge one pulse; floods, flags and repeats cannot farm credits', () => {
+  let run = actSonar(createSonar(31, 'expert'), { type: 'reveal', index: 0 })
+  assert.equal(run.excavations, 1)
+  assert.equal(sonarCharges(run), 3)
+  assert.equal(actSonar(run, { type: 'reveal', index: 0 }), run)
+  const hidden = run.game.cells.findIndex((cell) => cell.visibility === 'hidden')
+  const marked = actSonar(run, { type: 'flag', index: hidden })
+  assert.equal(marked.excavations, 1)
+  for (let count = 0; count < 3; count++) {
+    const index = run.game.cells.findIndex((cell) => !cell.mine && cell.visibility === 'hidden')
+    run = actSonar(run, { type: 'reveal', index })
+  }
+  assert.equal(run.excavations, 4)
+  assert.equal(sonarCharges(run), 4)
+  for (const index of [0, 1, 2, 3]) run = actSonar(run, { type: 'scan', index })
+  assert.equal(run.readings.length, 4)
+  assert.equal(sonarCharges(run), 0)
+  assert.equal(actSonar(run, { type: 'scan', index: 4 }), run)
+})
+
+test('scanning confirms mines without damage, locks gold flags and never recharges itself', () => {
+  const state = actSonar(createSonar(31), { type: 'reveal', index: 0 })
+  const index = state.game.cells.findIndex((cell) => cell.mine)
+  const scanned = actSonar(state, { type: 'scan', index })
+  assert.equal(scanned.game.phase, 'playing')
+  assert.equal(scanned.game.exploded, null)
+  assert.equal(scanned.game.cells[index]?.visibility, 'flagged')
+  assert.equal(scanned.excavations, state.excavations)
+  for (const type of ['flag', 'mark-safe', 'reveal'] as const)
+    assert.equal(actSonar(scanned, { type, index }), scanned)
+})
+
+test('a center scan opens only one square and can finish the last safe square', () => {
+  const state = actSonar(createSonar(31), { type: 'reveal', index: 0 })
+  const index = state.game.cells.findIndex((cell) => !cell.mine && cell.visibility === 'hidden')
+  const almost = {
+    ...state,
+    game: {
+      ...state.game,
+      cells: state.game.cells.map((cell, i) =>
+        !cell.mine && i !== index ? { ...cell, visibility: 'revealed' as const } : cell,
+      ),
+    },
+  }
+  const won = actSonar(almost, { type: 'scan', index })
+  assert.equal(won.game.phase, 'won')
+  assert.equal(won.excavations, almost.excavations)
 })

@@ -1,6 +1,6 @@
 import { SonarSession } from '../application/sonar-session.js'
 import { cueForMove } from '../audio/cues.js'
-import { SONAR_CHARGES } from '../game/sonar.js'
+import { sonarCharges } from '../game/sonar.js'
 import { translations } from '../i18n.js'
 import type { SonarRepository } from '../persistence/sonar-repository.js'
 import type { InteractionCue, SoundEffects } from '../types/audio.js'
@@ -13,7 +13,8 @@ import { secondaryBoardAction } from './board-actions.js'
 import { nextBoardMode } from './board-controls.js'
 import { SonarInput } from './sonar-input.js'
 import { sonarCopy } from './sonar-copy.js'
-import { sonarHelpTemplate, sonarRecordsTemplate } from './sonar-templates.js'
+import { startTutorial } from './tutorial-player.js'
+import { sonarRecordsTemplate } from './sonar-templates.js'
 import { SonarView } from './sonar-view.js'
 
 /** Coordinate Sonar's puzzle, presentation and device adapters through explicit ports. */
@@ -145,7 +146,10 @@ export class SonarApp implements SonarInputActions {
         this.view.toggleZoom()
         return
       case 'help':
-        this.showDialog(sonarHelpTemplate(this.language))
+        if (this.blocked) return
+        this.showDialog('')
+        const dialog = this.root.querySelector<HTMLDialogElement>('dialog')
+        if (dialog) startTutorial(dialog, 'sonar', this.language)
         return
       case 'records':
         this.recordDifficulty = this.session.state.difficulty
@@ -254,8 +258,7 @@ export class SonarApp implements SonarInputActions {
       return
     }
     if (!this.session.dispatch({ type: 'scan', index })) {
-      this.message =
-        state.readings.length >= SONAR_CHARGES ? sonarCopy(this.language).exhausted : ''
+      this.message = sonarCharges(state) <= 0 ? sonarCopy(this.language).exhausted : ''
       this.sounds.play('blocked')
       this.render()
       return
@@ -268,6 +271,7 @@ export class SonarApp implements SonarInputActions {
     this.render()
     this.view.animateScan(index)
     this.sounds.play('sonar-pulse')
+    this.showResult()
   }
 
   /** Ordinary operations use the shared engine and its actual public outcome sounds. */
@@ -287,6 +291,12 @@ export class SonarApp implements SonarInputActions {
           : 'unflag'
         : cueForMove(before, after, index)
     if (cue) this.sounds.play(cue)
+    this.showResult()
+  }
+
+  /** Both a direct excavation and a paid scan can finish the board. */
+  private showResult(): void {
+    const after = this.session.state.game
     if (after.phase === 'won' || after.phase === 'lost') {
       const t = translations[this.language]
       const s = sonarCopy(this.language)

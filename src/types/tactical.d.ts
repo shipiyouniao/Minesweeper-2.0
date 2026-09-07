@@ -117,6 +117,7 @@ export type TacticalReason =
   | 'nests'
   | 'mirror-seal'
   | 'reflection'
+  | 'clock-seal'
   | 'magnet-armor'
   | 'magnet-route'
   | 'magnet-busy'

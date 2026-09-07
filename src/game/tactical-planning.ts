@@ -97,7 +97,9 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
     }
     case 'attack':
       cost = 2
-      if (encounter.kind === 'magnetic' && encounter.exposedUntil < encounter.turn)
+      if (encounter.kind === 'clock' && !encounter.hourglasses.some((glass) => glass.used))
+        reason = 'clock-seal'
+      else if (encounter.kind === 'magnetic' && encounter.exposedUntil < encounter.turn)
         reason = 'magnet-armor'
       else if (encounter.kind === 'mirror' && encounter[encounter.active].health === 0)
         reason = 'used'

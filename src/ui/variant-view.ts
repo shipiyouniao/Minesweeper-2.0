@@ -688,6 +688,7 @@ export class VariantView {
       const player = document.createElement('div')
       player.className = 'dungeon-player'
       const clue = run.game.cells[run.player]?.adjacent ?? 0
+      player.dataset['number'] = String(clue)
       player.innerHTML = `${spriteImage(professionSprite(run.departure.profession))}${clue ? `<span class="landmark-clue">${clue}</span>` : ''}`
       player.style.width = `${current.offsetWidth}px`
       player.style.height = `${current.offsetHeight}px`

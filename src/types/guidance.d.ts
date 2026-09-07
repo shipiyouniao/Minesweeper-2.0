@@ -33,3 +33,9 @@ export interface PrologueScript {
   readonly prop: DungeonSprite
   readonly beats: readonly PrologueBeat[]
 }
+
+export interface BattleGuideStep {
+  readonly text: string
+  readonly prop: DungeonSprite
+  readonly symbol: string
+}

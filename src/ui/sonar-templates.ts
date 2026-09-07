@@ -32,7 +32,7 @@ export function sonarTemplate(language: Language, state: Sonar): string {
     <p class="sonar-storage" role="status"></p>${sonarDifficulties(language, state.difficulty)}
     <div class="sonar-layout"><section class="sonar-board-panel"><div class="sonar-board-heading"><span>${state.game.config.width} × ${state.game.config.height} · ${state.game.config.mines} ${s.mines}</span><button class="icon-button" data-control="zoom" aria-label="${s.zoom}">${icon('globe')}</button></div><div class="sonar-play-area"><div class="board-viewport"><div class="sonar-grid-wrap"><div class="board" role="grid" aria-label="${s.title}"></div><svg class="sonar-overlay" aria-hidden="true"></svg><div class="sonar-pulse" aria-hidden="true"></div></div></div><div class="sonar-pause" hidden><p>${t.paused}</p><button class="primary-button" data-control="pause">${t.resume}</button></div></div></section>
     <aside class="sonar-sidebar"><section class="sonar-instrument-panel"><div class="sonar-dial" aria-hidden="true">${sonarIcon()}</div><div class="sonar-counters"></div><p class="sonar-status" role="status" aria-live="polite"></p><button class="secondary-button" data-control="new">${icon('reset')} ${t.restart}</button></section><section class="sonar-log-panel"><h2>${s.history}</h2><div class="sonar-log"></div><div class="sonar-comparison"></div></section></aside></div>
-    </main><div class="action-dock sonar-dock"><button class="dock-slot sonar-scan" data-control="scan">${sonarIcon()}<strong>${s.scan}</strong><small><span class="sonar-charge-count">${SONAR_CHARGES}</span> / ${SONAR_CHARGES}</small></button><div class="sonar-mode"></div><p class="sonar-target-hint"></p></div>
+    </main><div class="action-dock sonar-dock"><button class="dock-slot sonar-scan" data-control="scan">${sonarIcon()}<strong>${s.scan}</strong><small><span class="sonar-charge-count">${SONAR_CHARGES}</span></small></button><div class="sonar-mode"></div><p class="sonar-target-hint"></p></div>
     <dialog class="sonar-dialog" aria-labelledby="sonar-dialog-title"><div class="sonar-dialog-content"></div></dialog>`
 }
 
@@ -48,7 +48,7 @@ export function sonarLogTemplate(
   return state.readings
     .map(
       (reading, index) =>
-        `<button class="sonar-reading sonar-color-${index}" data-sonar-reading="${index}" aria-pressed="${selected.includes(index)}"><span class="sonar-badge">${index + 1}</span><span><strong>${reading.mines} <small>${s.mines}</small></strong><small>${t.row} ${Math.floor(reading.center / state.game.config.width) + 1} · ${t.column} ${(reading.center % state.game.config.width) + 1}</small></span>${icon('check')}</button>`,
+        `<button class="sonar-reading sonar-color-${index % 3}" data-sonar-reading="${index}" aria-pressed="${selected.includes(index)}"><span class="sonar-badge">${index + 1}</span><span><strong>${reading.mines} <small>${s.mines}</small></strong><small>${t.row} ${Math.floor(reading.center / state.game.config.width) + 1} · ${t.column} ${(reading.center % state.game.config.width) + 1}</small></span>${icon('check')}</button>`,
     )
     .join('')
 }
@@ -65,13 +65,7 @@ export function sonarComparisonTemplate(
   const right = b === undefined ? undefined : state.readings[b]
   if (!left || !right) return `<p>${s.compareHint}</p>`
   const comparison = compareSonar(state.game.config, left, right)
-  return `<h3>${s.comparison}</h3><div class="sonar-equation"><span class="sonar-badge sonar-color-${a}">${a! + 1}</span><span>−</span><span class="sonar-badge sonar-color-${b}">${b! + 1}</span><span>=</span><strong>${comparison.difference > 0 ? '+' : ''}${comparison.difference}</strong></div><p>${s.difference}</p><small>${s.shared}: ${comparison.common.length} · ${s.exclusive}: ${comparison.leftOnly.length} / ${comparison.rightOnly.length}</small>`
-}
-
-/** Render native-dialog help with a geometric example that never uses the active board's secrets. */
-export function sonarHelpTemplate(language: Language): string {
-  const s = sonarCopy(language)
-  return `<h2 id="sonar-dialog-title" tabindex="-1">${s.help} · ${s.title}</h2><div class="sonar-help-example" aria-hidden="true"><span class="sonar-example-a">① 3</span><span class="sonar-example-b">② 2</span><strong>① − ② = +1</strong></div><div class="sonar-help-steps">${s.helpSteps.map((step, index) => `<section><span class="sonar-badge">${index + 1}</span><div><h3>${step.title}</h3><p>${step.note}</p></div></section>`).join('')}</div><button class="primary-button" data-control="close">${translations[language].close}</button>`
+  return `<h3>${s.comparison}</h3><div class="sonar-equation"><span class="sonar-badge sonar-color-${a! % 3}">${a! + 1}</span><span>−</span><span class="sonar-badge sonar-color-${b! % 3}">${b! + 1}</span><span>=</span><strong>${comparison.difference > 0 ? '+' : ''}${comparison.difference}</strong></div><p>${s.difference}</p><small>${s.shared}: ${comparison.common.length} · ${s.exclusive}: ${comparison.leftOnly.length} / ${comparison.rightOnly.length}</small>`
 }
 
 /** Keep move/scan rankings separate from time rankings and from other modes' result tables. */

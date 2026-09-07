@@ -467,3 +467,32 @@
     display: inline-flex;
   }
 }
+
+.sonar-obscured {
+  color: #879389 !important;
+  font-size: 1.35em;
+  letter-spacing: -0.12em;
+  text-shadow: 1px 0 2px #879389;
+}
+
+.sonar-counters progress {
+  min-width: 0;
+  width: 80px;
+  height: 6px;
+  accent-color: var(--sonar-accent);
+}
+.sonar-log {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.sonar-dock [data-control='scan'] {
+  touch-action: none;
+  user-select: none;
+}
+
+.cell.sonar-confirmed-mine {
+  color: #a2692a;
+  background: #f4e7bf;
+  border-color: #c5a354;
+}

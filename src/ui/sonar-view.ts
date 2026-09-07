@@ -1,4 +1,4 @@
-import { SONAR_CHARGES, sonarRegion } from '../game/sonar.js'
+import { sonarCharges, sonarObscured, sonarRegion } from '../game/sonar.js'
 import { translations } from '../i18n.js'
 import { icon } from '../icons.js'
 import type { InteractionCue } from '../types/audio.js'
@@ -93,13 +93,46 @@ export class SonarView {
     const t = translations[this.language]
     const s = sonarCopy(this.language)
     this.board.render(state.game, paused || this.dialogOpen, t)
+    for (const cell of this.root.querySelectorAll<HTMLElement>('[data-cell]')) {
+      const index = Number(cell.dataset['cell'])
+      const coordinate = `${t.row} ${Math.floor(index / state.game.config.width) + 1}, ${t.column} ${(index % state.game.config.width) + 1}: `
+      const confirmed =
+        state.readings.some((reading) => reading.center === Number(cell.dataset['cell'])) &&
+        state.game.cells[Number(cell.dataset['cell'])]?.mine
+      cell.classList.toggle('sonar-confirmed-mine', Boolean(confirmed))
+      if (confirmed)
+        cell.setAttribute(
+          'aria-label',
+          coordinate +
+            (this.language === 'zh'
+              ? '已确认地雷'
+              : this.language === 'ja'
+                ? '地雷確認済み'
+                : 'Confirmed mine'),
+        )
+      const masked = sonarObscured(state, Number(cell.dataset['cell']))
+      cell.classList.toggle('sonar-obscured', masked)
+      if (masked) {
+        cell.textContent = '≈'
+        cell.removeAttribute('data-number')
+        cell.setAttribute(
+          'aria-label',
+          coordinate +
+            (this.language === 'zh'
+              ? '模糊数字 · 扫描后看清'
+              : this.language === 'ja'
+                ? '不鮮明な数字 · 走査で判読'
+                : 'Obscured clue · scan to clarify'),
+        )
+      }
+    }
     this.element('.board-viewport').classList.toggle('obscured', paused)
     this.element('.sonar-pause').hidden = !paused
     this.element('.sonar-sidebar').inert = paused
     this.element('.sonar-sidebar').classList.toggle('sonar-private', paused)
     this.element('.sonar-storage').textContent = storageMessage
     this.element('.sonar-counters').innerHTML =
-      `<div><span>${s.charges}</span><strong>${SONAR_CHARGES - state.readings.length} / ${SONAR_CHARGES}</strong></div><div><span>${s.moves}</span><strong>${state.moves.toLocaleString(this.language)}</strong></div>`
+      `<div><span>${s.charges}</span><strong>${sonarCharges(state)}</strong></div><div><span>${this.language === 'zh' ? '充能' : this.language === 'ja' ? '充填' : 'Recharge'}</span><progress max="4" value="${state.excavations % 4}" aria-label="${this.language === 'zh' ? '安全挖掘充能' : 'Recharge'}"></progress><strong>${state.excavations % 4} / 4</strong></div><div><span>${s.moves}</span><strong>${state.moves.toLocaleString(this.language)}</strong></div>`
     this.element('.sonar-log').innerHTML = sonarLogTemplate(state, selected, this.language)
     this.element('.sonar-comparison').innerHTML = sonarComparisonTemplate(
       state,
@@ -113,7 +146,7 @@ export class SonarView {
       'data-control',
     )
     if (mode === 'reveal') this.element('.mode-cycle').setAttribute('title', s.revealHint)
-    this.element('.sonar-charge-count').textContent = String(SONAR_CHARGES - state.readings.length)
+    this.element('.sonar-charge-count').textContent = String(sonarCharges(state))
     const scan = this.element<HTMLButtonElement>('[data-control="scan"]')
     // At zero charges targeting still recalls previous centers, but never reveals a new reading.
     scan.disabled = paused || state.game.phase !== 'playing'
@@ -235,7 +268,7 @@ export class SonarView {
     for (const index of this.selected) {
       const reading = this.state.readings[index]
       if (reading)
-        fragments.push(this.regionShape(reading.center, `sonar-color-${index}`, index + 1))
+        fragments.push(this.regionShape(reading.center, `sonar-color-${index % 3}`, index + 1))
     }
     if (this.target !== null) fragments.push(this.regionShape(this.target, 'sonar-preview', null))
     overlay.innerHTML = fragments.join('')

@@ -1,5 +1,5 @@
 import { sonarDifficulty } from '../persistence/sonar-repository.js'
-import type { SonarCommand, SonarHold, SonarInputActions } from '../types/sonar-ui.js'
+import type { SonarCommand, SonarDrag, SonarHold, SonarInputActions } from '../types/sonar-ui.js'
 import { BoardRightClick } from './board-right-click.js'
 import { parseNavigation } from './input-parser.js'
 
@@ -31,6 +31,8 @@ export class SonarInput {
   private hold: SonarHold | null = null
   private timer: number | undefined
   private suppressUntil = 0
+  private drag: SonarDrag | null = null
+  private dragSuppressUntil = 0
 
   /** Bind delegated controls once and release every listener on mode disposal. */
   constructor(root: HTMLElement, actions: SonarInputActions) {
@@ -64,6 +66,11 @@ export class SonarInput {
 
   /** Cancel holds without preventing a native scroll; suppress their delayed synthetic click. */
   readonly cancelGesture = (): void => {
+    if (this.drag?.moved) {
+      this.dragSuppressUntil = performance.now() + 700
+      this.actions.cancelTarget()
+    }
+    this.drag = null
     clearTimeout(this.timer)
     this.timer = undefined
     if (this.hold) {
@@ -83,7 +90,7 @@ export class SonarInput {
 
   /** Route known buttons; touch cell activations are handled exactly once on pointer release. */
   private readonly click = (event: MouseEvent): void => {
-    if (!(event.target instanceof Element)) return
+    if (performance.now() < this.dragSuppressUntil || !(event.target instanceof Element)) return
     const button = event.target.closest<HTMLButtonElement>('button')
     if (!button) return
     this.actions.unlock()
@@ -98,7 +105,7 @@ export class SonarInput {
     const reading = button.dataset['sonarReading']
     if (difficulty) this.actions.command({ type: 'difficulty', value: difficulty })
     else if (record) this.actions.command({ type: 'record-difficulty', value: record })
-    else if (reading !== undefined && /^[0-2]$/.test(reading))
+    else if (reading !== undefined && /^\d{1,3}$/.test(reading))
       this.actions.command({ type: 'reading', value: Number(reading) })
     else {
       const command = sonarCommand(button.dataset['control'])
@@ -172,6 +179,21 @@ export class SonarInput {
     this.cancelGesture()
     this.hold = null
     this.suppressUntil = 0
+    const instrument =
+      event.target instanceof Element
+        ? event.target.closest<HTMLButtonElement>('[data-control="scan"]')
+        : null
+    if (
+      instrument &&
+      !instrument.disabled &&
+      event.isPrimary &&
+      event.button === 0 &&
+      !this.actions.blocked
+    ) {
+      this.drag = { pointer: event.pointerId, x: event.clientX, y: event.clientY, moved: false }
+      instrument.setPointerCapture(event.pointerId)
+      return
+    }
     if (
       !event.isPrimary ||
       event.button !== 0 ||
@@ -202,6 +224,14 @@ export class SonarInput {
 
   /** A moved finger cancels even if it later returns to the original square. */
   private readonly move = (event: PointerEvent): void => {
+    if (this.drag?.pointer === event.pointerId) {
+      if (Math.hypot(event.clientX - this.drag.x, event.clientY - this.drag.y) > 6) {
+        this.drag.moved = true
+        if (!this.actions.targeting) this.actions.command({ type: 'scan' })
+        this.actions.preview(this.cellAt(event.clientX, event.clientY))
+      }
+      return
+    }
     if (
       this.hold?.pointer === event.pointerId &&
       Math.hypot(event.clientX - this.hold.x, event.clientY - this.hold.y) > 10
@@ -211,6 +241,17 @@ export class SonarInput {
 
   /** A normal tap or aimed hold activates its original square; scrolling never consumes a pulse. */
   private readonly up = (event: PointerEvent): void => {
+    if (this.drag?.pointer === event.pointerId) {
+      const moved = this.drag.moved
+      this.drag = null
+      if (!moved) return
+      this.dragSuppressUntil = performance.now() + 700
+      const index = this.cellAt(event.clientX, event.clientY)
+      if (index !== null && !this.actions.blocked && this.actions.targeting)
+        this.actions.play(index)
+      else this.actions.cancelTarget()
+      return
+    }
     const hold = this.hold
     if (!hold || hold.pointer !== event.pointerId) return
     clearTimeout(this.timer)
@@ -238,6 +279,12 @@ export class SonarInput {
   private readonly suspend = (): void => {
     this.cancelGesture()
     this.actions.suspend()
+  }
+
+  /** Hit-test the board beneath the captured instrument pointer. */
+  private cellAt(x: number, y: number): number | null {
+    const cell = this.cell(document.elementFromPoint(x, y))
+    return cell ? Number(cell.dataset['cell']) : null
   }
 
   /** Resolve nested icon targets only inside this mounted board. */

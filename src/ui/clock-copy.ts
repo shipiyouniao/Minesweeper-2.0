@@ -33,8 +33,14 @@ export function clockSpellCopy(language: Language, spell: ClockSpell, turn: numb
 /** Summarize remaining hourglasses and the active casting or recovery phase. */
 export function clockStatus(language: Language, encounter: ClockEncounter): string {
   const count = encounter.hourglasses.filter((glass) => !glass.used).length
-  const phase =
-    encounter.recoveryUntil >= encounter.turn
+  const phase = !encounter.hourglasses.some((glass) => glass.used)
+    ? battleText(
+        language,
+        'Barrier · return a spell first',
+        '护罩中 · 先用沙漏转送法术',
+        '障壁 · 先に術を返送',
+      )
+    : encounter.recoveryUntil >= encounter.turn
       ? battleText(
           language,
           'Recovery · no new spell',
@@ -51,9 +57,9 @@ export function clockStatus(language: Language, encounter: ClockEncounter): stri
 export function clockCopy(language: Language, base: TacticalMessages): TacticalMessages {
   const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
   const hint = t(
-    'Leave the frozen marks before their deadlines. Strike, retreat and let your echo follow up; use a revealed hourglass to return the earliest spell.',
-    '按倒计时离开已锁定的刻印。攻击后撤退，残影补刀；靠近已揭开的沙漏，转送最早触发的法术。',
-    '期限前に固定された刻印から退避。攻撃後に退き残像で追撃。開いた砂時計に接近し最も早い術を返送。',
+    'Return a spell with an hourglass to break the barrier. Then strike, retreat and let your echo follow up.',
+    '先靠近沙漏转送法术，解除首领护罩。再攻击、撤离，让残影补刀。',
+    '砂時計で術を返送し障壁を解除。攻撃後に退避し、残像で追撃。',
   )
   return {
     ...base,
@@ -73,14 +79,14 @@ export function clockCopy(language: Language, base: TacticalMessages): TacticalM
         '刻印は2回終了後に3ダメージ。半分以下では3回終了後の直線攻撃を追加。重複は加算、予告は追尾しない。既知の道で回避不能な新攻撃は縮小・省略。',
       ),
       t(
-        'Each turn starts with a walkable echo at your feet. It repeats half the first successful strike damage (rounded down, minimum 1) at turn end, even after you move; no extra item or skill triggers. Incoming spells resolve first: a fatal hit prevents your follow-up.',
-        '每回合开始在脚下留下可通行残影，回合结束重放首次有效攻击的一半伤害（向下取整，至少 1），移动后仍可补刀，不额外触发道具或技能。敌方法术先结算，玩家死亡则取消补刀。',
-        '毎ターン足元に通行可能な残像。最初の有効攻撃の半分（切捨て、最低1）を終了時に追撃。移動後も有効、道具・スキルの追加発動なし。敵術が先に解決し、死亡時は追撃中止。',
+        'Each turn starts with a walkable echo at your feet. Move away from it to repeat the full first successful strike damage at turn end; no extra item or skill triggers. Incoming spells resolve first: a fatal hit prevents your follow-up.',
+        '每回合开始在脚下留下可通行残影，离开残影所在格后，回合结束追加首次有效攻击的等额伤害，不额外触发道具或技能。敌方法术先结算，玩家死亡则取消补刀。',
+        '毎ターン足元に通行可能な残像。残像のマスから移動すると、最初の有効攻撃と同じダメージで終了時に追撃、道具・スキルの追加発動なし。敵術が先に解決し、死亡時は追撃中止。',
       ),
       t(
-        'An adjacent or occupied revealed hourglass returns the earliest hostile spell for 1 AP, once per glass. It deals 6 boss damage and prevents new casting during the following turn. Already announced spells keep their deadlines. Glasses are optional; the boss has no invulnerable phase. Mines and clues never rewind.',
-        '相邻或脚下已揭开的沙漏可花 1 点转送最早触发的敌方法术，每座限用一次。命中造成 6 点首领伤害，并使下一回合不施放新法术；其他已预告法术照常结算。沙漏并非必需，首领始终可攻击。地雷和数字不会回溯。',
-        '隣接または足元の開いた砂時計で最も早い敵術を1行動力で返送。各1回、ボスに6ダメージ、次ターン新規詠唱停止。既存予告は通常通り解決。砂時計は任意、ボスは常に攻撃可能。地雷と数字は巻き戻らない。',
+        'An adjacent or occupied revealed hourglass returns the earliest hostile spell for 1 AP, once per glass. It deals 6 boss damage and prevents new casting during the following turn. Already announced spells keep their deadlines. The first return permanently breaks the barrier; attacks are blocked until then. Mines and clues never rewind.',
+        '相邻或脚下已揭开的沙漏可花 1 点转送最早触发的敌方法术，每座限用一次。命中造成 6 点首领伤害，并使下一回合不施放新法术；其他已预告法术照常结算。首次转送会永久解除护罩，此前无法攻击首领。地雷和数字不会回溯。',
+        '隣接または足元の開いた砂時計で最も早い敵術を1行動力で返送。各1回、ボスに6ダメージ、次ターン新規詠唱停止。既存予告は通常通り解決。最初の返送で障壁を永久解除。それまでは攻撃不可。地雷と数字は巻き戻らない。',
       ),
     ],
   }

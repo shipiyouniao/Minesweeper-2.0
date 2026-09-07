@@ -55,6 +55,8 @@ async function seed(value, language = 'zh') {
   )
   await page.reload()
   await page.locator('.clock-boss').waitFor()
+  const skip = page.locator('[data-scene="skip"]')
+  if (await skip.isVisible()) await skip.click()
   await page.waitForFunction(() =>
     [...document.images].every((image) => image.complete && image.naturalWidth > 0),
   )
@@ -68,7 +70,7 @@ try {
     assert.equal(await page.locator('.clock-hourglass .landmark-clue').count(), 0)
     assert.ok((await page.locator('.clock-countdowns').count()) > 0)
     await page.locator('[data-control="help"]').click()
-    assert.match(await page.locator('dialog[open]').innerText(), /6/)
+    assert.equal(await page.locator('dialog[open] .boss-picture-steps li').count(), 3)
     await page.keyboard.press('Escape')
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: 1100 })
@@ -82,6 +84,8 @@ try {
     assert.equal(await page.locator('.clock-countdowns b').first().innerText(), '1')
     await page.reload()
     await page.locator('.clock-boss').waitFor()
+    const skip = page.locator('[data-scene="skip"]')
+    if (await skip.isVisible()) await skip.click()
     assert.equal(await page.locator('.clock-countdowns b').first().innerText(), '1')
   }
   await seed(glass.save)
@@ -96,14 +100,54 @@ try {
   await page.locator('.clock-used').waitFor()
   await seed(strike.save)
   await page.locator('[data-control="attack"]').click()
-  assert.match(await page.locator('.clock-queue strong').innerText(), /2/)
+  assert.match(await page.locator('.clock-queue strong').innerText(), /5/)
+  assert.ok(await page.locator('.echo-damage').count())
+  const attacked = actExpedition(strike.run, { type: 'attack' })
+  const landing = attacked.game.cells.findIndex(
+    (_, index) =>
+      index !== attacked.player && tacticalPlan(attacked, { type: 'move', index }).allowed,
+  )
+  if (landing >= 0) {
+    await page.locator(`[data-cell="${landing}"]`).click()
+    await page.waitForFunction(
+      (index) =>
+        document.querySelector(`[data-cell="${index}"]`)?.classList.contains('dungeon-player'),
+      landing,
+    )
+    await page.waitForTimeout(500)
+  } else assert.notEqual(attacked.player, attacked.encounter.echo.index)
+  const clues = await page.locator('.landmark-clue').evaluateAll((elements) =>
+    elements
+      .filter((el) => Number(el.textContent) > 0)
+      .map((el) => ({
+        color: getComputedStyle(el).color,
+        expected: getComputedStyle(el.parentElement).getPropertyValue('--clue-color').trim(),
+        align: getComputedStyle(el).alignItems,
+        justify: getComputedStyle(el).justifyContent,
+      })),
+  )
+  assert.ok(clues.length)
+  for (const clue of clues) {
+    assert.equal(clue.align, 'center')
+    assert.equal(clue.justify, 'center')
+    assert.ok(clue.expected)
+    const rgb = clue.expected
+      .slice(1)
+      .match(/../g)
+      .map((part) => parseInt(part, 16))
+    assert.equal(clue.color, `rgb(${rgb.join(', ')})`)
+  }
+  await page.screenshot({ path: '.native/clock-ui/clock-echo-ready.png', fullPage: true })
   await page.locator('[data-control="end-turn"]').click()
-  assert.match(await page.locator('.clock-queue').innerText(), /残影 2/)
+  assert.match(await page.locator('.clock-queue').innerText(), /残影 5/)
+  assert.ok(await page.locator('.echo-hit').count())
   assert.ok((await page.locator('.clock-impact').count()) > 0)
   await page.locator('[data-control="brace"]').click()
   assert.equal(await page.locator('.clock-impact').count(), 0)
   await page.reload()
   await page.locator('.clock-boss').waitFor()
+  const skip = page.locator('[data-scene="skip"]')
+  if (await skip.isVisible()) await skip.click()
   assert.equal(await page.locator('.clock-impact').count(), 0)
   await seed(dual)
   assert.ok((await page.locator('.clock-queue li').count()) >= 2)

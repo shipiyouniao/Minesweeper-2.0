@@ -99,7 +99,8 @@ export function advanceClock(run: ClockExpedition): Expedition {
   const reflectedDamage = alive
     ? Math.min(e.health, due.filter((spell) => spell.redirected).length * 6)
     : 0
-  const echoDamage = alive ? Math.min(e.health - reflectedDamage, e.echo.damage) : 0
+  const echoDamage =
+    alive && run.player !== e.echo.index ? Math.min(e.health - reflectedDamage, e.echo.damage) : 0
   const health = e.health - reflectedDamage - echoDamage
   const next: ClockExpedition = {
     ...damaged,

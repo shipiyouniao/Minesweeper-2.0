@@ -12,6 +12,7 @@ export interface Sonar {
   readonly game: Game
   readonly readings: readonly SonarReading[]
   readonly moves: number
+  readonly excavations: number
 }
 
 /** Scanning is an information action; ordinary board commands keep their existing meanings. */
@@ -36,7 +37,7 @@ export interface SonarRecord {
 
 /** Progress and exactly-once settlement share a single versioned storage write. */
 export interface SonarSave {
-  readonly version: 1
+  readonly version: 2
   readonly difficulty: RankedDifficulty
   readonly seed: number
   readonly actions: readonly SonarAction[]

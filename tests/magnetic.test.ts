@@ -324,13 +324,20 @@ test('public forecasts and lure plans are unchanged when covered truth is poison
   assert.deepEqual(next.encounter.forecast, run.encounter.forecast)
 })
 
-test('brace and calibrated anchors prevent displacement and leave mine layouts unchanged', () => {
+test('brace reduces displacement and calibrated anchors prevent it and leave mine layouts unchanged', () => {
   const run = arena()
   const braced = actExpedition(run, { type: 'brace' })
   const ended = actExpedition(braced, { type: 'end-turn' })
-  assert.equal(ended.player, run.player)
+  assert.ok(braced.encounter?.kind === 'magnetic')
+  const projection = magneticProjection({ ...braced, encounter: braced.encounter })
+  assert.equal(projection.anchored, false)
+  assert.equal(projection.path.length, 2)
+  assert.equal(ended.player, projection.path.at(-1))
   assert.equal(ended.health, run.health)
-  assert.deepEqual(ended.game, run.game)
+  assert.deepEqual(
+    ended.game.cells.map((cell) => cell.mine),
+    run.game.cells.map((cell) => cell.mine),
+  )
   assert.equal(ended.encounter?.turn, 2)
   assert.equal(ended.encounter?.points, 3)
   const known = opened(run)

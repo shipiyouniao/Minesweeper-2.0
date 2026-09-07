@@ -17,6 +17,7 @@ export function markClockCell(
   if (e?.kind !== 'clock') return
   if (index === e.boss) {
     cell.classList.add('clock-boss')
+    cell.classList.toggle('clock-sealed', !e.hourglasses.some((glass) => glass.used))
     cell.classList.toggle('clock-recovery', e.recoveryUntil >= e.turn)
     cell.classList.toggle('clock-defeated', e.health === 0)
   }
@@ -46,7 +47,7 @@ export function markClockCell(
   if (index === e.echo.index) {
     cell.insertAdjacentHTML(
       'beforeend',
-      `<span class="clock-echo" aria-hidden="true">${spriteImage(professionSprite(run.departure.profession))}</span>`,
+      `<span class="clock-echo ${e.echo.damage > 0 ? 'echo-charged' : ''}" aria-hidden="true">${spriteImage(professionSprite(run.departure.profession))}${e.echo.damage ? `<b class="echo-damage">${e.echo.damage}</b>` : ''}</span>`,
     )
     const label = battleText(
       language,
@@ -71,8 +72,14 @@ export function markClockCell(
     animate &&
     (e.resolution?.cells.includes(index) ||
       (e.resolution?.echoDamage && (index === e.resolution.echoIndex || index === e.boss)))
-  )
+  ) {
     cell.classList.add('clock-impact')
+    if (index === e.boss && e.resolution?.echoDamage)
+      cell.insertAdjacentHTML(
+        'beforeend',
+        `<span class="echo-hit" aria-hidden="true">−${e.resolution.echoDamage}</span>`,
+      )
+  }
 }
 
 /** The queue exposes IDs and deadlines, including future spells absent from current danger cells. */
@@ -81,9 +88,9 @@ export function clockQueue(language: Language, run: Expedition): string {
   if (e?.kind !== 'clock') return ''
   const echo = battleText(
     language,
-    `Echo follow-up: ${e.echo.damage}`,
-    `残影补刀：${e.echo.damage}`,
-    `残像の追撃：${e.echo.damage}`,
+    `Echo: ${e.echo.damage} · ${run.player === e.echo.index ? 'Move away to activate' : 'Ready to strike'}`,
+    `残影追击 ${e.echo.damage} · ${run.player === e.echo.index ? '离开残影格后触发' : '已就绪'}`,
+    `残像の追撃：${e.echo.damage} · ${run.player === e.echo.index ? '移動して発動' : '準備完了'}`,
   )
   const result =
     e.resolution && (e.resolution.echoDamage || e.resolution.reflectedDamage)

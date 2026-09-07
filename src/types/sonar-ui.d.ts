@@ -92,3 +92,11 @@ export interface SonarMessages {
   readonly target: string
   readonly helpSteps: readonly HelpStep[]
 }
+
+/** Pointer capture tracks an instrument drag separately from board touch holds. */
+export interface SonarDrag {
+  readonly pointer: number
+  readonly x: number
+  readonly y: number
+  moved: boolean
+}

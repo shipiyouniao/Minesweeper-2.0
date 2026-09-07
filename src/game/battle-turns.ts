@@ -160,7 +160,7 @@ export function actBattle(
           ? {
               echo: {
                 ...encounter.echo,
-                damage: Math.max(1, Math.floor((encounter.health - health) / 2)),
+                damage: encounter.health - health,
               },
             }
           : {}),

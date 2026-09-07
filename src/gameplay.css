@@ -849,3 +849,23 @@ body {
   line-height: 1.6;
   margin: 10px 0 0;
 }
+
+.variant-board-panel .landmark-clue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  text-align: center;
+  color: var(--clue-color, #555b65);
+  font-variant-numeric: tabular-nums;
+}
+
+.variant-board-panel .landmark-clue {
+  width: max(16px, calc(var(--cell) * 0.4));
+  height: max(16px, calc(var(--cell) * 0.4));
+  border-radius: 50%;
+}
+.variant-board-panel .landmark-clue:empty {
+  display: none;
+}

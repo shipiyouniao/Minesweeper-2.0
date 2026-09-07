@@ -56,6 +56,33 @@ export function tutorialLesson(mode: Ruleset, language: Language): TutorialDefin
     'a',
     'flag',
   )
+  if (mode === 'sonar')
+    return {
+      mode,
+      title: t('Sonar · read the echoes', '声呐 · 听清雷区', 'ソナー · 反響を読む'),
+      steps: [
+        first,
+        {
+          title: t('Clear the blur', '用声呐看清数字', 'ソナーで数字を判読'),
+          text: t(
+            'Most numbered squares are obscured. Select Sonar, then the glowing square: only its center opens (mines become gold flags); the echo counts every mine in the 3 × 3 area.',
+            '多数数字被模糊标记遮住。先点声呐，再点发光格：中心格会直接揭开；若是地雷则变成金旗，不会引爆，同时得到周围 3 × 3 的总雷数。',
+            '数字の多くは不鮮明。ソナーを選び光るマスへ。中心だけ開き、地雷は金の旗になり、3 × 3 内の地雷数も分かります。',
+          ),
+          action: 'scan',
+          index: 3,
+          side: 'a',
+        },
+        number,
+        flagMode,
+        flag,
+      ],
+      ending: t(
+        'Start with 3 pulses. Four successful safe excavation actions earn another; opening a blank area counts once. Repeat clicks and flags earn nothing. Revisit scans freely.',
+        '开局有 3 次扫描。每安全挖开 4 次补 1 次，空白连开只算一次，重复点击和插旗不算。已扫描的读数随时可看。',
+        '最初は3回。安全な掘削4回で1回分補充。空白の連鎖は1回、再クリックや旗は対象外。過去の結果は自由に確認できます。',
+      ),
+    }
   if (mode === 'classic')
     return {
       mode,
