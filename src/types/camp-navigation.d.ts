@@ -12,16 +12,13 @@ export type CampLabel =
   | 'back'
   | 'current'
   | 'empty'
-  | 'floors'
   | 'buy'
-  | 'missing'
   | 'purchaseHelp'
   | 'workshopRequired'
   | 'professionHelp'
   | 'equipmentHelp'
   | 'routeHelp'
   | 'shopHelp'
-  | 'ownedCount'
   | 'loadoutBudget'
 
 /** Keep the selected item when returning from a different camp screen. */

@@ -170,7 +170,6 @@ export interface VariantMessages {
   readonly confirmedMine: string
   readonly triggeredMine: string
   readonly confirmedSafe: string
-  readonly probeResult: string
 }
 
 /** Every catalog entry has a name and a concrete gameplay explanation. */

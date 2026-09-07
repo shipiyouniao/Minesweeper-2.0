@@ -1,10 +1,11 @@
+import { message } from '../i18n.js'
 import { bossScript } from './boss-scripts.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
-import { battleText } from './combat-build-copy.js'
-import type { Expedition } from '../types/variants.js'
-import type { Language } from '../types/localization.js'
+
 import type { PrologueScript } from '../types/guidance.js'
+import type { Language } from '../types/localization.js'
+import type { Expedition } from '../types/variants.js'
 
 /** Presentation-only arrival scenes never mutate a turn, AP, clues, rewards or the game journal. */
 export class BossPrologue {
@@ -110,7 +111,7 @@ export class BossPrologue {
   private render(run: Expedition, script: PrologueScript, language: Language): void {
     if (!this.dialog || !run.encounter) return
     const beat = script.beats[this.beat]!
-    const t = (en: string, zh: string, ja: string): string => battleText(language, en, zh, ja)
+
     const e = run.encounter
     const objectives =
       e.kind === 'magnetic'
@@ -127,14 +128,12 @@ export class BossPrologue {
         ? script.title
         : beat.speaker === 'player'
           ? ''
-          : t('At the threshold', '门扉之间', '境界にて')
+          : message(language, 'boss-prologue.at-the-threshold')
     this.dialog.dataset['focus'] = beat.focus
     const line =
       beat.speaker === 'player'
-        ? language === 'en'
-          ? `(${beat.line})`
-          : `（${beat.line}）`
+        ? message(language, 'boss-prologue.label', { p0: beat.line })
         : beat.line
-    this.dialog.innerHTML = `<header class="prologue-header"><div><span class="guidance-eyebrow">ENCOUNTER / ${String(['bastion', 'brood', 'mirror', 'magnetic', 'clock'].indexOf(script.kind) + 1).padStart(2, '0')}</span><h2 id="prologue-title">${script.title}</h2><p>${script.subtitle}</p></div><button class="text-button" data-scene="skip">${t('Skip arrival', '跳过开场', '登場をスキップ')} ↗</button></header><div class="prologue-stage"><div class="scene-aura"></div><div class="scene-portrait scene-hero">${spriteImage(professionSprite(run.departure.profession))}<span>${t('Explorer', '来访者', '訪問者')}</span></div><div class="scene-map" style="--scene-columns:${run.game.config.width}">${run.game.cells.map((cell, index) => `<span class="scene-tile ${index === e.boss ? 'scene-boss' : index === run.player ? 'scene-player' : objectives.includes(index) ? 'scene-objective' : ''} ${cell.visibility === 'revealed' ? 'scene-open' : ''}">${index === e.boss ? spriteImage(script.sprite) : index === run.player ? spriteImage(professionSprite(run.departure.profession)) : objectives.includes(index) ? spriteImage(script.prop) : cell.visibility === 'revealed' && cell.adjacent ? cell.adjacent : ''}</span>`).join('')}</div><div class="scene-portrait scene-enemy">${spriteImage(script.sprite)}<span>${script.title}</span></div></div><section class="prologue-dialogue" data-speaker="${beat.speaker}"><div class="dialogue-portrait">${spriteImage(beat.speaker === 'player' ? professionSprite(run.departure.profession) : beat.speaker === 'boss' ? script.sprite : script.prop)}</div><div>${speaker ? `<strong>${speaker}</strong>` : ''}<p role="status">${line}</p></div></section><footer class="prologue-footer"><button class="text-button" data-scene="previous" ${this.beat === 0 ? 'disabled' : ''}>← ${t('Previous', '上一段', '戻る')}</button><span>${String(this.beat + 1).padStart(2, '0')} <i>/ ${script.beats.length}</i></span><button class="primary-button" data-scene="next">${this.beat === script.beats.length - 1 ? t('Enter battle', '进入战斗', '戦闘へ') : t('Continue', '继续', '次へ')} →</button></footer>`
+    this.dialog.innerHTML = `<header class="prologue-header"><div><span class="guidance-eyebrow">ENCOUNTER / ${String(['bastion', 'brood', 'mirror', 'magnetic', 'clock'].indexOf(script.kind) + 1).padStart(2, '0')}</span><h2 id="prologue-title">${script.title}</h2><p>${script.subtitle}</p></div><button class="text-button" data-scene="skip">${message(language, 'boss-prologue.skip-arrival')} ↗</button></header><div class="prologue-stage"><div class="scene-aura"></div><div class="scene-portrait scene-hero">${spriteImage(professionSprite(run.departure.profession))}<span>${message(language, 'boss-prologue.explorer')}</span></div><div class="scene-map" style="--scene-columns:${run.game.config.width}">${run.game.cells.map((cell, index) => `<span class="scene-tile ${index === e.boss ? 'scene-boss' : index === run.player ? 'scene-player' : objectives.includes(index) ? 'scene-objective' : ''} ${cell.visibility === 'revealed' ? 'scene-open' : ''}">${index === e.boss ? spriteImage(script.sprite) : index === run.player ? spriteImage(professionSprite(run.departure.profession)) : objectives.includes(index) ? spriteImage(script.prop) : cell.visibility === 'revealed' && cell.adjacent ? cell.adjacent : ''}</span>`).join('')}</div><div class="scene-portrait scene-enemy">${spriteImage(script.sprite)}<span>${script.title}</span></div></div><section class="prologue-dialogue" data-speaker="${beat.speaker}"><div class="dialogue-portrait">${spriteImage(beat.speaker === 'player' ? professionSprite(run.departure.profession) : beat.speaker === 'boss' ? script.sprite : script.prop)}</div><div>${speaker ? `<strong>${speaker}</strong>` : ''}<p role="status">${line}</p></div></section><footer class="prologue-footer"><button class="text-button" data-scene="previous" ${this.beat === 0 ? 'disabled' : ''}>← ${message(language, 'boss-prologue.previous')}</button><span>${String(this.beat + 1).padStart(2, '0')} <i>/ ${script.beats.length}</i></span><button class="primary-button" data-scene="next">${this.beat === script.beats.length - 1 ? message(language, 'boss-prologue.enter-battle') : message(language, 'boss-prologue.continue')} →</button></footer>`
   }
 }

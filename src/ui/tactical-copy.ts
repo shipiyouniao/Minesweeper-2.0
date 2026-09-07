@@ -1,201 +1,86 @@
+import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
 import type { TacticalMessages } from '../types/tactical-ui.js'
-import type { TacticalPlan, TacticalEncounter, EncounterKind } from '../types/tactical.js'
+import type { EncounterKind, TacticalEncounter, TacticalPlan } from '../types/tactical.js'
 import { battleCopy } from './battle-presentation.js'
 
 /** Explain a public action preview without inspecting the mine layout. */
 export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string {
-  const zh = language === 'zh'
-  const ja = language === 'ja'
   switch (plan.reason) {
     case 'clock-seal':
-      return zh
-        ? '先启动沙漏，转送一道法术，解除护罩'
-        : ja
-          ? '砂時計で術を返送して障壁を解除'
-          : 'Return a spell with an hourglass to break the barrier'
+      return message(language, 'tactical-copy.return-a-spell-with-an-hourglass-to')
     case 'magnet-armor':
-      return zh
-        ? '启动锚点，牵引骑士撞击后破甲'
-        : ja
-          ? '錨を起動し騎士を衝突させる'
-          : 'Lure the knight into an anchor to break its armor'
+      return message(language, 'tactical-copy.lure-the-knight-into-an-anchor-to')
     case 'magnet-route':
-      return zh
-        ? '先揭开骑士到锚点的通路，至少留出两格牵引距离'
-        : ja
-          ? '騎士から錨まで2マス以上の経路を開く'
-          : 'Open a route of at least two cells from the knight to the anchor'
+      return message(language, 'tactical-copy.open-a-route-of-at-least-two')
     case 'magnet-busy':
-      return zh
-        ? '牵引或破甲期间无法再次启动锚点'
-        : ja
-          ? '誘導・コア露出中は再起動不可'
-          : 'Anchors recharge after the lure and exposure window'
+      return message(language, 'tactical-copy.anchors-recharge-after-the-lure-and-exposure')
     case 'mirror-seal':
-      return zh
-        ? '先关闭另一侧镜域的封印'
-        : ja
-          ? '先に反対側の封印を停止'
-          : 'Disable the seal in the opposite realm first'
+      return message(language, 'tactical-copy.disable-the-seal-in-the-opposite-realm')
     case 'reflection':
-      return zh
-        ? '反射中 · 切换镜域，攻击另一位双子'
-        : ja
-          ? '反射中 · 転移してもう一方を攻撃'
-          : 'Reflection active · shift and strike the other twin'
+      return message(language, 'tactical-copy.reflection-active-shift-and-strike-the-other')
     case 'window':
-      return zh
-        ? '靠近并点击核心，花 1 点启动'
-        : ja
-          ? '隣接してコアを1行動力で起動'
-          : 'Approach and click the core to prime it for 1 AP'
+      return message(language, 'tactical-copy.approach-and-click-the-core-to-prime')
     case 'nests':
-      return zh
-        ? '先推理并摧毁巢穴，削弱女王护甲'
-        : ja
-          ? '巣を推理して破壊し女王の防護を弱める'
-          : 'Deduce and destroy nests to weaken the queen first'
+      return message(language, 'tactical-copy.deduce-and-destroy-nests-to-weaken-the')
     case 'ready':
-      return zh
-        ? `消耗 ${plan.cost} 点行动力`
-        : ja
-          ? `行動力 ${plan.cost}`
-          : `Cost: ${plan.cost} AP`
+      return message(language, 'tactical-copy.cost-ap', { p0: plan.cost })
     case 'points':
-      return zh
-        ? `需要 ${plan.cost} 点行动力 · 请缩短路线或结束回合`
-        : ja
-          ? `行動力${plan.cost}が必要 · 経路を短くするかターン終了`
-          : `Needs ${plan.cost} AP · shorten the route or end your turn`
+      return message(language, 'tactical-copy.needs-ap-shorten-the-route-or-end', { p0: plan.cost })
     case 'armor':
-      return zh
-        ? '先关闭两座护盾机关'
-        : ja
-          ? '先に2基の装置を停止'
-          : 'Disable both shield pylons first'
+      return message(language, 'tactical-copy.disable-both-shield-pylons-first')
     case 'adjacent':
-      return zh
-        ? '请移动到目标相邻格'
-        : ja
-          ? '対象に隣接するマスへ移動'
-          : 'Move next to the target first'
+      return message(language, 'tactical-copy.move-next-to-the-target-first')
     case 'flags':
-      return zh
-        ? '先标出目标周围的全部地雷'
-        : ja
-          ? '対象周囲の全地雷をマーク'
-          : 'Flag all mines around the target first'
+      return message(language, 'tactical-copy.flag-all-mines-around-the-target-first')
     case 'used':
-      return zh
-        ? '该操作已完成，或目标已清除'
-        : ja
-          ? '操作済み、または対象除去済み'
-          : 'Already used, or the target is cleared'
+      return message(language, 'tactical-copy.already-used-or-the-target-is-cleared')
     default:
-      return zh ? '选择可到达的格子' : ja ? '到達可能なマスを選択' : 'Choose a reachable cell'
+      return message(language, 'tactical-copy.choose-a-reachable-cell')
   }
 }
 
 /** Announce the latest accepted tactical outcome in a compact status line. */
 export function tacticalEventCopy(language: Language, encounter: TacticalEncounter): string {
-  const zh = language === 'zh'
-  const ja = language === 'ja'
   if (encounter.kind === 'magnetic' && encounter.event === 'braced')
-    return zh
-      ? '已稳固 · 抵抗本回合磁力，敌方伤害减少 3'
-      : ja
-        ? '固定中 · 磁力を防ぎ、敵ダメージを3軽減'
-        : 'Grounded · resist the pulse and reduce enemy damage by 3'
+    return message(language, 'tactical-copy.grounded-resist-the-pulse-and-reduce-enemy')
   if (encounter.event === 'braced')
-    return zh
-      ? '已防御 · 本回合敌方伤害减少 3'
-      : ja
-        ? '防御中 · 敵のダメージを3軽減'
-        : 'Braced · reduce enemy damage by 3 this turn'
+    return message(language, 'tactical-copy.braced-reduce-enemy-damage-by-3-this')
   if (encounter.event === 'misfire')
-    return zh
-      ? '校准错误 · 受到 5 点伤害'
-      : ja
-        ? '調整失敗 · 5ダメージ'
-        : 'Calibration failed · 5 damage'
+    return message(language, 'tactical-copy.calibration-failed-5-damage')
   switch (encounter.event) {
     case 'magnet-lured':
-      return zh
-        ? '牵引已锁定 · 让出金色路线'
-        : ja
-          ? '誘導確定 · 金色の経路を空ける'
-          : 'Lure locked · clear the gold route'
+      return message(language, 'tactical-copy.lure-locked-clear-the-gold-route')
     case 'magnet-overloaded':
-      return zh
-        ? '磁芯过载 · 三回合破甲窗口'
-        : ja
-          ? 'コア過負荷 · 3ターン露出'
-          : 'Core overloaded · three-turn strike window'
+      return message(language, 'tactical-copy.core-overloaded-three-turn-strike-window')
     case 'magnet-grounded':
-      return zh
-        ? '已抵抗磁力位移'
-        : ja
-          ? '磁力による移動を防いだ'
-          : 'Magnetic displacement resisted'
+      return message(language, 'tactical-copy.magnetic-displacement-resisted')
     case 'shifted':
-      return zh
-        ? '已切换镜域 · 继续本回合'
-        : ja
-          ? '転移完了 · 同じターンを続行'
-          : 'Realm shifted · the turn continues'
+      return message(language, 'tactical-copy.realm-shifted-the-turn-continues')
     case 'twin-fallen':
-      return zh
-        ? '一位双子已倒下 · 幸存者后续攻击增强'
-        : ja
-          ? '片方を撃破 · 生存者の次の攻撃が強化'
-          : 'One twin defeated · the survivor’s future attacks intensify'
+      return message(language, 'tactical-copy.one-twin-defeated-the-survivor-s-future')
     case 'nest-destroyed':
-      return zh
-        ? '巢穴已摧毁 · 停止补卵，女王护甲与回血降低'
-        : ja
-          ? '巣を破壊 · 補充停止、女王の防護と回復減少'
-          : 'Nest destroyed · supply stopped, queen armor and regeneration reduced'
+      return message(language, 'tactical-copy.nest-destroyed-supply-stopped-queen-armor-and')
     case 'window-opened':
-      return zh
-        ? '核心已启动 · 破甲窗口开启'
-        : ja
-          ? 'コア起動 · 露出開始'
-          : 'Core primed · strike window open'
+      return message(language, 'tactical-copy.core-primed-strike-window-open')
     case 'disabled':
       return tacticalCopy(language, encounter.kind).disabled
     case 'struck':
-      return zh
-        ? `攻击命中 · 造成 ${encounter.lastDamage} 点伤害`
-        : ja
-          ? `攻撃命中 · ${encounter.lastDamage}ダメージ`
-          : `Strike landed · ${encounter.lastDamage} damage`
+      return message(language, 'tactical-copy.strike-landed-damage', { p0: encounter.lastDamage })
     case 'hit':
-      return zh ? '敌方攻击命中' : ja ? '敵の攻撃が命中' : 'Enemy attack hit'
+      return message(language, 'tactical-copy.enemy-attack-hit')
     case 'evaded':
-      return zh ? '已避开或挡住攻击' : ja ? '攻撃を回避または防御' : 'Attack avoided or blocked'
+      return message(language, 'tactical-copy.attack-avoided-or-blocked')
     case 'defeated':
       return tacticalCopy(language, encounter.kind).victory
     case 'web-cut':
-      return zh ? '蛛网已清除 · 路线开放' : ja ? '巣網を除去 · 通行可能' : 'Web cleared · lane open'
+      return message(language, 'tactical-copy.web-cleared-lane-open')
     case 'egg-crushed':
-      return zh
-        ? '虫卵已摧毁 · 孵化取消'
-        : ja
-          ? '卵を破壊 · 孵化を阻止'
-          : 'Egg destroyed · hatching prevented'
+      return message(language, 'tactical-copy.egg-destroyed-hatching-prevented')
     case 'hatchling-cleared':
-      return zh
-        ? '幼虫已消灭 · 攻击预告取消'
-        : ja
-          ? '幼体を撃破 · 予告取消'
-          : 'Hatchling intercepted · attack cancelled'
+      return message(language, 'tactical-copy.hatchling-intercepted-attack-cancelled')
     default:
-      return zh
-        ? '战斗进行中 · 留意攻击预告'
-        : ja
-          ? '戦闘中 · 攻撃予告を確認'
-          : 'Battle in progress · watch the attack forecast'
+      return message(language, 'tactical-copy.battle-in-progress-watch-the-attack-forecast')
   }
 }
 

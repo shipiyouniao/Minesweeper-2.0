@@ -1,33 +1,34 @@
+import { message } from '../i18n.js'
 import { returnedToCampCopy } from './variant-copy.js'
-import { battleText } from './combat-build-copy.js'
+
 import { battleThreat } from '../game/combat-build.js'
-import { frontierCells } from '../game/expedition.js'
 import { probeArea } from '../game/dungeon-discovery.js'
+import { frontierCells } from '../game/expedition.js'
+import { currentWaymark, riftLandings, skillRoom } from '../game/mobility-skills.js'
+import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import { translations } from '../i18n.js'
+import { icon } from '../icons.js'
+import type { InteractionCue } from '../types/audio.js'
+import type { DungeonTool } from '../types/dungeon-ui.js'
 import type { Config, Game } from '../types/game.js'
 import type { Language } from '../types/localization.js'
-import type { BoardSide, Expedition } from '../types/variants.js'
-import type { InteractionCue } from '../types/audio.js'
 import type { NavigationKey, NavigationResult } from '../types/ui.js'
+import type { BoardSide, Expedition } from '../types/variants.js'
 import { BoardView } from './board-view.js'
-import { LanguageMenu } from './language-menu.js'
-import { TitleMenu } from './title-menu.js'
-import { siteHeaderTemplate } from './templates.js'
-import { professionCopy, variantCopy } from './variant-copy.js'
-import { icon } from '../icons.js'
+import { markBroodCell } from './brood-board.js'
+import { markClockCell } from './clock-board.js'
 import { spriteImage } from './dungeon-sprites.js'
+import { ExpeditionDialog } from './expedition-dialog.js'
+import { LanguageMenu } from './language-menu.js'
+import { MagneticBoard, markMagneticCell } from './magnetic-board.js'
+import { markMirrorCell, mirrorPreview } from './mirror-board.js'
+import { mirrorName } from './mirror-copy.js'
 import { professionSprite } from './profession-presentation.js'
-import { currentWaymark, skillRoom, riftLandings } from '../game/mobility-skills.js'
-import type { DungeonTool } from '../types/dungeon-ui.js'
-import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import { tacticalCopy, tacticalPlanCopy } from './tactical-copy.js'
 import { bossSprite } from './tactical-sprites.js'
-import { markBroodCell } from './brood-board.js'
-import { ExpeditionDialog } from './expedition-dialog.js'
-import { mirrorPreview, markMirrorCell } from './mirror-board.js'
-import { mirrorName } from './mirror-copy.js'
-import { markClockCell } from './clock-board.js'
-import { MagneticBoard, markMagneticCell } from './magnetic-board.js'
+import { siteHeaderTemplate } from './templates.js'
+import { TitleMenu } from './title-menu.js'
+import { professionCopy, variantCopy } from './variant-copy.js'
 
 /** Owns special-mode DOM, focus restoration, language-menu and modal lifetimes. */
 export class VariantView {
@@ -387,18 +388,8 @@ export class VariantView {
           cell.classList.add(mechanism.effect === 'weaken' ? 'mechanism-amber' : 'mechanism-blue')
           cell.title =
             mechanism.effect === 'weaken'
-              ? battleText(
-                  this.language,
-                  'Suppressor · lowers future attacks to 3',
-                  '抑制机关 · 后续攻击降至 3 点',
-                  '抑制装置 · 以後の攻撃を3に軽減',
-                )
-              : battleText(
-                  this.language,
-                  'Resonator · four-turn core windows',
-                  '共鸣机关 · 核心窗口延长至 4 回合',
-                  '共鳴装置 · コア露出を4ターンに延長',
-                )
+              ? message(this.language, 'variant-view.suppressor-lowers-future-attacks-to-3')
+              : message(this.language, 'variant-view.resonator-four-turn-core-windows')
         }
 
         cell.innerHTML = `${spriteImage(pylon.active ? 'bastion-pylon' : 'bastion-pylon-off')}${run.game.cells[index]?.visibility === 'revealed' ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
@@ -649,25 +640,13 @@ export class VariantView {
       }
       const anchor = currentWaymark(run)
       if (anchor !== null)
-        marker(
-          anchor,
-          'mobility-anchor',
-          battleText(this.language, 'Return anchor', '回撤锚点', '帰還の錨'),
-        )
+        marker(anchor, 'mobility-anchor', message(this.language, 'variant-view.return-anchor'))
       if (run.rift?.room === skillRoom(run))
         for (const index of [run.rift.from, run.rift.to])
-          marker(
-            index,
-            'mobility-rift',
-            battleText(this.language, 'Two-way rift', '双向裂隙', '双方向の裂け目'),
-          )
+          marker(index, 'mobility-rift', message(this.language, 'variant-view.two-way-rift'))
       if (run.departure.profession === 'riftwalker' && !run.skillUsed)
         for (const index of riftLandings(run))
-          marker(
-            index,
-            'mobility-landing',
-            battleText(this.language, 'Rift landing', '裂隙落点', '裂け目の着地点'),
-          )
+          marker(index, 'mobility-landing', message(this.language, 'variant-view.rift-landing'))
     }
     const current = grid?.querySelector<HTMLElement>(`[data-cell="${run.player}"]`)
     if (side === 'b') {

@@ -1,9 +1,10 @@
+import { message } from '../i18n.js'
 import { clockSpellCopy } from './clock-copy.js'
-import { battleText } from './combat-build-copy.js'
+
+import type { Language } from '../types/localization.js'
+import type { Expedition } from '../types/variants.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
-import type { Expedition } from '../types/variants.js'
-import type { Language } from '../types/localization.js'
 
 /** Show all deadlines together while leaving the clue number and actual pawn unobstructed. */
 export function markClockCell(
@@ -28,18 +29,8 @@ export function markClockCell(
     const revealed = run.game.cells[index]?.visibility === 'revealed'
     cell.innerHTML = `${spriteImage('clock-hourglass')}${revealed ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
     const label = glass.used
-      ? battleText(
-          language,
-          'Spent hourglass · walkable',
-          '沙漏已使用 · 可通行',
-          '使用済み砂時計 · 通行可能',
-        )
-      : battleText(
-          language,
-          'Hourglass · reveal, approach, return earliest spell · 1 AP',
-          '沙漏 · 揭开并靠近，转送最早法术 · 1 点',
-          '砂時計 · 開いて接近、最も早い術を返送 · 1',
-        )
+      ? message(language, 'clock-board.spent-hourglass-walkable')
+      : message(language, 'clock-board.hourglass-reveal-approach-return-earliest-spell-1')
     cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
     cell.title = label
   }
@@ -49,12 +40,7 @@ export function markClockCell(
       'beforeend',
       `<span class="clock-echo ${e.echo.damage > 0 ? 'echo-charged' : ''}" aria-hidden="true">${spriteImage(professionSprite(run.departure.profession))}${e.echo.damage ? `<b class="echo-damage">${e.echo.damage}</b>` : ''}</span>`,
     )
-    const label = battleText(
-      language,
-      `Echo · pending damage ${e.echo.damage}`,
-      `残影 · 待结算伤害 ${e.echo.damage}`,
-      `残像 · 追撃ダメージ${e.echo.damage}`,
-    )
+    const label = message(language, 'clock-board.echo-pending-damage', { p0: e.echo.damage })
     cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
   }
   const spells = e.spells.filter((spell) => spell.targets.includes(index))
@@ -86,20 +72,19 @@ export function markClockCell(
 export function clockQueue(language: Language, run: Expedition): string {
   const e = run.encounter
   if (e?.kind !== 'clock') return ''
-  const echo = battleText(
-    language,
-    `Echo: ${e.echo.damage} · ${run.player === e.echo.index ? 'Move away to activate' : 'Ready to strike'}`,
-    `残影追击 ${e.echo.damage} · ${run.player === e.echo.index ? '离开残影格后触发' : '已就绪'}`,
-    `残像の追撃：${e.echo.damage} · ${run.player === e.echo.index ? '移動して発動' : '準備完了'}`,
-  )
+  const echo = message(language, 'clock-board.echo', {
+    p0: e.echo.damage,
+    p1:
+      run.player === e.echo.index
+        ? message(language, 'clock-board.echo-move')
+        : message(language, 'clock-board.echo-ready'),
+  })
   const result =
     e.resolution && (e.resolution.echoDamage || e.resolution.reflectedDamage)
-      ? battleText(
-          language,
-          `Last turn: echo ${e.resolution.echoDamage}, returned spell ${e.resolution.reflectedDamage}`,
-          `上回合：残影 ${e.resolution.echoDamage}，转送法术 ${e.resolution.reflectedDamage}`,
-          `前ターン：残像${e.resolution.echoDamage}、返送${e.resolution.reflectedDamage}`,
-        )
+      ? message(language, 'clock-board.last-turn-echo-returned-spell', {
+          p0: e.resolution.echoDamage,
+          p1: e.resolution.reflectedDamage,
+        })
       : ''
   return `<div class="clock-queue"><strong>${echo}</strong>${result ? `<p>${result}</p>` : ''}<ul>${e.spells.map((spell) => `<li>${clockSpellCopy(language, spell, e.turn)}</li>`).join('')}</ul></div>`
 }

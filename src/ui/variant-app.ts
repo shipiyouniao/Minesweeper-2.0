@@ -1,35 +1,34 @@
-import { MilestoneNotices } from './milestone-notices.js'
-import { battleGuide } from './battle-guide.js'
-import { nextBoardMode } from './board-controls.js'
-import { startTutorial } from './tutorial-player.js'
-import { BossPrologue } from './boss-prologue.js'
-import type { BoardInputMode } from '../types/ui.js'
-import { boardHelpTemplate } from './board-help.js'
-import { battleHealthCopy } from './combat-build-copy.js'
-import { cueForVitality } from '../audio/cues.js'
-import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
-import { allowedDeparture, expeditionEarnings } from '../game/expedition.js'
+import { cueForVitality } from '../audio/cues.js'
 import { approachPath } from '../game/dungeon-path.js'
+import { allowedDeparture, expeditionEarnings } from '../game/expedition.js'
 import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
+import { message, translations } from '../i18n.js'
+import { VariantRepository } from '../persistence/variant-repository.js'
+import type { InteractionCue, SoundEffects } from '../types/audio.js'
+import type { CampScreen } from '../types/camp-navigation.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
-import { translations } from '../i18n.js'
-import type { SoundEffects, InteractionCue } from '../types/audio.js'
 import type { Language } from '../types/localization.js'
 import type { GameRepository } from '../types/storage.js'
-import type { BoardSide, Equipment, ExpeditionAction, Profession } from '../types/variants.js'
+import type { BoardInputMode, NavigationKey } from '../types/ui.js'
+import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import type { VariantCommand, VariantInputActions } from '../types/variant-ui.js'
-import type { NavigationKey } from '../types/ui.js'
-import { VariantRepository } from '../persistence/variant-repository.js'
+import type { BoardSide, Equipment, ExpeditionAction, Profession } from '../types/variants.js'
+import { battleGuide } from './battle-guide.js'
+import { secondaryBoardAction } from './board-actions.js'
+import { nextBoardMode } from './board-controls.js'
+import { boardHelpTemplate } from './board-help.js'
+import { BossPrologue } from './boss-prologue.js'
+import { navigateCamp } from './camp-navigation.js'
+import { campTemplate } from './camp-template.js'
+import { battleHealthCopy } from './combat-build-copy.js'
+import { MilestoneNotices } from './milestone-notices.js'
+import { startTutorial } from './tutorial-player.js'
 import { variantCopy } from './variant-copy.js'
+import { VariantInput } from './variant-input.js'
 import { expeditionTemplate, twinTemplate, variantRecords } from './variant-templates.js'
 import { VariantView } from './variant-view.js'
-import { VariantInput } from './variant-input.js'
-import { secondaryBoardAction } from './board-actions.js'
-import { campTemplate } from './camp-template.js'
-import { navigateCamp } from './camp-navigation.js'
-import type { CampScreen } from '../types/camp-navigation.js'
 
 /** Coordinates special-mode sessions with dedicated input and rendering adapters. */
 export class VariantApp implements VariantInputActions {
@@ -337,11 +336,7 @@ export class VariantApp implements VariantInputActions {
         const t = variantCopy(this.language)
         if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
           this.view.showInformation(
-            this.language === 'zh'
-              ? '战斗说明'
-              : this.language === 'ja'
-                ? '戦闘の手引き'
-                : 'Battle reference',
+            message(this.language, 'variant-app.battle-reference'),
             battleGuide(this.language, this.session.run),
           )
           return

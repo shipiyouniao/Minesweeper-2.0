@@ -1,8 +1,9 @@
-import { spriteImage } from './dungeon-sprites.js'
+import { message } from '../i18n.js'
 import { broodCellLabel } from './brood-copy.js'
-import { battleText } from './combat-build-copy.js'
-import type { Expedition } from '../types/variants.js'
+import { spriteImage } from './dungeon-sprites.js'
+
 import type { Language } from '../types/localization.js'
+import type { Expedition } from '../types/variants.js'
 
 /** Render public occupants and countdowns above the original clue, preserving cell focus targets. */
 export function markBroodCell(
@@ -24,7 +25,7 @@ export function markBroodCell(
     cell.innerHTML = `${spriteImage('brood-nest')}${revealed ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
     cell.setAttribute(
       'aria-label',
-      `${cell.getAttribute('aria-label')}, ${destroyed ? battleText(language, 'Nest destroyed', '巢穴已摧毁', '巣は破壊済み') : battleText(language, 'Nest · reveal and flag nearby mines to destroy', '巢穴 · 揭开并标出周围地雷后摧毁', '巣 · 開いて周囲の地雷に旗を立てて破壊')}`,
+      `${cell.getAttribute('aria-label')}, ${destroyed ? message(language, 'brood-board.nest-destroyed') : message(language, 'brood-board.nest-reveal-and-flag-nearby-mines-to')}`,
     )
   }
   const egg = encounter.eggs.find((entry) => entry.index === index)
@@ -49,12 +50,7 @@ export function markBroodCell(
       'beforeend',
       `<span class="brood-next">${spriteImage('brood-hatchling')}</span>`,
     )
-    const label =
-      language === 'zh'
-        ? '幼虫下一落点'
-        : language === 'ja'
-          ? '幼体の次の位置'
-          : 'Next hatchling position'
+    const label = message(language, 'brood-board.next-hatchling-position')
     cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
   }
 }

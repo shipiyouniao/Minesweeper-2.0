@@ -15,7 +15,7 @@
     "build": "npm run compile && vite build",
     "preview": "vite preview",
     "test": "node scripts/test.mjs",
-    "check": "npm run format:check && npm run check:contracts && npm run typecheck && npm test && npm run build",
+    "check": "npm run format:check && npm run check:contracts && npm run check:i18n && npm run typecheck && npm test && npm run build",
     "check:contracts": "node scripts/check-contracts.mjs",
     "bench:types": "node scripts/bench-types.mjs",
     "format": "prettier . --write",
@@ -23,7 +23,8 @@
     "test:legacy": "node scripts/test.mjs --legacy",
     "build:legacy": "node scripts/build-variant.mjs legacy",
     "build:native": "node scripts/build-variant.mjs native",
-    "bench:build": "node scripts/bench-build.mjs"
+    "bench:build": "node scripts/bench-build.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",

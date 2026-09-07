@@ -1,12 +1,13 @@
-import { magneticProjection } from '../game/magnetic-field.js'
 import { neighbors } from '../game/engine.js'
+import { magneticProjection } from '../game/magnetic-field.js'
+import { message } from '../i18n.js'
 import { magneticLandingCopy, magneticStatus } from './magnetic-copy.js'
-import { battleText } from './combat-build-copy.js'
+
+import type { Language } from '../types/localization.js'
+import type { MagneticExpedition } from '../types/magnetic.js'
+import type { Expedition } from '../types/variants.js'
 import { spriteImage, spriteUrl } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
-import type { Expedition } from '../types/variants.js'
-import type { MagneticExpedition } from '../types/magnetic.js'
-import type { Language } from '../types/localization.js'
 
 /** Keep a compact visual phase key directly above this arena. */
 export function magneticPlaybar(language: Language, run: Expedition): string {
@@ -34,12 +35,7 @@ export function markMagneticCell(
   if (encounter?.kind !== 'magnetic') return
   if (encounter.craters.includes(index)) {
     cell.classList.add('magnetic-crater')
-    const label = battleText(
-      language,
-      'Detonated mine · walkable crater',
-      '地雷已炸毁 · 弹坑可通行',
-      '地雷爆破済み · 通行可能なクレーター',
-    )
+    const label = message(language, 'magnetic-board.detonated-mine-walkable-crater')
     cell.title = label
     cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
   }
@@ -60,18 +56,8 @@ export function markMagneticCell(
   cell.classList.toggle('magnetic-calibrated', anchor.calibrated)
   cell.innerHTML = `${spriteImage('magnetic-anchor')}${revealed ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
   const label = anchor.calibrated
-    ? battleText(
-        language,
-        'Calibrated anchor · enter to ground, click again to lure',
-        '已校准锚点 · 移入稳固，再点牵引',
-        '調整済みの錨 · 乗って固定、再クリックで誘導',
-      )
-    : battleText(
-        language,
-        'Anchor · reveal and flag surrounding mines',
-        '锚点 · 揭开并标出周围地雷',
-        '錨 · 開き周囲の地雷をマーク',
-      )
+    ? message(language, 'magnetic-board.calibrated-anchor-enter-to-ground-click-again')
+    : message(language, 'magnetic-board.anchor-reveal-and-flag-surrounding-mines')
   cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
 }
 

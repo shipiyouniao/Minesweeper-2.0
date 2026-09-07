@@ -1,28 +1,15 @@
-import type { BoardInputMode } from '../types/ui.js'
-import { boardHelpTemplate } from './board-help.js'
-import { boardControlsTemplate } from './board-controls.js'
 import { DIFFICULTIES, RANKED_DIFFICULTIES } from '../game/difficulty.js'
-import type { HelpStep } from '../types/ui.js'
+import { PRESETS } from '../game/engine.js'
+import { languageName, message, translations } from '../i18n.js'
+import { icon } from '../icons.js'
 import type { Config, Difficulty, RankedDifficulty } from '../types/game.js'
 import type { Language, Messages } from '../types/localization.js'
-import type { Score } from '../types/storage.js'
 import type { SessionState } from '../types/session.js'
-import { PRESETS } from '../game/engine.js'
-import { translations } from '../i18n.js'
-import { icon } from '../icons.js'
+import type { Score } from '../types/storage.js'
+import type { BoardInputMode, HelpStep } from '../types/ui.js'
+import { boardControlsTemplate } from './board-controls.js'
+import { boardHelpTemplate } from './board-help.js'
 import { escapeHtml, formatTime } from './presentation.js'
-
-/** Display each language in its own script so the picker remains recognizable. */
-function languageName(language: Language): string {
-  switch (language) {
-    case 'zh':
-      return '中文'
-    case 'en':
-      return 'English'
-    case 'ja':
-      return '日本語'
-  }
-}
 
 /** Render one radio-style menu option with a visible selected indicator. */
 function languageOption(language: Language, selected: Language): string {
@@ -84,7 +71,7 @@ export function siteHeaderTemplate(
       </a>
       <nav aria-label="${t.play}">
         <button class="text-button tutorial-entry" ${attribute}="tutorial">
-          ${language === 'zh' ? '新手教学' : language === 'ja' ? 'はじめての練習' : 'Learn to play'}
+          ${message(language, 'templates.learn-to-play')}
         </button>
         <button class="text-button" ${attribute}="records">${t.records}</button>
         ${languageMenuTemplate(language)}

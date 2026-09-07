@@ -1,12 +1,12 @@
 import { sonarCharges, sonarObscured, sonarRegion } from '../game/sonar.js'
-import { translations } from '../i18n.js'
+import { message as translate, translations } from '../i18n.js'
 import { icon } from '../icons.js'
 import type { InteractionCue } from '../types/audio.js'
 import type { Language } from '../types/localization.js'
 import type { Sonar } from '../types/sonar.js'
 import type { BoardInputMode, NavigationKey, NavigationResult } from '../types/ui.js'
+import { boardControlHint, boardControlsTemplate } from './board-controls.js'
 import { BoardView } from './board-view.js'
-import { boardControlsTemplate, boardControlHint } from './board-controls.js'
 import { LanguageMenu } from './language-menu.js'
 import { sonarCopy } from './sonar-copy.js'
 import { sonarComparisonTemplate, sonarLogTemplate, sonarTemplate } from './sonar-templates.js'
@@ -103,12 +103,7 @@ export class SonarView {
       if (confirmed)
         cell.setAttribute(
           'aria-label',
-          coordinate +
-            (this.language === 'zh'
-              ? '已确认地雷'
-              : this.language === 'ja'
-                ? '地雷確認済み'
-                : 'Confirmed mine'),
+          coordinate + translate(this.language, 'sonar-view.confirmed-mine'),
         )
       const masked = sonarObscured(state, Number(cell.dataset['cell']))
       cell.classList.toggle('sonar-obscured', masked)
@@ -117,12 +112,7 @@ export class SonarView {
         cell.removeAttribute('data-number')
         cell.setAttribute(
           'aria-label',
-          coordinate +
-            (this.language === 'zh'
-              ? '模糊数字 · 扫描后看清'
-              : this.language === 'ja'
-                ? '不鮮明な数字 · 走査で判読'
-                : 'Obscured clue · scan to clarify'),
+          coordinate + translate(this.language, 'sonar-view.obscured-clue-scan-to-clarify'),
         )
       }
     }
@@ -132,7 +122,7 @@ export class SonarView {
     this.element('.sonar-sidebar').classList.toggle('sonar-private', paused)
     this.element('.sonar-storage').textContent = storageMessage
     this.element('.sonar-counters').innerHTML =
-      `<div><span>${s.charges}</span><strong>${sonarCharges(state)}</strong></div><div><span>${this.language === 'zh' ? '充能' : this.language === 'ja' ? '充填' : 'Recharge'}</span><progress max="4" value="${state.excavations % 4}" aria-label="${this.language === 'zh' ? '安全挖掘充能' : 'Recharge'}"></progress><strong>${state.excavations % 4} / 4</strong></div><div><span>${s.moves}</span><strong>${state.moves.toLocaleString(this.language)}</strong></div>`
+      `<div><span>${s.charges}</span><strong>${sonarCharges(state)}</strong></div><div><span>${translate(this.language, 'sonar-view.recharge')}</span><progress max="4" value="${state.excavations % 4}" aria-label="${translate(this.language, 'sonar-view.recharge-progress-label')}"></progress><strong>${state.excavations % 4} / 4</strong></div><div><span>${s.moves}</span><strong>${state.moves.toLocaleString(this.language)}</strong></div>`
     this.element('.sonar-log').innerHTML = sonarLogTemplate(state, selected, this.language)
     this.element('.sonar-comparison').innerHTML = sonarComparisonTemplate(
       state,
