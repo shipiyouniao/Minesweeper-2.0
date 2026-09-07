@@ -1,0 +1,20 @@
+/* Opt into utilities while retaining the existing game's reset and browser defaults. */
+@layer theme, base, utilities;
+@import 'tailwindcss/theme.css' layer(theme) prefix(tw);
+@import 'tailwindcss/utilities.css' layer(utilities) prefix(tw) source(none);
+@source './ui';
+
+/* Reuse the same runtime palette as the existing styles. */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
+  --radius-panel: 14px;
+  --text-caption: 0.8rem;
+}

@@ -27,8 +27,10 @@
     "check:i18n": "node scripts/check-i18n.mjs"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.20.1",
     "prettier": "3.9.6",
+    "tailwindcss": "^4.3.3",
     "typescript": "7.0.2",
     "typescript-legacy": "npm:typescript@6.0.3",
     "vite": "^8.2.2"

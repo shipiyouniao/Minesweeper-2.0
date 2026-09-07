@@ -1045,48 +1045,6 @@ dialog > p {
 .echo-obscured {
   color: #87958d;
 }
-.expedition-sonar-log {
-  padding: 12px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  font-size: 0.8rem;
-}
-.expedition-sonar-log p {
-  margin: 8px 0;
-}
-.expedition-sonar-log ol {
-  margin: 8px 0 0;
-  padding-left: 20px;
-  max-height: 160px;
-  overflow: auto;
-}
-.expedition-sonar-log li {
-  padding: 4px 0;
-}
-.expedition-sonar-log small {
-  display: block;
-  color: #358b79;
-}
-
-.expedition-sonar-log {
-  background: var(--surface);
-}
-.expedition-sonar-log button {
-  display: block;
-  width: 100%;
-  padding: 6px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  text-align: start;
-  color: var(--ink);
-}
-.expedition-sonar-log button:hover,
-.expedition-sonar-log button:focus-visible,
-.expedition-sonar-log button[aria-pressed='true'] {
-  background: #e6f0eb;
-  border-color: #9dbdaf;
-}
 .sonar-observed {
   box-shadow: inset 0 0 0 2px #358b79;
 }

@@ -1,9 +1,10 @@
-@import url('./tokens.css');
-@import url('./variants.css');
-@import url('./play-scale.css');
-@import url('./camp.css');
-@import url('./magnetic.css');
-@import url('./clock.css');
+@import './tokens.css';
+@import './tailwind.css';
+@import './variants.css';
+@import './play-scale.css';
+@import './camp.css';
+@import './magnetic.css';
+@import './clock.css';
 
 * {
   box-sizing: border-box;
@@ -33,13 +34,16 @@ button:disabled {
   cursor: default;
   opacity: 0.35;
 }
-button,
-input,
-select {
-  border: 0;
-}
-button {
-  background: none;
+/* Resets sit below opt-in utilities; existing component rules retain their precedence. */
+@layer base {
+  button,
+  input,
+  select {
+    border: 0;
+  }
+  button {
+    background: none;
+  }
 }
 a {
   color: inherit;

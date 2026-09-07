@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
 
 /** Keep the default native build and both A/B variants on the same bundler settings. */
 export default defineConfig(({ mode }) => {
@@ -16,19 +17,22 @@ export default defineConfig(({ mode }) => {
       outDir: benchmark ? `.bench/ab/${variant}/dist` : 'dist',
       emptyOutDir: true,
     },
-    plugins: benchmark
-      ? [
-          {
-            name: 'ab-application-entry',
-            transformIndexHtml: {
-              order: 'pre',
-              /** Switch only the entry module; both variants retain identical HTML/assets. */
-              handler(html) {
-                return html.replace('/.native/app/main.js', entry)
+    plugins: [
+      tailwindcss(),
+      ...(benchmark
+        ? [
+            {
+              name: 'ab-application-entry',
+              transformIndexHtml: {
+                order: 'pre',
+                /** Switch only the entry module; both variants retain identical HTML/assets. */
+                handler(html: string) {
+                  return html.replace('/.native/app/main.js', entry)
+                },
               },
             },
-          },
-        ]
-      : [],
+          ]
+        : []),
+    ],
   }
 })
