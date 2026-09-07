@@ -56,6 +56,9 @@ test('sound plans stay quiet, bounded, and short enough for interaction feedback
     'magnet-push',
     'magnet-charge',
     'sonar-pulse',
+    'dialogue-player',
+    'dialogue-boss',
+    'dialogue-narrator',
   ] as const) {
     const notes = notesForCue(cue)
     assert.ok(notes.length > 0 && notes.length <= 4)

@@ -1,111 +1,3 @@
-.guidance-dialog,
-.prologue-dialog {
-  width: min(980px, calc(100vw - 32px));
-  max-width: none;
-  max-height: calc(100dvh - 32px);
-  padding: 0;
-  border: 1px solid #d9dfd1;
-  border-radius: 24px;
-  background: #f8f9f3;
-  color: #253c2e;
-  box-shadow: 0 28px 100px #11271e66;
-  overflow: auto;
-}
-.guidance-dialog::backdrop,
-.prologue-dialog::backdrop {
-  background: #12251ee0;
-  backdrop-filter: blur(7px);
-}
-.guidance-header,
-.prologue-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 28px 32px 20px;
-}
-.guidance-eyebrow {
-  color: #829077;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  font-weight: 600;
-}
-.guidance-header h2,
-.prologue-header h2 {
-  margin: 8px 0 0;
-  font-size: 27px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-}
-.guidance-close {
-  border: 1px solid #d9dfd1;
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  font-size: 24px;
-  background: #fff;
-  color: #526851;
-  cursor: pointer;
-}
-.lesson-progress {
-  display: flex;
-  gap: 5px;
-  padding: 0 32px;
-}
-.lesson-progress span {
-  height: 3px;
-  flex: 1;
-  border-radius: 2px;
-  background: #e0e5da;
-}
-.lesson-progress .done {
-  background: #8da889;
-}
-.lesson-progress .current {
-  background: #b68b48;
-}
-.guidance-layout {
-  display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
-  gap: 32px;
-  padding: 28px 32px;
-}
-.lesson-number {
-  font-size: 46px;
-  color: #a6b49b;
-  font-family: Georgia, serif;
-  font-style: italic;
-  line-height: 1;
-}
-.lesson-note h3 {
-  font-size: 21px;
-  margin: 16px 0;
-}
-.lesson-note p {
-  font-size: 14px;
-  line-height: 1.95;
-}
-.lesson-note > small {
-  font-size: 10px;
-  color: #829077;
-}
-.lesson-feedback {
-  min-height: 46px;
-  color: #678347;
-  font-weight: 500;
-}
-.practice-vitals {
-  border-top: 1px solid #dce4d4;
-  border-bottom: 1px solid #dce4d4;
-  padding: 12px 0;
-  margin: 16px 0;
-  font-variant-numeric: tabular-nums;
-}
-.lesson-workspace {
-  min-width: 0;
-  align-self: center;
-}
 .practice-board-wrap {
   background: #eef1e7;
   padding: 14px;
@@ -166,51 +58,6 @@
 .practice-safe {
   color: #468161;
 }
-.practice-dock {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 18px;
-}
-.practice-dock button {
-  min-height: 60px;
-  border: 1px solid #c9d6bf;
-  border-radius: 12px;
-  padding: 7px 10px;
-  background: #fffef8;
-  color: #39523b;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex: 1;
-  min-width: 0;
-}
-.practice-dock .mode-cycle {
-  background: #365f43;
-  color: #fff;
-}
-.practice-dock img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-}
-.practice-dock svg {
-  width: 22px;
-  height: 22px;
-}
-.practice-dock small {
-  font-size: 9px;
-}
-.practice-dock strong,
-.practice-dock span {
-  font-size: 11px;
-  white-space: nowrap;
-}
-.practice-dock .selected {
-  outline: 2px solid #b68b48;
-}
 .practice-twins {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -229,52 +76,6 @@
 .practice-twins .practice-dock {
   grid-column: 1 / -1;
 }
-.guidance-footer,
-.prologue-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  border-top: 1px solid #dce3d5;
-  padding: 18px 32px;
-}
-.guidance-footer > span {
-  font-size: 10px;
-  color: #84917a;
-}
-.guidance-footer .primary-button,
-.prologue-footer .primary-button {
-  background: #345d41;
-  min-height: 44px;
-  padding: 12px 24px;
-}
-.prologue-dialog {
-  background: #171f24;
-  color: #f3ead6;
-  border-color: #4a4940;
-}
-.prologue-header p {
-  color: #a6ab9f;
-  font-size: 12px;
-  margin: 9px 0 0;
-  letter-spacing: 0.13em;
-}
-.prologue-header .text-button,
-.prologue-footer .text-button {
-  color: #b7c1b3;
-  min-height: 44px;
-}
-.prologue-stage {
-  position: relative;
-  min-height: 280px;
-  padding: 24px 30px;
-  display: grid;
-  grid-template-columns: 1fr 1.8fr 1fr;
-  align-items: center;
-  gap: 20px;
-  overflow: hidden;
-  background: radial-gradient(ellipse at 50% 70%, #4a554134, transparent 65%);
-}
 .scene-aura {
   position: absolute;
   width: 320px;
@@ -287,29 +88,6 @@
     0 0 0 18px #a4905810,
     0 0 0 48px #a4905805;
   pointer-events: none;
-}
-.scene-portrait {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-}
-.scene-portrait img {
-  width: 100%;
-  max-width: 190px;
-  height: 180px;
-  object-fit: contain;
-  filter: drop-shadow(0 14px 20px #0006);
-  transition:
-    transform 0.6s ease,
-    filter 0.6s ease;
-}
-.scene-portrait span {
-  font-size: 10px;
-  color: #a2af9e;
-  margin-top: 16px;
-  letter-spacing: 0.08em;
 }
 .scene-map {
   display: grid;
@@ -342,70 +120,6 @@
 .scene-objective {
   background: #d6b76b30;
 }
-.prologue-dialog[data-focus='objective'] .scene-objective {
-  outline: 1px solid #d2bb73;
-  box-shadow: 0 0 18px #e2c7798a;
-  animation: practice-pulse 2s ease-in-out infinite;
-}
-.prologue-dialog[data-focus='player'] .scene-hero img,
-.prologue-dialog[data-focus='boss'] .scene-enemy img {
-  transform: scale(1.12);
-  filter: drop-shadow(0 0 24px #c5d8a647);
-}
-.prologue-dialog[data-focus='field'] .scene-map {
-  transform: perspective(700px) rotateX(0) scale(1.05);
-}
-.prologue-dialogue {
-  display: grid;
-  grid-template-columns: 65px 1fr;
-  gap: 20px;
-  align-items: start;
-  padding: 24px 32px;
-  margin: 0 24px 24px;
-  border: 1px solid #b7b08b33;
-  background: #232f3090;
-  border-radius: 15px;
-  min-height: 164px;
-}
-.dialogue-portrait {
-  width: 64px;
-  height: 64px;
-  background: #d3dac412;
-  border-radius: 50%;
-  padding: 7px;
-}
-.dialogue-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.prologue-dialogue strong {
-  font-size: 11px;
-  color: #cbb883;
-  letter-spacing: 0.08em;
-}
-.prologue-dialogue p {
-  margin: 10px 0 0;
-  font-size: 16px;
-  line-height: 1.95;
-  animation: dialogue-in 0.35s ease both;
-}
-.prologue-dialogue[data-speaker='player'] p {
-  font-style: italic;
-  color: #c7d8c9;
-}
-.prologue-footer {
-  border-color: #b7b08b22;
-}
-.prologue-footer > span {
-  font-size: 16px;
-  color: #d0bc87;
-  font-variant-numeric: tabular-nums;
-}
-.prologue-footer i {
-  font-style: normal;
-  color: #69796e;
-}
 @keyframes dialogue-in {
   from {
     opacity: 0;
@@ -423,49 +137,6 @@
   }
 }
 @media (max-width: 650px) {
-  .guidance-dialog,
-  .prologue-dialog {
-    width: calc(100vw - 16px);
-    max-height: calc(100dvh - 16px);
-    border-radius: 18px;
-  }
-  .guidance-header,
-  .prologue-header {
-    padding: 18px 18px 14px;
-    gap: 10px;
-  }
-  .guidance-header h2,
-  .prologue-header h2 {
-    font-size: 21px;
-  }
-  .guidance-layout {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 16px 18px;
-  }
-  .lesson-progress {
-    padding-inline: 18px;
-  }
-  .lesson-number {
-    font-size: 25px;
-    float: left;
-    margin-right: 10px;
-  }
-  .lesson-note h3 {
-    font-size: 17px;
-    margin: 0 0 10px;
-  }
-  .lesson-note p {
-    font-size: 12px;
-    line-height: 1.8;
-    margin: 10px 0;
-  }
-  .lesson-note .lesson-feedback {
-    min-height: 0;
-  }
-  .lesson-note > small {
-    font-size: 9px;
-  }
   .practice-board-wrap {
     max-width: 340px;
     margin: auto;
@@ -481,36 +152,6 @@
   .practice-twins .practice-cell {
     min-height: 44px;
   }
-  .practice-dock {
-    margin-top: 10px;
-    gap: 5px;
-  }
-  .guidance-footer,
-  .prologue-footer {
-    padding: 12px 18px;
-    gap: 8px;
-    position: sticky;
-    bottom: 0;
-    background: #f8f9f3;
-  }
-  .guidance-footer > span {
-    display: none;
-  }
-  .prologue-footer {
-    background: #171f24;
-  }
-  .prologue-stage {
-    min-height: 175px;
-    grid-template-columns: 65px 1fr 90px;
-    gap: 8px;
-    padding: 12px 14px;
-  }
-  .scene-portrait img {
-    height: 100px;
-  }
-  .scene-portrait span {
-    display: none;
-  }
   .scene-aura {
     width: 180px;
     height: 180px;
@@ -522,36 +163,13 @@
   .scene-tile {
     font-size: 4px;
   }
-  .prologue-dialogue {
-    grid-template-columns: 36px 1fr;
-    gap: 12px;
-    padding: 17px 14px;
-    margin: 0 12px 16px;
-    min-height: 185px;
-  }
-  .dialogue-portrait {
-    width: 36px;
-    height: 36px;
-    padding: 3px;
-  }
-  .prologue-dialogue p {
-    font-size: 14px;
-    line-height: 1.9;
-  }
-  .prologue-header > button {
-    font-size: 10px;
-    flex-shrink: 0;
-    padding: 0;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .practice-target,
-  .prologue-dialog[data-focus='objective'] .scene-objective,
-  .prologue-dialogue p {
+  .practice-target {
     animation: none;
   }
-  .scene-map,
-  .scene-portrait img {
+
+  .scene-map {
     transition: none;
   }
 }
@@ -572,243 +190,8 @@ dialog:has(.battle-guide) > h2 {
   color: #61715c;
   margin: 0 48px 20px 0;
 }
-.battle-guide-hero {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 20px 28px;
-  background: #223b31;
-  border-radius: 16px;
-  color: #f4f0db;
-}
-.battle-guide-hero > img {
-  width: 104px;
-  height: 116px;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 12px #0004);
-}
-.battle-guide-hero span {
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: #b3c3a8;
-}
-.battle-guide-hero h3 {
-  font-size: 28px;
-  margin: 8px 0;
-}
-.battle-guide-hero p {
-  color: #d6dfcf;
-  font-size: 12px;
-  margin: 0;
-}
-.battle-guide-plan {
-  padding: 22px 0 8px;
-}
-.battle-guide h3 {
-  line-height: 1.4;
-}
-.battle-guide-plan h3,
-.battle-guide-costs h3 {
-  font-size: 16px;
-  margin: 0 0 10px;
-}
-.battle-guide-plan p,
-.battle-guide-cards p,
-.battle-guide-rules p {
-  font-size: 13px;
-  line-height: 1.9;
-  color: #536350;
-  margin: 0;
-}
-.battle-guide-flow {
-  display: flex;
-  list-style: none;
-  gap: 16px;
-  padding: 14px 0 22px;
-  margin: 0;
-}
-.battle-guide-flow li {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex: 1;
-  font-size: 12px;
-  color: #38573e;
-}
-.battle-guide-flow li > span {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: #dfe8d6;
-  font-variant-numeric: tabular-nums;
-}
-.battle-guide-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-.battle-guide-cards > section {
-  padding: 20px;
-  border: 1px solid #dae1d3;
-  border-radius: 14px;
-  background: #fffef9;
-}
-.battle-guide-number {
-  color: #a28c53;
-  font-size: 12px;
-}
-.battle-guide-cards h3 {
-  font-size: 15px;
-  margin: 8px 0 12px;
-}
-.battle-guide-costs {
-  margin: 22px 0 8px;
-  padding: 18px;
-  background: #eaf0e3;
-  border-radius: 14px;
-}
-.battle-guide-costs > div {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-}
-.battle-guide-costs > div > span {
-  font-size: 11px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.battle-guide-costs strong {
-  font-size: 19px;
-  color: #34573d;
-}
-.battle-guide-costs p {
-  font-size: 11px;
-  margin: 16px 0 0;
-}
-.battle-guide-costs p strong {
-  font-size: 12px;
-}
-.battle-guide-rules {
-  border-bottom: 1px solid #dce3d5;
-}
-.battle-guide-rules summary {
-  padding: 15px 0;
-  font-size: 13px;
-  cursor: pointer;
-  min-height: 44px;
-}
-.battle-guide-rules p {
-  padding: 0 0 18px;
-}
 @media (max-width: 650px) {
   dialog:has(.battle-guide) {
     padding: 20px 16px;
   }
-  .battle-guide-hero {
-    padding: 16px;
-    gap: 14px;
-  }
-  .battle-guide-hero > img {
-    width: 76px;
-    height: 92px;
-  }
-  .battle-guide-hero h3 {
-    font-size: 23px;
-  }
-  .battle-guide-cards {
-    grid-template-columns: 1fr;
-  }
-  .battle-guide-cards > section {
-    padding: 16px;
-  }
-  .battle-guide-flow {
-    gap: 8px;
-  }
-  .battle-guide-flow li {
-    flex-direction: column;
-    align-items: flex-start;
-    font-size: 11px;
-    line-height: 1.6;
-  }
-}
-
-.boss-picture-steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.boss-picture-steps li {
-  padding: 14px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-}
-.boss-mini-board {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 3px;
-  max-width: 260px;
-  margin: auto;
-}
-.boss-mini-board span {
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  background: #e9efe7;
-  border-radius: 5px;
-  min-width: 0;
-  color: #426d53;
-  font-size: 1.2rem;
-}
-.boss-mini-board span.mini-danger {
-  background: #f1ddd4;
-}
-.boss-mini-board img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.boss-picture-steps p {
-  display: flex;
-  gap: 9px;
-  line-height: 1.6;
-  margin: 14px 0 0;
-}
-.boss-picture-steps b {
-  color: #47785a;
-}
-.boss-cost-line {
-  font-size: 0.8rem;
-  color: var(--muted);
-  line-height: 1.8;
-  margin: 18px 0;
-}
-@media (max-width: 620px) {
-  .boss-picture-steps {
-    grid-template-columns: 1fr;
-  }
-  .boss-picture-steps li {
-    display: grid;
-    grid-template-columns: minmax(110px, 40%) 1fr;
-    gap: 12px;
-    align-items: center;
-  }
-  .boss-picture-steps p {
-    margin: 0;
-  }
-  .boss-mini-board {
-    width: 100%;
-  }
-}
-
-.boss-mini-board .mini-echo img {
-  opacity: 0.45;
-  filter: sepia(1) hue-rotate(180deg);
 }

@@ -1,3 +1,4 @@
+import { guidanceStyles } from './guidance-styles.js'
 import { message } from '../i18n.js'
 import { battleCopy } from './battle-presentation.js'
 
@@ -118,10 +119,10 @@ export function battleGuide(language: Language, run: Expedition): string {
                   },
                 ]
   const copy = battleCopy(language, boss.kind)
-  return `<article class="battle-guide battle-guide-visual"><header class="battle-guide-hero">${spriteImage(bossSprite(boss))}<div><h3>${copy.name}</h3><p>${message(language, 'battle-guide.three-moves-to-learn-the-fight')}</p></div></header><ol class="boss-picture-steps">${steps
+  return `<article class="battle-guide ${guidanceStyles['battle-guide']} battle-guide-visual"><header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${spriteImage(bossSprite(boss))}<div><h3>${copy.name}</h3><p>${message(language, 'battle-guide.three-moves-to-learn-the-fight')}</p></div></header><ol class="boss-picture-steps ${guidanceStyles['boss-picture-steps']}">${steps
     .map(
       (entry, index) =>
-        `<li><div class="boss-mini-board" aria-hidden="true">${Array.from(
+        `<li><div class="boss-mini-board ${guidanceStyles['boss-mini-board']}" aria-hidden="true">${Array.from(
           { length: 15 },
           (_, cell) => {
             const retreat =
@@ -135,5 +136,5 @@ export function battleGuide(language: Language, run: Expedition): string {
     )
     .join(
       '',
-    )}</ol><p class="boss-cost-line">${message(language, 'battle-guide.move-1-cell-reveal-1-strike-2')}</p><details class="battle-guide-rules"><summary>${message(language, 'battle-guide.full-rules')}</summary>${copy.help.map((line) => `<p>${line}</p>`).join('')}</details></article>`
+    )}</ol><p class="boss-cost-line ${guidanceStyles['boss-cost-line']}">${message(language, 'battle-guide.move-1-cell-reveal-1-strike-2')}</p><details class="battle-guide-rules ${guidanceStyles['battle-guide-rules']}"><summary>${message(language, 'battle-guide.full-rules')}</summary>${copy.help.map((line) => `<p>${line}</p>`).join('')}</details></article>`
 }

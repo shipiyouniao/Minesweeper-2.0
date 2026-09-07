@@ -38,6 +38,12 @@ function note(frequency: number, delay = 0, duration = 0.09): Tone {
 /** Compose original, lightweight cues without recordings, downloads, or runtime randomness. */
 export function notesForCue(cue: SoundCue): readonly Tone[] {
   switch (cue) {
+    case 'dialogue-player':
+      return [{ ...note(980, 0, 0.022), endFrequency: 1120, gain: 0.018 }]
+    case 'dialogue-boss':
+      return [{ ...note(260, 0, 0.028), endFrequency: 190, gain: 0.025 }]
+    case 'dialogue-narrator':
+      return [{ ...note(580, 0, 0.02), gain: 0.014 }]
     case 'sonar-pulse':
       return [
         { ...note(1040, 0, 0.34), endFrequency: 780, gain: 0.045 },
@@ -86,6 +92,9 @@ export function notesForCue(cue: SoundCue): readonly Tone[] {
 /** Prefer action results over menu dismissal or key feedback from the same gesture. */
 export function cuePriority(cue: SoundCue): number {
   switch (cue) {
+    case 'dialogue-player':
+    case 'dialogue-boss':
+    case 'dialogue-narrator':
     case 'navigate':
     case 'input':
     case 'dismiss':
