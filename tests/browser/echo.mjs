@@ -58,6 +58,44 @@ try {
       await target.click()
       await page.locator('.expedition-sonar-log li').first().waitFor()
       assert.equal(await page.locator('.expedition-sonar-log li').count(), 1)
+      const panelStyle = await page.locator('.expedition-sonar-log').evaluate((element) => {
+        const css = getComputedStyle(element)
+        return {
+          padding: css.paddingTop,
+          radius: css.borderTopLeftRadius,
+          border: css.borderTopWidth,
+        }
+      })
+      assert.deepEqual(panelStyle, { padding: '12px', radius: '14px', border: '1px' })
+      const readingButton = page.locator('[data-sonar-reading]').first()
+      const readingStyle = () =>
+        readingButton.evaluate((element) => {
+          const css = getComputedStyle(element)
+          return {
+            background: css.backgroundColor,
+            border: css.borderTopColor,
+            width: css.borderTopWidth,
+          }
+        })
+      const activeStyle = {
+        background: 'rgb(230, 240, 235)',
+        border: 'rgb(157, 189, 175)',
+        width: '1px',
+      }
+      if (width === 1280) {
+        await readingButton.hover()
+        assert.deepEqual(await readingStyle(), activeStyle)
+        await page.mouse.move(0, 0)
+      }
+      await page.keyboard.press('Tab')
+      await readingButton.focus()
+      assert.deepEqual(await readingStyle(), activeStyle)
+      await readingButton.click()
+      await page.locator('[data-control="end-turn"]').focus()
+      await page.mouse.move(0, 0)
+      assert.equal(await readingButton.getAttribute('aria-pressed'), 'true')
+      assert.deepEqual(await readingStyle(), activeStyle)
+
       const saved = await page.evaluate(() =>
         localStorage.getItem('minesweeper.variants.v1.expedition'),
       )

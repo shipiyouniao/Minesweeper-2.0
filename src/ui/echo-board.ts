@@ -62,19 +62,19 @@ export function expeditionReadings(language: Language, run: Expedition): string 
             : reading.resonance
               ? message(language, 'echo.present')
               : message(language, 'echo.absent')
-      return `<li><button type="button" data-sonar-reading="${reading.center}"><span>${mine}</span>${resonance ? `<small>${resonance}</small>` : ''}</button></li>`
+      return `<li class="tw:py-1"><button class="tw:block tw:w-full tw:rounded-lg tw:border tw:border-solid tw:border-transparent tw:bg-transparent tw:p-1.5 tw:text-start tw:text-ink tw:hover:bg-accent-soft tw:hover:border-accent-line tw:focus-visible:bg-accent-soft tw:focus-visible:border-accent-line tw:aria-pressed:bg-accent-soft tw:aria-pressed:border-accent-line" type="button" data-sonar-reading="${reading.center}"><span>${mine}</span>${resonance ? `<small class="tw:block tw:text-accent">${resonance}</small>` : ''}</button></li>`
     })
     .join('')
   const status = e
     ? message(language, 'echo.loan', { charges: run.sonar.loan, progress: run.sonar.loanProgress })
     : `${message(language, 'sonar-equipment.name')} · ${run.sonar.charges}/3 · ${run.sonar.progress}/12`
-  return `<section class="expedition-sonar-log"><strong>${status}</strong>${
+  return `<section class="expedition-sonar-log tw:rounded-panel tw:border tw:border-solid tw:border-line tw:bg-surface tw:p-3 tw:text-caption"><strong>${status}</strong>${
     e
-      ? `<p>${message(language, 'echo.candidates', {
+      ? `<p class="tw:my-2">${message(language, 'echo.candidates', {
           bodies: echoCandidates(run)
             .map((index) => e.bodies.indexOf(index) + 1)
             .join(' · '),
         })}</p>`
       : ''
-  }<ol>${items}</ol></section>`
+  }<ol class="tw:mt-2 tw:mb-0 tw:max-h-40 tw:overflow-auto tw:pl-5">${items}</ol></section>`
 }
