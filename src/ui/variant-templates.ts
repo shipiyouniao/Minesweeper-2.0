@@ -130,7 +130,7 @@ export function expeditionTemplate(
       <button class="secondary-button retreat-button" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button></div>`
           : ''
       }
-      <details class="relic-menu" data-relic-menu><summary><span>${spriteImage('treasure')}${t.relics}</span><strong>${run.relics.length}</strong></summary>${relics ? `<ul class="relic-list">${relics}</ul>` : `<p class="variant-note">${t.noRelics}</p>`}</details>
+      <details class="relic-menu tw:my-3 tw:mx-0 tw:overflow-hidden tw:rounded-2xl tw:border tw:border-solid tw:border-[#d7dfd2] tw:bg-[#fffef9]" data-relic-menu><summary class="tw:flex tw:min-h-[58px] tw:cursor-pointer tw:list-none tw:items-center tw:justify-between tw:gap-3.5 tw:px-4 tw:py-3 tw:hover:bg-accent-soft tw:focus-visible:bg-accent-soft"><span class="tw:flex tw:items-center tw:gap-[9px] tw:text-[13px] tw:font-semibold">${spriteImage('treasure')}${t.relics}</span><strong>${run.relics.length}</strong></summary>${relics ? `<ul class="relic-list">${relics}</ul>` : `<p class="variant-note">${t.noRelics}</p>`}</details>
 
       <ul class="scan-results">${run.scannedRows.map((row) => `<li>${common.row} ${row + 1}: <strong>${run.game.cells.slice(row * run.game.config.width, (row + 1) * run.game.config.width).filter((cell) => cell.mine).length}</strong> ${t.rowMines}</li>`).join('')}</ul>
     </aside></div></div>`

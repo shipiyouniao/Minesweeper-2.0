@@ -33,6 +33,13 @@ try {
       await page.locator('.echo-body').first().waitFor()
       const skip = page.locator('[data-scene="skip"]')
       if (await skip.isVisible()) await skip.click()
+      assert.deepEqual(
+        await page.locator('[data-relic-menu] > summary img').evaluate((icon) => {
+          const rect = icon.getBoundingClientRect()
+          return { width: rect.width, height: rect.height }
+        }),
+        { width: 28, height: 28 },
+      )
       assert.equal(await page.locator('.echo-body').count(), 3)
       assert.equal(await page.locator('.boss-cell').count(), 3)
       assert.equal(await page.locator('.echo-located').count(), 0)

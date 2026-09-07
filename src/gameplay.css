@@ -238,30 +238,6 @@ body {
   width: 200px;
   height: 68px;
 }
-.relic-menu {
-  background: #fffef9;
-  border: 1px solid #d7dfd2;
-  border-radius: 16px;
-  overflow: hidden;
-  margin: 12px 0;
-}
-.relic-menu > summary {
-  min-height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  cursor: pointer;
-  gap: 14px;
-  list-style: none;
-}
-.relic-menu > summary span {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-weight: 600;
-  font-size: 13px;
-}
 .relic-menu > summary img {
   width: 28px;
   height: 28px;
