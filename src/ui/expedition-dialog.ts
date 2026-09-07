@@ -1,3 +1,4 @@
+import { gameplayStyles } from './gameplay-styles.js'
 import type { Language } from '../types/localization.js'
 import type { Expedition } from '../types/variants.js'
 import type { ExpeditionDialogPhase } from '../types/variant-ui.js'
@@ -16,7 +17,7 @@ export class ExpeditionDialog {
     this.root = root
     this.language = language
     this.dialog = document.createElement('dialog')
-    this.dialog.className = 'expedition-dialog'
+    this.dialog.className = `expedition-dialog ${gameplayStyles['expedition-dialog']}`
     this.dialog.setAttribute('aria-labelledby', 'expedition-dialog-title')
     root.append(this.dialog)
     this.dialog.addEventListener('close', this.restoreFocus, { signal: this.listeners.signal })

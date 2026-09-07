@@ -1,3 +1,4 @@
+import { gameplayStyles } from './gameplay-styles.js'
 import { RANKED_DIFFICULTIES } from '../game/difficulty.js'
 import { compareSonar, SONAR_CHARGES } from '../game/sonar.js'
 import { translations } from '../i18n.js'
@@ -32,7 +33,7 @@ export function sonarTemplate(language: Language, state: Sonar): string {
     <p class="sonar-storage" role="status"></p>${sonarDifficulties(language, state.difficulty)}
     <div class="sonar-layout"><section class="sonar-board-panel"><div class="sonar-board-heading"><span>${state.game.config.width} × ${state.game.config.height} · ${state.game.config.mines} ${s.mines}</span><button class="icon-button" data-control="zoom" aria-label="${s.zoom}">${icon('globe')}</button></div><div class="sonar-play-area"><div class="board-viewport"><div class="sonar-grid-wrap"><div class="board" role="grid" aria-label="${s.title}"></div><svg class="sonar-overlay" aria-hidden="true"></svg><div class="sonar-pulse" aria-hidden="true"></div></div></div><div class="sonar-pause" hidden><p>${t.paused}</p><button class="primary-button" data-control="pause">${t.resume}</button></div></div></section>
     <aside class="sonar-sidebar"><section class="sonar-instrument-panel"><div class="sonar-dial" aria-hidden="true">${sonarIcon()}</div><div class="sonar-counters"></div><p class="sonar-status" role="status" aria-live="polite"></p><button class="secondary-button" data-control="new">${icon('reset')} ${t.restart}</button></section><section class="sonar-log-panel"><h2>${s.history}</h2><div class="sonar-log"></div><div class="sonar-comparison"></div></section></aside></div>
-    </main><div class="action-dock sonar-dock"><button class="dock-slot sonar-scan" data-control="scan">${sonarIcon()}<strong>${s.scan}</strong><small><span class="sonar-charge-count">${SONAR_CHARGES}</span></small></button><div class="sonar-mode"></div><p class="sonar-target-hint"></p></div>
+    </main><div class="action-dock ${gameplayStyles['action-dock']} sonar-dock ${gameplayStyles['sonar-dock']}"><button class="dock-slot sonar-scan" data-control="scan">${sonarIcon()}<strong>${s.scan}</strong><small><span class="sonar-charge-count">${SONAR_CHARGES}</span></small></button><div class="sonar-mode"></div><p class="sonar-target-hint ${gameplayStyles['sonar-target-hint']}"></p></div>
     <dialog class="sonar-dialog" aria-labelledby="sonar-dialog-title"><div class="sonar-dialog-content"></div></dialog>`
 }
 

@@ -1,3 +1,4 @@
+import { gameplayStyles } from './gameplay-styles.js'
 import { combatStats } from '../game/combat-build.js'
 import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
@@ -121,5 +122,5 @@ export function combatStatsTemplate(language: Language, run: Expedition): string
   const entries = sources
     .map((source) => `<li><strong>${source.name}</strong> · ${source.note}</li>`)
     .join('')
-  return `<div class="combat-stats"><span>${message(language, 'battle-presentation.attack')} <strong>${stats.attack}</strong></span><span>${message(language, 'battle-presentation.defense')} <strong>${stats.defense}</strong></span><span>${message(language, 'battle-presentation.turn-ap')} <strong>${stats.actions}</strong></span></div><details class="combat-sources"><summary>${message(language, 'battle-presentation.build-effects')}</summary><p>${message(language, 'battle-presentation.base-5-attack-0-defense-3-ap')}</p>${entries ? `<ul>${entries}</ul>` : ''}</details>`
+  return `<div class="combat-stats ${gameplayStyles['combat-stats']}"><span>${message(language, 'battle-presentation.attack')} <strong>${stats.attack}</strong></span><span>${message(language, 'battle-presentation.defense')} <strong>${stats.defense}</strong></span><span>${message(language, 'battle-presentation.turn-ap')} <strong>${stats.actions}</strong></span></div><details class="combat-sources ${gameplayStyles['combat-sources']}"><summary>${message(language, 'battle-presentation.build-effects')}</summary><p>${message(language, 'battle-presentation.base-5-attack-0-defense-3-ap')}</p>${entries ? `<ul>${entries}</ul>` : ''}</details>`
 }
