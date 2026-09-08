@@ -9,7 +9,7 @@ export const zhMessages: MessageCatalog = {
   'survey.legend': '连续雷段',
   'survey.hint': '根据边缘线索，翻开安全格。',
   'survey.bookkeeping': '“2 1”：两颗相连的雷，隔开后再有一颗。插错旗仍可能踩雷。',
-  'survey.line-action': '双击或双点快速开这一行／列，也可按 Enter 或空格。',
+  'survey.line-action': '点击快速开这一行／列，也可按 Enter 或空格。',
   'survey.line': '第 {number} {axis}：雷段 {runs} · 已插旗 {flags}',
   'survey.moves': '操作数',
   'survey.remaining': '待开安全格',

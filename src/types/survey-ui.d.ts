@@ -63,8 +63,3 @@ export interface SurveyHeaderHold extends SurveyHeader {
   readonly y: number
   readonly started: number
 }
-
-/** Only two completed taps on the same clue within the interval form a double tap. */
-export interface SurveyHeaderTap extends SurveyHeader {
-  readonly time: number
-}

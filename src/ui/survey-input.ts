@@ -3,7 +3,6 @@ import type {
   SurveyCommand,
   SurveyHeader,
   SurveyHeaderHold,
-  SurveyHeaderTap,
   SurveyHold,
   SurveyInputActions,
 } from '../types/survey-ui.js'
@@ -36,7 +35,6 @@ export class SurveyInput {
   private readonly rightClick: BoardRightClick
   private hold: SurveyHold | null = null
   private headerHold: SurveyHeaderHold | null = null
-  private headerTap: SurveyHeaderTap | null = null
   private timer: number | undefined
   private suppressUntil = 0
 
@@ -50,7 +48,6 @@ export class SurveyInput {
     })
     const options = { signal: this.listeners.signal }
     root.addEventListener('click', this.click, options)
-    root.addEventListener('dblclick', this.doubleClick, options)
     root.addEventListener('keydown', this.key, options)
     root.addEventListener('focusin', this.focus, options)
     root.addEventListener('pointerover', this.over, options)
@@ -76,7 +73,6 @@ export class SurveyInput {
     clearTimeout(this.timer)
     this.timer = undefined
     this.headerHold = null
-    this.headerTap = null
     if (this.hold) {
       this.hold.cancelled = true
       this.suppressUntil = performance.now() + 700
@@ -100,8 +96,8 @@ export class SurveyInput {
     this.actions.unlock()
     const header = this.header(button)
     if (header) {
-      // Assistive activation has no pointer click count; ordinary pointer clicks only select.
-      if (event.detail === 0 && !this.actions.blocked && performance.now() >= this.suppressUntil)
+      // One click opens the line; ignore the second click of a double-click and synthetic touch clicks.
+      if (event.detail <= 1 && !this.actions.blocked && performance.now() >= this.suppressUntil)
         this.actions.openLine(header.axis, header.line)
       return
     }
@@ -119,21 +115,6 @@ export class SurveyInput {
       const command = surveyCommand(button.dataset['control'])
       if (command) this.actions.command(command)
     }
-  }
-
-  /** A mouse double-click opens its named line; touch has its own scroll-aware double-tap path. */
-  private readonly doubleClick = (event: MouseEvent): void => {
-    const header = this.header(event.target)
-    if (
-      !header ||
-      event.button !== 0 ||
-      this.actions.blocked ||
-      performance.now() < this.suppressUntil
-    )
-      return
-    event.preventDefault()
-    this.actions.unlock()
-    this.actions.openLine(header.axis, header.line)
   }
 
   /** Preserve board shortcuts without intercepting forms, dialogs or modified browser shortcuts. */
@@ -203,7 +184,6 @@ export class SurveyInput {
   /** Touch movement remains native; only a stationary hold is eligible for secondary marking. */
   private readonly down = (event: PointerEvent): void => {
     this.actions.unlock()
-    const previousTap = this.headerTap
     this.cancelGesture()
     this.hold = null
     this.suppressUntil = 0
@@ -217,8 +197,6 @@ export class SurveyInput {
     const header = this.header(event.target)
     if (header) {
       this.suppressUntil = performance.now() + 700
-      this.headerTap =
-        previousTap?.axis === header.axis && previousTap.line === header.line ? previousTap : null
       this.headerHold = {
         ...header,
         pointer: event.pointerId,
@@ -283,7 +261,7 @@ export class SurveyInput {
       this.actions.play(hold.index)
   }
 
-  /** Accept two short, stationary taps on the same clue and suppress the browser's duplicate click. */
+  /** Open the touched clue on one short, stationary tap and suppress the browser's duplicate click. */
   private finishHeaderTap(event: PointerEvent): void {
     const hold = this.headerHold
     this.headerHold = null
@@ -294,15 +272,9 @@ export class SurveyInput {
       this.actions.blocked ||
       now - hold.started > 400 ||
       Math.hypot(event.clientX - hold.x, event.clientY - hold.y) > 10
-    ) {
-      this.headerTap = null
+    )
       return
-    }
-    const previous = this.headerTap
-    if (previous?.axis === hold.axis && previous.line === hold.line && now - previous.time <= 400) {
-      this.headerTap = null
-      this.actions.openLine(hold.axis, hold.line)
-    } else this.headerTap = { axis: hold.axis, line: hold.line, time: now }
+    this.actions.openLine(hold.axis, hold.line)
   }
 
   /** Reject duplicate native menus from touch holds; keyboard context menus remain usable. */

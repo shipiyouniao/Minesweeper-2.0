@@ -87,9 +87,6 @@ try {
         const header = page.locator(`#survey-${axis}-0`)
         if (mobile) await header.tap()
         else await header.click()
-        assert.deepEqual(await journal(page), save, 'one tap/click only selects a clue')
-        if (mobile) await header.tap()
-        else await header.dblclick()
         const after = await journal(page)
         assert.deepEqual(after.actions, [...save.actions, { type: 'chord-line', axis, index: 0 }])
         const before = save.actions.reduce(actSurvey, initial)
@@ -102,6 +99,9 @@ try {
         await header.focus()
         await page.keyboard.press('Enter')
         assert.deepEqual(await journal(page), after, 'repeating a finished line is a no-op')
+        if (mobile) await header.tap()
+        else await header.dblclick()
+        assert.deepEqual(await journal(page), after, 'repeated pointer clicks never add moves')
         await page.reload()
         assert.deepEqual(await journal(page), after)
       }
@@ -114,10 +114,7 @@ try {
       }
       const save = await fixture(page, 'row', 0)
       if (mobile) {
-        await page.locator('#survey-row-0').tap()
-        await page.locator('#survey-row-1').tap()
-        assert.deepEqual(await journal(page), save, 'taps on different clues cannot pair')
-        // A native pan originating on a clue must clear a pending tap and preserve page scrolling.
+        // A native pan originating on a clue must cancel its activation and preserve page scrolling.
         const header = page.locator('#survey-row-0')
         await header.scrollIntoViewIfNeeded()
         const box = await header.boundingBox()
@@ -135,12 +132,18 @@ try {
           })
         await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
         await cdp.detach()
-        await header.tap()
         assert.deepEqual(await journal(page), save, 'scrolling never quick-opens a line')
+        await header.tap()
+        assert.deepEqual(
+          (await journal(page)).actions,
+          [...save.actions, { type: 'chord-line', axis: 'row', index: 0 }],
+          'a fresh tap works after scrolling',
+        )
       }
+      const beforePause = await fixture(page, 'row', 0)
       await page.locator('[data-control="pause"]').first().click()
-      await page.locator('#survey-row-0').dispatchEvent('dblclick', { button: 0 })
-      assert.deepEqual(await journal(page), save, 'privacy pause blocks header actions')
+      await page.locator('#survey-row-0').dispatchEvent('click', { button: 0, detail: 1 })
+      assert.deepEqual(await journal(page), beforePause, 'privacy pause blocks header actions')
       assert.deepEqual(errors, [])
       console.log(
         `Survey line controls ${language} ${width}: shared zoom, exact axis, gestures, keyboard, replay and pause passed`,
