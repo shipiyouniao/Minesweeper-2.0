@@ -505,7 +505,7 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
     if (
       boss === 'matrix' &&
       after.encounter?.kind === 'matrix' &&
-      after.encounter.reflections === 3
+      after.encounter.empty.length === 0
     )
       earned.push('matrix-precise')
     if (boss === 'echo' && !attempt.hurt) earned.push('echo-flawless')

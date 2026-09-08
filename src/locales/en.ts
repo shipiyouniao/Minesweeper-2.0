@@ -2,41 +2,52 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
-  'matrix.rest': 'The beam is resting. Calibrate when the red line returns.',
+  'matrix.quiet': 'Quiet turn',
+  'matrix.open-hint': 'Shield broken. Approach the core and strike.',
   'matrix.hunt': 'Break the Matrix',
   'matrix.hunt-note': 'Defeat the Matrix Overseer once.',
   'matrix.precise': 'Perfect Refraction',
-  'matrix.precise-note': 'Defeat the Matrix Overseer with exactly three reflected beams.',
-  'matrix.precise-effect': 'Attack +1 while the Matrix Overseer’s shield is open.',
-
+  'matrix.precise-note': 'Defeat the Matrix Overseer without an empty attunement.',
+  'matrix.precise-effect': 'Attack +1 while the Matrix Overseer’s shield is broken.',
   'matrix.name': 'Matrix Overseer',
   'matrix.deduce':
-    'Read the edge runs. Open or survey every safe square in the glowing line and flag its mines.',
+    'Use floor numbers to clear a safe route. Open Observe and read the crystal runs around its nine cells.',
   'matrix.calibrate':
-    'Approach the active prism and click it: 1 AP. End the turn to reflect its beam and open the shield.',
+    'Reveal a safe target and stand on it or an orthogonal neighbor. Attune for 1 AP. Two collected crystals break each shield.',
   'matrix.fight':
-    'Strike from an adjacent square: 2 AP. The shield stays open for four turns; each health band starts a new circuit.',
+    'Strike from beside the core: 2 AP. The shield stays broken. At half health, end the turn to begin the second crystal hunt.',
   'matrix.forecast':
-    'Red beams fire at turn end for 4 damage. Mint beams are your reflected route and can hit you too. Step clear before ending. Every third turn is quiet.',
+    'Red cells take a 4-damage attack at turn end. Every third turn is quiet; movement, attunement and attacks still work.',
   'matrix.gaps':
-    '“2 1” means two adjacent mines, at least one safe square, then one mine. The gap may be longer. Walls count as safe.',
-  'matrix.line': 'Finish this prism’s line first; matching the flag count alone is not enough.',
-  'matrix.shield': 'Reflect the active prism’s beam to break the shield.',
-  'matrix.phase': 'Circuit broken. End the turn to activate the next prism.',
-  'matrix.armed': 'Prism aligned. Clear the mint return path, then end the turn.',
-  'matrix.reflected': 'Beam reflected. Shield open for four turns.',
-  'matrix.shifted': 'Next circuit online. Follow the glowing prism.',
-  'matrix.status': 'Circuit {phase}/3 · open turns {window}',
-  'matrix.prism': 'Prism {number}',
-  'matrix.line-action':
-    'Open deduced safe squares in this line; distant squares become safety notes.',
-  'matrix.floor': 'Open floor · use the edge runs',
-  'matrix.legend': 'Red: incoming · mint: reflected · numbered diamonds: circuits',
-  'matrix.scene-0': 'The room draws its own boundaries',
-  'matrix.scene-1': 'The floor has no numbers. Ordered marks run along its edges.',
-  'matrix.scene-2': 'Every square belongs in my ledger. Account for them all.',
-  'matrix.scene-3': 'Those prisms face its core. I can turn its own light against it.',
-  'matrix.scene-4': 'A red line crosses the floor. The first prism begins to glow.',
+    'Observe counts crystals only. 1 1 means two crystals separated by at least one cell. Floor numbers count mines only; digging never uncovers crystals.',
+  'matrix.shield': 'Collect two crystals in the active observation region to break the shield.',
+  'matrix.phase': 'First health band cleared. End the turn to activate the second region.',
+  'matrix.armed': 'Two crystals delivered. Shield shattered.',
+  'matrix.shifted': 'Second region active. Collect two more crystals.',
+  'matrix.status': 'Phase {phase}/2 · crystals {count}/2',
+  'matrix.legend': 'Teal borders: observation region · red cells: attack at turn end',
+  'matrix.scene-0': 'Another light beneath the floor',
+  'matrix.scene-1':
+    'Mines lie below the tiles. A different glow slips past the numbers carved into them.',
+  'matrix.scene-2': 'You have found the mines. Have you really seen the room?',
+  'matrix.scene-3':
+    'The lens reveals the crystal pattern. Two should be enough to pierce its shield.',
+  'matrix.scene-4': 'A small patch of floor glows teal. The Overseer gathers its light.',
+  'matrix.observe': 'Observe',
+  'matrix.attune': 'Attune · 1 AP',
+  'matrix.attune-hint':
+    'Select Attune, then a target, or drag it onto a cell. Reveal safe ground first and stand on it or an orthogonal neighbor.',
+  'matrix.observation-hint': 'These runs count crystals. Collect any two each phase.',
+  'matrix.region': 'Observation region',
+  'matrix.ground': 'Reveal the safe target first. Mines and walls cannot be attuned.',
+  'matrix.region-only': 'Choose a cell in the active nine-cell region.',
+  'matrix.note': 'Crystal guess',
+  'matrix.empty-cell': 'Crystal ruled out',
+  'matrix.unresolved': 'Crystal unknown',
+  'matrix.select': 'Select a cell to locate it on the battlefield.',
+  'matrix.collected': 'Crystal collected',
+  'matrix.collected-event': 'Crystal collected. One more breaks the shield.',
+  'matrix.empty-event': 'No crystal here. 1 AP spent.',
 
   'survey.mines': 'mines',
   'survey.title': 'Survey',
@@ -395,7 +406,7 @@ export const enMessages: MessageCatalog = {
   'combat-build-copy.1-loadout-point-starting-and-maximum-health':
     '1 loadout point. Starting and maximum health +2.',
   'combat-build-copy.1-loadout-point-the-first-control-or':
-    '1 loadout point. The first control or seal disabled, nest destroyed, or anchor calibrated each turn refunds 1 AP.',
+    '1 loadout point. The first control or seal disabled, nest destroyed, anchor calibrated, or crystal shield broken each turn refunds 1 AP.',
   'combat-build-copy.1-loadout-point-the-first-web-egg':
     '1 loadout point. The first web, egg or hatchling cleared each turn refunds 1 AP.',
   'combat-build-copy.2-loadout-points-1-ap-on-even':
@@ -451,7 +462,7 @@ export const enMessages: MessageCatalog = {
   'journey-relic-copy.end-a-combat-turn-outside-the-warning':
     'End a combat turn outside the warning area to gain 1 shield. Once per floor; cap 2.',
   'journey-relic-copy.first-control-or-seal-disabled-or-anchor':
-    'First control or seal disabled, or anchor calibrated, each floor refunds 1 AP, up to 5.',
+    'First control or seal disabled, anchor calibrated, or crystal shield broken each floor refunds 1 AP, up to 5.',
   'journey-relic-copy.first-strike-each-floor-4-damage': 'First strike each floor: +4 damage.',
   'journey-relic-copy.in-combat-your-first-walk-of-2':
     'In combat, your first walk of 2 or more steps each turn costs 1 less AP. Minimum cost 1; reveals excluded.',

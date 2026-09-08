@@ -254,14 +254,18 @@ export class VariantApp implements VariantInputActions {
     const run = this.session.run
     if (!run || this.paused || this.moving || this.view.dialogOpen) return
 
+    const plan = tool === 'attune' ? tacticalPlan(run, { type: 'attune', index }) : null
     this.expedition(
-      tool === 'sonar'
-        ? { type: 'sonar', index }
-        : tool === 'probe'
-          ? { type: 'probe', index }
-          : { type: 'sweep', row: Math.floor(index / run.game.config.width) },
+      tool === 'attune'
+        ? { type: 'attune', index }
+        : tool === 'sonar'
+          ? { type: 'sonar', index }
+          : tool === 'probe'
+            ? { type: 'probe', index }
+            : { type: 'sweep', row: Math.floor(index / run.game.config.width) },
     )
     this.render()
+    if (plan && !plan.allowed) this.view.explainTactical(plan)
   }
 
   /** Route finite UI commands, preserving confirmation before destructive run replacement. */
@@ -296,7 +300,13 @@ export class VariantApp implements VariantInputActions {
       command.type !== 'records'
     )
       return
-    if (command.type !== 'probe' && command.type !== 'scan') this.cancelMovement()
+    if (
+      command.type !== 'probe' &&
+      command.type !== 'scan' &&
+      command.type !== 'sonar' &&
+      command.type !== 'attune'
+    )
+      this.cancelMovement()
 
     switch (command.type) {
       case 'equip-title':
@@ -411,11 +421,17 @@ export class VariantApp implements VariantInputActions {
         this.expedition({ type: 'skill' })
         break
       }
-      case 'matrix-row':
-      case 'matrix-column':
-        this.input.cancelTools()
-        this.expedition({ type: command.type, index: command.value })
-        this.view.focusPlayer()
+      case 'observe':
+        this.view.toggleObservation()
+        return
+      case 'matrix-pick':
+        this.view.selectObservation(command.value)
+        return
+      case 'attune-cell':
+        this.useTool('attune', command.value)
+        return
+      case 'mark-crystal':
+        this.expedition({ type: 'mark-crystal', index: command.value })
         break
       case 'attack':
         if (this.session instanceof ExpeditionSession && this.session.run?.encounter)
@@ -490,6 +506,7 @@ export class VariantApp implements VariantInputActions {
           this.result(this.session.purchase(command.value))
         break
       case 'sonar':
+      case 'attune':
       case 'probe':
       case 'scan':
         this.input.selectTool(command.type)

@@ -1,7 +1,9 @@
 /** Generated raster assets used by terrain, landmarks, character and tool controls. */
 export type DungeonSprite =
   | 'matrix-overseer'
-  | 'matrix-prism'
+  | 'matrix-crystal'
+  | 'matrix-observe'
+  | 'attune'
   | 'clock-mage'
   | 'clock-hourglass'
   | 'magnetic-knight'
@@ -63,7 +65,7 @@ export type DungeonSprite =
   | 'mine'
 
 /** Tools with an explicit area or row target; no implicit focus-derived target exists. */
-export type DungeonTool = 'probe' | 'scan' | 'sonar'
+export type DungeonTool = 'probe' | 'scan' | 'sonar' | 'attune'
 
 /** One owned pointer drag, independent from a keyboard-selected tool. */
 export interface ToolDrag {

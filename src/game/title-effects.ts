@@ -50,8 +50,7 @@ export function titleCombatStats(run: Expedition): CombatStats {
   let attack = 0
   let defense = 0
   let actions = 0
-  if (title === 'matrix-precise' && boss?.kind === 'matrix' && boss.exposedUntil >= boss.turn)
-    attack = 1
+  if (title === 'matrix-precise' && boss?.kind === 'matrix' && boss.exposed) attack = 1
   if (title === 'echo-flawless' && boss && run.health === run.maxHealth) defense = 1
   if (title === 'echo-precise' && boss?.kind === 'echo' && boss.exposedUntil >= boss.turn)
     attack = 1

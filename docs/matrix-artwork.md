@@ -1,18 +1,28 @@
 # Matrix Overseer artwork
 
-Two original transparent PNGs were generated with the built-in OpenAI image generator on 2026-09-08. The existing Echo Warden artwork was a visual style reference for the boss; the newly generated boss was the style reference for its prism. Both outputs are used directly, preserving their transparency. No third-party character or stock asset was used.
+Four original transparent PNGs were generated with the built-in OpenAI image generator on 2026-09-08. The existing Echo Warden art provided the boss's miniature brass-and-enamel style reference. The crystal-hunt redesign retains that boss and adds three separate inventory sprites, used directly with their generated transparency. The obsolete prism station asset has been removed.
 
-| File                                        | Use                                                               |
-| ------------------------------------------- | ----------------------------------------------------------------- |
-| `public/assets/dungeon/matrix-overseer.png` | Boss tile, combat panel, arrival dialogue and illustrated guide   |
-| `public/assets/dungeon/matrix-prism.png`    | Numbered station tiles, circuit strip, arrival dialogue and guide |
+| File                                        | Use                                                    |
+| ------------------------------------------- | ------------------------------------------------------ |
+| `public/assets/dungeon/matrix-overseer.png` | Boss tile, combat panel, arrival and illustrated guide |
+| `public/assets/dungeon/matrix-crystal.png`  | Collected terrain overlay, observation map and guide   |
+| `public/assets/dungeon/matrix-observe.png`  | Observation tool button                                |
+| `public/assets/dungeon/attune.png`          | Attunement tool button                                 |
 
-The repository's MIT license applies to its distributed assets. Beam routes, shield outlines, circuit numbers and impact flashes are browser-rendered overlays, so the same images remain readable under zoom, different languages and reduced motion.
+The repository's MIT license applies to its distributed assets. Public region borders, crystal delivery beams and shield fractures are browser-rendered overlays. Reduced motion preserves the static state change without travel animation. No third-party character or stock asset was used.
 
 ## Boss prompt
 
 Create one original transparent-background game boss sprite for this repository, using the reference only for the polished miniature brass-and-dark-enamel fantasy board-game rendering style. Character: MATRIX OVERSEER, a levitating compact geometric automaton with a large angular emerald crystalline eye/core, square dark teal shoulders and an orbiting segmented brass square frame. Clearly distinct from the round bell robot reference: no tuning forks, no fists, no bell silhouette. Small short legs or hovering diamond base, proud supervisory pose, facing slightly right. A few large geometric shapes, restrained brass/ivory/teal palette with mint light accents, excellent legibility at 40px. Single centered full body asset filling 85% of square canvas, generous clean silhouette, no labels or text or numbers, no ground, no scene, no cast shadow outside silhouette, actual transparent alpha background. The generated image will be copied into a public MIT-licensed game's assets folder.
 
-## Prism prompt
+## Crystal prompt
 
-Generate a single standalone floor mechanism sprite matching this Matrix Overseer character's brass, dark teal enamel, ivory and emerald miniature game-art style: a CALIBRATION PRISM, one large angular translucent mint/emerald triangular prism held in a squat square brass pedestal, a single broad directional chevron etched into the base, slightly elevated three-quarter front view. No character, no orbit ring, no scenery. Geometric, simple bold silhouette clear at 32px, centered full mechanism occupying 85% of square canvas, no lettering or digits, actual transparent alpha background, soft rendered highlights, no external ground shadow. This is one original game item asset for a public MIT-licensed game.
+Use case: stylized-concept. Asset type: transparent game inventory sprite, square. Create ONE refractive crystal shard, a compact emerald and turquoise faceted crystal with a small antique brass collar, ivory facet highlights, soft hand-painted isometric fantasy illustration. Centered isolated object fills 80% of square, strong readable silhouette at 32px, restrained details. Actual transparent background, no shadow outside object, no text, no frame, no watermark. This is a collectible crystal for a minimal ivory/forest-green Minesweeper tactical game.
+
+## Observation prompt
+
+Use case: stylized-concept. Asset type: ONE square transparent game tool sprite. Create a compact brass observation lens, a round emerald glass magnifier mounted over a small ivory three-by-three square mosaic plate. Subtle turquoise crystal glow within the lens. Hand-painted isometric fantasy inventory art, antique brass and dark forest green, ivory highlights, minimalist strong silhouette readable at 32px. Centered object fills 80% of square. Actual transparent background. No text, digits, logo, UI frame or watermark. Matches a restrained brass and emerald tactical Minesweeper game.
+
+## Attunement prompt
+
+Use case: stylized-concept. Asset type: ONE square transparent game tool sprite. A compact magical attunement tuning fork made of antique brass, two short rounded prongs framing a tiny floating emerald crystal, dark forest-green handle and an ivory grip band. Hand-painted isometric fantasy inventory art. Strong simple silhouette, readable at 32px, centered diagonal upright object occupies 80% square. Subtle cyan resonance arcs around the prongs kept inside object bounds. Actual transparent background. No lettering, logo, UI border or watermark. Restrained brass/emerald palette for a minimalist tactical Minesweeper game.

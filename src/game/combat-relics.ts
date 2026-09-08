@@ -40,7 +40,7 @@ export function applyCombatRelics(
   if (action.type === 'attack' && available(result, 'duelist-edge'))
     result = claim(result, 'duelist-edge')
   if (
-    action.type === 'interact' &&
+    (action.type === 'interact' || action.type === 'attune') &&
     after.encounter.event === 'disabled' &&
     (after.encounter.kind === 'matrix' ||
       after.encounter.kind === 'bastion' ||

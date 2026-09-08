@@ -10,7 +10,7 @@ All five expedition difficulties are selectable on the camp overview. The Missio
 | Achievement | Silent Footsteps: Defeat Echo Warden without losing health.                                                                   |      400 | Title ability                         |
 | Achievement | Perfect Pitch: Defeat Echo Warden using at most six scans.                                                                    |      400 | Title ability                         |
 | Mission     | Break the Matrix: Defeat Matrix Overseer once.                                                                                |      100 | —                                     |
-| Achievement | Perfect Refraction: Defeat Matrix Overseer with exactly three reflections.                                                    |      250 | Title ability                         |
+| Achievement | Perfect Refraction: Defeat Matrix Overseer without an empty attunement.                                                       |      250 | Title ability                         |
 | Achievement | Untouched bulwark: Defeat the bastion without losing health. Revival counts as damage.                                        |      400 | Title ability                         |
 | Achievement | Beyond the mirror: Defeat both twins without losing health. Revival counts as damage.                                         |      400 | Title ability                         |
 | Achievement | Against the clock: Defeat the clock boss using exactly one arena hourglass.                                                   |      400 | Title ability                         |

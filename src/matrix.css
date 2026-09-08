@@ -1,126 +1,161 @@
 .matrix-panel {
   min-width: 0;
-  container-type: inline-size;
 }
-.matrix-circuits {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-  padding: 0;
-  margin: 10px 12px;
-}
-.matrix-circuits li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 5px 9px;
-  font-size: 12px;
-}
-.matrix-circuits img {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-}
-.matrix-circuits [data-current='true'] {
-  background: var(--accent-soft);
-  border-color: var(--accent);
-}
-.matrix-circuits [data-cleared='true'] {
-  opacity: 0.45;
-}
+.matrix-progress,
 .matrix-legend {
   margin: 8px 12px 12px;
   font-size: 12px;
   color: var(--muted);
   line-height: 1.6;
 }
-.matrix-grid .cell {
-  overflow: visible;
-  isolation: isolate;
+.matrix-region-cell {
+  box-shadow: inset 0 0 0 2px #459d8a;
 }
-.matrix-grid .dungeon-sprite {
-  position: relative;
-  z-index: 2;
-}
-.matrix-station {
-  position: absolute;
-  right: 1px;
-  bottom: 0;
-  z-index: 3;
-  border-radius: 4px;
-  padding: 0 3px;
-  background: var(--surface);
-  color: var(--ink);
-  font: 600 11px var(--mono);
-}
-.matrix-active {
-  box-shadow: inset 0 0 0 2px #258875 !important;
-}
-.matrix-core {
-  box-shadow: inset 0 0 0 2px #dfa941 !important;
-}
-.matrix-core.matrix-exposed {
-  box-shadow: inset 0 0 0 2px #38ac8e !important;
-}
-/* Paths cross cell gaps; sticky bands and the scrollport clip their outer ends. */
-.matrix-ray-row::before,
-.matrix-ray-column::before,
-.matrix-return-row::after,
-.matrix-return-column::after {
-  content: '';
-  position: absolute;
-  pointer-events: none;
-  z-index: 1;
-  background: #bd654c;
-  opacity: 0.7;
-}
-.matrix-ray-row::before,
-.matrix-return-row::after {
-  left: -3px;
-  right: -3px;
-  top: calc(50% - 2px);
-  height: 4px;
-}
-.matrix-ray-column::before,
-.matrix-return-column::after {
-  top: -3px;
-  bottom: -3px;
-  left: calc(50% - 2px);
-  width: 4px;
-}
-.matrix-return-row::after,
-.matrix-return-column::after {
-  background: #2aa68b;
-  opacity: 0.95;
-  box-shadow: 0 0 5px #62d8b9;
-  animation: matrix-light 1s ease-in-out infinite alternate;
-}
-.matrix-pressure {
-  outline: 1px dashed #bd654c;
+.matrix-selected {
+  outline: 3px solid #286eaa;
   outline-offset: -4px;
 }
-.enlarged-boards .matrix-grid {
-  --cell: clamp(40px, 3vw, 60px);
+.matrix-crystal-note::after {
+  content: '◇';
+  position: absolute;
+  top: 0;
+  right: 2px;
+  color: #277f71;
+  font-size: 13px;
+  pointer-events: none;
 }
-@keyframes matrix-light {
-  from {
-    filter: brightness(0.8);
-  }
-  to {
-    filter: brightness(1.35);
-  }
+.matrix-crystal {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  width: 45%;
+  height: 55%;
+  pointer-events: none;
 }
-@media (prefers-reduced-motion: reduce) {
-  .matrix-grid .cell::after {
-    animation: none;
-  }
+.matrix-crystal img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
-
+.matrix-empty-cell::after {
+  content: '×';
+  position: absolute;
+  top: 0;
+  right: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.matrix-core {
+  box-shadow: inset 0 0 0 2px #dfa941;
+}
+.matrix-core.matrix-exposed {
+  box-shadow: inset 0 0 0 2px #38ac8e;
+}
+.matrix-observation {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  background: var(--surface);
+  min-width: 0;
+}
+.matrix-observation[hidden] {
+  display: none;
+}
+.matrix-observation-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.matrix-observation p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 8px 0;
+}
+.matrix-mini {
+  display: grid;
+  grid-template-columns: 38px repeat(3, minmax(36px, 54px));
+  gap: 4px;
+  justify-content: center;
+  align-items: stretch;
+  margin: 12px auto;
+}
+.matrix-mini-runs {
+  display: grid;
+  align-content: center;
+  text-align: center;
+  font: 600 13px var(--mono);
+  min-height: 36px;
+}
+.matrix-mini-cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 20px;
+  cursor: pointer;
+}
+.matrix-mini-cell[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 2px #286eaa;
+}
+.matrix-mini-cell:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.matrix-mini-cell img {
+  width: 75%;
+  height: 75%;
+  object-fit: contain;
+}
+.matrix-local-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.matrix-local-actions button {
+  flex: 1;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.matrix-target-cost {
+  min-height: 3.2em;
+}
+.matrix-target-label {
+  font-variant-numeric: tabular-nums;
+}
+.matrix-charge-beam {
+  position: fixed;
+  z-index: 80;
+  pointer-events: none;
+  height: 4px;
+  background: #5bdfbb;
+  box-shadow: 0 0 10px #34be9a;
+  transform-origin: left center;
+}
+.matrix-extraction {
+  animation: matrix-extraction 700ms ease-out;
+}
+.matrix-fracture {
+  animation: matrix-fracture 850ms ease-out;
+}
 .matrix-burst {
   animation: matrix-burst 650ms ease-out;
+}
+@keyframes matrix-extraction {
+  40% {
+    background: #b3e8d9;
+  }
+}
+@keyframes matrix-fracture {
+  35% {
+    box-shadow:
+      inset 0 0 0 5px #fff7cd,
+      0 0 20px #4bcca6;
+    filter: brightness(1.8);
+  }
 }
 @keyframes matrix-burst {
   from {
@@ -132,7 +167,19 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
+  .matrix-extraction,
+  .matrix-fracture,
   .matrix-burst {
     animation: none;
   }
+}
+
+.matrix-observation {
+  position: fixed;
+  z-index: 35;
+  right: 16px;
+  width: min(320px, calc(100vw - 24px));
+  box-sizing: border-box;
+  overflow: auto;
+  box-shadow: 0 12px 40px #23382a26;
 }

@@ -20,6 +20,8 @@ export type VariantCommand =
         | 'zoom'
         | 'camp'
         | 'sonar'
+        | 'attune'
+        | 'observe'
         | 'probe'
         | 'scan'
         | 'skill'
@@ -44,7 +46,10 @@ export type VariantCommand =
         | 'cancel'
     }
   | { readonly type: 'difficulty'; readonly value: VariantDifficulty }
-  | { readonly type: 'skill-target' | 'matrix-row' | 'matrix-column'; readonly value: number }
+  | {
+      readonly type: 'skill-target' | 'matrix-pick' | 'mark-crystal' | 'attune-cell'
+      readonly value: number
+    }
   | { readonly type: 'profession'; readonly value: Profession }
   | { readonly type: 'equipment'; readonly value: Equipment }
   | { readonly type: 'upgrade'; readonly value: Upgrade }

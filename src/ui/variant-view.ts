@@ -1,4 +1,4 @@
-import { markMatrixCell } from './matrix-board.js'
+import { markMatrixCell, MatrixObservation, animateMatrixExtraction } from './matrix-board.js'
 import { sharedStyles } from './shared-styles.js'
 import { sonarRegion } from '../game/sonar.js'
 import { markEchoCell } from './echo-board.js'
@@ -17,6 +17,7 @@ import type { InteractionCue } from '../types/audio.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
 import type { Config, Game } from '../types/game.js'
 import type { Language } from '../types/localization.js'
+import type { TacticalPlan } from '../types/tactical.js'
 import type { NavigationKey, NavigationResult } from '../types/ui.js'
 import type { BoardSide, Expedition } from '../types/variants.js'
 import { BoardView } from './board-view.js'
@@ -29,7 +30,7 @@ import { MagneticBoard, markMagneticCell } from './magnetic-board.js'
 import { markMirrorCell, mirrorPreview } from './mirror-board.js'
 import { mirrorName } from './mirror-copy.js'
 import { professionSprite } from './profession-presentation.js'
-import { tacticalCopy, tacticalPlanCopy } from './tactical-copy.js'
+import { tacticalCopy, tacticalHint, tacticalPlanCopy } from './tactical-copy.js'
 import { bossSprite } from './tactical-sprites.js'
 import { siteHeaderTemplate } from './templates.js'
 import { TitleMenu } from './title-menu.js'
@@ -43,6 +44,7 @@ export class VariantView {
   private readonly status: HTMLElement
   private readonly dialog: HTMLDialogElement
   private readonly expeditionDialog: ExpeditionDialog
+  private readonly matrix: MatrixObservation
   private readonly magnetic: MagneticBoard
   private readonly menu: LanguageMenu
   private titleMenu: TitleMenu | null = null
@@ -70,6 +72,7 @@ export class VariantView {
     onLanguage: (language: Language) => void,
     feedback: (cue: InteractionCue) => void,
   ) {
+    this.matrix = new MatrixObservation(root, language)
     this.root = root
     this.feedback = feedback
     this.language = language
@@ -223,6 +226,8 @@ export class VariantView {
     if (expedition) this.markExpedition(expedition)
     if (expedition?.encounter) this.markTactical(expedition)
     this.magnetic.render(expedition)
+    this.matrix.render(expedition)
+    animateMatrixExtraction(this.content, previous, expedition)
     const comparison = expedition ? mirrorPreview(expedition) : null
     if (comparison) {
       this.markExpedition(comparison, 'b')
@@ -317,6 +322,22 @@ export class VariantView {
     }
   }
 
+  /** Open the small observation panel from its dock control. */
+  toggleObservation(): void {
+    this.matrix.toggle()
+  }
+
+  /** Select a local observation cell without spending a gameplay action. */
+  selectObservation(index: number): void {
+    this.matrix.select(index)
+  }
+
+  /** Retain explicit feedback for an invalid targeted action after a repaint. */
+  explainTactical(plan: TacticalPlan): void {
+    const hint = this.content.querySelector<HTMLElement>('.tool-hint')
+    if (hint) hint.textContent = tacticalPlanCopy(this.language, plan)
+  }
+
   /** Show an application-owned confirmation using the browser's focus-trapping dialog. */
   confirm(message: string, label: string): void {
     this.dialog.innerHTML = `<h2 id="variant-dialog-title">${translations[this.language].confirmTitle}</h2><p></p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="cancel">${translations[this.language].cancel}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="confirm"></button></div>`
@@ -339,13 +360,13 @@ export class VariantView {
     if (tool) this.previewRoute(null)
     const config = this.config
     if (!config) return
-    const area = index === null ? [] : probeArea(config, index)
+    const area = index === null ? [] : tool === 'attune' ? [index] : probeArea(config, index)
     for (const button of this.content.querySelectorAll<HTMLElement>('[data-tool]'))
       button.setAttribute('aria-pressed', String(button.dataset['tool'] === tool))
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
       cell.classList.toggle(
         'tool-target',
-        tool === 'probe' || tool === 'sonar'
+        tool === 'probe' || tool === 'sonar' || tool === 'attune'
           ? area.includes(Number(cell.dataset['cell']))
           : tool === 'scan' &&
               index !== null &&
@@ -361,11 +382,13 @@ export class VariantView {
     }
 
     const description =
-      tool === 'sonar'
-        ? message(this.language, 'sonar-equipment.note')
-        : tool === 'probe'
-          ? copy.probeHint
-          : copy.scanHint
+      tool === 'attune'
+        ? message(this.language, 'matrix.attune-hint')
+        : tool === 'sonar'
+          ? message(this.language, 'sonar-equipment.note')
+          : tool === 'probe'
+            ? copy.probeHint
+            : copy.scanHint
     if (index === null) {
       hint.textContent = description
       return
@@ -375,7 +398,7 @@ export class VariantView {
     const row = `${common.row} ${Math.floor(index / config.width) + 1}`
     const column = `${common.column} ${(index % config.width) + 1}`
     hint.textContent =
-      tool === 'probe' || tool === 'sonar'
+      tool === 'probe' || tool === 'sonar' || tool === 'attune'
         ? `${description} · ${row} · ${column}`
         : `${description} · ${row}`
   }
@@ -398,7 +421,7 @@ export class VariantView {
     if (hint)
       hint.textContent = plan
         ? tacticalPlanCopy(this.language, plan)
-        : tacticalCopy(this.language, run.encounter?.kind).hint
+        : tacticalHint(this.language, run)
   }
 
   /** Overlay public mechanisms and frozen attack warnings without exposing covered clues. */
@@ -551,6 +574,7 @@ export class VariantView {
   /** Maintain one tab stop per board and a purely coordinate-based partner highlight. */
   focus(side: BoardSide, index: number): void {
     if (side === 'a') {
+      this.matrix.select(index)
       this.focusA = index
       this.a?.rememberFocus(index)
     } else {
@@ -589,6 +613,7 @@ export class VariantView {
     this.resize?.disconnect()
     this.listeners.abort()
     this.magnetic.dispose()
+    this.matrix.dispose()
     this.menu.dispose()
     this.titleMenu?.dispose()
     this.expeditionDialog.dispose()
@@ -714,13 +739,8 @@ export class VariantView {
       )
       const player = document.createElement('div')
       player.className = 'dungeon-player'
-      const clue =
-        run.encounter?.kind === 'matrix'
-          ? 0
-          : echoObscured(run, run.player)
-            ? '≈'
-            : (run.game.cells[run.player]?.adjacent ?? 0)
-      if (run.encounter?.kind !== 'matrix') player.dataset['number'] = String(clue)
+      const clue = echoObscured(run, run.player) ? '≈' : (run.game.cells[run.player]?.adjacent ?? 0)
+      player.dataset['number'] = String(clue)
       player.innerHTML = `${spriteImage(professionSprite(run.departure.profession))}${clue ? `<span class="landmark-clue">${clue}</span>` : ''}`
       player.style.width = `${current.offsetWidth}px`
       player.style.height = `${current.offsetHeight}px`

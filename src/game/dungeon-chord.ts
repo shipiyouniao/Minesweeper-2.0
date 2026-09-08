@@ -1,4 +1,3 @@
-import { matrixLineTargets } from './matrix-logic.js'
 import { chordTargets } from './engine.js'
 import { approachPath } from './dungeon-path.js'
 import { occupied } from './dungeon-occupancy.js'
@@ -25,23 +24,9 @@ export function chordExpedition(
   if (!Number.isInteger(index) || index < 0 || index >= run.game.cells.length) return run
   if ((run.phase !== 'exploring' && run.phase !== 'boss') || occupied(run, index)) return run
   const confirmedSafe = run.surveyedCells.filter((other) => !run.confirmedMines.includes(other))
-  const targets =
-    run.encounter?.kind === 'matrix'
-      ? [
-          ...new Set([
-            ...matrixLineTargets(
-              { ...run, encounter: run.encounter },
-              'row',
-              Math.floor(index / run.game.config.width),
-            ),
-            ...matrixLineTargets(
-              { ...run, encounter: run.encounter },
-              'column',
-              index % run.game.config.width,
-            ),
-          ]),
-        ]
-      : chordTargets(run.game, index, confirmedSafe).filter((other) => !occupied(run, other))
+  const targets = chordTargets(run.game, index, confirmedSafe).filter(
+    (other) => !occupied(run, other),
+  )
   return revealBatch(run, targets, apply)
 }
 

@@ -320,8 +320,8 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
   const type = reader.string('type')
 
   switch (type) {
-    case 'matrix-row':
-    case 'matrix-column':
+    case 'attune':
+    case 'mark-crystal':
     case 'reveal':
     case 'move':
     case 'sonar':

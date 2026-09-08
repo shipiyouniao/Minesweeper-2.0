@@ -132,8 +132,8 @@ export type ExpeditionAction =
         | 'probe'
         | 'interact'
         | 'sonar'
-        | 'matrix-row'
-        | 'matrix-column'
+        | 'attune'
+        | 'mark-crystal'
       readonly index: number
     }
   | { readonly type: 'sweep'; readonly row: number }

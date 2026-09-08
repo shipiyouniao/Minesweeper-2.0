@@ -1,41 +1,37 @@
 import type { Game } from './game.js'
-import type { SurveyAxis, SurveyLayout } from './survey.js'
 import type { TacticalState } from './tactical.js'
 import type { Expedition } from './variants.js'
 
-/** A fixed optical station controls its perpendicular incoming beam. */
-export interface MatrixPrism {
-  readonly index: number
-  readonly axis: SurveyAxis
-  readonly line: number
+/** A local crystal puzzle; hidden identities are used only by generation and accepted extraction. */
+export interface MatrixRegion {
+  readonly indices: readonly number[]
+  readonly crystals: readonly number[]
+  readonly rows: readonly (readonly number[])[]
+  readonly columns: readonly (readonly number[])[]
 }
 
-/** Published nonogram clues and connected terrain are immutable throughout the fight. */
-export interface MatrixLayout extends SurveyLayout {
+/** Validated ordinary terrain and two independently solvable crystal regions. */
+export interface MatrixLayout {
   readonly game: Game
   readonly walls: readonly number[]
   readonly entrance: number
   readonly boss: number
-  readonly prisms: readonly MatrixPrism[]
-  readonly routes: readonly number[]
+  readonly regions: readonly [MatrixRegion, MatrixRegion]
 }
 
-/** Three separate shield circuits require three line deductions and melee damage bands. */
+/** Two permanent shield breaks replace repeated timed prism circuits. */
 export interface MatrixEncounter extends TacticalState {
   readonly kind: 'matrix'
-  readonly rows: readonly (readonly number[])[]
-  readonly columns: readonly (readonly number[])[]
-  readonly prisms: readonly MatrixPrism[]
-  readonly phase: number
-  readonly armed: boolean
-  readonly exposedUntil: number
-  readonly reflections: number
-  readonly beam: readonly number[]
-  readonly returnBeam: readonly number[]
-  readonly pressure: readonly number[]
+  readonly regions: readonly [MatrixRegion, MatrixRegion]
+  readonly phase: 1 | 2
+  readonly exposed: boolean
+  readonly collected: readonly number[]
+  readonly empty: readonly number[]
+  readonly notes: readonly number[]
+  readonly lastAttuned: number | null
 }
 
-/** A narrowed expedition keeps matrix transitions free of repeated union casts. */
+/** Narrow once at the boundary of a pure Matrix rule. */
 export interface MatrixExpedition extends Expedition {
   readonly encounter: MatrixEncounter
 }

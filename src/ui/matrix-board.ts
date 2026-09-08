@@ -1,38 +1,24 @@
 import { sharedStyles } from './shared-styles.js'
-import { activePrism, matrixLine } from '../game/matrix-logic.js'
-import { message, translations } from '../i18n.js'
+import { activeRegion, matrixCharge } from '../game/matrix-logic.js'
+import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
 import type { MatrixExpedition } from '../types/matrix.js'
-import type { SurveyAxis } from '../types/survey.js'
 import type { Expedition } from '../types/variants.js'
 import { boardZoomTemplate } from './board-zoom.js'
 import { spriteImage } from './dungeon-sprites.js'
-import { escapeHtml } from './presentation.js'
-import { professionCopy } from './variant-copy.js'
+import { matrixObservationTemplate } from './matrix-observation-template.js'
 
-/** Share Survey's measured sticky headers, with line clicks routed through expedition AP rules. */
+/** Keep ordinary floor numbers and the same scrollport/zoom geometry as other encounters. */
 export function matrixBoardFrame(language: Language, run: MatrixExpedition): string {
-  const e = run.encounter
-  const prism = activePrism(run)
-  /** Render one axis from public evidence, retaining contradictions as player hypotheses. */
-  function headers(axis: SurveyAxis): string {
-    return (axis === 'row' ? e.rows : e.columns)
-      .map((runs, index) => {
-        const reading = matrixLine(run, axis, index)
-        const label = `${translations[language][axis]} ${index + 1}: ${runs.join(' ') || '0'}. ${message(language, 'matrix.line-action')}`
-        return `<button type="button" class="survey-line" data-control="matrix-${axis}:${index}" data-active="${axis === prism.axis && index === prism.line}" data-complete="${reading.complete}" data-over="${reading.conflict}" aria-label="${escapeHtml(label)}"><span class="survey-runs">${(runs.length ? runs : [0]).map((size) => `<strong>${size}</strong>`).join('')}</span></button>`
-      })
-      .join('')
-  }
   return `<section class="variant-board-panel matrix-panel" aria-label="${message(language, 'matrix.name')}">
     <div class="board-frame-heading ${sharedStyles['board-frame-heading']}"><h2>${message(language, 'matrix.name')}</h2>${boardZoomTemplate(message(language, 'survey.zoom'))}</div>
-    <ol class="matrix-circuits">${e.prisms.map((entry, index) => `<li data-current="${e.phase === index + 1}" data-cleared="${index + 1 < e.phase}">${spriteImage('matrix-prism')}<span>${index + 1} · ${translations[language][entry.axis]} ${entry.line + 1}</span></li>`).join('')}</ol>
-    <div class="survey-board-surface"><div class="board-viewport survey-viewport"><div class="survey-grid matrix-grid" style="--columns:${run.game.config.width};--row-runs:${Math.max(1, ...e.rows.map((runs) => runs.length))}"><div class="survey-corner" aria-hidden="true">◇</div><div class="survey-column-heads">${headers('column')}</div><div class="survey-row-heads">${headers('row')}</div><div class="board" data-side="a" role="grid" aria-label="${message(language, 'matrix.name')}"></div></div></div></div>
+    <p class="matrix-progress">${message(language, 'matrix.status', { phase: run.encounter.phase, count: matrixCharge(run) })}</p>
+    <div class="board-viewport"><div class="board" data-side="a" role="grid" aria-label="${message(language, 'matrix.name')}"></div></div>
     <p class="matrix-legend">${message(language, 'matrix.legend')}</p>
   </section>`
 }
 
-/** Replace local-number clues with public terrain and show each frozen optical path on its cells. */
+/** Decorate public region membership and extracted objects without replacing mine numbers. */
 export function markMatrixCell(
   language: Language,
   run: Expedition,
@@ -41,43 +27,192 @@ export function markMatrixCell(
 ): void {
   const e = run.encounter
   if (e?.kind !== 'matrix') return
-  const common = translations[language]
-  const coordinates = `${common.row} ${Math.floor(index / run.game.config.width) + 1}, ${common.column} ${(index % run.game.config.width) + 1}`
-  cell.removeAttribute('data-number')
-  cell.querySelector('.landmark-clue')?.remove()
-  if (
-    run.game.cells[index]?.visibility === 'revealed' &&
-    !run.walls.includes(index) &&
-    !cell.classList.contains('mine')
-  ) {
-    if (!cell.querySelector('img')) cell.textContent = ''
-    cell.setAttribute('aria-label', `${coordinates}, ${message(language, 'matrix.floor')}`)
-  }
-  const station = e.prisms.findIndex((prism) => prism.index === index)
-  if (station >= 0) {
-    const name = message(language, 'matrix.prism', { number: station + 1 })
-    cell.classList.add('landmark-cell', 'matrix-prism')
-    cell.classList.toggle('matrix-active', station + 1 === e.phase)
-    cell.innerHTML = `${spriteImage('matrix-prism')}<span class="matrix-station">${station + 1}</span>`
-    cell.setAttribute('aria-label', `${coordinates}, ${name}`)
+  const live = run.phase === 'boss'
+  const region = activeRegion({ ...run, encounter: e })
+  cell.classList.toggle('matrix-region-cell', live && !e.exposed && region.indices.includes(index))
+  cell.classList.toggle('matrix-crystal-note', live && e.notes.includes(index))
+  if (e.collected.includes(index)) {
+    cell.classList.add('matrix-collected-cell')
+    cell.insertAdjacentHTML(
+      'beforeend',
+      `<span class="matrix-crystal">${spriteImage('matrix-crystal')}</span>`,
+    )
+    cell.setAttribute(
+      'aria-label',
+      `${cell.getAttribute('aria-label')}, ${message(language, 'matrix.collected')}`,
+    )
+  } else if (e.empty.includes(index)) {
+    cell.classList.add('matrix-empty-cell')
+    cell.setAttribute(
+      'aria-label',
+      `${cell.getAttribute('aria-label')}, ${message(language, 'matrix.empty-cell')}`,
+    )
   }
   if (index === e.boss) {
     cell.classList.add('matrix-core')
-    cell.classList.toggle('matrix-exposed', e.exposedUntil >= e.turn)
+    cell.classList.toggle('matrix-exposed', e.exposed)
   }
-  const active = e.prisms[e.phase - 1]!
-  const live = run.phase === 'boss'
-  const incoming = live && e.beam.includes(index)
-  const returning = live && e.armed && e.returnBeam.includes(index)
-  cell.classList.toggle('matrix-ray-row', incoming && active.axis === 'row')
-  cell.classList.toggle('matrix-ray-column', incoming && active.axis === 'column')
-  cell.classList.toggle('matrix-return-row', returning && active.axis === 'column')
-  cell.classList.toggle('matrix-return-column', returning && active.axis === 'row')
-  cell.classList.toggle('matrix-pressure', live && e.pressure.includes(index))
-  // Numeric-clue replacement must retain the pawn's accessible position on floor and prism tiles.
-  if (index === run.player)
+  if (region.indices.includes(index) && live && !e.exposed)
     cell.setAttribute(
       'aria-label',
-      `${cell.getAttribute('aria-label')}, ${professionCopy(language, run.departure.profession).name}`,
+      `${cell.getAttribute('aria-label')}, ${message(language, 'matrix.region')}`,
+    )
+}
+
+/** Own the collapsible local observation UI and its target, independently of replayable rules. */
+export class MatrixObservation {
+  private run: MatrixExpedition | null = null
+  private open = false
+  private selected: number | null = null
+
+  /** Retain one root and locale across normal board repaints. */
+  constructor(root: HTMLElement, language: Language) {
+    this.root = root
+    this.language = language
+    root.addEventListener('keydown', this.key, { signal: this.listeners.signal })
+    window.addEventListener('resize', this.position, { signal: this.listeners.signal })
+  }
+
+  private readonly root: HTMLElement
+  private readonly language: Language
+  private readonly listeners = new AbortController()
+
+  /** Remove popup listeners with the owning game view. */
+  dispose(): void {
+    this.listeners.abort()
+  }
+
+  /** Escape closes the observation overlay without trapping board navigation. */
+  private readonly key = (event: KeyboardEvent): void => {
+    if (event.key !== 'Escape' || !this.open) return
+    this.toggle()
+  }
+
+  /** Fit the panel above the actual dock, including its mobile wrapped rows. */
+  private readonly position = (): void => {
+    const holder = this.root.querySelector<HTMLElement>('.matrix-observation')
+    const dock = this.root.querySelector<HTMLElement>('.action-dock')?.getBoundingClientRect()
+    if (!holder || !dock) return
+    holder.style.bottom = `${Math.max(12, innerHeight - dock.top + 12)}px`
+    holder.style.maxHeight = `${Math.max(80, dock.top - 24)}px`
+  }
+
+  /** Refresh after a domain action; a new encounter never inherits old UI targeting. */
+  render(run: Expedition | null): void {
+    const previous = this.run
+    this.run =
+      run?.encounter?.kind === 'matrix' && run.phase === 'boss'
+        ? { ...run, encounter: run.encounter }
+        : null
+    if (
+      !this.run ||
+      !previous ||
+      previous.departure.seed !== this.run.departure.seed ||
+      previous.floor !== this.run.floor
+    ) {
+      this.open = false
+      this.selected = null
+    } else if (previous.encounter.phase !== this.run.encounter.phase) this.selected = null
+    this.paint()
+  }
+
+  /** Toggle observation without spending AP or implicitly selecting a crystal. */
+  toggle(): void {
+    if (!this.run) return
+    this.open = !this.open
+    this.paint()
+    if (this.open)
+      this.root
+        .querySelector<HTMLElement>('.matrix-observation button')
+        ?.focus({ preventScroll: true })
+    else
+      this.root
+        .querySelector<HTMLElement>('.tactical-controls [data-control="observe"]')
+        ?.focus({ preventScroll: true })
+  }
+
+  /** Link a chosen mini-map square to its real coordinate using only public membership. */
+  select(index: number): void {
+    if (!this.run) return
+    const selected = activeRegion(this.run).indices.includes(index) ? index : null
+    if (this.selected === selected) return
+    const miniFocused =
+      document.activeElement instanceof HTMLElement &&
+      document.activeElement.dataset['control']?.startsWith('matrix-pick:')
+    this.selected = selected
+    this.paint()
+    if (miniFocused)
+      this.root
+        .querySelector<HTMLElement>(`[data-control="matrix-pick:${index}"]`)
+        ?.focus({ preventScroll: true })
+  }
+
+  /** Render nine public cells; raw crystal identities never enter DOM attributes or labels. */
+  private paint(): void {
+    const holder = this.root.querySelector<HTMLElement>('.matrix-observation')
+    const trigger = this.root.querySelector<HTMLElement>(
+      '.tactical-controls [data-control="observe"]',
+    )
+    trigger?.setAttribute('aria-expanded', String(this.open))
+    if (!holder || !this.run) return
+    holder.hidden = !this.open
+    this.position()
+    const run = this.run
+    const language = this.language
+    for (const cell of this.root.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
+      cell.classList.toggle(
+        'matrix-selected',
+        this.open && !run.encounter.exposed && Number(cell.dataset['cell']) === this.selected,
+      )
+    if (!this.open) return
+    holder.innerHTML = matrixObservationTemplate(language, run, this.selected)
+  }
+}
+
+/** Animate collection and shield fracture only when new extraction is accepted. */
+export function animateMatrixExtraction(
+  root: HTMLElement,
+  before: Expedition | null,
+  after: Expedition | null,
+): void {
+  if (
+    before?.encounter?.kind !== 'matrix' ||
+    after?.encounter?.kind !== 'matrix' ||
+    before.departure.seed !== after.departure.seed ||
+    before.floor !== after.floor ||
+    before.encounter.collected.length === after.encounter.collected.length
+  )
+    return
+  const index = after.encounter.lastAttuned
+  const source = root.querySelector<HTMLElement>(`[data-side="a"] [data-cell="${index}"]`)
+  const boss = root.querySelector<HTMLElement>(
+    `[data-side="a"] [data-cell="${after.encounter.boss}"]`,
+  )
+  if (!source || !boss) return
+  source.classList.add('matrix-extraction')
+  if (after.encounter.exposed && !before.encounter.exposed) boss.classList.add('matrix-fracture')
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  const from = source.getBoundingClientRect(),
+    to = boss.getBoundingClientRect()
+  const beam = document.createElement('div')
+  beam.className = 'matrix-charge-beam'
+  const x = from.x + from.width / 2,
+    y = from.y + from.height / 2
+  const dx = to.x + to.width / 2 - x,
+    dy = to.y + to.height / 2 - y
+  beam.style.cssText = `left:${x}px;top:${y}px;width:${Math.hypot(dx, dy)}px;transform:rotate(${Math.atan2(dy, dx)}rad)`
+  root.append(beam)
+  beam
+    .animate(
+      [
+        { opacity: 0, scale: '0 1' },
+        { opacity: 1, scale: '1 1', offset: 0.5 },
+        { opacity: 0, scale: '1 1' },
+      ],
+      { duration: 700 },
+    )
+    .finished.then(
+      () => beam.remove(),
+      () => beam.remove(),
     )
 }

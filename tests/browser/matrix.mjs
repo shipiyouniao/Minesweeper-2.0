@@ -2,7 +2,6 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { battleFixture } from './battle-fixtures.mjs'
-import { actExpedition } from '../../.native/tests/src/game/expedition.js'
 import { professionCopy } from '../../.native/tests/src/ui/variant-copy.js'
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
@@ -51,10 +50,9 @@ try {
     })
     for (const lang of width === 1440 ? ['zh', 'en', 'ja'] : ['zh']) {
       await seed(fixture.entered.save, lang)
-      assert.equal(await page.locator('.matrix-prism').count(), 3)
-      assert.equal(await page.locator('.matrix-active').count(), 1)
-      assert.equal(await page.locator('.matrix-grid [data-number]').count(), 0)
-      assert.equal(await page.locator('.dungeon-player .landmark-clue').count(), 0)
+      assert.equal(await page.locator('.matrix-region-cell').count(), 9)
+      assert.equal(await page.locator('.survey-line').count(), 0)
+      assert.ok((await page.locator('.matrix-panel [data-number]').count()) > 0)
       assert.ok(
         (await page.locator('.player-cell').getAttribute('aria-label')).includes(
           professionCopy(lang, fixture.entered.run.departure.profession).name,
@@ -62,12 +60,9 @@ try {
       )
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
       const geometry = await page.evaluate(() => ({
-        header: document.querySelector('.survey-column-heads').getBoundingClientRect().bottom,
-        first: document.querySelector('.matrix-grid .cell').getBoundingClientRect().top,
-        cell: document.querySelector('.matrix-grid .cell').getBoundingClientRect().width,
+        cell: document.querySelector('.matrix-panel .cell').getBoundingClientRect().width,
         icon: document.querySelector('.matrix-core img').getBoundingClientRect().width,
       }))
-      assert.ok(geometry.header <= geometry.first, JSON.stringify(geometry))
       assert.ok(
         geometry.cell >= 24 && geometry.icon >= geometry.cell * 0.5,
         JSON.stringify(geometry),
@@ -77,52 +72,44 @@ try {
       assert.ok((await page.locator('dialog[open]').innerText()).length > 30)
       await page.keyboard.press('Escape')
     }
-    // A native line button must work for a touch tap or a keyboard click, and persist its axis.
-    const header = page.locator(
-      `[data-control="matrix-row:${Math.floor(fixture.entered.run.game.config.height / 2)}"]`,
-    )
-    if (width === 390) await header.tap()
-    else {
-      await header.focus()
-      await page.keyboard.press('Enter')
-    }
-    const journal = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)).journal, key)
-    assert.equal(journal.actions.at(-1).type, 'matrix-row')
-    assert.ok(journal.actions.length > fixture.entered.save.journal.actions.length)
+    // Observe starts collapsed, preserves a local selection and supports native button activation.
+    await page.locator('.tactical-controls [data-control="observe"]').click()
+    assert.equal(await page.locator('.matrix-mini-cell').count(), 9)
+    const local = fixture.entered.run.encounter.regions[0].crystals[0]
+    await page.locator('[data-control="matrix-pick:' + local + '"]').click()
+    await page.locator('[data-control="mark-crystal:' + local + '"]').click()
+    assert.equal(await page.locator('[data-cell="' + local + '"].matrix-selected').count(), 1)
+    assert.equal(await page.locator('[data-cell="' + local + '"].matrix-crystal-note').count(), 1)
+    await page.locator('[data-control="mark-crystal:' + local + '"]').click()
+    assert.equal(await page.locator('.matrix-crystal-note').count(), 0)
+    await page.keyboard.press('Escape')
+    assert.equal(await page.locator('.matrix-observation').isVisible(), false)
     await seed(fixture.objective.save)
-    const target = page.locator(`[data-cell="${fixture.objective.action.index}"]`)
-    if (width === 390) await target.tap()
-    else await target.click()
-    assert.ok((await page.locator('.matrix-return-row, .matrix-return-column').count()) > 0)
-    await page.screenshot({ path: `.native/matrix-ui/${width}-reflection.png`, fullPage: true })
-    // Once armed, the same tile remains a legal walking destination through ordinary input.
-    if (width === 390) await target.tap()
-    else await target.click()
-    const movement = await page.evaluate(
-      (key) => JSON.parse(localStorage.getItem(key)).journal.actions.at(-1),
-      key,
-    )
-    assert.deepEqual(movement, { type: 'move', index: fixture.objective.action.index })
-    assert.ok(
-      (await target.getAttribute('aria-label')).includes(
-        professionCopy('zh', fixture.objective.run.departure.profession).name,
-      ),
-    )
-    await page.locator('[data-control="end-turn"]').click()
+    const tool = page.locator('[data-control="attune"]')
+    const target = page.locator('[data-cell="' + fixture.objective.action.index + '"]')
+    if (width === 390) {
+      await tool.tap()
+      await tool.tap()
+      assert.equal(await tool.getAttribute('aria-pressed'), 'false')
+      await tool.tap()
+      await target.tap()
+    } else {
+      await tool.press('Enter')
+      await target.press('Enter')
+    }
     assert.equal(await page.locator('.matrix-exposed').count(), 1)
+    assert.equal(await page.locator('.matrix-collected-cell').count(), 2)
     const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)).journal, key)
-    const expected = actExpedition(actExpedition(fixture.objective.next, movement), {
-      type: 'end-turn',
-    })
-    assert.equal(saved.actions.at(-1).type, 'end-turn')
+    assert.equal(saved.actions.at(-1).type, 'attune')
+    assert.equal(saved.actions.at(-1).index, fixture.objective.action.index)
+    await page.screenshot({ path: '.native/matrix-ui/' + width + '-shield.png', fullPage: true })
     await page.reload()
     assert.equal(await page.locator('.matrix-exposed').count(), 1)
-    assert.equal(expected.encounter.reflections, 1)
     assert.deepEqual(errors, [])
     await context.close()
   }
   console.log(
-    'Matrix: touch/keyboard line actions, three locales, mobile/desktop/4K, clues, artwork, reflection and replay verified.',
+    'Matrix: touch/keyboard targeting, local notes, three locales, responsive layout, ordinary clues, extraction and replay verified.',
   )
 } finally {
   await browser.close()
