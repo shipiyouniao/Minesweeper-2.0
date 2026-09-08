@@ -1,5 +1,12 @@
 import { surveyDifficulty } from '../persistence/survey-repository.js'
-import type { SurveyCommand, SurveyHold, SurveyInputActions } from '../types/survey-ui.js'
+import type {
+  SurveyCommand,
+  SurveyHeader,
+  SurveyHeaderHold,
+  SurveyHeaderTap,
+  SurveyHold,
+  SurveyInputActions,
+} from '../types/survey-ui.js'
 import { BoardRightClick } from './board-right-click.js'
 import { parseNavigation } from './input-parser.js'
 
@@ -28,6 +35,8 @@ export class SurveyInput {
   private readonly listeners = new AbortController()
   private readonly rightClick: BoardRightClick
   private hold: SurveyHold | null = null
+  private headerHold: SurveyHeaderHold | null = null
+  private headerTap: SurveyHeaderTap | null = null
   private timer: number | undefined
   private suppressUntil = 0
 
@@ -41,6 +50,7 @@ export class SurveyInput {
     })
     const options = { signal: this.listeners.signal }
     root.addEventListener('click', this.click, options)
+    root.addEventListener('dblclick', this.doubleClick, options)
     root.addEventListener('keydown', this.key, options)
     root.addEventListener('focusin', this.focus, options)
     root.addEventListener('pointerover', this.over, options)
@@ -65,6 +75,8 @@ export class SurveyInput {
   readonly cancelGesture = (): void => {
     clearTimeout(this.timer)
     this.timer = undefined
+    this.headerHold = null
+    this.headerTap = null
     if (this.hold) {
       this.hold.cancelled = true
       this.suppressUntil = performance.now() + 700
@@ -86,6 +98,13 @@ export class SurveyInput {
     const button = event.target.closest<HTMLButtonElement>('button')
     if (!button) return
     this.actions.unlock()
+    const header = this.header(button)
+    if (header) {
+      // Assistive activation has no pointer click count; ordinary pointer clicks only select.
+      if (event.detail === 0 && !this.actions.blocked && performance.now() >= this.suppressUntil)
+        this.actions.openLine(header.axis, header.line)
+      return
+    }
     const cell = button.dataset['cell']
     if (cell !== undefined) {
       if (!this.actions.blocked && performance.now() >= this.suppressUntil)
@@ -100,6 +119,21 @@ export class SurveyInput {
       const command = surveyCommand(button.dataset['control'])
       if (command) this.actions.command(command)
     }
+  }
+
+  /** A mouse double-click opens its named line; touch has its own scroll-aware double-tap path. */
+  private readonly doubleClick = (event: MouseEvent): void => {
+    const header = this.header(event.target)
+    if (
+      !header ||
+      event.button !== 0 ||
+      this.actions.blocked ||
+      performance.now() < this.suppressUntil
+    )
+      return
+    event.preventDefault()
+    this.actions.unlock()
+    this.actions.openLine(header.axis, header.line)
   }
 
   /** Preserve board shortcuts without intercepting forms, dialogs or modified browser shortcuts. */
@@ -124,6 +158,12 @@ export class SurveyInput {
       return
     }
     if (this.actions.blocked) return
+    const header = this.header(event.target)
+    if (header && (key === 'enter' || key === ' ' || key === 'c')) {
+      event.preventDefault()
+      if (!event.repeat) this.actions.openLine(header.axis, header.line)
+      return
+    }
     const cell = this.cell(event.target)
     if (!cell) return
     const index = Number(cell.dataset['cell'])
@@ -144,11 +184,18 @@ export class SurveyInput {
   private readonly focus = (event: FocusEvent): void => {
     const cell = this.cell(event.target)
     if (cell) this.actions.focus(Number(cell.dataset['cell']))
+    const header = this.header(event.target)
+    if (header) this.actions.previewLine(header.axis, header.line)
   }
 
   /** Pointer hover highlights public row and column headers without taking a game action. */
   private readonly over = (event: PointerEvent): void => {
     if (event.pointerType !== 'mouse') return
+    const header = this.header(event.target)
+    if (header) {
+      this.actions.previewLine(header.axis, header.line)
+      return
+    }
     const cell = this.cell(event.target)
     this.actions.preview(cell ? Number(cell.dataset['cell']) : null)
   }
@@ -156,6 +203,7 @@ export class SurveyInput {
   /** Touch movement remains native; only a stationary hold is eligible for secondary marking. */
   private readonly down = (event: PointerEvent): void => {
     this.actions.unlock()
+    const previousTap = this.headerTap
     this.cancelGesture()
     this.hold = null
     this.suppressUntil = 0
@@ -166,6 +214,21 @@ export class SurveyInput {
       this.actions.blocked
     )
       return
+    const header = this.header(event.target)
+    if (header) {
+      this.suppressUntil = performance.now() + 700
+      this.headerTap =
+        previousTap?.axis === header.axis && previousTap.line === header.line ? previousTap : null
+      this.headerHold = {
+        ...header,
+        pointer: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        started: performance.now(),
+      }
+      this.actions.previewLine(header.axis, header.line)
+      return
+    }
     const cell = this.cell(event.target)
     if (!cell) return
     const hold: SurveyHold = {
@@ -189,6 +252,11 @@ export class SurveyInput {
   /** A moved finger cancels even if it later returns to the original square. */
   private readonly move = (event: PointerEvent): void => {
     if (
+      this.headerHold?.pointer === event.pointerId &&
+      Math.hypot(event.clientX - this.headerHold.x, event.clientY - this.headerHold.y) > 10
+    )
+      this.cancelGesture()
+    if (
       this.hold?.pointer === event.pointerId &&
       Math.hypot(event.clientX - this.hold.x, event.clientY - this.hold.y) > 10
     )
@@ -197,6 +265,10 @@ export class SurveyInput {
 
   /** A tap activates its original square exactly once; scrolling never excavates a cell. */
   private readonly up = (event: PointerEvent): void => {
+    if (this.headerHold?.pointer === event.pointerId) {
+      this.finishHeaderTap(event)
+      return
+    }
     const hold = this.hold
     if (!hold || hold.pointer !== event.pointerId) return
     clearTimeout(this.timer)
@@ -209,6 +281,28 @@ export class SurveyInput {
       Math.hypot(event.clientX - hold.x, event.clientY - hold.y) <= 10
     )
       this.actions.play(hold.index)
+  }
+
+  /** Accept two short, stationary taps on the same clue and suppress the browser's duplicate click. */
+  private finishHeaderTap(event: PointerEvent): void {
+    const hold = this.headerHold
+    this.headerHold = null
+    const now = performance.now()
+    this.suppressUntil = now + 700
+    if (
+      !hold ||
+      this.actions.blocked ||
+      now - hold.started > 400 ||
+      Math.hypot(event.clientX - hold.x, event.clientY - hold.y) > 10
+    ) {
+      this.headerTap = null
+      return
+    }
+    const previous = this.headerTap
+    if (previous?.axis === hold.axis && previous.line === hold.line && now - previous.time <= 400) {
+      this.headerTap = null
+      this.actions.openLine(hold.axis, hold.line)
+    } else this.headerTap = { axis: hold.axis, line: hold.line, time: now }
   }
 
   /** Reject duplicate native menus from touch holds; keyboard context menus remain usable. */
@@ -230,5 +324,19 @@ export class SurveyInput {
   private cell(target: EventTarget | null): HTMLElement | null {
     const cell = target instanceof Element ? target.closest<HTMLElement>('[data-cell]') : null
     return cell && this.root.contains(cell) ? cell : null
+  }
+
+  /** Decode only mounted clue buttons; row and column remain a concrete union at the input boundary. */
+  private header(target: EventTarget | null): SurveyHeader | null {
+    const element =
+      target instanceof Element
+        ? target.closest<HTMLElement>('.survey-line[data-axis][data-line]')
+        : null
+    if (!element || !this.root.contains(element)) return null
+    const axis = element.dataset['axis']
+    const line = Number(element.dataset['line'])
+    return (axis === 'row' || axis === 'column') && Number.isInteger(line) && line >= 0
+      ? { axis, line }
+      : null
   }
 }

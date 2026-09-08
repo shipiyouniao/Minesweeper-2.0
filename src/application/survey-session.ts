@@ -1,8 +1,8 @@
 import { actSurvey, createSurvey, SURVEY_ACTION_LIMIT } from '../game/survey.js'
 import { rankSurveyRecords, SurveyRepository } from '../persistence/survey-repository.js'
-import type { Action, RankedDifficulty } from '../types/game.js'
+import type { RankedDifficulty } from '../types/game.js'
 import type { SessionRuntime } from '../types/session.js'
-import type { Survey, SurveyRecord, SurveySave } from '../types/survey.js'
+import type { Survey, SurveyAction, SurveyRecord, SurveySave } from '../types/survey.js'
 
 /** Own replay and result settlement while all puzzle transitions remain pure. */
 export class SurveySession {
@@ -59,7 +59,7 @@ export class SurveySession {
   }
 
   /** Append only accepted commands; a terminal transition records a win exactly once. */
-  dispatch(action: Action): boolean {
+  dispatch(action: SurveyAction): boolean {
     if (this.atMoveLimit) return false
     const next = actSurvey(this.current, action)
     if (next === this.current) return false

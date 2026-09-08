@@ -1,3 +1,4 @@
+import { boardZoomTemplate } from './board-zoom.js'
 import { sharedStyles } from './shared-styles.js'
 import { gameplayStyles } from './gameplay-styles.js'
 import { expeditionReadings } from './echo-board.js'
@@ -120,7 +121,7 @@ export function expeditionTemplate(
     ${run.phase === 'boss' ? '' : `<p class="variant-status ${sharedStyles['variant-status']}" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button ${sharedStyles['primary-button']}" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
     ${run.phase === 'reward' ? `<button class="primary-button ${sharedStyles['primary-button']}" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="secondary-button ${sharedStyles['secondary-button']} retreat-button ${gameplayStyles['retreat-button']}" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button>` : ''}
-    <div class="board-play-area"><div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards"><div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true), boardZoomTemplate(language))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}</div>` : boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(language))}<aside class="run-sidebar ${gameplayStyles['run-sidebar']}"><section class="run-overview ${gameplayStyles['run-overview']}">${camp ? titleTemplate(language, camp, run.departure.title) : ''}<p class="variant-note ${sharedStyles['variant-note']}">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics ${sharedStyles['variant-metrics']}">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
+    <div class="board-play-area"><div class="expedition-layout">${run.encounter?.kind === 'mirror' ? `<div class="mirror-boards"><div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true), boardZoomTemplate(t.zoom))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}</div>` : boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}<aside class="run-sidebar ${gameplayStyles['run-sidebar']}"><section class="run-overview ${gameplayStyles['run-overview']}">${camp ? titleTemplate(language, camp, run.departure.title) : ''}<p class="variant-note ${sharedStyles['variant-note']}">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics ${sharedStyles['variant-metrics']}">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
     <p class="variant-note ${sharedStyles['variant-note']} reward-rate">${t.rewardRate} ×${rate}</p>
     ${vitalityTemplate(language, run)}</section>${tacticalTemplate(language, run)}${expeditionReadings(language, run)}
       ${
@@ -188,7 +189,7 @@ export function twinTemplate(language: Language, state: Twin, inputMode: BoardIn
     <p class="variant-status ${sharedStyles['variant-status']}" role="status" tabindex="-1">${status}</p>
     <div class="twin-tools ${sharedStyles['twin-tools']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="restart">${common.restart}</button></div>
     ${state.a.phase === 'won' || state.b.phase === 'won' ? `<p class="variant-note ${sharedStyles['variant-note']}">${t.safePartner}</p>` : ''}
-    <div class="board-play-area"><div class="action-dock ${gameplayStyles['action-dock']} compact-dock ${gameplayStyles['compact-dock']}">${boardControlsTemplate(language, inputMode, 'data-control')}</div><div class="twin-layout">${boardFrame('a', 'A', boardZoomTemplate(language))}${boardFrame('b', 'B')}</div></div>`
+    <div class="board-play-area"><div class="action-dock ${gameplayStyles['action-dock']} compact-dock ${gameplayStyles['compact-dock']}">${boardControlsTemplate(language, inputMode, 'data-control')}</div><div class="twin-layout">${boardFrame('a', 'A', boardZoomTemplate(t.zoom))}${boardFrame('b', 'B')}</div></div>`
 }
 
 /** Render a square, explicitly targeted inventory button with a persistent charge badge. */
@@ -232,12 +233,4 @@ export function difficultyTemplate(
       return `<button data-control="difficulty:${tier.id}" aria-pressed="${selected === tier.id}"><strong>${difficultyCopy(language, tier.id)}</strong><span>${size} × ${size}${expedition ? ` · ${tier.floors} ${t.floor}` : ''}</span></button>`
     },
   ).join('')}</div></fieldset>`
-}
-
-/** Keep zoom outside the grid so touch and keyboard users can choose usable target sizes. */
-function boardZoomTemplate(language: Language): string {
-  const t = variantCopy(language)
-  const lens =
-    '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>'
-  return `<div class="board-zoom ${sharedStyles['board-zoom']}"><button class="zoom-icon" data-control="zoom" aria-label="${t.zoom}" title="${t.zoom}" aria-pressed="false">${lens}<span aria-hidden="true">+</span></button></div>`
 }

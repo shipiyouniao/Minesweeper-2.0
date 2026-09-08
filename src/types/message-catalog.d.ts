@@ -7,6 +7,7 @@ export interface MessageCatalog {
   readonly 'survey.legend': string
   readonly 'survey.hint': string
   readonly 'survey.bookkeeping': string
+  readonly 'survey.line-action': string
   readonly 'survey.line': string
   readonly 'survey.moves': string
   readonly 'survey.remaining': string

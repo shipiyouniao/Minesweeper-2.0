@@ -1,9 +1,9 @@
 import { SURVEY_PRESETS } from '../game/survey.js'
 import { SURVEY_ACTION_LIMIT } from '../game/survey.js'
 import { RANKED_DIFFICULTIES } from '../game/difficulty.js'
-import type { Action, RankedDifficulty } from '../types/game.js'
+import type { Config, RankedDifficulty } from '../types/game.js'
 import type { JsonValue } from '../types/json.js'
-import type { SurveyRecord, SurveySave } from '../types/survey.js'
+import type { SurveyAction, SurveyRecord, SurveySave } from '../types/survey.js'
 import type { StorageLike } from '../types/storage.js'
 import { JsonObjectReader, parseJson } from './json-reader.js'
 
@@ -56,12 +56,19 @@ export function rankSurveyRecords(records: readonly SurveyRecord[]): readonly Su
 }
 
 /** Shape-check one finite command; replay subsequently verifies that it could be accepted. */
-function decodeAction(value: JsonValue, size: number): Action | null {
+function decodeAction(value: JsonValue, config: Config): SurveyAction | null {
   const reader = JsonObjectReader.from(value)
   if (!reader) return null
   const type = reader.string('type')
   const index = reader.number('index')
-  if (!integer(index, 0, size - 1)) return null
+  if (type === 'chord-line') {
+    const axis = reader.string('axis')
+    if (axis !== 'row' && axis !== 'column') return null
+    return integer(index, 0, (axis === 'row' ? config.height : config.width) - 1)
+      ? { type, axis, index }
+      : null
+  }
+  if (!integer(index, 0, config.width * config.height - 1)) return null
   switch (type) {
     case 'reveal':
     case 'flag':
@@ -118,9 +125,9 @@ export class SurveyRepository {
       return null
 
     const config = SURVEY_PRESETS[difficulty]
-    const actions: Action[] = []
+    const actions: SurveyAction[] = []
     for (const value of values) {
-      const action = decodeAction(value, config.width * config.height)
+      const action = decodeAction(value, config)
       if (!action) return null
       actions.push(action)
     }

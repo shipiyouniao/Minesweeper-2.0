@@ -9,6 +9,8 @@ export const jaMessages: MessageCatalog = {
   'survey.legend': '連続する地雷の数',
   'survey.hint': '縦横のヒントから安全なマスを開こう。',
   'survey.bookkeeping': '「2 1」は地雷2個、空白を挟んで1個。旗を間違えると地雷を踏むことも。',
+  'survey.line-action':
+    'ダブルクリック／ダブルタップでこの行・列をまとめて開く。Enter／スペースでも操作できます。',
   'survey.line': '{axis} {number}：連なり {runs} · 旗 {flags}',
   'survey.moves': '操作数',
   'survey.remaining': '残りの安全マス',
