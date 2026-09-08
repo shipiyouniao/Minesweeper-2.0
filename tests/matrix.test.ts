@@ -267,7 +267,13 @@ test('Half-health clamps burst damage and activates only the second local region
   const exposed: MatrixExpedition = {
     ...beside(initial, player),
     relics: ['tempered-edge', 'duelist-edge'],
-    encounter: { ...initial.encounter, exposed: true, points: 5, health: 16 },
+    encounter: {
+      ...initial.encounter,
+      exposed: true,
+      points: 5,
+      health: 16,
+      notes: [activeRegion(initial).indices[0]!],
+    },
   }
   const hit = actExpedition(exposed, { type: 'attack' })
   assert.ok(hit.encounter?.kind === 'matrix')

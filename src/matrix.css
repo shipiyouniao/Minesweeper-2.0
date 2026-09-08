@@ -15,14 +15,21 @@
   outline: 3px solid #286eaa;
   outline-offset: -4px;
 }
-.matrix-crystal-note::after {
-  content: '◇';
+.matrix-guess {
+  display: none;
   position: absolute;
-  top: 0;
-  right: 2px;
-  color: #277f71;
-  font-size: 13px;
+  inset: 8%;
   pointer-events: none;
+  z-index: 3;
+}
+.matrix-crystal-note .matrix-guess {
+  display: block;
+}
+.matrix-guess img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px #183d3280);
 }
 .matrix-crystal {
   position: absolute;
@@ -51,80 +58,38 @@
 .matrix-core.matrix-exposed {
   box-shadow: inset 0 0 0 2px #38ac8e;
 }
+/* Reserve edge space so clues remain visible even in a corner region. */
+.matrix-panel .board-viewport {
+  position: relative;
+  padding: 30px;
+}
 .matrix-observation {
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 14px;
-  background: var(--surface);
-  min-width: 0;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
 }
 .matrix-observation[hidden] {
   display: none;
 }
-.matrix-observation-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.matrix-observation p {
-  font-size: 12px;
-  color: var(--muted);
-  line-height: 1.6;
-  margin: 8px 0;
-}
-.matrix-mini {
-  display: grid;
-  grid-template-columns: 38px repeat(3, minmax(36px, 54px));
-  gap: 4px;
-  justify-content: center;
-  align-items: stretch;
-  margin: 12px auto;
-}
-.matrix-mini-runs {
-  display: grid;
-  align-content: center;
-  text-align: center;
-  font: 600 13px var(--mono);
-  min-height: 36px;
-}
-.matrix-mini-cell {
+.matrix-edge-clue {
+  position: absolute;
   display: grid;
   place-items: center;
-  aspect-ratio: 1;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: var(--accent-soft);
+  min-width: 24px;
+  padding: 2px 4px;
+  border-radius: 5px;
+  background: var(--surface);
   color: var(--ink);
-  font-size: 20px;
-  cursor: pointer;
-}
-.matrix-mini-cell[aria-pressed='true'] {
-  box-shadow: inset 0 0 0 2px #286eaa;
-}
-.matrix-mini-cell:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-.matrix-mini-cell img {
-  width: 75%;
-  height: 75%;
-  object-fit: contain;
-}
-.matrix-local-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.matrix-local-actions button {
-  flex: 1;
-  font-size: 12px;
+  border: 1px solid #459d8a;
+  font: 700 12px/1.15 var(--mono);
   white-space: nowrap;
 }
-.matrix-target-cost {
-  min-height: 3.2em;
+.matrix-row-clue {
+  transform: translate(-100%, -50%);
 }
-.matrix-target-label {
-  font-variant-numeric: tabular-nums;
+.matrix-column-clue {
+  transform: translate(-50%, -100%);
 }
 .matrix-charge-beam {
   position: fixed;
@@ -141,9 +106,6 @@
 .matrix-fracture {
   animation: matrix-fracture 850ms ease-out;
 }
-.matrix-burst {
-  animation: matrix-burst 650ms ease-out;
-}
 @keyframes matrix-extraction {
   40% {
     background: #b3e8d9;
@@ -157,29 +119,9 @@
     filter: brightness(1.8);
   }
 }
-@keyframes matrix-burst {
-  from {
-    background-color: #d88c62;
-    filter: brightness(1.6);
-  }
-  to {
-    filter: brightness(1);
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .matrix-extraction,
-  .matrix-fracture,
-  .matrix-burst {
+  .matrix-fracture {
     animation: none;
   }
-}
-
-.matrix-observation {
-  position: fixed;
-  z-index: 35;
-  right: 16px;
-  width: min(320px, calc(100vw - 24px));
-  box-sizing: border-box;
-  overflow: auto;
-  box-shadow: 0 12px 40px #23382a26;
 }

@@ -31,7 +31,8 @@ export const zhMessages: MessageCatalog = {
   'matrix.observe': '观测镜',
   'matrix.attune': '调谐 · 1 点',
   'matrix.attune-hint': '点调谐再点目标，或拖到目标格；目标须已揭开，且在角色脚下或四邻格。',
-  'matrix.observation-hint': '这里数的是晶体。每阶段采集两颗即可。',
+  'matrix.observation-hint':
+    '观测时：右键或长按标记晶体，点击目标前往采集（另耗 1 点）。再按观测镜隐藏线索。',
   'matrix.region': '观测区',
   'matrix.ground': '先揭开目标安全格，雷和墙不能调谐。',
   'matrix.region-only': '选择当前九格观测区内的目标。',

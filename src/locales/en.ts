@@ -37,7 +37,8 @@ export const enMessages: MessageCatalog = {
   'matrix.attune': 'Attune · 1 AP',
   'matrix.attune-hint':
     'Select Attune, then a target, or drag it onto a cell. Reveal safe ground first and stand on it or an orthogonal neighbor.',
-  'matrix.observation-hint': 'These runs count crystals. Collect any two each phase.',
+  'matrix.observation-hint':
+    'While observing: right-click or hold to mark crystals; click a target to walk over and collect (1 extra AP). Press Observe again to hide clues.',
   'matrix.region': 'Observation region',
   'matrix.ground': 'Reveal the safe target first. Mines and walls cannot be attuned.',
   'matrix.region-only': 'Choose a cell in the active nine-cell region.',

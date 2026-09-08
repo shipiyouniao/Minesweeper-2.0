@@ -35,7 +35,8 @@ export const jaMessages: MessageCatalog = {
   'matrix.attune': '調律 · 1',
   'matrix.attune-hint':
     '調律を選んで対象を押すか、対象へドラッグ。安全な床を開き、その上か上下左右に立つ。',
-  'matrix.observation-hint': 'この数字は結晶の並び。各段階で二つ集めればよい。',
+  'matrix.observation-hint':
+    '観測中は右クリック・長押しで結晶をマーク。対象を押すと移動して採集（追加で行動力1）。観測鏡をもう一度押すと手掛かりを隠す。',
   'matrix.region': '観測区',
   'matrix.ground': '先に安全な対象マスを開く。地雷や壁は調律できない。',
   'matrix.region-only': '現在の九マス観測区から対象を選ぶ。',

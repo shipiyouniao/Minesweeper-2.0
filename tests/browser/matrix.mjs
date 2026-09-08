@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { battleFixture } from './battle-fixtures.mjs'
+import { actExpedition } from '../../.native/tests/src/game/expedition.js'
+import { tacticalPlan } from '../../.native/tests/src/game/tactical-planning.js'
 import { professionCopy } from '../../.native/tests/src/ui/variant-copy.js'
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
@@ -59,6 +61,10 @@ try {
         ),
       )
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
+      const tops = await page
+        .locator('.tactical-controls .dock-slot')
+        .evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().top))
+      assert.ok(Math.max(...tops) - Math.min(...tops) < 2, `Combat buttons wrapped: ${tops}`)
       const geometry = await page.evaluate(() => ({
         cell: document.querySelector('.matrix-panel .cell').getBoundingClientRect().width,
         icon: document.querySelector('.matrix-core img').getBoundingClientRect().width,
@@ -72,18 +78,78 @@ try {
       assert.ok((await page.locator('dialog[open]').innerText()).length > 30)
       await page.keyboard.press('Escape')
     }
-    // Observe starts collapsed, preserves a local selection and supports native button activation.
-    await page.locator('.tactical-controls [data-control="observe"]').click()
-    assert.equal(await page.locator('.matrix-mini-cell').count(), 9)
+    // Clues attach to the board; crystal notes hide and return without flagging mines.
+    const observe = page.locator('.tactical-controls [data-control="observe"]')
+    await observe.click()
+    assert.equal(await page.locator('.matrix-edge-clue').count(), 6)
+    assert.equal(await page.locator('.matrix-mini-cell').count(), 0)
     const local = fixture.entered.run.encounter.regions[0].crystals[0]
-    await page.locator('[data-control="matrix-pick:' + local + '"]').click()
-    await page.locator('[data-control="mark-crystal:' + local + '"]').click()
-    assert.equal(await page.locator('[data-cell="' + local + '"].matrix-selected').count(), 1)
-    assert.equal(await page.locator('[data-cell="' + local + '"].matrix-crystal-note').count(), 1)
-    await page.locator('[data-control="mark-crystal:' + local + '"]').click()
+    const square = page.locator('[data-side="a"] [data-cell="' + local + '"]')
+    const originalLabel = await square.getAttribute('aria-label')
+    await square.press('f')
+    assert.equal(await square.evaluate((e) => e.classList.contains('matrix-crystal-note')), true)
+    const markedLabel = await square.getAttribute('aria-label')
+    assert.notEqual(markedLabel, originalLabel)
+    assert.ok(markedLabel.startsWith(originalLabel + ', '))
+    await observe.click()
+    assert.equal(await square.getAttribute('aria-label'), originalLabel)
+    assert.equal(await page.locator('.matrix-observation').isVisible(), false)
     assert.equal(await page.locator('.matrix-crystal-note').count(), 0)
+    await observe.click()
+    assert.equal(await square.evaluate((e) => e.classList.contains('matrix-crystal-note')), true)
+    assert.equal(await square.getAttribute('aria-label'), markedLabel)
+    await square.press('f')
+    assert.equal(await square.getAttribute('aria-label'), originalLabel)
+    assert.equal(await page.locator('.matrix-crystal-note').count(), 0)
+    await page.screenshot({ path: `.native/matrix-ui/${width}-observation.png`, fullPage: true })
     await page.keyboard.press('Escape')
     assert.equal(await page.locator('.matrix-observation').isVisible(), false)
+    // Exhaust AP with legal movement, then verify both visual and interaction state.
+    let exhausted = fixture.entered.run
+    const spent = []
+    while (exhausted.encounter.points > 0 && spent.length < 10) {
+      const index = exhausted.game.cells.findIndex((_, index) => {
+        const plan = tacticalPlan(exhausted, { type: 'move', index })
+        return (
+          exhausted.game.cells[index].visibility === 'revealed' && plan.allowed && plan.cost === 1
+        )
+      })
+      assert.ok(index >= 0)
+      const action = { type: 'move', index }
+      exhausted = actExpedition(exhausted, action)
+      spent.push(action)
+    }
+    assert.equal(exhausted.encounter.points, 0)
+    await seed({
+      ...fixture.entered.save,
+      journal: {
+        ...fixture.entered.save.journal,
+        actions: [...fixture.entered.save.journal.actions, ...spent],
+      },
+    })
+    const depleted = page.locator('[data-control="attune"]')
+    assert.equal(await depleted.getAttribute('aria-disabled'), 'true')
+    assert.ok(await depleted.evaluate((e) => Number(getComputedStyle(e).opacity) < 0.6))
+    await depleted.click({ force: true })
+    assert.equal(await depleted.getAttribute('aria-pressed'), 'false')
+    assert.equal(await page.locator('#attune-tip').isVisible(), true)
+    // A board click walks to the crystal and extracts it without a separate tool activation.
+    await seed({
+      ...fixture.objective.save,
+      journal: {
+        ...fixture.objective.save.journal,
+        actions: [...fixture.objective.save.journal.actions, { type: 'end-turn' }],
+      },
+    })
+    await observe.click()
+    await page.locator('[data-cell="' + fixture.objective.action.index + '"]').click()
+    await page.locator('.matrix-exposed').waitFor()
+    assert.equal(await observe.getAttribute('aria-expanded'), 'false')
+    assert.equal(await observe.getAttribute('aria-pressed'), 'false')
+    assert.equal(await page.locator('.matrix-observation').isVisible(), false)
+    await observe.click()
+    assert.equal(await observe.getAttribute('aria-expanded'), 'false')
+    assert.equal(await page.locator('.matrix-collected-cell').count(), 2)
     await seed(fixture.objective.save)
     const tool = page.locator('[data-control="attune"]')
     const target = page.locator('[data-cell="' + fixture.objective.action.index + '"]')

@@ -6,16 +6,16 @@ The seventh Expedition boss combines ordinary Minesweeper navigation with a smal
 
 Floor numbers count adjacent **mines**. Zero cells expand normally, and quick-open uses the same neighboring-number rules as ordinary Expedition floors. Marking mines and suspected-safe terrain never charges the boss mechanism.
 
-The **Observe** tool opens a nine-cell map of the highlighted 3 × 3 region. Its row and column runs count **crystals**, independently of mines. A `1 1` clue means two crystal groups separated by at least one cell without a crystal. Crystals occupy safe terrain, but opening their floor tiles does not reveal or collect them.
+The **Observe** tool toggles clues along the edges of the highlighted 3 × 3 region on the battlefield. Its row and column runs count **crystals**, independently of mines. A `1 1` clue means two crystal groups separated by at least one cell without a crystal. Crystals occupy safe terrain, but opening their floor tiles does not reveal or collect them.
 
-Each region contains three or four crystals and is uniquely solvable from its local runs. Only the active phase publishes its region and clues. Choose a mini-map cell to highlight its battlefield coordinate; focusing a battlefield cell selects its matching local cell. Crystal guesses are optional, free and cancellable. They remain hypotheses until extraction.
+Each region contains three or four crystals and is uniquely solvable from its local runs. Only the active phase publishes its region and clues. While observing, right-click or long-press a region cell to toggle a crystal-shaped guess instead of a mine flag. Guesses are optional, free and cancellable, and remain hypotheses until extraction.
 
-Observe is a collapsible overlay above the fixed action dock. Closing it or pressing Escape leaves the player free to explore. All ordinary mine numbers remain visible on the main board.
+Press Observe again or Escape to hide the clues and guesses. Reopening restores guesses; changing observation regions clears them. All ordinary mine numbers remain visible on the main board.
 
 ## Extract and strike
 
 1. Reveal the chosen safe floor tile. Stand on it or an orthogonal neighbor.
-2. Select **Attune**, then the tile, or drag the tool onto it. The selected observation cell also has a direct Attune button. A valid attempt costs **1 AP**.
+2. Select **Attune**, then the tile, or drag the tool onto it. While observing, clicking a region cell also walks or reveals and then attempts collection, reserving the movement/reveal cost plus 1 AP. A valid attempt costs **1 AP**. Attune is greyed out when AP is exhausted or the shield is already broken, with a custom reason bubble.
 3. A crystal is revealed and collected immediately. An empty attempt spends its AP and records the empty location, without bonus damage. Repeating a resolved target, targeting a wall/mine, or targeting outside the active region is blocked without cost.
 4. The **second collected crystal immediately breaks the shield**, with a charge beam and shield fracture. Remaining AP can be used to attack. Extra crystals in that region are inert.
 5. Melee attacks cost **2 AP** from an orthogonal neighbor of the boss. The shield stays broken until the health boundary; it has no expiry or recharge action.
@@ -58,7 +58,7 @@ Existing claims and title ownership remain valid. Expedition rules revision **13
 
 ## Implementation and acceptance
 
-Contracts live in `src/types/matrix.d.ts`. Generation, local public knowledge, attunement and combat transitions are pure functions. The session owns accepted-action replay; `MatrixObservation` owns the collapsible panel and its selection. Generated assets and full prompts are documented in [Matrix artwork](matrix-artwork.md).
+Contracts live in `src/types/matrix.d.ts`. Generation, local public knowledge, attunement and combat transitions are pure functions. The session owns accepted-action replay; `MatrixObservation` owns the board-edge clues and observation input state. Generated assets and full prompts are documented in [Matrix artwork](matrix-artwork.md).
 
 Behavioral checks cover all five tiers, connectivity, exact quotas, public solvability, covered-information privacy, normal flood reveal, invalid/repeated/empty extraction, quiet turns, immediate permanent shield breaks, phase boundaries, build refunds and replay settlement. The browser regression is `tests/browser/matrix.mjs`.
 
@@ -75,3 +75,7 @@ A controlled public-information player was run at Standard difficulty, floor 3, 
 The offensive build uses Steel blade, Tempered edge and Duelist edge. The mobility/defense build uses Sentinel, Field boots, Plated vest, Marching boots and Layered armor. The driver uses public mine deductions and local crystal runs, then bounded tactical planning; it does not read hidden identities to choose digs or extractions. Every run collected exactly four crystals. The count includes the final active turn.
 
 These are deterministic acceptance runs, not human completion-time measurements or optimal solutions. The unupgraded results span 12–17 turns against the initial roughly 10–15-turn tuning target; route and build choices still matter. The retained [design record](matrix-overseer-redesign.md) explains the transition.
+
+## Visual feedback
+
+All seven bosses have distinct attack and ground-impact effects, player and boss hit feedback, and object interaction animations. Removed webs, eggs, hatchlings and nests retain transient artwork while tearing or breaking; devices, seals, anchors, hourglasses, sonar and crystals use their own effects. Effects compare accepted public state changes, respect reduced motion and clean up after playback. See `tests/browser/combat-feedback.mjs` and `tests/browser/interaction-feedback.mjs`.
