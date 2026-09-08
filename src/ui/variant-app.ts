@@ -411,6 +411,12 @@ export class VariantApp implements VariantInputActions {
         this.expedition({ type: 'skill' })
         break
       }
+      case 'matrix-row':
+      case 'matrix-column':
+        this.input.cancelTools()
+        this.expedition({ type: command.type, index: command.value })
+        this.view.focusPlayer()
+        break
       case 'attack':
         if (this.session instanceof ExpeditionSession && this.session.run?.encounter)
           this.expedition(tacticalCellAction(this.session.run, this.session.run.encounter.boss))

@@ -3,6 +3,7 @@ import type { DungeonSprite } from '../types/dungeon-ui.js'
 
 /** Select the boss's own living, exposed or defeated artwork for both panel and board. */
 export function bossSprite(encounter: TacticalEncounter): DungeonSprite {
+  if (encounter.kind === 'matrix') return 'matrix-overseer'
   if (encounter.kind === 'echo') return 'echo-warden'
   if (encounter.kind === 'clock') return 'clock-mage'
   if (encounter.kind === 'magnetic') return 'magnetic-knight'

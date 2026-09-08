@@ -1,3 +1,4 @@
+import { armMatrix, advanceMatrix, strikeMatrix } from './matrix-battle.js'
 import { advanceEcho, openEcho, strikeEcho } from './echo-battle.js'
 import { useExpeditionSonar } from './expedition-sonar.js'
 import { neighbors } from './engine.js'
@@ -37,6 +38,7 @@ function correctFlags(run: Expedition, index: number): boolean {
 function interact(run: Expedition, index: number): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+  if (encounter.kind === 'matrix') return armMatrix({ ...run, encounter })
   if (encounter.kind === 'echo') return openEcho({ ...run, encounter }, index)
   if (encounter.kind === 'clock') return redirectClock({ ...run, encounter }, index)
   if (encounter.kind === 'magnetic') return lureMagnetic({ ...run, encounter }, index)
@@ -92,6 +94,7 @@ function interact(run: Expedition, index: number): Expedition {
 function endTurn(run: Expedition): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+  if (encounter.kind === 'matrix') return advanceMatrix({ ...run, encounter })
   if (encounter.kind === 'echo') return advanceEcho({ ...run, encounter })
   if (encounter.kind === 'clock') return advanceClock({ ...run, encounter })
   if (encounter.kind === 'magnetic') return advanceMagnetic({ ...run, encounter })
@@ -151,6 +154,8 @@ export function actBattle(
   else if (action.type === 'shift' && encounter.kind === 'mirror')
     next = shiftMirror({ ...run, encounter })
   else if (action.type === 'sonar') next = useExpeditionSonar(run, action.index)
+  else if (action.type === 'attack' && encounter.kind === 'matrix')
+    next = strikeMatrix({ ...run, encounter }, strikeDamage(run))
   else if (action.type === 'attack' && encounter.kind === 'echo')
     next = strikeEcho({ ...run, encounter }, strikeDamage(run))
   else if (action.type === 'attack' && encounter.kind === 'mirror')

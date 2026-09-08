@@ -48,3 +48,7 @@ Rules revision **9** retires older expeditions with checkpointed extraction. Cam
 Domain coverage includes all 22 licenses and translations, departure freeze, ownership tampering, revision-eight retirement, bounded starting tools and health growth, specialist conditions, all five AP resolvers, explicit boss entry, relic choice stages, physical chest limits and skill refunds. A discovered Mirror Twins turn-budget error is fixed: AP is calculated from the incoming turn, so boots and title conditions use the correct turn number.
 
 `tests/browser/title-builds.mjs` exercises the actual menu, reward descriptions, health effect, changing a future title during play, reload and subsequent departure in all three languages with mouse, keyboard and touch. The layout suite covers the longer scrolling options and run statistics from 320px to 4K.
+
+## Matrix title
+
+**Perfect Refraction** joins the 25-title catalog: defeat Matrix Overseer using exactly three reflected beams. Equipping it grants +1 attack while that boss’s shield is open. Its one-time claim pays 250 supplies; it grants no repeatable currency bonus. Echo Warden also contributes Silent Footsteps (+1 defense at full health) and Perfect Pitch (+1 attack against its exposed core).

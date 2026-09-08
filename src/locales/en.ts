@@ -2,6 +2,42 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'matrix.rest': 'The beam is resting. Calibrate when the red line returns.',
+  'matrix.hunt': 'Break the Matrix',
+  'matrix.hunt-note': 'Defeat the Matrix Overseer once.',
+  'matrix.precise': 'Perfect Refraction',
+  'matrix.precise-note': 'Defeat the Matrix Overseer with exactly three reflected beams.',
+  'matrix.precise-effect': 'Attack +1 while the Matrix Overseer’s shield is open.',
+
+  'matrix.name': 'Matrix Overseer',
+  'matrix.deduce':
+    'Read the edge runs. Open or survey every safe square in the glowing line and flag its mines.',
+  'matrix.calibrate':
+    'Approach the active prism and click it: 1 AP. End the turn to reflect its beam and open the shield.',
+  'matrix.fight':
+    'Strike from an adjacent square: 2 AP. The shield stays open for four turns; each health band starts a new circuit.',
+  'matrix.forecast':
+    'Red beams fire at turn end for 4 damage. Mint beams are your reflected route and can hit you too. Step clear before ending. Every third turn is quiet.',
+  'matrix.gaps':
+    '“2 1” means two adjacent mines, at least one safe square, then one mine. The gap may be longer. Walls count as safe.',
+  'matrix.line': 'Finish this prism’s line first; matching the flag count alone is not enough.',
+  'matrix.shield': 'Reflect the active prism’s beam to break the shield.',
+  'matrix.phase': 'Circuit broken. End the turn to activate the next prism.',
+  'matrix.armed': 'Prism aligned. Clear the mint return path, then end the turn.',
+  'matrix.reflected': 'Beam reflected. Shield open for four turns.',
+  'matrix.shifted': 'Next circuit online. Follow the glowing prism.',
+  'matrix.status': 'Circuit {phase}/3 · open turns {window}',
+  'matrix.prism': 'Prism {number}',
+  'matrix.line-action':
+    'Open deduced safe squares in this line; distant squares become safety notes.',
+  'matrix.floor': 'Open floor · use the edge runs',
+  'matrix.legend': 'Red: incoming · mint: reflected · numbered diamonds: circuits',
+  'matrix.scene-0': 'The room draws its own boundaries',
+  'matrix.scene-1': 'The floor has no numbers. Ordered marks run along its edges.',
+  'matrix.scene-2': 'Every square belongs in my ledger. Account for them all.',
+  'matrix.scene-3': 'Those prisms face its core. I can turn its own light against it.',
+  'matrix.scene-4': 'A red line crosses the floor. The first prism begins to glow.',
+
   'survey.mines': 'mines',
   'survey.title': 'Survey',
   'survey.intro': 'Trace mine runs. Cross-check both axes.',

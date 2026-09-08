@@ -124,7 +124,16 @@ export interface Expedition extends Vitality {
 export type ExpeditionAction =
   | {
       readonly type:
-        'reveal' | 'flag' | 'mark-safe' | 'chord' | 'move' | 'probe' | 'interact' | 'sonar'
+        | 'reveal'
+        | 'flag'
+        | 'mark-safe'
+        | 'chord'
+        | 'move'
+        | 'probe'
+        | 'interact'
+        | 'sonar'
+        | 'matrix-row'
+        | 'matrix-column'
       readonly index: number
     }
   | { readonly type: 'sweep'; readonly row: number }

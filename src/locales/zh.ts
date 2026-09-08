@@ -2,6 +2,38 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'matrix.rest': '光束正在蓄能，红线出现后再校准棱镜。',
+  'matrix.hunt': '打破矩阵',
+  'matrix.hunt-note': '击败一次矩阵守望者。',
+  'matrix.precise': '完美折射',
+  'matrix.precise-note': '仅折返三次光束，击败矩阵守望者。',
+  'matrix.precise-effect': '矩阵守望者开盾期间，攻击 +1。',
+
+  'matrix.name': '矩阵守望者',
+  'matrix.deduce': '按边缘雷段推理：挖开或探明高亮行列里的安全格，标出雷。',
+  'matrix.calibrate': '靠近亮起的棱镜，点击校准（1 行动点）。结束回合后光束折返，护盾开启。',
+  'matrix.fight':
+    '相邻攻击消耗 2 行动点，破盾后有 4 回合输出。每打掉一段生命，就要破解下一枚棱镜。',
+  'matrix.forecast':
+    '红色光束在回合结束时造成 4 点伤害。青色是折返路径，也会伤到自己，结束回合前记得避开。每三回合停火一次。',
+  'matrix.gaps': '“2 1”表示两颗相连的雷、至少一格安全格，再一颗雷；间隔可以更长。墙按安全格计算。',
+  'matrix.line': '先解清这枚棱镜所在的行或列，只有旗子数量对上还不够。',
+  'matrix.shield': '折返当前棱镜的光束，才能打破护盾。',
+  'matrix.phase': '这段回路已击破，结束回合后启用下一枚棱镜。',
+  'matrix.armed': '棱镜已校准，离开青色折返路径后结束回合。',
+  'matrix.reflected': '光束折返，护盾开启 4 回合。',
+  'matrix.shifted': '下一段回路启动，寻找新亮起的棱镜。',
+  'matrix.status': '回路 {phase}/3 · 开盾剩余 {window} 回合',
+  'matrix.prism': '棱镜 {number}',
+  'matrix.line-action': '点击雷段可挖开推得出的安全格，够不着的会留下疑似安全标记。',
+  'matrix.floor': '已揭开的地面 · 请看边缘雷段',
+  'matrix.legend': '红线：攻击预告 · 青线：折返光束 · 菱形编号：回路顺序',
+  'matrix.scene-0': '房间画出了自己的边界',
+  'matrix.scene-1': '地面没有数字，只有边缘一串串排列的刻痕。',
+  'matrix.scene-2': '每一格都记在我的账上。你数得清吗？',
+  'matrix.scene-3': '棱镜正对着它的核心……那就借它的光，拆它的盾。',
+  'matrix.scene-4': '红线掠过地面，第一枚棱镜亮了。',
+
   'survey.mines': '雷',
   'survey.title': '测绘',
   'survey.intro': '沿雷段描图，用行列交叉推理。',

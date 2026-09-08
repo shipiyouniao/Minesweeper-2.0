@@ -2,6 +2,39 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'matrix.rest': '光線は充填中。赤い線が戻ったら調整しよう。',
+  'matrix.hunt': '行列を崩せ',
+  'matrix.hunt-note': '行列の監督者を一度倒す。',
+  'matrix.precise': '完全なる屈折',
+  'matrix.precise-note': '光線の反射をちょうど 3 回で行列の監督者を倒す。',
+  'matrix.precise-effect': '行列の監督者の盾が開いている間、攻撃 +1。',
+
+  'matrix.name': '行列の監督者',
+  'matrix.deduce': '端の連続地雷数を読み、光る行・列の安全マスを開くか調査し、地雷に旗を立てよう。',
+  'matrix.calibrate':
+    '光るプリズムに近づいてクリックすると調整（1 AP）。ターン終了時に光線が反射し、盾が開く。',
+  'matrix.fight': '隣接攻撃は 2 AP。盾は 4 ターン開き、体力を一区切り削ると次の回路に切り替わる。',
+  'matrix.forecast':
+    '赤い光線はターン終了時に 4 ダメージ。ミント色の反射光も自分に当たるので、先に退避しよう。3 ターンごとに攻撃が休止する。',
+  'matrix.gaps':
+    '「2 1」は地雷 2 個の連続と地雷 1 個。その間の安全マスは最低 1 個で、もっと長くてもよい。壁は安全マスとして数える。',
+  'matrix.line': 'まずこのプリズムの行・列を解こう。旗の数が合うだけでは調整できない。',
+  'matrix.shield': '有効なプリズムで光線を反射して盾を破ろう。',
+  'matrix.phase': '回路を破壊した。ターンを終了すると次のプリズムが起動する。',
+  'matrix.armed': 'プリズム調整完了。ミント色の反射経路から離れ、ターンを終了しよう。',
+  'matrix.reflected': '光線を反射した。盾が 4 ターン開く。',
+  'matrix.shifted': '次の回路が起動した。新しく光るプリズムへ。',
+  'matrix.status': '回路 {phase}/3 · 盾の開放 残り {window} ターン',
+  'matrix.prism': 'プリズム {number}',
+  'matrix.line-action': '数字を押すと推論できる安全マスを開く。届かないマスには安全メモを残す。',
+  'matrix.floor': '開いた床 · 端の連続数を読もう',
+  'matrix.legend': '赤：攻撃予告 · ミント：反射光 · 菱形の番号：回路順',
+  'matrix.scene-0': '部屋が自らの境界を描く',
+  'matrix.scene-1': '床に数字はなく、端に並んだ刻印だけがある。',
+  'matrix.scene-2': 'すべてのマスは私の台帳にある。数えきれるか？',
+  'matrix.scene-3': 'プリズムは核を向いている……その光を借りて盾を割ろう。',
+  'matrix.scene-4': '赤い線が床を横切り、最初のプリズムが光る。',
+
   'survey.mines': '地雷',
   'survey.title': '測量',
   'survey.intro': '地雷の連なりを、縦横から読み解く。',

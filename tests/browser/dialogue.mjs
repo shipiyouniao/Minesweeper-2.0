@@ -92,7 +92,7 @@ try {
     )
     await page.addInitScript(
       (save) => localStorage.setItem('minesweeper.variants.v1.expedition', JSON.stringify(save)),
-      battleFixture(48).entered.save,
+      battleFixture(52).entered.save,
     )
     await page.goto('http://127.0.0.1:4173/Minesweeper-2.0/?ruleset=expedition&lang=zh')
     await page.locator('[data-dialogue-text]').waitFor()

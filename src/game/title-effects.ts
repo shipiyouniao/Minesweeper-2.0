@@ -4,6 +4,7 @@ import type { CombatStats } from '../types/combat-build.js'
 import type { TitleId } from '../types/titles.js'
 
 export const TITLES: readonly TitleId[] = [
+  'matrix-precise',
   'bastion-flawless',
   'mirror-flawless',
   'clock-no-glass',
@@ -49,6 +50,8 @@ export function titleCombatStats(run: Expedition): CombatStats {
   let attack = 0
   let defense = 0
   let actions = 0
+  if (title === 'matrix-precise' && boss?.kind === 'matrix' && boss.exposedUntil >= boss.turn)
+    attack = 1
   if (title === 'echo-flawless' && boss && run.health === run.maxHealth) defense = 1
   if (title === 'echo-precise' && boss?.kind === 'echo' && boss.exposedUntil >= boss.turn)
     attack = 1

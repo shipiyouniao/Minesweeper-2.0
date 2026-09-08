@@ -1,5 +1,6 @@
 /** One earned achievement occupies the expedition's single title slot. */
 export type TitleId =
+  | 'matrix-precise'
   | 'bastion-flawless'
   | 'mirror-flawless'
   | 'echo-flawless'

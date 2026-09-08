@@ -3,6 +3,8 @@ import type { EncounterKind } from './tactical.js'
 import type { TitleId } from './titles.js'
 
 export type MilestoneId =
+  | 'hunt-matrix'
+  | 'matrix-precise'
   | 'bastion-flawless'
   | 'mirror-flawless'
   | 'echo-flawless'

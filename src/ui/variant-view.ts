@@ -1,3 +1,4 @@
+import { markMatrixCell } from './matrix-board.js'
 import { sharedStyles } from './shared-styles.js'
 import { sonarRegion } from '../game/sonar.js'
 import { markEchoCell } from './echo-board.js'
@@ -58,6 +59,7 @@ export class VariantView {
   private expedition: Expedition | null = null
   private targetingTool = false
   private animateClock = false
+  private matrixBurst: readonly number[] = []
   private readonly listeners = new AbortController()
 
   /** Mount the stable shell once; only its mode content changes after an action. */
@@ -154,6 +156,14 @@ export class VariantView {
   render(html: string, a: Game | null, b: Game | null, expedition: Expedition | null): void {
     this.resize?.disconnect()
     const previous = this.expedition
+    this.matrixBurst =
+      previous?.encounter?.kind === 'matrix' &&
+      expedition?.encounter?.kind === 'matrix' &&
+      previous.departure.seed === expedition.departure.seed &&
+      previous.floor === expedition.floor &&
+      expedition.encounter.turn === previous.encounter.turn + 1
+        ? previous.encounter.intent.targets
+        : []
     this.animateClock = Boolean(
       previous?.encounter?.kind === 'clock' &&
       expedition?.encounter?.kind === 'clock' &&
@@ -164,8 +174,12 @@ export class VariantView {
     this.config = a?.config ?? null
     this.expedition = expedition
     this.targetingTool = false
-    const oldA = this.content.querySelector<HTMLElement>('[data-side="a"]')?.parentElement
-    const oldB = this.content.querySelector<HTMLElement>('[data-side="b"]')?.parentElement
+    const oldA = this.content
+      .querySelector<HTMLElement>('[data-side="a"]')
+      ?.closest<HTMLElement>('.board-viewport')
+    const oldB = this.content
+      .querySelector<HTMLElement>('[data-side="b"]')
+      ?.closest<HTMLElement>('.board-viewport')
     const scrollA = [oldA?.scrollLeft ?? 0, oldA?.scrollTop ?? 0]
     const scrollB = [oldB?.scrollLeft ?? 0, oldB?.scrollTop ?? 0]
     const identity = expedition
@@ -218,10 +232,12 @@ export class VariantView {
     if (sameBoard) {
       this.content
         .querySelector('[data-side="a"]')
-        ?.parentElement?.scrollTo(scrollA[0] ?? 0, scrollA[1] ?? 0)
+        ?.closest('.board-viewport')
+        ?.scrollTo(scrollA[0] ?? 0, scrollA[1] ?? 0)
       this.content
         .querySelector('[data-side="b"]')
-        ?.parentElement?.scrollTo(scrollB[0] ?? 0, scrollB[1] ?? 0)
+        ?.closest('.board-viewport')
+        ?.scrollTo(scrollB[0] ?? 0, scrollB[1] ?? 0)
     }
 
     const selector =
@@ -427,6 +443,8 @@ export class VariantView {
           `${cell.getAttribute('aria-label')}, ${pylon.active ? t.pylon : t.disabled}`,
         )
       }
+      markMatrixCell(this.language, run, cell, index)
+      if (this.matrixBurst.includes(index)) cell.classList.add('matrix-burst')
       markEchoCell(this.language, run, cell, index)
       markBroodCell(this.language, run, cell, index)
       markMirrorCell(this.language, run, cell, index)
@@ -696,8 +714,13 @@ export class VariantView {
       )
       const player = document.createElement('div')
       player.className = 'dungeon-player'
-      const clue = echoObscured(run, run.player) ? '≈' : (run.game.cells[run.player]?.adjacent ?? 0)
-      player.dataset['number'] = String(clue)
+      const clue =
+        run.encounter?.kind === 'matrix'
+          ? 0
+          : echoObscured(run, run.player)
+            ? '≈'
+            : (run.game.cells[run.player]?.adjacent ?? 0)
+      if (run.encounter?.kind !== 'matrix') player.dataset['number'] = String(clue)
       player.innerHTML = `${spriteImage(professionSprite(run.departure.profession))}${clue ? `<span class="landmark-clue">${clue}</span>` : ''}`
       player.style.width = `${current.offsetWidth}px`
       player.style.height = `${current.offsetHeight}px`
