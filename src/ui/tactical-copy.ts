@@ -1,16 +1,31 @@
 import { message } from '../i18n.js'
+import { matrixHealthFloor } from '../game/matrix-logic.js'
 import type { Language } from '../types/localization.js'
 import type { TacticalMessages } from '../types/tactical-ui.js'
 import type { EncounterKind, TacticalEncounter, TacticalPlan } from '../types/tactical.js'
 import { battleCopy } from './battle-presentation.js'
+import type { Expedition } from '../types/variants.js'
+
+/** Keep the current objective visible after a pointer preview or blocked click disappears. */
+export function tacticalHint(language: Language, run: Expedition): string {
+  const encounter = run.encounter
+  if (encounter?.kind !== 'matrix' || run.phase !== 'boss')
+    return tacticalCopy(language, encounter?.kind).hint
+
+  const matrix = { ...run, encounter }
+  if (encounter.health <= matrixHealthFloor(matrix)) return message(language, 'matrix.phase')
+  return encounter.exposed
+    ? message(language, 'matrix.open-hint')
+    : message(language, 'matrix.shield')
+}
 
 /** Explain a public action preview without inspecting the mine layout. */
 export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string {
   switch (plan.reason) {
-    case 'matrix-rest':
-      return message(language, 'matrix.rest')
-    case 'matrix-line':
-      return message(language, 'matrix.line')
+    case 'matrix-region':
+      return message(language, 'matrix.region-only')
+    case 'matrix-ground':
+      return message(language, 'matrix.ground')
     case 'matrix-shield':
       return message(language, 'matrix.shield')
     case 'matrix-phase':
@@ -65,8 +80,10 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
   switch (encounter.event) {
     case 'matrix-shifted':
       return message(language, 'matrix.shifted')
-    case 'matrix-reflected':
-      return message(language, 'matrix.reflected')
+    case 'matrix-collected':
+      return message(language, 'matrix.collected-event')
+    case 'matrix-empty':
+      return message(language, 'matrix.empty-event')
     case 'magnet-lured':
       return message(language, 'tactical-copy.lure-locked-clear-the-gold-route')
     case 'magnet-overloaded':
@@ -100,6 +117,8 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
     case 'hatchling-cleared':
       return message(language, 'tactical-copy.hatchling-intercepted-attack-cancelled')
     default:
+      if (encounter.kind === 'matrix' && encounter.turn % 3 === 0)
+        return message(language, 'matrix.quiet')
       return message(language, 'tactical-copy.battle-in-progress-watch-the-attack-forecast')
   }
 }

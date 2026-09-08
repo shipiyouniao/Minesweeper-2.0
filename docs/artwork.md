@@ -27,4 +27,4 @@ The fourth boss family adds original generated knight and anchor sprites, plus b
 
 ## Matrix Overseer
 
-The seventh boss family uses two original transparent generated assets for its automaton and prism stations. See [the complete prompts and asset map](matrix-artwork.md). Beam forecasts, reflection paths and shield states are rendered as responsive board overlays.
+The seventh boss family uses four original transparent generated assets: the automaton, collectible crystal, observation lens and attunement tool. See [the complete prompts and asset map](matrix-artwork.md). Frozen attack forecasts, crystal delivery beams and shield fractures use responsive overlays with reduced-motion support.

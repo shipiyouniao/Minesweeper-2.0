@@ -16,8 +16,8 @@ export function battleGuide(language: Language, run: Expedition): string {
   const steps: readonly BattleGuideStep[] =
     boss.kind === 'matrix'
       ? [
-          { text: message(language, 'matrix.deduce'), prop: 'matrix-prism', symbol: '2 1' },
-          { text: message(language, 'matrix.calibrate'), prop: 'matrix-prism', symbol: '↱' },
+          { text: message(language, 'matrix.deduce'), prop: 'matrix-observe', symbol: '1 1' },
+          { text: message(language, 'matrix.calibrate'), prop: 'attune', symbol: '◇' },
           { text: message(language, 'matrix.fight'), prop: 'matrix-overseer', symbol: '→' },
         ]
       : boss.kind === 'echo'

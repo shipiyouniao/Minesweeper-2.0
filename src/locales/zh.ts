@@ -2,37 +2,46 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
-  'matrix.rest': '光束正在蓄能，红线出现后再校准棱镜。',
+  'matrix.quiet': '停火回合',
+  'matrix.open-hint': '护盾已破，靠近核心攻击。',
   'matrix.hunt': '打破矩阵',
   'matrix.hunt-note': '击败一次矩阵守望者。',
   'matrix.precise': '完美折射',
-  'matrix.precise-note': '仅折返三次光束，击败矩阵守望者。',
-  'matrix.precise-effect': '矩阵守望者开盾期间，攻击 +1。',
-
+  'matrix.precise-note': '调谐从未落空，击败矩阵守望者。',
+  'matrix.precise-effect': '矩阵守望者护盾破碎时，攻击 +1。',
   'matrix.name': '矩阵守望者',
-  'matrix.deduce': '按边缘雷段推理：挖开或探明高亮行列里的安全格，标出雷。',
-  'matrix.calibrate': '靠近亮起的棱镜，点击校准（1 行动点）。结束回合后光束折返，护盾开启。',
-  'matrix.fight':
-    '相邻攻击消耗 2 行动点，破盾后有 4 回合输出。每打掉一段生命，就要破解下一枚棱镜。',
-  'matrix.forecast':
-    '红色光束在回合结束时造成 4 点伤害。青色是折返路径，也会伤到自己，结束回合前记得避开。每三回合停火一次。',
-  'matrix.gaps': '“2 1”表示两颗相连的雷、至少一格安全格，再一颗雷；间隔可以更长。墙按安全格计算。',
-  'matrix.line': '先解清这枚棱镜所在的行或列，只有旗子数量对上还不够。',
-  'matrix.shield': '折返当前棱镜的光束，才能打破护盾。',
-  'matrix.phase': '这段回路已击破，结束回合后启用下一枚棱镜。',
-  'matrix.armed': '棱镜已校准，离开青色折返路径后结束回合。',
-  'matrix.reflected': '光束折返，护盾开启 4 回合。',
-  'matrix.shifted': '下一段回路启动，寻找新亮起的棱镜。',
-  'matrix.status': '回路 {phase}/3 · 开盾剩余 {window} 回合',
-  'matrix.prism': '棱镜 {number}',
-  'matrix.line-action': '点击雷段可挖开推得出的安全格，够不着的会留下疑似安全标记。',
-  'matrix.floor': '已揭开的地面 · 请看边缘雷段',
-  'matrix.legend': '红线：攻击预告 · 青线：折返光束 · 菱形编号：回路顺序',
-  'matrix.scene-0': '房间画出了自己的边界',
-  'matrix.scene-1': '地面没有数字，只有边缘一串串排列的刻痕。',
-  'matrix.scene-2': '每一格都记在我的账上。你数得清吗？',
-  'matrix.scene-3': '棱镜正对着它的核心……那就借它的光，拆它的盾。',
-  'matrix.scene-4': '红线掠过地面，第一枚棱镜亮了。',
+  'matrix.deduce': '按地板数字扫雷开路。打开观测镜，用九格边缘的晶体段数寻找折光晶体。',
+  'matrix.calibrate':
+    '揭开目标安全格，走到它上面或四邻格。用调谐采集：1 行动点；每阶段取两颗就破盾。',
+  'matrix.fight': '靠近核心攻击：2 行动点。护盾不会自行恢复；打到半血后结束回合，开始第二次寻晶。',
+  'matrix.forecast': '红色格子在回合结束时受到 4 点攻击。每三回合停火一次，仍可移动、调谐和攻击。',
+  'matrix.gaps':
+    '观测镜的数字只数晶体。1 1 表示两颗晶体之间至少隔一格；地板数字只数雷。挖开地面不会自动发现晶体。',
+  'matrix.shield': '在当前观测区采集两颗晶体，打破护盾。',
+  'matrix.phase': '第一段生命已击破，结束回合后开启第二个观测区。',
+  'matrix.armed': '两颗晶体已送达，护盾破碎。',
+  'matrix.shifted': '第二个观测区已亮起，再取两颗晶体。',
+  'matrix.status': '阶段 {phase}/2 · 晶体 {count}/2',
+  'matrix.legend': '青色边框：观测区 · 红色格子：回合结束时受击',
+  'matrix.scene-0': '地面下藏着另一种光',
+  'matrix.scene-1': '雷埋在石板下，晶体的微光却绕开了刻在地上的数字。',
+  'matrix.scene-2': '看见地雷，就以为看清了这间屋子？',
+  'matrix.scene-3': '观测镜能看出晶体的排列。取两颗，就能击穿它的盾。',
+  'matrix.scene-4': '一小片地面泛起青光，守望者开始蓄力。',
+  'matrix.observe': '观测镜',
+  'matrix.attune': '调谐 · 1 点',
+  'matrix.attune-hint': '点调谐再点目标，或拖到目标格；目标须已揭开，且在角色脚下或四邻格。',
+  'matrix.observation-hint': '这里数的是晶体。每阶段采集两颗即可。',
+  'matrix.region': '观测区',
+  'matrix.ground': '先揭开目标安全格，雷和墙不能调谐。',
+  'matrix.region-only': '选择当前九格观测区内的目标。',
+  'matrix.note': '晶体猜测',
+  'matrix.empty-cell': '已排除晶体',
+  'matrix.unresolved': '晶体未知',
+  'matrix.select': '选一格，在棋盘上查看位置。',
+  'matrix.collected': '已采集晶体',
+  'matrix.collected-event': '晶体已采集，再取一颗就破盾。',
+  'matrix.empty-event': '这里没有晶体，消耗 1 行动点。',
 
   'survey.mines': '雷',
   'survey.title': '测绘',
@@ -355,7 +364,7 @@ export const zhMessages: MessageCatalog = {
   'combat-build-copy.1-loadout-point-starting-and-maximum-health':
     '装备预算 1 点。初始生命与生命上限 +2。',
   'combat-build-copy.1-loadout-point-the-first-control-or':
-    '装备预算 1 点。每回合首次关闭机关或封印、摧毁巢穴、校准锚点，返还 1 点行动力。',
+    '装备预算 1 点。每回合首次关闭机关或封印、摧毁巢穴、校准锚点，或用晶体破盾，返还 1 点行动力。',
   'combat-build-copy.1-loadout-point-the-first-web-egg':
     '装备预算 1 点。每回合首次清除蛛网、虫卵或幼虫，返还 1 点行动力。',
   'combat-build-copy.2-loadout-points-1-ap-on-even': '装备预算 2 点。偶数回合行动力 +1，总上限 5。',
@@ -409,7 +418,7 @@ export const zhMessages: MessageCatalog = {
   'journey-relic-copy.end-a-combat-turn-outside-the-warning':
     '战斗中，在预警区外结束回合可获得 1 层护盾。每层一次，上限 2。',
   'journey-relic-copy.first-control-or-seal-disabled-or-anchor':
-    '每层首次关闭机关、封印或校准锚点，返还 1 点行动力，总上限 5。',
+    '每层首次关闭机关、封印、校准锚点或用晶体破盾，返还 1 点行动力，总上限 5。',
   'journey-relic-copy.first-strike-each-floor-4-damage': '每层首次攻击伤害 +4。',
   'journey-relic-copy.in-combat-your-first-walk-of-2':
     '战斗中，每回合首次移动至少 2 格时少花 1 点行动点，最低消耗 1 点。不影响揭格。',

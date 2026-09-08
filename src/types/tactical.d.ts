@@ -55,7 +55,8 @@ export interface TacticalState {
     | 'window-opened'
     | 'echo-shifted'
     | 'matrix-shifted'
-    | 'matrix-reflected'
+    | 'matrix-collected'
+    | 'matrix-empty'
     | 'shifted'
     | 'twin-fallen'
     | 'magnet-lured'
@@ -117,8 +118,8 @@ export interface EncounterTier {
 
 /** A public action preview uses known paths, visible flags, resources and action points only. */
 export type TacticalReason =
-  | 'matrix-rest'
-  | 'matrix-line'
+  | 'matrix-region'
+  | 'matrix-ground'
   | 'matrix-shield'
   | 'matrix-phase'
   | 'ready'

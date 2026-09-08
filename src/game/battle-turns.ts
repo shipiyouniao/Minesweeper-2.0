@@ -1,4 +1,4 @@
-import { armMatrix, advanceMatrix, strikeMatrix } from './matrix-battle.js'
+import { attuneMatrix, noteMatrix, advanceMatrix, strikeMatrix } from './matrix-battle.js'
 import { advanceEcho, openEcho, strikeEcho } from './echo-battle.js'
 import { useExpeditionSonar } from './expedition-sonar.js'
 import { neighbors } from './engine.js'
@@ -38,7 +38,7 @@ function correctFlags(run: Expedition, index: number): boolean {
 function interact(run: Expedition, index: number): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
-  if (encounter.kind === 'matrix') return armMatrix({ ...run, encounter })
+  if (encounter.kind === 'matrix') return run
   if (encounter.kind === 'echo') return openEcho({ ...run, encounter }, index)
   if (encounter.kind === 'clock') return redirectClock({ ...run, encounter }, index)
   if (encounter.kind === 'magnetic') return lureMagnetic({ ...run, encounter }, index)
@@ -150,6 +150,10 @@ export function actBattle(
   let next: Expedition
   if (action.type === 'brace')
     next = { ...run, encounter: { ...encounter, braced: true, event: 'braced' } }
+  else if (action.type === 'attune' && encounter.kind === 'matrix')
+    next = attuneMatrix({ ...run, encounter }, action.index)
+  else if (action.type === 'mark-crystal' && encounter.kind === 'matrix')
+    next = noteMatrix({ ...run, encounter }, action.index)
   else if (action.type === 'interact') next = interact(run, action.index)
   else if (action.type === 'shift' && encounter.kind === 'mirror')
     next = shiftMirror({ ...run, encounter })

@@ -13,7 +13,7 @@ function excavationTarget(run: Expedition): number | null {
   const column = run.player % width
   const remaining =
     run.encounter?.kind === 'matrix'
-      ? [run.encounter.prisms[run.encounter.phase - 1]!.index]
+      ? [run.encounter.regions[run.encounter.phase - 1]!.indices[4]!]
       : run.encounter?.kind === 'brood'
         ? run.encounter.nests.filter((center) =>
             [center, ...neighbors(run.game.config, center)].some(

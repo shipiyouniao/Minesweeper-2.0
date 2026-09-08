@@ -24,8 +24,9 @@ export function parseVariantCommand(value: string): VariantCommand | null {
   if (parts.length > 2) return null
   const [type, id] = parts
   switch (type) {
-    case 'matrix-row':
-    case 'matrix-column':
+    case 'matrix-pick':
+    case 'mark-crystal':
+    case 'attune-cell':
     case 'skill-target': {
       const index = Number(id)
       return id !== undefined &&
@@ -51,6 +52,8 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     case 'start':
     case 'camp':
     case 'sonar':
+    case 'observe':
+    case 'attune':
     case 'probe':
     case 'scan':
     case 'skill':

@@ -131,7 +131,7 @@ export class BossPrologue {
     const e = run.encounter
     const objectives =
       e.kind === 'matrix'
-        ? e.prisms.map((prism) => prism.index)
+        ? [e.regions[e.phase - 1]!.indices[4]!]
         : e.kind === 'magnetic'
           ? e.anchors.map((a) => a.index)
           : e.kind === 'clock'

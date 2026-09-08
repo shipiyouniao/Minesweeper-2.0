@@ -12,7 +12,7 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
       title: message(language, 'matrix.name'),
       subtitle: message(language, 'matrix.scene-0'),
       sprite: 'matrix-overseer',
-      prop: 'matrix-prism',
+      prop: 'matrix-crystal',
       beats: [
         { speaker: 'scene', focus: 'field', line: message(language, 'matrix.scene-1') },
         { speaker: 'boss', focus: 'boss', line: message(language, 'matrix.scene-2') },

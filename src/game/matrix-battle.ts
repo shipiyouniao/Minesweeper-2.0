@@ -4,16 +4,16 @@ import { applyDamageRelics } from './relic-effects.js'
 import { adjacentSteps } from './variant-board.js'
 import { surveyIndices } from './survey-logic.js'
 import { generateMatrix } from './matrix-generation.js'
-import { activePrism, matrixHealthFloor } from './matrix-logic.js'
+import { activeRegion, matrixCharge, matrixHealthFloor } from './matrix-logic.js'
 import type { Expedition } from '../types/variants.js'
 import type { MatrixExpedition } from '../types/matrix.js'
 
-/** Enter an independent nonogram arena while preserving the expedition's complete build. */
+/** Enter normal Minesweeper terrain while preserving the expedition's build. */
 export function enterMatrix(run: Expedition): Expedition {
   const tier = encounterTier(run.departure.difficulty)
   const config = {
     ...tier.config,
-    mines: Math.round(tier.config.width * tier.config.height * 0.28),
+    mines: Math.round(tier.config.width * tier.config.height * 0.19),
   }
   const layout = generateMatrix(config, (run.departure.seed ^ Math.imul(run.floor, 0x6a71)) >>> 0)
   const maxHealth = 18 + tier.health * 3
@@ -29,12 +29,12 @@ export function enterMatrix(run: Expedition): Expedition {
     scannedRows: [],
     confirmedMines: [],
     triggeredMines: [],
-    surveyedCells: [...new Set([...layout.routes, ...layout.opening])],
+    surveyedCells: [],
     probeReport: null,
     phase: 'boss',
     travelled: [],
     priorTravel: run.priorTravel + run.travelled.length,
-    sonar: { ...run.sonar, readings: [] },
+    sonar: { ...run.sonar, readings: [], loan: 0, loanProgress: 0 },
     encounter: {
       kind: 'matrix',
       boss: layout.boss,
@@ -48,16 +48,13 @@ export function enterMatrix(run: Expedition): Expedition {
       turnTriggers: [],
       event: 'entered',
       intent: { kind: 'cross', targets: [], damage: 4 },
-      rows: layout.rows,
-      columns: layout.columns,
-      prisms: layout.prisms,
+      regions: layout.regions,
       phase: 1,
-      armed: false,
-      exposedUntil: 0,
-      reflections: 0,
-      beam: [],
-      returnBeam: [],
-      pressure: [],
+      exposed: false,
+      collected: [],
+      empty: [],
+      notes: [],
+      lastAttuned: null,
     },
   }
   return forecastMatrix({
@@ -66,74 +63,61 @@ export function enterMatrix(run: Expedition): Expedition {
   })
 }
 
-/** Freeze a line beam and a player-directed warning with an affordable, publicly safe escape. */
+/** Freeze a player or objective line; retain a known, affordable orthogonal escape. */
 function forecastMatrix(run: MatrixExpedition): MatrixExpedition {
   const e = run.encounter
-  const prism = activePrism(run)
-  const beam =
-    e.exposedUntil < e.turn && e.turn % 3 !== 0
-      ? surveyIndices(run.game.config, prism.axis, prism.line)
-      : []
-  const step = prism.axis === 'row' ? run.game.config.width : 1
-  const direction = Math.sign(e.boss - prism.index) * step
-  const returnBeam: number[] = []
-  for (let index = prism.index; index !== e.boss; index += direction) returnBeam.push(index)
-  returnBeam.push(e.boss)
   const axis = e.turn % 2 ? 'row' : 'column'
+  const target = e.turn % 4 === 2 ? activeRegion(run).indices[4]! : run.player
   const line =
-    axis === 'row'
-      ? Math.floor(run.player / run.game.config.width)
-      : run.player % run.game.config.width
-  const aimed = surveyIndices(run.game.config, axis, line)
+    axis === 'row' ? Math.floor(target / run.game.config.width) : target % run.game.config.width
+  let targets =
+    e.turn % 3 === 0
+      ? []
+      : surveyIndices(run.game.config, axis, line).filter((index) => !run.walls.includes(index))
   const exits = adjacentSteps(run.game, run.player).filter(
     (index) =>
       !run.walls.includes(index) &&
       !run.confirmedMines.includes(index) &&
-      (run.game.cells[index]?.visibility === 'revealed' || run.surveyedCells.includes(index)),
+      run.game.cells[index]?.visibility === 'revealed' &&
+      !run.game.cells[index]!.mine,
   )
-  const pressure =
-    e.turn % 3 === 0
-      ? []
-      : exits.some((index) => !aimed.includes(index) && !beam.includes(index))
-        ? aimed
-        : exits.some((index) => !beam.includes(index))
-          ? [run.player]
-          : []
-  // A forced dead end never gets a lethal beam; the turn remains available for exploration.
-  const safeBeam =
-    beam.includes(run.player) &&
-    !exits.some((index) => !beam.includes(index) && !pressure.includes(index))
-      ? []
-      : beam
-  return {
-    ...run,
-    encounter: {
-      ...e,
-      beam: safeBeam,
-      returnBeam,
-      pressure,
-      intent: { kind: 'cross', targets: [...new Set([...safeBeam, ...pressure])], damage: 4 },
-    },
-  }
+  // Do not announce an unavoidable hit from a cul-de-sac with no publicly known exit.
+  if (targets.includes(run.player) && !exits.some((index) => !targets.includes(index)))
+    targets = exits.length ? [run.player] : []
+  return { ...run, encounter: { ...e, intent: { kind: axis, targets, damage: 4 } } }
 }
 
-/** Rotate the calibrated optic; the visible return path is added only by this explicit action. */
-export function armMatrix(run: MatrixExpedition): MatrixExpedition {
+/** Resolve an already validated extraction. Hidden identity is read only after AP acceptance. */
+export function attuneMatrix(run: MatrixExpedition, index: number): MatrixExpedition {
   const e = run.encounter
-  const beam = e.beam.filter((index) => index <= activePrism(run).index)
+  const found = activeRegion(run).crystals.includes(index)
+  const collected = found ? [...e.collected, index] : e.collected
+  const charged = found && matrixCharge(run) === 1
   return {
     ...run,
     encounter: {
       ...e,
-      beam,
-      armed: true,
-      event: 'disabled',
-      intent: { ...e.intent, targets: [...new Set([...beam, ...e.pressure, ...e.returnBeam])] },
+      collected,
+      empty: found ? e.empty : [...e.empty, index],
+      // Guesses belong to this objective; retire them when its shield breaks.
+      notes: charged ? [] : e.notes.filter((note) => note !== index),
+      lastAttuned: index,
+      exposed: e.exposed || charged,
+      event: charged ? 'disabled' : found ? 'matrix-collected' : 'matrix-empty',
     },
   }
 }
 
-/** Melee damage uses the shared build but cannot skip a shield circuit. */
+/** Hypotheses are cancellable and cannot discover or charge anything by themselves. */
+export function noteMatrix(run: MatrixExpedition, index: number): MatrixExpedition {
+  const e = run.encounter
+  const notes = e.notes.includes(index)
+    ? e.notes.filter((note) => note !== index)
+    : [...e.notes, index]
+  return { ...run, encounter: { ...e, notes, event: 'acted' } }
+}
+
+/** Shared build damage cannot skip the second crystal objective. */
 export function strikeMatrix(run: MatrixExpedition, damage: number): MatrixExpedition {
   const e = run.encounter
   const health = Math.max(matrixHealthFloor(run), e.health - damage)
@@ -148,7 +132,7 @@ export function strikeMatrix(run: MatrixExpedition, damage: number): MatrixExped
   }
 }
 
-/** Resolve exactly the displayed forecast, then reflect, advance circuits and refill build AP. */
+/** Resolve the frozen attack, then activate the next region only at the health boundary. */
 export function advanceMatrix(run: MatrixExpedition): MatrixExpedition {
   const e = run.encounter
   const damage = incomingCombatDamage(
@@ -157,7 +141,7 @@ export function advanceMatrix(run: MatrixExpedition): MatrixExpedition {
   )
   const hurt =
     damage > 0 ? applyDamageRelics(run, { ...run, ...damageExpedition(run, damage) }, null) : run
-  const shifted = e.phase < 3 && e.health <= matrixHealthFloor(run)
+  const shifted = e.phase === 1 && e.health <= matrixHealthFloor(run)
   const next: MatrixExpedition = {
     ...hurt,
     steps: run.steps + 1,
@@ -167,11 +151,9 @@ export function advanceMatrix(run: MatrixExpedition): MatrixExpedition {
       turn: e.turn + 1,
       braced: false,
       turnTriggers: [],
-      armed: false,
-      phase: e.phase + Number(shifted),
-      exposedUntil: shifted ? 0 : e.armed ? e.turn + 4 : e.exposedUntil,
-      reflections: e.reflections + Number(e.armed),
-      event: shifted ? 'matrix-shifted' : e.armed ? 'matrix-reflected' : damage ? 'hit' : 'evaded',
+      phase: shifted ? 2 : e.phase,
+      exposed: shifted ? false : e.exposed,
+      event: shifted ? 'matrix-shifted' : damage ? 'hit' : 'evaded',
     },
   }
   if (next.phase === 'lost') return next

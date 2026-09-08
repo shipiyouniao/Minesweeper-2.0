@@ -24,7 +24,9 @@ for (const file of [
   await stat(file)
 for (const sprite of [
   'matrix-overseer',
-  'matrix-prism',
+  'matrix-crystal',
+  'matrix-observe',
+  'attune',
   'mirror-dawn',
   'mirror-dusk',
   'mirror-seal',

@@ -1,94 +1,177 @@
+import { neighbors } from './engine.js'
 import { adjacentSteps, placedBoard, shuffled } from './variant-board.js'
-import { deduceSurvey, surveyIndices, surveyRuns } from './survey-logic.js'
+import { solveBattle } from './battle-arena.js'
+import { deduceSurvey, surveyRuns } from './survey-logic.js'
 import type { Config, Game } from '../types/game.js'
-import type { MatrixLayout, MatrixPrism } from '../types/matrix.js'
-import type { SurveyKnowledge } from '../types/survey.js'
+import type { MatrixLayout, MatrixRegion } from '../types/matrix.js'
 
-/** Reserve a perimeter and central cross, wall off isolated pockets, then publish enough facts
- * for line intersections to solve the entire field without guessing. */
-export function generateMatrix(config: Config, seed: number): MatrixLayout {
-  const { width, height } = config
-  const cx = Math.floor(width / 2)
-  const cy = Math.floor(height / 2)
-  const boss = cy * width + cx
-  const entrance = boss + width + 1
-  const indices = Array.from({ length: width * height }, (_, index) => index)
-  const routes = indices.filter((index) => {
-    const x = index % width
-    const y = Math.floor(index / width)
-    return (
-      x === 0 ||
-      y === 0 ||
-      x === width - 1 ||
-      y === height - 1 ||
-      x === cx ||
-      y === cy ||
-      (Math.abs(x - cx) <= 1 && Math.abs(y - cy) <= 1)
+/** Enumerate tiny, line-solvable patterns once; rotations retain their own seed weight. */
+function crystalPatterns(): readonly MatrixRegion[] {
+  const patterns: MatrixRegion[] = []
+  const indices = Array.from({ length: 9 }, (_, index) => index)
+  for (let mask = 0; mask < 512; mask++) {
+    const crystals = indices.filter((index) => mask & (1 << index))
+    if (crystals.length !== 3 && crystals.length !== 4) continue
+    const rows = [0, 1, 2].map((row) =>
+      surveyRuns([0, 1, 2].map((col) => crystals.includes(row * 3 + col))),
     )
-  })
-  const stations: readonly MatrixPrism[] = [
-    { index: boss - 2 * width, axis: 'row', line: cy - 2 },
-    { index: boss + 2 * width, axis: 'row', line: cy + 2 },
-    { index: boss - 2, axis: 'column', line: cx - 2 },
-    { index: boss + 2, axis: 'column', line: cx + 2 },
-  ]
-  const prisms = shuffled(stations, seed ^ 0x71a9).slice(0, 3)
-  const order = shuffled(
-    indices.filter((index) => !routes.includes(index)),
-    seed,
-  )
-  // Every circuit must cross a real mine run; fill the remaining quota from the same shuffle.
-  const required = new Set(
-    prisms.map((prism) =>
-      order.find((index) =>
-        prism.axis === 'row'
-          ? Math.floor(index / width) === prism.line
-          : index % width === prism.line,
-      )!,
-    ),
-  )
-  const mines = new Set([
-    ...required,
-    ...order.filter((index) => !required.has(index)).slice(0, config.mines - required.size),
-  ])
-  const board = placedBoard(config, mines, seed, entrance)
-  const reached = new Set([entrance])
-  const queue = [entrance]
+    const columns = [0, 1, 2].map((col) =>
+      surveyRuns([0, 1, 2].map((row) => crystals.includes(row * 3 + col))),
+    )
+    const solved = deduceSurvey(
+      { width: 3, height: 3, mines: crystals.length },
+      rows,
+      columns,
+      indices.map(() => 'unresolved'),
+    )
+    if (!solved.contradiction && !solved.cells.includes('unresolved'))
+      patterns.push({ indices, crystals, rows, columns })
+  }
+  return patterns
+}
+
+const patterns = crystalPatterns()
+
+/** Orthogonal distances account for the boss and rocks before terrain is published. */
+function distances(game: Game, start: number, blocked: ReadonlySet<number>): Map<number, number> {
+  const found = new Map([[start, 0]])
+  const queue = [start]
   for (const index of queue)
-    for (const other of adjacentSteps(board, index))
-      if (other !== boss && !mines.has(other) && !reached.has(other)) {
-        reached.add(other)
-        queue.push(other)
-      }
-  const walls = indices.filter((index) => !mines.has(index) && !reached.has(index))
-  const rows = Array.from({ length: height }, (_, line) =>
-    surveyRuns(surveyIndices(config, 'row', line).map((index) => mines.has(index))),
+    for (const next of adjacentSteps(game, index)) {
+      if (found.has(next) || blocked.has(next) || game.cells[next]!.mine) continue
+      found.set(next, found.get(index)! + 1)
+      queue.push(next)
+    }
+  return found
+}
+
+/** Fit independent crystal runs onto terrain reachable through ordinary public deduction. */
+function observationRegion(
+  game: Game,
+  solved: Game,
+  walls: readonly number[],
+  origin: number,
+  seed: number,
+): MatrixRegion | null {
+  const indices = Array.from(
+    { length: 9 },
+    (_, local) => origin + Math.floor(local / 3) * game.config.width + (local % 3),
   )
-  const columns = Array.from({ length: width }, (_, line) =>
-    surveyRuns(surveyIndices(config, 'column', line).map((index) => mines.has(index))),
+  const pattern = shuffled(patterns, seed).find((entry) =>
+    entry.crystals.every((local) => {
+      const index = indices[local]!
+      return (
+        !walls.includes(index) &&
+        !game.cells[index]!.mine &&
+        solved.cells[index]!.visibility === 'revealed'
+      )
+    }),
   )
-  const opening: number[] = []
-  let facts: readonly SurveyKnowledge[] = indices.map((index) =>
-    routes.includes(index) || walls.includes(index) ? 'safe' : 'unresolved',
+  if (!pattern) return null
+  return { ...pattern, indices, crystals: pattern.crystals.map((local) => indices[local]!) }
+}
+
+/** Shuffle an exact quota; require connected terrain and short, deducible objective approaches. */
+function candidate(config: Config, seed: number): MatrixLayout | null {
+  const indices = Array.from({ length: config.width * config.height }, (_, index) => index)
+  const interior = indices.filter(
+    (index) =>
+      index % config.width > 0 &&
+      index % config.width < config.width - 1 &&
+      Math.floor(index / config.width) > 0 &&
+      Math.floor(index / config.width) < config.height - 1,
   )
-  // Each safe anchor strictly reduces unresolved cells; generation always terminates.
-  while (true) {
-    const result = deduceSurvey(config, rows, columns, facts)
-    const anchor = order.find((index) => !mines.has(index) && result.cells[index] === 'unresolved')
-    if (anchor === undefined) break
-    opening.push(anchor)
-    facts = result.cells.map((cell, index) => (index === anchor ? 'safe' : cell))
-  }
+  const entrance = shuffled(interior, seed)[0]!
+  const opening = new Set([entrance, ...neighbors(config, entrance)])
+  const mines = new Set(
+    shuffled(
+      indices.filter((index) => !opening.has(index)),
+      seed ^ 0x26d91,
+    ).slice(0, config.mines),
+  )
+  const placed = placedBoard(config, mines, seed, entrance)
+  const initial = distances(placed, entrance, new Set())
+  const boss = shuffled(
+    interior.filter((index) => {
+      const distance = initial.get(index) ?? Infinity
+      return (
+        distance >= 5 &&
+        distance <= 8 &&
+        adjacentSteps(placed, index).filter((other) => !mines.has(other)).length >= 3
+      )
+    }),
+    seed ^ 0xb055,
+  )[0]
+  if (boss === undefined) return null
+  const obstacles = new Set([boss])
+  // Safe rocks vary paths; disconnected islands become explicit walls rather than unreachable floor.
+  for (const index of shuffled(
+    indices.filter(
+      (index) =>
+        !opening.has(index) &&
+        !mines.has(index) &&
+        index !== boss &&
+        !adjacentSteps(placed, boss).includes(index),
+    ),
+    seed ^ 0x70c,
+  ).slice(0, 3))
+    obstacles.add(index)
+  const reached = distances(placed, entrance, obstacles)
+  const walls = indices.filter(
+    (index) => obstacles.has(index) || (!mines.has(index) && !reached.has(index)),
+  )
   const game: Game = {
-    ...board,
+    ...placed,
     phase: 'playing',
-    cells: board.cells.map((cell, index) => ({
-      ...cell,
-      visibility:
-        Math.abs((index % width) - cx) <= 1 && Math.abs(Math.floor(index / width) - cy) <= 1
-          ? 'revealed'
-          : 'hidden',
-    })),
+    cells: placed.cells.map((cell, index) =>
+      walls.includes(index) ? { ...cell, visibility: 'hidden' } : cell,
+    ),
   }
-  return { game, mines, rows, columns, opening, walls, entrance, boss, prisms, routes }
+  if (game.cells.filter((cell) => cell.visibility === 'revealed').length > indices.length * 0.5)
+    return null
+  const solved = solveBattle(game, walls, entrance)
+  const approaches = adjacentSteps(game, boss).filter(
+    (index) => !walls.includes(index) && solved.cells[index]!.visibility === 'revealed',
+  )
+  if (approaches.length < 2) return null
+  const fromBoss = distances(game, approaches[0]!, new Set(walls))
+  const origins = shuffled(
+    indices.filter(
+      (index) =>
+        index % config.width <= config.width - 3 &&
+        Math.floor(index / config.width) <= config.height - 3,
+    ),
+    seed ^ 0x0b5e,
+  )
+  const regions: MatrixRegion[] = []
+  for (const origin of origins) {
+    const region = observationRegion(game, solved, walls, origin, seed ^ origin)
+    if (
+      !region ||
+      regions.some((other) => other.indices.some((index) => region.indices.includes(index)))
+    )
+      continue
+    // Every crystal is deducibly reachable; at least two choices are near the boss.
+    if (
+      region.crystals.filter(
+        (index) => (fromBoss.get(index) ?? Infinity) <= 4 && (reached.get(index) ?? Infinity) <= 9,
+      ).length < 2
+    )
+      continue
+    if (!region.crystals.some((index) => game.cells[index]!.visibility === 'hidden')) continue
+    regions.push(region)
+    if (regions.length === 2)
+      return { game, walls, entrance, boss, regions: [regions[0]!, regions[1]!] }
+  }
+  return null
+}
+
+/** Bounded retries preserve replay; fallback also passes every validation. */
+export function generateMatrix(config: Config, seed: number): MatrixLayout {
+  for (let attempt = 0; attempt < 512; attempt++) {
+    const base = attempt < 384 ? seed : 0x6a71
+    const layout = candidate(config, (base + Math.imul(attempt % 384, 0x45d9f3b)) >>> 0)
+    if (layout) return layout
+  }
+  throw new Error('No verified crystal arena for the supported tier')
 }

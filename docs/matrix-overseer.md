@@ -1,53 +1,77 @@
 # Matrix Overseer
 
-The seventh Expedition boss adapts [Survey](survey.md) into a positional fight: solve a line of mines, calibrate its prism, reflect the announced beam, then approach the exposed core. It is a separate boss room in the seeded checkpoint rotation, not a standalone mode or an extra button that skips exploration.
+The seventh Expedition boss combines ordinary Minesweeper navigation with a small crystal hunt. Clear safe routes, locate hidden crystals in a local observation region, collect two to break a shield, then approach and attack. The boss appears in the seeded checkpoint rotation.
 
-## Read the circuit
+## Two kinds of information
 
-The edge clues describe consecutive mine runs. **2 1** means two adjacent mines followed by one mine, with **at least one safe square** between the groups. The gap can contain several safe squares. Walls and the boss pedestal count as safe squares in these clues. Tiles do not disclose adjacent-mine numbers, and opening a blank never flood-fills.
+Floor numbers count adjacent **mines**. Zero cells expand normally, and quick-open uses the same neighboring-number rules as ordinary Expedition floors. Marking mines and suspected-safe terrain never charges the boss mechanism.
 
-Three numbered prisms operate in order. The active prism highlights its incoming row or column. Account for every square in that line: excavate or survey the safe cells and flag the mines. A matching flag total alone cannot calibrate a circuit. Publicly contradictory flags are underlined in the edge clues; the game never silently turns an ordinary guess into a confirmed mine.
+The **Observe** tool opens a nine-cell map of the highlighted 3 × 3 region. Its row and column runs count **crystals**, independently of mines. A `1 1` clue means two crystal groups separated by at least one cell without a crystal. Crystals occupy safe terrain, but opening their floor tiles does not reveal or collect them.
 
-Click or tap a line clue to excavate its deducible safe targets within the current travel/AP budget. Unreachable targets become cancellable suspected-safe notes. C, or right-click/long-press on an open tile, reads both crossing lines. These operations use the same travel, mine damage, shields and tool reactions as ordinary excavation. Wrong flag hypotheses can still lead to a mine.
+Each region contains three or four crystals and is uniquely solvable from its local runs. Only the active phase publishes its region and clues. Choose a mini-map cell to highlight its battlefield coordinate; focusing a battlefield cell selects its matching local cell. Crystal guesses are optional, free and cancellable. They remain hypotheses until extraction.
 
-## Reflect and strike
+Observe is a collapsible overlay above the fixed action dock. Closing it or pressing Escape leaves the player free to explore. All ordinary mine numbers remain visible on the main board.
 
-1. Open the active prism tile and stand on or next to it. Click it to calibrate for **1 AP** while its red incoming beam is present.
-2. Calibration turns the beam toward the boss. The mint return path is drawn on the board immediately; it can damage the explorer too. Clear it before ending the turn.
-3. End turn resolves the frozen warning and opens the shield for **four full turns**. Approach an orthogonal neighbor of the boss and strike for **2 AP**, using the expedition's actual attack stat.
-4. Damage stops at each third of boss health. End turn after breaking that band activates the next prism and shield circuit. All three must be played; burst damage cannot skip them.
+## Extract and strike
 
-Reflection opens the shield but deals no automatic boss damage. If a window expires, the same solved prism can be calibrated again. This prevents a slow build from becoming stuck while retaining a reason to plan travel and attacks. Finishing the boss uses the existing floor reward: full health, up to one additional shield, then the normal relic/extraction dialog.
+1. Reveal the chosen safe floor tile. Stand on it or an orthogonal neighbor.
+2. Select **Attune**, then the tile, or drag the tool onto it. The selected observation cell also has a direct Attune button. A valid attempt costs **1 AP**.
+3. A crystal is revealed and collected immediately. An empty attempt spends its AP and records the empty location, without bonus damage. Repeating a resolved target, targeting a wall/mine, or targeting outside the active region is blocked without cost.
+4. The **second collected crystal immediately breaks the shield**, with a charge beam and shield fracture. Remaining AP can be used to attack. Extra crystals in that region are inert.
+5. Melee attacks cost **2 AP** from an orthogonal neighbor of the boss. The shield stays broken until the health boundary; it has no expiry or recharge action.
+6. At half health, damage stops. End turn resolves the announced attack and activates the second region. Two more crystals break the final shield.
 
-## Forecast rhythm and balance
+Only **four extractions** are required across both phases. There is no requirement to flag the entire board, resolve every safe tile, collect every crystal, or wait for a non-quiet turn to extract. Quiet turns allow attunement and attacks.
 
-Incoming and reflected beams deal **4 raw damage**, resolved once per affected player square even where paths cross. A separate red dashed warning aims a row or column at the explorer's turn-start position. Moving the mouse or walking cannot retarget it. Every third turn is quiet, giving time to excavate a dead end or cross a beam lane. Calibration waits until an incoming beam is present again.
+## Forecasts and builds
 
-At turn start the forecast retains a one-step escape through revealed or publicly surveyed safe terrain. If a full attack would trap that starting position, it falls back to a smaller warning or rests. This does not protect a later choice to spend all AP in a threatened square. Calibration explicitly changes the optical path, which is visible before committing the turn.
+A frozen row or column attack aims at the player or the active region. It resolves for **4 raw damage** only at End turn. Every third turn is quiet. A warning that would trap the starting player is shortened or omitted unless there is a revealed safe orthogonal escape. Spending all AP in a newly entered warning remains a tactical risk.
+
+Attack, defense, shields, healing, additional AP and movement discounts use the shared combat rules. Focus lens and Breach sigil can refund AP on the actual shield-breaking extraction, within their existing per-turn/per-floor limits. Probes, scanners and profession reconnaissance reveal **mine** information and establish routes; they do not extract crystals. Archaeologist scouts the current region's center.
+
+Mines and crystal runs do not shuffle between phases. Existing explicit mine-removal abilities retain their ordinary effect; phase changes never invalidate clues.
 
 | Difficulty | Arena   | Mines | Boss health | Base AP / attack |
 | ---------- | ------- | ----- | ----------- | ---------------- |
-| Relaxed    | 11 × 9  | 28    | 30          | 3 / 5            |
-| Standard   | 11 × 9  | 28    | 30          | 3 / 5            |
-| Advanced   | 13 × 11 | 40    | 36          | 3 / 5            |
-| Expert     | 13 × 11 | 40    | 36          | 3 / 5            |
-| Abyss      | 15 × 13 | 55    | 42          | 3 / 5            |
+| Relaxed    | 11 × 9  | 19    | 30          | 3 / 5            |
+| Standard   | 11 × 9  | 19    | 30          | 3 / 5            |
+| Advanced   | 13 × 11 | 27    | 36          | 3 / 5            |
+| Expert     | 13 × 11 | 27    | 36          | 3 / 5            |
+| Abyss      | 15 × 13 | 37    | 42          | 3 / 5            |
 
-The generator shuffles an exact mine set around a connected perimeter, central cross and small starting hub. Unreachable safe pockets become walls. Ordered run clues retain the original mine positions. A bounded sequence of public safe anchors makes line-intersection deduction complete. Approaches to every prism and the boss remain connected; no equipment is required to solve the room.
+All five difficulties keep the observation puzzle at 3 × 3.
 
-## Build and progression
+## Generation
 
-Probes and scanners contribute trusted facts to circuit completion. Profession reconnaissance, Sonar, movement skills, shield conversion and excavation retain their normal costs and limits. Attack, defense, extra AP, walking discounts, damage reactions and once-per-floor calibration rewards use the shared combat pipeline. The mine layout and edge clues remain fixed throughout the encounter.
+An exact mine quota is shuffled outside a random safe opening. The generator varies the entrance, boss position, rocks and two non-overlapping observation regions. Disconnected safe pockets become walls. There is no fixed perimeter, central cross or station arrangement.
+
+The ordinary public-clue solver validates access to all offered crystals and at least two boss approaches. Each phase offers at least two crystals near the boss, reducing forced travel. The small crystal patterns are selected independently from 140 line-solvable oriented layouts with three or four crystals; this count includes rotations and reflections.
+
+Generation uses bounded seeded retries and a validated fallback sequence. The local preview provides **New board** and **Restart this board** separately.
+
+## Progression and saves
 
 - **Break the Matrix:** defeat the boss once; 100 supplies.
-- **Perfect Refraction:** win using exactly three reflections; 250 supplies and a title granting +1 attack while this boss's shield is open.
+- **Perfect Refraction:** win without an empty attunement; 250 supplies and a title giving +1 attack while the Matrix shield is broken.
 
-Expedition rules revision **12** retires incompatible active journals through the [existing camp return policy](save-policy.md). Banked supplies, purchases, titles and records remain intact. No old combat engine is kept for replay compatibility.
+Existing claims and title ownership remain valid. Expedition rules revision **13** retires incompatible journals through the [camp return policy](save-policy.md), preserving camp progress and banking the recorded extraction value. The old prism resolver and full-board nonogram branches have been removed.
 
 ## Implementation and acceptance
 
-Named contracts live in `src/types/matrix.d.ts`. Generation, public line reasoning and combat transitions are separate pure modules; the existing expedition session owns journals and effects. Survey's public line solver and measured sticky header styles are reused. The fixed action dock, shared help/sound controls, square tools and keyboard focus behavior remain common to Expedition.
+Contracts live in `src/types/matrix.d.ts`. Generation, local public knowledge, attunement and combat transitions are pure functions. The session owns accepted-action replay; `MatrixObservation` owns the collapsible panel and its selection. Generated assets and full prompts are documented in [Matrix artwork](matrix-artwork.md).
 
-Domain checks cover exact density, complete connected safe terrain, public-only deduction, all five tiers, legal unupgraded three-circuit victories, damage/defense/shields, AP and build rewards, single-cell excavation, line actions and replay. Browser acceptance covers mouse/touch/keyboard actions, three translations, mobile/desktop/4K proportions, header clipping, generated sprites and the visible reflection transition. Reduced motion disables beam pulses and impact flashes without hiding forecasts.
+Behavioral checks cover all five tiers, connectivity, exact quotas, public solvability, covered-information privacy, normal flood reveal, invalid/repeated/empty extraction, quiet turns, immediate permanent shield breaks, phase boundaries, build refunds and replay settlement. The browser regression is `tests/browser/matrix.mjs`.
 
-Original generated assets and the complete prompt set are recorded in [Matrix artwork](matrix-artwork.md).
+A controlled public-information player was run at Standard difficulty, floor 3, with no probes, scans, starting shields or training. Reproduce the measurements with `npm test`, then `node tests/matrix-acceptance.mjs`:
+
+| Seed | Explorer, no equipment/relics | Offensive build | Mobility/defense build |
+| ---- | ----------------------------- | --------------- | ---------------------- |
+| 6    | 12 turns                      | 9 turns         | 10 turns               |
+| 18   | 15 turns                      | 14 turns        | 12 turns               |
+| 55   | 17 turns                      | 15 turns        | 14 turns               |
+| 111  | 15 turns                      | 14 turns        | 14 turns               |
+| 209  | 14 turns                      | 11 turns        | 9 turns                |
+
+The offensive build uses Steel blade, Tempered edge and Duelist edge. The mobility/defense build uses Sentinel, Field boots, Plated vest, Marching boots and Layered armor. The driver uses public mine deductions and local crystal runs, then bounded tactical planning; it does not read hidden identities to choose digs or extractions. Every run collected exactly four crystals. The count includes the final active turn.
+
+These are deterministic acceptance runs, not human completion-time measurements or optimal solutions. The unupgraded results span 12–17 turns against the initial roughly 10–15-turn tuning target; route and build choices still matter. The retained [design record](matrix-overseer-redesign.md) explains the transition.

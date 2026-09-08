@@ -67,7 +67,6 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
         message(language, 'matrix.calibrate'),
         message(language, 'matrix.fight'),
         message(language, 'matrix.forecast'),
-        message(language, 'matrix.line-action'),
       ],
     }
   if (kind === 'echo')
@@ -94,11 +93,15 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
 
 /** Summarize the actual remaining objectives and core window, rather than a generic boss phase. */
 export function battleStatus(language: Language, encounter: TacticalEncounter): string {
-  if (encounter.kind === 'matrix')
-    return message(language, 'matrix.status', {
+  if (encounter.kind === 'matrix') {
+    const status = message(language, 'matrix.status', {
       phase: encounter.phase,
-      window: Math.max(0, encounter.exposedUntil - encounter.turn + 1),
+      count: encounter.regions[encounter.phase - 1]!.indices.filter((index) =>
+        encounter.collected.includes(index),
+      ).length,
     })
+    return encounter.turn % 3 === 0 ? `${status} · ${message(language, 'matrix.quiet')}` : status
+  }
   if (encounter.kind === 'echo')
     return message(language, 'echo.status', {
       phase: encounter.phase,

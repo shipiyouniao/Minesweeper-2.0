@@ -51,4 +51,4 @@ Domain coverage includes all 22 licenses and translations, departure freeze, own
 
 ## Matrix title
 
-**Perfect Refraction** joins the 25-title catalog: defeat Matrix Overseer using exactly three reflected beams. Equipping it grants +1 attack while that boss’s shield is open. Its one-time claim pays 250 supplies; it grants no repeatable currency bonus. Echo Warden also contributes Silent Footsteps (+1 defense at full health) and Perfect Pitch (+1 attack against its exposed core).
+**Perfect Refraction** joins the 25-title catalog: defeat Matrix Overseer without an empty attunement. Equipping it grants +1 attack while that boss’s shield is open. Its one-time claim pays 250 supplies; it grants no repeatable currency bonus. Echo Warden also contributes Silent Footsteps (+1 defense at full health) and Perfect Pitch (+1 attack against its exposed core).

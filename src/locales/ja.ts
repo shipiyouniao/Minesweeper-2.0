@@ -2,38 +2,50 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
-  'matrix.rest': '光線は充填中。赤い線が戻ったら調整しよう。',
-  'matrix.hunt': '行列を崩せ',
-  'matrix.hunt-note': '行列の監督者を一度倒す。',
-  'matrix.precise': '完全なる屈折',
-  'matrix.precise-note': '光線の反射をちょうど 3 回で行列の監督者を倒す。',
-  'matrix.precise-effect': '行列の監督者の盾が開いている間、攻撃 +1。',
-
-  'matrix.name': '行列の監督者',
-  'matrix.deduce': '端の連続地雷数を読み、光る行・列の安全マスを開くか調査し、地雷に旗を立てよう。',
+  'matrix.quiet': '休戦ターン',
+  'matrix.open-hint': 'シールド破壊。コアに近づいて攻撃。',
+  'matrix.hunt': '矩陣を破る',
+  'matrix.hunt-note': '矩陣の監視者を一度倒す。',
+  'matrix.precise': '完全な屈折',
+  'matrix.precise-note': '調律を一度も外さず、矩陣の監視者を倒す。',
+  'matrix.precise-effect': '矩陣の監視者のシールドが壊れている間、攻撃 +1。',
+  'matrix.name': '矩陣の監視者',
+  'matrix.deduce':
+    '床の数字で地雷を読み、安全な道を開く。観測鏡の九マスと端の数字から結晶の位置を探す。',
   'matrix.calibrate':
-    '光るプリズムに近づいてクリックすると調整（1 AP）。ターン終了時に光線が反射し、盾が開く。',
-  'matrix.fight': '隣接攻撃は 2 AP。盾は 4 ターン開き、体力を一区切り削ると次の回路に切り替わる。',
+    '安全な対象マスを開き、その上か上下左右に立つ。調律は行動力 1。各段階で結晶を二つ集めるとシールドが壊れる。',
+  'matrix.fight':
+    'コアの隣から攻撃：行動力 2。シールドは自然回復しない。体力半分でターンを終了すると、二つ目の観測区が始まる。',
   'matrix.forecast':
-    '赤い光線はターン終了時に 4 ダメージ。ミント色の反射光も自分に当たるので、先に退避しよう。3 ターンごとに攻撃が休止する。',
+    '赤いマスはターン終了時に 4 ダメージ。三ターンごとに休戦し、その間も移動・調律・攻撃ができる。',
   'matrix.gaps':
-    '「2 1」は地雷 2 個の連続と地雷 1 個。その間の安全マスは最低 1 個で、もっと長くてもよい。壁は安全マスとして数える。',
-  'matrix.line': 'まずこのプリズムの行・列を解こう。旗の数が合うだけでは調整できない。',
-  'matrix.shield': '有効なプリズムで光線を反射して盾を破ろう。',
-  'matrix.phase': '回路を破壊した。ターンを終了すると次のプリズムが起動する。',
-  'matrix.armed': 'プリズム調整完了。ミント色の反射経路から離れ、ターンを終了しよう。',
-  'matrix.reflected': '光線を反射した。盾が 4 ターン開く。',
-  'matrix.shifted': '次の回路が起動した。新しく光るプリズムへ。',
-  'matrix.status': '回路 {phase}/3 · 盾の開放 残り {window} ターン',
-  'matrix.prism': 'プリズム {number}',
-  'matrix.line-action': '数字を押すと推論できる安全マスを開く。届かないマスには安全メモを残す。',
-  'matrix.floor': '開いた床 · 端の連続数を読もう',
-  'matrix.legend': '赤：攻撃予告 · ミント：反射光 · 菱形の番号：回路順',
-  'matrix.scene-0': '部屋が自らの境界を描く',
-  'matrix.scene-1': '床に数字はなく、端に並んだ刻印だけがある。',
-  'matrix.scene-2': 'すべてのマスは私の台帳にある。数えきれるか？',
-  'matrix.scene-3': 'プリズムは核を向いている……その光を借りて盾を割ろう。',
-  'matrix.scene-4': '赤い線が床を横切り、最初のプリズムが光る。',
+    '観測鏡は結晶だけを数える。1 1 は二つの結晶の間に最低一マスの空きを示す。床の数字は地雷だけを数え、掘っても結晶は見つからない。',
+  'matrix.shield': '現在の観測区で結晶を二つ集めてシールドを壊す。',
+  'matrix.phase': '最初の体力帯を突破。ターン終了後に二つ目の観測区が起動する。',
+  'matrix.armed': '結晶が二つ届いた。シールド破壊。',
+  'matrix.shifted': '二つ目の観測区が起動。結晶をあと二つ集める。',
+  'matrix.status': '段階 {phase}/2 · 結晶 {count}/2',
+  'matrix.legend': '青緑の枠：観測区 · 赤いマス：ターン終了時に攻撃',
+  'matrix.scene-0': '床の下に潜む別の光',
+  'matrix.scene-1': '石板の下には地雷。だが結晶の光は、床に刻まれた数字をすり抜けていた。',
+  'matrix.scene-2': '地雷を見つけただけで、この部屋を見通したつもりか？',
+  'matrix.scene-3': '観測鏡なら結晶の並びが読める。二つあれば、あの盾を破れる。',
+  'matrix.scene-4': '床の一角が青緑に光り、監視者が力をため始めた。',
+  'matrix.observe': '観測鏡',
+  'matrix.attune': '調律 · 1',
+  'matrix.attune-hint':
+    '調律を選んで対象を押すか、対象へドラッグ。安全な床を開き、その上か上下左右に立つ。',
+  'matrix.observation-hint': 'この数字は結晶の並び。各段階で二つ集めればよい。',
+  'matrix.region': '観測区',
+  'matrix.ground': '先に安全な対象マスを開く。地雷や壁は調律できない。',
+  'matrix.region-only': '現在の九マス観測区から対象を選ぶ。',
+  'matrix.note': '結晶の予想',
+  'matrix.empty-cell': '結晶なしを確認',
+  'matrix.unresolved': '結晶は未確認',
+  'matrix.select': 'マスを選んで戦場上の位置を確認。',
+  'matrix.collected': '結晶を回収済み',
+  'matrix.collected-event': '結晶を回収。あと一つでシールドが壊れる。',
+  'matrix.empty-event': 'ここに結晶はなかった。行動力 1 消費。',
 
   'survey.mines': '地雷',
   'survey.title': '測量',
@@ -369,7 +381,7 @@ export const jaMessages: MessageCatalog = {
   'combat-build-copy.1-loadout-point-starting-and-maximum-health':
     '装備1ポイント。初期・最大体力+2。',
   'combat-build-copy.1-loadout-point-the-first-control-or':
-    '装備1ポイント。毎ターン最初の装置・封印停止、巣破壊、錨調整で行動力1回復。',
+    '装備1ポイント。毎ターン最初の装置・封印停止、巣破壊、錨調整、結晶によるシールド破壊で行動力1回復。',
   'combat-build-copy.1-loadout-point-the-first-web-egg':
     '装備1ポイント。毎ターン最初の巣網・卵・幼体除去で行動力1回復。',
   'combat-build-copy.2-loadout-points-1-ap-on-even': '装備2ポイント。偶数ターンの行動力+1、上限5。',
@@ -423,7 +435,7 @@ export const jaMessages: MessageCatalog = {
   'journey-relic-copy.end-a-combat-turn-outside-the-warning':
     '戦闘で予告範囲外でターンを終えるとシールド+1。各階1回、上限2。',
   'journey-relic-copy.first-control-or-seal-disabled-or-anchor':
-    '各階最初の装置・封印停止、または錨調整で行動力1回復、上限5。',
+    '各階最初の装置・封印停止、錨調整、結晶によるシールド破壊で行動力1回復、上限5。',
   'journey-relic-copy.first-strike-each-floor-4-damage': '各階の初撃ダメージ+4。',
   'journey-relic-copy.in-combat-your-first-walk-of-2':
     '戦闘中、各ターン最初の2歩以上の移動は行動力を1節約。最低1、マスを開く行動は対象外。',

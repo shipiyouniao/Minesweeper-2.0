@@ -1,34 +1,43 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
-  readonly 'matrix.rest': string
+  readonly 'matrix.quiet': string
+  readonly 'matrix.open-hint': string
   readonly 'matrix.hunt': string
   readonly 'matrix.hunt-note': string
   readonly 'matrix.precise': string
   readonly 'matrix.precise-note': string
   readonly 'matrix.precise-effect': string
-
   readonly 'matrix.name': string
   readonly 'matrix.deduce': string
   readonly 'matrix.calibrate': string
   readonly 'matrix.fight': string
   readonly 'matrix.forecast': string
   readonly 'matrix.gaps': string
-  readonly 'matrix.line': string
   readonly 'matrix.shield': string
   readonly 'matrix.phase': string
   readonly 'matrix.armed': string
-  readonly 'matrix.reflected': string
   readonly 'matrix.shifted': string
   readonly 'matrix.status': string
-  readonly 'matrix.prism': string
-  readonly 'matrix.line-action': string
-  readonly 'matrix.floor': string
   readonly 'matrix.legend': string
   readonly 'matrix.scene-0': string
   readonly 'matrix.scene-1': string
   readonly 'matrix.scene-2': string
   readonly 'matrix.scene-3': string
   readonly 'matrix.scene-4': string
+  readonly 'matrix.observe': string
+  readonly 'matrix.attune': string
+  readonly 'matrix.attune-hint': string
+  readonly 'matrix.observation-hint': string
+  readonly 'matrix.region': string
+  readonly 'matrix.ground': string
+  readonly 'matrix.region-only': string
+  readonly 'matrix.note': string
+  readonly 'matrix.empty-cell': string
+  readonly 'matrix.unresolved': string
+  readonly 'matrix.select': string
+  readonly 'matrix.collected': string
+  readonly 'matrix.collected-event': string
+  readonly 'matrix.empty-event': string
 
   readonly 'survey.mines': string
   readonly 'survey.title': string
