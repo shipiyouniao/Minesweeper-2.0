@@ -79,7 +79,14 @@ export class DungeonToolController {
         ? event.target.closest<HTMLButtonElement>('[data-tool]')
         : null
     const tool = toolOf(target)
-    if (!target || target.disabled || !tool || event.button !== 0) return
+    if (
+      !target ||
+      target.disabled ||
+      target.getAttribute('aria-disabled') === 'true' ||
+      !tool ||
+      event.button !== 0
+    )
+      return
     this.actions.unlock()
     this.drag = {
       pointerId: event.pointerId,

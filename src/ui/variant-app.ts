@@ -79,6 +79,15 @@ export class VariantApp implements VariantInputActions {
 
   /** Apply board input only while the board is visible and no modal owns interaction. */
   play(side: BoardSide, index: number, flag?: boolean): void {
+    if (side === 'a' && this.view.observingCell(index)) {
+      if (this.paused || this.view.dialogOpen || this.moving) return
+      if (flag || (flag === undefined && this.inputMode === 'flag')) {
+        this.input.cancelTools()
+        this.expedition({ type: 'mark-crystal', index })
+        this.render()
+      } else void this.collectObserved(index)
+      return
+    }
     if (flag === undefined && (this.inputMode === 'mark-safe' || this.inputMode === 'chord')) {
       this.cellCommand(side, index, this.inputMode)
       return
@@ -125,6 +134,10 @@ export class VariantApp implements VariantInputActions {
 
   /** Keep pointer shortcuts on the same guarded commands used by explicit board controls. */
   secondary(side: BoardSide, index: number): void {
+    if (side === 'a' && this.view.observingCell(index)) {
+      this.play(side, index, true)
+      return
+    }
     const game =
       this.session instanceof TwinSession ? this.session.state[side] : this.session.run?.game
     if (!game) return
@@ -224,6 +237,39 @@ export class VariantApp implements VariantInputActions {
     if (finished) this.commitPlay('a', index, false, move)
   }
 
+  /** Walk/reveal and collect through the same checked, replayable actions as the tools. */
+  private async collectObserved(index: number): Promise<void> {
+    if (!(this.session instanceof ExpeditionSession)) return
+    const run = this.session.run
+    if (!run || run.encounter?.kind !== 'matrix') return
+    const used = run.encounter.collected.includes(index) || run.encounter.empty.includes(index)
+    if (run.player === index) {
+      if (!used) this.useTool('attune', index)
+      return
+    }
+    const action = tacticalCellAction(run, index)
+    const plan = tacticalPlan(run, action)
+    if (action.type !== 'move' && action.type !== 'reveal') return
+    if (!plan.allowed || plan.cost + Number(!used) > run.encounter.points) {
+      this.sounds.play('blocked')
+      this.view.explainTactical(plan.allowed ? { ...plan, allowed: false, reason: 'points' } : plan)
+      return
+    }
+    const generation = this.walkGeneration + 1
+    await this.walkAndPlay(index, plan.path, action.type === 'move')
+    const current = this.session.run
+    if (
+      !used &&
+      generation === this.walkGeneration &&
+      current &&
+      !this.paused &&
+      !this.view.dialogOpen &&
+      this.view.observingCell(index) &&
+      tacticalPlan(current, { type: 'attune', index }).allowed
+    )
+      this.useTool('attune', index)
+  }
+
   /** Discard pending movement before replacing or hiding its board. */
   private cancelMovement(): void {
     const committed = this.magneticPerformance
@@ -307,6 +353,14 @@ export class VariantApp implements VariantInputActions {
       command.type !== 'attune'
     )
       this.cancelMovement()
+
+    if (
+      command.type === 'attune' &&
+      this.session instanceof ExpeditionSession &&
+      (this.session.run?.encounter?.points === 0 ||
+        (this.session.run?.encounter?.kind === 'matrix' && this.session.run.encounter.exposed))
+    )
+      return
 
     switch (command.type) {
       case 'equip-title':

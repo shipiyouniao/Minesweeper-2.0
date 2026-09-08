@@ -6,15 +6,14 @@ import type { MatrixExpedition } from '../types/matrix.js'
 import type { Expedition } from '../types/variants.js'
 import { boardZoomTemplate } from './board-zoom.js'
 import { spriteImage } from './dungeon-sprites.js'
-import { matrixObservationTemplate } from './matrix-observation-template.js'
 
 /** Keep ordinary floor numbers and the same scrollport/zoom geometry as other encounters. */
 export function matrixBoardFrame(language: Language, run: MatrixExpedition): string {
   return `<section class="variant-board-panel matrix-panel" aria-label="${message(language, 'matrix.name')}">
     <div class="board-frame-heading ${sharedStyles['board-frame-heading']}"><h2>${message(language, 'matrix.name')}</h2>${boardZoomTemplate(message(language, 'survey.zoom'))}</div>
     <p class="matrix-progress">${message(language, 'matrix.status', { phase: run.encounter.phase, count: matrixCharge(run) })}</p>
-    <div class="board-viewport"><div class="board" data-side="a" role="grid" aria-label="${message(language, 'matrix.name')}"></div></div>
-    <p class="matrix-legend">${message(language, 'matrix.legend')}</p>
+    <div class="board-viewport"><div class="board" data-side="a" role="grid" aria-label="${message(language, 'matrix.name')}"></div><div id="matrix-observation" class="matrix-observation" hidden></div></div>
+    <p class="matrix-legend">${message(language, 'matrix.legend')}</p><p class="matrix-legend">${message(language, 'matrix.observation-hint')}</p>
   </section>`
 }
 
@@ -30,7 +29,11 @@ export function markMatrixCell(
   const live = run.phase === 'boss'
   const region = activeRegion({ ...run, encounter: e })
   cell.classList.toggle('matrix-region-cell', live && !e.exposed && region.indices.includes(index))
-  cell.classList.toggle('matrix-crystal-note', live && e.notes.includes(index))
+  if (live && e.notes.includes(index))
+    cell.insertAdjacentHTML(
+      'beforeend',
+      `<span class="matrix-guess" aria-hidden="true">${spriteImage('matrix-crystal')}</span>`,
+    )
   if (e.collected.includes(index)) {
     cell.classList.add('matrix-collected-cell')
     cell.insertAdjacentHTML(
@@ -59,45 +62,42 @@ export function markMatrixCell(
     )
 }
 
-/** Own the collapsible local observation UI and its target, independently of replayable rules. */
+/** Toggle public nonogram clues on the actual board, preserving replayable crystal notes. */
 export class MatrixObservation {
   private run: MatrixExpedition | null = null
   private open = false
-  private selected: number | null = null
+  private readonly root: HTMLElement
+  private readonly listeners = new AbortController()
+  private readonly resizing = new ResizeObserver(() => this.position())
 
-  /** Retain one root and locale across normal board repaints. */
+  private readonly language: Language
+  private readonly cellLabels = new WeakMap<HTMLElement, string>()
+
   constructor(root: HTMLElement, language: Language) {
-    this.root = root
     this.language = language
+    this.root = root
     root.addEventListener('keydown', this.key, { signal: this.listeners.signal })
-    window.addEventListener('resize', this.position, { signal: this.listeners.signal })
   }
 
-  private readonly root: HTMLElement
-  private readonly language: Language
-  private readonly listeners = new AbortController()
-
-  /** Remove popup listeners with the owning game view. */
   dispose(): void {
     this.listeners.abort()
+    this.resizing.disconnect()
   }
 
-  /** Escape closes the observation overlay without trapping board navigation. */
   private readonly key = (event: KeyboardEvent): void => {
-    if (event.key !== 'Escape' || !this.open) return
-    this.toggle()
+    if (event.key === 'Escape' && this.open) this.toggle()
   }
 
-  /** Fit the panel above the actual dock, including its mobile wrapped rows. */
-  private readonly position = (): void => {
-    const holder = this.root.querySelector<HTMLElement>('.matrix-observation')
-    const dock = this.root.querySelector<HTMLElement>('.action-dock')?.getBoundingClientRect()
-    if (!holder || !dock) return
-    holder.style.bottom = `${Math.max(12, innerHeight - dock.top + 12)}px`
-    holder.style.maxHeight = `${Math.max(80, dock.top - 24)}px`
+  /** Only the active, unbroken observation region changes board input. */
+  contains(index: number): boolean {
+    return !!(
+      this.open &&
+      this.run &&
+      !this.run.encounter.exposed &&
+      activeRegion(this.run).indices.includes(index)
+    )
   }
 
-  /** Refresh after a domain action; a new encounter never inherits old UI targeting. */
   render(run: Expedition | null): void {
     const previous = this.run
     this.run =
@@ -106,66 +106,90 @@ export class MatrixObservation {
         : null
     if (
       !this.run ||
+      this.run.encounter.exposed ||
       !previous ||
       previous.departure.seed !== this.run.departure.seed ||
       previous.floor !== this.run.floor
-    ) {
+    )
       this.open = false
-      this.selected = null
-    } else if (previous.encounter.phase !== this.run.encounter.phase) this.selected = null
+    this.resizing.disconnect()
+    const grid = this.root.querySelector<HTMLElement>('.matrix-panel .board')
+    if (grid) this.resizing.observe(grid)
     this.paint()
   }
 
-  /** Toggle observation without spending AP or implicitly selecting a crystal. */
   toggle(): void {
-    if (!this.run) return
+    if (!this.run || this.run.encounter.exposed) return
     this.open = !this.open
     this.paint()
-    if (this.open)
-      this.root
-        .querySelector<HTMLElement>('.matrix-observation button')
-        ?.focus({ preventScroll: true })
-    else
-      this.root
-        .querySelector<HTMLElement>('.tactical-controls [data-control="observe"]')
-        ?.focus({ preventScroll: true })
   }
 
-  /** Link a chosen mini-map square to its real coordinate using only public membership. */
   select(index: number): void {
-    if (!this.run) return
-    const selected = activeRegion(this.run).indices.includes(index) ? index : null
-    if (this.selected === selected) return
-    const miniFocused =
-      document.activeElement instanceof HTMLElement &&
-      document.activeElement.dataset['control']?.startsWith('matrix-pick:')
-    this.selected = selected
-    this.paint()
-    if (miniFocused)
-      this.root
-        .querySelector<HTMLElement>(`[data-control="matrix-pick:${index}"]`)
-        ?.focus({ preventScroll: true })
-  }
-
-  /** Render nine public cells; raw crystal identities never enter DOM attributes or labels. */
-  private paint(): void {
-    const holder = this.root.querySelector<HTMLElement>('.matrix-observation')
-    const trigger = this.root.querySelector<HTMLElement>(
-      '.tactical-controls [data-control="observe"]',
-    )
-    trigger?.setAttribute('aria-expanded', String(this.open))
-    if (!holder || !this.run) return
-    holder.hidden = !this.open
-    this.position()
-    const run = this.run
-    const language = this.language
-    for (const cell of this.root.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
+    for (const cell of this.root.querySelectorAll<HTMLElement>('.matrix-panel [data-cell]'))
       cell.classList.toggle(
         'matrix-selected',
-        this.open && !run.encounter.exposed && Number(cell.dataset['cell']) === this.selected,
+        this.contains(index) && Number(cell.dataset['cell']) === index,
       )
-    if (!this.open) return
-    holder.innerHTML = matrixObservationTemplate(language, run, this.selected)
+  }
+
+  private paint(): void {
+    const holder = this.root.querySelector<HTMLElement>('.matrix-observation')
+    const trigger = this.root.querySelector<HTMLElement>('[data-control="observe"]')
+    trigger?.setAttribute('aria-expanded', String(this.open))
+    trigger?.setAttribute('aria-pressed', String(this.open))
+    for (const cell of this.root.querySelectorAll<HTMLElement>('.matrix-panel [data-cell]')) {
+      const index = Number(cell.dataset['cell'])
+      cell.classList.toggle(
+        'matrix-crystal-note',
+        this.contains(index) && !!this.run?.encounter.notes.includes(index),
+      )
+      const baseLabel = this.cellLabels.get(cell) ?? cell.getAttribute('aria-label') ?? ''
+      this.cellLabels.set(cell, baseLabel)
+      cell.setAttribute(
+        'aria-label',
+        cell.classList.contains('matrix-crystal-note')
+          ? `${baseLabel}, ${message(this.language, 'matrix.note')}`
+          : baseLabel,
+      )
+      if (!this.contains(index)) cell.classList.remove('matrix-selected')
+    }
+    if (!holder) return
+    holder.hidden = !this.open || !this.run || this.run.encounter.exposed
+    if (holder.hidden || !this.run) return
+    const region = activeRegion(this.run)
+    holder.innerHTML =
+      region.rows
+        .map(
+          (runs, i) =>
+            `<span class="matrix-edge-clue matrix-row-clue" data-region-offset="${i * 3}">${(runs.length ? runs : [0]).join(' ')}</span>`,
+        )
+        .join('') +
+      region.columns
+        .map(
+          (runs, i) =>
+            `<span class="matrix-edge-clue matrix-column-clue" data-region-offset="${i}">${(runs.length ? runs : [0]).join('<br>')}</span>`,
+        )
+        .join('')
+    this.position()
+  }
+
+  /** Keep clues attached to their row/column during zoom and scrolling. */
+  private position(): void {
+    if (!this.run) return
+    const holder = this.root.querySelector<HTMLElement>('.matrix-observation')
+    const viewport = holder?.parentElement
+    if (!holder || holder.hidden || !viewport) return
+    const origin = viewport.getBoundingClientRect()
+    const region = activeRegion(this.run)
+    for (const clue of holder.querySelectorAll<HTMLElement>('[data-region-offset]')) {
+      const index = region.indices[Number(clue.dataset['regionOffset'])]
+      const cell = viewport.querySelector<HTMLElement>(`[data-cell="${index}"]`)
+      if (!cell) continue
+      const box = cell.getBoundingClientRect()
+      const row = clue.classList.contains('matrix-row-clue')
+      clue.style.left = `${box.left - origin.left + viewport.scrollLeft + (row ? -3 : box.width / 2)}px`
+      clue.style.top = `${box.top - origin.top + viewport.scrollTop + (row ? box.height / 2 : -3)}px`
+    }
   }
 }
 

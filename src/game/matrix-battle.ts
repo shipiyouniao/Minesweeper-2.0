@@ -152,6 +152,7 @@ export function advanceMatrix(run: MatrixExpedition): MatrixExpedition {
       braced: false,
       turnTriggers: [],
       phase: shifted ? 2 : e.phase,
+      notes: shifted ? [] : e.notes,
       exposed: shifted ? false : e.exposed,
       event: shifted ? 'matrix-shifted' : damage ? 'hit' : 'evaded',
     },

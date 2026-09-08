@@ -1,3 +1,5 @@
+import { animateBattleInteractions } from './battle-interactions.js'
+import { animateBattleFeedback } from './battle-feedback.js'
 import { markMatrixCell, MatrixObservation, animateMatrixExtraction } from './matrix-board.js'
 import { sharedStyles } from './shared-styles.js'
 import { sonarRegion } from '../game/sonar.js'
@@ -61,7 +63,6 @@ export class VariantView {
   private expedition: Expedition | null = null
   private targetingTool = false
   private animateClock = false
-  private matrixBurst: readonly number[] = []
   private readonly listeners = new AbortController()
 
   /** Mount the stable shell once; only its mode content changes after an action. */
@@ -159,14 +160,6 @@ export class VariantView {
   render(html: string, a: Game | null, b: Game | null, expedition: Expedition | null): void {
     this.resize?.disconnect()
     const previous = this.expedition
-    this.matrixBurst =
-      previous?.encounter?.kind === 'matrix' &&
-      expedition?.encounter?.kind === 'matrix' &&
-      previous.departure.seed === expedition.departure.seed &&
-      previous.floor === expedition.floor &&
-      expedition.encounter.turn === previous.encounter.turn + 1
-        ? previous.encounter.intent.targets
-        : []
     this.animateClock = Boolean(
       previous?.encounter?.kind === 'clock' &&
       expedition?.encounter?.kind === 'clock' &&
@@ -228,6 +221,8 @@ export class VariantView {
     this.magnetic.render(expedition)
     this.matrix.render(expedition)
     animateMatrixExtraction(this.content, previous, expedition)
+    animateBattleFeedback(this.content, previous, expedition)
+    animateBattleInteractions(this.content, previous, expedition)
     const comparison = expedition ? mirrorPreview(expedition) : null
     if (comparison) {
       this.markExpedition(comparison, 'b')
@@ -322,7 +317,12 @@ export class VariantView {
     }
   }
 
-  /** Open the small observation panel from its dock control. */
+  /** Query the observation overlay without exposing private crystal identities. */
+  observingCell(index: number): boolean {
+    return this.matrix.contains(index)
+  }
+
+  /** Toggle clues beside the active board region. */
   toggleObservation(): void {
     this.matrix.toggle()
   }
@@ -467,7 +467,6 @@ export class VariantView {
         )
       }
       markMatrixCell(this.language, run, cell, index)
-      if (this.matrixBurst.includes(index)) cell.classList.add('matrix-burst')
       markEchoCell(this.language, run, cell, index)
       markBroodCell(this.language, run, cell, index)
       markMirrorCell(this.language, run, cell, index)

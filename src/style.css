@@ -12,6 +12,7 @@
 @import './sonar.css' layer(components);
 @import './survey.css' layer(components);
 @import './matrix.css' layer(components);
+@import './combat-feedback.css' layer(components);
 
 /* Resets stay below component styles and opt-in utilities. */
 @layer base {

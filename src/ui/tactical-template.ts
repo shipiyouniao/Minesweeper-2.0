@@ -10,7 +10,7 @@ import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import type { Language } from '../types/localization.js'
 import type { Expedition } from '../types/variants.js'
 import { spriteImage } from './dungeon-sprites.js'
-import { tacticalCopy, tacticalEventCopy, tacticalHint } from './tactical-copy.js'
+import { tacticalCopy, tacticalEventCopy, tacticalHint, tacticalPlanCopy } from './tactical-copy.js'
 import { bossSprite } from './tactical-sprites.js'
 
 /** Present the active boss's public state in the compact sidebar. */
@@ -38,9 +38,16 @@ export function tacticalControlsTemplate(language: Language, run: Expedition): s
   const strikeLabel =
     strike.type === 'interact' ? message(language, 'tactical-template.prime-core-1-ap') : null
   const t = tacticalCopy(language, encounter.kind)
+  const attuneBlocked = encounter.kind === 'matrix' && (encounter.exposed || encounter.points < 1)
+  const attuneHint =
+    encounter.kind === 'matrix' && encounter.exposed
+      ? message(language, 'matrix.open-hint')
+      : encounter.points < 1
+        ? tacticalPlanCopy(language, { path: [], cost: 1, allowed: false, reason: 'points' })
+        : message(language, 'matrix.attune-hint')
   const matrixTools =
     encounter.kind === 'matrix'
-      ? `<button class="dock-slot" data-control="observe" aria-expanded="false" aria-controls="matrix-observation">${spriteImage('matrix-observe')}${message(language, 'matrix.observe')}</button><button class="dock-slot inventory-tool ${sharedStyles['inventory-tool']}" data-control="attune" data-tool="attune" aria-pressed="false" ${encounter.exposed ? 'disabled' : ''}>${spriteImage('attune')}${message(language, 'matrix.attune')}</button>`
+      ? `<button class="dock-slot" data-control="observe" aria-expanded="false" aria-controls="matrix-observation">${spriteImage('matrix-observe')}${message(language, 'matrix.observe')}</button><div class="dock-skill ${gameplayStyles['dock-skill']} tw:focus-within:[&_.skill-bubble]:block"><button class="dock-slot inventory-tool ${sharedStyles['inventory-tool']} tw:aria-disabled:opacity-45 tw:aria-disabled:grayscale tw:aria-disabled:cursor-default" aria-describedby="attune-tip" data-control="attune" data-tool="attune" aria-pressed="false" aria-disabled="${attuneBlocked}">${spriteImage('attune')}${message(language, 'matrix.attune')}</button><div id="attune-tip" role="tooltip" class="skill-bubble ${gameplayStyles['skill-bubble']}">${attuneHint}</div></div>`
       : ''
   return `<div class="tactical-controls ${gameplayStyles['tactical-controls']}">${matrixTools}${encounter.kind === 'mirror' ? `<button class="dock-slot" data-control="shift" ${tacticalPlan(run, { type: 'shift' }).allowed ? '' : 'disabled'}>${spriteImage('mirror-rift')}${message(language, 'tactical-template.shift-realm-1-ap')}</button>` : ''}<button class="dock-slot" data-control="attack" ${tacticalPlan(run, strike).allowed ? '' : 'disabled'}>${spriteImage('bastion-strike')}${strikeLabel ?? t.attack}</button><button class="dock-slot" data-control="brace" ${tacticalPlan(run, { type: 'brace' }).allowed ? '' : 'disabled'}>${spriteImage('shield')}${t.brace}</button><button class="dock-slot primary-button ${sharedStyles['primary-button']}" data-control="end-turn">${spriteImage('bastion-intent')}<strong>${t.end}</strong><small>${message(language, 'tactical-template.ap-left', { p0: encounter.points })}</small></button></div>`
 }

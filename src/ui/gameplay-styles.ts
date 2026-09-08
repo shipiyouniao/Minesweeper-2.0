@@ -132,6 +132,7 @@ export const gameplayStyles = {
     'tw:[@media(max-width:_650px)]:[&_.dock-slot]:w-17 tw:[@media(max-width:_650px)]:[&_.dock-slot]:[flex-basis:68px] tw:[@media(max-width:_650px)]:[&_.dock-slot]:[padding-inline:3px]',
     'tw:[@media(max-width:_650px)]:[&_.dock-slot>strong]:text-[10px]',
     'tw:[@media(max-width:_650px)]:[&_.tool-label]:text-[10px]',
+    'tw:[&_.tactical-controls]:flex-nowrap tw:[&_.tactical-controls>.dock-skill]:min-w-0 tw:[&_.tactical-controls>.dock-skill]:[flex:0_0_100px]',
     'tw:[&_.tactical-controls]:flex tw:[&_.tactical-controls]:gap-2 tw:[&_.tactical-controls]:m-0 tw:[&_.tactical-controls]:[padding:0_12px_0_0] tw:[&_.tactical-controls]:[border-right:1px_solid_#cbd5ca] tw:[&_.tactical-controls]:[flex:0_0_auto]',
     'tw:[&_.tactical-controls_.dock-slot]:w-25 tw:[&_.tactical-controls_.dock-slot]:[flex-basis:100px] tw:[&_.tactical-controls_.dock-slot]:text-[11px] tw:[&_.tactical-controls_.dock-slot]:whitespace-nowrap',
     'tw:[&_.tactical-controls_[data-control=end-turn]]:bg-[#345a40] tw:[&_.tactical-controls_[data-control=end-turn]]:border-[#345a40] tw:[&_.tactical-controls_[data-control=end-turn]]:text-[#fffef5]',

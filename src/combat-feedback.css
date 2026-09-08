@@ -1,0 +1,623 @@
+/* Transient combat layers use cell geometry, so zoom and scrolling stay aligned. */
+.combat-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  border-radius: inherit;
+  animation: combat-fade 800ms both;
+}
+.combat-impact {
+  --impact: #dbab62;
+  border: 3px solid var(--impact);
+  box-shadow: inset 0 0 18px var(--impact);
+}
+.combat-bastion {
+  --impact: #b48a54;
+  background: conic-gradient(
+    from 20deg,
+    transparent 0 18%,
+    #e7c998a0 19% 22%,
+    transparent 23% 47%,
+    #815c43aa 48% 51%,
+    transparent 52% 77%,
+    #e7c998a0 78% 81%,
+    transparent 82%
+  );
+  animation-name: combat-quake;
+}
+.combat-brood {
+  --impact: #89ae59;
+  background:
+    radial-gradient(ellipse at 30% 35%, #bddd7dbc 0 12%, transparent 14%),
+    radial-gradient(ellipse at 65% 60%, #92ac57c0 0 20%, transparent 22%);
+  border-radius: 35% 55% 40% 60%;
+  animation-name: combat-venom;
+}
+.combat-mirror {
+  --impact: #92b8f1;
+  background: conic-gradient(
+    from 45deg,
+    #a9cdf1b0,
+    transparent 20%,
+    #f0d790c0 25%,
+    transparent 45%,
+    #a9cdf1b0 50%,
+    transparent 70%,
+    #f0d790c0 75%,
+    transparent
+  );
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  animation-name: combat-shatter;
+}
+.combat-magnetic {
+  --impact: #70c7d8;
+  background: repeating-linear-gradient(
+    115deg,
+    transparent 0 16%,
+    #a7eeffc0 18% 21%,
+    transparent 23% 35%
+  );
+  animation-name: combat-electric;
+}
+.combat-clock {
+  --impact: #bb99e0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 70%, #ddc3efa0 90%, transparent);
+  border-style: dashed;
+  animation-name: combat-clock;
+}
+.combat-echo {
+  --impact: #56b8ac;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0 15%,
+    #90ded2b0 17% 22%,
+    transparent 24% 35%
+  );
+  animation-name: combat-wave;
+}
+.combat-matrix {
+  --impact: #54bea6;
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, transparent 42%, #a8ffe8c0 45% 55%, transparent 58%),
+    linear-gradient(0deg, transparent 42%, #a8ffe8c0 45% 55%, transparent 58%);
+  animation-name: combat-lattice;
+}
+.combat-boss-hit {
+  border: 3px solid var(--impact);
+  background-color: #fff4c080;
+  animation-duration: 500ms;
+}
+.combat-slash {
+  inset: 15% -10%;
+  border-top: 5px solid #fff9dd;
+  border-bottom: 2px solid #dba64c;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 4px #aa783a);
+  animation: combat-slash 400ms both;
+}
+.combat-player-hit {
+  border: 3px solid #c96055;
+  background: radial-gradient(ellipse, transparent 25%, #d8605090);
+  animation: combat-hurt 600ms both;
+}
+.combat-guard {
+  inset: 8%;
+  border: 3px solid #8dbedf;
+  border-radius: 45% 45% 55% 55%;
+  background: #d2eafa60;
+  animation: combat-wave 550ms both;
+}
+.combat-damage {
+  inset: -25% 0 auto;
+  text-align: center;
+  color: #76521e;
+  font: 800 clamp(14px, 2vw, 22px)/1.2 var(--mono);
+  text-shadow:
+    0 1px 2px #fff,
+    1px 0 2px #fff,
+    -1px 0 2px #fff;
+  animation: combat-number 950ms both;
+}
+.combat-player-damage {
+  color: #ac302c;
+}
+@keyframes combat-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  60% {
+    opacity: 1;
+  }
+}
+@keyframes combat-quake {
+  0% {
+    opacity: 0;
+    scale: 0.5;
+  }
+  25% {
+    opacity: 1;
+    scale: 1.1;
+    rotate: -5deg;
+  }
+  45% {
+    rotate: 4deg;
+  }
+  70% {
+    scale: 1;
+    rotate: -2deg;
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.15;
+  }
+}
+@keyframes combat-venom {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+  }
+  30% {
+    opacity: 1;
+    scale: 1.05;
+  }
+  70% {
+    opacity: 0.7;
+    scale: 0.95 1.1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.2;
+  }
+}
+@keyframes combat-shatter {
+  0% {
+    opacity: 0;
+    scale: 0.15;
+    rotate: -45deg;
+  }
+  25% {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.5;
+    rotate: 35deg;
+  }
+}
+@keyframes combat-electric {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  50%,
+  75% {
+    opacity: 1;
+    translate: -2px 0;
+  }
+  35%,
+  65% {
+    opacity: 0.3;
+    translate: 2px 0;
+  }
+}
+@keyframes combat-clock {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+    rotate: -90deg;
+  }
+  30% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    rotate: 180deg;
+    scale: 1.15;
+  }
+}
+@keyframes combat-wave {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.35;
+  }
+}
+@keyframes combat-lattice {
+  0% {
+    opacity: 0;
+    scale: 0.2 1;
+  }
+  25% {
+    opacity: 1;
+    scale: 1.05;
+  }
+  60% {
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1 0.2;
+  }
+}
+@keyframes combat-slash {
+  0% {
+    opacity: 0;
+    transform: rotate(-55deg) scaleX(0.1);
+  }
+  35% {
+    opacity: 1;
+    transform: rotate(-25deg) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(10deg) scaleX(1.2);
+  }
+}
+@keyframes combat-hurt {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  55% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.4;
+  }
+}
+@keyframes combat-number {
+  0% {
+    opacity: 0;
+    translate: 0 5px;
+  }
+  20%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .combat-fx {
+    animation-name: combat-fade;
+    animation-duration: 180ms;
+    animation-delay: 0ms !important;
+  }
+}
+
+/* Object interactions retain a short-lived image after the game removes the object. */
+.interaction-fx {
+  position: absolute;
+  inset: 4%;
+  z-index: 9;
+  pointer-events: none;
+  border-radius: inherit;
+  animation: interaction-pulse 750ms both;
+}
+.interaction-fx > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.interaction-fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid #b5d6bb;
+  border-radius: inherit;
+}
+.interaction-web-cut {
+  animation-name: interaction-tear;
+}
+.interaction-web-cut::after {
+  border: 0;
+  background: linear-gradient(130deg, transparent 46%, #fffbe4 48% 52%, transparent 54%);
+}
+.interaction-nest-break {
+  animation-name: interaction-collapse;
+  filter: sepia(0.4);
+}
+.interaction-nest-break::after {
+  border: 0;
+  background: repeating-conic-gradient(#ac905b90 0 8deg, transparent 9deg 50deg);
+}
+.interaction-egg-break {
+  animation-name: interaction-crack;
+}
+.interaction-egg-break::after {
+  border: 0;
+  background: linear-gradient(120deg, transparent 46%, #705b39 48% 51%, transparent 53%);
+}
+.interaction-hatchling-clear {
+  animation-name: interaction-scatter;
+}
+.interaction-power-down {
+  animation-name: interaction-power;
+}
+.interaction-power-down::after {
+  border-color: #edc46d;
+  box-shadow: 0 0 12px #edc46d;
+}
+.interaction-core-open {
+  border: 4px double #edc46d;
+  border-radius: 50%;
+  box-shadow: 0 0 14px #edc46d;
+  animation-name: interaction-open;
+}
+.interaction-seal-break {
+  animation-name: interaction-shards;
+}
+.interaction-seal-break::after {
+  border-color: #b6c8f3;
+  transform: rotate(45deg);
+}
+.interaction-rift {
+  animation-name: interaction-rift;
+  background: #9f92d44d;
+  border-radius: 50%;
+}
+.interaction-anchor-on {
+  animation-name: interaction-anchor;
+}
+.interaction-anchor-on::after {
+  border: 3px dashed #63bed8;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #63bed8;
+}
+.interaction-hourglass {
+  animation-name: interaction-time;
+}
+.interaction-hourglass::after {
+  border: 3px dotted #bfa0e1;
+  border-radius: 50%;
+}
+.interaction-sonar {
+  animation-name: interaction-sonar;
+}
+.interaction-sonar::after,
+.interaction-echo-open::after {
+  border: 4px double #5ec8b9;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #5ec8b9;
+}
+.interaction-echo-open {
+  animation-name: interaction-open;
+}
+.interaction-crystal {
+  animation-name: interaction-crystal;
+  filter: drop-shadow(0 0 6px #76e4c5);
+}
+.interaction-empty {
+  border: 2px dashed #8d9c96;
+  border-radius: 50%;
+  animation-name: interaction-empty;
+}
+@keyframes interaction-pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  30%,
+  60% {
+    opacity: 1;
+  }
+}
+@keyframes interaction-tear {
+  0% {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+  35% {
+    scale: 1.1;
+    clip-path: polygon(0 0, 44% 0, 54% 100%, 0 100%);
+  }
+  100% {
+    opacity: 0;
+    translate: -30% 20%;
+    rotate: -22deg;
+  }
+}
+@keyframes interaction-collapse {
+  0% {
+    opacity: 1;
+  }
+  20% {
+    rotate: -8deg;
+  }
+  40% {
+    rotate: 8deg;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.3 0.25;
+    translate: 0 35%;
+  }
+}
+@keyframes interaction-crack {
+  0% {
+    opacity: 1;
+  }
+  35% {
+    scale: 1.15 0.9;
+    rotate: 10deg;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.4 0.5;
+    translate: 0 20%;
+  }
+}
+@keyframes interaction-scatter {
+  0% {
+    opacity: 1;
+  }
+  30% {
+    rotate: -20deg;
+    scale: 1.1;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.2;
+    rotate: 80deg;
+  }
+}
+@keyframes interaction-power {
+  0%,
+  30% {
+    opacity: 1;
+    filter: brightness(1.7);
+  }
+  60% {
+    opacity: 0.6;
+    filter: grayscale(1);
+  }
+  100% {
+    opacity: 0;
+    filter: grayscale(1);
+    scale: 0.9;
+  }
+}
+@keyframes interaction-open {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.5;
+  }
+}
+@keyframes interaction-shards {
+  0% {
+    opacity: 1;
+  }
+  30% {
+    scale: 1.15;
+    filter: brightness(1.8);
+  }
+  100% {
+    opacity: 0;
+    rotate: 45deg;
+    scale: 1.5;
+  }
+}
+@keyframes interaction-rift {
+  0% {
+    opacity: 0;
+    scale: 0.15 1;
+  }
+  40% {
+    opacity: 1;
+    scale: 1.2;
+  }
+  100% {
+    opacity: 0;
+    scale: 1 0.1;
+    rotate: 90deg;
+  }
+}
+@keyframes interaction-anchor {
+  0% {
+    opacity: 0;
+    scale: 0.75;
+  }
+  30% {
+    opacity: 1;
+    translate: 0 -15%;
+  }
+  55% {
+    translate: 0 5%;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.15;
+  }
+}
+@keyframes interaction-time {
+  0% {
+    opacity: 1;
+    rotate: 0deg;
+  }
+  60% {
+    opacity: 1;
+    rotate: 180deg;
+    scale: 1.15;
+  }
+  100% {
+    opacity: 0;
+    rotate: 180deg;
+    scale: 0.5;
+  }
+}
+@keyframes interaction-sonar {
+  0% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 2.5;
+  }
+}
+@keyframes interaction-crystal {
+  0% {
+    opacity: 1;
+    scale: 0.7;
+  }
+  40% {
+    opacity: 1;
+    scale: 1.2;
+    translate: 0 -15%;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.5;
+    translate: 0 -60%;
+  }
+}
+@keyframes interaction-empty {
+  0% {
+    opacity: 0;
+    scale: 0.2;
+  }
+  40% {
+    opacity: 0.8;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .interaction-fx {
+    animation-name: interaction-pulse;
+    animation-duration: 180ms;
+  }
+}
