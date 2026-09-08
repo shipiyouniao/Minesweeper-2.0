@@ -1,12 +1,12 @@
 # Game modes: design and implementation plan
 
-Every mode in this document is approved for development. **Expedition**, **Twin boards** and **Sonar** are playable. **Survey** and **Tides** are planned, not playable menu entries yet. Classic Minesweeper retains its existing difficulties, saves, and records.
+Every mode in this document is approved for development. **Expedition**, **Twin boards**, **Sonar** and **Survey** are playable. **Tides** remains planned, not a playable menu entry yet. Classic Minesweeper retains its existing difficulties, saves, and records.
 
 Relic Dungeon is part of Expedition, not a separate mode: it describes the multi-floor run, randomized relic choices, and permanent camp progression. With its permanent unlocks, Expedition is a **roguelite**.
 
 ## Shared design
 
-- Rulesets and difficulty are separate. The existing `mode` URL parameter still means classic difficulty. The new `ruleset` parameter accepts `classic`, `expedition`, `twin`, or `sonar`.
+- Rulesets and difficulty are separate. The existing `mode` URL parameter still means classic difficulty. The new `ruleset` parameter accepts `classic`, `expedition`, `twin`, `sonar`, or `survey`.
 - All mine placement uses seeded Fisher–Yates shuffling with unbiased bounded indices and exact mine counts. Apply generation constraints before placement; never roll independently for each cell.
 - Pure immutable functions own rules and derived information. Session objects own progress/settlement; repositories own serialization; input and view objects own browser event and DOM lifetimes.
 - Named contracts live in module-scoped `.d.ts` files. Commands use concrete unions. No business `any`, `unknown`, mapped types, or conditional types.
@@ -21,7 +21,7 @@ Relic Dungeon is part of Expedition, not a separate mode: it describes the multi
 
 Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → defeat the boss on guarded floors → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
 
-[Bastion Guardian and Brood Queen](tactical-builds.md), [Mirror Twins](mirror-twins.md), [Magnetic Knight](magnetic-knight.md) and [Clock Mage](clock-mage.md) provide separate tactical rooms with a shared health/build system. Bastion uses calibrated controls and core windows; the queen has permanently destroyable nests and interceptable creatures; the twins use two mine-exclusive realms, crossed seals and alternating attacks. The knight uses projected magnetic fields and delayed charges; the mage uses frozen spell deadlines and echo follow-ups. Only End turn resolves enemy attacks. The seeded roster rotates across the selected difficulty's checkpoints. Incompatible journals return to camp under the [save policy](save-policy.md).
+[Bastion Guardian and Brood Queen](tactical-builds.md), [Mirror Twins](mirror-twins.md), [Magnetic Knight](magnetic-knight.md) , [Clock Mage](clock-mage.md) and [Echo Warden](echo-warden.md) provide separate tactical rooms with a shared health/build system. Bastion uses calibrated controls and core windows; the queen has permanently destroyable nests and interceptable creatures; the twins use two mine-exclusive realms, crossed seals and alternating attacks. The knight uses projected magnetic fields and delayed charges; the mage uses frozen spell deadlines and echo follow-ups; Echo Warden combines obscured clues, regional scans and three-phase core localization. Only End turn resolves enemy attacks. The seeded roster rotates across the selected difficulty's checkpoints. Incompatible journals return to camp under the [save policy](save-policy.md).
 
 ### Floor rules
 
@@ -103,11 +103,11 @@ Charges/relics carry between floors and disappear when the run ends. Scanned row
 | Survival charms   | 500   | Add Field dressing and Second wind                 |
 | Prospector seals  | 900   | Add Supply cache and Cache guard                   |
 
-The table above highlights early facilities; the [complete price-sorted catalog](camp-progression.md) contains 24 distinct gameplay purchases and two finite trainings. Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Six purchased [combat equipment licenses](tactical-builds.md) and the milestone Field radio share this budget. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
+The table above highlights early facilities; the [complete price-sorted catalog](camp-progression.md) contains 25 distinct gameplay purchases and two finite trainings. Workshop equipment is reusable but constrained by a **three-point departure budget**: extra probe costs 1, extra scan costs 1, extra shield costs 2. Six purchased [combat equipment licenses](tactical-builds.md), the one-point [Sonar license](echo-warden.md) and the milestone Field radio share this budget. Each item can be selected once. Players cannot carry every upgrade simultaneously. Purchases are camp-only, keeping an active run's available catalog stable.
 
 Prices form a stepped curve: both early professions cost 100 supplies together and can be bought after one rewarding expedition; the workshop is a middle milestone; the 7,500-supply archive is affordable within ten successful Abyss clears even without optional chests. New departures receive [difficulty-scaled settlement rewards](expedition-rewards.md), with roughly 200 supplies on the reference Relaxed route. The camp shows savings, remaining cost and percentage. Existing currency and purchased facilities are preserved. See [the pricing model and its limitations](camp-progression.md).
 
-Permanent progression is finite. Twenty missions and twenty-two achievements add one-time supplies, exclusive licenses and titles; these payments are separate from expedition settlement. The [current milestone budget](milestone-balance.md) keeps their combined currency at 11,340, and [22 title abilities](title-builds.md) add a single frozen departure choice. Surplus supplies remain visible after all unlocks but have no additional spending sink yet. Biomes and branching events remain planned; they are not implemented content. There is no uncapped permanent health upgrade or monetized currency.
+Permanent progression is finite. Twenty-one missions and twenty-four achievements add one-time supplies, exclusive licenses and titles; these payments are separate from expedition settlement. The [milestone budget](milestone-balance.md) assigns 11,340 supplies to the original goals; the Echo hunt and its two challenges add 900. The [24 title abilities](title-builds.md) provide a single frozen departure choice. Surplus supplies remain visible after all unlocks but have no additional spending sink yet. Biomes and branching events remain planned; they are not implemented content. There is no uncapped permanent health upgrade or monetized currency.
 
 ### Persistence and acceptance
 
@@ -147,21 +147,20 @@ A separate twin envelope stores the seed, validated actions, settled state, and 
 
 **Identity:** spend limited information to resolve the most valuable uncertainty. See [complete Sonar rules, controls and acceptance](sonar.md).
 
-- Start with a classic board and three scan charges. After the first safe opening, choose a cell as the center of a 3 × 3 scan region; clip at board edges. Reveal that region's total mines, including flagged mines.
-- Scans do not reveal individual identities or move mines. Keep regions/totals for reference; revisiting an identical scan does not consume another charge.
-- Reveal every safe cell to win. Fewer scans breaks ties between equal move counts; results stay in the Sonar namespace.
-- UI: region preview, explicit keyboard/touch confirmation, understandable overlapping outlines, remaining charges, persistent scan history, and distinct preview/accepted-scan feedback.
-- Initially reuse classic seeded placement. Later difficulty may vary the budget but cannot silently alter a saved game's rules.
-- Acceptance: clipped counts, overlapping consistency, no covered-cell leaks, no repeat charges, no scan before generation, deterministic history restoration, and isolated records.
+- Start with a seeded board and three scans. Most nonzero revealed clues are obscured until clarified by a scan; zero regions remain readable.
+- A scan reports the clipped 3×3 mine total, opens only its center (a mine becomes a locked gold flag), and permanently clarifies all clues in its region, including later excavations.
+- Earn one scan per four accepted safe excavation actions. Repeated centers recall their existing reading without spending a charge. Scans and annotations never recharge the instrument.
+- Reveal every safe cell to win. Moves and scan counts rank separately from Classic records. Preserve observations across reload; keep hidden clues out of both DOM text and accessibility metadata.
+- The released [Echo Warden](echo-warden.md) adapts regional readings into core localization and turn-based shell windows, with distinct owned/loan resource pools.
 
-## Survey — approved, planned
+## Survey — implemented
 
-**Identity:** combine local adjacency with nonogram-like global constraints.
+**Identity:** combine local adjacency with whole-row/column constraints. See [rules, presets, sampling and acceptance](survey.md).
 
 - Show total mines for each row and column alongside ordinary adjacent clues. These are totals, not runs of consecutive mines.
 - Display fixed totals and current player flag counts. Matching a total is bookkeeping, **not proof of correctness**. Never use hidden truth to mark a player's flags correct.
 - Reveal every safe cell to win. Layout stays static with a safe opening; row/column totals appear only after generation.
-- Tune density/size against the added information using sample puzzles, rather than blindly reusing expert density.
+- Three independently sampled presets: 8×8/10 mines, 12×10/24 mines and 18×14/60 mines. Line information materially improves the limited public-deduction baseline without promising universal no-guess boards.
 - UI: aligned sticky row/column headers, keyboard associations between cell and totals, mobile layout retaining all constraints.
 - Acceptance: total sums equal exact mine count; every cell contributes to one row/column; totals survive reload unchanged; wrong flags leak no correctness; responsive headers stay aligned.
 
@@ -182,16 +181,16 @@ Tides is the highest-risk design because its generator preserves a system of con
 ## Delivery order and limits
 
 1. **Delivered:** ruleset routing, separate saves, configurable Expedition/camp progression, Twin boards, localization and regression coverage.
-2. **Next:** the [tracked expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1), followed by the Sonar-derived encounter and Survey with accessible information overlays and independent records.
+2. **Next:** the [tracked expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1), with the Survey-derived Matrix Overseer encounter as the next mode adaptation. Sonar and Echo Warden are delivered.
 3. **Then:** Tides constraint solver/worker, replay compatibility and transition feedback.
 
-Saves are local and disappear when browser storage is cleared. They are not an anti-cheat system. One active run per special ruleset is supported; simultaneous edits to one ruleset in multiple tabs use last-write-wins browser storage. Journals are bounded at 20,000 accepted actions to limit recovery work; Expedition can still extract at its limit and Twin/Sonar can restart. Storage failures are shown while in-memory play continues.
+Saves are local and disappear when browser storage is cleared. They are not an anti-cheat system. One active run per special ruleset is supported; simultaneous edits to one ruleset in multiple tabs use last-write-wins browser storage. Journals are bounded at 20,000 accepted actions to limit recovery work; Expedition can still extract at its limit and Twin/Sonar/Survey can restart. Storage failures are shown while in-memory play continues.
 
 No new compiler performance figures are claimed. Historical TS6/TS7 A/B reports remain tied to their measured commits.
 
 ### Magnetic Knight encounter
 
-The fourth released boss family adds visible push/pull fields, projected landings, grounding and reusable numbered anchors. A known route lets the player lure the knight into an anchor, with physical charge and impact effects, then strike during three turns of core exposure. The seeded roster now contains Bastion Guardian, Brood Queen, Mirror Twins, Magnetic Knight and Clock Mage; checkpoint floors and rewards are unchanged. Read [the full rules, values and acceptance](magnetic-knight.md).
+The fourth released boss family adds visible push/pull fields, projected landings, grounding and reusable numbered anchors. A known route lets the player lure the knight into an anchor, with physical charge and impact effects, then strike during three turns of core exposure. The seeded roster now contains Bastion Guardian, Brood Queen, Mirror Twins, Magnetic Knight, Clock Mage and Echo Warden; checkpoint floors and rewards are unchanged. Read [the full rules, values and acceptance](magnetic-knight.md).
 
 ## Clock Mage
 

@@ -1,0 +1,105 @@
+/* One set of tracks sizes the board and both axes; constraints remain aligned during panning. */
+.survey-viewport {
+  padding: 12px;
+  max-height: min(72dvh, 960px);
+  scroll-padding: 54px;
+}
+.survey-grid {
+  --gap: 3px;
+  --header: 44px;
+  --cell: clamp(
+    24px,
+    calc((100cqi - var(--header) - var(--columns) * var(--gap)) / var(--columns)),
+    clamp(40px, 3vw, 60px)
+  );
+  display: grid;
+  grid-template-columns: var(--header) max-content;
+  grid-template-rows: var(--header) max-content;
+  gap: var(--gap);
+  width: max-content;
+  margin: auto;
+  isolation: isolate;
+}
+.survey-grid .board {
+  --cell: inherit;
+  --gap: inherit;
+  margin: 0;
+}
+.survey-grid .cell {
+  font-size: clamp(12px, calc(var(--cell) * 0.42), 25px);
+  scroll-margin: 54px;
+}
+.survey-grid .cell .icon {
+  width: 60%;
+  height: 60%;
+}
+.survey-column-heads {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), var(--cell));
+  gap: var(--gap);
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+.survey-row-heads {
+  display: grid;
+  grid-auto-rows: var(--cell);
+  gap: var(--gap);
+  position: sticky;
+  left: 0;
+  z-index: 4;
+}
+.survey-corner {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--surface);
+}
+.survey-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1px;
+  border-radius: 4px;
+  background: var(--surface-alt);
+  color: var(--muted);
+  font: 500 clamp(10px, calc(var(--cell) * 0.3), 18px) var(--mono);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.survey-line strong {
+  color: var(--ink);
+}
+.survey-line[data-active='true'] {
+  background: var(--accent-soft);
+  outline: 1px solid var(--accent-line);
+}
+.survey-line[data-over='true'] {
+  color: #a64735;
+  text-decoration: underline wavy;
+}
+.survey-grid .cell.survey-cross {
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+}
+.survey-grid .cell:focus-visible {
+  box-shadow: 0 0 0 1px var(--surface);
+}
+.survey-enlarged .survey-grid {
+  --cell: clamp(40px, 3vw, 60px);
+}
+.survey-private {
+  visibility: hidden;
+}
+@media (max-width: 600px) {
+  .survey-viewport {
+    padding: 6px;
+  }
+  .survey-grid {
+    --gap: 2px;
+    --header: 38px;
+  }
+}

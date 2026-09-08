@@ -3,6 +3,7 @@ import { BrowserStorage } from './platform/browser.js'
 import { Repository } from './storage.js'
 import { GameRouter } from './ui/game-router.js'
 import { VariantRepository } from './persistence/variant-repository.js'
+import { SurveyRepository } from './persistence/survey-repository.js'
 import { SonarRepository } from './persistence/sonar-repository.js'
 
 /** Compose browser adapters, application state, and UI at the only startup boundary. */
@@ -25,7 +26,14 @@ function bootstrap(): GameRouter {
     navigator.languages[0] ?? navigator.language,
   )
   const variants = new VariantRepository(storage)
-  return new GameRouter(root, repository, variants, new SonarRepository(storage), language)
+  return new GameRouter(
+    root,
+    repository,
+    variants,
+    new SonarRepository(storage),
+    new SurveyRepository(storage),
+    language,
+  )
 }
 
 const app = bootstrap()

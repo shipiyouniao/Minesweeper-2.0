@@ -10,6 +10,7 @@
 @import './guidance.css' layer(components);
 @import './progression.css' layer(components);
 @import './sonar.css' layer(components);
+@import './survey.css' layer(components);
 
 /* Resets stay below component styles and opt-in utilities. */
 @layer base {

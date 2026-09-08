@@ -2,6 +2,37 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'survey.mines': '地雷',
+  'survey.title': '測量',
+  'survey.intro': '縦と横から、手がかりをつなぐ。',
+  'survey.opening': 'マスを開くと、各行・列の地雷数が表示されます。',
+  'survey.legend': '旗 / 地雷数',
+  'survey.hint': '外側の地雷数とマスの数字を組み合わせよう。',
+  'survey.bookkeeping': '数が合っても、旗の位置が正しいとは限りません。',
+  'survey.line': '{axis} {number}：旗 {flags} / 地雷 {total} · 未開封 {covered}',
+  'survey.pending-line': '{axis} {number}：旗 {flags} · 地雷数は開始後に表示',
+  'survey.moves': '操作数',
+  'survey.remaining': '残りの安全マス',
+  'survey.zoom': 'マスを拡大',
+  'survey.fit': '幅に合わせる',
+  'survey.win': '測量完了',
+  'survey.loss': '地雷に当たりました',
+  'survey.rank-hint': '難易度別に、操作数の少ないクリアを記録します。',
+  'survey.no-records': '初めての測量クリアがここに記録されます。',
+  'survey.recovered':
+    '測量を復元できなかったため、新しい盤面を用意しました。有効な記録は残っています。',
+  'survey.limit': 'この測量は操作上限に達しました。新しい盤面を始めてください。',
+  'survey.help-local-title': '隣を見る',
+  'survey.help-local': '数字は周囲8マスの地雷数です。安全なマスをすべて開けばクリア。',
+  'survey.help-lines-title': '行と列を見る',
+  'survey.help-lines':
+    '外側はその行・列全体の「旗 / 地雷数」です。連続する地雷の長さではありません。地雷数0なら、その行・列はすべて安全です。',
+  'survey.help-marks-title': '印を残す',
+  'survey.help-marks':
+    '右クリック・長押しで未開封 → 旗 → 安全の予想 → 解除。開いたマスでは旗と予想を使って周囲をまとめて開けます。予想が外れると地雷に当たります。',
+  'survey.help-controls-title': '操作方法',
+  'survey.help-controls':
+    '矢印で移動、Enterで開く、Fで旗、Sで安全の予想、Cでまとめ開き。タッチでは操作ボタンで切替。拡大後に盤面をスクロールしても外側の地雷数は見えます。',
   'echo.shifted': '本体が移動した。古い本体の観測は無効。再スキャンしよう。',
   'echo.phase-break': '殻を破壊した。ターン終了時に本体が移動する。',
   'echo.rhythm': '隙は3ターン。3ターンごとに音波が止むので、移動や攻撃の好機。',
