@@ -90,11 +90,14 @@ export function tutorialLesson(mode: Ruleset, language: Language): TutorialDefin
           side: 'a',
           mode: 'reveal',
         },
-        cell(
-          message(language, 'survey.lesson-gap-title'),
-          message(language, 'survey.lesson-gap'),
-          12,
-        ),
+        {
+          ...cell(
+            message(language, 'survey.lesson-gap-title'),
+            message(language, 'survey.lesson-gap'),
+            12,
+          ),
+          illustration: 'survey-gaps',
+        },
       ],
       ending: message(language, 'survey.lesson-ending'),
     }

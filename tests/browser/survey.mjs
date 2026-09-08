@@ -96,6 +96,14 @@ try {
             ).map(String),
           )
       await geometry(page)
+      assert.deepEqual(
+        await page
+          .locator('.survey-sidebar .survey-example')
+          .evaluateAll((rows) =>
+            rows.map((row) => row.querySelectorAll('.survey-example-safe').length),
+          ),
+        [1, 3],
+      )
       const dock = await page.locator('.action-dock').evaluate((element) => ({
         position: getComputedStyle(element).position,
         bottom: element.getBoundingClientRect().bottom,
@@ -168,6 +176,18 @@ try {
       await page.locator('[data-practice="next"]').click()
       await page.locator('[data-practice="cycle"]').click()
       await page.locator('[data-practice="next"]').click()
+      assert.deepEqual(
+        await page
+          .locator('.lesson-note .survey-example')
+          .evaluateAll((rows) =>
+            rows.map((row) => row.querySelectorAll('.survey-example-safe').length),
+          ),
+        [1, 3],
+      )
+      if (language === 'zh') {
+        await page.locator('.lesson-note .survey-examples').scrollIntoViewIfNeeded()
+        await page.screenshot({ path: `.native/survey-gap-lesson-${width}.png`, fullPage: true })
+      }
       await page.locator('[data-practice-cell="12"]').click()
       await page.locator('[data-practice="next"]').click()
       await page.locator('[data-practice="close"]').last().click()

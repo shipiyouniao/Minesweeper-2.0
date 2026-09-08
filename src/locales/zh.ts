@@ -8,7 +8,7 @@ export const zhMessages: MessageCatalog = {
   'survey.opening': '从能填满的一行，或雷段必经的位置开始。',
   'survey.legend': '连续雷段',
   'survey.hint': '根据边缘线索，翻开安全格。',
-  'survey.bookkeeping': '“2 1”：两颗相连的雷，隔开后再有一颗。插错旗仍可能踩雷。',
+  'survey.bookkeeping': '“2 1”：一段两颗雷，一段一颗雷。两段之间至少隔一个安全格，也可以隔多个。',
   'survey.line-action': '点击快速开这一行／列，也可按 Enter 或空格。',
   'survey.line': '第 {number} {axis}：雷段 {runs} · 已插旗 {flags}',
   'survey.moves': '操作数',
@@ -34,8 +34,10 @@ export const zhMessages: MessageCatalog = {
   'survey.lesson-chord': '点选高亮旗子。它所在行的雷已标齐，两端的安全格会一起打开。',
   'survey.lesson-gap-title': '雷段之间要留空',
   'survey.lesson-reveal-mode': '将底部操作切回翻开。',
-  'survey.lesson-gap': '中间行的“2 2”正好是两颗雷、一个空格、两颗雷。翻开中间的空格。',
-  'survey.lesson-ending': '按顺序读雷段，段间留空，再交叉看行列。翻开所有安全格即可完成。',
+  'survey.lesson-gap':
+    '雷段之间至少隔一个安全格，也可以隔多个。这行只有 5 格，“2 2”只能隔一个。翻开中间格。',
+  'survey.lesson-ending':
+    '按顺序读雷段，段间至少留一个安全格，再交叉看行列。翻开所有安全格即可完成。',
   'echo.shifted': '真身换位了。旧的真身读数已失效，重新扫描。',
   'echo.phase-break': '这一段外壳已击破，回合结束后真身换位。',
   'echo.rhythm': '破绽持续 3 回合。每第 3 回合声波停歇，抓紧走位或攻击。',

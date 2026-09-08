@@ -8,7 +8,8 @@ export const jaMessages: MessageCatalog = {
   'survey.opening': '長い連なりや、ぴったり埋まる列から始めよう。',
   'survey.legend': '連続する地雷の数',
   'survey.hint': '縦横のヒントから安全なマスを開こう。',
-  'survey.bookkeeping': '「2 1」は地雷2個、空白を挟んで1個。旗を間違えると地雷を踏むことも。',
+  'survey.bookkeeping':
+    '「2 1」は地雷2個の連なりと1個の連なり。間には安全なマスが最低1つ必要で、複数空くこともあります。',
   'survey.line-action':
     'クリック／タップでこの行・列をまとめて開く。Enter／スペースでも操作できます。',
   'survey.line': '{axis} {number}：連なり {runs} · 旗 {flags}',
@@ -36,8 +37,9 @@ export const jaMessages: MessageCatalog = {
   'survey.lesson-gap-title': '連なりの間を空ける',
   'survey.lesson-reveal-mode': '操作ボタンを「開く」に戻そう。',
   'survey.lesson-gap':
-    '中央の行は「2 2」。地雷2個、空白1マス、地雷2個でぴったり。中央の空白を開こう。',
-  'survey.lesson-ending': '順番と間隔を読み、縦横で確かめよう。安全なマスをすべて開けば完了。',
+    '連なりの間は安全なマスが最低1つ必要で、複数空くこともあります。この5マスの行は「2 2」なので、間は1マスだけ。中央を開こう。',
+  'survey.lesson-ending':
+    '順番を読み、連なりの間を最低1マス空けて、縦横で確かめよう。安全なマスをすべて開けば完了。',
   'echo.shifted': '本体が移動した。古い本体の観測は無効。再スキャンしよう。',
   'echo.phase-break': '殻を破壊した。ターン終了時に本体が移動する。',
   'echo.rhythm': '隙は3ターン。3ターンごとに音波が止むので、移動や攻撃の好機。',
