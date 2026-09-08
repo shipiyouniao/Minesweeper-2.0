@@ -8,7 +8,6 @@ export interface MessageCatalog {
   readonly 'survey.hint': string
   readonly 'survey.bookkeeping': string
   readonly 'survey.line': string
-  readonly 'survey.pending-line': string
   readonly 'survey.moves': string
   readonly 'survey.remaining': string
   readonly 'survey.zoom': string
@@ -19,14 +18,20 @@ export interface MessageCatalog {
   readonly 'survey.no-records': string
   readonly 'survey.recovered': string
   readonly 'survey.limit': string
-  readonly 'survey.help-local-title': string
-  readonly 'survey.help-local': string
-  readonly 'survey.help-lines-title': string
-  readonly 'survey.help-lines': string
-  readonly 'survey.help-marks-title': string
-  readonly 'survey.help-marks': string
-  readonly 'survey.help-controls-title': string
-  readonly 'survey.help-controls': string
+  readonly 'survey.chord': string
+  readonly 'survey.lesson-title': string
+  readonly 'survey.lesson-overlap-title': string
+  readonly 'survey.lesson-overlap': string
+  readonly 'survey.lesson-column-title': string
+  readonly 'survey.lesson-column': string
+  readonly 'survey.lesson-column-right': string
+  readonly 'survey.lesson-chord-title': string
+  readonly 'survey.lesson-chord-mode': string
+  readonly 'survey.lesson-chord': string
+  readonly 'survey.lesson-gap-title': string
+  readonly 'survey.lesson-reveal-mode': string
+  readonly 'survey.lesson-gap': string
+  readonly 'survey.lesson-ending': string
   readonly 'echo.shifted': string
   readonly 'echo.phase-break': string
   readonly 'echo.rhythm': string

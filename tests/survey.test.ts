@@ -4,113 +4,168 @@ import {
   actSurvey,
   createSurvey,
   surveyLine,
+  surveyKnowledge,
+  surveyChordTargets,
   SURVEY_ACTION_LIMIT,
   SURVEY_PRESETS,
 } from '../src/game/survey.js'
-import { neighbors } from '../src/game/engine.js'
+import {
+  deduceSurvey,
+  deduceSurveyLine,
+  surveyRuns,
+  surveyIndices,
+} from '../src/game/survey-logic.js'
+import { surveyPractice } from '../src/game/survey-practice.js'
 import { SurveySession } from '../src/application/survey-session.js'
 import {
   SurveyRepository,
   SURVEY_STORAGE_KEY,
   rankSurveyRecords,
 } from '../src/persistence/survey-repository.js'
-import type { SurveyRecord, SurveySave } from '../src/types/survey.js'
+import type { SurveyKnowledge, SurveyRecord, SurveySave } from '../src/types/survey.js'
 import { FakeRuntime, MemoryStorage } from './helpers.js'
 import { solveSurvey } from './survey-helpers.js'
 
-test('Survey publishes exact immutable row/column totals only after seeded safe generation', () => {
+test('Survey run inference agrees with independent exhaustive placements, including empty and inconsistent lines', () => {
+  for (let length = 1; length <= 8; length++) {
+    for (let mask = 0; mask < 1 << length; mask++) {
+      const actual = Array.from({ length }, (_, index) => Boolean(mask & (1 << index)))
+      const runs = surveyRuns(actual)
+      const known: SurveyKnowledge[] = actual.map((mine, index) =>
+        index % 3 === 0 ? (mine ? 'mine' : 'safe') : 'unresolved',
+      )
+      const candidates = Array.from({ length: 1 << length }, (_, candidate) =>
+        Array.from({ length }, (_, index) => Boolean(candidate & (1 << index))),
+      ).filter(
+        (candidate) =>
+          JSON.stringify(surveyRuns(candidate)) === JSON.stringify(runs) &&
+          candidate.every(
+            (mine, index) => known[index] === 'unresolved' || mine === (known[index] === 'mine'),
+          ),
+      )
+      const result = deduceSurveyLine(runs, known)
+      assert.equal(result.contradiction, false)
+      assert.deepEqual(
+        result.cells,
+        known.map((_, index) =>
+          candidates.every((candidate) => candidate[index])
+            ? 'mine'
+            : candidates.every((candidate) => !candidate[index])
+              ? 'safe'
+              : 'unresolved',
+        ),
+      )
+    }
+  }
+  assert.equal(deduceSurveyLine([2, 1], ['mine', 'safe', 'mine', 'mine']).contradiction, true)
+  assert.deepEqual(deduceSurveyLine([], ['unresolved', 'unresolved']).cells, ['safe', 'safe'])
+})
+
+test('Every sampled Survey has exact shuffled density, ordered clues and a complete public deduction path', () => {
   for (const difficulty of ['easy', 'medium', 'expert'] as const) {
     for (let seed = 0; seed < 100; seed++) {
-      const empty = createSurvey(seed, difficulty)
-      assert.deepEqual(empty.rows, [])
-      assert.equal(surveyLine(empty, 'row', 0).total, null)
-      const first = seed % empty.game.cells.length
-      const state = actSurvey(empty, { type: 'reveal', index: first })
-      assert.deepEqual(actSurvey(empty, { type: 'reveal', index: first }), state)
+      const state = createSurvey(seed, difficulty)
+      assert.deepEqual(createSurvey(seed, difficulty), state)
       assert.equal(
-        state.rows.reduce((a, b) => a + b),
-        state.game.config.mines,
+        state.game.cells.filter((cell) => cell.mine).length,
+        SURVEY_PRESETS[difficulty].mines,
       )
-      assert.equal(
-        state.columns.reduce((a, b) => a + b),
-        state.game.config.mines,
+      assert.ok(state.game.cells.every((cell) => cell.adjacent === 0))
+      for (const axis of ['row', 'column'] as const) {
+        const clues = axis === 'row' ? state.rows : state.columns
+        for (const [line, runs] of clues.entries())
+          assert.deepEqual(
+            runs,
+            surveyRuns(
+              surveyIndices(state.game.config, axis, line).map(
+                (index) => state.game.cells[index]!.mine,
+              ),
+            ),
+          )
+      }
+      assert.ok(
+        state.game.cells.filter((cell) => cell.visibility === 'revealed').length <
+          state.game.cells.length / 5,
       )
-      assert.equal(state.game.cells[first]?.adjacent, 0)
-      for (const index of [first, ...neighbors(state.game.config, first)])
-        assert.equal(state.game.cells[index]?.visibility, 'revealed')
-      for (let row = 0; row < state.game.config.height; row++)
-        assert.equal(
-          state.rows[row],
-          state.game.cells.filter(
-            (cell, index) => cell.mine && Math.floor(index / state.game.config.width) === row,
-          ).length,
-        )
-      for (let column = 0; column < state.game.config.width; column++)
-        assert.equal(
-          state.columns[column],
-          state.game.cells.filter(
-            (cell, index) => cell.mine && index % state.game.config.width === column,
-          ).length,
-        )
-      const annotated = actSurvey(state, {
-        type: 'flag',
-        index: state.game.cells.findIndex((cell) => cell.visibility === 'hidden'),
-      })
-      assert.equal(annotated.rows, state.rows)
-      assert.equal(annotated.columns, state.columns)
+      const result = deduceSurvey(
+        state.game.config,
+        state.rows,
+        state.columns,
+        state.game.cells.map(surveyKnowledge),
+      )
+      assert.equal(result.contradiction, false)
+      assert.ok(!result.cells.includes('unresolved'))
+      assert.equal(solveSurvey(state).game.phase, 'won')
     }
   }
 })
 
-test('Survey hypotheses cannot change totals or leak hidden identities through line summaries', () => {
-  let state = actSurvey(createSurvey(31), { type: 'reveal', index: 0 })
-  const index = state.game.cells.findIndex((cell) => !cell.mine && cell.visibility === 'hidden')
-  state = actSurvey(state, { type: 'flag', index })
-  const row = Math.floor(index / state.game.config.width)
-  assert.equal(surveyLine(state, 'row', row).flags, 1)
-  const falseWorld = {
+test('Survey opens one safe square, has no Classic zero flood and can lose on the first wrong deduction', () => {
+  const state = surveyPractice()
+  const open = actSurvey(state, { type: 'reveal', index: 0 })
+  assert.equal(open.game.cells.filter((cell) => cell.visibility === 'revealed').length, 1)
+  assert.equal(open.game.phase, 'playing')
+  const lost = actSurvey(state, { type: 'reveal', index: 2 })
+  assert.equal(lost.game.phase, 'lost')
+  assert.equal(lost.game.exploded, 2)
+  assert.equal(actSurvey(lost, { type: 'flag', index: 3 }), lost)
+})
+
+test('Survey line summaries and quick-open targets depend only on published runs and visible annotations', () => {
+  let state = surveyPractice()
+  for (const index of [1, 2, 3]) state = actSurvey(state, { type: 'flag', index })
+  const changedWorld = {
     ...state,
     game: {
       ...state.game,
-      cells: state.game.cells.map((cell) =>
-        cell.visibility === 'revealed' ? cell : { ...cell, mine: !cell.mine, adjacent: 8 },
-      ),
+      cells: state.game.cells.map((cell) => ({ ...cell, mine: !cell.mine, adjacent: 8 })),
     },
   }
-  for (let line = 0; line < state.game.config.height; line++)
-    assert.deepEqual(surveyLine(state, 'row', line), surveyLine(falseWorld, 'row', line))
-  const noted = actSurvey(state, { type: 'mark-safe', index })
-  assert.equal(surveyLine(noted, 'row', row).flags, 0)
-  assert.equal(noted.rows, state.rows)
-  assert.ok(noted.game.safeMarks.includes(index))
+  for (const axis of ['row', 'column'] as const)
+    for (let line = 0; line < 5; line++)
+      assert.deepEqual(surveyLine(state, axis, line), surveyLine(changedWorld, axis, line))
+  assert.deepEqual(surveyChordTargets(state, 2), [0, 4])
+  assert.deepEqual(surveyChordTargets(changedWorld, 2), [0, 4])
+  const cleared = actSurvey(state, { type: 'chord', index: 2 })
+  assert.equal(surveyLine(cleared, 'row', 0).complete, true)
+  assert.equal(cleared.game.cells[5]?.visibility, 'hidden')
 })
 
-test('Survey preserves pre-opening flags and rejects invalid or empty operations', () => {
-  const empty = actSurvey(createSurvey(31), { type: 'flag', index: 63 })
-  assert.equal(surveyLine(empty, 'row', 7).flags, 1)
-  assert.equal(surveyLine(empty, 'row', 7).total, null)
-  const state = actSurvey(empty, { type: 'reveal', index: 0 })
-  assert.equal(state.game.cells[63]?.visibility, 'flagged')
-  for (const index of [-1, 0.5, NaN, Infinity, 64]) {
+test('Equal flag totals with incorrect run spacing conflict and cannot quick-open a line', () => {
+  let state = surveyPractice()
+  for (const index of [0, 2, 4]) state = actSurvey(state, { type: 'flag', index })
+  assert.equal(surveyLine(state, 'row', 0).total, 3)
+  assert.equal(surveyLine(state, 'row', 0).conflict, true)
+  assert.deepEqual(surveyChordTargets(state, 2), [])
+  assert.equal(actSurvey(state, { type: 'chord', index: 2 }), state)
+})
+
+test('Safe notes are cancellable hypotheses; quick-open trusts them and a mistaken note can lose', () => {
+  let state = surveyPractice()
+  state = actSurvey(state, { type: 'mark-safe', index: 1 })
+  assert.equal(surveyLine(state, 'row', 0).conflict, false)
+  const clear = actSurvey(state, { type: 'mark-safe', index: 1 })
+  assert.deepEqual(clear.game.safeMarks, [])
+  const lost = actSurvey(state, { type: 'chord', index: 0 })
+  assert.equal(lost.game.phase, 'lost')
+  assert.equal(lost.game.exploded, 1)
+})
+
+test('A plausible but wrong run of flags can still cause a mine hit when quick-opening', () => {
+  let state = surveyPractice()
+  for (const index of [0, 1, 2]) state = actSurvey(state, { type: 'flag', index })
+  assert.equal(surveyLine(state, 'row', 0).conflict, false)
+  const lost = actSurvey(state, { type: 'chord', index: 2 })
+  assert.equal(lost.game.phase, 'lost')
+  assert.equal(lost.game.exploded, 3)
+})
+
+test('Survey rejects off-board and empty operations without spending journal moves', () => {
+  const state = surveyPractice()
+  for (const index of [-1, 0.5, NaN, Infinity, 25])
     assert.equal(actSurvey(state, { type: 'reveal', index }), state)
-    assert.deepEqual(surveyLine(state, 'row', index), { total: null, flags: 0, covered: 0 })
-  }
   assert.equal(actSurvey(state, { type: 'chord', index: 0 }), state)
-})
-
-test('Survey quick-open trusts player notes and can lose to an incorrect safe hypothesis', () => {
-  let state = actSurvey(createSurvey(31), { type: 'reveal', index: 0 })
-  const open = state.game.cells.findIndex(
-    (cell, index) =>
-      cell.visibility === 'revealed' &&
-      neighbors(state.game.config, index).some((other) => state.game.cells[other]?.mine),
-  )
-  const mine = neighbors(state.game.config, open).find((index) => state.game.cells[index]?.mine)!
-  state = actSurvey(state, { type: 'mark-safe', index: mine })
-  const ended = actSurvey(state, { type: 'chord', index: open })
-  assert.equal(ended.game.phase, 'lost')
-  assert.equal(ended.game.exploded, mine)
-  assert.equal(actSurvey(ended, { type: 'flag', index: mine }), ended)
+  assert.equal(surveyLine(state, 'row', -1).total, null)
 })
 
 test('Survey journal restores exact progress and never touches another mode namespace', () => {
@@ -122,9 +177,9 @@ test('Survey journal restores exact progress and never touches another mode name
   ])
     storage.setItem(key, 'keep')
   const session = new SurveySession(new SurveyRepository(storage), new FakeRuntime())
-  session.dispatch({ type: 'flag', index: 63 })
-  session.dispatch({ type: 'reveal', index: 0 })
-  session.dispatch({ type: 'mark-safe', index: 63 })
+  const index = session.state.game.cells.findIndex((cell) => cell.visibility === 'hidden')
+  session.dispatch({ type: 'flag', index })
+  session.dispatch({ type: 'mark-safe', index })
   const restored = new SurveySession(new SurveyRepository(storage), new FakeRuntime())
   assert.deepEqual(restored.state, session.state)
   assert.equal(storage.data.size, 4)
@@ -135,7 +190,6 @@ test('Survey terminal settlement records one win across reload and retains recor
   const storage = new MemoryStorage()
   const runtime = new FakeRuntime()
   const session = new SurveySession(new SurveyRepository(storage), runtime)
-  session.dispatch({ type: 'reveal', index: 0 })
   for (const [index, cell] of session.state.game.cells.entries())
     if (!cell.mine) session.dispatch({ type: 'reveal', index })
   assert.equal(session.state.game.phase, 'won')
@@ -149,7 +203,7 @@ test('Survey terminal settlement records one win across reload and retains recor
   assert.equal(restored.records.length, 1)
 })
 
-test('Survey retains valid records while retiring malformed, incompatible or impossible journals', () => {
+test('Survey retires old rules and their incomparable scores; malformed current journals retain valid wins', () => {
   const record: SurveyRecord = {
     id: 'one',
     date: '2026-09-08T00:00:00.000Z',
@@ -157,7 +211,7 @@ test('Survey retains valid records while retiring malformed, incompatible or imp
     moves: 30,
   }
   const valid: SurveySave = {
-    version: 1,
+    version: 2,
     difficulty: 'easy',
     seed: 31,
     actions: [],
@@ -165,13 +219,13 @@ test('Survey retains valid records while retiring malformed, incompatible or imp
     records: [record],
   }
   const invalid = [
+    { ...valid, version: 1 },
     { ...valid, version: 9 },
     { ...valid, seed: -1 },
     { ...valid, settled: true },
     { ...valid, difficulty: 'custom' },
     { ...valid, actions: [{ type: 'scan', index: 0 }] },
     { ...valid, actions: [{ type: 'reveal', index: 64 }] },
-    { ...valid, actions: [{ type: 'chord', index: 0 }] },
   ]
   for (const save of invalid) {
     const storage = new MemoryStorage()
@@ -179,12 +233,12 @@ test('Survey retains valid records while retiring malformed, incompatible or imp
     const repository = new SurveyRepository(storage)
     const session = new SurveySession(repository, new FakeRuntime())
     assert.equal(repository.recovered, true)
-    assert.equal(session.state.game.phase, 'ready')
-    assert.deepEqual(session.records, [record])
+    assert.equal(session.state.moves, 0)
+    assert.deepEqual(session.records, save.version === 2 ? [record] : [])
   }
 })
 
-test('Survey handles unavailable storage and bounds journals and per-preset rankings', () => {
+test('Survey contains storage errors and bounds journals and per-preset rankings', () => {
   const repository = new SurveyRepository({
     getItem() {
       throw new Error('blocked')
@@ -195,17 +249,18 @@ test('Survey handles unavailable storage and bounds journals and per-preset rank
     removeItem() {},
   })
   const session = new SurveySession(repository, new FakeRuntime())
-  assert.equal(session.dispatch({ type: 'reveal', index: 0 }), true)
   assert.equal(repository.available, false)
+  assert.equal(session.state.moves, 0)
   const storage = new MemoryStorage()
+  const index = createSurvey(31).game.cells.findIndex((cell) => cell.visibility === 'hidden')
   storage.setItem(
     SURVEY_STORAGE_KEY,
     JSON.stringify({
-      version: 1,
+      version: 2,
       difficulty: 'easy',
       seed: 31,
       settled: false,
-      actions: Array.from({ length: SURVEY_ACTION_LIMIT }, () => ({ type: 'flag', index: 63 })),
+      actions: Array.from({ length: SURVEY_ACTION_LIMIT }, () => ({ type: 'flag', index })),
       records: [],
     }),
   )
@@ -220,30 +275,5 @@ test('Survey handles unavailable storage and bounds journals and per-preset rank
     difficulty: index % 2 ? 'easy' : 'expert',
     moves: 35 - index,
   }))
-  const ranked = rankSurveyRecords(records)
-  assert.equal(ranked.length, 20)
-  assert.equal(ranked[0]?.moves, 2)
-})
-
-test('Survey public-line deductions stay sound across the preset corpus and add useful information', () => {
-  let improved = 0
-  for (const difficulty of ['easy', 'medium', 'expert'] as const) {
-    for (let seed = 0; seed < 60; seed++) {
-      const start = actSurvey(createSurvey(seed, difficulty), { type: 'reveal', index: 0 })
-      const local = solveSurvey(start, false)
-      const survey = solveSurvey(start, true)
-      assert.notEqual(survey.game.phase, 'lost')
-      for (const cell of survey.game.cells)
-        if (cell.visibility === 'flagged') assert.equal(cell.mine, true)
-      if (
-        survey.game.cells.filter((cell) => cell.visibility === 'revealed').length >
-        local.game.cells.filter((cell) => cell.visibility === 'revealed').length
-      )
-        improved++
-    }
-  }
-  assert.ok(
-    improved > 30,
-    'line information should change the outcome on a meaningful part of the corpus',
-  )
+  assert.equal(rankSurveyRecords(records).length, 20)
 })

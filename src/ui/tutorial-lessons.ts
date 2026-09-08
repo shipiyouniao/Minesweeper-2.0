@@ -40,6 +40,64 @@ export function tutorialLesson(mode: Ruleset, language: Language): TutorialDefin
     'a',
     'flag',
   )
+  if (mode === 'survey')
+    return {
+      mode,
+      title: message(language, 'survey.lesson-title'),
+      steps: [
+        flagMode,
+        cell(
+          message(language, 'survey.lesson-overlap-title'),
+          message(language, 'survey.lesson-overlap'),
+          2,
+          'a',
+          'flag',
+        ),
+        cell(
+          message(language, 'survey.lesson-column-title'),
+          message(language, 'survey.lesson-column'),
+          1,
+          'a',
+          'flag',
+        ),
+        cell(
+          message(language, 'survey.lesson-column-title'),
+          message(language, 'survey.lesson-column-right'),
+          3,
+          'a',
+          'flag',
+        ),
+        {
+          title: message(language, 'survey.lesson-chord-title'),
+          text: message(language, 'survey.lesson-chord-mode'),
+          action: 'mode',
+          index: -1,
+          side: 'a',
+          mode: 'chord',
+        },
+        cell(
+          message(language, 'survey.lesson-chord-title'),
+          message(language, 'survey.lesson-chord'),
+          2,
+          'a',
+          'chord',
+        ),
+        {
+          title: message(language, 'survey.lesson-gap-title'),
+          text: message(language, 'survey.lesson-reveal-mode'),
+          action: 'mode',
+          index: -1,
+          side: 'a',
+          mode: 'reveal',
+        },
+        cell(
+          message(language, 'survey.lesson-gap-title'),
+          message(language, 'survey.lesson-gap'),
+          12,
+        ),
+      ],
+      ending: message(language, 'survey.lesson-ending'),
+    }
   if (mode === 'sonar')
     return {
       mode,

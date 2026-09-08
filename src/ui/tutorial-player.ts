@@ -4,8 +4,10 @@ import { approachPath } from '../game/dungeon-path.js'
 import { act, neighbors } from '../game/engine.js'
 import { actExpedition, createExpedition } from '../game/expedition.js'
 import { actSonar, sonarCharges, sonarObscured } from '../game/sonar.js'
+import { actSurvey, surveyLine } from '../game/survey.js'
+import { surveyPractice } from '../game/survey-practice.js'
 import { placedBoard } from '../game/variant-board.js'
-import { message } from '../i18n.js'
+import { message, translations } from '../i18n.js'
 import type { Sonar } from '../types/sonar.js'
 import { boardControlsTemplate, nextBoardMode } from './board-controls.js'
 import { tutorialLesson } from './tutorial-lessons.js'
@@ -26,12 +28,19 @@ export function startTutorial(dialog: HTMLDialogElement, mode: Ruleset, language
   players.set(dialog, player)
 }
 
+/** Release practice listeners and held gestures before the owning application removes its dialog. */
+export function stopTutorial(dialog: HTMLDialogElement): void {
+  players.get(dialog)?.dispose()
+  players.delete(dialog)
+}
+
 /** A lesson advances only after the requested real rule transition succeeds. */
 class TutorialPlayer {
   private readonly events = new AbortController()
   private readonly lesson: TutorialDefinition
   private a: Game
   private sonar: Sonar
+  private survey = surveyPractice()
   private b: Game
   private run: Expedition
   private step = 0
@@ -63,6 +72,7 @@ class TutorialPlayer {
     this.lesson = tutorialLesson(ruleset, language)
     const board = placedBoard({ width: 5, height: 5, mines: 3 }, new Set([4, 16, 22]), 7, 0)
     this.a = { ...board, cells: board.cells.map((cell) => ({ ...cell, visibility: 'hidden' })) }
+    if (ruleset === 'survey') this.a = this.survey.game
     this.sonar = { game: this.a, difficulty: 'easy', readings: [], moves: 0, excavations: 0 }
     this.b = placedBoard(board.config, new Set([6, 18, 24]), 8, 0)
     const base = createExpedition({
@@ -125,13 +135,11 @@ class TutorialPlayer {
     if (this.originalLabel) this.dialog.setAttribute('aria-labelledby', this.originalLabel)
   }
 
-  /** Choose lesson text using the language captured when practice was opened. */
-
   /** Render practice cells using public clues, the lesson target and expedition landmarks. */
   private board(game: Game, side: 'a' | 'b'): string {
     const step = this.lesson.steps[this.step]
     const ring = step?.action === 'inspect' ? neighbors(game.config, step.index) : []
-    return `<section class="practice-board-wrap"><h3>${this.ruleset === 'twin' ? side.toUpperCase() : message(this.language, 'tutorial-player.practice-field')}</h3><div class="practice-board" role="grid" aria-label="${side.toUpperCase()}" aria-rowcount="5" aria-colcount="5">${game.cells
+    const grid = `<div class="practice-board" role="grid" aria-label="${side.toUpperCase()}" aria-rowcount="5" aria-colcount="5">${game.cells
       .map((cell, index) => {
         const target =
           step?.side === side &&
@@ -141,7 +149,7 @@ class TutorialPlayer {
         const known = cell.visibility === 'revealed'
         const flag = cell.visibility === 'flagged'
         const player = this.ruleset === 'expedition' && this.run.player === index
-        const label = `${message(this.language, 'tutorial-player.row')} ${Math.floor(index / 5) + 1}, ${message(this.language, 'tutorial-player.column')} ${(index % 5) + 1}, ${flag ? message(this.language, 'tutorial-player.flag') : known ? (masked ? '≈' : cell.adjacent) : message(this.language, 'tutorial-player.covered')}`
+        const label = `${message(this.language, 'tutorial-player.row')} ${Math.floor(index / 5) + 1}, ${message(this.language, 'tutorial-player.column')} ${(index % 5) + 1}, ${flag ? message(this.language, 'tutorial-player.flag') : known ? (this.ruleset === 'survey' ? translations[this.language].empty : masked ? '≈' : cell.adjacent) : message(this.language, 'tutorial-player.covered')}`
         const entity =
           this.ruleset === 'expedition'
             ? player
@@ -152,9 +160,29 @@ class TutorialPlayer {
                   ? spriteImage('treasure')
                   : ''
             : ''
-        return `<button class="practice-cell ${known ? 'open' : ''} ${flag ? 'flagged' : ''} ${target ? 'practice-target' : ''} ${ring.includes(index) ? 'practice-neighbor' : ''}" data-practice-cell="${index}" data-practice-side="${side}" aria-label="${label}${target ? ', ' + message(this.language, 'tutorial-player.try-here') : ''}" tabindex="${target && step?.index === index ? '0' : '-1'}">${entity || (flag ? '⚑' : known && cell.adjacent ? (masked ? '≈' : cell.adjacent) : '')}${this.ruleset === 'expedition' && this.run.surveyedCells.includes(index) && !known && !flag ? '<span class="practice-safe">✓</span>' : ''}</button>`
+        return `<button class="practice-cell ${known ? 'open' : ''} ${flag ? 'flagged' : ''} ${target ? 'practice-target' : ''} ${ring.includes(index) ? 'practice-neighbor' : ''}" data-practice-cell="${index}" data-practice-side="${side}" ${this.ruleset === 'survey' ? `aria-describedby="practice-survey-row-${Math.floor(index / 5)} practice-survey-column-${index % 5}"` : ''} aria-label="${label}${target ? ', ' + message(this.language, 'tutorial-player.try-here') : ''}" tabindex="${target && step?.index === index ? '0' : '-1'}">${entity || (flag ? '⚑' : known && cell.adjacent ? (masked ? '≈' : cell.adjacent) : '')}${this.ruleset === 'expedition' && this.run.surveyedCells.includes(index) && !known && !flag ? '<span class="practice-safe">✓</span>' : ''}</button>`
       })
-      .join('')}</div></section>`
+      .join('')}</div>`
+    const field =
+      this.ruleset === 'survey'
+        ? `<div class="practice-survey"><span></span><div class="practice-survey-columns">${this.surveyHeaders('column')}</div><div class="practice-survey-rows">${this.surveyHeaders('row')}</div>${grid}</div>`
+        : grid
+    return `<section class="practice-board-wrap"><h3>${this.ruleset === 'twin' ? side.toUpperCase() : message(this.language, 'tutorial-player.practice-field')}</h3>${field}</section>`
+  }
+
+  /** Give practice cells the same accessible ordered-run descriptions as the real puzzle. */
+  private surveyHeaders(axis: 'row' | 'column'): string {
+    return (axis === 'row' ? this.survey.rows : this.survey.columns)
+      .map((runs, index) => {
+        const label = message(this.language, 'survey.line', {
+          axis: translations[this.language][axis],
+          number: index + 1,
+          runs: runs.join(', ') || '0',
+          flags: surveyLine(this.survey, axis, index).flags,
+        })
+        return `<span id="practice-survey-${axis}-${index}" aria-label="${label}">${runs.join(axis === 'row' ? ' ' : '<br>') || '0'}</span>`
+      })
+      .join('')
   }
 
   /** Refresh lesson instructions, controls and progress from the current practice state. */
@@ -162,6 +190,10 @@ class TutorialPlayer {
     const step = this.lesson.steps[this.step]
     const done = !step
     this.dialog.innerHTML = `<header class="guidance-header ${guidanceStyles['guidance-header']}"><div><span class="guidance-eyebrow ${guidanceStyles['guidance-eyebrow']}">FIELD NOTES / ${message(this.language, 'tutorial-player.learn-by-doing')}</span><h2 id="tutorial-title">${this.lesson.title}</h2></div><button class="guidance-close ${guidanceStyles['guidance-close']}" data-practice="close" aria-label="${message(this.language, 'tutorial-player.exit-practice')}">×</button></header><div class="lesson-progress ${guidanceStyles['lesson-progress']}" aria-label="${this.step + 1} / ${this.lesson.steps.length}">${this.lesson.steps.map((_, i) => `<span class="${i < this.step ? 'done' : i === this.step ? 'current' : ''}"></span>`).join('')}</div><div class="guidance-layout ${guidanceStyles['guidance-layout']}"><article class="lesson-note ${guidanceStyles['lesson-note']}"><span class="lesson-number ${guidanceStyles['lesson-number']}">${done ? '✓' : String(this.step + 1).padStart(2, '0')}</span><h3>${step?.title ?? message(this.language, 'tutorial-player.ready-for-the-field')}</h3><p>${step?.text ?? this.lesson.ending}</p><p class="lesson-feedback ${guidanceStyles['lesson-feedback']}" role="status">${this.message || (this.completed ? message(this.language, 'tutorial-player.good-continue-when-you-are-ready') : '')}</p>${this.ruleset === 'expedition' ? `<div class="practice-vitals ${guidanceStyles['practice-vitals']}">♥ ${this.run.health}/${this.run.maxHealth} · ◇ ${this.run.shields} · ${message(this.language, 'tutorial-player.chests')} ${this.run.collected.length}/1</div>` : ''}</article><div class="lesson-workspace ${guidanceStyles['lesson-workspace']} ${this.ruleset === 'twin' ? 'practice-twins' : ''}">${this.board(this.ruleset === 'expedition' ? this.run.game : this.a, 'a')}${this.ruleset === 'twin' ? this.board(this.b, 'b') : ''}<div class="practice-dock ${guidanceStyles['practice-dock']}">${this.ruleset === 'sonar' ? `<button class="practice-tool" data-practice="scan">${spriteImage('scanner')}<span>${message(this.language, 'tutorial-player.sonar')} · ${sonarCharges(this.sonar)}</span></button>` : ''}${this.ruleset === 'expedition' ? `<button class="practice-tool ${this.tool === 'probe' ? 'selected' : ''}" data-practice="probe">${spriteImage('probe')}<span>${message(this.language, 'tutorial-player.probe')} · ${this.run.probes}</span></button><button class="practice-tool ${this.tool === 'scan' ? 'selected' : ''}" data-practice="scan">${spriteImage('scanner')}<span>${message(this.language, 'tutorial-player.scan')} · ${this.run.scans}</span></button><button class="practice-tool" data-practice="skill" ${this.run.skillUsed ? 'disabled' : ''}>${spriteImage('skill-explorer')}<span>${message(this.language, 'tutorial-player.light')}</span></button>` : ''}${boardControlsTemplate(this.language, this.mode, 'data-action').replace('data-action="cycle-mode"', 'data-practice="cycle"')}</div></div></div><footer class="guidance-footer ${guidanceStyles['guidance-footer']}"><button class="text-button ${sharedStyles['text-button']}" data-practice="restart">${message(this.language, 'tutorial-player.start-again')}</button><span>${message(this.language, 'tutorial-player.click-tap-arrows-enter')}</span><button class="primary-button ${sharedStyles['primary-button']}" data-practice="${done ? 'close' : 'next'}" ${!done && !this.completed ? 'disabled' : ''}>${done ? message(this.language, 'tutorial-player.back-to-game') : message(this.language, 'tutorial-player.continue')} →</button></footer>`
+    if (this.ruleset === 'survey' && this.mode === 'chord')
+      this.dialog
+        .querySelector('.mode-cycle')
+        ?.setAttribute('title', message(this.language, 'survey.chord'))
   }
 
   /** Focus the next required action without scrolling the page underneath the lesson. */
@@ -242,9 +274,11 @@ class TutorialPlayer {
       }
       const before = side === 'a' ? this.a : this.b
       const next =
-        this.ruleset === 'sonar'
-          ? (this.sonar = actSonar(this.sonar, { type, index })).game
-          : act(before, { type, index })
+        this.ruleset === 'survey'
+          ? (this.survey = actSurvey(this.survey, { type, index })).game
+          : this.ruleset === 'sonar'
+            ? (this.sonar = actSonar(this.sonar, { type, index })).game
+            : act(before, { type, index })
       if (side === 'a') this.a = next
       else this.b = next
       this.completed = next !== before

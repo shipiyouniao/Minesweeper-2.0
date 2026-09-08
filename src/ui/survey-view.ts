@@ -9,6 +9,7 @@ import type { BoardInputMode, NavigationKey, NavigationResult } from '../types/u
 import { boardControlHint, boardControlsTemplate } from './board-controls.js'
 import { BoardView } from './board-view.js'
 import { LanguageMenu } from './language-menu.js'
+import { startTutorial, stopTutorial } from './tutorial-player.js'
 import { surveyTemplate } from './survey-templates.js'
 
 /** Keep cells stable while public line counts, focus and modal state change around them. */
@@ -20,6 +21,7 @@ export class SurveyView {
   private readonly dialog: HTMLDialogElement
   private readonly listeners = new AbortController()
   private state: Survey
+  private clueState: Survey | null = null
   private target: number | null = null
   private paused = false
   private enlarged = false
@@ -46,6 +48,15 @@ export class SurveyView {
     this.menu = new LanguageMenu(this.element('.language-picker'), onLanguage, feedback)
     this.dialog = this.element<HTMLDialogElement>('.survey-dialog')
     this.buildHeaders()
+    const grid = this.element('.survey-grid')
+    grid.style.setProperty(
+      '--row-runs',
+      String(Math.max(...state.rows.map((runs) => runs.length), 1)),
+    )
+    grid.style.setProperty(
+      '--column-runs',
+      String(Math.max(...state.columns.map((runs) => runs.length), 1)),
+    )
 
     this.dialog.addEventListener(
       'close',
@@ -98,12 +109,16 @@ export class SurveyView {
       ? ''
       : mode === 'reveal'
         ? message(this.language, 'survey.hint')
-        : boardControlHint(this.language, mode)
+        : mode === 'chord'
+          ? message(this.language, 'survey.chord')
+          : boardControlHint(this.language, mode)
+    if (mode === 'chord')
+      this.element('.mode-cycle').setAttribute('title', message(this.language, 'survey.chord'))
     this.element('.survey-counters').innerHTML =
       `<div><span class="tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted">${message(this.language, 'survey.moves')}</span><strong class="tw:block tw:text-[clamp(24px,1.6vw,32px)] tw:mt-1">${state.moves.toLocaleString(this.language)}</strong></div><div><span class="tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted">${message(this.language, 'survey.remaining')}</span><strong class="tw:block tw:text-[clamp(24px,1.6vw,32px)] tw:mt-1">${stats(state.game).remaining}</strong></div>`
     this.element('.survey-status').textContent = limited
       ? message(this.language, 'survey.limit')
-      : state.game.phase === 'ready'
+      : state.moves === 0
         ? message(this.language, 'survey.opening')
         : ''
     const audio = this.element('[data-control="sound"]')
@@ -164,6 +179,13 @@ export class SurveyView {
     this.dialog.querySelector<HTMLElement>('#survey-dialog-title')?.focus()
   }
 
+  /** Run the shared interactive lesson with isolated Survey rules and its own practice board. */
+  showTutorial(): void {
+    this.menu.close()
+    this.returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    startTutorial(this.dialog, 'survey', this.language)
+  }
+
   /** Native close restores focus through the single close handler. */
   closeDialog(): void {
     this.dialog.close()
@@ -173,6 +195,7 @@ export class SurveyView {
   dispose(): void {
     this.listeners.abort()
     this.menu.dispose()
+    stopTutorial(this.dialog)
     this.root.replaceChildren()
   }
 
@@ -195,7 +218,7 @@ export class SurveyView {
     }
   }
 
-  /** Matching counts keep a neutral style; only public over-flagging receives an explicit warning. */
+  /** Refresh public constraints only on a move; hover changes highlights without solving again. */
   private renderHeaders(): void {
     const t = translations[this.language]
     const target = this.paused ? null : this.target
@@ -205,27 +228,23 @@ export class SurveyView {
     for (const axis of ['row', 'column'] as const) {
       for (const header of this.root.querySelectorAll<HTMLElement>(`[data-axis="${axis}"]`)) {
         const index = Number(header.dataset['line'])
-        const line = surveyLine(this.state, axis, index)
-        const label =
-          line.total === null
-            ? message(this.language, 'survey.pending-line', {
-                axis: t[axis],
-                number: index + 1,
-                flags: line.flags,
-              })
-            : message(this.language, 'survey.line', {
-                axis: t[axis],
-                number: index + 1,
-                flags: line.flags,
-                total: line.total,
-                covered: line.covered,
-              })
-        header.innerHTML = `<span class="tw:sr-only">${label}</span><span aria-hidden="true">${line.flags}/<strong>${line.total ?? '·'}</strong></span>`
-        header.setAttribute('aria-label', label)
-        header.title = label
-        header.dataset['over'] = String(line.total !== null && line.flags > line.total)
+        if (this.clueState !== this.state) {
+          const line = surveyLine(this.state, axis, index)
+          const label = message(this.language, 'survey.line', {
+            axis: t[axis],
+            number: index + 1,
+            runs: line.runs.join(', ') || '0',
+            flags: line.flags,
+          })
+          header.innerHTML = `<span class="tw:sr-only">${label}</span><span class="survey-runs" aria-hidden="true">${(line.runs.length ? line.runs : [0]).map((run) => `<strong>${run}</strong>`).join('')}</span>`
+          header.setAttribute('aria-label', label)
+          header.title = label
+          header.dataset['over'] = String(line.conflict)
+          header.dataset['complete'] = String(line.complete)
+        }
         header.dataset['active'] = String(index === (axis === 'row' ? row : column))
-        if (header.dataset['active'] === 'true') focused.push(label)
+        if (header.dataset['active'] === 'true')
+          focused.push(header.getAttribute('aria-label') ?? '')
       }
     }
     for (const cell of this.root.querySelectorAll<HTMLElement>('[data-cell]')) {
@@ -237,6 +256,7 @@ export class SurveyView {
       )
     }
     this.element('.survey-focus').textContent = focused.join(' · ')
+    this.clueState = this.state
   }
 
   /** Fail at the template boundary if required markup is missing. */

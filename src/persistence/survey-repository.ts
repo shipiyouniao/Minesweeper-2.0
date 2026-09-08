@@ -101,13 +101,14 @@ export class SurveyRepository {
     this.recovered = true
     const reader = JsonObjectReader.from(parseJson(text))
     if (!reader) return null
+    // Scores from different rules are not comparable; only current-format wins survive recovery.
+    if (reader.number('version') !== 2) return null
     this.records = decodeRecords(reader.array('records'))
     const difficulty = surveyDifficulty(reader.string('difficulty'))
     const seed = reader.number('seed')
     const settled = reader.value('settled')
     const values = reader.array('actions')
     if (
-      reader.number('version') !== 1 ||
       !difficulty ||
       !integer(seed, 0, 0xffffffff) ||
       typeof settled !== 'boolean' ||
@@ -124,7 +125,7 @@ export class SurveyRepository {
       actions.push(action)
     }
     this.recovered = false
-    return { version: 1, difficulty, seed, actions, settled, records: this.records }
+    return { version: 2, difficulty, seed, actions, settled, records: this.records }
   }
 
   /** Progress and newly earned records become durable in one write. */

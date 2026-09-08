@@ -1,12 +1,13 @@
 /* One set of tracks sizes the board and both axes; constraints remain aligned during panning. */
 .survey-viewport {
   padding: 12px;
-  max-height: min(72dvh, 960px);
-  scroll-padding: 54px;
+  max-height: min(72dvh, 1200px);
+  scroll-padding: 130px;
 }
 .survey-grid {
   --gap: 3px;
-  --header: 44px;
+  --clue-size: clamp(15px, 1.1vw, 21px);
+  --header: calc(var(--row-runs) * (var(--clue-size) + 6px) + 12px);
   --cell: clamp(
     24px,
     calc((100cqi - var(--header) - var(--columns) * var(--gap)) / var(--columns)),
@@ -14,7 +15,7 @@
   );
   display: grid;
   grid-template-columns: var(--header) max-content;
-  grid-template-rows: var(--header) max-content;
+  grid-template-rows: calc(var(--column-runs) * (var(--clue-size) + 6px) + 12px) max-content;
   gap: var(--gap);
   width: max-content;
   margin: auto;
@@ -27,7 +28,7 @@
 }
 .survey-grid .cell {
   font-size: clamp(12px, calc(var(--cell) * 0.42), 25px);
-  scroll-margin: 54px;
+  scroll-margin: 130px;
 }
 .survey-grid .cell .icon {
   width: 60%;
@@ -68,11 +69,31 @@
   border-radius: 4px;
   background: var(--surface-alt);
   color: var(--muted);
-  font: 500 clamp(10px, calc(var(--cell) * 0.3), 18px) var(--mono);
+  font: 500 var(--clue-size) var(--mono);
   box-shadow: 0 0 0 2px var(--surface);
 }
 .survey-line strong {
   color: var(--ink);
+}
+.survey-runs {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+}
+.survey-column-heads .survey-line {
+  align-items: flex-end;
+}
+.survey-column-heads .survey-runs {
+  flex-direction: column;
+}
+.survey-row-heads .survey-line {
+  justify-content: flex-end;
+}
+.survey-line[data-complete='true'] strong {
+  color: var(--muted);
+  opacity: 0.5;
 }
 .survey-line[data-active='true'] {
   background: var(--accent-soft);
@@ -94,12 +115,61 @@
 .survey-private {
   visibility: hidden;
 }
+.practice-survey {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 4px;
+  max-width: 354px;
+  margin: auto;
+}
+.practice-survey-columns {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: end;
+  gap: 4px;
+}
+.practice-survey-rows {
+  display: grid;
+  grid-template-rows: repeat(5, 1fr);
+  gap: 4px;
+}
+.practice-survey span {
+  display: grid;
+  place-items: center;
+  background: var(--surface-alt);
+  border-radius: 4px;
+  font: 13px/1.5 var(--mono);
+}
+.practice-survey .practice-board {
+  width: 100%;
+}
+.survey-example {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  font: 16px var(--mono);
+}
+.survey-example strong {
+  margin-right: 10px;
+}
+.survey-example span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  background: var(--surface-alt);
+  color: #875232;
+}
+.survey-example .survey-example-safe {
+  background: var(--paper);
+}
 @media (max-width: 600px) {
   .survey-viewport {
     padding: 6px;
   }
   .survey-grid {
     --gap: 2px;
-    --header: 38px;
+    --clue-size: 14px;
   }
 }

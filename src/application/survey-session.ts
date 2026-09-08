@@ -11,13 +11,13 @@ export class SurveySession {
   private current: Survey
   private saved: SurveySave
 
-  /** Restore accepted actions and regenerate line totals rather than trusting serialized observations. */
+  /** Restore accepted actions and regenerate run clues rather than trusting serialized observations. */
   constructor(repository: SurveyRepository, runtime: SessionRuntime) {
     this.repository = repository
     this.runtime = runtime
     const saved = repository.load()
     this.saved = saved ?? {
-      version: 1,
+      version: 2,
       difficulty: 'easy',
       seed: runtime.randomSeed(),
       actions: [],

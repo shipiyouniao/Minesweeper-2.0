@@ -4,13 +4,13 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 export const enMessages: MessageCatalog = {
   'survey.mines': 'mines',
   'survey.title': 'Survey',
-  'survey.intro': 'Read the rows. Connect the clues.',
-  'survey.opening': 'Open a square to reveal the row and column totals.',
-  'survey.legend': 'Flags / mines',
-  'survey.hint': 'Use the edge totals together with the numbers inside the board.',
-  'survey.bookkeeping': 'A matching count does not prove your flags are correct.',
-  'survey.line': '{axis} {number}: {flags} flags / {total} mines · {covered} covered',
-  'survey.pending-line': '{axis} {number}: {flags} flags · total after opening',
+  'survey.intro': 'Trace mine runs. Cross-check both axes.',
+  'survey.opening': 'Start from a full line or overlapping runs.',
+  'survey.legend': 'Consecutive mine runs',
+  'survey.hint': 'Open safe ground using the edge clues.',
+  'survey.bookkeeping':
+    '“2 1”: two mines together, a gap, then one mine. A wrong flag can still lead you into a mine.',
+  'survey.line': '{axis} {number}: runs {runs} · {flags} flags',
   'survey.moves': 'Moves',
   'survey.remaining': 'Safe squares left',
   'survey.zoom': 'Enlarge squares',
@@ -19,21 +19,29 @@ export const enMessages: MessageCatalog = {
   'survey.loss': 'A mine interrupted the survey',
   'survey.rank-hint': 'Best wins by fewest moves, separately for each difficulty.',
   'survey.no-records': 'Your first completed survey goes here.',
-  'survey.recovered':
-    'The saved survey could not be restored. A new board is ready; valid records were kept.',
+  'survey.recovered': 'A new survey is ready. Only records from the current rules are retained.',
   'survey.limit': 'This survey has reached its move limit. Start a new board to continue.',
-  'survey.help-local-title': 'Read nearby numbers',
-  'survey.help-local':
-    'A number counts mines in its eight neighboring squares. Open every safe square to win.',
-  'survey.help-lines-title': 'Read across the board',
-  'survey.help-lines':
-    'Each edge shows placed flags / total mines for that whole line. These are totals, not consecutive runs. Zero means the entire line is safe.',
-  'survey.help-marks-title': 'Leave a note',
-  'survey.help-marks':
-    'Right-click or hold: covered → flag → suspected safe → clear. On an open square, quick-open its neighbors using your flags and safe notes. A wrong guess can hit a mine.',
-  'survey.help-controls-title': 'Choose your controls',
-  'survey.help-controls':
-    'Arrows move focus; Enter opens; F flags; S notes safe; C quick-opens. The mode button offers the same actions on touch. Enlarge for bigger squares and pan while the edge counts stay visible.',
+  'survey.chord':
+    'Quick-open this row and column after their runs are flagged, or open your safe notes.',
+  'survey.lesson-title': 'Survey · mine runs',
+  'survey.lesson-overlap-title': 'Find the overlap',
+  'survey.lesson-overlap':
+    'The first row has a run of 3 in 5 squares. Wherever it starts, it crosses the middle. Flag that square.',
+  'survey.lesson-column-title': 'Cross the axes',
+  'survey.lesson-column':
+    'The second column says 5: every square is a mine. Flag its square in the first row.',
+  'survey.lesson-column-right':
+    'The fourth column also says 5. Flag the highlighted intersection to complete the first row’s run.',
+  'survey.lesson-chord-title': 'Clear a finished line',
+  'survey.lesson-chord-mode': 'Cycle the bottom action button to Quick-open.',
+  'survey.lesson-chord':
+    'Select the highlighted flag. Its row has all three mines marked, so the two remaining squares can open.',
+  'survey.lesson-gap-title': 'Leave room between runs',
+  'survey.lesson-reveal-mode': 'Cycle the action button back to Open.',
+  'survey.lesson-gap':
+    'The middle row says “2 2”: two mines, a gap, two mines. It fits exactly. Open the middle square.',
+  'survey.lesson-ending':
+    'Read runs in order, leave a gap, then check the crossing line. Open all safe ground to finish.',
   'echo.shifted': 'The core moved. Scan again; old core readings have expired.',
   'echo.phase-break': 'Shell broken. The core moves at the end of this turn.',
   'echo.rhythm': 'A 3-turn opening. Every third turn is quiet: reposition or strike.',
