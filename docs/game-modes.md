@@ -21,7 +21,7 @@ Relic Dungeon is part of Expedition, not a separate mode: it describes the multi
 
 Prepare at camp → choose profession/equipment → explore a floor → walk to its stairs → defeat the boss on guarded floors → choose one relic → continue through the selected 3–12 floors → extract, win, or lose → spend banked supplies on permanent unlocks.
 
-[Bastion Guardian and Brood Queen](tactical-builds.md), [Mirror Twins](mirror-twins.md), [Magnetic Knight](magnetic-knight.md) , [Clock Mage](clock-mage.md) and [Echo Warden](echo-warden.md) provide separate tactical rooms with a shared health/build system. Bastion uses calibrated controls and core windows; the queen has permanently destroyable nests and interceptable creatures; the twins use two mine-exclusive realms, crossed seals and alternating attacks. The knight uses projected magnetic fields and delayed charges; the mage uses frozen spell deadlines and echo follow-ups; Echo Warden combines obscured clues, regional scans and three-phase core localization. Only End turn resolves enemy attacks. The seeded roster rotates across the selected difficulty's checkpoints. Incompatible journals return to camp under the [save policy](save-policy.md).
+[Bastion Guardian and Brood Queen](tactical-builds.md), [Mirror Twins](mirror-twins.md), [Magnetic Knight](magnetic-knight.md) , [Clock Mage](clock-mage.md) , [Echo Warden](echo-warden.md) and [Matrix Overseer](matrix-overseer.md) provide separate tactical rooms with a shared health/build system. Bastion uses calibrated controls and core windows; the queen has permanently destroyable nests and interceptable creatures; the twins use two mine-exclusive realms, crossed seals and alternating attacks. The knight uses projected magnetic fields and delayed charges; the mage uses frozen spell deadlines and echo follow-ups; Echo Warden combines obscured clues, regional scans and three-phase core localization. Matrix Overseer uses ordered mine runs, calibrated prisms and reflected beam windows across three health bands. Only End turn resolves enemy attacks. The seeded roster rotates across the selected difficulty's checkpoints. Incompatible journals return to camp under the [save policy](save-policy.md).
 
 ### Floor rules
 
@@ -182,7 +182,7 @@ Tides is the highest-risk design because its generator preserves a system of con
 ## Delivery order and limits
 
 1. **Delivered:** ruleset routing, separate saves, configurable Expedition/camp progression, Twin boards, localization and regression coverage.
-2. **Next:** the [tracked expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1), with the Survey-derived Matrix Overseer encounter as the next mode adaptation. Sonar and Echo Warden are delivered.
+2. **Next:** the [tracked expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1), with Tides constraint generation as the next independent mode. Sonar, Echo Warden, Survey and Matrix Overseer are delivered.
 3. **Then:** Tides constraint solver/worker, replay compatibility and transition feedback.
 
 Saves are local and disappear when browser storage is cleared. They are not an anti-cheat system. One active run per special ruleset is supported; simultaneous edits to one ruleset in multiple tabs use last-write-wins browser storage. Journals are bounded at 20,000 accepted actions to limit recovery work; Expedition can still extract at its limit and Twin/Sonar/Survey can restart. Storage failures are shown while in-memory play continues.
@@ -191,7 +191,7 @@ No new compiler performance figures are claimed. Historical TS6/TS7 A/B reports 
 
 ### Magnetic Knight encounter
 
-The fourth released boss family adds visible push/pull fields, projected landings, grounding and reusable numbered anchors. A known route lets the player lure the knight into an anchor, with physical charge and impact effects, then strike during three turns of core exposure. The seeded roster now contains Bastion Guardian, Brood Queen, Mirror Twins, Magnetic Knight, Clock Mage and Echo Warden; checkpoint floors and rewards are unchanged. Read [the full rules, values and acceptance](magnetic-knight.md).
+The fourth released boss family adds visible push/pull fields, projected landings, grounding and reusable numbered anchors. A known route lets the player lure the knight into an anchor, with physical charge and impact effects, then strike during three turns of core exposure. The seeded roster now contains Bastion Guardian, Brood Queen, Mirror Twins, Magnetic Knight, Clock Mage, Echo Warden and Matrix Overseer; checkpoint floors and rewards are unchanged. Read [the full rules, values and acceptance](magnetic-knight.md).
 
 ## Clock Mage
 

@@ -54,6 +54,22 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
       message(language, 'battle-presentation.brace-reduces-this-turn-s-enemy-damage'),
     ],
   }
+  if (kind === 'matrix')
+    return {
+      ...copy,
+      name: message(language, 'matrix.name'),
+      hint: message(language, 'matrix.deduce'),
+      pylon: message(language, 'matrix.calibrate'),
+      disabled: message(language, 'matrix.armed'),
+      help: [
+        message(language, 'matrix.deduce'),
+        message(language, 'matrix.gaps'),
+        message(language, 'matrix.calibrate'),
+        message(language, 'matrix.fight'),
+        message(language, 'matrix.forecast'),
+        message(language, 'matrix.line-action'),
+      ],
+    }
   if (kind === 'echo')
     return {
       ...copy,
@@ -78,6 +94,11 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
 
 /** Summarize the actual remaining objectives and core window, rather than a generic boss phase. */
 export function battleStatus(language: Language, encounter: TacticalEncounter): string {
+  if (encounter.kind === 'matrix')
+    return message(language, 'matrix.status', {
+      phase: encounter.phase,
+      window: Math.max(0, encounter.exposedUntil - encounter.turn + 1),
+    })
   if (encounter.kind === 'echo')
     return message(language, 'echo.status', {
       phase: encounter.phase,

@@ -2,7 +2,7 @@
 
 The game supports **one current expedition implementation**. When a rules update invalidates an active expedition, the explorer returns to camp. Permanent supplies, purchases, completion counts and records are preserved. Old generators, combat resolvers, reward tables and localized rule variants are removed instead of retained for replay.
 
-The current title-build rules use revision **9**, defined by `EXPEDITION_RULES_REVISION` in `src/persistence/expedition-format.ts`. Earlier version-4 journals, including revision eight, bank their recorded extraction checkpoint and return to camp without replay. New departures snapshot one owned title; existing camp claims and money remain intact.
+The current Matrix Overseer encounter rules use revision **12**, defined by `EXPEDITION_RULES_REVISION` in `src/persistence/expedition-format.ts`. Earlier version-4 journals, including revision eleven, bank their recorded extraction checkpoint and return to camp without replay. New departures snapshot one owned title; existing camp claims and money remain intact.
 
 ## This transition
 

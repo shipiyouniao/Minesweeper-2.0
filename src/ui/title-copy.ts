@@ -6,6 +6,8 @@ import type { TitleId } from '../types/titles.js'
 /** Describe the equipped title's exact condition and bounded reward in every supported locale. */
 export function titleEffectCopy(language: Language, title: TitleId): string {
   switch (title) {
+    case 'matrix-precise':
+      return message(language, 'matrix.precise-effect')
     case 'bastion-flawless':
       return message(language, 'title-copy.defense-1-while-braced')
     case 'mirror-flawless':

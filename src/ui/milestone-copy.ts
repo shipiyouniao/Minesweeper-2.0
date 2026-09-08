@@ -17,6 +17,13 @@ export function milestoneCopy(language: Language, id: MilestoneId): VariantDescr
         name: message(language, 'milestone-copy.beyond-the-mirror'),
         note: message(language, 'milestone-copy.defeat-both-twins-without-losing-health-revival'),
       }
+    case 'hunt-matrix':
+      return { name: message(language, 'matrix.hunt'), note: message(language, 'matrix.hunt-note') }
+    case 'matrix-precise':
+      return {
+        name: message(language, 'matrix.precise'),
+        note: message(language, 'matrix.precise-note'),
+      }
     case 'hunt-echo':
       return { name: message(language, 'echo.hunt'), note: message(language, 'echo.hunt-note') }
     case 'echo-flawless':

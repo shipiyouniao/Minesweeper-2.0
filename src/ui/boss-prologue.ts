@@ -130,17 +130,19 @@ export class BossPrologue {
 
     const e = run.encounter
     const objectives =
-      e.kind === 'magnetic'
-        ? e.anchors.map((a) => a.index)
-        : e.kind === 'clock'
-          ? e.hourglasses.map((a) => a.index)
-          : e.kind === 'bastion'
-            ? e.pylons.map((p) => p.index)
-            : e.kind === 'brood'
-              ? e.nests
-              : e.kind === 'echo'
-                ? e.bodies
-                : [e[e.active].seal.index]
+      e.kind === 'matrix'
+        ? e.prisms.map((prism) => prism.index)
+        : e.kind === 'magnetic'
+          ? e.anchors.map((a) => a.index)
+          : e.kind === 'clock'
+            ? e.hourglasses.map((a) => a.index)
+            : e.kind === 'bastion'
+              ? e.pylons.map((p) => p.index)
+              : e.kind === 'brood'
+                ? e.nests
+                : e.kind === 'echo'
+                  ? e.bodies
+                  : [e[e.active].seal.index]
     const speaker =
       beat.speaker === 'boss'
         ? script.title
@@ -152,7 +154,7 @@ export class BossPrologue {
       beat.speaker === 'player'
         ? message(language, 'boss-prologue.label', { p0: beat.line })
         : beat.line
-    this.dialog.innerHTML = `<header class="prologue-header ${guidanceStyles['prologue-header']}"><div><span class="guidance-eyebrow ${guidanceStyles['guidance-eyebrow']}">ENCOUNTER / ${String(['bastion', 'brood', 'mirror', 'magnetic', 'clock', 'echo'].indexOf(script.kind) + 1).padStart(2, '0')}</span><h2 id="prologue-title">${script.title}</h2><p>${script.subtitle}</p></div><button class="text-button ${sharedStyles['text-button']}" data-scene="skip">${message(language, 'boss-prologue.skip-arrival')} ↗</button></header><div class="prologue-stage ${guidanceStyles['prologue-stage']}"><div class="scene-aura"></div><div class="scene-portrait ${guidanceStyles['scene-portrait']} scene-hero">${spriteImage(professionSprite(run.departure.profession))}<span>${message(language, 'boss-prologue.explorer')}</span></div><div class="scene-map" style="--scene-columns:${run.game.config.width}">${run.game.cells.map((cell, index) => `<span class="scene-tile ${(e.kind === 'echo' ? e.bodies.includes(index) : index === e.boss) ? 'scene-boss' : index === run.player ? 'scene-player' : objectives.includes(index) ? 'scene-objective' : ''} ${cell.visibility === 'revealed' ? 'scene-open' : ''}">${(e.kind === 'echo' ? e.bodies.includes(index) : index === e.boss) ? spriteImage(script.sprite) : index === run.player ? spriteImage(professionSprite(run.departure.profession)) : objectives.includes(index) ? spriteImage(script.prop) : cell.visibility === 'revealed' && cell.adjacent ? (e.kind === 'echo' ? '≈' : cell.adjacent) : ''}</span>`).join('')}</div><div class="scene-portrait ${guidanceStyles['scene-portrait']} scene-enemy">${spriteImage(script.sprite)}<span>${script.title}</span></div></div><section class="prologue-dialogue ${guidanceStyles['prologue-dialogue']}" data-speaker="${beat.speaker}"><div class="dialogue-portrait ${guidanceStyles['dialogue-portrait']}">${spriteImage(beat.speaker === 'player' ? professionSprite(run.departure.profession) : beat.speaker === 'boss' ? script.sprite : script.prop)}</div><div>${speaker ? `<strong>${speaker}</strong>` : ''}<p role="status" data-dialogue-line>${line}</p></div></section><footer class="prologue-footer ${guidanceStyles['prologue-footer']}"><button class="text-button ${sharedStyles['text-button']}" data-scene="previous" ${this.beat === 0 ? 'disabled' : ''}>← ${message(language, 'boss-prologue.previous')}</button><span>${String(this.beat + 1).padStart(2, '0')} <i>/ ${script.beats.length}</i></span><button class="primary-button ${sharedStyles['primary-button']}" data-scene="next">${this.beat === script.beats.length - 1 ? message(language, 'boss-prologue.enter-battle') : message(language, 'boss-prologue.continue')} →</button></footer>`
+    this.dialog.innerHTML = `<header class="prologue-header ${guidanceStyles['prologue-header']}"><div><span class="guidance-eyebrow ${guidanceStyles['guidance-eyebrow']}">ENCOUNTER / ${String(['bastion', 'brood', 'mirror', 'magnetic', 'clock', 'echo', 'matrix'].indexOf(script.kind) + 1).padStart(2, '0')}</span><h2 id="prologue-title">${script.title}</h2><p>${script.subtitle}</p></div><button class="text-button ${sharedStyles['text-button']}" data-scene="skip">${message(language, 'boss-prologue.skip-arrival')} ↗</button></header><div class="prologue-stage ${guidanceStyles['prologue-stage']}"><div class="scene-aura"></div><div class="scene-portrait ${guidanceStyles['scene-portrait']} scene-hero">${spriteImage(professionSprite(run.departure.profession))}<span>${message(language, 'boss-prologue.explorer')}</span></div><div class="scene-map" style="--scene-columns:${run.game.config.width}">${run.game.cells.map((cell, index) => `<span class="scene-tile ${(e.kind === 'echo' ? e.bodies.includes(index) : index === e.boss) ? 'scene-boss' : index === run.player ? 'scene-player' : objectives.includes(index) ? 'scene-objective' : ''} ${cell.visibility === 'revealed' ? 'scene-open' : ''}">${(e.kind === 'echo' ? e.bodies.includes(index) : index === e.boss) ? spriteImage(script.sprite) : index === run.player ? spriteImage(professionSprite(run.departure.profession)) : objectives.includes(index) ? spriteImage(script.prop) : cell.visibility === 'revealed' && cell.adjacent ? (e.kind === 'matrix' ? '' : e.kind === 'echo' ? '≈' : cell.adjacent) : ''}</span>`).join('')}</div><div class="scene-portrait ${guidanceStyles['scene-portrait']} scene-enemy">${spriteImage(script.sprite)}<span>${script.title}</span></div></div><section class="prologue-dialogue ${guidanceStyles['prologue-dialogue']}" data-speaker="${beat.speaker}"><div class="dialogue-portrait ${guidanceStyles['dialogue-portrait']}">${spriteImage(beat.speaker === 'player' ? professionSprite(run.departure.profession) : beat.speaker === 'boss' ? script.sprite : script.prop)}</div><div>${speaker ? `<strong>${speaker}</strong>` : ''}<p role="status" data-dialogue-line>${line}</p></div></section><footer class="prologue-footer ${guidanceStyles['prologue-footer']}"><button class="text-button ${sharedStyles['text-button']}" data-scene="previous" ${this.beat === 0 ? 'disabled' : ''}>← ${message(language, 'boss-prologue.previous')}</button><span>${String(this.beat + 1).padStart(2, '0')} <i>/ ${script.beats.length}</i></span><button class="primary-button ${sharedStyles['primary-button']}" data-scene="next">${this.beat === script.beats.length - 1 ? message(language, 'boss-prologue.enter-battle') : message(language, 'boss-prologue.continue')} →</button></footer>`
     const paragraph = this.dialog.querySelector<HTMLElement>('[data-dialogue-line]')
     if (paragraph)
       this.reveal.start(

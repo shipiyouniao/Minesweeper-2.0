@@ -1,3 +1,4 @@
+import { defeatMatrix } from './matrix-helpers.js'
 import { defeatEcho } from './echo-helpers.js'
 import { defeatClock } from './clock-helpers.js'
 import { defeatMagnetic } from './magnetic-helpers.js'
@@ -102,6 +103,7 @@ function choices(run: Expedition, knownSafe: ReadonlySet<number>): ExpeditionAct
 
 /** Play complete turns with a bounded beam, proving wins through accepted public-state actions. */
 export function defeatBattle(initial: Expedition): ExpeditionAction[] {
+  if (initial.encounter?.kind === 'matrix') return defeatMatrix(initial)
   if (initial.encounter?.kind === 'echo') return defeatEcho(initial)
   if (initial.encounter?.kind === 'clock') return defeatClock(initial)
   if (initial.encounter?.kind === 'mirror') return defeatMirror(initial)

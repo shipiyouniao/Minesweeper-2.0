@@ -24,3 +24,7 @@ Nine transparent PNG assets were generated for the explorer, terrain, landmarks 
 ## Magnetic Knight
 
 The fourth boss family adds original generated knight and anchor sprites, plus board-native magnetic forecasts, physical motion and overload effects. See [the prompt and provenance record](magnetic-artwork.md).
+
+## Matrix Overseer
+
+The seventh boss family uses two original transparent generated assets for its automaton and prism stations. See [the complete prompts and asset map](matrix-artwork.md). Beam forecasts, reflection paths and shield states are rendered as responsive board overlays.

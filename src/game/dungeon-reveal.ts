@@ -14,7 +14,8 @@ export function revealDungeon(run: Expedition, index: number): Game {
     if (!cell || cell.visibility !== 'hidden') continue
     cells[target] = { ...cell, visibility: 'revealed' }
     if (cell.mine) return pruneSafeMarks({ ...run.game, cells, phase: 'lost', exploded: target })
-    if (cell.adjacent === 0) queue.push(...neighbors(run.game.config, target))
+    if (run.encounter?.kind !== 'matrix' && cell.adjacent === 0)
+      queue.push(...neighbors(run.game.config, target))
   }
 
   return pruneSafeMarks({ ...run.game, cells, phase: 'playing' })

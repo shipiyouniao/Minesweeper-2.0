@@ -74,7 +74,7 @@ test('all 24 achievement titles have finite identities, complete copy and no cur
     new Set(TITLES),
     new Set(MILESTONES.filter((entry) => entry.kind === 'achievements').map((entry) => entry.id)),
   )
-  assert.equal(TITLES.length, 24)
+  assert.equal(TITLES.length, 25)
   assert.equal(parseTitle('first-boss'), null)
   assert.equal(parseTitle('invented'), null)
   const storage = new MemoryStorage()
@@ -350,8 +350,8 @@ test('authored goal budget supports stepped unlocks without funding the shop aft
       (total, entry) => total + entry.supplies,
       0,
     )
-  assert.equal(sum('missions'), 2290)
-  assert.equal(sum('achievements'), 9950)
+  assert.equal(sum('missions'), 2390)
+  assert.equal(sum('achievements'), 10200)
   assert.ok(MILESTONES.every((entry) => entry.supplies > 0 && entry.supplies <= 800))
   const shop = UPGRADES.reduce((total, item) => total + upgradeCost(item), 0)
   assert.equal(shop, 41400)

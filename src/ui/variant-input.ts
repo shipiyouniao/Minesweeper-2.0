@@ -24,6 +24,8 @@ export function parseVariantCommand(value: string): VariantCommand | null {
   if (parts.length > 2) return null
   const [type, id] = parts
   switch (type) {
+    case 'matrix-row':
+    case 'matrix-column':
     case 'skill-target': {
       const index = Number(id)
       return id !== undefined &&

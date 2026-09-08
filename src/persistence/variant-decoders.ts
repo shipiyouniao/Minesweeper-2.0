@@ -152,7 +152,8 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
         value === 'mirror' ||
         value === 'magnetic' ||
         value === 'clock' ||
-        value === 'echo') &&
+        value === 'echo' ||
+        value === 'matrix') &&
       !bossKinds.includes(value)
     )
       bossKinds.push(value)
@@ -171,7 +172,8 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
       kind === 'mirror' ||
       kind === 'magnetic' ||
       kind === 'clock' ||
-      kind === 'echo')
+      kind === 'echo' ||
+      kind === 'matrix')
       ? {
           seed,
           floor,
@@ -318,6 +320,8 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
   const type = reader.string('type')
 
   switch (type) {
+    case 'matrix-row':
+    case 'matrix-column':
     case 'reveal':
     case 'move':
     case 'sonar':

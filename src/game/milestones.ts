@@ -12,6 +12,23 @@ import type {
 
 export const MILESTONES: readonly MilestoneDefinition[] = [
   {
+    id: 'hunt-matrix',
+    kind: 'missions',
+    metric: 'bossKill',
+    bossKind: 'matrix',
+    target: 1,
+    supplies: 100,
+    reward: null,
+  },
+  {
+    id: 'matrix-precise',
+    kind: 'achievements',
+    metric: 'challenge',
+    target: 1,
+    supplies: 250,
+    reward: null,
+  },
+  {
     id: 'hunt-echo',
     kind: 'missions',
     metric: 'bossKill',
@@ -485,6 +502,12 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
   }
   const earned: MilestoneId[] = []
   if (boss && known && attempt) {
+    if (
+      boss === 'matrix' &&
+      after.encounter?.kind === 'matrix' &&
+      after.encounter.reflections === 3
+    )
+      earned.push('matrix-precise')
     if (boss === 'echo' && !attempt.hurt) earned.push('echo-flawless')
     if (boss === 'echo' && after.encounter?.kind === 'echo' && after.encounter.pulsesUsed <= 6)
       earned.push('echo-precise')

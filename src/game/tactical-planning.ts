@@ -1,3 +1,4 @@
+import { activePrism, matrixLine, matrixHealthFloor } from './matrix-logic.js'
 import { canUseExpeditionSonar, echoCandidates } from './expedition-sonar.js'
 import { approachPath, walkingPath } from './dungeon-path.js'
 import { adjacentSteps } from './variant-board.js'
@@ -23,6 +24,15 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
       index,
     }
   if (encounter) {
+    if (
+      encounter.kind === 'matrix' &&
+      activePrism({ ...run, encounter }).index === index &&
+      run.game.cells[index]?.visibility === 'revealed' &&
+      (run.player === index ||
+        (adjacentSteps(run.game, run.player).includes(index) &&
+          tacticalPlan(run, { type: 'interact', index }).allowed))
+    )
+      return { type: 'interact', index }
     if (
       encounter.kind === 'clock' &&
       encounter.hourglasses.some((glass) => glass.index === index && !glass.used) &&
@@ -111,6 +121,12 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       break
     case 'attack':
       cost = 2
+      if (encounter.kind === 'matrix') {
+        if (encounter.health <= matrixHealthFloor({ ...run, encounter })) reason = 'matrix-phase'
+        else if (encounter.exposedUntil < encounter.turn) reason = 'matrix-shield'
+        else if (!adjacentSteps(run.game, run.player).includes(encounter.boss)) reason = 'adjacent'
+        break
+      }
       if (
         encounter.kind === 'echo' &&
         encounter.phase < 3 &&
@@ -148,6 +164,28 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       else if (!adjacentSteps(run.game, run.player).includes(encounter.boss)) reason = 'adjacent'
       break
     case 'interact': {
+      if (encounter.kind === 'matrix') {
+        const prism = activePrism({ ...run, encounter })
+        if (
+          action.index !== prism.index ||
+          encounter.armed ||
+          encounter.exposedUntil >= encounter.turn ||
+          encounter.health <= matrixHealthFloor({ ...run, encounter })
+        )
+          reason = 'used'
+        else if (!encounter.beam.length) reason = 'matrix-rest'
+        else if (
+          run.player !== action.index &&
+          !adjacentSteps(run.game, run.player).includes(action.index)
+        )
+          reason = 'adjacent'
+        else if (
+          run.game.cells[action.index]?.visibility !== 'revealed' ||
+          !matrixLine({ ...run, encounter }, prism.axis, prism.line).complete
+        )
+          reason = 'matrix-line'
+        break
+      }
       if (encounter.kind === 'echo') {
         const candidates = echoCandidates(run)
         if (candidates.length !== 1 || candidates[0] !== action.index) reason = 'echo-locate'

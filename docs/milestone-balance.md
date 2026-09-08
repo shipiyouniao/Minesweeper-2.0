@@ -2,7 +2,7 @@
 
 The earlier catalog gave 89,220 supplies across 42 one-time goals against a 39,800-supply shop. Several early claims were individually worth multiple complete expeditions. This pass lowers every mission and achievement payout while preserving all unlocks, goal thresholds, purchase prices and difficulty-scaled expedition settlement.
 
-## Budget
+## Initial reduction (historical)
 
 | Source           |    Previous |     Current | Role                                                     |
 | ---------------- | ----------: | ----------: | -------------------------------------------------------- |
@@ -43,3 +43,7 @@ After all goal currency is spent, 28,460 of the shop's cost remains to be funded
 Tests pin the complete reward budgets, retain one-time claim/ownership behavior, verify first-run role affordability, and compare the deliberately generous two-Expert bound against the real catalog total. Browser acceptance checks displayed rewards, claims and reload in English, Chinese and Japanese. Gameplay balance should next be informed by completion rate, chest collection and supplies per minute; no telemetry or human timing measurements are claimed here.
 
 The [earlier closure audit](closure-acceptance.md#economy) records the pre-tuning economy and is retained as historical evidence. This document and the current source catalog supersede its payout values.
+
+## Current catalog after Echo and Matrix
+
+The released catalog now contains 22 missions (2,390 supplies), 25 achievements (10,200 supplies), and 27 purchases costing 41,400 supplies. Echo added 900 one-time supplies; Matrix adds 350. All 47 claims total 12,590. Adding two maximum Expert settlements gives 15,194, still below half of the shop cost (20,700). These later additions preserve the original spending constraint and do not pay repeatable boss currency.

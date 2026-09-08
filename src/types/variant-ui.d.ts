@@ -44,7 +44,7 @@ export type VariantCommand =
         | 'cancel'
     }
   | { readonly type: 'difficulty'; readonly value: VariantDifficulty }
-  | { readonly type: 'skill-target'; readonly value: number }
+  | { readonly type: 'skill-target' | 'matrix-row' | 'matrix-column'; readonly value: number }
   | { readonly type: 'profession'; readonly value: Profession }
   | { readonly type: 'equipment'; readonly value: Equipment }
   | { readonly type: 'upgrade'; readonly value: Upgrade }

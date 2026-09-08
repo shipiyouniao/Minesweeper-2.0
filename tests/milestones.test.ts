@@ -225,7 +225,7 @@ test('a complete accepted expedition records each floor, boss and victory once a
 })
 
 test('milestone IDs, translations and command boundaries remain finite and complete', () => {
-  assert.equal(new Set(MILESTONES.map((item) => item.id)).size, 45)
+  assert.equal(new Set(MILESTONES.map((item) => item.id)).size, 47)
   for (const language of ['en', 'zh', 'ja'] as const) {
     for (const entry of MILESTONES) {
       assert.ok(milestoneCopy(language, entry.id).name)

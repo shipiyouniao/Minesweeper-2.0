@@ -50,11 +50,11 @@ test('every boss has a kill mission using recorded boss history', () => {
     ...EMPTY_CAMP,
     milestones: {
       ...milestoneProgress(EMPTY_CAMP),
-      bossKinds: ['bastion', 'brood', 'mirror', 'magnetic', 'clock', 'echo'] as const,
+      bossKinds: ['bastion', 'brood', 'mirror', 'magnetic', 'clock', 'echo', 'matrix'] as const,
     },
   }
   const missions = MILESTONES.filter((entry) => entry.metric === 'bossKill')
-  assert.equal(missions.length, 6)
+  assert.equal(missions.length, 7)
   for (const entry of missions) assert.equal(milestoneValue(reload(camp), entry), 1)
 })
 test('web challenge requires full fight history and keeps a web cut disqualification through reload', () => {

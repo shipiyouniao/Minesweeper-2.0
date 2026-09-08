@@ -42,7 +42,8 @@ export function applyCombatRelics(
   if (
     action.type === 'interact' &&
     after.encounter.event === 'disabled' &&
-    (after.encounter.kind === 'bastion' ||
+    (after.encounter.kind === 'matrix' ||
+      after.encounter.kind === 'bastion' ||
       after.encounter.kind === 'mirror' ||
       after.encounter.kind === 'magnetic' ||
       after.encounter.kind === 'clock') &&

@@ -95,7 +95,10 @@ export function rechargeExpeditionSonar(
 ): Expedition {
   if (
     before === after ||
-    (action.type !== 'reveal' && action.type !== 'chord') ||
+    (action.type !== 'reveal' &&
+      action.type !== 'chord' &&
+      action.type !== 'matrix-row' &&
+      action.type !== 'matrix-column') ||
     before.floor !== after.floor ||
     before.encounter?.kind !== after.encounter?.kind ||
     after.health < before.health ||

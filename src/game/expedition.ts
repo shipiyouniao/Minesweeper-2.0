@@ -1,3 +1,4 @@
+import { matrixLineTargets } from './matrix-logic.js'
 import {
   EMPTY_EXPEDITION_SONAR,
   useExpeditionSonar,
@@ -41,7 +42,7 @@ import { generateDungeon } from './dungeon-generator.js'
 import { probeDungeon, scanDungeon, scoutExit } from './dungeon-discovery.js'
 import { act } from './engine.js'
 import { revealDungeon } from './dungeon-reveal.js'
-import { chordExpedition } from './dungeon-chord.js'
+import { chordExpedition, revealBatch } from './dungeon-chord.js'
 import { adjacentSteps, shuffled } from './variant-board.js'
 import { approachPath, walkingPath } from './dungeon-path.js'
 import { expeditionConfig, expeditionFloors } from './variant-difficulty.js'
@@ -398,10 +399,28 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
 /** Apply the accepted intent, then process each newly earned discovery reaction once. */
 export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
   if (action.type === 'chord' && echoObscured(run, action.index)) return run
-  const next =
-    action.type === 'chord'
-      ? chordExpedition(run, action.index, revealForBatch)
-      : applyExpedition(run, action, 'enter')
+  let next: Expedition
+  if (action.type === 'matrix-row' || action.type === 'matrix-column') {
+    const axis = action.type === 'matrix-row' ? 'row' : 'column'
+    const limit = axis === 'row' ? run.game.config.height : run.game.config.width
+    if (
+      run.phase !== 'boss' ||
+      run.encounter?.kind !== 'matrix' ||
+      !Number.isInteger(action.index) ||
+      action.index < 0 ||
+      action.index >= limit
+    )
+      return run
+
+    const targets = matrixLineTargets({ ...run, encounter: run.encounter }, axis, action.index)
+    next = revealBatch(run, targets, revealForBatch)
+  } else {
+    next =
+      action.type === 'chord'
+        ? chordExpedition(run, action.index, revealForBatch)
+        : applyExpedition(run, action, 'enter')
+  }
+
   return rechargeExpeditionSonar(run, refreshExpeditionReadings(run, next), action)
 }
 

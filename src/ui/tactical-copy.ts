@@ -7,6 +7,14 @@ import { battleCopy } from './battle-presentation.js'
 /** Explain a public action preview without inspecting the mine layout. */
 export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string {
   switch (plan.reason) {
+    case 'matrix-rest':
+      return message(language, 'matrix.rest')
+    case 'matrix-line':
+      return message(language, 'matrix.line')
+    case 'matrix-shield':
+      return message(language, 'matrix.shield')
+    case 'matrix-phase':
+      return message(language, 'matrix.phase')
     case 'echo-locate':
       return message(language, 'echo.locate')
     case 'echo-phase':
@@ -55,6 +63,10 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
   if (encounter.event === 'misfire')
     return message(language, 'tactical-copy.calibration-failed-5-damage')
   switch (encounter.event) {
+    case 'matrix-shifted':
+      return message(language, 'matrix.shifted')
+    case 'matrix-reflected':
+      return message(language, 'matrix.reflected')
     case 'magnet-lured':
       return message(language, 'tactical-copy.lure-locked-clear-the-gold-route')
     case 'magnet-overloaded':
