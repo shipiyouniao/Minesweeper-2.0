@@ -9,7 +9,7 @@ export const enMessages: MessageCatalog = {
   'survey.legend': 'Consecutive mine runs',
   'survey.hint': 'Open safe ground using the edge clues.',
   'survey.bookkeeping':
-    '“2 1”: two mines together, a gap, then one mine. A wrong flag can still lead you into a mine.',
+    '“2 1” means a run of two mines, then one mine. Leave at least one safe square between runs; the gap can be longer.',
   'survey.line-action': 'Click or tap to quick-open this line. Enter or Space also works.',
   'survey.line': '{axis} {number}: runs {runs} · {flags} flags',
   'survey.moves': 'Moves',
@@ -40,9 +40,9 @@ export const enMessages: MessageCatalog = {
   'survey.lesson-gap-title': 'Leave room between runs',
   'survey.lesson-reveal-mode': 'Cycle the action button back to Open.',
   'survey.lesson-gap':
-    'The middle row says “2 2”: two mines, a gap, two mines. It fits exactly. Open the middle square.',
+    'Runs need at least one safe square between them; the gap can be longer. This five-square row says “2 2”, so only one gap fits. Open the middle square.',
   'survey.lesson-ending':
-    'Read runs in order, leave a gap, then check the crossing line. Open all safe ground to finish.',
+    'Read runs in order, leave at least one safe square between them, then check the crossing line. Open all safe ground to finish.',
   'echo.shifted': 'The core moved. Scan again; old core readings have expired.',
   'echo.phase-break': 'Shell broken. The core moves at the end of this turn.',
   'echo.rhythm': 'A 3-turn opening. Every third turn is quiet: reposition or strike.',

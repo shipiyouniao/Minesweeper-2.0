@@ -1,6 +1,9 @@
-/* One set of tracks sizes the board and both axes; constraints remain aligned during panning. */
-.survey-viewport {
+/* Keep the frame gutter outside the scrollport so content cannot pass behind its sticky edges. */
+.survey-board-surface {
   padding: 12px;
+}
+.survey-viewport {
+  padding: 0;
   max-height: min(72dvh, 1200px);
   scroll-padding: 130px;
 }
@@ -15,7 +18,8 @@
   );
   display: grid;
   grid-template-columns: var(--header) max-content;
-  grid-template-rows: calc(var(--column-runs) * (var(--clue-size) + 6px) + 12px) max-content;
+  /* Let the longest clue's actual line boxes size the header, including font metrics and padding. */
+  grid-template-rows: max-content max-content;
   gap: var(--gap);
   width: max-content;
   margin: auto;
@@ -41,6 +45,8 @@
   position: sticky;
   top: 0;
   z-index: 4;
+  background: var(--surface);
+  box-shadow: 0 var(--gap) 0 var(--surface);
 }
 .survey-row-heads {
   display: grid;
@@ -49,6 +55,8 @@
   position: sticky;
   left: 0;
   z-index: 4;
+  background: var(--surface);
+  box-shadow: var(--gap) 0 0 var(--surface);
 }
 .survey-corner {
   position: sticky;
@@ -59,9 +67,11 @@
   place-items: center;
   color: var(--accent);
   background: var(--surface);
+  box-shadow: var(--gap) var(--gap) 0 var(--surface);
 }
 .survey-line {
   min-width: 0;
+  min-height: 0;
   padding: 0;
   cursor: pointer;
   touch-action: manipulation;
@@ -95,6 +105,10 @@
 }
 .survey-row-heads .survey-line {
   justify-content: flex-end;
+}
+.survey-row-heads .survey-runs {
+  /* Dense rows still share the exact cell height; horizontal padding must not enlarge line boxes. */
+  padding-block: 0;
 }
 .survey-line[data-complete='true'] strong {
   color: var(--muted);
@@ -149,11 +163,16 @@
 .practice-survey .practice-board {
   width: 100%;
 }
+.survey-examples {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
 .survey-example {
   display: flex;
   gap: 4px;
   align-items: center;
-  font: 16px var(--mono);
+  font: 14px var(--mono);
 }
 .survey-example strong {
   margin-right: 10px;
@@ -161,8 +180,9 @@
 .survey-example span {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
   border-radius: 5px;
   background: var(--surface-alt);
   color: #875232;
@@ -171,7 +191,7 @@
   background: var(--paper);
 }
 @media (max-width: 600px) {
-  .survey-viewport {
+  .survey-board-surface {
     padding: 6px;
   }
   .survey-grid {

@@ -6,6 +6,8 @@ Survey is a mine nonogram at `?ruleset=survey`: read consecutive mine runs along
 
 Read row clues from left to right and column clues from top to bottom. **2 1** means two adjacent mines, at least one safe square, then one mine. The runs must appear in that order; extra safe space may appear before, between or after them. **0** means an entirely safe line.
 
+The sidebar and interactive gap lesson show the same **2 1** clue with one and three safe squares between its runs. Clues specify the mine runs, not the exact length of each gap.
+
 For example, a run of **3** in five squares always occupies the center, even before its exact position is known. A clue of **2 2** in five squares fits exactly: `mine mine safe mine mine`. Use deductions in one direction to narrow the crossing direction.
 
 Open every safe square to finish. An excavation opens only its target. A mine ends the survey, including an incorrect first excavation: the clues are already visible before the player chooses where to start. The generator verifies a complete deduction path and may publish a few safe starting squares.
@@ -42,7 +44,7 @@ Run `npm test` followed by `node scripts/sample-survey.mjs` to reproduce. The sc
 - Quick-open acts on the selected square's **whole row and column**. A line whose flags already account for its runs can have the remaining squares opened together. Suspected-safe notes on either line are also excavated, even when flags are incomplete. Invalid spacing blocks automatic line completion; mistaken notes remain the player's risk.
 - Arrows/HJKL/Home/End move focus, Enter/Space perform the selected action, F flags, S adds a safe note and C quick-opens. P pauses; N requests a new puzzle. Replacing a puzzle after an accepted move requires confirmation.
 - The header's How to play opens the shared interactive tutorial. Its isolated 5×5 field teaches overlap, crossing lines, quick-open and the separator between two runs through actual Survey transitions. Practice never changes the live journal or records.
-- Row/column headers stay aligned and sticky inside the board's scroll host. Column clues stack vertically; row clues read horizontally. Clue type is sized independently of dense board squares. Hover and keyboard focus highlight the crossing lines. Each cell is associated with both clue descriptions for assistive technology.
+- Row/column headers stay aligned and sticky inside the board's scroll host. Column clues stack vertically and size their header from actual text bounds; row clues read horizontally within the exact cell height. Frame padding stays outside the scroll host, while opaque clue bands cover their gaps during horizontal and vertical panning. Clue type is sized independently of dense board squares. Hover and keyboard focus highlight the crossing lines. Each cell is associated with both clue descriptions for assistive technology.
 - Narrow screens can pan the board. The shared magnifier **+ / −** control switches between enlarged touch targets and the fitted board, with synchronized labels and tooltips. The outer scroll surface ends above the fixed dock. Pause/backgrounding covers the clues, board and sidebar. Closing a dialog never clears a background-owned pause.
 
 English, Chinese and Japanese use the centralized typed catalogs. Sound effects and preferences use the existing shared adapters. No new media or runtime dependency is required.
@@ -64,3 +66,5 @@ Domain coverage includes an exhaustive independent line-placement oracle up to e
 `tests/browser/survey.mjs` exercises all three languages on mobile and desktop: native holds, right-click cycles, keyboard input, complete interactive lessons, journal isolation, clue privacy, restart/records/modals, mode switching and zoom. It checks fixed dock geometry, shared difficulty selection and header alignment at narrow, tablet, desktop and 4K widths. Run against a production preview using `GAME_URL`; `PLAYWRIGHT_MODULE` and `BROWSER_CHANNEL` select the browser runtime. Screenshots belong in ignored `.native/` output. `tests/browser/survey-lines.mjs` additionally checks shared zoom appearance against Twin, exact-axis excavation, single mouse clicks, native taps and scroll cancellation, keyboard activation, no-op repeats and replay.
 
 The native/legacy checks, build A/B workflow and Pages deployment remain shared with the rest of the application. Survey's planned Expedition adaptation, Matrix Overseer, is a separate encounter delivery.
+
+`tests/browser/survey-layout.mjs` checks text containment, first-row clearance, opaque sticky bands and both-axis clipping at 320px through 4K widths, including enlarged boards and short windows.

@@ -54,10 +54,6 @@ export class SurveyView {
       '--row-runs',
       String(Math.max(...state.rows.map((runs) => runs.length), 1)),
     )
-    grid.style.setProperty(
-      '--column-runs',
-      String(Math.max(...state.columns.map((runs) => runs.length), 1)),
-    )
 
     this.dialog.addEventListener(
       'close',

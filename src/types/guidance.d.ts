@@ -10,6 +10,8 @@ export interface TutorialStep {
   readonly index: number
   readonly side: 'a' | 'b'
   readonly mode?: BoardInputMode
+  /** Optional visual example kept separate from the interactive practice board. */
+  readonly illustration?: 'survey-gaps'
 }
 
 export interface TutorialDefinition {
