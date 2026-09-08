@@ -12,7 +12,7 @@ import type { SurveyCommand, SurveyInputActions } from '../types/survey-ui.js'
 import { secondaryBoardAction } from './board-actions.js'
 import { nextBoardMode } from './board-controls.js'
 import { SurveyInput } from './survey-input.js'
-import { surveyHelpTemplate, surveyRecordsTemplate } from './survey-templates.js'
+import { surveyRecordsTemplate } from './survey-templates.js'
 import { SurveyView } from './survey-view.js'
 
 /** Coordinate Survey's puzzle, presentation and device adapters through explicit ports. */
@@ -59,7 +59,7 @@ export class SurveyApp implements SurveyInputActions {
     return this.paused || this.view.dialogOpen
   }
 
-  /** Apply the selected primary operation using the shared immutable board engine. */
+  /** Apply the selected primary operation using Survey's immutable rules. */
   play(index: number): void {
     if (this.blocked) return
     this.apply(index, this.mode)
@@ -104,7 +104,9 @@ export class SurveyApp implements SurveyInputActions {
         return
       case 'help':
         if (this.blocked) return
-        this.showDialog(surveyHelpTemplate(this.language))
+        this.input.cancelGesture()
+        this.view.showTutorial()
+        this.render()
         return
       case 'records':
         this.recordDifficulty = this.session.state.difficulty
@@ -119,7 +121,7 @@ export class SurveyApp implements SurveyInputActions {
         if (command.type === 'difficulty' && command.value === this.session.state.difficulty) return
         this.pendingDifficulty =
           command.type === 'difficulty' ? command.value : this.session.state.difficulty
-        if (this.session.state.game.phase === 'playing') {
+        if (this.session.state.game.phase === 'playing' && this.session.state.moves > 0) {
           this.showDialog(
             `<h2 id="survey-dialog-title" tabindex="-1">${t.confirmTitle}</h2><p>${t.confirmNote}</p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="close">${t.cancel}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="confirm">${t.start}</button></div>`,
           )
@@ -148,6 +150,7 @@ export class SurveyApp implements SurveyInputActions {
   /** Forward shared board geometry and use mute-aware feedback for edges and movement. */
   navigate(index: number, key: NavigationKey): void {
     const result = this.view.navigate(index, key)
+    this.preview(this.view.focusIndex)
     this.sounds.play(result === 'moved' ? 'navigate' : 'blocked')
   }
 
@@ -183,7 +186,7 @@ export class SurveyApp implements SurveyInputActions {
     this.sounds.dispose()
   }
 
-  /** Ordinary operations use the shared engine and its actual public outcome sounds. */
+  /** Ordinary operations report their actual public outcome through the shared sound adapter. */
   private apply(index: number, type: BoardInputMode): void {
     const before = this.session.state.game
     if (!this.session.dispatch({ type, index })) {

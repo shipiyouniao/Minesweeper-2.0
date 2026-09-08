@@ -1,60 +1,65 @@
 # Survey
 
-Survey is a standalone mode at `?ruleset=survey`. Ordinary adjacent clues combine with the exact mine total for every row and column. The layout stays fixed after the first safe opening. Its planned Expedition adaptation, Matrix Overseer, is a separate encounter delivery.
+Survey is a mine nonogram at `?ruleset=survey`: read consecutive mine runs along both axes and excavate the safe ground between them. It has no eight-neighbor numbers and no blank-region flood fill. Every move follows the edge clues, so Classic's local-number strategy cannot bypass the mode's central puzzle.
 
-## Rules and difficulty
+## Reading the field
+
+Read row clues from left to right and column clues from top to bottom. **2 1** means two adjacent mines, at least one safe square, then one mine. The runs must appear in that order; extra safe space may appear before, between or after them. **0** means an entirely safe line.
+
+For example, a run of **3** in five squares always occupies the center, even before its exact position is known. A clue of **2 2** in five squares fits exactly: `mine mine safe mine mine`. Use deductions in one direction to narrow the crossing direction.
+
+Open every safe square to finish. An excavation opens only its target. A mine ends the survey, including an incorrect first excavation: the clues are already visible before the player chooses where to start. The generator verifies a complete deduction path and may publish a few safe starting squares.
+
+Flags and suspected-safe notes are player hypotheses. A wavy red clue means the current flags/open squares cannot fit its ordered runs; this checks public constraints, not concealed mine identities. A finished line fades when all its squares have been accounted for consistently. A locally consistent but incorrect hypothesis can still lead to a mine.
+
+## Difficulty and generation
 
 | Preset | Board   | Mines | Density |
 | ------ | ------- | ----: | ------: |
-| Easy   | 8 × 8   |    10 |   15.6% |
-| Medium | 12 × 10 |    24 |   20.0% |
-| Expert | 18 × 14 |    60 |   23.8% |
+| Easy   | 8 × 8   |    30 |   46.9% |
+| Medium | 12 × 10 |    56 |   46.7% |
+| Expert | 16 × 14 |   108 |   48.2% |
 
-The first square and its surrounding neighborhood are safe. Eligible positions use the existing seeded Fisher–Yates shuffle with exact mine counts and unbiased bounded indices. Blank regions expand normally. Before that first reveal, flags and suspected-safe notes are allowed, but line totals are not available: the opening has not yet determined the layout.
+Difficulty increases through larger intersecting systems rather than extra adjacent-clue assistance. Mine positions use a seeded Fisher–Yates shuffle and an exact count. The generator evaluates at most eight layouts and prefers the one needing the fewest safe starting facts. This selection deliberately biases the final layouts toward deductive play; it is not uniform sampling of all mine fields.
 
-Each edge header shows **placed flags / total mines** for its entire row or column. These are totals, not lengths of consecutive runs. A zero-total line is safe. Subtracting already deduced mines from a total may resolve the rest of the line; combine this information with adjacent clues and crossing lines.
+For each layout, a solver enumerates legal placements independently along each row and column. It keeps only cells shared by every legal placement, then propagates those facts across the other axis until no more change. It never guesses or reads the solution. If propagation stalls, generation publishes one previously unresolved safe square and resumes. Each addition decreases the unresolved set, bounding the fallback without an unending retry loop. Fully deriving every square proves the published puzzle has a unique solution. Internal intermediate deductions are not given to the player.
 
-Flags remain player hypotheses. Equal counts receive no correctness badge and never trigger automatic excavation. Over-flagged lines receive a wavy underline, derived solely from the public total and the player's flag count. Suspected-safe notes neither reduce a line's mine total nor count as flags. Incorrect notes or flags can still cause a loss when used to quick-open.
+Reproducible sample: seeds **0–199** for every preset, recorded on 2026-09-08.
 
-Reveal every safe square to win; hitting a mine loses. Only accepted state-changing board operations count toward the move score. Empty chords, rejected operations, hover, focus, zoom, dialogs, locale changes and pause do not count. Terminal results can be dismissed to inspect the finished board.
+| Preset | Fully deduced / 200 | Mean starting squares | Maximum starting squares | Mean propagation rounds |
+| ------ | ------------------: | --------------------: | -----------------------: | ----------------------: |
+| Easy   |                 200 |                 0.005 |                        1 |                    4.84 |
+| Medium |                 200 |                 0.055 |                        1 |                    6.79 |
+| Expert |                 200 |                 0.375 |                        3 |                    9.40 |
 
-## Controls and layout
+Run `npm test` followed by `node scripts/sample-survey.mjs` to reproduce. The script also reports generation timing on the current machine. One local Node 22 run measured medians of 0.56 / 2.77 / 20.82 ms and 95th percentiles of 3.24 / 10.46 / 59.00 ms. Timing varies with hardware and concurrent work; propagation rounds describe the solver, not human difficulty or play time.
 
-- Click/tap performs the selected mode: reveal, flag, suspected safe or quick-open. The visible mode button cycles through all four.
-- Right-click or stationary touch hold cycles covered → flag → suspected safe → unmarked. On a revealed square it quick-opens using nearby flags and safe notes. A right drag is rejected; touch scrolling cancels pending excavation and holds.
-- Arrows/HJKL/Home/End move focus; Enter/Space activate; F flags; S toggles suspected safety; C quick-opens. P pauses, N requests a new board. Active puzzles require confirmation before replacement.
-- Hover/focus highlights the relevant row and column and shows their full descriptions. Each grid cell is associated with both headers for assistive technology. No covered-cell mine identity or adjacent clue is rendered.
-- Normal sizing fits available space down to a 24px minimum. Dense boards on narrow screens can pan; explicit enlargement gives at least 40px squares. Both axes share the board's tracks and scroll host. Sticky headers retain context during horizontal and vertical panning, and native vertical scrolling can continue to the page.
-- Pause/backgrounding covers the board, axis totals and sidebar, and blocks board input. Closing a dialog cannot clear a background-owned pause. Language changes preserve progress. All controls use the shared mute-aware sound adapter.
+## Controls and shared interface
 
-English, Chinese and Japanese copy lives in the typed locale catalogs. Tailwind utilities own panel presentation; `survey.css` owns board geometry, sticky headers and clue highlighting. No new image or audio dependency is needed for this information mode.
+- The fixed page-bottom action dock uses the same button, mode colors and touch targets as the other modes. Its four actions are Open, Flag, Suspected safe and Quick-open. Difficulty uses Classic's shared segmented control, including board dimensions.
+- Right-click or a stationary touch hold cycles covered → flag → suspected safe → clear. Right-click/hold an open square to quick-open. Mouse drags are rejected; native touch scrolling cancels the hold.
+- Quick-open acts on the selected square's **whole row and column**. A line whose flags already account for its runs can have the remaining squares opened together. Suspected-safe notes on either line are also excavated, even when flags are incomplete. Invalid spacing blocks automatic line completion; mistaken notes remain the player's risk.
+- Arrows/HJKL/Home/End move focus, Enter/Space perform the selected action, F flags, S adds a safe note and C quick-opens. P pauses; N requests a new puzzle. Replacing a puzzle after an accepted move requires confirmation.
+- The header's How to play opens the shared interactive tutorial. Its isolated 5×5 field teaches overlap, crossing lines, quick-open and the separator between two runs through actual Survey transitions. Practice never changes the live journal or records.
+- Row/column headers stay aligned and sticky inside the board's scroll host. Column clues stack vertically; row clues read horizontally. Clue type is sized independently of dense board squares. Hover and keyboard focus highlight the crossing lines. Each cell is associated with both clue descriptions for assistive technology.
+- Narrow screens can pan the board; Enlarge offers bigger touch targets. The outer scroll surface ends above the fixed dock. Pause/backgrounding covers the clues, board and sidebar. Closing a dialog never clears a background-owned pause.
 
-## Architecture and save policy
+English, Chinese and Japanese use the centralized typed catalogs. Sound effects and preferences use the existing shared adapters. No new media or runtime dependency is required.
 
-`game/survey.ts` owns immutable puzzle transitions and the public `surveyLine` projection. It calculates row and column totals only on generation; later transitions retain those observations. The projection reads public totals and cell visibility only, never hidden mine or clue values.
+## Architecture and saves
 
-`SurveySession` owns replay, the accepted-action journal and exactly-once win records. `SurveyRepository` validates concrete DTOs through the shared JSON reader and writes only `minesweeper.survey.v1`. Named contracts live in module-scoped `survey.d.ts` and `survey-ui.d.ts`. Input, view and application classes own browser lifetimes separately from game rules.
+`survey-logic.ts` contains public line-placement inference. `survey-generation.ts` owns seeded layout selection and safe starting facts. `survey.ts` owns immutable play transitions and line presentation data. Annotation transitions reuse the common engine; excavation and quick-open are specific to Survey. No Classic adjacency data is computed or published for this mode.
 
-The version-1 envelope stores difficulty, seed, accepted commands, settlement and records in one atomic write. Reload reconstructs the board and line totals. Invalid or incompatible journals are replaced while separately valid records survive; no older rule engine is retained. A 20,000-action limit bounds replay and always leaves restart available. Unavailable storage is reported while in-memory play continues. Simultaneous tabs use last-write-wins storage, consistent with the other modes.
+`SurveySession` owns the accepted-action journal and exactly-once result settlement. `SurveyRepository` validates explicit DTOs and writes the version-2 envelope atomically under the existing `minesweeper.survey.v1` storage namespace. The namespace is stable; the envelope version identifies the current rules. Named contracts live in `.d.ts` modules; UI classes own their event, focus and modal lifetimes.
 
-Keep ten best wins per difficulty, sorted by fewest operations and then record date. These local records are independent of Classic time records, Sonar scans, Twin results and Expedition rewards. Survey awards no camp currency.
+Old Survey rules and their incomparable scores are retired at the persistence boundary. There is no old engine or replay migration. A malformed current journal can retain separately valid current-rule wins. Other modes and camp progress are untouched. Unavailable storage allows in-memory play, and a 20,000-action journal cap leaves restart available. Multiple tabs use last-write-wins storage.
 
-## Preset sampling
-
-The first tuning pass uses seeds **0–199** for each preset, always opening index 0. The public-information player in `tests/survey-helpers.ts` applies ordinary all-safe/all-mine and nested adjacent-clue deductions. The comparison enables the same player to also use all-safe/all-mine consequences of whole-line totals. It never guesses, searches hidden layouts or reads covered mine identities.
-
-| Preset | Adjacent clues only: wins / 200 | With line totals: wins / 200 | Boards with more safe squares opened | Mean opening size |
-| ------ | ------------------------------: | ---------------------------: | -----------------------------------: | ----------------: |
-| Easy   |                             107 |                          195 |                                   90 |            16.920 |
-| Medium |                              28 |                          171 |                                  162 |            14.375 |
-| Expert |                               4 |                           71 |                                  112 |            12.045 |
-
-Recorded on 2026-09-08 for the presets above. Reproduce with `npm test` followed by `node scripts/sample-survey.mjs`. These figures measure a limited deterministic deduction strategy, not human win rates, a complete solver or a no-guess guarantee. They show that line totals materially change play and that the three presets retain different inference demands. Future difficulty tuning must retire incompatible active journals or advance the envelope version; historical results must retain their original rules.
+Keep ten best wins per difficulty, sorted by accepted board operations, then date. Rejected moves, empty quick-open, navigation and presentation changes add no moves. Survey does not award camp currency.
 
 ## Acceptance
 
-Domain coverage includes 300 seeded openings with independently counted row/column totals, hypothesis privacy, safe-note chord loss, pre-opening flags, rejected moves, isolated replay, terminal settlement, malformed/incompatible saves, storage failure, journal limits and a 180-board public-deduction corpus.
+Domain coverage includes an exhaustive independent line-placement oracle up to eight squares, 300 reproducible complete puzzles, exact mine counts/run clues, deduction-only wins, no Classic flood fill, first-excavation loss, public-information privacy, ordered-run contradictions, note-driven quick-open risk, isolated replay, exactly-once wins, save retirement, storage failure and journal bounds.
 
-`tests/browser/survey.mjs` checks English/Chinese/Japanese at 390px and 1440px: native holds, right-click mark cycles and quick-open, keyboard commands, public headers, reload, confirmation, help, records, modal/privacy interaction, mode switching, all presets and zoom. It additionally checks header alignment and page overflow at 320px, 800px and 3840px, with native touch scroll cancellation on mobile. Screenshots go to ignored `.native/` output. Run against a production preview using `GAME_URL`; `PLAYWRIGHT_MODULE` and `BROWSER_CHANNEL` select the available browser runtime.
+`tests/browser/survey.mjs` exercises all three languages on mobile and desktop: native holds, right-click cycles, keyboard input, complete interactive lessons, journal isolation, clue privacy, restart/records/modals, mode switching and zoom. It checks fixed dock geometry, shared difficulty selection and header alignment at narrow, tablet, desktop and 4K widths. Run against a production preview using `GAME_URL`; `PLAYWRIGHT_MODULE` and `BROWSER_CHANNEL` select the browser runtime. Screenshots belong in ignored `.native/` output.
 
-The existing native and legacy checks, build A/B workflow and Pages deployment include Survey. No new compiler-performance claim is made by this feature.
+The native/legacy checks, build A/B workflow and Pages deployment remain shared with the rest of the application. Survey's planned Expedition adaptation, Matrix Overseer, is a separate encounter delivery.

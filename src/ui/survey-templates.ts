@@ -5,6 +5,9 @@ import type { RankedDifficulty } from '../types/game.js'
 import type { Language } from '../types/localization.js'
 import type { Survey, SurveyRecord } from '../types/survey.js'
 import { siteHeaderTemplate } from './templates.js'
+import { SURVEY_PRESETS } from '../game/survey.js'
+import { gameplayStyles } from './gameplay-styles.js'
+import { guidanceStyles } from './guidance-styles.js'
 import { sharedStyles } from './shared-styles.js'
 
 /** Keep common presentation utilities explicit; the specialized sheet owns only board geometry. */
@@ -18,7 +21,7 @@ export function surveyDifficulties(
   records = false,
 ): string {
   const t = translations[language]
-  return `<div class="tw:flex tw:flex-wrap tw:gap-2 tw:my-4" aria-label="${records ? t.records : t.difficulty}">${RANKED_DIFFICULTIES.map((difficulty) => `<button class="tw:rounded-lg tw:px-4 tw:py-2 tw:text-[clamp(14px,0.9vw,18px)] tw:text-muted tw:aria-pressed:bg-accent-soft tw:aria-pressed:text-accent tw:hover:bg-surface-alt" data-survey-${records ? 'record' : 'difficulty'}="${difficulty}" aria-pressed="${selected === difficulty}">${t[difficulty]}</button>`).join('')}</div>`
+  return `<div class="difficulty-tabs ${sharedStyles['difficulty-tabs']}" aria-label="${records ? t.records : t.difficulty}">${RANKED_DIFFICULTIES.map((difficulty) => `<button class="${selected === difficulty ? 'selected' : ''}" data-survey-${records ? 'record' : 'difficulty'}="${difficulty}" aria-pressed="${selected === difficulty}">${t[difficulty]}<span>${SURVEY_PRESETS[difficulty].width} × ${SURVEY_PRESETS[difficulty].height}</span></button>`).join('')}</div>`
 }
 
 /** Mount a quiet field-notebook layout with sticky constraints inside the board's own scroll host. */
@@ -34,21 +37,10 @@ export function surveyTemplate(language: Language, state: Survey): string {
           <div class="tw:relative"><div class="board-viewport survey-viewport"><div class="survey-grid"><div class="survey-corner" aria-hidden="true">↘</div><div class="survey-column-heads"></div><div class="survey-row-heads"></div><div class="board" role="grid" aria-label="${message(language, 'survey.title')}" aria-describedby="survey-legend"></div></div></div>
           <div class="survey-pause tw:absolute tw:inset-0 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-4 tw:bg-surface" hidden><p>${t.paused}</p><button class="primary-button ${sharedStyles['primary-button']}" data-control="pause">${t.resume}</button></div></div>
         </section>
-        <aside class="survey-sidebar ${panel} tw:p-5 tw:flex tw:flex-col tw:gap-5"><div class="survey-counters tw:grid tw:grid-cols-2 tw:gap-3"></div><div class="tw:border-0 tw:border-t tw:border-solid tw:border-line tw:pt-4"><p class="tw:text-[clamp(14px,0.9vw,18px)] tw:font-medium">${message(language, 'survey.hint')}</p><div class="survey-focus tw:my-3 tw:text-[clamp(14px,0.9vw,18px)] tw:text-accent tw:leading-7" role="status"></div><p class="tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted tw:leading-relaxed">${message(language, 'survey.bookkeeping')}</p></div><p class="survey-status tw:text-[clamp(14px,0.9vw,18px)] tw:text-muted" role="status"></p><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="new">${icon('reset')} ${t.restart}</button></aside>
+        <aside class="survey-sidebar ${panel} tw:p-5 tw:flex tw:flex-col tw:gap-5"><div class="survey-counters tw:grid tw:grid-cols-2 tw:gap-3"></div><div class="tw:border-0 tw:border-t tw:border-solid tw:border-line tw:pt-4"><p class="tw:text-[clamp(14px,0.9vw,18px)] tw:font-medium">${message(language, 'survey.hint')}</p><div class="survey-focus tw:my-3 tw:text-[clamp(14px,0.9vw,18px)] tw:text-accent tw:leading-7" role="status"></div><p class="tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted tw:leading-relaxed">${message(language, 'survey.bookkeeping')}</p><div class="survey-example" aria-hidden="true"><strong>2 1</strong><span>⚑</span><span>⚑</span><span class="survey-example-safe">·</span><span>⚑</span></div></div><p class="survey-status tw:text-[clamp(14px,0.9vw,18px)] tw:text-muted" role="status"></p><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="new">${icon('reset')} ${t.restart}</button></aside>
       </div>
-      <div class="survey-controls tw:sticky tw:bottom-0 tw:z-10 tw:flex tw:flex-wrap tw:items-center tw:gap-3 tw:mt-4 tw:py-3 tw:bg-paper"><div class="survey-mode tw:[&_.mode-cycle]:flex tw:[&_.mode-cycle]:flex-col tw:[&_.mode-cycle]:items-center tw:[&_.mode-cycle]:gap-1 tw:[&_.mode-cycle]:rounded-xl tw:[&_.mode-cycle]:bg-accent tw:[&_.mode-cycle]:text-white tw:[&_.mode-cycle]:px-4 tw:[&_.mode-cycle]:py-3 tw:[&_.mode-cycle]:min-w-24 tw:[&_.mode-cycle]:text-[clamp(14px,0.9vw,18px)] tw:[&_.mode-cycle_small]:text-[10px] tw:[&_.mode-cycle:hover]:brightness-110"></div><p class="survey-mode-hint tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted tw:flex-1 tw:min-w-40"></p></div>
-    </main><dialog class="survey-dialog" aria-labelledby="survey-dialog-title"><div class="survey-dialog-content"></div></dialog>`
-}
-
-/** A short illustrated rule card uses familiar board glyphs instead of a dense opening paragraph. */
-export function surveyHelpTemplate(language: Language): string {
-  const t = translations[language]
-  return `<h2 id="survey-dialog-title" tabindex="-1">${message(language, 'survey.title')}</h2><div class="tw:grid tw:gap-5 tw:[&_p]:text-[clamp(14px,0.9vw,18px)] tw:[&_p]:leading-relaxed tw:[&_p]:text-muted">
-    <section><strong>① ${message(language, 'survey.help-local-title')}</strong><p>${message(language, 'survey.help-local')}</p></section>
-    <section><strong>↔ ${message(language, 'survey.help-lines-title')}</strong><p>${message(language, 'survey.help-lines')}</p></section>
-    <section><strong>⚑ ${message(language, 'survey.help-marks-title')}</strong><p>${message(language, 'survey.help-marks')}</p></section>
-    <section><strong>⌨ ${message(language, 'survey.help-controls-title')}</strong><p>${message(language, 'survey.help-controls')}</p></section>
-    <button class="primary-button ${sharedStyles['primary-button']}" data-control="close">${t.close}</button></div>`
+    </main><div class="action-dock ${gameplayStyles['action-dock']} survey-dock"><div class="survey-mode"></div><p class="survey-mode-hint ${gameplayStyles['sonar-target-hint']}"></p></div>
+    <dialog class="survey-dialog ${guidanceStyles['sonar-dialog']}" aria-labelledby="survey-dialog-title"><div class="survey-dialog-content ${guidanceStyles['sonar-dialog-content']}"></div></dialog>`
 }
 
 /** Rank completed surveys independently; dates are formatted only after persistence validation. */

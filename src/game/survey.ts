@@ -1,76 +1,131 @@
-import { act, createGame } from './engine.js'
-import type { Action, PresetBoards, RankedDifficulty } from '../types/game.js'
-import type { Survey, SurveyLine } from '../types/survey.js'
+import { act } from './engine.js'
+import { generateSurvey } from './survey-generation.js'
+import { deduceSurveyLine, surveyIndices } from './survey-logic.js'
+import type { Action, Cell, PresetBoards, RankedDifficulty } from '../types/game.js'
+import type { Survey, SurveyKnowledge, SurveyLine } from '../types/survey.js'
 
 export const SURVEY_ACTION_LIMIT = 20_000
 
-/** Compact rectangles keep both axes legible while density grows with the extra information. */
+/** Dense mine runs create overlap deductions; board area grows without shrinking clue typography. */
 export const SURVEY_PRESETS: PresetBoards = {
-  easy: { width: 8, height: 8, mines: 10 },
-  medium: { width: 12, height: 10, mines: 24 },
-  expert: { width: 18, height: 14, mines: 60 },
+  easy: { width: 8, height: 8, mines: 30 },
+  medium: { width: 12, height: 10, mines: 56 },
+  expert: { width: 16, height: 14, mines: 108 },
 }
 
-/** Defer all mine totals until the first reveal has fixed the safe opening. */
+/** Generate clues before play so the very first excavation can be a logical choice. */
 export function createSurvey(seed: number, difficulty: RankedDifficulty = 'easy'): Survey {
+  const config = SURVEY_PRESETS[difficulty]
+  const layout = generateSurvey(config, seed >>> 0)
   return {
     difficulty,
-    game: createGame(SURVEY_PRESETS[difficulty], seed),
+    game: {
+      config,
+      seed: seed >>> 0,
+      phase: 'playing',
+      firstClick: null,
+      exploded: null,
+      safeMarks: [],
+      cells: Array.from({ length: config.width * config.height }, (_, index) => ({
+        mine: layout.mines.has(index),
+        // Survey has no adjacency clue, including in the shared cell renderer and ARIA labels.
+        adjacent: 0,
+        visibility: layout.opening.includes(index) ? 'revealed' : 'hidden',
+      })),
+    },
     moves: 0,
-    rows: [],
-    columns: [],
+    rows: layout.rows,
+    columns: layout.columns,
   }
 }
 
-/** Publish exact totals once, then share those immutable observations for every later move. */
+/** Player safe notes remain hypotheses; only excavations and flags constrain line reasoning. */
+export function surveyKnowledge(cell: Cell): SurveyKnowledge {
+  return cell.visibility === 'revealed'
+    ? 'safe'
+    : cell.visibility === 'flagged'
+      ? 'mine'
+      : 'unresolved'
+}
+
+/** Open unfinished squares in a fully flagged line, plus explicitly noted safe squares on either axis. */
+export function surveyChordTargets(state: Survey, index: number): readonly number[] {
+  const targets = new Set<number>()
+  for (const axis of ['row', 'column'] as const) {
+    const line =
+      axis === 'row' ? Math.floor(index / state.game.config.width) : index % state.game.config.width
+    const reading = surveyLine(state, axis, line)
+    const filled = !reading.conflict && reading.total === reading.flags
+    for (const at of surveyIndices(state.game.config, axis, line))
+      if (
+        state.game.cells[at]?.visibility === 'hidden' &&
+        (filled || state.game.safeMarks.includes(at))
+      )
+        targets.add(at)
+  }
+  return [...targets].sort((a, b) => a - b)
+}
+
+/** Keep annotation semantics shared, but never invoke Classic's neighborhood reveal or flood fill. */
 export function actSurvey(state: Survey, action: Action): Survey {
-  const game = act(state.game, action)
-  if (game === state.game) return state
-
-  // The common engine accepts a fully opened chord. It adds no Survey operation or journal entry.
-  if (
-    game.phase === state.game.phase &&
-    game.safeMarks === state.game.safeMarks &&
-    game.cells.every((cell, index) => cell.visibility === state.game.cells[index]?.visibility)
-  )
-    return state
-
-  if (state.game.firstClick !== null || game.firstClick === null)
-    return { ...state, game, moves: state.moves + 1 }
-
-  const rows = Array<number>(game.config.height).fill(0)
-  const columns = Array<number>(game.config.width).fill(0)
-  for (const [index, cell] of game.cells.entries()) {
-    if (!cell.mine) continue
-    const row = Math.floor(index / game.config.width)
-    const column = index % game.config.width
-    rows[row] = rows[row]! + 1
-    columns[column] = columns[column]! + 1
+  const before = state.game
+  const cell = before.cells[action.index]
+  if (!Number.isInteger(action.index) || !cell || before.phase !== 'playing') return state
+  if (action.type === 'flag' || action.type === 'mark-safe') {
+    const game = act(before, action)
+    return game === before ? state : { ...state, game, moves: state.moves + 1 }
   }
+  const targets =
+    action.type === 'chord' || cell.visibility === 'revealed'
+      ? surveyChordTargets(state, action.index)
+      : cell.visibility === 'hidden'
+        ? [action.index]
+        : []
+  if (!targets.length) return state
 
-  return { ...state, game, rows, columns, moves: state.moves + 1 }
+  const cells = [...before.cells]
+  let exploded: number | null = null
+  for (const index of targets) {
+    cells[index] = { ...cells[index]!, visibility: 'revealed' }
+    if (cells[index]!.mine) {
+      exploded = index
+      break
+    }
+  }
+  const won =
+    exploded === null && cells.every((entry) => entry.mine || entry.visibility === 'revealed')
+  return {
+    ...state,
+    moves: state.moves + 1,
+    game: {
+      ...before,
+      cells: won
+        ? cells.map((entry) => (entry.mine ? { ...entry, visibility: 'flagged' } : entry))
+        : cells,
+      safeMarks: before.safeMarks.filter((index) => cells[index]?.visibility === 'hidden'),
+      firstClick: before.firstClick ?? action.index,
+      phase: exploded !== null ? 'lost' : won ? 'won' : 'playing',
+      exploded,
+    },
+  }
 }
 
-/** Combine published totals with annotations, without reading concealed cell identities. */
+/** Validate flags against ordered public runs, not merely a coincidentally matching count. */
 export function surveyLine(state: Survey, axis: 'row' | 'column', line: number): SurveyLine {
-  const { width, height } = state.game.config
-  const count = axis === 'row' ? height : width
-  if (!Number.isInteger(line) || line < 0 || line >= count)
-    return { total: null, flags: 0, covered: 0 }
-
-  let flags = 0
-  let covered = 0
-  const length = axis === 'row' ? width : height
-  for (let offset = 0; offset < length; offset++) {
-    const index = axis === 'row' ? line * width + offset : offset * width + line
-    const visibility = state.game.cells[index]!.visibility
-    flags += Number(visibility === 'flagged')
-    covered += Number(visibility !== 'revealed')
-  }
-
+  const runs = (axis === 'row' ? state.rows : state.columns)[line]
+  if (!Number.isInteger(line) || !runs)
+    return { runs: [], total: null, flags: 0, covered: 0, conflict: false, complete: false }
+  const cells = surveyIndices(state.game.config, axis, line).map(
+    (index) => state.game.cells[index]!,
+  )
+  const knowledge = cells.map(surveyKnowledge)
+  const contradiction = deduceSurveyLine(runs, knowledge).contradiction
   return {
-    total: (axis === 'row' ? state.rows : state.columns)[line] ?? null,
-    flags,
-    covered,
+    runs,
+    total: runs.reduce((sum, run) => sum + run, 0),
+    flags: cells.filter((cell) => cell.visibility === 'flagged').length,
+    covered: cells.filter((cell) => cell.visibility !== 'revealed').length,
+    conflict: contradiction,
+    complete: !contradiction && !knowledge.includes('unresolved'),
   }
 }

@@ -71,7 +71,7 @@ try {
           localStorage.setItem(
             key,
             JSON.stringify({
-              version: 1,
+              version: 2,
               difficulty: 'easy',
               seed: 31,
               actions: [],
@@ -85,19 +85,38 @@ try {
       const page = await context.newPage()
       page.on('pageerror', (error) => errors.push(error.message))
       await page.goto(`${base}?ruleset=survey&lang=${language}`)
-      assert.equal(await page.locator('.survey-line strong').first().innerText(), '·')
-      await page.locator('[data-cell="0"]').click()
       const initial = await model(page)
       for (const axis of ['row', 'column'])
         for (let i = 0; i < (axis === 'row' ? 8 : 8); i++)
-          assert.equal(
-            await page.locator(`#survey-${axis}-${i} strong`).innerText(),
-            String(surveyLine(initial, axis, i).total),
+          assert.deepEqual(
+            await page.locator(`#survey-${axis}-${i} strong`).allTextContents(),
+            (surveyLine(initial, axis, i).runs.length
+              ? surveyLine(initial, axis, i).runs
+              : [0]
+            ).map(String),
           )
       await geometry(page)
+      const dock = await page.locator('.action-dock').evaluate((element) => ({
+        position: getComputedStyle(element).position,
+        bottom: element.getBoundingClientRect().bottom,
+        width: element.getBoundingClientRect().width,
+      }))
+      assert.equal(dock.position, 'fixed')
+      assert.ok(Math.abs(dock.bottom - 1000) < 1)
+      assert.ok(Math.abs(dock.width - width) < 1)
+      assert.equal(await page.locator('.difficulty-tabs .selected').count(), 1)
       const safe = initial.game.cells.findIndex(
         (cell) => !cell.mine && cell.visibility === 'hidden',
       )
+      const open = initial.game.cells.findIndex(
+        (cell, index) =>
+          !cell.mine &&
+          index !== safe &&
+          (Math.floor(index / 8) === Math.floor(safe / 8) || index % 8 === safe % 8),
+      )
+      assert.ok(open >= 0)
+      if (initial.game.cells[open].visibility === 'hidden')
+        await page.locator(`[data-cell="${open}"]`).click()
       const target = page.locator(`[data-cell="${safe}"]`)
       for (const state of ['flagged', 'suspected-safe', 'hidden']) {
         if (mobile) await hold(context, page, target)
@@ -113,15 +132,7 @@ try {
       await page.keyboard.press('ArrowLeft')
       assert.equal(await page.locator('[data-axis="row"][data-active="true"]').count(), 1)
       assert.equal(await page.locator('[data-axis="column"][data-active="true"]').count(), 1)
-      const note = await model(page)
-      // A public-safe note can be excavated through the revealed square's secondary action.
-      const open = note.game.cells.findIndex(
-        (cell, index) =>
-          cell.visibility === 'revealed' &&
-          Math.abs((index % 8) - (safe % 8)) <= 1 &&
-          Math.abs(Math.floor(index / 8) - Math.floor(safe / 8)) <= 1,
-      )
-      assert.ok(open >= 0)
+      // A safe note anywhere on the selected row/column participates in quick-open.
       await target.focus()
       await page.keyboard.press('s')
       const openCell = page.locator(`[data-cell="${open}"]`)
@@ -139,8 +150,28 @@ try {
       await page.keyboard.press('Escape')
       assert.deepEqual(await saved(page), snapshot)
       await page.locator('.tutorial-entry').click()
-      assert.equal(await page.locator('dialog section').count(), 4)
-      await page.keyboard.press('Escape')
+      assert.equal(await page.locator('dialog[data-tutorial="survey"]').count(), 1)
+      await page.locator('[data-practice="cycle"]').click()
+      await page.locator('[data-practice="next"]').click()
+      if (language === 'zh')
+        await page.screenshot({ path: `.native/survey-tutorial-${width}.png`, fullPage: true })
+      for (const index of [2, 1, 3]) {
+        await page.locator(`[data-practice-cell="${index}"]`).click()
+        await page.locator('[data-practice="next"]').click()
+      }
+      await page.locator('[data-practice="cycle"]').click()
+      await page.locator('[data-practice="cycle"]').click()
+      await page.locator('[data-practice="next"]').click()
+      await page.locator('[data-practice-cell="2"]').click()
+      assert.match(await page.locator('[data-practice-cell="0"]').getAttribute('class'), /open/)
+      assert.match(await page.locator('[data-practice-cell="4"]').getAttribute('class'), /open/)
+      await page.locator('[data-practice="next"]').click()
+      await page.locator('[data-practice="cycle"]').click()
+      await page.locator('[data-practice="next"]').click()
+      await page.locator('[data-practice-cell="12"]').click()
+      await page.locator('[data-practice="next"]').click()
+      await page.locator('[data-practice="close"]').last().click()
+      assert.deepEqual(await saved(page), snapshot)
       await page.locator('[data-control="records"]').last().click()
       await page.locator('[data-survey-record="expert"]').click()
       assert.equal(
@@ -164,7 +195,6 @@ try {
         if (await page.locator('dialog').evaluate((d) => d.open))
           await page.locator('[data-control="confirm"]').click()
         await geometry(page)
-        await page.locator('[data-cell="0"]').click()
       }
       await page.locator('[data-control="zoom"]').click()
       await page.locator('.survey-viewport').evaluate((e) => {
@@ -205,7 +235,6 @@ try {
     page.on('pageerror', (error) => errors.push(error.message))
     await page.goto(`${base}?ruleset=survey&lang=zh`)
     await page.locator('[data-survey-difficulty="expert"]').click()
-    await page.locator('[data-cell="0"]').click()
     await geometry(page)
     await page.screenshot({ path: `.native/survey-final-${width}.png`, fullPage: true })
     await page.close()

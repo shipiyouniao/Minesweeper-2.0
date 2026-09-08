@@ -155,14 +155,15 @@ A separate twin envelope stores the seed, validated actions, settled state, and 
 
 ## Survey — implemented
 
-**Identity:** combine local adjacency with whole-row/column constraints. See [rules, presets, sampling and acceptance](survey.md).
+**Identity:** a mine nonogram driven entirely by ordered row/column runs. See [rules, presets, generation and acceptance](survey.md).
 
-- Show total mines for each row and column alongside ordinary adjacent clues. These are totals, not runs of consecutive mines.
-- Display fixed totals and current player flag counts. Matching a total is bookkeeping, **not proof of correctness**. Never use hidden truth to mark a player's flags correct.
-- Reveal every safe cell to win. Layout stays static with a safe opening; row/column totals appear only after generation.
-- Three independently sampled presets: 8×8/10 mines, 12×10/24 mines and 18×14/60 mines. Line information materially improves the limited public-deduction baseline without promising universal no-guess boards.
-- UI: aligned sticky row/column headers, keyboard associations between cell and totals, mobile layout retaining all constraints.
-- Acceptance: total sums equal exact mine count; every cell contributes to one row/column; totals survive reload unchanged; wrong flags leak no correctness; responsive headers stay aligned.
+- Remove adjacent numbers and blank flood fill. Edge clues such as **2 1** describe ordered consecutive mine runs with at least one safe separator.
+- Generate exact-density shuffled fields, then verify complete public line-intersection deductions. Publish a safe starting square only when reasoning otherwise stalls; prefer layouts needing fewer starting facts.
+- Reveal every safe cell to win; an incorrect excavation, including the first, hits a mine. All clues are available from the start.
+- Three presets: 8×8/30 mines, 12×10/56 mines and 16×14/108 mines. Seed sampling records deduction completeness, starting facts and propagation rounds instead of extra assistance over Classic.
+- Reuse the fixed bottom action dock, shared difficulty tabs and interactive practice player. Retain aligned sticky headers, mobile panning and accessible crossing-line descriptions.
+- Quick-open works along the selected row/column, using completed runs and safe notes. Conflicts and line completion depend only on published clues and visible annotations.
+- Retire the old additive-clue rules and their incomparable scores at the save boundary. Other modes and camp progress remain independent.
 
 ## Tides — approved, planned after solver work
 
