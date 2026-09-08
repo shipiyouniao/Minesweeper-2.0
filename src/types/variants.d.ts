@@ -14,7 +14,7 @@ import type { MilestoneProgress, MilestoneRelic } from './milestones.js'
 import type { TitleId, TitleProgress } from './titles.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
-export type Ruleset = 'classic' | 'expedition' | 'twin' | 'sonar'
+export type Ruleset = 'classic' | 'expedition' | 'twin' | 'sonar' | 'survey'
 
 /** The board receiving a twin-board action. */
 export type BoardSide = 'a' | 'b'

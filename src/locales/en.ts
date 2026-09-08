@@ -2,6 +2,38 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'survey.mines': 'mines',
+  'survey.title': 'Survey',
+  'survey.intro': 'Read the rows. Connect the clues.',
+  'survey.opening': 'Open a square to reveal the row and column totals.',
+  'survey.legend': 'Flags / mines',
+  'survey.hint': 'Use the edge totals together with the numbers inside the board.',
+  'survey.bookkeeping': 'A matching count does not prove your flags are correct.',
+  'survey.line': '{axis} {number}: {flags} flags / {total} mines · {covered} covered',
+  'survey.pending-line': '{axis} {number}: {flags} flags · total after opening',
+  'survey.moves': 'Moves',
+  'survey.remaining': 'Safe squares left',
+  'survey.zoom': 'Enlarge squares',
+  'survey.fit': 'Fit board',
+  'survey.win': 'Survey complete',
+  'survey.loss': 'A mine interrupted the survey',
+  'survey.rank-hint': 'Best wins by fewest moves, separately for each difficulty.',
+  'survey.no-records': 'Your first completed survey goes here.',
+  'survey.recovered':
+    'The saved survey could not be restored. A new board is ready; valid records were kept.',
+  'survey.limit': 'This survey has reached its move limit. Start a new board to continue.',
+  'survey.help-local-title': 'Read nearby numbers',
+  'survey.help-local':
+    'A number counts mines in its eight neighboring squares. Open every safe square to win.',
+  'survey.help-lines-title': 'Read across the board',
+  'survey.help-lines':
+    'Each edge shows placed flags / total mines for that whole line. These are totals, not consecutive runs. Zero means the entire line is safe.',
+  'survey.help-marks-title': 'Leave a note',
+  'survey.help-marks':
+    'Right-click or hold: covered → flag → suspected safe → clear. On an open square, quick-open its neighbors using your flags and safe notes. A wrong guess can hit a mine.',
+  'survey.help-controls-title': 'Choose your controls',
+  'survey.help-controls':
+    'Arrows move focus; Enter opens; F flags; S notes safe; C quick-opens. The mode button offers the same actions on touch. Enlarge for bigger squares and pan while the edge counts stay visible.',
   'echo.shifted': 'The core moved. Scan again; old core readings have expired.',
   'echo.phase-break': 'Shell broken. The core moves at the end of this turn.',
   'echo.rhythm': 'A 3-turn opening. Every third turn is quiet: reposition or strike.',

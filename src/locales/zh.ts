@@ -2,6 +2,36 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'survey.mines': '雷',
+  'survey.title': '测绘',
+  'survey.intro': '纵横推理，步步有据。',
+  'survey.opening': '点开一格，查看各行各列的雷数。',
+  'survey.legend': '已插旗 / 雷数',
+  'survey.hint': '结合边缘雷数与格内数字推理。',
+  'survey.bookkeeping': '数量对上了，不代表旗子都标对了。',
+  'survey.line': '{axis} {number}：已插旗 {flags} / 雷数 {total} · 未揭开 {covered}',
+  'survey.pending-line': '{axis} {number}：已插旗 {flags} · 开格后显示雷数',
+  'survey.moves': '操作数',
+  'survey.remaining': '剩余安全格',
+  'survey.zoom': '放大格子',
+  'survey.fit': '适应宽度',
+  'survey.win': '测绘完成',
+  'survey.loss': '测绘触雷',
+  'survey.rank-hint': '按操作数从少到多记录各难度的最佳通关。',
+  'survey.no-records': '第一次测绘通关后，会记录在这里。',
+  'survey.recovered': '测绘存档无法恢复，已准备新棋盘并保留有效记录。',
+  'survey.limit': '本局已达到操作上限，请开始新的测绘。',
+  'survey.help-local-title': '看周围',
+  'survey.help-local': '格内数字表示周围八格的雷数。揭开所有安全格即可通关。',
+  'survey.help-lines-title': '看整行整列',
+  'survey.help-lines':
+    '边缘显示整行或整列的“已插旗 / 雷数”，不表示连续雷的长度。雷数为零，这一整行或整列都安全。',
+  'survey.help-marks-title': '做好标记',
+  'survey.help-marks':
+    '右击或长按：未开格 → 旗子 → 疑似安全 → 清除。对已开格使用可按旗子和安全标记快速开格；猜错仍会触雷。',
+  'survey.help-controls-title': '操作方式',
+  'survey.help-controls':
+    '方向键移动，Enter 开格，F 插旗，S 标疑似安全，C 快速开格。触屏可用操作按钮切换。放大后拖动棋盘，边缘雷数会保持可见。',
   'echo.shifted': '真身换位了。旧的真身读数已失效，重新扫描。',
   'echo.phase-break': '这一段外壳已击破，回合结束后真身换位。',
   'echo.rhythm': '破绽持续 3 回合。每第 3 回合声波停歇，抓紧走位或攻击。',

@@ -16,16 +16,23 @@ import { SonarSession } from '../application/sonar-session.js'
 import type { SonarRepository } from '../persistence/sonar-repository.js'
 import { SonarApp } from './sonar-app.js'
 import { sonarCopy } from './sonar-copy.js'
+import { SurveySession } from '../application/survey-session.js'
+import type { SurveyRepository } from '../persistence/survey-repository.js'
+import { SurveyApp } from './survey-app.js'
+import { message } from '../i18n.js'
 
 /** Parse public routing input independently from the classic difficulty parameter. */
 export function parseRuleset(value: string | null): Ruleset {
-  return value === 'expedition' || value === 'twin' || value === 'sonar' ? value : 'classic'
+  return value === 'expedition' || value === 'twin' || value === 'sonar' || value === 'survey'
+    ? value
+    : 'classic'
 }
 
 /** Owns exactly one mounted game and switches modes without erasing their save slots. */
 export class GameRouter implements MountedGame {
   private readonly repository: Repository
   private readonly variants: VariantRepository
+  private readonly survey: SurveyRepository
   private readonly sonar: SonarRepository
   private language: Language
   private readonly navigation: HTMLElement
@@ -41,10 +48,12 @@ export class GameRouter implements MountedGame {
     repository: Repository,
     variants: VariantRepository,
     sonar: SonarRepository,
+    survey: SurveyRepository,
     language: Language,
   ) {
     this.repository = repository
     this.variants = variants
+    this.survey = survey
     this.sonar = sonar
     this.language = language
     root.innerHTML = `<nav class="ruleset-tabs ${sharedStyles['ruleset-tabs']}"></nav><div class="ruleset-host"></div>`
@@ -85,6 +94,17 @@ export class GameRouter implements MountedGame {
       )
     }
 
+    if (this.mode === 'survey')
+      return new SurveyApp(
+        this.host,
+        new SurveySession(this.survey, browserRuntime),
+        this.survey,
+        this.repository,
+        this.language,
+        sounds,
+        this.languageChanged,
+      )
+
     if (this.mode === 'sonar')
       return new SonarApp(
         this.host,
@@ -115,7 +135,7 @@ export class GameRouter implements MountedGame {
   private renderNavigation(): void {
     const t = variantCopy(this.language)
     this.navigation.setAttribute('aria-label', t.modes)
-    this.navigation.innerHTML = `<span>${t.modes}</span>${(['classic', 'expedition', 'twin', 'sonar'] as const).map((mode) => `<button data-ruleset="${mode}" aria-pressed="${mode === this.mode}">${mode === 'sonar' ? sonarCopy(this.language).title : t[mode]}</button>`).join('')}`
+    this.navigation.innerHTML = `<span>${t.modes}</span>${(['classic', 'expedition', 'twin', 'sonar', 'survey'] as const).map((mode) => `<button data-ruleset="${mode}" aria-pressed="${mode === this.mode}">${mode === 'survey' ? message(this.language, 'survey.title') : mode === 'sonar' ? sonarCopy(this.language).title : t[mode]}</button>`).join('')}`
   }
 
   /** Save and dispose the current mode before activating another independent namespace. */

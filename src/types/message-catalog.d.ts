@@ -1,5 +1,32 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'survey.mines': string
+  readonly 'survey.title': string
+  readonly 'survey.intro': string
+  readonly 'survey.opening': string
+  readonly 'survey.legend': string
+  readonly 'survey.hint': string
+  readonly 'survey.bookkeeping': string
+  readonly 'survey.line': string
+  readonly 'survey.pending-line': string
+  readonly 'survey.moves': string
+  readonly 'survey.remaining': string
+  readonly 'survey.zoom': string
+  readonly 'survey.fit': string
+  readonly 'survey.win': string
+  readonly 'survey.loss': string
+  readonly 'survey.rank-hint': string
+  readonly 'survey.no-records': string
+  readonly 'survey.recovered': string
+  readonly 'survey.limit': string
+  readonly 'survey.help-local-title': string
+  readonly 'survey.help-local': string
+  readonly 'survey.help-lines-title': string
+  readonly 'survey.help-lines': string
+  readonly 'survey.help-marks-title': string
+  readonly 'survey.help-marks': string
+  readonly 'survey.help-controls-title': string
+  readonly 'survey.help-controls': string
   readonly 'echo.shifted': string
   readonly 'echo.phase-break': string
   readonly 'echo.rhythm': string
