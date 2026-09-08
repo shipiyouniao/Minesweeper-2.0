@@ -61,6 +61,11 @@
   background: var(--surface);
 }
 .survey-line {
+  min-width: 0;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,7 +100,8 @@
   color: var(--muted);
   opacity: 0.5;
 }
-.survey-line[data-active='true'] {
+.survey-line[data-active='true'],
+.survey-line:focus-visible {
   background: var(--accent-soft);
   outline: 1px solid var(--accent-line);
 }

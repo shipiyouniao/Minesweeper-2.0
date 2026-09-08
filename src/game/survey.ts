@@ -1,8 +1,14 @@
 import { act } from './engine.js'
 import { generateSurvey } from './survey-generation.js'
 import { deduceSurveyLine, surveyIndices } from './survey-logic.js'
-import type { Action, Cell, PresetBoards, RankedDifficulty } from '../types/game.js'
-import type { Survey, SurveyKnowledge, SurveyLine } from '../types/survey.js'
+import type { Cell, PresetBoards, RankedDifficulty } from '../types/game.js'
+import type {
+  Survey,
+  SurveyAction,
+  SurveyAxis,
+  SurveyKnowledge,
+  SurveyLine,
+} from '../types/survey.js'
 
 export const SURVEY_ACTION_LIMIT = 20_000
 
@@ -54,33 +60,48 @@ export function surveyChordTargets(state: Survey, index: number): readonly numbe
   for (const axis of ['row', 'column'] as const) {
     const line =
       axis === 'row' ? Math.floor(index / state.game.config.width) : index % state.game.config.width
-    const reading = surveyLine(state, axis, line)
-    const filled = !reading.conflict && reading.total === reading.flags
-    for (const at of surveyIndices(state.game.config, axis, line))
-      if (
-        state.game.cells[at]?.visibility === 'hidden' &&
-        (filled || state.game.safeMarks.includes(at))
-      )
-        targets.add(at)
+    for (const at of surveyLineTargets(state, axis, line)) targets.add(at)
   }
   return [...targets].sort((a, b) => a - b)
 }
 
+/** Restrict a header's quick-open to its own line, using the existing public flag and note rules. */
+export function surveyLineTargets(
+  state: Survey,
+  axis: SurveyAxis,
+  line: number,
+): readonly number[] {
+  const reading = surveyLine(state, axis, line)
+  if (reading.total === null) return []
+  const filled = !reading.conflict && reading.total === reading.flags
+  return surveyIndices(state.game.config, axis, line).filter(
+    (index) =>
+      state.game.cells[index]?.visibility === 'hidden' &&
+      (filled || state.game.safeMarks.includes(index)),
+  )
+}
+
 /** Keep annotation semantics shared, but never invoke Classic's neighborhood reveal or flood fill. */
-export function actSurvey(state: Survey, action: Action): Survey {
+export function actSurvey(state: Survey, action: SurveyAction): Survey {
   const before = state.game
-  const cell = before.cells[action.index]
+  const source =
+    action.type === 'chord-line' && action.axis === 'row'
+      ? action.index * before.config.width
+      : action.index
+  const cell = before.cells[source]
   if (!Number.isInteger(action.index) || !cell || before.phase !== 'playing') return state
   if (action.type === 'flag' || action.type === 'mark-safe') {
     const game = act(before, action)
     return game === before ? state : { ...state, game, moves: state.moves + 1 }
   }
   const targets =
-    action.type === 'chord' || cell.visibility === 'revealed'
-      ? surveyChordTargets(state, action.index)
-      : cell.visibility === 'hidden'
-        ? [action.index]
-        : []
+    action.type === 'chord-line'
+      ? surveyLineTargets(state, action.axis, action.index)
+      : action.type === 'chord' || cell.visibility === 'revealed'
+        ? surveyChordTargets(state, action.index)
+        : cell.visibility === 'hidden'
+          ? [action.index]
+          : []
   if (!targets.length) return state
 
   const cells = [...before.cells]
@@ -103,7 +124,7 @@ export function actSurvey(state: Survey, action: Action): Survey {
         ? cells.map((entry) => (entry.mine ? { ...entry, visibility: 'flagged' } : entry))
         : cells,
       safeMarks: before.safeMarks.filter((index) => cells[index]?.visibility === 'hidden'),
-      firstClick: before.firstClick ?? action.index,
+      firstClick: before.firstClick ?? source,
       phase: exploded !== null ? 'lost' : won ? 'won' : 'playing',
       exploded,
     },

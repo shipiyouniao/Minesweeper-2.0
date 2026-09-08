@@ -1,6 +1,7 @@
 import type { RankedDifficulty } from './game.js'
 import type { InteractionCue } from './audio.js'
 import type { NavigationKey } from './ui.js'
+import type { SurveyAxis } from './survey.js'
 
 /** Survey owns its finite controls without adding unrelated commands to Classic or Expedition. */
 export type SurveyCommand =
@@ -21,12 +22,16 @@ export interface SurveyInputActions {
   secondary(index: number): void
   /** Execute an explicit keyboard annotation or quick-open command. */
   direct(index: number, type: 'flag' | 'mark-safe' | 'chord'): void
+  /** Quick-open exactly one public row or column from its header. */
+  openLine(axis: SurveyAxis, line: number): void
   /** Remember the current public board coordinate. */
   focus(index: number): void
   /** Move keyboard focus using shared board geometry. */
   navigate(index: number, key: NavigationKey): void
   /** Highlight only the public row and column of a pointer target. */
   preview(index: number | null): void
+  /** Highlight the single line named by a focused or hovered clue. */
+  previewLine(axis: SurveyAxis, line: number): void
   /** Checkpoint and cover information when backgrounded. */
   suspend(): void
   /** Prepare audio during the original browser gesture. */
@@ -43,4 +48,23 @@ export interface SurveyHold {
   readonly y: number
   cancelled: boolean
   acted: boolean
+}
+
+/** A decoded clue header always identifies one supported axis and a finite line index. */
+export interface SurveyHeader {
+  readonly axis: SurveyAxis
+  readonly line: number
+}
+
+/** Keep touch taps attached to their original clue, while letting native scrolling cancel them. */
+export interface SurveyHeaderHold extends SurveyHeader {
+  readonly pointer: number
+  readonly x: number
+  readonly y: number
+  readonly started: number
+}
+
+/** Only two completed taps on the same clue within the interval form a double tap. */
+export interface SurveyHeaderTap extends SurveyHeader {
+  readonly time: number
 }

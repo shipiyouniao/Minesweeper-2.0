@@ -1,5 +1,10 @@
 import type { Action, Game, RankedDifficulty } from './game.js'
 
+/** A whole-line action must retain its axis so replay cannot open a crossing line by accident. */
+export type SurveyAxis = 'row' | 'column'
+export type SurveyAction =
+  Action | { readonly type: 'chord-line'; readonly axis: SurveyAxis; readonly index: number }
+
 /** A mine nonogram: ordered runs replace the classic eight-neighbor clues entirely. */
 export interface Survey {
   readonly difficulty: RankedDifficulty
@@ -50,7 +55,7 @@ export interface SurveySave {
   readonly version: 2
   readonly difficulty: RankedDifficulty
   readonly seed: number
-  readonly actions: readonly Action[]
+  readonly actions: readonly SurveyAction[]
   readonly settled: boolean
   readonly records: readonly SurveyRecord[]
 }

@@ -10,6 +10,8 @@ export const enMessages: MessageCatalog = {
   'survey.hint': 'Open safe ground using the edge clues.',
   'survey.bookkeeping':
     '“2 1”: two mines together, a gap, then one mine. A wrong flag can still lead you into a mine.',
+  'survey.line-action':
+    'Double-click or double-tap to quick-open this line. Enter or Space also works.',
   'survey.line': '{axis} {number}: runs {runs} · {flags} flags',
   'survey.moves': 'Moves',
   'survey.remaining': 'Safe squares left',

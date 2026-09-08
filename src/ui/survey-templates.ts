@@ -1,3 +1,4 @@
+import { boardZoomTemplate } from './board-zoom.js'
 import { RANKED_DIFFICULTIES } from '../game/difficulty.js'
 import { message, translations } from '../i18n.js'
 import { icon } from '../icons.js'
@@ -33,7 +34,7 @@ export function surveyTemplate(language: Language, state: Survey): string {
       <div class="tw:flex tw:gap-1"><button class="${button}" data-control="records" aria-label="${t.records}">${icon('trophy')}</button><button class="${button}" data-control="sound" aria-label="${t.sound}"></button><button class="${button}" data-control="pause" aria-label="${t.pause}"></button></div></div>
       <p class="survey-storage tw:text-[clamp(14px,0.9vw,18px)] tw:text-muted" role="status"></p>${surveyDifficulties(language, state.difficulty)}
       <div class="tw:grid tw:gap-5 tw:items-start tw:min-[960px]:grid-cols-[minmax(0,1fr)_280px] tw:min-[1600px]:grid-cols-[minmax(0,1fr)_320px]">
-        <section class="survey-board-panel ${panel} tw:min-w-0 tw:overflow-hidden"><div class="tw:flex tw:items-center tw:justify-between tw:px-4 tw:py-2 tw:gap-2 tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted"><span>${state.game.config.width} × ${state.game.config.height} · ${state.game.config.mines} ${message(language, 'survey.mines')}</span><span id="survey-legend">${message(language, 'survey.legend')}</span><button class="${button}" data-control="zoom" aria-label="${message(language, 'survey.zoom')}">${icon('globe')}</button></div>
+        <section class="survey-board-panel ${panel} tw:min-w-0 tw:overflow-hidden"><div class="board-frame-heading ${sharedStyles['board-frame-heading']} tw:px-4 tw:py-2 tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted"><span>${state.game.config.width} × ${state.game.config.height} · ${state.game.config.mines} ${message(language, 'survey.mines')}</span><span id="survey-legend">${message(language, 'survey.legend')}</span>${boardZoomTemplate(message(language, 'survey.zoom'))}</div>
           <div class="tw:relative"><div class="board-viewport survey-viewport"><div class="survey-grid"><div class="survey-corner" aria-hidden="true">↘</div><div class="survey-column-heads"></div><div class="survey-row-heads"></div><div class="board" role="grid" aria-label="${message(language, 'survey.title')}" aria-describedby="survey-legend"></div></div></div>
           <div class="survey-pause tw:absolute tw:inset-0 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-4 tw:bg-surface" hidden><p>${t.paused}</p><button class="primary-button ${sharedStyles['primary-button']}" data-control="pause">${t.resume}</button></div></div>
         </section>

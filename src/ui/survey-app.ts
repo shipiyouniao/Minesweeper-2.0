@@ -5,6 +5,7 @@ import { message, translations } from '../i18n.js'
 import type { SurveyRepository } from '../persistence/survey-repository.js'
 import type { InteractionCue, SoundEffects } from '../types/audio.js'
 import type { RankedDifficulty } from '../types/game.js'
+import type { SurveyAction, SurveyAxis } from '../types/survey.js'
 import type { Language } from '../types/localization.js'
 import type { GameRepository } from '../types/storage.js'
 import type { BoardInputMode, NavigationKey } from '../types/ui.js'
@@ -62,20 +63,26 @@ export class SurveyApp implements SurveyInputActions {
   /** Apply the selected primary operation using Survey's immutable rules. */
   play(index: number): void {
     if (this.blocked) return
-    this.apply(index, this.mode)
+    this.apply({ index, type: this.mode })
   }
 
   /** Right-click/hold share the existing public mark cycle and quick-open rule. */
   secondary(index: number): void {
     if (this.blocked) return
     const action = secondaryBoardAction(this.session.state.game, index)
-    if (action) this.apply(index, action)
+    if (action) this.apply({ index, type: action })
   }
 
   /** Direct keyboard annotations retain their meaning independently of the touch mode. */
   direct(index: number, type: 'flag' | 'mark-safe' | 'chord'): void {
     if (this.blocked) return
-    this.apply(index, type)
+    this.apply({ index, type })
+  }
+
+  /** Header shortcuts share modal guards, scoring and persistence with cell operations. */
+  openLine(axis: SurveyAxis, line: number): void {
+    if (this.blocked) return
+    this.apply({ type: 'chord-line', axis, index: line })
   }
 
   /** Route presentation commands while keeping restart confirmation separate from rule transitions. */
@@ -159,6 +166,12 @@ export class SurveyApp implements SurveyInputActions {
     this.view.preview(this.blocked ? null : index)
   }
 
+  /** A clue highlights only its own axis, so the affected line is visible before activation. */
+  previewLine(axis: SurveyAxis, line: number): void {
+    if (this.blocked) this.view.preview(null)
+    else this.view.previewLine(axis, line)
+  }
+
   /** Checkpoint and cover both the board and its line observations when backgrounded. */
   suspend(): void {
     this.paused = this.session.state.game.phase === 'playing' || this.paused
@@ -187,20 +200,28 @@ export class SurveyApp implements SurveyInputActions {
   }
 
   /** Ordinary operations report their actual public outcome through the shared sound adapter. */
-  private apply(index: number, type: BoardInputMode): void {
+  private apply(action: SurveyAction): void {
     const before = this.session.state.game
-    if (!this.session.dispatch({ type, index })) {
+    if (!this.session.dispatch(action)) {
       this.sounds.play('blocked')
       return
     }
     this.render()
     const after = this.session.state.game
     const cue =
-      type === 'mark-safe'
-        ? after.safeMarks.includes(index)
+      action.type === 'mark-safe'
+        ? after.safeMarks.includes(action.index)
           ? 'flag'
           : 'unflag'
-        : cueForMove(before, after, index)
+        : cueForMove(
+            before,
+            after,
+            action.type === 'chord-line'
+              ? after.cells.findIndex(
+                  (cell, index) => cell.visibility !== before.cells[index]?.visibility,
+                )
+              : action.index,
+          )
     if (cue) this.sounds.play(cue)
     this.showResult()
   }

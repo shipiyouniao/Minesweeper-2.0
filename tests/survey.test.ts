@@ -111,6 +111,86 @@ test('Survey opens one safe square, has no Classic zero flood and can lose on th
   assert.equal(actSurvey(lost, { type: 'flag', index: 3 }), lost)
 })
 
+test('Header quick-open acts on exactly its row or column and does not consume a repeated action', () => {
+  let row = surveyPractice()
+  for (const index of [1, 2, 3]) row = actSurvey(row, { type: 'flag', index })
+  row = actSurvey(row, { type: 'mark-safe', index: 5 })
+  const openedRow = actSurvey(row, { type: 'chord-line', axis: 'row', index: 0 })
+  assert.deepEqual(
+    openedRow.game.cells.flatMap((cell, index) => (cell.visibility === 'revealed' ? [index] : [])),
+    [0, 4],
+  )
+  assert.deepEqual(openedRow.game.safeMarks, [5])
+  assert.equal(openedRow.moves, row.moves + 1)
+  assert.equal(actSurvey(openedRow, { type: 'chord-line', axis: 'row', index: 0 }), openedRow)
+
+  let column = surveyPractice()
+  for (const index of [2, 22]) column = actSurvey(column, { type: 'flag', index })
+  const openedColumn = actSurvey(column, { type: 'chord-line', axis: 'column', index: 2 })
+  assert.deepEqual(
+    openedColumn.game.cells.flatMap((cell, index) =>
+      cell.visibility === 'revealed' ? [index] : [],
+    ),
+    [7, 12, 17],
+  )
+  for (const axis of ['row', 'column'] as const)
+    for (const index of [-1, 0.5, NaN, 5, 25])
+      assert.equal(actSurvey(column, { type: 'chord-line', axis, index }), column)
+})
+
+test('Header quick-open retains safe-note risk and does not bypass incomplete or contradictory runs', () => {
+  const state = surveyPractice()
+  assert.equal(actSurvey(state, { type: 'chord-line', axis: 'row', index: 0 }), state)
+  let conflict = state
+  for (const index of [0, 2, 4]) conflict = actSurvey(conflict, { type: 'flag', index })
+  assert.equal(actSurvey(conflict, { type: 'chord-line', axis: 'row', index: 0 }), conflict)
+  const noted = actSurvey(state, { type: 'mark-safe', index: 12 })
+  assert.equal(
+    actSurvey(noted, { type: 'chord-line', axis: 'row', index: 2 }).game.cells[12]?.visibility,
+    'revealed',
+  )
+  const mistaken = actSurvey(state, { type: 'mark-safe', index: 2 })
+  assert.equal(
+    actSurvey(mistaken, { type: 'chord-line', axis: 'column', index: 2 }).game.phase,
+    'lost',
+  )
+})
+
+test('Header actions replay atomically in current saves and reject malformed axis-specific coordinates', () => {
+  const storage = new MemoryStorage()
+  const runtime = new FakeRuntime()
+  const session = new SurveySession(new SurveyRepository(storage), runtime)
+  const width = session.state.game.config.width
+  for (const [index, cell] of session.state.game.cells.entries())
+    if (index < width && cell.mine) session.dispatch({ type: 'flag', index })
+  assert.equal(session.dispatch({ type: 'chord-line', axis: 'row', index: 0 }), true)
+  const restored = new SurveySession(new SurveyRepository(storage), runtime)
+  assert.deepEqual(restored.state, session.state)
+  assert.equal(restored.dispatch({ type: 'chord-line', axis: 'row', index: 0 }), false)
+
+  for (const action of [
+    { type: 'chord-line', axis: 'diagonal', index: 0 },
+    { type: 'chord-line', axis: 'row', index: 10 },
+    { type: 'chord-line', axis: 'column', index: 12 },
+    { type: 'chord-line', index: 0 },
+  ]) {
+    storage.setItem(
+      SURVEY_STORAGE_KEY,
+      JSON.stringify({
+        version: 2,
+        seed: 31,
+        difficulty: 'medium',
+        actions: [action],
+        settled: false,
+        records: [],
+      }),
+    )
+    const repository = new SurveyRepository(storage)
+    assert.equal(repository.load(), null)
+    assert.equal(repository.recovered, true)
+  }
+})
+
 test('Survey line summaries and quick-open targets depend only on published runs and visible annotations', () => {
   let state = surveyPractice()
   for (const index of [1, 2, 3]) state = actSurvey(state, { type: 'flag', index })

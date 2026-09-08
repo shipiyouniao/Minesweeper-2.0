@@ -4,7 +4,7 @@ import { message, translations } from '../i18n.js'
 import { icon } from '../icons.js'
 import type { InteractionCue } from '../types/audio.js'
 import type { Language } from '../types/localization.js'
-import type { Survey } from '../types/survey.js'
+import type { Survey, SurveyAxis } from '../types/survey.js'
 import type { BoardInputMode, NavigationKey, NavigationResult } from '../types/ui.js'
 import { boardControlHint, boardControlsTemplate } from './board-controls.js'
 import { BoardView } from './board-view.js'
@@ -22,7 +22,8 @@ export class SurveyView {
   private readonly listeners = new AbortController()
   private state: Survey
   private clueState: Survey | null = null
-  private target: number | null = null
+  private targetRow = -1
+  private targetColumn = -1
   private paused = false
   private enlarged = false
   private returnFocus: HTMLElement | null = null
@@ -133,7 +134,15 @@ export class SurveyView {
 
   /** Hover/focus highlights whole lines, using coordinates alone. */
   preview(index: number | null): void {
-    this.target = index
+    this.targetRow = index === null ? -1 : Math.floor(index / this.state.game.config.width)
+    this.targetColumn = index === null ? -1 : index % this.state.game.config.width
+    this.renderHeaders()
+  }
+
+  /** Focus a clue without also highlighting an unrelated crossing line. */
+  previewLine(axis: SurveyAxis, line: number): void {
+    this.targetRow = axis === 'row' ? line : -1
+    this.targetColumn = axis === 'column' ? line : -1
     this.renderHeaders()
   }
 
@@ -151,11 +160,14 @@ export class SurveyView {
   toggleZoom(): void {
     this.enlarged = !this.enlarged
     this.element('.survey-board-panel').classList.toggle('survey-enlarged', this.enlarged)
-    this.element('[data-control="zoom"]').setAttribute(
-      'aria-label',
-      this.enlarged ? message(this.language, 'survey.fit') : message(this.language, 'survey.zoom'),
-    )
-    this.element('[data-control="zoom"]').setAttribute('aria-pressed', String(this.enlarged))
+    const button = this.element('[data-control="zoom"]')
+    const label = this.enlarged
+      ? message(this.language, 'survey.fit')
+      : message(this.language, 'survey.zoom')
+    button.setAttribute('aria-label', label)
+    button.setAttribute('title', label)
+    button.setAttribute('aria-pressed', String(this.enlarged))
+    this.element('[data-control="zoom"] span').textContent = this.enlarged ? '−' : '+'
   }
 
   /** Privacy covers and modal dialogs also dismiss the language popover. */
@@ -206,7 +218,7 @@ export class SurveyView {
       this.element(`.survey-${axis}-heads`).innerHTML = Array.from(
         { length },
         (_, index) =>
-          `<div class="survey-line" id="survey-${axis}-${index}" data-axis="${axis}" data-line="${index}"></div>`,
+          `<button type="button" class="survey-line" id="survey-${axis}-${index}" data-axis="${axis}" data-line="${index}" aria-keyshortcuts="Enter Space C"></button>`,
       ).join('')
     }
     for (const cell of this.root.querySelectorAll<HTMLElement>('[data-cell]')) {
@@ -221,9 +233,8 @@ export class SurveyView {
   /** Refresh public constraints only on a move; hover changes highlights without solving again. */
   private renderHeaders(): void {
     const t = translations[this.language]
-    const target = this.paused ? null : this.target
-    const row = target === null ? -1 : Math.floor(target / this.state.game.config.width)
-    const column = target === null ? -1 : target % this.state.game.config.width
+    const row = this.paused ? -1 : this.targetRow
+    const column = this.paused ? -1 : this.targetColumn
     const focused: string[] = []
     for (const axis of ['row', 'column'] as const) {
       for (const header of this.root.querySelectorAll<HTMLElement>(`[data-axis="${axis}"]`)) {
@@ -238,11 +249,16 @@ export class SurveyView {
           })
           header.innerHTML = `<span class="tw:sr-only">${label}</span><span class="survey-runs" aria-hidden="true">${(line.runs.length ? line.runs : [0]).map((run) => `<strong>${run}</strong>`).join('')}</span>`
           header.setAttribute('aria-label', label)
-          header.title = label
+          header.setAttribute('aria-description', message(this.language, 'survey.line-action'))
+          header.title = `${label}. ${message(this.language, 'survey.line-action')}`
           header.dataset['over'] = String(line.conflict)
           header.dataset['complete'] = String(line.complete)
         }
         header.dataset['active'] = String(index === (axis === 'row' ? row : column))
+        header.setAttribute(
+          'aria-disabled',
+          String(this.paused || this.dialogOpen || this.state.game.phase !== 'playing'),
+        )
         if (header.dataset['active'] === 'true')
           focused.push(header.getAttribute('aria-label') ?? '')
       }
