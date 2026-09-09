@@ -1,5 +1,6 @@
 import { matrixBoardFrame } from './matrix-board.js'
 import { boardZoomTemplate } from './board-zoom.js'
+import { mineCounterTemplate } from './mine-counter.js'
 import { sharedStyles } from './shared-styles.js'
 import { gameplayStyles } from './gameplay-styles.js'
 import { expeditionReadings } from './echo-board.js'
@@ -191,7 +192,7 @@ export function twinTemplate(language: Language, state: Twin, inputMode: BoardIn
     <p class="variant-status ${sharedStyles['variant-status']}" role="status" tabindex="-1">${status}</p>
     <div class="twin-tools ${sharedStyles['twin-tools']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="restart">${common.restart}</button></div>
     ${state.a.phase === 'won' || state.b.phase === 'won' ? `<p class="variant-note ${sharedStyles['variant-note']}">${t.safePartner}</p>` : ''}
-    <div class="board-play-area"><div class="action-dock ${gameplayStyles['action-dock']} compact-dock ${gameplayStyles['compact-dock']}">${boardControlsTemplate(language, inputMode, 'data-control')}</div><div class="twin-layout">${boardFrame('a', 'A', boardZoomTemplate(t.zoom))}${boardFrame('b', 'B')}</div></div>`
+    <div class="board-play-area"><div class="action-dock ${gameplayStyles['action-dock']} compact-dock ${gameplayStyles['compact-dock']}">${boardControlsTemplate(language, inputMode, 'data-control')}</div><div class="twin-layout">${boardFrame('a', 'A', `<div class="tw:flex tw:items-center tw:gap-3">${mineCounterTemplate(language, state.a, 'a')}${boardZoomTemplate(t.zoom)}</div>`)}${boardFrame('b', 'B', mineCounterTemplate(language, state.b, 'b'))}</div></div>`
 }
 
 /** Render a square, explicitly targeted inventory button with a persistent charge badge. */

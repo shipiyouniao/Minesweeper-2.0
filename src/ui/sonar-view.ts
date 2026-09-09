@@ -9,6 +9,7 @@ import { boardControlHint, boardControlsTemplate } from './board-controls.js'
 import { BoardView } from './board-view.js'
 import { LanguageMenu } from './language-menu.js'
 import { sonarCopy } from './sonar-copy.js'
+import { remainingMines } from './mine-counter.js'
 import { sonarComparisonTemplate, sonarLogTemplate, sonarTemplate } from './sonar-templates.js'
 
 /** Own the board, overlays, native modal and animation lifetimes without changing puzzle state. */
@@ -90,6 +91,10 @@ export class SonarView {
   ): void {
     this.state = state
     this.selected = selected
+    const counter = this.element('[data-mine-count]')
+    const remaining = String(remainingMines(state.game))
+    if (counter.textContent !== remaining) counter.textContent = remaining
+
     const t = translations[this.language]
     const s = sonarCopy(this.language)
     this.board.render(state.game, paused || this.dialogOpen, t)
