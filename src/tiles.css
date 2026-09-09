@@ -1,0 +1,9 @@
+/* One covered material across real boards and interactive practice boards.
+   Low specificity leaves flags, confirmed information, hazards and focus above it. */
+.cell:where(.hidden),
+.story-cell:where(.is-covered),
+.practice-cell:where(:not(.open):not(.flagged)) {
+  background: var(--tile-covered-fill);
+  border: 1px solid var(--tile-covered-edge);
+  box-shadow: var(--tile-covered-shadow);
+}

@@ -5,19 +5,32 @@ export class DialogueReveal {
   private timer: ReturnType<typeof setTimeout> | null = null
   private output: HTMLElement | null = null
   private text = ''
+  private completed: (() => void) | null = null
   private readonly sounds: SoundEffects
 
+  /** Share activation and mute settings with the owning scene. */
   constructor(sounds: SoundEffects) {
     this.sounds = sounds
   }
 
   /** Reserve the complete line's geometry while the visual copy types above it. */
-  start(paragraph: HTMLElement, text: string, cue: SoundCue, language: string): void {
+  start(
+    paragraph: HTMLElement,
+    text: string,
+    cue: SoundCue,
+    language: string,
+    completed?: () => void,
+  ): void {
     this.cancel()
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    this.text = text
     paragraph.setAttribute('aria-label', text)
     paragraph.setAttribute('aria-atomic', 'true')
+    if (!text || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      paragraph.textContent = text
+      completed?.()
+      return
+    }
+    this.text = text
+    this.completed = completed ?? null
     const wrapper = document.createElement('span')
     wrapper.className = 'tw:relative tw:block'
     wrapper.setAttribute('aria-hidden', 'true')
@@ -48,7 +61,7 @@ export class DialogueReveal {
       output.textContent += letter
       if (/[\p{L}\p{N}]/u.test(letter)) this.sounds.play(cue)
       if (index === letters.length) {
-        this.cancel()
+        this.finish()
         return
       }
       this.timer = setTimeout(tick, /[，。！？、,.!?;:]/u.test(letter) ? 95 : 28)
@@ -60,7 +73,9 @@ export class DialogueReveal {
   finish(): boolean {
     if (!this.output) return false
     this.output.textContent = this.text
+    const completed = this.completed
     this.cancel()
+    completed?.()
     return true
   }
 
@@ -69,5 +84,6 @@ export class DialogueReveal {
     if (this.timer !== null) clearTimeout(this.timer)
     this.timer = null
     this.output = null
+    this.completed = null
   }
 }

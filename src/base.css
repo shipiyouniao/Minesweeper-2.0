@@ -145,7 +145,7 @@ h1 {
   box-shadow: 0 0 0 1px var(--surface);
 }
 .cell.hidden:hover {
-  background: #d8dfd3;
+  filter: brightness(1.04);
 }
 .cell.hidden:active {
   border-bottom-width: 1px;

@@ -2,6 +2,16 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'story.return-bag': '这个行囊，应该能物归原主了。',
+  'story.open-eyes': '睁开眼睛',
+  'story.dialogue-next': '继续',
+  'story.dialogue-read': '显示整句',
+  'story.where-am-i': '这里……是哪里？',
+  'story.other-world': '我的故乡……没有这样的光。',
+  'story.found-bag': '这里有个落下的行囊。',
+  'story.keep-bag': '带上吧。失主也许就在营地等着。',
+  'story.home-question': '你觉得……还能找到回去的路吗？',
+  'story.thanks': '谢谢你，露米。总算能松口气了。',
   'story.prologue': '序章 · 雾中的灯火',
   'story.camp': '灯栖营地',
   'story.guide': '露米',

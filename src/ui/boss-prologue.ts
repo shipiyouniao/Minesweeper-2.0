@@ -1,5 +1,6 @@
 import { sharedStyles } from './shared-styles.js'
 import { DialogueReveal } from './dialogue-reveal.js'
+import { bossDialogueCue, playerDialogueCue } from '../audio/dialogue-voices.js'
 import type { SoundEffects } from '../types/audio.js'
 import { guidanceStyles } from './guidance-styles.js'
 import { message } from '../i18n.js'
@@ -163,9 +164,9 @@ export class BossPrologue {
         paragraph,
         line,
         beat.speaker === 'player'
-          ? 'dialogue-player'
+          ? playerDialogueCue(run.departure.profession)
           : beat.speaker === 'boss'
-            ? 'dialogue-boss'
+            ? bossDialogueCue(script.kind)
             : 'dialogue-narrator',
         language,
       )

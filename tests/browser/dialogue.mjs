@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { battleFixture } from './battle-fixtures.mjs'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'msedge' })
 try {
   for (const width of [390, 1440]) {
@@ -9,7 +10,7 @@ try {
       viewport: { width, height: 950 },
       hasTouch: width === 390,
     })
-    await page.goto('http://127.0.0.1:5173/minefarer/')
+    await page.goto(base)
     const result = await page.evaluate(async () => {
       const { DialogueReveal } = await import('./.native/app/ui/dialogue-reveal.js')
       const { notesForCue } = await import('./.native/app/audio/cues.js')
@@ -94,11 +95,15 @@ try {
       (save) => localStorage.setItem('minesweeper.variants.v1.expedition', JSON.stringify(save)),
       battleFixture(51).entered.save,
     )
-    await page.goto('http://127.0.0.1:4173/minefarer/?ruleset=expedition&lang=zh')
+    await page.goto(`${base}?ruleset=expedition&lang=zh`)
     await page.locator('[data-dialogue-text]').waitFor()
     const advance = page.locator('[data-scene="next"]')
-    const footer = await page.locator('.prologue-footer > span').innerText()
+    // Restart a line after layout settles; animation scrolling must not race its short duration.
     await advance.click()
+    await advance.click()
+    await page.locator('[data-scene="previous"]').click()
+    const footer = await page.locator('.prologue-footer > span').innerText()
+    await advance.dispatchEvent('click')
     assert.equal(await page.locator('.prologue-footer > span').innerText(), footer)
     const line = page.locator('[data-dialogue-line]')
     assert.equal(
@@ -108,10 +113,21 @@ try {
     await advance.click()
     assert.notEqual(await page.locator('.prologue-footer > span').innerText(), footer)
     await page.locator('[data-scene="skip"]').click()
+    await page.locator('.prologue-dialog').waitFor({ state: 'detached' })
     assert.equal(await page.locator('.prologue-dialog').count(), 0)
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.locator('[data-control="prologue"]').click()
     assert.equal(await page.locator('[data-dialogue-text]').count(), 0)
+    const accessible = await page.evaluate(async () => {
+      const { DialogueReveal } = await import('./.native/app/ui/dialogue-reveal.js')
+      let completed = 0
+      const reveal = new DialogueReveal({ play() {} })
+      const line = document.createElement('p')
+      for (const text of ['第一句', '第二句'])
+        reveal.start(line, text, 'dialogue-player', 'zh', () => completed++)
+      return { completed, text: line.textContent, label: line.getAttribute('aria-label') }
+    })
+    assert.deepEqual(accessible, { completed: 2, text: '第二句', label: '第二句' })
     await page.close()
   }
   console.log(

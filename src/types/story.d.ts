@@ -4,6 +4,16 @@ import type { CampScreen } from './camp-navigation.js'
 import type { Camp } from './variants.js'
 import type { Language } from './localization.js'
 
+/** Dialogue beats are presentation only; actions still belong to the playable scene. */
+export interface StoryDialogueBeat {
+  readonly speaker: 'player' | 'lumi'
+  readonly line: string
+  readonly gesture: 'wake' | 'point' | 'nod' | 'greet' | 'offer' | 'steady'
+}
+
+/** Board reactions play after the corresponding accepted interaction. */
+export type StoryReaction = 'greet' | 'collect'
+
 /** Authored scenes share coordinates and movement without sharing a random generator. */
 export interface StoryScene {
   readonly id: 'awakening' | 'trail' | 'approach' | 'camp'

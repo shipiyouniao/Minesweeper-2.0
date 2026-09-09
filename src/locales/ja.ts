@@ -2,6 +2,16 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'story.return-bag': 'この鞄、持ち主に返せそうだね。',
+  'story.open-eyes': '目を開ける',
+  'story.dialogue-next': '続ける',
+  'story.dialogue-read': '全文を表示',
+  'story.where-am-i': 'ここは……どこ？',
+  'story.other-world': '故郷には……こんな光はなかった。',
+  'story.found-bag': '誰かの鞄が落ちている。',
+  'story.keep-bag': '持っていこう。持ち主が野営地で待っているかも。',
+  'story.home-question': '元の世界へ戻る道は、見つかるかな？',
+  'story.thanks': 'ありがとう、ルミ。やっと一息つけるよ。',
   'story.prologue': '序章 · 霧の中の灯',
   'story.camp': '灯の宿営地',
   'story.guide': 'ルミ',

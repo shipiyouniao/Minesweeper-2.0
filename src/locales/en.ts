@@ -2,6 +2,16 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'story.return-bag': 'This bag should make it back to its owner.',
+  'story.open-eyes': 'Open your eyes',
+  'story.dialogue-next': 'Continue',
+  'story.dialogue-read': 'Show the whole line',
+  'story.where-am-i': 'Where… am I?',
+  'story.other-world': 'My home has nothing like these lights.',
+  'story.found-bag': 'Someone left a bag here.',
+  'story.keep-bag': 'Bring it along. Its owner may be waiting at camp.',
+  'story.home-question': 'Do you think there is a way back to my world?',
+  'story.thanks': 'Thank you, Lumi. I can finally catch my breath.',
   'story.prologue': 'Prologue · A light in the mist',
   'story.camp': 'Lanternrest',
   'story.guide': 'Lumi',

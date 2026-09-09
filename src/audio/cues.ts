@@ -1,6 +1,7 @@
 import type { SoundCue, Tone } from '../types/audio.js'
 import type { Game } from '../types/game.js'
 import type { Vitality } from '../types/vitality.js'
+import { dialogueTone, isDialogueCue } from './dialogue-voices.js'
 
 /** Describe visible resource changes only; audio must never inspect an unrevealed cell. */
 export function cueForVitality(before: Vitality, after: Vitality): SoundCue | null {
@@ -37,6 +38,7 @@ function note(frequency: number, delay = 0, duration = 0.09): Tone {
 
 /** Compose original, lightweight cues without recordings, downloads, or runtime randomness. */
 export function notesForCue(cue: SoundCue): readonly Tone[] {
+  if (isDialogueCue(cue)) return [dialogueTone(cue)]
   switch (cue) {
     case 'tide-anchor':
       return [
@@ -49,12 +51,6 @@ export function notesForCue(cue: SoundCue): readonly Tone[] {
         { ...note(180, 0.3, 0.55), endFrequency: 540, gain: 0.04 },
         { ...note(540, 0.7, 0.5), endFrequency: 160, gain: 0.025 },
       ]
-    case 'dialogue-player':
-      return [{ ...note(980, 0, 0.022), endFrequency: 1120, gain: 0.018 }]
-    case 'dialogue-boss':
-      return [{ ...note(260, 0, 0.028), endFrequency: 190, gain: 0.025 }]
-    case 'dialogue-narrator':
-      return [{ ...note(580, 0, 0.02), gain: 0.014 }]
     case 'sonar-pulse':
       return [
         { ...note(1040, 0, 0.34), endFrequency: 780, gain: 0.045 },
@@ -102,13 +98,11 @@ export function notesForCue(cue: SoundCue): readonly Tone[] {
 
 /** Prefer action results over menu dismissal or key feedback from the same gesture. */
 export function cuePriority(cue: SoundCue): number {
+  if (isDialogueCue(cue)) return 0
   switch (cue) {
     case 'tide-anchor':
     case 'tide-wave':
       return 2
-    case 'dialogue-player':
-    case 'dialogue-boss':
-    case 'dialogue-narrator':
     case 'navigate':
     case 'input':
     case 'dismiss':
