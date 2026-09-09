@@ -16,6 +16,9 @@
   --panel-shadow: 0 12px 40px #213e3008, inset 0 1px #ffffffb3;
   --blue: #3457db;
   --blue-tint: #edf0fb;
+  --tile-covered-fill: linear-gradient(145deg, #b9c9b1, #d6dfce);
+  --tile-covered-edge: #9eaf97;
+  --tile-covered-shadow: inset 0 2px #e4eed7, 0 2px #758e6745;
   --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', 'Microsoft YaHei', sans-serif;
   --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 }

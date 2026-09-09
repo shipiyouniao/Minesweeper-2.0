@@ -48,6 +48,18 @@ Current story attempts replay only the current authored-content revision. Incomp
 
 Story art uses the existing chibi proportions, simple oval faces, soft 3D materials and brass/leather accents. The original blue explorer remains the protagonist. Lumi and the camp illustration match that asset family; the discarded painterly concepts are not shipped. See [story artwork](story-artwork.md).
 
-Scene dialogue is inline rather than modal. Number scopes have outlines, targets have visible borders, flags use distinct shapes and triggered warnings are immutable. Keyboard focus sits above the cells. The board fits available width and laptop height; the fixed controls stay outside filtered containers. Reduced motion removes walking and beacon animation. Sound follows the existing shared mute setting, and all story copy is provided in English, Chinese and Japanese.
+Scene dialogue is inline rather than modal. On a fresh start, the traveler blinks awake and the clearing comes into focus over 2.2 seconds. The opening can be skipped with its button or Escape. Returning to a saved attempt starts directly on the board.
+
+Short exchanges reveal one grapheme at a time. Continue first finishes the current sentence, then advances to the next speaker; the board objective remains visible throughout. Active speakers move forward and nod, point or greet. Walking up to Lumi produces a greeting from both characters. Finding the satchel lifts its icon above the traveler, and the first camp conversation passes it between the two portraits when it was recovered. These effects belong to `StoryPerformance`, separate from game rules and the saved action journal. They cannot move a character, advance a floor or pay a reward.
+
+Lumi, all eight professions and all eight boss families have distinct synthesized syllables. Speech is louder than the previous dialogue mix, while ordinary game effects retain their existing levels. Punctuation stays silent. All speech follows the shared mute setting; route changes and backgrounding cancel it. Timed dialogue cannot activate browser audio by itself: a direct link remains silent until the player interacts. Normal entry from the homepage supplies that gesture.
+
+Reduced motion presents complete sentences and removes the opening, character gestures, walking and beacon animation. Number scopes have outlines, targets have visible borders, flags use distinct shapes and triggered warnings are immutable. Keyboard focus sits above the cells. The board fits available width and laptop height; the fixed controls stay outside filtered containers. All story copy is provided in English, Chinese and Japanese.
+
+The prologue's soft green covered-tile material is shared by classic, twin, sonar, survey, expedition, boss and interactive practice boards through `src/tiles.css` and three design tokens. State-specific flags, confirmed information, damage warnings and keyboard outlines remain above that base material.
+
+![Inline conversation on desktop](screenshots/story-dialogue-desktop.png)
+
+![Meeting Lumi at camp on mobile](screenshots/story-dialogue-mobile.png)
 
 The project continues to use module-scoped `.d.ts` contracts, pure rules, session ownership and both native and legacy TypeScript validation.

@@ -16,6 +16,8 @@
 @import './combat-feedback.css' layer(components);
 @import './shell.css' layer(components);
 @import './story.css' layer(components);
+@import './tiles.css' layer(components);
+@import './story-performance.css' layer(components);
 
 /* Resets stay below component styles and opt-in utilities. */
 @layer base {

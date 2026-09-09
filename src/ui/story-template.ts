@@ -41,26 +41,6 @@ export function storySiteName(language: Language, site: CampSite): string {
   return campPageName(language, site.destination)
 }
 
-/** Dialogue changes after meaningful scene interactions, with no detached tutorial modal. */
-function guideLine(state: StoryViewState): string {
-  const language = state.language
-  const run = state.run
-  if (!run) {
-    if (state.conversation === 'road') return message(language, 'story.road-line')
-    if (state.conversation === 'guide' || state.progress.completed.includes('meet-guide'))
-      return message(language, 'story.guide-line')
-    return message(language, 'story.arrival-line')
-  }
-  if (run.phase === 'fallen') return message(language, 'story.fallen')
-  if (state.feedback === 'hurt') return message(language, 'story.hurt')
-  if (run.floor === 1) return message(language, 'story.trail-line')
-  if (run.floor === 2) return message(language, 'story.approach-line')
-  if (!run.inspected) return message(language, 'story.wake-line')
-  if (!run.practicedFlag) return message(language, 'story.flag-line')
-  if (!run.practicedReveal) return message(language, 'story.open-line')
-  return message(language, 'story.travel-line')
-}
-
 /** Keep one short actionable instruction next to the live scene. */
 function objective(state: StoryViewState): string {
   const language = state.language
@@ -163,6 +143,6 @@ export function storyTemplate(state: StoryViewState): string {
   <main class="story-main" data-story-scene="${state.board.scene.id}">
     ${!state.storageAvailable ? `<p role="alert">${message(language, 'story.storage')}</p>` : ''}
     <section class="story-banner glass-panel" style="--story-hero:url('${hero}')"><div><p class="eyebrow">${run ? message(language, 'story.prologue') : 'MINEFARER / CAMP'}</p><h1 data-route-heading>${sceneName(state)}</h1><p>${run ? `${run.floor + 1} / 3` : `${new Intl.NumberFormat(language).format(state.camp.supplies)} ${variantCopy(language).supplies}`}</p></div></section>
-    ${state.service ? `<div class="story-service"><button class="story-back" data-story-action="back">← ${message(language, 'story.back-camp')}</button>${state.service.page === 'professions' ? titleTemplate(language, state.camp) : ''}${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, 'standard', state.service)}</div>` : `<div class="story-layout"><section class="story-stage glass-panel"><div class="story-stage-top"><span>${objective(state)}</span>${run ? `<span class="story-hearts" aria-label="${message(language, 'story.health')}: ${run.health} / 3">${'♥'.repeat(run.health)}${'♡'.repeat(3 - run.health)}</span>` : ''}</div><div class="story-dialogue">${storyGuideImage()}<div><strong>${message(language, 'story.guide')}</strong><p aria-live="polite">${guideLine(state)}</p></div></div>${sceneBoard(state)}<p class="story-notice" role="status">${notice || (run?.collected ? message(language, 'story.satchel-found') : '')}</p></section><aside class="story-sidebar glass-panel">${storyTasks(state)}${run ? `<a class="story-shortcut" data-route href="${routeHref({ page: 'game', mode: 'expedition' }, language)}"><strong>${message(language, 'story.temporary')} ↗</strong><span>${message(language, 'story.temporary-note')}</span></a>` : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>`}
+    ${state.service ? `<div class="story-service"><button class="story-back" data-story-action="back">← ${message(language, 'story.back-camp')}</button>${state.service.page === 'professions' ? titleTemplate(language, state.camp) : ''}${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, 'standard', state.service)}</div>` : `<div class="story-layout"><section class="story-stage glass-panel"><div class="story-stage-top"><span>${objective(state)}</span>${run ? `<span class="story-hearts" aria-label="${message(language, 'story.health')}: ${run.health} / 3">${'♥'.repeat(run.health)}${'♡'.repeat(3 - run.health)}</span>` : ''}</div><div class="story-dialogue"><div class="story-speakers"><span data-story-speaker="player">${spriteImage(professionSprite(run ? 'explorer' : state.loadout.profession))}</span><span data-story-speaker="lumi">${storyGuideImage()}</span></div><div class="story-dialogue-copy"><strong data-story-speaker-name></strong><p role="status" data-story-dialogue-line></p><button class="story-dialogue-next" data-story-action="dialogue">${message(language, 'story.dialogue-next')} →</button></div></div>${sceneBoard(state)}<p class="story-notice" role="status">${notice || (run?.collected ? message(language, 'story.satchel-found') : '')}</p></section><aside class="story-sidebar glass-panel">${storyTasks(state)}${run ? `<a class="story-shortcut" data-route href="${routeHref({ page: 'game', mode: 'expedition' }, language)}"><strong>${message(language, 'story.temporary')} ↗</strong><span>${message(language, 'story.temporary-note')}</span></a>` : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>`}
   </main>${state.service ? '' : sceneDock(state)}`
 }

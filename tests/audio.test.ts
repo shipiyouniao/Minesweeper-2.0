@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { act, createGame, PRESETS } from '../src/game/engine.js'
 import { cueForMove, cuePriority, notesForCue } from '../src/audio/cues.js'
 import { BrowserSoundEffects } from '../src/platform/browser-sound-effects.js'
+import { bossDialogueCue, dialogueTone, playerDialogueCue } from '../src/audio/dialogue-voices.js'
 
 test('unchanged states have no gameplay cue, flags toggle audibly, and a flood produces one cue', () => {
   const ready = createGame(PRESETS.easy, 31)
@@ -94,4 +95,39 @@ test('missing Web Audio does not interrupt gameplay, muting, or repeated disposa
     sounds.dispose()
   })
   assert.equal(sounds.enabled, false)
+})
+
+test('character voices stay distinct and the existing dialogue is more audible without raising gameplay effects', () => {
+  const voices = [
+    ...(
+      [
+        'explorer',
+        'surveyor',
+        'engineer',
+        'archaeologist',
+        'alchemist',
+        'sentinel',
+        'waymarker',
+        'riftwalker',
+      ] as const
+    ).map(playerDialogueCue),
+    ...(['bastion', 'brood', 'mirror', 'magnetic', 'clock', 'echo', 'matrix', 'tide'] as const).map(
+      bossDialogueCue,
+    ),
+    'dialogue-lumi',
+    'dialogue-narrator',
+  ] as const
+  const signatures = voices.map((cue) => {
+    const tone = dialogueTone(cue)
+    assert.ok(tone.gain >= 0.024 && tone.gain <= 0.045)
+    assert.ok(tone.duration >= 0.025 && tone.duration <= 0.045)
+    assert.ok(tone.frequency > 100 && tone.frequency < 2000)
+    assert.equal(cuePriority(cue), 0)
+    return `${tone.frequency}:${tone.endFrequency}:${tone.waveform}`
+  })
+  assert.equal(new Set(signatures).size, voices.length)
+  assert.ok(dialogueTone('dialogue-player').gain >= 0.018 * 1.7)
+  assert.ok(dialogueTone('dialogue-boss').gain >= 0.04)
+  assert.ok(dialogueTone('dialogue-narrator').gain >= 0.014 * 1.7)
+  assert.equal(notesForCue('reveal')[0]!.gain, 0.075)
 })

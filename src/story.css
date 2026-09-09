@@ -88,13 +88,6 @@
   box-shadow: inset 0 1px #ffffffa6;
   padding: 2px;
 }
-.story-cell.is-covered {
-  background: linear-gradient(145deg, #b9c9b1, #d6dfce);
-  border-color: #9eaf97;
-  box-shadow:
-    inset 0 2px #e4eed7,
-    0 2px #758e6745;
-}
 .story-cell.is-flagged {
   color: #4463c7;
   background: #e4e9f1;

@@ -1,6 +1,27 @@
 /** Each sound describes a public interaction, never a covered board clue. */
 export type InteractionCue = 'tap' | 'navigate' | 'dismiss' | 'blocked' | 'input' | 'confirm'
 
+/** Character voices share the dialogue lifecycle but retain their own pitch and material. */
+export type DialogueCue =
+  | 'dialogue-player'
+  | 'dialogue-lumi'
+  | 'dialogue-narrator'
+  | 'dialogue-boss'
+  | 'dialogue-surveyor'
+  | 'dialogue-engineer'
+  | 'dialogue-archaeologist'
+  | 'dialogue-alchemist'
+  | 'dialogue-sentinel'
+  | 'dialogue-waymarker'
+  | 'dialogue-riftwalker'
+  | 'dialogue-brood'
+  | 'dialogue-mirror'
+  | 'dialogue-magnetic'
+  | 'dialogue-clock'
+  | 'dialogue-echo'
+  | 'dialogue-matrix'
+  | 'dialogue-tide'
+
 /** Gameplay cues have priority over navigation feedback from the same browser event. */
 export type SoundCue =
   | InteractionCue
@@ -18,9 +39,7 @@ export type SoundCue =
   | 'magnet-push'
   | 'magnet-charge'
   | 'sonar-pulse'
-  | 'dialogue-player'
-  | 'dialogue-boss'
-  | 'dialogue-narrator'
+  | DialogueCue
 
 /** A short oscillator envelope, expressed in seconds and hertz. */
 export interface Tone {
@@ -29,6 +48,7 @@ export interface Tone {
   readonly delay: number
   readonly duration: number
   readonly gain: number
+  readonly waveform?: 'sine' | 'triangle'
 }
 
 /** Browser resources owned by one scheduled note. */

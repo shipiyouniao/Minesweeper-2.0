@@ -7,7 +7,7 @@ export function scheduleTone(context: BaseAudioContext, tone: Tone, start: numbe
   const begins = start + tone.delay
   const ends = begins + tone.duration
 
-  oscillator.type = 'sine'
+  oscillator.type = tone.waveform ?? 'sine'
   oscillator.frequency.setValueAtTime(tone.frequency, begins)
   oscillator.frequency.exponentialRampToValueAtTime(tone.endFrequency, ends)
 

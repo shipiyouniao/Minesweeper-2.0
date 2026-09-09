@@ -13,6 +13,7 @@ import { BoardRightClick } from './board-right-click.js'
 import { navigateCamp } from './camp-navigation.js'
 import { LanguageMenu } from './language-menu.js'
 import { storyTemplate } from './story-template.js'
+import { StoryPerformance } from './story-performance.js'
 import { TitleMenu } from './title-menu.js'
 import { parseVariantCommand } from './variant-input.js'
 
@@ -32,6 +33,7 @@ export class StoryApp implements MountedGame {
   private feedback: StoryFeedback = 'none'
   private readonly listeners = new AbortController()
   private readonly rightClick: BoardRightClick
+  private readonly performance: StoryPerformance
   private languageMenu: LanguageMenu | null = null
   private titleMenu: TitleMenu | null = null
   private hold: StoryHold | null = null
@@ -56,6 +58,11 @@ export class StoryApp implements MountedGame {
     this.sounds = sounds
     this.onLanguage = onLanguage
     this.session = new StorySession(new CampSession(repository))
+    this.performance = new StoryPerformance(
+      root,
+      sounds,
+      this.session.run?.floor === 0 && this.session.camp.story.journal?.actions.length === 0,
+    )
     this.rightClick = new BoardRightClick(root, (cell) => {
       void this.activate(Number(cell.dataset['storyCell']), true)
     })
@@ -76,6 +83,7 @@ export class StoryApp implements MountedGame {
     this.generation++
     this.animation?.cancel()
     this.cancelHold()
+    this.performance.dispose()
     this.listeners.abort()
     this.rightClick.dispose()
     this.languageMenu?.dispose()
@@ -120,7 +128,9 @@ export class StoryApp implements MountedGame {
     this.titleMenu?.dispose()
     document.documentElement.lang = this.language === 'zh' ? 'zh-CN' : this.language
     document.title = 'Minefarer'
-    this.root.innerHTML = storyTemplate(this.snapshot())
+    const state = this.snapshot()
+    this.root.innerHTML = storyTemplate(state)
+    this.performance.present(state)
     const picker = this.root.querySelector<HTMLElement>('.language-picker')!
     this.languageMenu = new LanguageMenu(picker, this.selectLanguage, (cue) =>
       this.sounds.play(cue),
@@ -204,7 +214,7 @@ export class StoryApp implements MountedGame {
 
   /** Apply one scene action; route preview/animation never reads covered mine locations. */
   private async activate(index: number, flag: boolean): Promise<void> {
-    if (this.moving || !Number.isInteger(index)) return
+    if (this.moving || this.performance.busy || !Number.isInteger(index)) return
     const state = this.snapshot()
     const cell = state.board.game.cells[index]
     if (!cell || state.board.walls.includes(index)) return
@@ -259,6 +269,9 @@ export class StoryApp implements MountedGame {
         this.service = { page: site.destination, category: 'all', selected: 'surveyor' }
     }
     this.render()
+    if (!state.run && index === 51) this.performance.react('greet')
+    if (state.run && !state.run.collected && this.session.run?.collected)
+      this.performance.react('collect')
   }
 
   /** Animate the existing chibi over a path; reduced-motion users see the committed destination. */
@@ -291,6 +304,15 @@ export class StoryApp implements MountedGame {
       '[data-story-cell], [data-story-action], [data-control]',
     )
     if (!button) return
+    if (button.dataset['storyAction'] === 'wake') {
+      this.performance.skipOpening()
+      return
+    }
+    if (this.performance.busy) return
+    if (button.dataset['storyAction'] === 'dialogue') {
+      this.performance.advance()
+      return
+    }
     const index = button.dataset['storyCell']
     if (index !== undefined) {
       if (performance.now() < this.suppressClickUntil) {
@@ -346,6 +368,14 @@ export class StoryApp implements MountedGame {
 
   /** Mouse, keyboard and touch all call the same finite scene actions. */
   private readonly key = (event: KeyboardEvent): void => {
+    this.sounds.unlock()
+    if (this.performance.busy) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        this.performance.skipOpening()
+      }
+      return
+    }
     const cell =
       event.target instanceof HTMLElement
         ? event.target.closest<HTMLElement>('[data-story-cell]')

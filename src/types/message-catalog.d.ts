@@ -1,5 +1,15 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'story.return-bag': string
+  readonly 'story.open-eyes': string
+  readonly 'story.dialogue-next': string
+  readonly 'story.dialogue-read': string
+  readonly 'story.where-am-i': string
+  readonly 'story.other-world': string
+  readonly 'story.found-bag': string
+  readonly 'story.keep-bag': string
+  readonly 'story.home-question': string
+  readonly 'story.thanks': string
   readonly 'story.prologue': string
   readonly 'story.camp': string
   readonly 'story.guide': string
