@@ -52,7 +52,7 @@ export class AppView {
     const focusIndex = resetFocus ? 0 : (this.board?.focusIndex ?? 0)
 
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
-    document.title = `${messages.title} · Minesweeper 2.0`
+    document.title = `${messages.title} · Minefarer`
     this.menu?.dispose()
     this.resizing.disconnect()
     this.root.innerHTML = appTemplate(state, language, inputMode)

@@ -1,4 +1,6 @@
 import { MILESTONES } from '../game/milestones.js'
+import { decodeStory } from './story-decoder.js'
+import type { CampLoadout } from '../types/story.js'
 import { parseTitle } from '../game/title-effects.js'
 import { expeditionConfig, parseVariantDifficulty, twinConfig } from '../game/variant-difficulty.js'
 import { parseRelicPack, RELIC_PACKS } from '../game/relic-packs.js'
@@ -454,15 +456,30 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
 
   const journal = oldEnvelope || oldRules ? null : decodeJournal(raw)
   const recovered = returnedSupplies === null && journalValue !== null && !journal
+  const story = decodeStory(reader.value('story'))
+  const loadout = decodeLoadout(reader.child('loadout'))
   const save: ExpeditionSave = {
     version: 4,
     camp:
       returnedSupplies === null ? camp : { ...camp, supplies: camp.supplies + returnedSupplies },
     journal,
     records,
+    ...(story ? { story } : {}),
+    ...(loadout ? { loadout } : {}),
     ...(difficulty ? { difficulty } : {}),
   }
   return { save, migrated: oldEnvelope || oldRules, recovered, returnedSupplies }
+}
+
+/** Decode camp choices separately from immutable active-departure snapshots. */
+function decodeLoadout(reader: JsonObjectReader | null): CampLoadout | null {
+  const profession = parseProfession(reader?.string('profession') ?? null)
+  const equipment = (reader?.array('equipment') ?? []).map((v) =>
+    parseEquipment(typeof v === 'string' ? v : null),
+  )
+  return profession && equipment.length <= 3 && equipment.every((v): v is Equipment => v !== null)
+    ? { profession, equipment: [...new Set(equipment)] }
+    : null
 }
 
 /** Expose normalized save data to callers that do not need recovery presentation metadata. */

@@ -19,6 +19,7 @@ import type { SurveyRepository } from '../persistence/survey-repository.js'
 import { SurveyApp } from './survey-app.js'
 import { parseLanguage } from '../i18n.js'
 import { HomeApp } from './home-app.js'
+import { StoryApp } from './story-app.js'
 import { parseRoute, sameRoute } from './navigation.js'
 
 /** Own exactly one menu or game, checkpointing before navigation and restoring on return. */
@@ -69,6 +70,15 @@ export class GameRouter implements MountedGame {
     const sounds = new BrowserSoundEffects(this.repository.preferences().sound)
     this.sounds = sounds
     this.host.dataset['page'] = this.route.page
+    if (this.route.page === 'story')
+      return new StoryApp(
+        this.host,
+        this.variants,
+        this.repository,
+        this.language,
+        sounds,
+        this.languageChanged,
+      )
     if (this.route.page !== 'game') {
       return new HomeApp(
         this.host,

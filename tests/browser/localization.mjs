@@ -6,7 +6,7 @@ const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || 'msedge',
   headless: true,
 })
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 try {
   for (const width of [390, 1280]) {
     const context = await browser.newContext({

@@ -1,12 +1,18 @@
-![Minesweeper 2.0 — A TypeScript 7 experiment, with ivory ceramic tiles and a cobalt flag](docs/assets/readme-banner.png)
+![Minefarer — a chibi traveler and guide arriving at Lanternrest](public/assets/story/camp-banner.png)
 
-# Minesweeper 2.0 — A TypeScript 7 Experiment
+# Minefarer
+
+**A Minesweeper adventure · A TypeScript 7 experiment**
+
+Start the [prologue](docs/prologue.md): learn by exploring three authored scenes with Lumi, recover a lost satchel, and reach Lanternrest. Teaching lives beside the scene, with mouse, touch and keyboard interactions. Walk to camp facilities to use the shared shop, professions, equipment, titles and tasks.
+
+The existing **roguelite remains available through a temporary entrance**, including its current difficulty choices, bosses and save. Its final Recollection entrance and story-driven content selection will arrive later. This release opens the prologue and camp; it does not claim the full story campaign is complete. See [Roadmap II](https://github.com/shipiyouniao/minefarer/issues/55).
 
 **Play five modes:** Classic Minesweeper, mine-exclusive **Twin boards**, **[Sonar](docs/sonar.md)** with rechargeable scans, **[Survey](docs/survey.md)** with consecutive mine-run puzzles, and a 3–12-floor **Expedition** across five difficulty tiers. Expedition combines connected dungeon exploration, eight professions with [once-per-floor skills](docs/profession-skills.md), including two [exclusive mobility careers](docs/reward-professions.md), a shared health/shield system, bounded equipment and up to 37 possible relics. The camp offers 25 distinct gameplay purchases plus two one-time trainings, with a stepped [pricing curve](docs/camp-progression.md).
 
 **[Missions and achievements](docs/milestones.md):** select difficulty directly on the camp overview, then pursue 22 missions and 25 achievements for supplies, two exclusive mobility careers, Field radio equipment, eight exclusive relics and [25 titles with build abilities](docs/title-builds.md). Goal currency follows a reduced [milestone budget](docs/milestone-balance.md). Progress persists across runs; each reward can be claimed once.
 
-**Seven boss families:** Bastion Guardian, Brood Queen, [Mirror Twins](docs/mirror-twins.md), [Magnetic Knight](docs/magnetic-knight.md), [Clock Mage](docs/clock-mage.md), [Echo Warden](docs/echo-warden.md) and [Matrix Overseer](docs/matrix-overseer.md). Clear ordinary minefields and hunt crystals through a local observation lens to break two shields; scan resonance bodies to locate its hidden core; read magnetic push/pull forecasts and lure charges into anchors; against the Clock Mage, escape frozen spell deadlines and use an echo to follow up after retreat. Each boss has its own artwork, arrival scene and mechanics. Reduced-motion mode preserves the tactical forecasts. Read the [mode design](docs/game-modes.md) and [expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1) for current rules and planned modes.
+**Eight boss families:** Bastion Guardian, Brood Queen, [Mirror Twins](docs/mirror-twins.md), [Magnetic Knight](docs/magnetic-knight.md), [Clock Mage](docs/clock-mage.md), [Echo Warden](docs/echo-warden.md) [Matrix Overseer](docs/matrix-overseer.md), and [Tidekeeper](docs/tidekeeper.md). Clear ordinary minefields and hunt crystals through a local observation lens to break two shields; scan resonance bodies to locate its hidden core; read magnetic push/pull forecasts and lure charges into anchors; against the Clock Mage, escape frozen spell deadlines and use an echo to follow up after retreat. Each boss has its own artwork, arrival scene and mechanics. Reduced-motion mode preserves the tactical forecasts. Read the [mode design](docs/game-modes.md) and [expansion Roadmap](https://github.com/shipiyouniao/minefarer/issues/1) for current rules and planned modes.
 
 [Tidekeeper](docs/tidekeeper.md) adds a tactical boss that rearranges the floor every three turns. Drop anchors to preserve paths and turn the tidal core against its shield.
 
@@ -20,7 +26,7 @@ Difficulty-based expedition income and authored balance scenarios are documented
 
 A playable Minesweeper game and a practical testbed for the **TypeScript 7 native compiler**. This repository revisits a first-year university project with a minimal interface, original artwork, a deterministic game engine, and a native TypeScript development workflow.
 
-**[Play in your browser →](https://shipiyouniao.github.io/Minesweeper-2.0/)** · [Compiler experiment notes](docs/typescript7.md) · [Captured benchmark results](docs/typescript7-benchmark.json)
+**[Play in your browser →](https://shipiyouniao.github.io/minefarer/)** · [Compiler experiment notes](docs/typescript7.md) · [Captured benchmark results](docs/typescript7-benchmark.json)
 
 [Contributing](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [License](LICENSE)
 
@@ -97,7 +103,7 @@ npm ci
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173/Minesweeper-2.0/**. The development command performs the first native compile before starting the server. Subsequent TypeScript edits are compiled by the native watcher and served through Vite.
+Open **http://127.0.0.1:5173/minefarer/**. The development command performs the first native compile before starting the server. Subsequent TypeScript edits are compiled by the native watcher and served through Vite.
 
 | Command                         | Purpose                                                                            |
 | ------------------------------- | ---------------------------------------------------------------------------------- |
@@ -256,9 +262,9 @@ npm run check
 node scripts/verify-build.mjs
 ```
 
-Pull requests run validation. Pushes to `main` and manual runs on `main` also upload `dist/` and deploy it to GitHub Pages after validation succeeds. The public game is hosted at [shipiyouniao.github.io/Minesweeper-2.0](https://shipiyouniao.github.io/Minesweeper-2.0/).
+Pull requests run validation. Pushes to `main` and manual runs on `main` also upload `dist/` and deploy it to GitHub Pages after validation succeeds. The public game is hosted at [shipiyouniao.github.io/minefarer](https://shipiyouniao.github.io/minefarer/).
 
-For a fork, set **Settings → Pages → Source** to **GitHub Actions**. The current Vite `base` is `/Minesweeper-2.0/`; update `vite.config.ts` and the expected path in `scripts/verify-build.mjs` if the repository name or hosting path changes.
+For a fork, set **Settings → Pages → Source** to **GitHub Actions**. The current Vite `base` is `/minefarer/`; update `vite.config.ts` and the expected path in `scripts/verify-build.mjs` if the repository name or hosting path changes.
 
 ## Artwork and project history
 

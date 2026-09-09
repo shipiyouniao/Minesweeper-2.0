@@ -6,7 +6,7 @@ import { defeatBattle } from '../../.native/tests/tests/battle-helpers.js'
 import { actExpedition } from '../../.native/tests/src/game/expedition.js'
 import { battleInteractionEffects } from '../../.native/app/ui/battle-interactions.js'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'msedge' })
 await mkdir('.native/interaction-feedback', { recursive: true })
 const verified = new Set()

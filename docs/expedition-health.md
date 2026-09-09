@@ -2,7 +2,7 @@
 
 > Historical delivery notes: the [current combat table](tactical-builds.md), [board interaction rules](board-interaction.md) and [save policy](save-policy.md) supersede older numeric values, hazard markers and replay-compatibility statements below. Current mine hits use red mine markers, including shielded hits; gold flags indicate discovered mines. Only the current expedition implementation is shipped.
 
-This delivery implements the shared-health workstream in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). It gives ordinary exploration room for a mistake and establishes the resource model for future tactical Boss rooms.
+This delivery implements the shared-health workstream in [Roadmap #1](https://github.com/shipiyouniao/minefarer/issues/1). It gives ordinary exploration room for a mistake and establishes the resource model for future tactical Boss rooms.
 
 ## Playable rules
 

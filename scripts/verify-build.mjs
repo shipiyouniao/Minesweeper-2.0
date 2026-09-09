@@ -3,9 +3,7 @@ import { spawnSync } from 'node:child_process'
 import assert from 'node:assert/strict'
 
 const html = await readFile('dist/index.html', 'utf8')
-const assets = [...html.matchAll(/(?:src|href)="(\/Minesweeper-2\.0\/[^"?#]+)"/g)].map(
-  (match) => match[1],
-)
+const assets = [...html.matchAll(/(?:src|href)="(\/minefarer\/[^"?#]+)"/g)].map((match) => match[1])
 assert.ok(
   assets.some((path) => path.endsWith('.js')),
   'Missing JavaScript entry',
@@ -14,7 +12,7 @@ assert.ok(
   assets.some((path) => path.endsWith('.css')),
   'Missing stylesheet',
 )
-for (const asset of assets) await stat('dist/' + asset.replace('/Minesweeper-2.0/', ''))
+for (const asset of assets) await stat('dist/' + asset.replace('/minefarer/', ''))
 for (const file of [
   'dist/assets/quiet-board.png',
   'dist/favicon.svg',

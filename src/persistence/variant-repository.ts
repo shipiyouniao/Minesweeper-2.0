@@ -5,6 +5,7 @@ import { loadExpeditionSave, decodeTwinSave } from './variant-decoders.js'
 /** Owns mode-specific storage, containing browser quota/privacy failures at one boundary. */
 export class VariantRepository {
   private readonly storage: StorageLike
+  private expeditionCache: ExpeditionSave | null = null
   available = true
   recovered = false
   migrated = false
@@ -17,12 +18,15 @@ export class VariantRepository {
 
   /** Load the camp and expedition envelope without accessing any classic slot. */
   expedition(): ExpeditionSave | null {
+    if (!this.available && this.expeditionCache) return this.expeditionCache
     const text = this.read('expedition')
+    if (!this.available && this.expeditionCache) return this.expeditionCache
     const loaded = loadExpeditionSave(text)
     this.migrated = loaded?.migrated ?? false
     this.returnedSupplies = loaded?.returnedSupplies ?? null
     this.recovered = loaded?.recovered ?? text !== null
-    return loaded?.save ?? null
+    this.expeditionCache = loaded?.save ?? null
+    return this.expeditionCache
   }
 
   /** Load the paired-board envelope using its own schema decoder. */
@@ -35,6 +39,8 @@ export class VariantRepository {
 
   /** Commit camp and expedition settlement through their typed namespace. */
   saveExpedition(value: ExpeditionSave): void {
+    // Keep the active tab usable after a quota/privacy error, including its camp transition.
+    this.expeditionCache = value
     this.write('expedition', value)
   }
 

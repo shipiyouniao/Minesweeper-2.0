@@ -15,7 +15,7 @@ import { defeatEncounter } from '../../.native/tests/tests/encounter-helpers.js'
 // Optional browser acceptance: use an installed Playwright or its explicit module path.
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:4173/minefarer/'
 const output = new URL('../../.native/reward-ui/', import.meta.url)
 const storageKey = 'minesweeper.variants.v1.expedition'
 

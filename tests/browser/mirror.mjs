@@ -7,7 +7,7 @@ import { actExpedition } from '../../.native/tests/src/game/expedition.js'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:4173/minefarer/'
 const key = 'minesweeper.variants.v1.expedition'
 const fixture = battleFixture(50)
 assert.equal(fixture.entered.run.encounter.kind, 'mirror')

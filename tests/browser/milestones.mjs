@@ -9,7 +9,7 @@ const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || 'msedge',
   headless: true,
 })
-const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:4173/minefarer/'
 const key = 'minesweeper.variants.v1.expedition'
 const errors = []
 await mkdir('.native/milestone-ui', { recursive: true })

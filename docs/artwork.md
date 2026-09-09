@@ -1,5 +1,7 @@
 # Original artwork
 
+The current Minefarer README and story scenes use the [chibi story artwork](story-artwork.md). The older cover below is retained as historical artwork.
+
 - `docs/assets/readme-banner.png`: an original wide README cover created with the built-in image generation tool. The 2172 × 724 PNG is stored unchanged. It uses the game's ivory, charcoal, cobalt, and sage palette, with editorial typography and ceramic Minesweeper tiles. It is a decorative composition rather than a playable board. The image stays in `docs/` so it does not add to the deployed game's assets.
 - `public/assets/quiet-board.png`: created with the built-in image generation tool for this refresh. It is a decorative ceramic Minesweeper still life; the board itself is rendered as accessible HTML buttons.
 - `public/favicon.svg` and `src/icons.ts`: original SVG artwork written for the app. Classic and Twin boards use scalable flag, mine and control icons. Expedition uses the new generated dungeon sprites described below.

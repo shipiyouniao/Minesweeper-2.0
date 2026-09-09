@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:4173/minefarer/'
 const key = 'minesweeper.variants.v1.expedition'
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || undefined,

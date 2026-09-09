@@ -80,7 +80,7 @@ Camp progress is additive to the version-4 envelope. Old camps retain money, pur
 
 Behavioral tests cover actual accepted runs, journal reload, settlement, claims, malformed progress, ownership gates, bounded equipment/relic effects and translations. Browser tests cover difficulty on the overview, reward previews, keyboard/touch claims, saved selection and layout at 320–3840 CSS pixels in English, Chinese and Japanese.
 
-Two exclusive reward professions now ship in this expansion: Waymarker and Riftwalker. Their [skill rules, unlocks and original artwork](reward-professions.md) introduce placement, return and temporary path choices instead of tool conversion. Further content remains tracked in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1).
+Two exclusive reward professions now ship in this expansion: Waymarker and Riftwalker. Their [skill rules, unlocks and original artwork](reward-professions.md) introduce placement, return and temporary path choices instead of tool conversion. Further content remains tracked in [Roadmap #1](https://github.com/shipiyouniao/minefarer/issues/1).
 
 ## Boss challenges and titles
 

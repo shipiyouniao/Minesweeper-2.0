@@ -22,7 +22,7 @@ const page = `<!doctype html><html lang="zh"><head><meta charset="utf-8"><meta n
 <body><header><strong>执潮者 · 标准难度试玩</strong><button data-scene="entry">重开本局</button><button data-scene="new">新棋盘</button><button data-scene="anchor">体验落锚</button><button data-scene="wave">体验反流</button><span id="status"></span></header><iframe title="执潮者战斗" allow="autoplay"></iframe>
 <script type="module">
 const frame=document.querySelector('iframe'),buttons=[...document.querySelectorAll('button')],status=document.querySelector('#status');
-const game='/Minesweeper-2.0/?ruleset=expedition&lang='+(new URLSearchParams(location.search).get('lang')||'zh');
+const game='/minefarer/?ruleset=expedition&lang='+(new URLSearchParams(location.search).get('lang')||'zh');
 /** Stop the previous local game before replacing this preview origin's fixture journal. */
 async function start(scene){
  buttons.forEach(button=>button.disabled=true);status.textContent='正在准备棋盘…';
@@ -68,7 +68,7 @@ const server = createServer(async (request, response) => {
         }),
       )
     }
-    const prefix = '/Minesweeper-2.0/'
+    const prefix = '/minefarer/'
     if (!url.pathname.startsWith(prefix)) return response.writeHead(404).end()
     const file = resolve(
       root,

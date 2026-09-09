@@ -17,7 +17,7 @@ import type { Ruleset } from '../types/variants.js'
 
 /** The brand always returns home, preserving locale and allowing native link gestures. */
 export function brandTemplate(language: Language): string {
-  return `<a class="brand ${sharedStyles['brand']}" data-route href="${routeHref({ page: 'home' }, language)}" aria-label="Minesweeper 2.0 · ${message(language, 'home.back')}"><span class="brand-mark ${sharedStyles['brand-mark']}">${icon('flag')}</span><span>Minesweeper<span class="brand-version ${sharedStyles['brand-version']}">2.0</span></span></a>`
+  return `<a class="brand ${sharedStyles['brand']}" data-route href="${routeHref({ page: 'home' }, language)}" aria-label="Minefarer · ${message(language, 'home.back')}"><span class="brand-mark ${sharedStyles['brand-mark']}">${icon('flag')}</span><span>Minefarer</span></a>`
 }
 
 /** Render one radio-style menu option with a visible selected indicator. */
@@ -252,7 +252,7 @@ export function appTemplate(
         <span>${icon('check')}${t.firstSafe}</span>
         <span>${icon('check')}${t.autoSave}</span>
         <a
-          href="https://github.com/shipiyouniao/Minesweeper-2.0"
+          href="https://github.com/shipiyouniao/minefarer"
           target="_blank"
           rel="noopener noreferrer"
         >

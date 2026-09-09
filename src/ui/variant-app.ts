@@ -66,6 +66,10 @@ export class VariantApp implements VariantInputActions {
   ) {
     this.root = root
     this.session = session
+    if (session instanceof ExpeditionSession) {
+      this.profession = session.loadout.profession
+      this.equipment = session.loadout.equipment
+    }
     this.repository = repository
     this.preferences = preferences
     this.language = language
@@ -608,6 +612,12 @@ export class VariantApp implements VariantInputActions {
         this.pending = null
         break
     }
+
+    if (
+      this.session instanceof ExpeditionSession &&
+      (command.type === 'profession' || command.type === 'equipment')
+    )
+      this.session.selectLoadout({ profession: this.profession, equipment: this.equipment })
 
     this.render()
   }

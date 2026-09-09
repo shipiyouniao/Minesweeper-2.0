@@ -10,7 +10,7 @@ const page = await browser.newPage({
 })
 const errors = []
 page.on('pageerror', (error) => errors.push(error.message))
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const url = `${base}?ruleset=expedition&tutorial=expedition&lang=zh`
 try {
   await page.goto(url)

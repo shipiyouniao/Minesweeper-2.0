@@ -1,4 +1,4 @@
-# Contributing to Minesweeper 2.0
+# Contributing to Minefarer
 
 Thanks for helping improve this small game and its TypeScript 7 experiment. Bug reports, accessibility improvements, translations, clearer explanations, and reproducible compiler measurements are welcome.
 
@@ -6,7 +6,7 @@ Read the [architecture guide](docs/architecture.md) before changing application 
 
 ## Report a bug or suggest an improvement
 
-Search [existing issues](https://github.com/shipiyouniao/Minesweeper-2.0/issues) before opening a new one. Include steps to reproduce, expected and actual behavior, and your browser or Node.js version. For a game bug, include the difficulty and whether you restored a saved game. Screenshots help with visual and accessibility issues.
+Search [existing issues](https://github.com/shipiyouniao/minefarer/issues) before opening a new one. Include steps to reproduce, expected and actual behavior, and your browser or Node.js version. For a game bug, include the difficulty and whether you restored a saved game. Screenshots help with visual and accessibility issues.
 
 Use the [security policy](SECURITY.md) for suspected vulnerabilities. Do not publish exploit details, credentials, or private browser data in a public issue.
 
@@ -23,7 +23,7 @@ npm ci
 npm run dev
 ```
 
-Open [the local game](http://127.0.0.1:5173/Minesweeper-2.0/). The default compiler is the pinned TypeScript 7 native compiler. Do not replace it with a global `tsc` or rely on the legacy alias's executable.
+Open [the local game](http://127.0.0.1:5173/minefarer/). The default compiler is the pinned TypeScript 7 native compiler. Do not replace it with a global `tsc` or rely on the legacy alias's executable.
 
 ## Keep the architecture readable
 

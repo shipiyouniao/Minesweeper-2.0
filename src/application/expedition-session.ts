@@ -34,6 +34,7 @@ import type {
 } from '../types/variants.js'
 import type { SessionRuntime } from '../types/session.js'
 import { VariantRepository } from '../persistence/variant-repository.js'
+import type { CampLoadout } from '../types/story.js'
 
 /** Owns a replayable expedition and atomically settles its permanent camp progress. */
 export class ExpeditionSession {
@@ -53,7 +54,7 @@ export class ExpeditionSession {
       records: [],
     }
     // Commit the camp credit and removal of the obsolete journal in one storage write.
-    if (repository.migrated || repository.recovered) this.persist()
+    if (repository.migrated || repository.recovered) this.commit()
     const journal = this.save.journal
     if (!journal) return
 
@@ -61,7 +62,7 @@ export class ExpeditionSession {
       allowedDeparture(this.save.camp, journal.departure.profession, journal.departure.equipment) &&
       (journal.departure.title === null ||
         ownedTitles(this.camp).includes(journal.departure.title)) &&
-      journal.departure.archive === this.save.camp.upgrades.includes('archive') &&
+      (!journal.departure.archive || this.save.camp.upgrades.includes('archive')) &&
       journal.departure.packs.every((pack) => this.save.camp.upgrades.includes(pack)) &&
       journal.departure.training.every((training) => this.save.camp.upgrades.includes(training)) &&
       (journal.departure.milestoneRelics ?? []).every((relic) =>
@@ -86,7 +87,7 @@ export class ExpeditionSession {
     if (!this.current) {
       repository.recovered = true
       this.save = { ...this.save, journal: null }
-      this.persist()
+      this.commit()
     }
   }
 
@@ -98,6 +99,22 @@ export class ExpeditionSession {
   /** Read permanent progress separately from temporary run resources. */
   get camp(): Camp {
     return this.save.camp
+  }
+
+  /** Reuse camp choices across the story board and temporary roguelite entrance. */
+  get loadout(): CampLoadout {
+    const loadout = this.save.loadout
+    return loadout && allowedDeparture(this.camp, loadout.profession, loadout.equipment)
+      ? loadout
+      : { profession: 'explorer', equipment: [] }
+  }
+
+  /** Persist future departure choices without altering a current run. */
+  selectLoadout(loadout: CampLoadout): void {
+    this.refreshShared()
+    if (this.current || !allowedDeparture(this.camp, loadout.profession, loadout.equipment)) return
+    this.save = { ...this.save, loadout }
+    this.commit()
   }
 
   /** Return up to ten outcomes per difficulty, separate from other rulesets. */
@@ -112,10 +129,11 @@ export class ExpeditionSession {
 
   /** Persist a camp choice only when no expedition is active. */
   selectDifficulty(difficulty: VariantDifficulty): void {
+    this.refreshShared()
     if (this.current) return
 
     this.save = { ...this.save, difficulty }
-    this.persist()
+    this.commit()
   }
 
   /** Reserve the final journal slot for extraction when the recovery budget is exhausted. */
@@ -129,6 +147,7 @@ export class ExpeditionSession {
     equipment: readonly Equipment[],
     difficulty: VariantDifficulty = this.difficulty,
   ): boolean {
+    this.refreshShared()
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
     const departure: Departure = {
       title: milestoneProgress(this.camp).title ?? null,
@@ -153,12 +172,13 @@ export class ExpeditionSession {
         returnSupplies: 0,
       },
     }
-    this.persist()
+    this.commit()
     return true
   }
 
   /** Apply a legal intent and settle terminal outcomes in the same persistence write. */
   dispatch(action: ExpeditionAction): boolean {
+    this.refreshShared()
     const run = this.current
     const journal = this.save.journal
     if (
@@ -192,6 +212,7 @@ export class ExpeditionSession {
         earned,
       }
       this.save = {
+        ...this.save,
         version: 4,
         difficulty: this.difficulty,
         journal: null,
@@ -204,7 +225,7 @@ export class ExpeditionSession {
       }
     }
 
-    this.persist()
+    this.commit()
     return true
   }
 
@@ -217,37 +238,58 @@ export class ExpeditionSession {
 
   /** Permanent purchases are permitted only at camp, never halfway through replay. */
   purchase(upgrade: Upgrade): boolean {
+    this.refreshShared()
     if (this.current) return false
     const camp = buyUpgrade(this.camp, upgrade)
     if (camp === this.camp) return false
     this.save = { ...this.save, camp }
-    this.persist()
+    this.commit()
     return true
   }
 
   /** Choose titles only at camp; the current expedition's loadout stays read-only. */
   equipTitle(id: MilestoneId | null): boolean {
+    this.refreshShared()
     if (this.current) return false
 
     const camp = equipTitle(this.camp, id)
     if (camp === this.camp) return false
     this.save = { ...this.save, camp }
-    this.persist()
+    this.commit()
     return true
   }
 
   /** Claim only at camp so new unlocks cannot rewrite an active departure snapshot. */
   claim(id: MilestoneId): boolean {
+    this.refreshShared()
     if (this.current) return false
     const camp = claimMilestone(this.camp, id)
     if (camp === this.camp) return false
     this.save = { ...this.save, camp }
-    this.persist()
+    this.commit()
     return true
   }
 
-  /** Checkpoint the already coherent envelope; storage errors remain observable in the adapter. */
-  persist(): void {
+  /** Read shared progress before an intent so another entrance's purchases and story survive. */
+  private refreshShared(): void {
+    const latest = this.repository.expedition()
+    if (!latest) return
+    this.save = {
+      ...this.save,
+      camp: latest.camp,
+      ...(latest.story ? { story: latest.story } : {}),
+      ...(latest.loadout ? { loadout: latest.loadout } : {}),
+    }
+  }
+
+  /** Commit a synchronous intent after shared progress was refreshed at its boundary. */
+  private commit(): void {
     this.repository.saveExpedition(this.save)
+  }
+
+  /** A lifecycle checkpoint has no new rewards and must preserve the newest shared progress. */
+  persist(): void {
+    this.refreshShared()
+    this.commit()
   }
 }

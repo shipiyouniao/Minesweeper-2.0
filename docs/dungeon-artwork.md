@@ -64,7 +64,7 @@ Use case: stylized-concept. Production game sprite for a minimal Minesweeper rog
 
 The existing `player.png` remains the Explorer. The Surveyor and Engineer were generated on September 4, 2026 with the built-in image tool, using that Explorer as a style reference. Their selected PNGs are copied unchanged into the asset directory. Both contain real transparent alpha. These variants share the original clay style while using distinct silhouettes and equipment; they appear on the profession cards and the walking pawn. Text labels remain the accessible source of each profession's name.
 
-This covers the three currently playable professions. Future professions, skill artwork and Boss assets remain in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1).
+This covers the three currently playable professions. Future professions, skill artwork and Boss assets remain in [Roadmap #1](https://github.com/shipiyouniao/minefarer/issues/1).
 
 ### `surveyor.png`
 

@@ -12,6 +12,7 @@ import type {
 import type { RelicPack, ExpansionRelic } from './relic-packs.js'
 import type { MilestoneProgress, MilestoneRelic } from './milestones.js'
 import type { TitleId, TitleProgress } from './titles.js'
+import type { CampLoadout, StoryProgress } from './story.js'
 
 /** Rulesets are independent of classic difficulty and have separate save slots. */
 export type Ruleset = 'classic' | 'expedition' | 'twin' | 'sonar' | 'survey'
@@ -184,6 +185,8 @@ export interface ExpeditionJournal {
 
 /** One atomic value prevents refresh from awarding a settled run twice. */
 export interface ExpeditionSave {
+  readonly story?: StoryProgress
+  readonly loadout?: CampLoadout
   readonly difficulty?: VariantDifficulty
   readonly version: 4
   readonly camp: Camp

@@ -10,7 +10,7 @@ import { EXPEDITION_RULES_REVISION } from '../../.native/tests/src/persistence/e
 
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:4173/minefarer/'
 const key = 'minesweeper.variants.v1.expedition'
 const fixtures = [51, 52, 53, 54, 48].map((seed) => battleFixture(seed).entered)
 const browser = await chromium.launch({

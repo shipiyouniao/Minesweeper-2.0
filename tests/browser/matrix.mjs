@@ -7,7 +7,7 @@ import { tacticalPlan } from '../../.native/tests/src/game/tactical-planning.js'
 import { professionCopy } from '../../.native/tests/src/ui/variant-copy.js'
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:4173/minefarer/'
 const key = 'minesweeper.variants.v1.expedition'
 const fixture = battleFixture(54)
 assert.equal(fixture.entered.run.encounter.kind, 'matrix')
