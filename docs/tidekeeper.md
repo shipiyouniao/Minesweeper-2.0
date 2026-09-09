@@ -24,7 +24,7 @@ The broken shield stays open until its health section ends. This leaves time to 
 
 1. Resolve the published attack against the old board and pawn position.
 2. Apply ordinary defense, shields, damage reactions and revival. A defeated expedition stops here.
-3. On a tide turn, choose a validated permutation. The pawn's floor, boss tile and anchor footprints stay fixed.
+3. On a tide turn, choose a validated permutation. Walls, their orthogonally adjacent mines, the pawn's floor, boss tile and anchor footprints stay fixed.
 4. Move the public tiles, including their marks. The wave crosses the board while the tiles travel to their new positions.
 5. An anchored, revealed core sends a visible beam back to the boss and shatters the shield. Anchors expire.
 6. Publish the next attack and refresh action points. Its threatened pawn always has a revealed, affordable one-step escape; otherwise the forecast becomes a single-tile attack or a quiet turn.
@@ -41,7 +41,7 @@ Generation uses seeded Fisher–Yates permutations, exact mine counts and bounde
 
 ## Integration and trial
 
-Tidekeeper is the eighth family in the seeded boss rotation. Checkpoint floors, ordinary floor rewards and camp purchase values remain unchanged. Shared combat upgrades work normally; Breach sigil and Focus lens also reward the countercurrent shield break. The current journal revision is 14; older expeditions return to camp under the [save policy](save-policy.md), without keeping another combat implementation.
+Tidekeeper is the eighth family in the seeded boss rotation. Checkpoint floors, ordinary floor rewards and camp purchase values remain unchanged. Shared combat upgrades work normally; Breach sigil and Focus lens also reward the countercurrent shield break. The current journal revision is 15; older expeditions return to camp under the [save policy](save-policy.md), without keeping another combat implementation.
 
 Run the production UI in an isolated local trial:
 

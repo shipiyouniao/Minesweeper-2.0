@@ -132,6 +132,33 @@ test('Generated tides keep exact quotas, fixed footprints, connected paths and d
   assert.ok(moving >= 23, `${moving}/25 tides changed the layout`)
 })
 
+test('Walls and their orthogonal mine borders stay fixed through successive tides', () => {
+  const initial = room(13)
+  const walls = initial.walls.filter((index) => index !== initial.encounter.boss)
+  const borderMines = initial.game.cells.flatMap((cell, index) =>
+    cell.mine && walls.some((wall) => adjacentSteps(initial.game, wall).includes(index))
+      ? [index]
+      : [],
+  )
+  assert.ok(walls.length > 1, 'Exercise a wall cluster at the board edge')
+  assert.ok(borderMines.length > 1, 'Exercise the mines bordering that cluster')
+
+  let run = initial
+  let moving = 0
+  for (const turn of [3, 6, 9]) {
+    run = shuffleTide({ ...run, encounter: { ...run.encounter, turn } })
+    assert.deepEqual(run.walls, initial.walls)
+    for (const index of [...walls, ...borderMines]) {
+      assert.equal(run.encounter.permutation[index], index)
+      assert.equal(run.game.cells[index]!.mine, initial.game.cells[index]!.mine)
+      assert.equal(run.game.cells[index]!.visibility, initial.game.cells[index]!.visibility)
+    }
+    assert.deepEqual(run.confirmedMines, initial.confirmedMines)
+    moving += Number(run.encounter.permutation.some((to, from) => to !== from))
+  }
+  assert.equal(moving, 3, 'Fixed borders must not stop the rest of the floor from moving')
+})
+
 test('Anchors cost a point, reject remote or covered targets, and expire after exactly three end turns', () => {
   const run = room()
   const anchored = actExpedition(run, { type: 'anchor', index: run.player })

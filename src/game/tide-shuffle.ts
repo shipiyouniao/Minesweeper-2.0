@@ -82,9 +82,17 @@ function playable(run: TideExpedition): boolean {
 
 /** Shuffle outside fixed footprints; failed candidates never mutate the accepted board. */
 export function shuffleTide(run: TideExpedition): TideExpedition {
+  // The boss shares the movement wall list, but only terrain walls retain their mine borders.
+  const wallMines = run.walls
+    .filter((index) => index !== run.encounter.boss)
+    .flatMap((index) =>
+      adjacentSteps(run.game, index).filter((other) => run.game.cells[other]!.mine),
+    )
   const fixed = new Set([
     run.player,
     run.encounter.boss,
+    ...run.walls,
+    ...wallMines,
     ...run.encounter.anchors.flatMap((index) => anchorArea(run.game.config, index)),
   ])
   const indices = run.game.cells.map((_, index) => index)
