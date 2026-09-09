@@ -1,4 +1,5 @@
 import type { MatrixEncounter } from './matrix.js'
+import type { TideEncounter } from './tide.js'
 import type { EchoEncounter } from './echo.js'
 import type { Expedition, ExpeditionAction, Relic } from './variants.js'
 import type { Config } from './game.js'
@@ -9,7 +10,7 @@ import type { MagneticEncounter } from './magnetic.js'
 
 /** Released encounter families have independent rules and artwork. */
 export type EncounterKind =
-  'bastion' | 'brood' | 'mirror' | 'magnetic' | 'clock' | 'echo' | 'matrix'
+  'bastion' | 'brood' | 'mirror' | 'magnetic' | 'clock' | 'echo' | 'matrix' | 'tide'
 
 /** A public control protects one armor section until its surrounding flags are calibrated. */
 export interface ShieldPylon {
@@ -40,6 +41,10 @@ export interface TacticalState {
   readonly intent: TacticalIntent
   readonly event:
     | 'entered'
+    | 'tide-anchored'
+    | 'tide-broken'
+    | 'tide-armored'
+    | 'tide-shuffled'
     | 'acted'
     | 'braced'
     | 'disabled'
@@ -101,6 +106,7 @@ export interface BroodEncounter extends TacticalState {
 
 /** A finite encounter union keeps each boss's state and rules explicit. */
 export type TacticalEncounter =
+  | TideEncounter
   | MatrixEncounter
   | EchoEncounter
   | BastionEncounter
@@ -118,6 +124,8 @@ export interface EncounterTier {
 
 /** A public action preview uses known paths, visible flags, resources and action points only. */
 export type TacticalReason =
+  | 'tide-shield'
+  | 'tide-phase'
   | 'matrix-region'
   | 'matrix-ground'
   | 'matrix-shield'

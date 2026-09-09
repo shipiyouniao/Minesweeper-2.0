@@ -81,5 +81,21 @@ export function applyCombatRelics(
       probes: Math.min(4, result.probes + 1),
       scans: Math.min(4, result.scans + 1),
     }
+  if (after.encounter.event === 'tide-broken') {
+    const sigil = available(result, 'breach-sigil')
+    if (sigil) result = claim(result, 'breach-sigil')
+    const focus = result.departure.equipment.includes('focus-lens')
+    result = {
+      ...result,
+      encounter: {
+        ...result.encounter!,
+        points: Math.min(5, result.encounter!.points + Number(sigil) + Number(focus)),
+        turnTriggers: [
+          ...result.encounter!.turnTriggers,
+          ...(focus ? ['focus-lens' as const] : []),
+        ],
+      },
+    }
+  }
   return result
 }

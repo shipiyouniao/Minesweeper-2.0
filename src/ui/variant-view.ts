@@ -1,3 +1,4 @@
+import { TideBoard, markTideCell, animateTideAnchor } from './tide-board.js'
 import { animateBattleInteractions } from './battle-interactions.js'
 import { animateBattleFeedback } from './battle-feedback.js'
 import { markMatrixCell, MatrixObservation, animateMatrixExtraction } from './matrix-board.js'
@@ -48,6 +49,7 @@ export class VariantView {
   private readonly expeditionDialog: ExpeditionDialog
   private readonly matrix: MatrixObservation
   private readonly magnetic: MagneticBoard
+  private readonly tide: TideBoard
   private readonly menu: LanguageMenu
   private titleMenu: TitleMenu | null = null
   private readonly feedback: (cue: InteractionCue) => void
@@ -112,6 +114,7 @@ export class VariantView {
     this.dialog = dialog
     this.expeditionDialog = new ExpeditionDialog(root, language)
     this.magnetic = new MagneticBoard(root, language)
+    this.tide = new TideBoard(root)
     this.menu = new LanguageMenu(picker, onLanguage, feedback)
     dialog.addEventListener('cancel', () => feedback('dismiss'), { signal: this.listeners.signal })
     root.addEventListener(
@@ -223,6 +226,7 @@ export class VariantView {
     animateMatrixExtraction(this.content, previous, expedition)
     animateBattleFeedback(this.content, previous, expedition)
     animateBattleInteractions(this.content, previous, expedition)
+    animateTideAnchor(this.content, previous, expedition)
     const comparison = expedition ? mirrorPreview(expedition) : null
     if (comparison) {
       this.markExpedition(comparison, 'b')
@@ -366,7 +370,7 @@ export class VariantView {
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
       cell.classList.toggle(
         'tool-target',
-        tool === 'probe' || tool === 'sonar' || tool === 'attune'
+        tool === 'probe' || tool === 'sonar' || tool === 'attune' || tool === 'anchor'
           ? area.includes(Number(cell.dataset['cell']))
           : tool === 'scan' &&
               index !== null &&
@@ -382,13 +386,15 @@ export class VariantView {
     }
 
     const description =
-      tool === 'attune'
-        ? message(this.language, 'matrix.attune-hint')
-        : tool === 'sonar'
-          ? message(this.language, 'sonar-equipment.note')
-          : tool === 'probe'
-            ? copy.probeHint
-            : copy.scanHint
+      tool === 'anchor'
+        ? message(this.language, 'tide.anchor-hint')
+        : tool === 'attune'
+          ? message(this.language, 'matrix.attune-hint')
+          : tool === 'sonar'
+            ? message(this.language, 'sonar-equipment.note')
+            : tool === 'probe'
+              ? copy.probeHint
+              : copy.scanHint
     if (index === null) {
       hint.textContent = description
       return
@@ -398,7 +404,7 @@ export class VariantView {
     const row = `${common.row} ${Math.floor(index / config.width) + 1}`
     const column = `${common.column} ${(index % config.width) + 1}`
     hint.textContent =
-      tool === 'probe' || tool === 'sonar' || tool === 'attune'
+      tool === 'probe' || tool === 'sonar' || tool === 'attune' || tool === 'anchor'
         ? `${description} · ${row} · ${column}`
         : `${description} · ${row}`
   }
@@ -466,6 +472,7 @@ export class VariantView {
           `${cell.getAttribute('aria-label')}, ${pylon.active ? t.pylon : t.disabled}`,
         )
       }
+      markTideCell(this.language, run, cell, index)
       markMatrixCell(this.language, run, cell, index)
       markEchoCell(this.language, run, cell, index)
       markBroodCell(this.language, run, cell, index)
@@ -547,6 +554,12 @@ export class VariantView {
   cancelWalk(): void {
     this.walking?.cancel()
     this.magnetic.cancel()
+    this.tide.cancel()
+  }
+
+  /** Show a committed tide, with interruption owned by the current view. */
+  async tideTurn(before: Expedition, after: Expedition): Promise<void> {
+    await this.tide.perform(before, after)
   }
 
   /** Animate one already committed magnetic turn before presenting its new snapshot. */

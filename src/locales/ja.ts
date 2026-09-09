@@ -2,6 +2,31 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'tide.held': '床が潮に耐えた。道はそのままだ。',
+  'tide.until': '潮まで{turns}ターン',
+  'tide.name': '潮の番人',
+  'tide.core': '潮核 · この安全な床を開いてから固定する',
+  'tide.anchor': '投錨 · 行動力 1',
+  'tide.anchor-hint':
+    '錨を足元か上下左右の開いたマスへドラッグ。または錨を選んで対象をクリック。周囲3×3を次の潮まで固定。潮ごとに2個、各行動力1。',
+  'tide.hint': '潮核の床を開いて固定。次の潮の逆流で盾を砕く。',
+  'tide.deduce':
+    '通常の掃雷の数字で潮核へ進む。3ターンごとに床が入れ替わり、足元と固定範囲は動かない。',
+  'tide.fight': '隣接して行動力2で攻撃。体力半分で盾が復活。再び潮核を固定して逆流を起こす。',
+  'tide.shuffle-note':
+    '地雷、旗、開閉状態、安全マークは床と一緒に移動し、数字を再計算。通常の旗は誤りの可能性あり。古いソナーと範囲報告は失効。赤い予告攻撃、潮、次の予告の順で処理。ターン終了だけが時間を進める。',
+  'tide.status': '潮まで{turns}ターン · 錨{anchors}/2 · 装甲{phase}/2',
+  'tide.open': '盾破壊',
+  'tide.shield': '盾展開中',
+  'tide.anchored': '投錨完了。枠内の床を次の潮まで固定。',
+  'tide.shuffled': '潮が引いた。新しい数字を確認。',
+  'tide.broken': '逆流！盾を破壊。',
+  'tide.phase': 'ターン終了で次の装甲へ。再び潮核を固定する。',
+  'tide.scene-0': '留まらぬ床',
+  'tide.scene-1': '真鍮の床が浮き、互いにすれ違う。足元の一枚だけが動かない。',
+  'tide.scene-2': '歩みを数えよ。三拍の後、道は海へ還る。',
+  'tide.scene-3': '潮核が盾を支えている。固定すれば流れを返せそうだ。',
+  'tide.scene-4': '荷袋に二つの錨。向こうの水面に細い線が走り、次の一撃を示す。',
   'matrix.quiet': '休戦ターン',
   'matrix.open-hint': 'シールド破壊。コアに近づいて攻撃。',
   'matrix.hunt': '矩陣を破る',

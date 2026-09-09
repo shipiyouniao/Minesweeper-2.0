@@ -12,6 +12,8 @@ export type SoundCue =
   | 'damage'
   | 'shield'
   | 'heal'
+  | 'tide-anchor'
+  | 'tide-wave'
   | 'magnet-pull'
   | 'magnet-push'
   | 'magnet-charge'

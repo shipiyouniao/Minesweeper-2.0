@@ -14,122 +14,131 @@ export function battleGuide(language: Language, run: Expedition): string {
   if (!boss) return ''
 
   const steps: readonly BattleGuideStep[] =
-    boss.kind === 'matrix'
+    boss.kind === 'tide'
       ? [
-          { text: message(language, 'matrix.deduce'), prop: 'matrix-observe', symbol: '1 1' },
-          { text: message(language, 'matrix.calibrate'), prop: 'attune', symbol: '◇' },
-          { text: message(language, 'matrix.fight'), prop: 'matrix-overseer', symbol: '→' },
+          { text: message(language, 'tide.deduce'), prop: 'tide-core', symbol: '2' },
+          { text: message(language, 'tide.anchor-hint'), prop: 'tide-anchor', symbol: '⚓' },
+          { text: message(language, 'tide.fight'), prop: 'tidekeeper', symbol: '→' },
         ]
-      : boss.kind === 'echo'
+      : boss.kind === 'matrix'
         ? [
-            { text: message(language, 'echo.locate'), prop: 'sonar', symbol: '◎' },
-            { text: message(language, 'echo.shell'), prop: 'echo-warden', symbol: '↗' },
-            { text: message(language, 'echo.fight'), prop: 'bastion-strike', symbol: '→' },
+            { text: message(language, 'matrix.deduce'), prop: 'matrix-observe', symbol: '1 1' },
+            { text: message(language, 'matrix.calibrate'), prop: 'attune', symbol: '◇' },
+            { text: message(language, 'matrix.fight'), prop: 'matrix-overseer', symbol: '→' },
           ]
-        : boss.kind === 'bastion'
+        : boss.kind === 'echo'
           ? [
-              {
-                text: message(language, 'battle-guide.flag-the-mines-around-both-pylons-then'),
-                prop: 'bastion-pylon',
-                symbol: '⚑',
-              },
-              {
-                text: message(language, 'battle-guide.approach-the-core-and-activate-it-to'),
-                prop: 'bastion-core',
-                symbol: '↗',
-              },
-              {
-                text: message(language, 'battle-guide.strike-while-exposed-leave-the-red-cells'),
-                prop: 'bastion-strike',
-                symbol: '→',
-              },
+              { text: message(language, 'echo.locate'), prop: 'sonar', symbol: '◎' },
+              { text: message(language, 'echo.shell'), prop: 'echo-warden', symbol: '↗' },
+              { text: message(language, 'echo.fight'), prop: 'bastion-strike', symbol: '→' },
             ]
-          : boss.kind === 'brood'
+          : boss.kind === 'bastion'
             ? [
                 {
-                  text: message(language, 'battle-guide.flag-nearby-mines-and-destroy-a-nest'),
-                  prop: 'brood-nest',
+                  text: message(language, 'battle-guide.flag-the-mines-around-both-pylons-then'),
+                  prop: 'bastion-pylon',
                   symbol: '⚑',
                 },
                 {
-                  text: message(language, 'battle-guide.fewer-nests-mean-less-armor-and-healing'),
-                  prop: 'brood-queen',
-                  symbol: '→',
+                  text: message(language, 'battle-guide.approach-the-core-and-activate-it-to'),
+                  prop: 'bastion-core',
+                  symbol: '↗',
                 },
                 {
-                  text: message(language, 'battle-guide.clear-eggs-before-they-hatch-and-avoid'),
-                  prop: 'brood-egg',
-                  symbol: '×',
+                  text: message(language, 'battle-guide.strike-while-exposed-leave-the-red-cells'),
+                  prop: 'bastion-strike',
+                  symbol: '→',
                 },
               ]
-            : boss.kind === 'mirror'
+            : boss.kind === 'brood'
               ? [
                   {
-                    text: message(language, 'battle-guide.compare-the-boards-a-mine-on-one'),
-                    prop: 'mirror-rift',
-                    symbol: '⇄',
+                    text: message(language, 'battle-guide.flag-nearby-mines-and-destroy-a-nest'),
+                    prop: 'brood-nest',
+                    symbol: '⚑',
                   },
                   {
-                    text: message(language, 'battle-guide.disable-a-seal-to-expose-the-twin'),
-                    prop: 'mirror-seal',
-                    symbol: '⇄',
+                    text: message(language, 'battle-guide.fewer-nests-mean-less-armor-and-healing'),
+                    prop: 'brood-queen',
+                    symbol: '→',
                   },
                   {
-                    text: message(
-                      language,
-                      'battle-guide.strike-switch-realms-strike-the-other-twin',
-                    ),
-                    prop: 'mirror-dusk',
-                    symbol: '⇄',
+                    text: message(language, 'battle-guide.clear-eggs-before-they-hatch-and-avoid'),
+                    prop: 'brood-egg',
+                    symbol: '×',
                   },
                 ]
-              : boss.kind === 'magnetic'
+              : boss.kind === 'mirror'
                 ? [
                     {
-                      text: message(language, 'battle-guide.open-a-route-to-an-anchor-then'),
-                      prop: 'magnetic-anchor',
-                      symbol: '→',
+                      text: message(language, 'battle-guide.compare-the-boards-a-mine-on-one'),
+                      prop: 'mirror-rift',
+                      symbol: '⇄',
                     },
                     {
-                      text: message(language, 'battle-guide.use-the-preparation-turn-to-leave-the'),
-                      prop: 'magnetic-anchor',
-                      symbol: '↗',
+                      text: message(language, 'battle-guide.disable-a-seal-to-expose-the-twin'),
+                      prop: 'mirror-seal',
+                      symbol: '⇄',
                     },
                     {
                       text: message(
                         language,
-                        'battle-guide.the-crash-breaks-its-armor-approach-and',
+                        'battle-guide.strike-switch-realms-strike-the-other-twin',
                       ),
-                      prop: 'magnetic-knight',
-                      symbol: '→',
+                      prop: 'mirror-dusk',
+                      symbol: '⇄',
                     },
                   ]
-                : [
-                    {
-                      text: message(
-                        language,
-                        'battle-guide.approach-a-revealed-hourglass-and-return-a',
-                      ),
-                      prop: 'clock-hourglass',
-                      symbol: '↗',
-                    },
-                    {
-                      text: message(
-                        language,
-                        'battle-guide.strike-then-leave-your-echo-it-repeats',
-                      ),
-                      prop: 'player',
-                      symbol: '→',
-                    },
-                    {
-                      text: message(
-                        language,
-                        'battle-guide.leave-the-marked-cells-before-the-countdown',
-                      ),
-                      prop: 'clock-hourglass',
-                      symbol: '↗',
-                    },
-                  ]
+                : boss.kind === 'magnetic'
+                  ? [
+                      {
+                        text: message(language, 'battle-guide.open-a-route-to-an-anchor-then'),
+                        prop: 'magnetic-anchor',
+                        symbol: '→',
+                      },
+                      {
+                        text: message(
+                          language,
+                          'battle-guide.use-the-preparation-turn-to-leave-the',
+                        ),
+                        prop: 'magnetic-anchor',
+                        symbol: '↗',
+                      },
+                      {
+                        text: message(
+                          language,
+                          'battle-guide.the-crash-breaks-its-armor-approach-and',
+                        ),
+                        prop: 'magnetic-knight',
+                        symbol: '→',
+                      },
+                    ]
+                  : [
+                      {
+                        text: message(
+                          language,
+                          'battle-guide.approach-a-revealed-hourglass-and-return-a',
+                        ),
+                        prop: 'clock-hourglass',
+                        symbol: '↗',
+                      },
+                      {
+                        text: message(
+                          language,
+                          'battle-guide.strike-then-leave-your-echo-it-repeats',
+                        ),
+                        prop: 'player',
+                        symbol: '→',
+                      },
+                      {
+                        text: message(
+                          language,
+                          'battle-guide.leave-the-marked-cells-before-the-countdown',
+                        ),
+                        prop: 'clock-hourglass',
+                        symbol: '↗',
+                      },
+                    ]
   const copy = battleCopy(language, boss.kind)
   return `<article class="battle-guide ${guidanceStyles['battle-guide']} battle-guide-visual"><header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${spriteImage(bossSprite(boss))}<div><h3>${copy.name}</h3><p>${message(language, 'battle-guide.three-moves-to-learn-the-fight')}</p></div></header><ol class="boss-picture-steps ${guidanceStyles['boss-picture-steps']}">${steps
     .map(

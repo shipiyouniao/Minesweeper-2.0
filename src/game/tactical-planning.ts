@@ -1,4 +1,5 @@
 import { activeRegion, matrixHealthFloor } from './matrix-logic.js'
+import { tideHealthFloor } from './tide-battle.js'
 import { canUseExpeditionSonar, echoCandidates } from './expedition-sonar.js'
 import { approachPath, walkingPath } from './dungeon-path.js'
 import { adjacentSteps } from './variant-board.js'
@@ -95,6 +96,22 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
   let reason: TacticalReason = 'ready'
 
   switch (action.type) {
+    case 'anchor':
+      if (encounter.kind !== 'tide') reason = 'inactive'
+      else if (encounter.anchors.length >= 2 || encounter.anchors.includes(action.index))
+        reason = 'used'
+      else if (
+        run.walls.includes(action.index) ||
+        run.game.cells[action.index]?.visibility !== 'revealed' ||
+        run.confirmedMines.includes(action.index)
+      )
+        reason = 'path'
+      else if (
+        run.player !== action.index &&
+        !adjacentSteps(run.game, run.player).includes(action.index)
+      )
+        reason = 'adjacent'
+      break
     case 'move':
     case 'reveal': {
       const route =
@@ -144,6 +161,12 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       break
     case 'attack':
       cost = 2
+      if (encounter.kind === 'tide') {
+        if (encounter.health <= tideHealthFloor({ ...run, encounter })) reason = 'tide-phase'
+        else if (!encounter.exposed) reason = 'tide-shield'
+        else if (!adjacentSteps(run.game, run.player).includes(encounter.boss)) reason = 'adjacent'
+        break
+      }
       if (encounter.kind === 'matrix') {
         if (encounter.health <= matrixHealthFloor({ ...run, encounter })) reason = 'matrix-phase'
         else if (!encounter.exposed) reason = 'matrix-shield'
@@ -187,7 +210,7 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
       else if (!adjacentSteps(run.game, run.player).includes(encounter.boss)) reason = 'adjacent'
       break
     case 'interact': {
-      if (encounter.kind === 'matrix') {
+      if (encounter.kind === 'matrix' || encounter.kind === 'tide') {
         reason = 'inactive'
         break
       }

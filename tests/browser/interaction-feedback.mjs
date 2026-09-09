@@ -11,7 +11,7 @@ const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 
 await mkdir('.native/interaction-feedback', { recursive: true })
 const verified = new Set()
 try {
-  for (const seed of [49, 50, 51, 52, 60, 54, 55]) {
+  for (const seed of [48, 49, 50, 51, 60, 53, 54]) {
     const fixture = battleFixture(seed).entered
     let run = fixture.run
     const actions = [...fixture.save.journal.actions]
@@ -35,7 +35,7 @@ try {
       run = next
     }
     const context = await browser.newContext({
-      viewport: { width: seed === 50 ? 390 : 1440, height: 1000 },
+      viewport: { width: seed === 49 ? 390 : 1440, height: 1000 },
     })
     await context.addInitScript(() => {
       const save = sessionStorage.getItem('interaction-fixture')

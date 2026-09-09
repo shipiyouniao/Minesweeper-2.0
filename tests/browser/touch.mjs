@@ -7,11 +7,11 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
 const key = 'minesweeper.variants.v1.expedition'
 const fixtures = [
-  battleFixture(45).entered,
-  battleFixture(46).entered,
-  battleFixture(47).entered,
+  battleFixture(51).entered,
+  battleFixture(52).entered,
+  battleFixture(53).entered,
+  battleFixture(54).entered,
   battleFixture(48).entered,
-  battleFixture(49).entered,
 ]
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || undefined,

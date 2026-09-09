@@ -26,6 +26,7 @@ function windup(cell: HTMLElement | null, kind: EncounterKind, reduced: boolean)
     cell?.querySelector<HTMLElement>(':scope > img, .landmark-sprite, .dungeon-sprite') ?? cell
   if (!actor) return
   const poses = {
+    tide: ['scale(1)', 'translateY(-12%) scale(1.1)', 'translateY(12%)', 'none'],
     bastion: [
       'translateY(0)',
       'translateY(-18%) scaleY(1.12)',
@@ -73,7 +74,9 @@ export function animateBattleFeedback(
       (relic === 'second-wind' || relic === 'abyss-hourglass') &&
       !before.runTriggers.includes(relic),
   )
-  if (turn) {
+  // TideBoard already resolved the old footprint before moving tiles. The pawn stays fixed,
+  // so the actual injury or absorbed-hit feedback below still belongs to its current cell.
+  if (turn && enemy.kind !== 'tide') {
     const targets = before.game.cells.flatMap((_, index) =>
       battleThreat(enemy, index, before.game.config) > 0 ? [index] : [],
     )

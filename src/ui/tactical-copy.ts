@@ -9,6 +9,8 @@ import type { Expedition } from '../types/variants.js'
 /** Keep the current objective visible after a pointer preview or blocked click disappears. */
 export function tacticalHint(language: Language, run: Expedition): string {
   const encounter = run.encounter
+  if (encounter?.kind === 'tide')
+    return encounter.exposed ? message(language, 'tide.fight') : message(language, 'tide.hint')
   if (encounter?.kind !== 'matrix' || run.phase !== 'boss')
     return tacticalCopy(language, encounter?.kind).hint
 
@@ -22,6 +24,10 @@ export function tacticalHint(language: Language, run: Expedition): string {
 /** Explain a public action preview without inspecting the mine layout. */
 export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string {
   switch (plan.reason) {
+    case 'tide-shield':
+      return message(language, 'tide.hint')
+    case 'tide-phase':
+      return message(language, 'tide.phase')
     case 'matrix-region':
       return message(language, 'matrix.region-only')
     case 'matrix-ground':
@@ -78,6 +84,16 @@ export function tacticalEventCopy(language: Language, encounter: TacticalEncount
   if (encounter.event === 'misfire')
     return message(language, 'tactical-copy.calibration-failed-5-damage')
   switch (encounter.event) {
+    case 'tide-anchored':
+      return message(language, 'tide.anchored')
+    case 'tide-shuffled':
+      if (encounter.kind === 'tide' && encounter.permutation.every((to, from) => to === from))
+        return message(language, 'tide.held')
+      return message(language, 'tide.shuffled')
+    case 'tide-broken':
+      return message(language, 'tide.broken')
+    case 'tide-armored':
+      return message(language, 'tide.phase')
     case 'matrix-shifted':
       return message(language, 'matrix.shifted')
     case 'matrix-collected':

@@ -38,6 +38,17 @@ function note(frequency: number, delay = 0, duration = 0.09): Tone {
 /** Compose original, lightweight cues without recordings, downloads, or runtime randomness. */
 export function notesForCue(cue: SoundCue): readonly Tone[] {
   switch (cue) {
+    case 'tide-anchor':
+      return [
+        { ...note(420, 0, 0.16), endFrequency: 90, gain: 0.05 },
+        note(960, 0.12, 0.06),
+        note(680, 0.18, 0.12),
+      ]
+    case 'tide-wave':
+      return [
+        { ...note(180, 0.3, 0.55), endFrequency: 540, gain: 0.04 },
+        { ...note(540, 0.7, 0.5), endFrequency: 160, gain: 0.025 },
+      ]
     case 'dialogue-player':
       return [{ ...note(980, 0, 0.022), endFrequency: 1120, gain: 0.018 }]
     case 'dialogue-boss':
@@ -92,6 +103,9 @@ export function notesForCue(cue: SoundCue): readonly Tone[] {
 /** Prefer action results over menu dismissal or key feedback from the same gesture. */
 export function cuePriority(cue: SoundCue): number {
   switch (cue) {
+    case 'tide-anchor':
+    case 'tide-wave':
+      return 2
     case 'dialogue-player':
     case 'dialogue-boss':
     case 'dialogue-narrator':

@@ -1,5 +1,8 @@
 /** Generated raster assets used by terrain, landmarks, character and tool controls. */
 export type DungeonSprite =
+  | 'tidekeeper'
+  | 'tide-core'
+  | 'tide-anchor'
   | 'matrix-overseer'
   | 'matrix-crystal'
   | 'matrix-observe'
@@ -65,7 +68,7 @@ export type DungeonSprite =
   | 'mine'
 
 /** Tools with an explicit area or row target; no implicit focus-derived target exists. */
-export type DungeonTool = 'probe' | 'scan' | 'sonar' | 'attune'
+export type DungeonTool = 'probe' | 'scan' | 'sonar' | 'attune' | 'anchor'
 
 /** One owned pointer drag, independent from a keyboard-selected tool. */
 export interface ToolDrag {

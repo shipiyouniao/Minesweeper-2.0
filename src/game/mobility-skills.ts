@@ -64,7 +64,10 @@ export function walkingNeighbors(run: Expedition, index: number): number[] {
   const ordinary = adjacentSteps(run.game, index)
   const rift = run.rift
   if (!rift || rift.room !== skillRoom(run)) return ordinary
-  if ((rift.from + rift.to) / 2 === run.encounter?.boss) return ordinary
+  // A tide carries both ends of an established portal. Their arithmetic midpoint no longer
+  // identifies the original crossed obstacle, and cannot invalidate the already-paid link.
+  if (run.encounter?.kind !== 'tide' && (rift.from + rift.to) / 2 === run.encounter?.boss)
+    return ordinary
   return index === rift.from
     ? [...ordinary, rift.to]
     : index === rift.to

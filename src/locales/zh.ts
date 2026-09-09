@@ -2,6 +2,30 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'tide.held': '地板抵住了这次潮水，道路没有改变。',
+  'tide.until': '{turns} 回合后涨潮',
+  'tide.name': '执潮者',
+  'tide.core': '潮核 · 先揭开这块安全地板，再落锚固定',
+  'tide.anchor': '落锚 · 1 点',
+  'tide.anchor-hint':
+    '把锚拖到脚下或上下左右已揭开的格子，也可先选锚再点目标。固定周围 3×3，持续到下次涨潮；每轮两枚，每枚 1 点。',
+  'tide.hint': '揭开潮核地板，再落锚固定。下次涨潮时反流破盾。',
+  'tide.deduce': '按扫雷数字开路，靠近潮核。每三回合地板重排，脚下和落锚区域留在原位。',
+  'tide.fight': '相邻攻击消耗 2 点。半血后护盾重建，再固定一次潮核，引发第二次反流。',
+  'tide.shuffle-note':
+    '雷、旗子、揭开状态和安全标记随地板移动，数字重算；普通旗仍可能插错。旧声呐和区域报告失效。先结算红色预警攻击，再涨潮，随后显示新预警。只有结束回合才推进时间。',
+  'tide.status': '{turns} 回合后涨潮 · 锚 {anchors}/2 · 护甲 {phase}/2',
+  'tide.open': '护盾已破',
+  'tide.shield': '护盾生效',
+  'tide.anchored': '已落锚，描边区域固定至涨潮。',
+  'tide.shuffled': '潮水退去，留意新的数字。',
+  'tide.broken': '反流冲击，护盾破碎！',
+  'tide.phase': '结束回合后进入第二段护甲，需要再次固定潮核。',
+  'tide.scene-0': '潮水之下，无处长留',
+  'tide.scene-1': '黄铜地板浮起，彼此错身。靴子下的那一块纹丝不动。',
+  'tide.scene-2': '数好你的脚步。三拍之后，道路归海。',
+  'tide.scene-3': '潮核在给护盾供能。把它锚住，水流或许会倒灌。',
+  'tide.scene-4': '两枚锚沉入行囊。对面的水面亮起细线，下一击将沿线袭来。',
   'matrix.quiet': '停火回合',
   'matrix.open-hint': '护盾已破，靠近核心攻击。',
   'matrix.hunt': '打破矩阵',

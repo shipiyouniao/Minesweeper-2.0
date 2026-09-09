@@ -8,6 +8,8 @@
 
 **Seven boss families:** Bastion Guardian, Brood Queen, [Mirror Twins](docs/mirror-twins.md), [Magnetic Knight](docs/magnetic-knight.md), [Clock Mage](docs/clock-mage.md), [Echo Warden](docs/echo-warden.md) and [Matrix Overseer](docs/matrix-overseer.md). Clear ordinary minefields and hunt crystals through a local observation lens to break two shields; scan resonance bodies to locate its hidden core; read magnetic push/pull forecasts and lure charges into anchors; against the Clock Mage, escape frozen spell deadlines and use an echo to follow up after retreat. Each boss has its own artwork, arrival scene and mechanics. Reduced-motion mode preserves the tactical forecasts. Read the [mode design](docs/game-modes.md) and [expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1) for current rules and planned modes.
 
+[Tidekeeper](docs/tidekeeper.md) adds a tactical boss that rearranges the floor every three turns. Drop anchors to preserve paths and turn the tidal core against its shield.
+
 Difficulty-based expedition income and authored balance scenarios are documented in [the reward table](docs/expedition-rewards.md).
 
 **UI styling:** [Tailwind utilities](docs/styling.md) style interface components using the existing palette. Native element defaults, board geometry and effects retain dedicated styles.

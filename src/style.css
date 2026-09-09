@@ -4,6 +4,7 @@
 @import './play-scale.css' layer(components);
 @import './camp.css' layer(components);
 @import './magnetic.css' layer(components);
+@import './tide.css' layer(components);
 @import './clock.css' layer(components);
 @import './base.css' layer(components);
 @import './gameplay.css' layer(components);
