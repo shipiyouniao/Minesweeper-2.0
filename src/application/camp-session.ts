@@ -1,3 +1,4 @@
+import { storyTaskReward } from '../game/story-quests.js'
 import { allowedDeparture, buyUpgrade, EMPTY_CAMP } from '../game/expedition.js'
 import { claimMilestone, equipTitle } from '../game/milestones.js'
 import { VariantRepository } from '../persistence/variant-repository.js'
@@ -6,6 +7,11 @@ import type { CampLoadout, StoryProgress, StoryTask } from '../types/story.js'
 import type { Camp, ExpeditionSave, Upgrade } from '../types/variants.js'
 
 export const EMPTY_STORY: StoryProgress = {
+  facts: [],
+  dialogue: { completed: [], active: null },
+  accepted: [],
+  pinned: [],
+  mapOwned: false,
   arrived: false,
   completed: [],
   claimed: [],
@@ -95,7 +101,7 @@ export class CampSession {
     for (const id of story.completed) {
       if (claimed.includes(id)) continue
       claimed.push(id)
-      earned += id === 'reach-camp' ? 60 : id === 'lost-satchel' ? 30 : 0
+      earned += storyTaskReward(id)
     }
     const completed: StoryTask[] = [...new Set([...previous.completed, ...story.completed])]
     this.repository.saveExpedition({

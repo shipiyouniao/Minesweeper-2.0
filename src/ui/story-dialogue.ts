@@ -1,11 +1,20 @@
 import { message } from '../i18n.js'
 import type { StoryDialogueBeat, StoryViewState } from '../types/story.js'
+import { storyDialogueEvent } from '../game/story-events.js'
+import { spriteImage } from './dungeon-sprites.js'
+import { professionSprite } from './profession-presentation.js'
+
+/** Finished narrative events have no residual panel on the board. */
+export function storyDialogueTemplate(state: StoryViewState): string {
+  if (!storyDialogueEvent(state)) return ''
+  return `<dialog class="story-dialogue" aria-labelledby="story-speaker-name"><div class="story-speakers"><span data-story-speaker="player">${spriteImage(professionSprite(state.run ? 'explorer' : state.loadout.profession))}</span><span data-story-speaker="lumi"><img class="story-guide" src="${import.meta.env.BASE_URL}assets/story/guide.png" alt="" draggable="false"></span></div><div class="story-dialogue-copy"><strong id="story-speaker-name" data-story-speaker-name></strong><p role="status" data-story-dialogue-line></p><button class="story-dialogue-next" data-story-action="dialogue">${message(state.language, 'story.dialogue-next')} →</button></div></dialog>`
+}
 
 /** Brief exchanges respond to the scene while the current teaching objective stays beside them. */
 export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat[] {
   const { language, run } = state
   if (!run) {
-    if (state.conversation === 'road')
+    if (storyDialogueEvent(state) === 'road')
       return [{ speaker: 'lumi', line: message(language, 'story.road-line'), gesture: 'point' }]
     if (state.conversation === 'guide' || state.progress.completed.includes('meet-guide'))
       return [
@@ -48,7 +57,18 @@ export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat
       { speaker: 'lumi', line: message(language, 'story.wake-line'), gesture: 'greet' },
     ]
   if (!run.practicedFlag)
-    return [{ speaker: 'lumi', line: message(language, 'story.flag-line'), gesture: 'point' }]
+    return [
+      {
+        speaker: 'lumi',
+        line:
+          message(language, 'story.flag-line') +
+          ' ' +
+          (state.touchInput
+            ? message(language, 'story.flag-touch')
+            : message(language, 'story.flag-mouse')),
+        gesture: 'point',
+      },
+    ]
   if (!run.practicedReveal)
     return [{ speaker: 'lumi', line: message(language, 'story.open-line'), gesture: 'point' }]
   return [{ speaker: 'lumi', line: message(language, 'story.travel-line'), gesture: 'nod' }]

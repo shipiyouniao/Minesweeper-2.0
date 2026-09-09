@@ -80,8 +80,12 @@ try {
   const muted = await page.evaluate(() => window.speechNotes.length)
   await complete(page)
   assert.equal(await page.evaluate(() => window.speechNotes.length), muted)
-  assert.equal(await page.locator('[data-story-action="dialogue"]').isVisible(), false)
+  assert.equal(await page.locator('[data-story-action="dialogue"]').isVisible(), true)
   assert.deepEqual((await save(page)).story, initial.story)
+  await page.locator('[data-story-action="dialogue"]').click()
+  await page.locator('.story-quest-reveal').waitFor()
+  assert.deepEqual((await save(page)).story.accepted, ['reach-camp'])
+  assert.equal(await page.locator('[data-story-action="dialogue"]').isVisible(), false)
   await page.screenshot({ path: '.native/performance-screenshots/dialogue-desktop.png' })
   await page.locator('[data-story-action="explore"]').click()
   await page.locator('[data-story-cell="12"]').click()
@@ -163,6 +167,43 @@ try {
   await complete(camp)
   await camp.screenshot({ path: '.native/performance-screenshots/camp-mobile.png' })
   assert.equal((await save(camp)).camp.supplies, 90)
+  await camp.locator('[data-story-action="dialogue"]').click()
+  await camp.evaluate(() => {
+    window.campLine = document.querySelector('[data-story-dialogue-line]')
+  })
+  await camp.locator('[data-story-cell="11"]').click()
+  await camp.locator('[data-camp-page="shop"]').waitFor()
+  for (const service of ['equipment', 'professions', 'achievements', 'missions', 'shop']) {
+    await camp.locator(`[data-control="camp-page:${service}"]`).click()
+    await camp.locator(`[data-camp-page="${service}"]`).waitFor()
+    assert.equal(
+      await camp.locator('.story-service [data-control="camp-page:overview"]').count(),
+      1,
+    )
+    assert.equal(await camp.locator('.story-service [data-story-action="back"]').count(), 0)
+    await camp.locator('[data-control="camp-page:overview"]').click()
+    const occupied = camp.locator(
+      `[data-story-cell="${await camp.locator('.story-traveler').getAttribute('data-player')}"]`,
+    )
+    await occupied.hover()
+    assert.deepEqual(
+      await occupied.evaluate((el) => ({
+        filter: getComputedStyle(el).filter,
+        layer: getComputedStyle(el).zIndex,
+      })),
+      { filter: 'none', layer: 'auto' },
+    )
+    assert.equal(
+      await camp.evaluate(
+        () => window.campLine === document.querySelector('[data-story-dialogue-line]'),
+      ),
+      true,
+      `${service}: completed dialogue must survive service changes`,
+    )
+    assert.equal(await camp.locator('[data-story-action="dialogue"]').isVisible(), false)
+    await camp.locator('[data-story-cell="11"]').click()
+    await camp.locator('[data-camp-page="shop"]').waitFor()
+  }
   await camp.close()
 
   for (const mode of ['classic', 'twin', 'sonar', 'survey', 'expedition', 'boss']) {

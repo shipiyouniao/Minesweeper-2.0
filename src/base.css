@@ -180,39 +180,55 @@ h1 {
   border-color: #e8d8d1;
 }
 .cell[data-number='1'],
-.dungeon-player[data-number='1'] {
+.dungeon-player[data-number='1'],
+.story-cell[data-number='1'],
+.story-traveler[data-number='1'] {
   --clue-color: #355ecc;
   color: var(--clue-color);
 }
 .cell[data-number='2'],
-.dungeon-player[data-number='2'] {
+.dungeon-player[data-number='2'],
+.story-cell[data-number='2'],
+.story-traveler[data-number='2'] {
   --clue-color: #368473;
   color: var(--clue-color);
 }
 .cell[data-number='3'],
-.dungeon-player[data-number='3'] {
+.dungeon-player[data-number='3'],
+.story-cell[data-number='3'],
+.story-traveler[data-number='3'] {
   --clue-color: #b95648;
   color: var(--clue-color);
 }
 .cell[data-number='4'],
-.dungeon-player[data-number='4'] {
+.dungeon-player[data-number='4'],
+.story-cell[data-number='4'],
+.story-traveler[data-number='4'] {
   --clue-color: #7860aa;
   color: var(--clue-color);
 }
 .cell[data-number='5'],
-.dungeon-player[data-number='5'] {
+.dungeon-player[data-number='5'],
+.story-cell[data-number='5'],
+.story-traveler[data-number='5'] {
   --clue-color: #9e6d35;
   color: var(--clue-color);
 }
 .cell[data-number='6'],
-.dungeon-player[data-number='6'] {
+.dungeon-player[data-number='6'],
+.story-cell[data-number='6'],
+.story-traveler[data-number='6'] {
   --clue-color: #368292;
   color: var(--clue-color);
 }
 .cell[data-number='7'],
 .dungeon-player[data-number='7'],
+.story-cell[data-number='7'],
+.story-traveler[data-number='7'],
 .cell[data-number='8'],
-.dungeon-player[data-number='8'] {
+.dungeon-player[data-number='8'],
+.story-cell[data-number='8'],
+.story-traveler[data-number='8'] {
   --clue-color: #555b65;
   color: var(--clue-color);
 }

@@ -6,6 +6,7 @@ import { DialogueReveal } from './dialogue-reveal.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { professionCopy } from './variant-copy.js'
 import { storyDialogue } from './story-dialogue.js'
+import { storyDialogueEvent } from '../game/story-events.js'
 
 /** Own cinematic presentation independently of the replay journal and game actions. */
 export class StoryPerformance {
@@ -42,39 +43,61 @@ export class StoryPerformance {
     return this.awakening
   }
 
+  get currentBeat(): number {
+    return this.beat
+  }
+
+  private openDialogue(): void {
+    const dialog = this.root.querySelector<HTMLDialogElement>('dialog.story-dialogue')
+    if (!this.awakening && dialog && !dialog.open) {
+      dialog.addEventListener('cancel', (event) => event.preventDefault(), {
+        signal: this.events.signal,
+      })
+      dialog.showModal()
+    }
+  }
+
   /** Reattach the same paragraph on ordinary renders so toggling tools never restarts speech. */
   present(state: StoryViewState): void {
     this.state = state
     const paragraph = this.root.querySelector<HTMLElement>('[data-story-dialogue-line]')
-    if (!paragraph) {
+    if (!storyDialogueEvent(state) || !paragraph) {
+      // A camp service temporarily hides the scene; it does not start a new conversation.
       this.reveal.cancel()
+      this.typing = false
       this.paragraph = null
+      this.beats = []
       this.key = ''
       return
     }
     const beats = storyDialogue(state)
-    const key = `${state.language}:${state.run ? 'explorer' : state.loadout.profession}:${state.board.scene.id}:${beats.map((b) => `${b.speaker}:${b.line}`).join('\n')}`
+    const key = `${state.language}:${state.board.scene.id}:${beats.map((b) => `${b.speaker}:${b.line}`).join('\n')}`
     if (key === this.key && this.paragraph) {
       paragraph.replaceWith(this.paragraph)
       this.updateSpeaker()
       this.updateNext()
+      this.openDialogue()
       return
     }
     this.reveal.cancel()
     this.beats = beats
     this.key = key
-    this.beat = 0
+    const active = state.progress.dialogue?.active
+    this.beat =
+      active?.id === storyDialogueEvent(state) ? Math.min(active.beat, beats.length - 1) : 0
     this.paragraph = paragraph
     this.showBeat()
+    this.openDialogue()
     if (this.awakening && !this.curtain) this.openEyes()
   }
 
   /** One click completes typing; a following click advances the exchange without moving a cell. */
-  advance(): void {
-    if (this.awakening || this.reveal.finish()) return
-    if (this.beat + 1 >= this.beats.length) return
+  advance(): boolean {
+    if (this.awakening || this.reveal.finish()) return false
+    if (this.beat + 1 >= this.beats.length) return true
     this.beat++
     this.showBeat()
+    return false
   }
 
   /** Finish the opening immediately when requested, preserving the current scene and objectives. */
@@ -91,6 +114,7 @@ export class StoryPerformance {
     }
     if (!this.disposed) {
       this.showBeat()
+      this.openDialogue()
       this.root
         .querySelector<HTMLElement>('[data-story-action="dialogue"]')
         ?.focus({ preventScroll: true })
@@ -164,7 +188,7 @@ export class StoryPerformance {
   private showBeat(): void {
     const state = this.state
     const beat = this.beats[this.beat]
-    if (!state || !beat || !this.paragraph) return
+    if (!state || !storyDialogueEvent(state) || !beat || !this.paragraph?.isConnected) return
     this.updateSpeaker()
     this.paragraph.textContent = beat.line
     if (this.awakening) return
@@ -246,8 +270,8 @@ export class StoryPerformance {
     const button = this.root.querySelector<HTMLButtonElement>('[data-story-action="dialogue"]')
     if (!button || !this.state) return
     const more = this.beat + 1 < this.beats.length
-    button.hidden = !this.typing && !more
-    button.textContent = `${more ? message(this.state.language, 'story.dialogue-next') : message(this.state.language, 'story.dialogue-read')} →`
+    button.hidden = false
+    button.textContent = `${this.typing && !more ? message(this.state.language, 'story.dialogue-read') : message(this.state.language, 'story.dialogue-next')} →`
   }
 
   /** Eyelids briefly blink, widen, then bring the live scene into focus. */

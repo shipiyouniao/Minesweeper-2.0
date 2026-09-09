@@ -1,3 +1,5 @@
+import { message } from '../i18n.js'
+import { storyTaskName } from './story-quests.js'
 import { CampSession } from '../application/camp-session.js'
 import { StorySession } from '../application/story-session.js'
 import { CAMP_SCENE, CAMP_SITES } from '../game/story-content.js'
@@ -14,6 +16,8 @@ import { navigateCamp } from './camp-navigation.js'
 import { LanguageMenu } from './language-menu.js'
 import { storyTemplate } from './story-template.js'
 import { StoryPerformance } from './story-performance.js'
+import { StoryMapControls } from './story-map-controls.js'
+import { storyDialogueEvent } from '../game/story-events.js'
 import { TitleMenu } from './title-menu.js'
 import { parseVariantCommand } from './variant-input.js'
 
@@ -41,8 +45,15 @@ export class StoryApp implements MountedGame {
   private animation: Animation | null = null
   private generation = 0
   private moving = false
+  private panel: 'tasks' | 'map' | null = null
+  private mapLevel: 'local' | 'region' | 'world' = 'local'
+  private mapScene = 3
+  private mapLegend = false
+  private readonly mapControls = new StoryMapControls()
+  private touchInput = matchMedia('(pointer: coarse)').matches
+  private questTimer: ReturnType<typeof setTimeout> | null = null
 
-  /** Mount directly into the active scene; the prologue never creates a dialog element. */
+  /** Restore the active scene and any unfinished dialogue. */
   constructor(
     root: HTMLElement,
     repository: VariantRepository,
@@ -61,7 +72,10 @@ export class StoryApp implements MountedGame {
     this.performance = new StoryPerformance(
       root,
       sounds,
-      this.session.run?.floor === 0 && this.session.camp.story.journal?.actions.length === 0,
+      this.session.run?.floor === 0 &&
+        this.session.camp.story.journal?.actions.length === 0 &&
+        !this.session.camp.story.dialogue?.active &&
+        !this.session.camp.story.dialogue?.completed.includes('wake'),
     )
     this.rightClick = new BoardRightClick(root, (cell) => {
       void this.activate(Number(cell.dataset['storyCell']), true)
@@ -80,7 +94,9 @@ export class StoryApp implements MountedGame {
 
   /** Cancel presentation only; accepted movement was already checkpointed by the session. */
   dispose(): void {
+    this.mapControls.dispose()
     this.generation++
+    if (this.questTimer) clearTimeout(this.questTimer)
     this.animation?.cancel()
     this.cancelHold()
     this.performance.dispose()
@@ -98,6 +114,11 @@ export class StoryApp implements MountedGame {
     const board = run?.board ?? buildStoryBoard(CAMP_SCENE)
     const saved = progress.campPosition
     return {
+      panel: this.panel,
+      mapLevel: this.mapLevel,
+      mapScene: this.mapScene,
+      mapLegend: this.mapLegend,
+      touchInput: this.touchInput,
       language: this.language,
       run,
       board,
@@ -124,13 +145,34 @@ export class StoryApp implements MountedGame {
     const active = document.activeElement instanceof HTMLElement ? document.activeElement : null
     const cell = active?.dataset['storyCell']
     const control = active?.dataset['storyAction']
+    const task = active?.dataset['task']
+    const banner = this.root.querySelector('.story-quest-reveal')
+    const expanded = [...this.root.querySelectorAll<HTMLDetailsElement>('.story-quest[open]')].map(
+      (details) => ({
+        id: details.dataset['task'],
+        panel: !!details.closest('.story-quest-panel'),
+      }),
+    )
     this.languageMenu?.dispose()
     this.titleMenu?.dispose()
     document.documentElement.lang = this.language === 'zh' ? 'zh-CN' : this.language
     document.title = 'Minefarer'
-    const state = this.snapshot()
+    let state = this.snapshot()
+    const dialogue = storyDialogueEvent(state)
+    if (dialogue && state.progress.dialogue?.active?.id !== dialogue) {
+      this.session.checkpointDialogue(dialogue, 0)
+      state = this.snapshot()
+    }
     this.root.innerHTML = storyTemplate(state)
+    if (banner) this.root.append(banner)
+    for (const details of this.root.querySelectorAll<HTMLDetailsElement>('.story-quest'))
+      details.open = expanded.some(
+        (entry) =>
+          entry.id === details.dataset['task'] &&
+          entry.panel === !!details.closest('.story-quest-panel'),
+      )
     this.performance.present(state)
+    this.mapControls.mount(this.root)
     const picker = this.root.querySelector<HTMLElement>('.language-picker')!
     this.languageMenu = new LanguageMenu(picker, this.selectLanguage, (cue) =>
       this.sounds.play(cue),
@@ -140,7 +182,9 @@ export class StoryApp implements MountedGame {
     if (cell !== undefined) this.focusCell(Number(cell))
     else if (control)
       this.root
-        .querySelector<HTMLElement>(`[data-story-action="${control}"]`)
+        .querySelector<HTMLElement>(
+          `[data-story-action="${control}"]${task ? `[data-task="${task}"]` : ''}`,
+        )
         ?.focus({ preventScroll: true })
   }
 
@@ -214,7 +258,10 @@ export class StoryApp implements MountedGame {
 
   /** Apply one scene action; route preview/animation never reads covered mine locations. */
   private async activate(index: number, flag: boolean): Promise<void> {
+    if (this.root.querySelector('dialog.story-dialogue[open]')) return
     if (this.moving || this.performance.busy || !Number.isInteger(index)) return
+    if (this.session.run?.floor === 0 && !this.session.camp.story.accepted?.includes('reach-camp'))
+      return
     const state = this.snapshot()
     const cell = state.board.game.cells[index]
     if (!cell || state.board.walls.includes(index)) return
@@ -259,7 +306,29 @@ export class StoryApp implements MountedGame {
     if (generation !== this.generation) return
     this.moving = false
     this.feedback = hurt ? 'hurt' : 'none'
+    if (state.run && this.session.run?.player === this.session.run?.board.exit) {
+      if (this.session.dispatch({ type: 'continue' })) {
+        this.inspected = null
+        this.flagMode = false
+        this.panel = null
+      } else this.feedback = 'lesson'
+    } else if (
+      state.run &&
+      state.run.floor > 0 &&
+      this.session.run?.player === this.session.run?.board.entrance
+    ) {
+      if (this.session.dispatch({ type: 'return' })) {
+        this.inspected = null
+        this.flagMode = false
+        this.panel = null
+      }
+    }
     if (!state.run) {
+      if (index === state.board.exit && this.session.leaveCamp()) {
+        this.conversation = null
+        this.inspected = null
+        this.panel = null
+      }
       const site = CAMP_SITES.find((entry) => entry.index === index)
       if (site?.destination === 'guide') {
         this.session.meetGuide()
@@ -270,8 +339,33 @@ export class StoryApp implements MountedGame {
     }
     this.render()
     if (!state.run && index === 51) this.performance.react('greet')
-    if (state.run && !state.run.collected && this.session.run?.collected)
+    if (
+      state.run &&
+      state.run.floor === this.session.run?.floor &&
+      !state.run.collected &&
+      this.session.run?.collected
+    )
       this.performance.react('collect')
+  }
+
+  /** Give accepted objectives a large scene title, with cleanup even when motion is disabled. */
+  private questReveal(title: string, subtitle: string): void {
+    this.root.querySelector('.story-quest-reveal')?.remove()
+    if (this.questTimer) clearTimeout(this.questTimer)
+    const banner = document.createElement('div')
+    banner.className = 'story-quest-reveal'
+    banner.setAttribute('role', 'status')
+    const heading = document.createElement('h2')
+    heading.textContent = title
+    const label = document.createElement('p')
+    label.textContent = subtitle
+    banner.append(label, heading)
+    this.root.append(banner)
+    this.sounds.play('confirm')
+    this.questTimer = setTimeout(() => {
+      banner.remove()
+      this.questTimer = null
+    }, 2800)
   }
 
   /** Animate the existing chibi over a path; reduced-motion users see the committed destination. */
@@ -283,6 +377,7 @@ export class StoryApp implements MountedGame {
       const cell = this.root.querySelector<HTMLElement>(`[data-story-cell="${index}"]`)
       return cell ? [{ left: `${cell.offsetLeft}px`, top: `${cell.offsetTop}px` }] : []
     })
+    traveler.classList.add('is-walking')
     this.animation = traveler.animate(frames, {
       duration: Math.min(1800, (path.length - 1) * 100),
       fill: 'forwards',
@@ -294,6 +389,7 @@ export class StoryApp implements MountedGame {
       /* Navigation can cancel presentation after the move has committed. */
     }
     this.animation = null
+    traveler.classList.remove('is-walking')
   }
 
   /** Delegate ordinary clicks while a held touch suppresses its compatibility click. */
@@ -310,7 +406,24 @@ export class StoryApp implements MountedGame {
     }
     if (this.performance.busy) return
     if (button.dataset['storyAction'] === 'dialogue') {
-      this.performance.advance()
+      const id = storyDialogueEvent(this.snapshot())
+      if (!id) return
+      if (this.performance.advance()) {
+        const hadMap = this.session.camp.story.mapOwned
+        const task = this.session.completeDialogue(id)
+        const map = !hadMap && this.session.camp.story.mapOwned
+        this.render()
+        if (task)
+          this.questReveal(
+            storyTaskName(this.language, task),
+            message(this.language, 'story.quest-accepted'),
+          )
+        else if (map)
+          this.questReveal(
+            message(this.language, 'story.map'),
+            message(this.language, 'story.map-received'),
+          )
+      } else this.session.checkpointDialogue(id, this.performance.currentBeat)
       return
     }
     const index = button.dataset['storyCell']
@@ -328,6 +441,48 @@ export class StoryApp implements MountedGame {
       return
     }
     switch (button.dataset['storyAction']) {
+      case 'map-legend':
+        this.mapLegend = !this.mapLegend
+        break
+      case 'map-level': {
+        const level = button.dataset['level']
+        if (level !== 'local' && level !== 'region' && level !== 'world') return
+        this.mapLevel = level
+        break
+      }
+      case 'map-scene': {
+        const scene = Number(button.dataset['scene'])
+        if (
+          !Number.isInteger(scene) ||
+          scene < 0 ||
+          scene > (this.session.camp.story.arrived ? 4 : (this.session.run?.floor ?? 3))
+        )
+          return
+        this.mapScene = scene
+        this.mapLevel = 'local'
+        break
+      }
+      case 'tasks':
+      case 'map':
+        if (button.dataset['storyAction'] === 'map' && this.panel !== 'map') {
+          this.mapScene = this.session.run?.floor ?? 3
+          this.mapLevel = 'local'
+          this.mapLegend = false
+        }
+        this.panel =
+          this.panel === button.dataset['storyAction']
+            ? null
+            : (button.dataset['storyAction'] as 'tasks' | 'map')
+        break
+      case 'close-panel':
+        this.panel = null
+        break
+      case 'pin': {
+        const id = button.dataset['task']
+        if (id === 'reach-camp' || id === 'lost-satchel' || id === 'meet-guide')
+          this.session.togglePin(id)
+        break
+      }
       case 'flag':
         this.flagMode = true
         break
@@ -355,6 +510,11 @@ export class StoryApp implements MountedGame {
     }
     this.sounds.play('confirm')
     this.render()
+    if (
+      button.dataset['storyAction'] === 'map-level' ||
+      button.dataset['storyAction'] === 'map-scene'
+    )
+      this.root.querySelector<HTMLElement>('.atlas-scale')?.focus({ preventScroll: true })
   }
 
   /** Maintain roving focus while leaving browser scrolling and all nonboard keys alone. */
@@ -374,6 +534,11 @@ export class StoryApp implements MountedGame {
         event.preventDefault()
         this.performance.skipOpening()
       }
+      return
+    }
+    if (event.key === 'Escape' && this.panel) {
+      this.panel = null
+      this.render()
       return
     }
     const cell =
@@ -409,6 +574,15 @@ export class StoryApp implements MountedGame {
   /** Arm a hold only for a touch cell; scrolling past the threshold cancels it. */
   private readonly down = (event: PointerEvent): void => {
     this.sounds.unlock()
+    const touch = event.pointerType !== 'mouse'
+    if (touch !== this.touchInput) {
+      this.touchInput = touch
+      const objective = this.root.querySelector('[data-story-flag-guidance]')
+      if (objective && this.session.run?.inspected && !this.session.run.practicedFlag)
+        objective.textContent = touch
+          ? message(this.language, 'story.flag-touch')
+          : message(this.language, 'story.flag-mouse')
+    }
     if (event.pointerType === 'mouse' || !event.isPrimary || this.moving) return
     const cell =
       event.target instanceof Element
