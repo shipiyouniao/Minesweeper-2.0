@@ -1,5 +1,35 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'story.atlas-watchtower': string
+  readonly 'story.atlas-uncharted': string
+  readonly 'story.atlas-zoom': string
+  readonly 'story.atlas-zoom-in': string
+  readonly 'story.atlas-zoom-out': string
+  readonly 'story.atlas-fit': string
+  readonly 'story.atlas-tree': string
+  readonly 'story.atlas-world': string
+  readonly 'story.atlas-legend': string
+  readonly 'story.atlas-region': string
+  readonly 'story.atlas-local': string
+  readonly 'story.atlas-woodland': string
+  readonly 'story.atlas-here': string
+  readonly 'story.atlas-route': string
+  readonly 'story.atlas-enter': string
+  readonly 'story.quest-accepted': string
+  readonly 'story.no-quests': string
+  readonly 'story.no-accepted': string
+  readonly 'story.pin': string
+  readonly 'story.unpin': string
+  readonly 'story.map': string
+  readonly 'story.no-map': string
+  readonly 'story.map-received': string
+  readonly 'story.quest-main-detail': string
+  readonly 'story.quest-side-detail': string
+  readonly 'story.quest-guide-detail': string
+  readonly 'story.quest-location': string
+  readonly 'story.flag-mouse': string
+  readonly 'story.flag-touch': string
+  readonly 'story.map-unvisited': string
   readonly 'story.return-bag': string
   readonly 'story.open-eyes': string
   readonly 'story.dialogue-next': string

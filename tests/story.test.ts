@@ -18,6 +18,102 @@ import { VariantRepository } from '../src/persistence/variant-repository.js'
 import type { StoryAction, StoryRun } from '../src/types/story.js'
 import { FakeRuntime, MemoryStorage } from './helpers.js'
 
+test('camp return and both travel directions preserve explored scenes and pay rewards only once', () => {
+  const repository = new VariantRepository(new MemoryStorage())
+  let session = new StorySession(new CampSession(repository))
+  const boards = []
+  for (let floor = 0; floor < 3; floor++) {
+    solveFloor(
+      session.run!,
+      (action) => {
+        session.dispatch(action)
+      },
+      () => session.run!,
+    )
+    boards.push(session.run!.board)
+    assert.equal(session.dispatch({ type: 'continue' }), true)
+  }
+  const supplies = session.camp.camp.supplies
+  assert.equal(session.leaveCamp(), false)
+  session.moveCamp(buildStoryBoard(CAMP_SCENE).exit)
+  assert.equal(session.leaveCamp(), true)
+  session = new StorySession(new CampSession(repository))
+  for (let floor = 2; floor >= 0; floor--) {
+    assert.equal(session.run!.floor, floor)
+    assert.deepEqual(session.run!.board, boards[floor])
+    if (floor > 0) {
+      assert.equal(session.dispatch({ type: 'visit', index: session.run!.board.entrance }), true)
+      assert.equal(session.dispatch({ type: 'return' }), true)
+      session = new StorySession(new CampSession(repository))
+    }
+  }
+  for (let floor = 0; floor < 3; floor++) {
+    session.dispatch({ type: 'visit', index: session.run!.board.exit })
+    assert.equal(session.dispatch({ type: 'continue' }), true)
+  }
+  assert.equal(session.run, null)
+  assert.equal(session.camp.camp.supplies, supplies)
+  session = new StorySession(new CampSession(repository))
+  assert.equal(session.run, null)
+  assert.equal(session.leaveCamp(), true)
+  assert.deepEqual(session.run!.board, boards[2])
+})
+
+test('legacy camp saves reopen the surveyed prologue without replaying rewards', () => {
+  const repository = new VariantRepository(new MemoryStorage())
+  const camp = new CampSession(repository)
+  camp.saveStory({
+    ...camp.story,
+    arrived: true,
+    completed: ['reach-camp', 'lost-satchel'],
+    campPosition: 49,
+    journal: null,
+  })
+  const balance = camp.camp.supplies
+  const session = new StorySession(new CampSession(repository))
+  assert.equal(session.leaveCamp(), true)
+  assert.equal(session.run!.floor, 2)
+  assert.ok(session.run!.board.game.cells.every((cell) => cell.visibility !== 'hidden'))
+  const restored = new StorySession(new CampSession(repository))
+  assert.deepEqual(restored.run, session.run)
+  assert.equal(restored.dispatch({ type: 'continue' }), true)
+  assert.equal(restored.camp.camp.supplies, balance)
+})
+
+test('story quests start empty and acceptance, tracking and map ownership survive reload', () => {
+  const repository = new VariantRepository(new MemoryStorage())
+  const session = new StorySession(new CampSession(repository))
+  assert.deepEqual(session.camp.story.accepted, [])
+  assert.deepEqual(session.camp.story.pinned, [])
+  session.receiveMap()
+  assert.equal(session.camp.story.mapOwned, false)
+  assert.equal(session.acceptTask(), 'reach-camp')
+  assert.equal(session.acceptTask(), null)
+  session.togglePin('reach-camp')
+  session.togglePin('meet-guide')
+  const resumed = new StorySession(new CampSession(repository))
+  assert.deepEqual(resumed.camp.story.accepted, ['reach-camp'])
+  assert.deepEqual(resumed.camp.story.pinned, [])
+  resumed.togglePin('reach-camp')
+  assert.deepEqual(resumed.camp.story.pinned, ['reach-camp'])
+})
+
+test('legacy story saves retain completed quests and maps without inventing starting quests', () => {
+  assert.deepEqual(decodeStory({ journal: { revision: 1, actions: [] } })?.accepted, [])
+  const legacy = decodeStory({ completed: ['reach-camp', 'meet-guide'] })!
+  assert.deepEqual(legacy.accepted, ['reach-camp', 'meet-guide'])
+  assert.deepEqual(legacy.pinned, [])
+  assert.equal(legacy.mapOwned, true)
+  assert.equal(decodeStory({ completed: ['meet-guide'], mapOwned: false })?.mapOwned, false)
+  assert.deepEqual(
+    decodeStory({
+      accepted: ['reach-camp'],
+      pinned: ['fake', 'meet-guide', 'reach-camp', 'reach-camp'],
+    })?.pinned,
+    ['reach-camp'],
+  )
+})
+
 /** Solve with public clue constraints, then perform the authored teaching and travel objectives. */
 function solveFloor(
   initial: StoryRun,
@@ -294,4 +390,45 @@ test('a concurrent roguelite checkpoint and settlement preserve newer story and 
   assert.equal(expedition.dispatch({ type: 'retreat' }), true)
   assert.deepEqual(repository.expedition()!.story, progress)
   assert.equal(repository.expedition()!.camp.supplies, 90)
+})
+
+test('dialogue checkpoints survive reload and completion accepts a quest only once', () => {
+  const repository = new VariantRepository(new MemoryStorage())
+  let session = new StorySession(new CampSession(repository))
+  session.checkpointDialogue('wake', 1)
+  session = new StorySession(new CampSession(repository))
+  assert.deepEqual(session.camp.story.dialogue?.active, { id: 'wake', beat: 1 })
+  assert.equal(session.completeDialogue('wake'), 'reach-camp')
+  session = new StorySession(new CampSession(repository))
+  assert.equal(session.completeDialogue('wake'), null)
+  assert.deepEqual(session.camp.story.dialogue, { completed: ['wake'], active: null })
+  assert.deepEqual(session.camp.story.accepted, ['reach-camp'])
+  session.camp.saveStory({ ...session.camp.story, completed: ['reach-camp'], pinned: [] })
+  session.togglePin('reach-camp')
+  assert.deepEqual(session.camp.story.pinned, [])
+})
+
+test('restarting an exhausted legacy route clears its origin and archive atomically', () => {
+  const repository = new VariantRepository(new MemoryStorage())
+  const camp = new CampSession(repository)
+  const actions: StoryAction[] = [
+    { type: 'return' },
+    ...Array.from({ length: 2999 }, (): StoryAction => ({ type: 'flag', index: 13 })),
+  ]
+  camp.saveStory({
+    ...camp.story,
+    arrived: true,
+    routeLegacy: true,
+    completed: ['reach-camp', 'lost-satchel'],
+    route: { revision: 1, actions: [] },
+    journal: { revision: 1, actions },
+  })
+  const session = new StorySession(camp)
+  assert.equal(session.exhausted, true)
+  const supplies = repository.expedition()!.camp.supplies
+  assert.equal(session.dispatch({ type: 'retry' }), true)
+  assert.equal(camp.story.routeLegacy, undefined)
+  assert.equal(camp.story.route, undefined)
+  assert.deepEqual(new StorySession(new CampSession(repository)).run, createStoryRun())
+  assert.equal(repository.expedition()!.camp.supplies, supplies)
 })

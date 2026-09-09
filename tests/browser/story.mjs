@@ -76,10 +76,55 @@ async function visit(page, index) {
       document.querySelector('.story-traveler')?.getAttribute('data-player') === String(target),
     index,
   )
+  await verifyClues(page)
+}
+
+/** Occupied revealed clues stay readable; covered cells expose no numeric badge or truth. */
+async function verifyClues(page) {
+  const result = await page.evaluate(() => {
+    const traveler = document.querySelector('.story-traveler')
+    const cell = document.querySelector(`[data-story-cell="${traveler.dataset.player}"]`)
+    const badge = traveler.querySelector('.story-clue-badge')
+    const badges = [...document.querySelectorAll('.story-clue-badge')]
+    return {
+      number: Number(cell.dataset.number),
+      badge: Number(badge?.textContent || 0),
+      leaks: [...document.querySelectorAll('.story-cell.is-covered')].filter(
+        (el) => Number(el.dataset.number) || el.querySelector('.story-clue-badge'),
+      ).length,
+      aligned: badges.every((el) => {
+        const style = getComputedStyle(el)
+        const range = document.createRange()
+        range.selectNodeContents(el)
+        const text = range.getBoundingClientRect()
+        const circle = el.getBoundingClientRect()
+        return (
+          style.display === 'grid' &&
+          style.placeItems === 'center' &&
+          Math.abs(text.x + text.width / 2 - circle.x - circle.width / 2) < 1
+        )
+      }),
+      colors: badges.every(
+        (el) => getComputedStyle(el).color === getComputedStyle(el.parentElement).color,
+      ),
+    }
+  })
+  assert.equal(result.badge, result.number)
+  assert.equal(result.leaks, 0)
+  assert.equal(result.aligned, true)
+  assert.equal(result.colors, true)
+}
+
+/** Complete the current exchange through its public dialogue button. */
+async function finishDialogue(page) {
+  const next = page.locator('[data-story-action="dialogue"]')
+  for (let i = 0; i < 12 && (await next.isVisible()); i++) await next.click()
+  assert.equal(await next.isVisible(), false)
 }
 
 /** Complete each scene from public clues and the visible teaching objectives. */
 async function solve(page, floor) {
+  await finishDialogue(page)
   if (floor === 0) await page.locator('[data-story-cell="12"]').click()
   for (let turn = 0; turn < 50; turn++) {
     const cells = await visible(page)
@@ -88,6 +133,7 @@ async function solve(page, floor) {
       await page.locator(`[data-story-cell="${index}"]`).click({ button: 'right' })
     let acted = false
     for (const index of safe) {
+      if (index === [34, 52, 25][floor]) continue
       const latest = await visible(page)
       if (!latest.find((c) => c.index === index)?.covered) continue
       const player = Number(await page.locator('.story-traveler').getAttribute('data-player'))
@@ -99,16 +145,18 @@ async function solve(page, floor) {
   }
   if (floor < 2) await visit(page, 31)
   if (floor === 1) await visit(page, 42)
-  await visit(page, [34, 52, 25][floor])
-  assert.equal(
-    await page
-      .locator('.story-hearts')
-      .getAttribute('aria-label')
-      .then((s) => s.endsWith('3 / 3')),
-    true,
-  )
-  assert.equal(await page.locator('[data-story-action="continue"]').isEnabled(), true)
-  await page.locator('[data-story-action="continue"]').click()
+  if (floor < 2) {
+    assert.equal(
+      await page
+        .locator('.story-hearts')
+        .getAttribute('aria-label')
+        .then((s) => s.endsWith('3 / 3')),
+      true,
+    )
+  }
+  assert.equal(await page.locator('[data-story-action="continue"]').count(), 0)
+  await page.locator(`[data-story-cell="${[34, 52, 25][floor]}"]`).click()
+  await page.locator(`[data-story-scene="${['trail', 'approach', 'camp'][floor]}"]`).waitFor()
 }
 
 /** Assert scene readability and fixed controls at the viewport edges. */
@@ -143,6 +191,22 @@ try {
   await page.goto(`${base}?lang=zh`)
   await page.locator('.destination-expedition').click()
   assert.equal(await page.locator('[data-story-scene="awakening"]').count(), 1)
+  assert.equal(await page.locator('.story-tasks .story-quest').count(), 0)
+  await page.locator('[data-story-action="map"]').click()
+  assert.ok((await page.locator('.story-quest-panel').innerText()).includes('地图'))
+  assert.equal(await page.locator('.story-map').count(), 0)
+  await page.locator('[data-story-action="close-panel"]').click()
+  await finishDialogue(page)
+  await page.locator('.story-quest-reveal').waitFor()
+  await page.locator('.story-tasks summary').click()
+  assert.equal(await page.locator('.story-quest-bubble').isVisible(), true)
+  await page.locator('[data-story-action="pin"]').click()
+  assert.equal(await page.locator('.story-tasks .story-quest').count(), 0)
+  await page.locator('[data-story-action="tasks"]').click()
+  await page.locator('.story-quest-panel summary').click()
+  await page.locator('.story-quest-panel [data-story-action="pin"]').click()
+  assert.equal(await page.locator('.story-tasks .story-quest').count(), 1)
+  await page.locator('[data-story-action="close-panel"]').click()
   await page.screenshot({ path: '.native/story-screenshots/prologue-desktop.png' })
   await solve(page, 0)
   await page.reload()
@@ -158,6 +222,7 @@ try {
   await solve(page, 1)
   await solve(page, 2)
   await page.locator('[data-story-scene="camp"]').waitFor()
+  await finishDialogue(page)
   await geometry(page)
   await page.locator('.title-trigger').click()
   assert.equal(await page.locator('.title-options').isVisible(), true)
@@ -174,10 +239,14 @@ try {
     return [42, 50, 52, 60].includes(player)
   })
   await page.screenshot({ path: '.native/story-screenshots/camp-desktop.png' })
+  await finishDialogue(page)
+  await page.locator('[data-story-action="map"]').click()
+  assert.equal(await page.locator('.atlas-local-grid').count(), 1)
+  await page.locator('[data-story-action="close-panel"]').click()
   await page.locator('[data-story-cell="11"]').click()
   await page.locator('[data-camp-page="shop"]').waitFor()
   assert.ok((await page.locator('.shop-tile').count()) >= 27)
-  await page.locator('[data-story-action="back"]').click()
+  await page.locator('[data-control="camp-page:overview"]').click()
   await page.reload()
   save = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('minesweeper.variants.v1.expedition')),
@@ -185,6 +254,32 @@ try {
   assert.equal(save.camp.supplies, 90)
   assert.ok(save.story.completed.includes('meet-guide'))
   const campStorage = await page.context().storageState()
+  await page.locator('[data-story-cell="49"]').click()
+  await page.locator('[data-story-scene="approach"]').waitFor()
+  await page.reload()
+  await page.locator('[data-story-scene="approach"]').waitFor()
+  assert.equal(await page.locator('.story-traveler').getAttribute('data-player'), '25')
+  for (const [gate, next] of [
+    [28, 'trail'],
+    [19, 'awakening'],
+  ]) {
+    await page.locator(`[data-story-cell="${gate}"]`).click()
+    await page.locator(`[data-story-scene="${next}"]`).waitFor()
+  }
+  for (const [gate, next] of [
+    [34, 'trail'],
+    [52, 'approach'],
+    [25, 'camp'],
+  ]) {
+    await page.locator(`[data-story-cell="${gate}"]`).click()
+    await page.locator(`[data-story-scene="${next}"]`).waitFor()
+  }
+  assert.equal(
+    await page.evaluate(
+      () => JSON.parse(localStorage.getItem('minesweeper.variants.v1.expedition')).camp.supplies,
+    ),
+    90,
+  )
   await page.close()
 
   for (const width of [320, 390, 800, 844, 1440, 3840]) {
@@ -201,7 +296,9 @@ try {
       const boardBox = await responsive.locator('.story-board').boundingBox()
       assert.ok(boardBox.width >= 200 && boardBox.height >= 150, JSON.stringify(boardBox))
       if (width === 390 && language === 'zh') {
+        await finishDialogue(responsive)
         await responsive.locator('[data-story-cell="12"]').tap()
+        assert.ok((await responsive.locator('.story-stage-top').innerText()).includes('长按'))
         const cell = responsive.locator('[data-story-cell="22"]')
         await cell.scrollIntoViewIfNeeded()
         const box = await cell.boundingBox()

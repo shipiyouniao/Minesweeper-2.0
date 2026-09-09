@@ -38,10 +38,12 @@ export interface StoryBoard {
 export type StoryAction =
   | { readonly type: 'visit' | 'flag' | 'inspect'; readonly index: number }
   | { readonly type: 'continue' }
+  | { readonly type: 'return' }
   | { readonly type: 'retry' }
 
 /** Runtime state is rebuilt from authored content, never from serialized hidden cells. */
 export interface StoryRun {
+  readonly visited?: readonly StorySceneMemory[]
   readonly floor: number
   readonly board: StoryBoard
   readonly player: number
@@ -55,16 +57,64 @@ export interface StoryRun {
   readonly phase: 'exploring' | 'arrived' | 'fallen'
 }
 
+/** Scene snapshots never recursively include the travel history. */
+export type StorySceneMemory = Omit<StoryRun, 'visited'>
+
 /** Permanent story objectives are separate from ordinary expedition milestones. */
 export type StoryTask = 'reach-camp' | 'lost-satchel' | 'meet-guide'
 
 /** One envelope commits story rewards and the shared wallet together. */
 export interface StoryProgress {
+  readonly facts?: readonly StoryFact[]
+  readonly dialogue?: StoryDialogueProgress
+  readonly accepted?: readonly StoryTask[]
+  readonly pinned?: readonly StoryTask[]
+  readonly mapOwned?: boolean
+  readonly route?: { readonly revision: number; readonly actions: readonly StoryAction[] }
+  readonly routeLegacy?: boolean
   readonly arrived: boolean
   readonly completed: readonly StoryTask[]
   readonly claimed: readonly StoryTask[]
   readonly campPosition: number
   readonly journal: { readonly revision: number; readonly actions: readonly StoryAction[] } | null
+}
+
+export type StoryDialogueId =
+  | 'wake'
+  | 'flag'
+  | 'open'
+  | 'travel'
+  | 'trail'
+  | 'satchel'
+  | 'approach'
+  | 'arrival'
+  | 'guide'
+  | 'road'
+
+export interface StoryDialogueProgress {
+  readonly completed: readonly StoryDialogueId[]
+  readonly active: { readonly id: StoryDialogueId; readonly beat: number } | null
+}
+
+/** Versioned storage DTO. Runtime aliases are confined to the decoder/encoder boundary. */
+export interface StorySaveData {
+  readonly schemaVersion: 2
+  readonly travel: {
+    readonly campReached: boolean
+    readonly campPosition: number
+    readonly activeJournal: StoryProgress['journal']
+    readonly archivedJournal: StoryProgress['route'] | null
+    readonly origin: 'prologue' | 'surveyed-legacy'
+  }
+  readonly quests: {
+    readonly facts: readonly StoryFact[]
+    readonly accepted: readonly StoryTask[]
+    readonly pinned: readonly StoryTask[]
+    readonly completed: readonly StoryTask[]
+    readonly claimed: readonly StoryTask[]
+  }
+  readonly inventory: { readonly mapOwned: boolean }
+  readonly dialogue: StoryDialogueProgress
 }
 
 /** Camp choices are shared; starting a run still takes an immutable departure snapshot. */
@@ -102,6 +152,11 @@ export interface StoryViewState {
   readonly feedback: StoryFeedback
   readonly sound: boolean
   readonly storageAvailable: boolean
+  readonly touchInput?: boolean
+  readonly panel?: 'tasks' | 'map' | null
+  readonly mapLevel?: 'local' | 'region' | 'world'
+  readonly mapScene?: number
+  readonly mapLegend?: boolean
   readonly exhausted: boolean
 }
 
@@ -113,4 +168,24 @@ export interface StoryHold {
   readonly x: number
   readonly y: number
   readonly timer: ReturnType<typeof setTimeout>
+}
+
+/** Durable outcomes describe the fiction, independent of board coordinates or wording. */
+export type StoryFact = 'camp-reached' | 'satchel-secured' | 'satchel-delivered' | 'guide-met'
+
+/** Content uses explicit prerequisite groups, never executable string expressions. */
+export type StoryCondition =
+  | { readonly kind: 'fact'; readonly id: StoryFact }
+  | { readonly kind: 'task'; readonly id: StoryTask }
+  | { readonly kind: 'dialogue'; readonly id: StoryDialogueId }
+  | { readonly kind: 'all' | 'any'; readonly conditions: readonly StoryCondition[] }
+
+/** One catalog owns a task's identity, introduction, prerequisites, outcome and reward. */
+export interface StoryTaskDefinition {
+  readonly id: StoryTask
+  readonly category: 'main' | 'side'
+  readonly introducedBy: StoryDialogueId
+  readonly prerequisite: StoryCondition
+  readonly objective: StoryCondition
+  readonly supplies: number
 }

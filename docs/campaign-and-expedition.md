@@ -1,6 +1,6 @@
 # Campaign, shared camp and reusable expedition floors
 
-Status: direction approved and tracked in [Roadmap II #55](https://github.com/shipiyouniao/minefarer/issues/55); not implemented. The requirements below replace the earlier proposal for separate campaign loadouts or normalized campaign equipment. Detailed chapter content, reward amounts and combination weights remain to be authored and playtested.
+Status: direction approved and tracked in [Roadmap II #55](https://github.com/shipiyouniao/minefarer/issues/55). The prologue and shared camp are implemented; the local foundation follow-up adds versioned story saves and typed prologue task conditions. The full chapter, persistent overworld and Recollection remain unimplemented. The requirements below replace the earlier proposal for separate campaign loadouts or normalized campaign equipment. Detailed chapter content, reward amounts and combination weights remain to be authored and playtested.
 
 [Roadmap II new modes and boss families](roadmap-2-mode-candidates.md) records the approved Lookout, Fleet and Islands additions and the requirement for visually distinct numeric clue kinds on mixed floors. Detailed parameters and story remain under discussion.
 
@@ -121,6 +121,8 @@ The existing domain separates pure rules, application sessions, persistence and 
 - Authored chapter content references named stage, floor, task, reward and scene definitions. Contracts live in module-scoped `.d.ts` files with concrete unions and documented functions; no dynamic property bags, conditional-type framework or arbitrary content scripts.
 
 The new persistence envelope retains permanent camp data and independent campaign/roguelite attempts. Incompatible attempts return their checkpointed earnings to the shared camp and retire under the existing save policy. Completed story tasks, claims, purchases and achievements remain. Fixed stage definitions carry content revisions; do not retain historical map engines to replay obsolete attempts.
+
+See [the next chapter content draft](watchtower-chapter.md) for the proposed first playable arc. It is a content draft, not a shipped chapter.
 
 ## Delivery order and acceptance
 
