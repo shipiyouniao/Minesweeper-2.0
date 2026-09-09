@@ -1,3 +1,4 @@
+import { campaignLayout } from './campaign-layout.js'
 import {
   EMPTY_EXPEDITION_SONAR,
   useExpeditionSonar,
@@ -122,7 +123,9 @@ export function buyUpgrade(camp: Camp, upgrade: Upgrade): Camp {
 function createFloor(departure: Departure, floor: number): Expedition {
   const seed = (departure.seed + Math.imul(floor, 0x9e3779b9)) >>> 0
   const config = expeditionConfig(departure, floor)
-  const layout = generateDungeon(seed, config.mines, config.width, config.height)
+  const layout = departure.campaign
+    ? campaignLayout(floor)
+    : generateDungeon(seed, config.mines, config.width, config.height)
   return {
     ...layout,
     encounter: null,
@@ -307,6 +310,8 @@ function movePlayer(run: Expedition, index: number): Expedition {
 /** Commit an exit reward only for a living explorer that actually reached the stairs. */
 function finishAtExit(run: Expedition): Expedition {
   if (run.phase !== 'exploring' || run.player !== run.exit) return run
+  if (run.departure.campaign && run.treasures.some((index) => !run.collected.includes(index)))
+    return run
   if (!run.encounter && isEncounterFloor(run)) return applyTitleEntry(enterEncounter(run))
   return completeFloor(run)
 }

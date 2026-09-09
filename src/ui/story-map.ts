@@ -1,4 +1,12 @@
-import { CAMP_SCENE, CAMP_SITES, PROLOGUE_SCENES } from '../game/story-content.js'
+import {
+  CAMP_SCENE,
+  CAMP_SITES,
+  PROLOGUE_SCENES,
+  NORTH_ROAD_SCENE,
+  QUARRY_SCENES,
+  TOWER_LANDING_SCENE,
+  QUARRY_GATE,
+} from '../game/story-content.js'
 import { message } from '../i18n.js'
 import { icon } from '../icons.js'
 import type { CampSite, StoryViewState } from '../types/story.js'
@@ -17,13 +25,18 @@ function landmarkImage(site: CampSite): string {
 export function storyMap(state: StoryViewState): string {
   const lang = state.language
   const level = state.mapLevel ?? 'local'
-  const scene = state.mapScene ?? state.run?.floor ?? 3
+  const current = state.run ? state.run.floor + (state.run.floor >= 3 ? 1 : 0) : 3
+  const scene = state.mapScene ?? current
   const names = [
     message(lang, 'story.awakening'),
     message(lang, 'story.trail'),
     message(lang, 'story.approach'),
     message(lang, 'story.camp'),
-    message(lang, 'story.atlas-watchtower'),
+    message(lang, 'story.north-road'),
+    message(lang, 'story.quarry-yard'),
+    message(lang, 'story.quarry-passage'),
+    message(lang, 'story.quarry-machine'),
+    message(lang, 'story.tower-landing'),
   ]
   const world = message(lang, 'story.atlas-world')
   const region = message(lang, 'story.atlas-region')
@@ -36,16 +49,32 @@ export function storyMap(state: StoryViewState): string {
       ? ''
       : `<button class="atlas-back" data-story-action="map-level" data-level="${level === 'local' ? 'region' : 'world'}">← ${level === 'local' ? regionName : world}</button>`
   const position = message(lang, 'story.atlas-here')
-  const current = state.run?.floor ?? 3
-  const explored = state.progress.arrived
-    ? 3
-    : Math.max(current, ...(state.run?.visited ?? []).map((entry) => entry.floor))
+  const explored = Math.max(
+    state.progress.completed.includes('survey-road')
+      ? 8
+      : state.progress.facts?.includes('lift-discovered')
+        ? 5
+        : state.progress.arrived
+          ? 3
+          : 0,
+    current,
+    ...(state.progress.world?.scenes ?? []).map((entry) =>
+      entry.id === 'north-road' ? 4 : PROLOGUE_SCENES.findIndex((scene) => scene.id === entry.id),
+    ),
+  )
   let drawing: string
   let landmarks = ''
   if (level === 'local') {
-    const content = [...PROLOGUE_SCENES, CAMP_SCENE][scene]
+    const content = [
+      ...PROLOGUE_SCENES,
+      CAMP_SCENE,
+      NORTH_ROAD_SCENE,
+      ...QUARRY_SCENES,
+      TOWER_LANDING_SCENE,
+    ][scene]
     if (!content) {
-      drawing = `<div class="atlas-uncharted"><span>${icon('globe')}</span><p>${message(lang, 'story.atlas-uncharted')}</p><button class="atlas-back" data-map-name="${escapeHtml(names[3]!)}" data-story-action="map-scene" data-scene="3">← ${names[3]}</button></div>`
+      const backScene = scene === 5 ? 4 : 3
+      drawing = `<div class="atlas-uncharted"><span>${icon('globe')}</span><p>${message(lang, 'story.atlas-uncharted')}</p><button class="atlas-back" data-map-name="${escapeHtml(names[backScene]!)}" data-story-action="map-scene" data-scene="${backScene}">← ${names[backScene]}</button></div>`
     } else {
       const cells = content.rows
         .join('')
@@ -56,15 +85,27 @@ export function storyMap(state: StoryViewState): string {
           const entrance = terrain === 'S'
           const exit = terrain === 'E'
           const destination =
-            site?.destination === 'road'
-              ? 4
-              : exit
-                ? scene === 3
-                  ? 2
-                  : scene + 1
-                : entrance && scene > 0 && scene !== 3
-                  ? scene - 1
-                  : null
+            scene === 4 && index === QUARRY_GATE
+              ? 5
+              : scene === 4 && exit
+                ? 8
+                : scene === 5 && entrance
+                  ? 4
+                  : scene === 8 && entrance
+                    ? 4
+                    : scene === 7 && exit
+                      ? 6
+                      : scene === 8 && exit
+                        ? null
+                        : site?.destination === 'road'
+                          ? 4
+                          : exit
+                            ? scene === 3
+                              ? 2
+                              : scene + 1
+                            : entrance && scene > 0 && scene !== 3
+                              ? scene - 1
+                              : null
           const hidden = scene === current && state.board.game.cells[index]?.visibility === 'hidden'
           const name =
             destination !== null
@@ -111,7 +152,12 @@ export function storyMap(state: StoryViewState): string {
             [17, 73],
             [38, 48],
             [61, 66],
-            [80, 28],
+            [65, 30],
+            [81, 47],
+            [90, 64],
+            [75, 81],
+            [53, 87],
+            [88, 14],
           ]
             .map(
               ([x, y], i) =>

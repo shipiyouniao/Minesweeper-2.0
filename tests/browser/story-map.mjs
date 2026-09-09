@@ -162,7 +162,7 @@ try {
           String(destination),
         )
         assert.equal(await page.locator('.atlas-heading h3').innerText(), targetName)
-        if (destination === 4) assert.equal(await page.locator('.atlas-uncharted').count(), 1)
+        if (destination === 4) assert.equal(await page.locator('.atlas-tile').count(), 99)
       }
       await page.keyboard.press('Escape')
       assert.equal(await page.locator('.story-atlas').count(), 0)

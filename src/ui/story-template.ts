@@ -1,7 +1,7 @@
 import { pinnedStoryTasks, storyQuestPanel } from './story-quests.js'
 import { storyDialogueTemplate } from './story-dialogue.js'
 import { neighbors } from '../game/engine.js'
-import { CAMP_SITES } from '../game/story-content.js'
+import { CAMP_SITES, QUARRY_GATE } from '../game/story-content.js'
 import { storyTeachingTarget } from '../game/story.js'
 import { message, translations } from '../i18n.js'
 import { icon } from '../icons.js'
@@ -31,6 +31,16 @@ function sceneName(state: StoryViewState): string {
       return message(state.language, 'story.trail')
     case 'approach':
       return message(state.language, 'story.approach')
+    case 'north-road':
+      return message(state.language, 'story.north-road')
+    case 'quarry-yard':
+      return message(state.language, 'story.quarry-yard')
+    case 'quarry-passage':
+      return message(state.language, 'story.quarry-passage')
+    case 'quarry-machine':
+      return message(state.language, 'story.quarry-machine')
+    case 'tower-landing':
+      return message(state.language, 'story.tower-landing')
     case 'camp':
       return message(state.language, 'story.camp')
   }
@@ -58,6 +68,7 @@ function cellTemplate(state: StoryViewState, index: number): string {
   const triggered = run?.triggered.includes(index)
   const flagged = cell.visibility === 'flagged'
   const covered = cell.visibility === 'hidden'
+  const quarryGate = run?.floor === 3 && index === QUARRY_GATE
   const exit = index === board.exit
   const entrance = run && run.floor > 0 && index === board.entrance
   const destinations = [
@@ -79,22 +90,50 @@ function cellTemplate(state: StoryViewState, index: number): string {
   } else if (site) {
     label = storySiteName(language, site)
     content = site.destination === 'guide' ? storyGuideImage() : spriteImage(site.sprite)
+  } else if (quarryGate) {
+    label = message(language, 'story.quarry-yard')
+    content = spriteImage('workshop')
   } else if (exit || entrance) {
-    label = destinations[run ? run.floor + (exit ? 1 : -1) : 2]!
-    content = `<img class="dungeon-sprite" src="${import.meta.env.BASE_URL}assets/story/lantern.png" alt="" draggable="false">`
+    label =
+      run && run.floor >= 4
+        ? entrance
+          ? run.floor === 4 || run.floor === 7
+            ? message(language, 'story.north-road')
+            : run.floor === 5
+              ? message(language, 'story.quarry-yard')
+              : message(language, 'story.quarry-passage')
+          : run.floor === 4
+            ? message(language, 'story.quarry-passage')
+            : run.floor === 5
+              ? message(language, 'story.quarry-machine')
+              : run.floor === 6
+                ? message(language, 'story.quarry-passage')
+                : message(language, 'story.atlas-watchtower')
+        : run?.board.scene.id === 'north-road'
+          ? exit
+            ? state.progress.facts?.includes('lift-restored')
+              ? message(language, 'story.tower-landing')
+              : message(language, 'story.lift')
+            : message(language, 'story.camp')
+          : destinations[run ? run.floor + (exit ? 1 : -1) : 2]!
+    content =
+      run?.floor === 3 && exit && state.progress.facts?.includes('lift-restored')
+        ? spriteImage('workshop')
+        : `<img class="dungeon-sprite" src="${import.meta.env.BASE_URL}assets/story/lantern.png" alt="" draggable="false">`
   } else if (treasure) {
-    label = message(language, 'story.satchel')
+    label =
+      run?.floor === 6 ? message(language, 'story.spindle') : message(language, 'story.satchel')
     content = spriteImage('treasure')
   } else if (!covered && run && cell.adjacent) {
     label = message(language, 'story.clue', { count: cell.adjacent })
     content = `<span class="story-clue">${cell.adjacent}</span>`
   }
-  if (number && (site || exit || entrance || treasure)) {
+  if (number && (site || exit || entrance || quarryGate || treasure)) {
     label += ` · ${message(language, 'story.clue', { count: number })}`
     if (index !== state.player) content += `<span class="story-clue-badge">${number}</span>`
   }
   const name = `${Math.floor(index / board.game.config.width) + 1}, ${(index % board.game.config.width) + 1}: ${label}`
-  return `<button class="story-cell ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance ? 'is-site' : ''}" data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance ? `<span class="story-site-label">${label}</span>` : ''}</button>`
+  return `<button class="story-cell ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance || quarryGate ? 'is-site' : ''}" data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance || quarryGate ? `<span class="story-site-label">${label}</span>` : ''}</button>`
 }
 
 /** A single movable overlay keeps the chibi traveler above cell edges and clues. */
@@ -110,7 +149,7 @@ function sceneBoard(state: StoryViewState): string {
 function sceneDock(state: StoryViewState): string {
   const language = state.language
   const run = state.run
-  return `<footer class="story-dock"><div class="story-dock-inner">${run ? `<div class="story-modes" role="group" aria-label="${message(language, 'story.explore')}"><button data-story-action="explore" aria-pressed="${!state.flagMode}">${icon('pointer')}${message(language, 'story.explore')}</button><button data-story-action="flag" aria-pressed="${state.flagMode}">${icon('flag')}${message(language, 'story.flag')}</button></div>${run.phase === 'fallen' || state.exhausted ? `<button class="story-primary" data-story-action="retry">${message(language, 'story.retry')}</button>` : ''}` : ''}<button data-story-action="tasks">${icon('trophy')}${message(language, 'story.tasks')}</button><button data-story-action="map" class="${state.progress.mapOwned ? '' : 'is-unavailable'}">${icon('globe')}${message(language, 'story.map')}${state.progress.mapOwned ? '' : ' · —'}</button></div></footer>`
+  return `<footer class="story-dock"><div class="story-dock-inner">${run ? `<div class="story-modes" role="group" aria-label="${message(language, 'story.explore')}"><button data-story-action="explore" aria-pressed="${!state.flagMode}">${icon('pointer')}${message(language, 'story.explore')}</button><button data-story-action="flag" aria-pressed="${state.flagMode}">${icon('flag')}${message(language, 'story.flag')}</button></div>${!state.campaignCleared && run.floor === 7 && run.player === run.board.exit && state.progress.dialogue?.completed.includes('tower-arrival') ? `<a data-route data-story-campaign class="story-primary" href="${routeHref({ page: 'campaign' }, language)}">${message(language, 'campaign.enter')}</a>` : ''}${run.phase === 'fallen' ? `<button class="story-primary" data-story-action="retry">${message(language, 'story.retry')}</button>` : ''}` : ''}<button data-story-action="map" class="${state.progress.mapOwned ? '' : 'is-unavailable'}">${icon('globe')}${message(language, 'story.map')}${state.progress.mapOwned ? '' : ' · —'}</button><div class="story-resources"><span class="story-vitals"><span>${message(language, 'story.health')}</span><strong class="story-hearts" role="img" aria-label="${message(language, 'story.health')}: ${run?.health ?? 3} / 3">${'♥'.repeat(run?.health ?? 3)}${'♡'.repeat(3 - (run?.health ?? 3))}</strong></span><span class="story-wallet" aria-label="${variantCopy(language).supplies}">${spriteImage('treasure')}<span>${variantCopy(language).supplies}<strong>${new Intl.NumberFormat(language).format(state.camp.supplies)}</strong></span></span></div></div></footer>`
 }
 
 /** Camp services reuse the existing purchasing and loadout templates instead of duplicating them. */
@@ -129,7 +168,7 @@ export function storyTemplate(state: StoryViewState): string {
   return `<header class="site-header"><div class="header-identity">${brandTemplate(language)}<a class="route-back" data-route href="${routeHref({ page: 'home' }, language)}">${icon('arrow')}<span>${message(language, 'home.back')}</span></a></div><nav><a class="story-temporary" data-route href="${routeHref({ page: 'game', mode: 'expedition' }, language)}">${message(language, 'story.temporary')}</a><button class="icon-button" data-story-action="sound" aria-label="${state.sound ? t.soundOn : t.soundOff}" aria-pressed="${state.sound}">${icon(state.sound ? 'volume' : 'volumeOff')}</button>${languageMenuTemplate(language)}</nav></header>
   <main class="story-main" data-story-scene="${state.board.scene.id}">
     ${!state.storageAvailable ? `<p role="alert">${message(language, 'story.storage')}</p>` : ''}
-    <section class="story-banner glass-panel" style="--story-hero:url('${hero}')"><div><p class="eyebrow">${run ? message(language, 'story.prologue') : 'MINEFARER / CAMP'}</p><h1 data-route-heading>${sceneName(state)}</h1><p>${run ? `${run.floor + 1} / 3` : `${new Intl.NumberFormat(language).format(state.camp.supplies)} ${variantCopy(language).supplies}`}</p></div></section>
-    ${state.service ? `<div class="story-service">${state.service.page === 'professions' ? titleTemplate(language, state.camp) : ''}${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, 'standard', state.service)}</div>` : `<div class="story-layout"><section class="story-stage glass-panel"><div class="story-stage-top">${run ? `<span class="story-hearts" aria-label="${message(language, 'story.health')}: ${run.health} / 3">${'♥'.repeat(run.health)}${'♡'.repeat(3 - run.health)}</span>` : ''}</div>${sceneBoard(state)}${notice ? `<p class="story-notice" role="status">${notice}</p>` : ''}</section><aside class="story-sidebar glass-panel">${pinnedStoryTasks(state)}${run ? `<a class="story-shortcut" data-route href="${routeHref({ page: 'game', mode: 'expedition' }, language)}"><strong>${message(language, 'story.temporary')} ↗</strong><span>${message(language, 'story.temporary-note')}</span></a>` : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>`}
+    <section class="story-banner glass-panel" style="--story-hero:url('${hero}')"><div><p class="eyebrow">${run ? (run.floor < 3 ? message(language, 'story.prologue') : message(language, 'story.world-road')) : 'MINEFARER / CAMP'}</p><h1 data-route-heading>${sceneName(state)}</h1><p>${run ? (run.floor < 3 ? `${run.floor + 1} / 3` : message(language, 'story.atlas-woodland')) : `${new Intl.NumberFormat(language).format(state.camp.supplies)} ${variantCopy(language).supplies}`}</p></div></section>
+    ${state.service ? `<div class="story-service">${state.service.page === 'professions' ? titleTemplate(language, state.camp) : ''}${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, 'standard', state.service)}</div>` : `<div class="story-layout"><section class="story-stage glass-panel">${sceneBoard(state)}${notice ? `<p class="story-notice" role="status">${notice}</p>` : ''}</section><aside class="story-sidebar glass-panel">${pinnedStoryTasks(state)}${run ? '' : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>`}
   </main>${storyDialogueTemplate(state)}${storyQuestPanel(state)}${state.service ? '' : sceneDock(state)}`
 }

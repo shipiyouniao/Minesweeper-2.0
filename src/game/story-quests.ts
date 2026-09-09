@@ -1,5 +1,7 @@
+import type { MilestoneProgress } from '../types/milestones.js'
 import type {
   StoryCondition,
+  StoryCampaignMetric,
   StoryDialogueId,
   StoryFact,
   StoryProgress,
@@ -7,11 +9,41 @@ import type {
   StoryTaskDefinition,
 } from '../types/story.js'
 
+export const STORY_CAMPAIGN_METRICS: readonly StoryCampaignMetric[] = [
+  'travel',
+  'chests',
+  'floors',
+  'bosses',
+  'skills',
+  'wins',
+]
+
+/** Apply only new accepted campaign activity, separately from world travel and roguelite. */
+export function recordStoryCampaign(
+  progress: StoryProgress,
+  before: MilestoneProgress,
+  after: MilestoneProgress,
+): StoryProgress {
+  const campaignActivity: Partial<Record<StoryCampaignMetric, number>> = {
+    ...progress.campaignActivity,
+  }
+  for (const metric of STORY_CAMPAIGN_METRICS) {
+    const delta = Math.max(0, after[metric] - before[metric])
+    if (delta > 0) campaignActivity[metric] = Math.min(1e9, (campaignActivity[metric] ?? 0) + delta)
+  }
+  return recordStoryFacts({ ...progress, campaignActivity }, [])
+}
+
 export const STORY_FACTS: readonly StoryFact[] = [
   'camp-reached',
   'satchel-secured',
   'satchel-delivered',
   'guide-met',
+  'lift-discovered',
+  'road-reported',
+  'spindle-secured',
+  'lift-restored',
+  'tower-reached',
 ]
 
 export const STORY_TASKS: readonly StoryTaskDefinition[] = [
@@ -45,11 +77,43 @@ export const STORY_TASKS: readonly StoryTaskDefinition[] = [
     objective: { kind: 'fact', id: 'guide-met' },
     supplies: 0,
   },
+  {
+    id: 'survey-road',
+    category: 'main',
+    introducedBy: 'north-road-start',
+    prerequisite: { kind: 'task', id: 'meet-guide' },
+    objective: {
+      kind: 'all',
+      conditions: [
+        { kind: 'fact', id: 'lift-discovered' },
+        { kind: 'fact', id: 'road-reported' },
+      ],
+    },
+    supplies: 20,
+  },
+  {
+    id: 'repair-lift',
+    category: 'main',
+    introducedBy: 'quarry-lead',
+    prerequisite: { kind: 'task', id: 'survey-road' },
+    objective: { kind: 'fact', id: 'lift-restored' },
+    supplies: 0,
+  },
+  {
+    id: 'reach-tower',
+    category: 'main',
+    introducedBy: 'lift-repaired',
+    prerequisite: { kind: 'task', id: 'repair-lift' },
+    objective: { kind: 'fact', id: 'tower-reached' },
+    supplies: 0,
+  },
 ]
 
 /** Completed objectives unlock routes even before a separate reward has been claimed. */
 export function storyConditionMet(condition: StoryCondition, progress: StoryProgress): boolean {
   switch (condition.kind) {
+    case 'campaign':
+      return (progress.campaignActivity?.[condition.metric] ?? 0) >= condition.target
     case 'fact':
       return progress.facts?.includes(condition.id) ?? false
     case 'task':

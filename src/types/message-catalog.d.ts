@@ -1,5 +1,17 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'story.north-road': string
+  readonly 'story.lift': string
+  readonly 'story.world-road': string
+  readonly 'story.road-task': string
+  readonly 'story.road-detail': string
+  readonly 'story.north-start-1': string
+  readonly 'story.north-start-2': string
+  readonly 'story.north-found-1': string
+  readonly 'story.north-found-2': string
+  readonly 'story.north-report-1': string
+  readonly 'story.north-report-2': string
+
   readonly 'story.atlas-watchtower': string
   readonly 'story.atlas-uncharted': string
   readonly 'story.atlas-zoom': string
@@ -28,7 +40,40 @@ export interface MessageCatalog {
   readonly 'story.quest-guide-detail': string
   readonly 'story.quest-location': string
   readonly 'story.flag-mouse': string
+  readonly 'campaign.lesson-move': string
+  readonly 'campaign.lesson-title': string
+  readonly 'campaign.lesson-enter': string
+  readonly 'campaign.lesson-probe': string
+  readonly 'campaign.lesson-scan': string
+  readonly 'campaign.lesson-skill': string
+  readonly 'campaign.lesson-open': string
+  readonly 'campaign.lesson-begin': string
+  readonly 'campaign.lesson-skip': string
+  readonly 'campaign.enter': string
+  readonly 'campaign.title': string
+  readonly 'campaign.abandon': string
+  readonly 'campaign.abandon-note': string
+  readonly 'campaign.exit': string
+  readonly 'campaign.abandoned': string
+  readonly 'campaign.leave': string
+  readonly 'campaign.objective': string
   readonly 'story.flag-touch': string
+  readonly 'story.quarry-yard': string
+  readonly 'story.quarry-passage': string
+  readonly 'story.quarry-machine': string
+  readonly 'story.tower-landing': string
+  readonly 'story.spindle': string
+  readonly 'story.repair-task': string
+  readonly 'story.repair-detail': string
+  readonly 'story.repair-return': string
+  readonly 'story.climb-task': string
+  readonly 'story.climb-detail': string
+  readonly 'story.quarry-lead': string
+  readonly 'story.spindle-found': string
+  readonly 'story.lift-fixed': string
+  readonly 'story.tower-arrival': string
+  readonly 'story.chord-mouse': string
+  readonly 'story.chord-touch': string
   readonly 'story.map-unvisited': string
   readonly 'story.return-bag': string
   readonly 'story.open-eyes': string
@@ -77,6 +122,7 @@ export interface MessageCatalog {
   readonly 'story.retry': string
   readonly 'story.satchel': string
   readonly 'story.satchel-found': string
+  readonly 'story.all-tasks': string
   readonly 'story.tasks': string
   readonly 'story.main-task': string
   readonly 'story.side-task': string

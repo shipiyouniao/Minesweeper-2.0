@@ -18,6 +18,27 @@ import { VariantRepository } from '../src/persistence/variant-repository.js'
 import type { StoryAction, StoryRun } from '../src/types/story.js'
 import { FakeRuntime, MemoryStorage } from './helpers.js'
 
+test('story chords require matching flags and preserve physical pickup and travel', () => {
+  const initial = createStoryRun()
+  assert.equal(actStory(initial, { type: 'chord', index: 21 }), initial)
+  const flagged = actStory(initial, { type: 'flag', index: 22 })
+  const opened = actStory(flagged, { type: 'chord', index: 21 })
+  assert.equal(opened.board.game.cells[31]!.visibility, 'revealed')
+  assert.equal(opened.board.game.cells[22]!.visibility, 'flagged')
+  assert.equal(opened.player, 21)
+  assert.equal(opened.health, 3)
+  assert.equal(opened.practicedReveal, true)
+  assert.equal(opened.collected, false)
+  assert.equal(opened.floor, 0)
+  assert.equal(actStory(opened, { type: 'chord', index: 21 }), opened)
+  const wrong = actStory(initial, { type: 'flag', index: 31 })
+  const hurt = actStory(wrong, { type: 'chord', index: 21 })
+  assert.equal(hurt.health, 2)
+  assert.deepEqual(hurt.triggered, [22])
+  assert.equal(hurt.player, 21)
+  assert.equal(hurt.board.game.cells[31]!.visibility, 'flagged')
+})
+
 test('camp return and both travel directions preserve explored scenes and pay rewards only once', () => {
   const repository = new VariantRepository(new MemoryStorage())
   let session = new StorySession(new CampSession(repository))
@@ -347,16 +368,14 @@ test('archive purchases preserve the frozen departure of a paused roguelite', ()
   assert.ok(resumed.camp.upgrades.includes('archive'))
 })
 
-test('a full story journal retains an explicit restart after reload', () => {
+test('a full legacy journal migrates to a checkpoint and keeps accepting actions', () => {
   const repository = new VariantRepository(new MemoryStorage())
   const camp = new CampSession(repository)
   const actions: StoryAction[] = Array.from({ length: 3000 }, () => ({ type: 'flag', index: 22 }))
   camp.saveStory({ ...camp.story, journal: { revision: 1, actions } })
   const session = new StorySession(new CampSession(repository))
-  assert.equal(session.exhausted, true)
-  assert.equal(session.dispatch({ type: 'retry' }), true)
-  assert.equal(session.exhausted, false)
-  assert.deepEqual(session.run, createStoryRun())
+  assert.equal(session.camp.story.journal, null)
+  assert.ok(session.camp.story.world)
   assert.equal(session.dispatch({ type: 'inspect', index: 12 }), true)
   assert.deepEqual(new StorySession(new CampSession(repository)).run, session.run)
 })
@@ -408,7 +427,7 @@ test('dialogue checkpoints survive reload and completion accepts a quest only on
   assert.deepEqual(session.camp.story.pinned, [])
 })
 
-test('restarting an exhausted legacy route clears its origin and archive atomically', () => {
+test('a full legacy return route migrates without resetting the player or paying again', () => {
   const repository = new VariantRepository(new MemoryStorage())
   const camp = new CampSession(repository)
   const actions: StoryAction[] = [
@@ -423,12 +442,123 @@ test('restarting an exhausted legacy route clears its origin and archive atomica
     route: { revision: 1, actions: [] },
     journal: { revision: 1, actions },
   })
+  const balance = camp.camp.supplies
   const session = new StorySession(camp)
-  assert.equal(session.exhausted, true)
-  const supplies = repository.expedition()!.camp.supplies
-  assert.equal(session.dispatch({ type: 'retry' }), true)
+  assert.equal(session.run?.floor, 2)
   assert.equal(camp.story.routeLegacy, undefined)
   assert.equal(camp.story.route, undefined)
-  assert.deepEqual(new StorySession(new CampSession(repository)).run, createStoryRun())
-  assert.equal(repository.expedition()!.camp.supplies, supplies)
+  assert.equal(camp.story.journal, null)
+  assert.equal(session.dispatch({ type: 'flag', index: 13 }), true)
+  assert.deepEqual(new StorySession(new CampSession(repository)).run, session.run)
+  assert.equal(camp.camp.supplies, balance)
+})
+
+test('the northern overworld route is physically discovered, reported once and retained on return', () => {
+  const repository = new VariantRepository(new MemoryStorage())
+  const camp = new CampSession(repository)
+  camp.saveStory({
+    ...camp.story,
+    arrived: true,
+    completed: ['reach-camp', 'meet-guide'],
+    mapOwned: true,
+    campPosition: 13,
+  })
+  let session = new StorySession(camp)
+  assert.equal(session.enterNorthRoad(), true)
+  assert.equal(session.run!.board.scene.id, 'north-road')
+  assert.equal(session.completeDialogue('north-road-start'), 'survey-road')
+  session.completeDialogue('north-road-report')
+  assert.ok(!camp.story.facts?.includes('road-reported'))
+  solveFloor(
+    session.run!,
+    (action) => {
+      session.dispatch(action)
+    },
+    () => session.run!,
+  )
+  session.dispatch({ type: 'visit', index: session.run!.board.exit })
+  assert.ok(camp.story.facts?.includes('lift-discovered'))
+  const board = session.run!.board
+  assert.ok(!camp.story.completed.includes('survey-road'))
+  session.completeDialogue('north-road-found')
+  session.dispatch({ type: 'visit', index: session.run!.board.entrance })
+  assert.equal(session.dispatch({ type: 'return' }), true)
+  assert.equal(session.run, null)
+  assert.equal(camp.story.campPosition, 13)
+  session.moveCamp(51)
+  const supplies = camp.camp.supplies
+  session.completeDialogue('north-road-report')
+  assert.ok(camp.story.completed.includes('survey-road'))
+  assert.equal(camp.camp.supplies, supplies + 20)
+  session = new StorySession(new CampSession(repository))
+  session.completeDialogue('north-road-report')
+  assert.equal(camp.camp.supplies, supplies + 20)
+  session.moveCamp(13)
+  assert.equal(session.enterNorthRoad(), true)
+  assert.deepEqual(session.run!.board, board)
+  session = new StorySession(new CampSession(repository))
+  assert.equal(session.run!.board.scene.id, 'north-road')
+  assert.deepEqual(session.run!.board, board)
+})
+
+test('quarry spindle requires collection, repairs persist and the tower has a physical return route', () => {
+  const repository = new VariantRepository(new MemoryStorage())
+  const camp = new CampSession(repository)
+  camp.saveStory({
+    ...camp.story,
+    arrived: true,
+    completed: ['reach-camp', 'meet-guide', 'survey-road'],
+    mapOwned: true,
+    campPosition: 13,
+  })
+  let session = new StorySession(camp)
+  assert.equal(session.enterNorthRoad(), true)
+  session.dispatch({ type: 'visit', index: 75 })
+  assert.equal(session.travelWorld(), false)
+  session.completeDialogue('quarry-lead')
+  assert.equal(session.travelWorld(), true)
+  for (let floor = 4; floor <= 6; floor++) {
+    assert.equal(session.run!.floor, floor)
+    solveFloor(
+      session.run!,
+      (action) => {
+        session.dispatch(action)
+      },
+      () => session.run!,
+    )
+    if (floor < 6) assert.equal(session.travelWorld(), true)
+  }
+  assert.ok(session.camp.story.facts?.includes('spindle-secured'))
+  const retry = actStory({ ...session.run!, phase: 'fallen', health: 0 }, { type: 'retry' })
+  assert.equal(retry.collected, true, 'retry must not respawn a secured spindle')
+  assert.ok(!session.camp.story.facts?.includes('lift-restored'))
+  session.completeDialogue('spindle-found')
+  for (let floor = 6; floor >= 4; floor--) {
+    session.dispatch({ type: 'visit', index: session.run!.board.entrance })
+    assert.equal(session.travelWorld(), true)
+  }
+  assert.equal(session.run!.floor, 3)
+  assert.equal(session.run!.player, 75)
+  session.dispatch({ type: 'visit', index: session.run!.board.exit })
+  assert.equal(session.travelWorld(), true)
+  assert.ok(session.camp.story.completed.includes('repair-lift'))
+  session.completeDialogue('lift-repaired')
+  assert.equal(session.travelWorld(), true)
+  assert.equal(session.run!.floor, 7)
+  session.dispatch({ type: 'visit', index: session.run!.board.exit })
+  session.completeDialogue('tower-arrival')
+  assert.ok(session.camp.story.completed.includes('reach-tower'))
+  const balance = session.camp.camp.supplies
+  session = new StorySession(new CampSession(repository))
+  assert.equal(session.run!.floor, 7)
+  session.dispatch({ type: 'visit', index: session.run!.board.entrance })
+  assert.equal(session.travelWorld(), true)
+  assert.equal(session.run!.floor, 3)
+  assert.equal(session.travelWorld(), true)
+  assert.equal(session.run!.floor, 7)
+  assert.equal(session.camp.camp.supplies, balance)
+  assert.equal(
+    session.camp.story.world!.scenes.filter((scene) => scene.id === 'quarry-machine').length,
+    1,
+  )
 })

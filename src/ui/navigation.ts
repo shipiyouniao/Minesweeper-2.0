@@ -6,6 +6,7 @@ export const FREE_MODES: readonly FreeMode[] = ['classic', 'twin', 'sonar', 'sur
 /** Decode only public route names; a bare or invalid link opens the homepage. */
 export function parseRoute(search: string): AppRoute {
   const params = new URLSearchParams(search)
+  if (params.get('page') === 'campaign') return { page: 'campaign' }
   if (params.get('page') === 'story') return { page: 'story' }
   if (params.get('page') === 'free') return { page: 'free' }
 
@@ -30,6 +31,7 @@ export function routeHref(route: AppRoute, language: Language): string {
   const params = new URLSearchParams()
   if (route.page === 'game') params.set('ruleset', route.mode)
   else if (route.page === 'free') params.set('page', 'free')
+  else if (route.page === 'campaign') params.set('page', 'campaign')
   else if (route.page === 'story') params.set('page', 'story')
   params.set('lang', language)
   return `?${params}`

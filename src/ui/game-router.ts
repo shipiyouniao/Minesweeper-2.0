@@ -70,6 +70,30 @@ export class GameRouter implements MountedGame {
     const sounds = new BrowserSoundEffects(this.repository.preferences().sound)
     this.sounds = sounds
     this.host.dataset['page'] = this.route.page
+    if (this.route.page === 'campaign') {
+      const repository = this.variants.forCampaign()
+      const session = new ExpeditionSession(repository, browserRuntime)
+      if (!session.run)
+        session.start(session.loadout.profession, session.loadout.equipment, 'relaxed')
+      if (session.run)
+        return new VariantApp(
+          this.host,
+          session,
+          repository,
+          this.repository,
+          this.language,
+          sounds,
+          this.languageChanged,
+        )
+      return new StoryApp(
+        this.host,
+        this.variants,
+        this.repository,
+        this.language,
+        sounds,
+        this.languageChanged,
+      )
+    }
     if (this.route.page === 'story')
       return new StoryApp(
         this.host,
