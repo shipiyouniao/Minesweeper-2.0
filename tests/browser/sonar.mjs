@@ -161,8 +161,8 @@ try {
       assert.deepEqual(await saved(page), beforeRecall)
 
       // Routing out and back keeps the seed and complete scan history in its own namespace.
-      await page.locator('[data-ruleset="classic"]').click()
-      await page.locator('[data-ruleset="sonar"]').click()
+      await page.locator('.route-back').click()
+      await page.locator('.free-mode-card[href*="ruleset=sonar"]').click()
       assert.deepEqual(await saved(page), beforeRecall)
       await page.reload()
       assert.equal(await page.locator('.sonar-reading').count(), 3)

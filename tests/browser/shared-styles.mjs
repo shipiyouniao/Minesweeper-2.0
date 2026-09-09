@@ -15,21 +15,20 @@ try {
         const style = (selector) => getComputedStyle(document.querySelector(selector))
         return {
           header: style('.site-header').padding,
-          tabs: style('.ruleset-tabs').padding,
+          glass: style('.site-header').backdropFilter,
           layout: style('.layout').padding,
           art: style('.hero-art').width,
           learn: style('.tutorial-entry').color,
           overflow: document.documentElement.scrollWidth > innerWidth,
         }
       })
-      assert.equal(styles.header, width <= 650 ? '10px 0px' : '16px 0px')
+      assert.match(styles.glass, /blur/)
       assert.equal(styles.learn, 'rgb(53, 93, 66)')
       assert.equal(styles.overflow, false)
       if (width <= 480) {
         assert.equal(styles.layout, '0px 16px')
         assert.equal(styles.art, '110px')
       }
-      if (width <= 650) assert.equal(styles.tabs, '8px 12px')
       await page.locator('.language-trigger').click()
       const selected = page.locator('.language-option[aria-checked="true"]')
       assert.equal(await selected.count(), 1)

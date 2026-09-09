@@ -2,6 +2,21 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'home.title': '选择玩法',
+  'home.note': '走进远征，或专注一局解谜。',
+  'home.free': '自由模式',
+  'home.expedition-note': '搭配职业与装备，探索地牢，挑战各具机制的 Boss。',
+  'home.free-note': '标准、双生、声呐、测绘，按自己的节奏来一局。',
+  'home.enter-expedition': '进入远征',
+  'home.choose-mode': '选择模式',
+  'home.back': '首页',
+  'home.settings': '设置',
+  'home.directory-note': '四种读懂棋盘的方式，选择你想玩的那一种。',
+  'home.saved': '棋局与成长进度保存在当前设备。',
+  'home.classic-note': '根据相邻数字判断雷的位置，标记地雷，清空棋盘。',
+  'home.twin-note': '两张棋盘，同一组坐标。在彼此的线索中找到答案。',
+  'home.sonar-note': '发出脉冲，比较回声，在模糊的数字间辨认雷区。',
+  'home.survey-note': '从边缘的连续雷段出发，交叉行列线索解开棋盘。',
   'board.remaining-mines': '剩余雷数',
   'tide.held': '地板抵住了这次潮水，道路没有改变。',
   'tide.until': '{turns} 回合后涨潮',
@@ -822,13 +837,11 @@ export const zhMessages: MessageCatalog = {
     '持有至少 3 件遗物时，奖励多 1 个候选，上限 5。',
   'title-copy.with-fewer-than-3-relics-reward-offers':
     '持有不足 3 件遗物时，奖励多 1 个候选，上限 5。',
-  'title-template.changes-apply-next-departure': '更换后，下次出发生效。',
   'title-template.choose-a-title': '佩戴称号',
   'title-template.earn-titles-through-achievements': '完成成就获得称号。',
   'title-template.expedition-title': '远征称号',
   'title-template.no-title': '不佩戴',
   'title-template.no-titles-earned-yet': '还未获得称号',
-  'title-template.this-expedition': '本局称号',
   'tutorial-lessons.a-probe-looks-ahead': '探针替你先看一眼',
   'tutorial-lessons.a-quiet-first-step': '先翻开一小片土地',
   'tutorial-lessons.alternate-between-local-clues-and-proven-mines':

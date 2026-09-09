@@ -30,7 +30,7 @@ export function surveyDifficulties(
 /** Mount a quiet field-notebook layout with sticky constraints inside the board's own scroll host. */
 export function surveyTemplate(language: Language, state: Survey): string {
   const t = translations[language]
-  return `${siteHeaderTemplate(language, 'data-control')}
+  return `${siteHeaderTemplate(language, 'data-control', 'survey')}
     <main class="survey-main tw:[width:min(94%,1440px)] tw:min-[2400px]:[width:min(90%,1600px)] tw:mx-auto tw:px-0 tw:pb-8 ">
       <div class="tw:flex tw:items-center tw:justify-between tw:gap-4 tw:mt-3"><div><p class="eyebrow ${sharedStyles['eyebrow']}">SURVEY / 04</p><h1 class="tw:text-[clamp(30px,2.2vw,48px)] tw:my-2">${message(language, 'survey.title')}</h1><p class="tw:text-muted tw:text-[clamp(14px,0.9vw,18px)] tw:mt-2">${message(language, 'survey.intro')}</p></div>
       <div class="tw:flex tw:gap-1"><button class="${button}" data-control="records" aria-label="${t.records}">${icon('trophy')}</button><button class="${button}" data-control="sound" aria-label="${t.sound}"></button><button class="${button}" data-control="pause" aria-label="${t.pause}"></button></div></div>

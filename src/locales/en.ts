@@ -2,6 +2,22 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'home.title': 'Choose your next game',
+  'home.note': 'Set out on an expedition, or settle into a puzzle.',
+  'home.free': 'Free play',
+  'home.expedition-note':
+    'Choose your profession and gear. Explore the dungeon and take on its bosses.',
+  'home.free-note': 'Classic, Twin boards, Sonar and Survey. A puzzle at your own pace.',
+  'home.enter-expedition': 'Enter expedition',
+  'home.choose-mode': 'Explore modes',
+  'home.back': 'Home',
+  'home.settings': 'Settings',
+  'home.directory-note': 'Four ways to read the board. Pick a mode to play.',
+  'home.saved': 'Your games and progress are saved on this device.',
+  'home.classic-note': 'Read the nearby numbers, mark the mines and clear the field.',
+  'home.twin-note': 'Two boards, shared coordinates. Clues on one help solve the other.',
+  'home.sonar-note': 'Send a pulse and compare its echoes to uncover the hidden field.',
+  'home.survey-note': 'Follow the mine runs at each edge and cross the clues to solve the grid.',
   'board.remaining-mines': 'Remaining mines',
   'tide.held': 'The floor resisted this tide. Your routes stay in place.',
   'tide.until': 'Tide in {turns} turns',
@@ -909,13 +925,11 @@ export const enMessages: MessageCatalog = {
     'With 3 or more relics, reward offers have 1 extra choice, up to 5.',
   'title-copy.with-fewer-than-3-relics-reward-offers':
     'With fewer than 3 relics, reward offers have 1 extra choice, up to 5.',
-  'title-template.changes-apply-next-departure': 'Changes apply next departure.',
   'title-template.choose-a-title': 'Choose a title',
   'title-template.earn-titles-through-achievements': 'Earn titles through achievements.',
   'title-template.expedition-title': 'Expedition title',
   'title-template.no-title': 'No title',
   'title-template.no-titles-earned-yet': 'No titles earned yet',
-  'title-template.this-expedition': 'This expedition',
   'tutorial-lessons.a-probe-looks-ahead': 'A probe looks ahead',
   'tutorial-lessons.a-quiet-first-step': 'A quiet first step',
   'tutorial-lessons.alternate-between-local-clues-and-proven-mines':

@@ -82,7 +82,7 @@ export class VariantView {
     const t = variantCopy(language)
     const common = translations[language]
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
-    root.innerHTML = `${siteHeaderTemplate(language, 'data-control')}
+    root.innerHTML = `${siteHeaderTemplate(language, 'data-control', mode)}
       <main class="variant-main ${mode}"><div class="game-heading ${sharedStyles['game-heading']} variant-heading ${sharedStyles['variant-heading']}"><h2>${mode === 'expedition' ? t.expedition : t.twin}</h2><div class="game-heading-actions ${sharedStyles['game-heading-actions']}"><button class="icon-button ${sharedStyles['icon-button']}" data-control="sound" aria-label="${common.sound}" aria-pressed="true">${icon('volume')}</button><button class="icon-button ${sharedStyles['icon-button']}" data-control="pause" aria-label="${common.pause}">${icon('pause')}</button></div></div>
       <p class="variant-storage ${sharedStyles['variant-storage']}" role="status"></p><div class="variant-pause ${sharedStyles['variant-pause']}" hidden><p>${common.paused}</p><button class="primary-button ${sharedStyles['primary-button']}" data-control="pause">${common.resume}</button></div><div class="variant-content"></div></main>
       <dialog aria-labelledby="variant-dialog-title"><h2 id="variant-dialog-title">${common.confirmTitle}</h2><p></p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="cancel">${common.cancel}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="confirm">${common.start}</button></div></dialog>`

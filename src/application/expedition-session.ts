@@ -225,8 +225,10 @@ export class ExpeditionSession {
     return true
   }
 
-  /** Persist the next departure's title without changing the active build or paying a reward. */
+  /** Choose titles only at camp; the current expedition's loadout stays read-only. */
   equipTitle(id: MilestoneId | null): boolean {
+    if (this.current) return false
+
     const camp = equipTitle(this.camp, id)
     if (camp === this.camp) return false
     this.save = { ...this.save, camp }

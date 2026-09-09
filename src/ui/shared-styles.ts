@@ -1,7 +1,5 @@
 /** Complete utility groups for shared controls, menus, dialogs and mode panels. */
 export const sharedStyles = {
-  'ruleset-tabs':
-    'tw:max-w-360 tw:[margin:0_auto] tw:[padding:12px_20px] tw:gap-2 tw:flex-wrap tw:text-[13px] tw:[flex:0_0_auto] tw:w-full tw:[&>span]:text-muted tw:[&>span]:mr-3 tw:[&_button]:rounded-lg tw:[&_button]:[padding:10px_16px] tw:[&_button]:border tw:[&_button]:border-solid tw:[&_button]:border-transparent tw:[&_button[aria-pressed=true]]:text-[var(--blue)] tw:[&_button[aria-pressed=true]]:bg-surface tw:[&_button[aria-pressed=true]]:border-line tw:[@media(min-width:_651px)_and_(max-width:_760px)]:[padding:0_16px] tw:[@media(max-width:_760px)]:gap-1 tw:[@media(max-width:_760px)]:[&>span]:hidden tw:[@media(max-width:_760px)]:[&_button]:[padding:10px_12px] tw:[@media(max-width:_650px)]:[padding:8px_12px] tw:[@media(max-width:_650px)]:gap-1 tw:[@media(max-width:_650px)]:text-[11px] tw:[@media(max-width:_650px)]:[&>span]:hidden',
   'variant-heading':
     'tw:flex tw:items-center tw:justify-between tw:gap-6 tw:mb-3 tw:[&_h1]:text-[clamp(28px,_5vw,_42px)] tw:[&_h1]:[margin:10px_0] tw:[&_h1]:[letter-spacing:-1.5px] tw:[@media(max-width:_760px)]:gap-3',
   'variant-records':
@@ -48,8 +46,7 @@ export const sharedStyles = {
     'tw:text-[1.6em] tw:whitespace-nowrap tw:[min-width:2.8em] tw:text-center tw:[line-height:1.4] tw:[&.vertical]:[transform:rotate(90deg)]',
   'clock-queue':
     'tw:p-3 tw:border tw:border-solid tw:border-[#9eacb9] tw:rounded-xl tw:bg-[#eaf2f7] tw:text-[#253e57] tw:text-[12px] tw:[&_ul]:pl-4.5 tw:[&_ul]:[margin:8px_0_0] tw:[&_li_+_li]:mt-1.5',
-  'site-header':
-    'tw:max-w-310 tw:m-auto tw:flex tw:items-center tw:justify-between tw:min-h-25 tw:[padding:16px_0] tw:[border-bottom:1px_solid_var(--line)] tw:mb-6 tw:[@media(min-width:_801px)_and_(max-height:_850px)]:min-h-17  tw:[@media(min-width:_481px)_and_(max-width:_800px)]:min-h-19   tw:[@media(max-width:_480px)]:gap-2 tw:[@media(max-width:_480px)]:min-h-17.5 tw:[&_nav]:gap-3.5 tw:[@media(max-width:_650px)]:mb-4 tw:[@media(max-width:_650px)]:[padding:10px_0] tw:[@media(max-width:_650px)]:gap-2 tw:[@media(max-width:_650px)]:[&_.brand>span:last-child]:text-[12px] tw:[@media(max-width:_650px)]:[&_nav]:gap-2 tw:[@media(max-width:_650px)]:[&_nav_.text-button]:text-[10px] tw:[@media(max-width:_650px)]:[&_nav_.text-button]:whitespace-nowrap tw:[@media(max-width:_650px)]:[&_nav>[data-control=records]]:hidden tw:[@media(max-width:_650px)]:[&_nav>[data-action=records]]:hidden',
+  'site-header': 'glass-panel',
   'site-footer':
     'tw:max-w-310 tw:m-auto tw:flex tw:items-center tw:justify-between tw:[padding:25px_40px] tw:[border-top:1px_solid_var(--line)] tw:text-[#8b908b] tw:text-[10px] tw:gap-4 tw:[&_a:hover]:text-[var(--blue)] tw:[&>div]:flex tw:[&>div]:items-center tw:[&>div]:gap-5.5 tw:[&>div>span]:flex tw:[&>div>span]:items-center tw:[&>div>span]:gap-1.5 tw:[&_.icon]:w-3 tw:[&_.icon]:h-3 tw:[&_.icon]:text-[#6e8b79] tw:[@media(max-width:_800px)]:[padding:22px_24px] tw:[@media(max-width:_800px)]:text-[9px] tw:[@media(max-width:_800px)]:flex-wrap tw:[@media(max-width:_800px)]:[justify-content:center] tw:[@media(max-width:_800px)]:[&>div]:gap-4',
   brand:

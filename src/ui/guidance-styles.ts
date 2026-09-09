@@ -2,12 +2,12 @@
 export const guidanceStyles = {
   'guidance-dialog': [
     'tw:[&.sonar-dialog]:[width:min(650px,_calc(100vw_-_28px))]',
-    'tw:[width:min(980px,_calc(100vw_-_32px))] tw:max-w-none tw:[max-height:calc(100dvh_-_32px)] tw:p-0 tw:border tw:border-solid tw:border-[#d9dfd1] tw:[border-radius:24px] tw:bg-[#f8f9f3] tw:text-[#253c2e] tw:[box-shadow:0_28px_100px_#11271e66] tw:[overflow:auto]',
+    'tw:[width:min(980px,_calc(100vw_-_32px))] tw:max-w-none tw:[max-height:calc(100dvh_-_32px)] tw:p-0 tw:border tw:border-solid tw:border-[#d9dfd1] tw:[border-radius:24px] tw:bg-[var(--dialog-surface)] tw:text-[#253c2e] tw:[box-shadow:0_28px_100px_#11271e66] tw:[overflow:auto]',
     'tw:[&::backdrop]:bg-[#12251ee0] tw:[&::backdrop]:[backdrop-filter:blur(7px)]',
     'tw:[@media(max-width:_650px)]:[width:calc(100vw_-_16px)] tw:[@media(max-width:_650px)]:[max-height:calc(100dvh_-_16px)] tw:[@media(max-width:_650px)]:rounded-[18px]',
   ].join(' '),
   'prologue-dialog': [
-    'tw:[width:min(980px,_calc(100vw_-_32px))] tw:max-w-none tw:[max-height:calc(100dvh_-_32px)] tw:p-0 tw:border tw:border-solid tw:border-[#4a4940] tw:[border-radius:24px] tw:bg-[#171f24] tw:text-[#f3ead6] tw:[box-shadow:0_28px_100px_#11271e66] tw:[overflow:auto]',
+    'tw:[width:min(980px,_calc(100vw_-_32px))] tw:max-w-none tw:[max-height:calc(100dvh_-_32px)] tw:p-0 tw:border tw:border-solid tw:border-[#4a4940] tw:[border-radius:24px] tw:bg-[var(--prologue-surface)] tw:text-[#f3ead6] tw:[box-shadow:0_28px_100px_#11271e66] tw:[overflow:auto]',
     'tw:[&::backdrop]:bg-[#12251ee0] tw:[&::backdrop]:[backdrop-filter:blur(7px)]',
     'tw:[&[data-focus=objective]_.scene-objective]:[outline:1px_solid_#d2bb73] tw:[&[data-focus=objective]_.scene-objective]:[box-shadow:0_0_18px_#e2c7798a] tw:[&[data-focus=objective]_.scene-objective]:[animation:practice-pulse_2s_ease-in-out_infinite]',
     'tw:[&[data-focus=player]_.scene-hero_img]:[transform:scale(1.12)] tw:[&[data-focus=player]_.scene-hero_img]:[filter:drop-shadow(0_0_24px_#c5d8a647)]',
@@ -206,16 +206,17 @@ export const guidanceStyles = {
     'tw:[@media(max-width:_800px)]:[grid-template-columns:minmax(0,_1fr)] tw:[@media(max-width:_800px)]:gap-4',
   ].join(' '),
   'sonar-board-panel': [
-    'tw:border tw:border-solid tw:border-[#d9dfd9] tw:bg-[#fffefa] tw:rounded-[18px] tw:min-w-0 tw:overflow-hidden',
+    'tw:border tw:border-solid tw:border-line tw:bg-surface tw:rounded-[18px] tw:min-w-0 tw:overflow-hidden',
   ].join(' '),
   'sonar-instrument-panel': [
-    'tw:border tw:border-solid tw:border-[#d9dfd9] tw:bg-[#fffefa] tw:rounded-[18px] tw:[padding:clamp(18px,_1.5vw,_26px)]',
+    'tw:border tw:border-solid tw:border-line tw:bg-surface tw:rounded-[18px] tw:[padding:clamp(18px,_1.5vw,_26px)]',
     'tw:[&>button]:w-full',
-    'tw:[@media(max-width:_800px)]:grid tw:[@media(max-width:_800px)]:[grid-template-columns:1fr_auto] tw:[@media(max-width:_800px)]:gap-3 tw:[@media(max-width:_800px)]:items-center',
+    'tw:[@media(max-width:_800px)]:grid tw:[@media(min-width:_441px)_and_(max-width:_800px)]:[grid-template-columns:minmax(0,_1fr)_auto] tw:[@media(max-width:_800px)]:gap-3 tw:[@media(max-width:_800px)]:items-center',
     'tw:[@media(max-width:_800px)]:[&>button]:text-[12px]',
+    'tw:[@media(max-width:_440px)]:[grid-template-columns:minmax(0,_1fr)]',
   ].join(' '),
   'sonar-log-panel': [
-    'tw:border tw:border-solid tw:border-[#d9dfd9] tw:bg-[#fffefa] tw:rounded-[18px] tw:[padding:clamp(18px,_1.5vw,_26px)]',
+    'tw:border tw:border-solid tw:border-line tw:bg-surface tw:rounded-[18px] tw:[padding:clamp(18px,_1.5vw,_26px)]',
     'tw:[&_h2]:text-[16px] tw:[&_h2]:[margin:0_0_16px]',
   ].join(' '),
   'sonar-board-heading': [

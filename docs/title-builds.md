@@ -2,7 +2,7 @@
 
 Claiming any achievement unlocks its namesake title and ability. Existing achievement claims already own the corresponding ability. Titles occupy one independent departure slot, cost no loadout points and do not stack. Select one in the styled, scrollable title menu; each option shows its effect before selection. Achievement cards and combat build details show the same description.
 
-The selected title is frozen into the departure. Choosing another title in the expedition sidebar changes the next departure; a separate current-title card appears when the two differ. Switching, refreshing, restarting and claiming do not grant an extra title reward.
+Select a title at camp before departure. The expedition sidebar shows the captured title and its effect as read-only information; changing or clearing a title is rejected while a run exists. Return to camp to choose a different title for the next departure. Refreshing, restarting and claiming do not grant an extra title reward.
 
 ## Authored abilities
 
@@ -47,7 +47,7 @@ Rules revision **9** retires older expeditions with checkpointed extraction. Cam
 
 Domain coverage includes all 22 licenses and translations, departure freeze, ownership tampering, revision-eight retirement, bounded starting tools and health growth, specialist conditions, all five AP resolvers, explicit boss entry, relic choice stages, physical chest limits and skill refunds. A discovered Mirror Twins turn-budget error is fixed: AP is calculated from the incoming turn, so boots and title conditions use the correct turn number.
 
-`tests/browser/title-builds.mjs` exercises the actual menu, reward descriptions, health effect, changing a future title during play, reload and subsequent departure in all three languages with mouse, keyboard and touch. The layout suite covers the longer scrolling options and run statistics from 320px to 4K.
+`tests/browser/title-builds.mjs` exercises the actual menu, reward descriptions, health effect, camp-only title changes and read-only title effects during play, reload and subsequent departure in all three languages with mouse, keyboard and touch. The layout suite covers the longer scrolling options and run statistics from 320px to 4K.
 
 ## Matrix title
 

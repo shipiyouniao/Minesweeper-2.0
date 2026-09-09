@@ -33,6 +33,8 @@ Use scoped selectors for shared-control states: tutorial button colors, sound to
 
 ## Verification
 
+The [homepage redesign](home-and-navigation.md) adds `src/shell.css` for page composition, decorative mini-boards and shared glass surfaces. Glass, dock and dialog colors live in `tokens.css`; existing utility groups consume those tokens. Keep blur off ancestors of the fixed action dock, and keep clue-bearing cells opaque. Do not put filters or entry transforms on the scrolling route host. The glass theme has opaque fallbacks, and menu motion follows the existing reduced-motion rule.
+
 Run `npm run check`, both `build:native` and `build:legacy`, and `node scripts/verify-build.mjs` for styling integration changes. Exercise production output as well as development.
 
 - `tests/browser/shared-styles.mjs`: shared controls, responsive sizing, language menu, ranking dialog and keyboard focus in three languages.

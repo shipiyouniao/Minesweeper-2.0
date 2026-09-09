@@ -111,7 +111,7 @@ export const gameplayStyles = {
   'action-dock': [
     'tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])_.skill-bubble]:left-auto tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])_.skill-bubble]:right-0 tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])_.skill-bubble]:[transform:none]',
     'tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])>[data-tool]]:[flex-basis:calc((100%_-_24px)/5)] tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])>[data-tool]]:[width:calc((100%_-_24px)/5)] tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])>.dock-skill]:[flex-basis:calc((100%_-_24px)/5)] tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])>.dock-skill]:[width:calc((100%_-_24px)/5)] tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])>.mode-cycle]:[flex-basis:calc((100%_-_24px)/5)] tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])>.mode-cycle]:[width:calc((100%_-_24px)/5)] tw:[@media(max-width:_389px)]:[&:has(>[data-tool=sonar])>.dock-skill>button]:w-full',
-    'tw:[position:fixed] tw:bottom-0 tw:left-0 tw:right-0 tw:[z-index:30] tw:[min-height:var(--dock-space)] tw:[padding:9px_16px_calc(9px_+_env(safe-area-inset-bottom,_0px))] tw:flex tw:items-center tw:[justify-content:center] tw:gap-2.5 tw:bg-[#eef1edfa] tw:[border-top:1px_solid_#cbd5ca] tw:[box-shadow:0_-8px_28px_#23382a0b] tw:[backdrop-filter:blur(16px)]',
+    'tw:[position:fixed] tw:bottom-0 tw:left-0 tw:right-0 tw:[z-index:30] tw:[min-height:var(--dock-space)] tw:[padding:9px_16px_calc(9px_+_env(safe-area-inset-bottom,_0px))] tw:flex tw:items-center tw:[justify-content:center] tw:gap-2.5 tw:bg-[var(--dock-surface)] tw:[border-top:1px_solid_#cbd5ca] tw:[box-shadow:0_-8px_28px_#23382a0b] tw:[backdrop-filter:var(--glass-blur)]',
     'tw:[&_.dock-slot]:relative tw:[&_.dock-slot]:[flex:0_1_104px] tw:[&_.dock-slot]:w-26 tw:[&_.dock-slot]:h-19 tw:[&_.dock-slot]:min-h-11 tw:[&_.dock-slot]:flex tw:[&_.dock-slot]:flex-col tw:[&_.dock-slot]:items-center tw:[&_.dock-slot]:[justify-content:center] tw:[&_.dock-slot]:gap-0.5 tw:[&_.dock-slot]:[padding:5px_8px] tw:[&_.dock-slot]:border tw:[&_.dock-slot]:border-solid tw:[&_.dock-slot]:border-[#d2dbcf] tw:[&_.dock-slot]:[border-radius:13px] tw:[&_.dock-slot]:bg-[#fffefb] tw:[&_.dock-slot]:text-[#284535] tw:[&_.dock-slot]:cursor-pointer tw:[&_.dock-slot]:text-[12px] tw:[&_.dock-slot]:[transition:background-color_0.15s_ease,_border-color_0.15s_ease,_box-shadow_0.15s_ease,_transform_0.15s_ease]',
     'tw:[&_.dock-slot>img]:w-8.5 tw:[&_.dock-slot>img]:h-8.5 tw:[&_.dock-slot>img]:object-contain',
     'tw:[&_.dock-slot>svg]:w-8.5 tw:[&_.dock-slot>svg]:h-8.5 tw:[&_.dock-slot>svg]:object-contain',
@@ -189,7 +189,7 @@ export const gameplayStyles = {
     'tw:[&>span]:text-[20px]',
   ].join(' '),
   'run-overview': [
-    'tw:p-4 tw:border tw:border-solid tw:border-[#d7dfd2] tw:rounded-2xl tw:bg-[#fffef9] tw:mb-3',
+    'tw:p-4 tw:border tw:border-solid tw:border-[#d7dfd2] tw:rounded-2xl tw:bg-surface tw:mb-3',
     'tw:[&_.variant-heading]:[margin:0_0_12px] tw:[&_.variant-heading]:gap-2',
     'tw:[&_.variant-heading_h2]:text-[20px] tw:[&_.variant-heading_h2]:m-0',
     'tw:[&_.variant-note]:text-[11px] tw:[&_.variant-note]:[margin:4px_0]',

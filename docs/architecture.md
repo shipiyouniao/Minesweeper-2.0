@@ -39,7 +39,7 @@ flowchart LR
 
 ## Special-mode boundaries
 
-The [mode design record](game-modes.md) specifies all approved rulesets and their delivery status. `GameRouter` owns exactly one mounted game, checkpoints it before switching, and keeps `ruleset` separate from classic difficulty. It shares browser preferences and audio conventions, not mutable game state.
+The [mode design record](game-modes.md) specifies all approved rulesets and their delivery status. `GameRouter` owns exactly one mounted menu or game. The homepage separates Expedition from the Free play directory; game links keep `ruleset` separate from classic difficulty. It checkpoints and disposes games before menu navigation, and restores them on re-entry or browser Back/Forward. `HomeApp` owns menu settings without starting a game session; pure route helpers and explicit `navigation.d.ts` contracts define the public URLs. It shares browser preferences and audio conventions, not mutable game state.
 
 `game/expedition.ts` owns route connectivity, frontier legality, tools, relic offers and camp purchase rules. `game/twin.ts` partitions one shuffled candidate list into two disjoint mine layouts and resolves paired outcomes. `game/variant-board.ts` provides deterministic shuffling and construction from an explicit mine set; classic seed/layout behavior remains unchanged.
 

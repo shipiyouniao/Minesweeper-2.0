@@ -671,13 +671,7 @@ export class VariantApp implements VariantInputActions {
       const run = this.session.run
       this.view.render(
         run
-          ? expeditionTemplate(
-              this.language,
-              run,
-              expeditionEarnings(run),
-              this.inputMode,
-              this.session.camp,
-            )
+          ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.inputMode)
           : campTemplate(
               this.language,
               this.session.camp,

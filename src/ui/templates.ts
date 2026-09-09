@@ -12,6 +12,13 @@ import type { BoardInputMode, HelpStep } from '../types/ui.js'
 import { boardControlsTemplate } from './board-controls.js'
 import { boardHelpTemplate } from './board-help.js'
 import { escapeHtml, formatTime } from './presentation.js'
+import { routeHref } from './navigation.js'
+import type { Ruleset } from '../types/variants.js'
+
+/** The brand always returns home, preserving locale and allowing native link gestures. */
+export function brandTemplate(language: Language): string {
+  return `<a class="brand ${sharedStyles['brand']}" data-route href="${routeHref({ page: 'home' }, language)}" aria-label="Minesweeper 2.0 · ${message(language, 'home.back')}"><span class="brand-mark ${sharedStyles['brand-mark']}">${icon('flag')}</span><span>Minesweeper<span class="brand-version ${sharedStyles['brand-version']}">2.0</span></span></a>`
+}
 
 /** Render one radio-style menu option with a visible selected indicator. */
 function languageOption(language: Language, selected: Language): string {
@@ -68,17 +75,24 @@ export function languageMenuTemplate(language: Language): string {
 export function siteHeaderTemplate(
   language: Language,
   attribute: 'data-action' | 'data-control' = 'data-action',
+  mode: Ruleset = 'classic',
 ): string {
   const t = translations[language]
   return /* HTML */ `
     <header class="site-header ${sharedStyles['site-header']}">
-      <a class="brand ${sharedStyles['brand']}" href="./" aria-label="Minesweeper 2.0">
-        <span class="brand-mark ${sharedStyles['brand-mark']}">${icon('flag')}</span>
-        <span>
-          Minesweeper
-          <span class="brand-version ${sharedStyles['brand-version']}">2.0</span>
-        </span>
-      </a>
+      <div class="header-identity">
+        ${brandTemplate(language)}
+        <a
+          class="route-back"
+          data-route
+          href="${routeHref({ page: mode === 'expedition' ? 'home' : 'free' }, language)}"
+        >
+          ${icon('arrow')}
+          <span>
+            ${mode === 'expedition' ? message(language, 'home.back') : message(language, 'home.free')}
+          </span>
+        </a>
+      </div>
       <nav aria-label="${t.play}">
         <button
           class="text-button ${sharedStyles['text-button']} tutorial-entry ${sharedStyles['tutorial-entry']}"
