@@ -1,8 +1,15 @@
-import { STORY_FACTS, STORY_TASKS } from '../game/story-quests.js'
+import { decodeStoryWorld } from './story-world-decoder.js'
+import { STORY_FACTS, STORY_TASKS, STORY_CAMPAIGN_METRICS } from '../game/story-quests.js'
 import type { JsonValue } from '../types/json.js'
 import { STORY_REVISION } from '../game/story-content.js'
 import { STORY_DIALOGUE_IDS } from '../game/story-events.js'
-import type { StoryAction, StoryDialogueId, StoryProgress, StoryTask } from '../types/story.js'
+import type {
+  StoryAction,
+  StoryDialogueId,
+  StoryProgress,
+  StoryTask,
+  StoryCampaignMetric,
+} from '../types/story.js'
 import { JsonObjectReader } from './json-reader.js'
 
 /** Accept durable task identities without trusting serialized reward amounts. */
@@ -31,12 +38,18 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
   let reader = JsonObjectReader.from(value)
   if (!reader) return undefined
   const source = reader
-  if (reader.number('schemaVersion') === 2) {
+  const world =
+    reader.number('schemaVersion') === 3
+      ? decodeStoryWorld(reader.child('travel')?.value('world'))
+      : null
+  if (reader.number('schemaVersion') === 3 && !world) return undefined
+  if (reader.number('schemaVersion') === 2 || reader.number('schemaVersion') === 3) {
     const travel = reader.child('travel')
     const quests = reader.child('quests')
     if (!travel || !quests || !reader.child('inventory') || !reader.child('dialogue'))
       return undefined
     reader = JsonObjectReader.from({
+      campaignActivity: quests.value('campaignActivity') ?? null,
       facts: quests.value('facts') ?? [],
       arrived: travel.value('campReached') ?? false,
       campPosition: travel.value('campPosition') ?? 31,
@@ -109,7 +122,16 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
   const pending = dialogue?.child('active')
   const pendingId = STORY_DIALOGUE_IDS.find((id) => id === pending?.string('id'))
   const beat = pending?.number('beat') ?? -1
+  const activity = reader.child('campaignActivity')
+  const campaignActivity: Partial<Record<StoryCampaignMetric, number>> = {}
+  for (const metric of STORY_CAMPAIGN_METRICS) {
+    const amount = activity?.number(metric)
+    if (amount !== undefined && amount !== null && Number.isSafeInteger(amount) && amount >= 0)
+      campaignActivity[metric] = Math.min(1e9, amount)
+  }
   return {
+    ...(activity ? { campaignActivity } : {}),
+    ...(world ? { world } : {}),
     facts: [
       ...new Set([
         ...STORY_FACTS.filter((id) => reader.array('facts')?.includes(id)),

@@ -88,14 +88,18 @@ export function expeditionTemplate(
   const common = translations[language]
   const terminal = run.phase === 'lost' || run.phase === 'won' || run.phase === 'retreated'
   const rate = expeditionRewardPercent(run.departure) / 100
-  const exitReady = reachableCells(run).has(run.exit)
+  const exitReady =
+    reachableCells(run).has(run.exit) &&
+    (!run.departure.campaign || run.treasures.every((index) => run.collected.includes(index)))
   const status =
     run.phase === 'won'
       ? t.won
       : run.phase === 'lost'
         ? t.lost
         : run.phase === 'retreated'
-          ? t.retreated
+          ? run.departure.campaign
+            ? message(language, 'campaign.abandoned')
+            : t.retreated
           : run.phase === 'reward'
             ? t.reward
             : run.phase === 'boss'
@@ -122,8 +126,8 @@ export function expeditionTemplate(
   return `
     ${run.phase === 'boss' ? '' : `<p class="variant-status ${sharedStyles['variant-status']}" role="status" tabindex="-1">${status}</p>`}
     ${terminal ? `<button class="primary-button ${sharedStyles['primary-button']}" data-control="result">${t.viewResult} · +${earned}</button>` : ''}
-    ${run.phase === 'reward' ? `<button class="primary-button ${sharedStyles['primary-button']}" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="secondary-button ${sharedStyles['secondary-button']} retreat-button ${gameplayStyles['retreat-button']}" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button>` : ''}
-    <div class="board-play-area"><div class="expedition-layout">${run.encounter?.kind === 'tide' ? `<div class="tide-stage">${tidePlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}</div>` : run.encounter?.kind === 'matrix' ? matrixBoardFrame(language, { ...run, encounter: run.encounter }) : run.encounter?.kind === 'mirror' ? `<div class="mirror-boards"><div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true), boardZoomTemplate(t.zoom))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}</div>` : boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}<aside class="run-sidebar ${gameplayStyles['run-sidebar']}"><section class="run-overview ${gameplayStyles['run-overview']}">${activeTitleTemplate(language, run.departure.title)}<p class="variant-note ${sharedStyles['variant-note']}">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics ${sharedStyles['variant-metrics']}">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
+    ${run.phase === 'reward' ? `<button class="primary-button ${sharedStyles['primary-button']}" data-control="rewards">${run.offers.length ? t.chooseRelic : t.nextFloor}</button><button class="secondary-button ${sharedStyles['secondary-button']} retreat-button ${gameplayStyles['retreat-button']}" data-control="retreat"><span aria-hidden="true">↶</span>${run.departure.campaign ? message(language, 'campaign.abandon') : t.retreat}</button>` : ''}
+    ${run.departure.campaign ? `<p class="variant-note">${message(language, 'campaign.objective', { count: run.collected.length, total: run.treasures.length })}</p>` : ''}<div class="board-play-area"><div class="expedition-layout">${run.encounter?.kind === 'tide' ? `<div class="tide-stage">${tidePlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}</div>` : run.encounter?.kind === 'matrix' ? matrixBoardFrame(language, { ...run, encounter: run.encounter }) : run.encounter?.kind === 'mirror' ? `<div class="mirror-boards"><div class="mirror-active" data-realm="${run.encounter.active}">${boardFrame('a', mirrorBoardLabel(language, run, true), boardZoomTemplate(t.zoom))}</div><div class="mirror-comparison">${boardFrame('b', mirrorBoardLabel(language, run, false))}</div></div>` : run.encounter?.kind === 'clock' ? `<div class="clock-stage">${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}</div>` : run.encounter?.kind === 'magnetic' ? `<div class="magnetic-stage">${magneticPlaybar(language, run)}${boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}</div>` : boardFrame('a', `${t.floor} ${run.floor}`, boardZoomTemplate(t.zoom))}<aside class="run-sidebar ${gameplayStyles['run-sidebar']}"><section class="run-overview ${gameplayStyles['run-overview']}">${activeTitleTemplate(language, run.departure.title)}<p class="variant-note ${sharedStyles['variant-note']}">${t.difficulty} · ${difficultyCopy(language, run.departure.difficulty)} · ${run.game.config.width} × ${run.game.config.height}</p><div class="variant-metrics ${sharedStyles['variant-metrics']}">${metric(t.floor, `${run.floor} / ${expeditionFloors(run.departure)}`)}${metric(t.loot, run.loot)}${metric(t.steps, run.steps)}</div>
     <p class="variant-note ${sharedStyles['variant-note']} reward-rate">${t.rewardRate} ×${rate}</p>
     ${vitalityTemplate(language, run)}</section>${tacticalTemplate(language, run)}${expeditionReadings(language, run)}
       ${
@@ -134,7 +138,7 @@ export function expeditionTemplate(
       ${run.departure.equipment.includes('sonar') || run.encounter?.kind === 'echo' ? toolButton('sonar', message(language, 'sonar-equipment.name'), expeditionSonarCharges(run)) : ''}${toolButton('probe', t.probes, run.probes)}${toolButton('scan', t.scans, run.scans)}
       ${professionSkillTemplate(language, run)}${boardControlsTemplate(language, inputMode, 'data-control')}</div>
       ${run.probeReport ? `<p class="probe-result" role="status">${message(language, 'variant-copy.probe-found-count-mines', { count: run.probeReport.mines })}</p>` : ''}
-      <button class="secondary-button ${sharedStyles['secondary-button']} retreat-button ${gameplayStyles['retreat-button']}" data-control="retreat"><span aria-hidden="true">↶</span>${t.retreat}</button></div>`
+      <button class="secondary-button ${sharedStyles['secondary-button']} retreat-button ${gameplayStyles['retreat-button']}" data-control="retreat"><span aria-hidden="true">↶</span>${run.departure.campaign ? message(language, 'campaign.abandon') : t.retreat}</button></div>`
           : ''
       }
       <details class="relic-menu ${gameplayStyles['relic-menu']} tw:my-3 tw:mx-0 tw:overflow-hidden tw:rounded-2xl tw:border tw:border-solid tw:border-[#d7dfd2] tw:bg-[#fffef9]" data-relic-menu><summary class="tw:flex tw:min-h-[58px] tw:cursor-pointer tw:list-none tw:items-center tw:justify-between tw:gap-3.5 tw:px-4 tw:py-3 tw:hover:bg-accent-soft tw:focus-visible:bg-accent-soft"><span class="tw:flex tw:items-center tw:gap-[9px] tw:text-[13px] tw:font-semibold">${spriteImage('treasure')}${t.relics}</span><strong>${run.relics.length}</strong></summary>${relics ? `<ul class="relic-list ${gameplayStyles['relic-list']}">${relics}</ul>` : `<p class="variant-note ${sharedStyles['variant-note']}">${t.noRelics}</p>`}</details>
@@ -163,7 +167,14 @@ export function relicRewardTemplate(language: Language, run: Expedition): string
 export function expeditionResultTemplate(language: Language, run: Expedition): string {
   const t = variantCopy(language)
   const reward = expeditionReward(run)
-  const title = run.phase === 'won' ? t.won : run.phase === 'lost' ? t.lost : t.retreated
+  const title =
+    run.phase === 'won'
+      ? t.won
+      : run.phase === 'lost'
+        ? t.lost
+        : run.departure.campaign
+          ? message(language, 'campaign.abandoned')
+          : t.retreated
   const number = new Intl.NumberFormat(language)
 
   return `<button class="dialog-close ${sharedStyles['dialog-close']} icon-button ${sharedStyles['icon-button']}" data-control="cancel" aria-label="${translations[language].close}">${icon('close')}</button>
@@ -171,7 +182,7 @@ export function expeditionResultTemplate(language: Language, run: Expedition): s
     <h2 id="expedition-dialog-title" tabindex="-1" autofocus>${title}</h2>
     <div class="settlement-total ${gameplayStyles['settlement-total']}">${spriteImage('treasure')}<span>${t.earned}</span><strong>+${number.format(reward.total)}</strong></div>
     <p class="dialog-intro ${sharedStyles['dialog-intro']} reward-breakdown">${t.rewardBase} ${number.format(reward.base)} + ${t.rewardBonus} ${number.format(reward.bonus)} = ${number.format(reward.total)}</p>
-    <button class="primary-button ${sharedStyles['primary-button']}" data-control="camp">${t.camp}</button>`
+    <button class="primary-button ${sharedStyles['primary-button']}" data-control="camp">${run.departure.campaign ? message(language, 'campaign.exit') : t.camp}</button>`
 }
 
 /** Present both boards at once, with responsive stacking on narrow screens. */

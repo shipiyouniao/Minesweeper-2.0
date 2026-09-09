@@ -69,6 +69,7 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  readonly campaign?: 'tower-road-v4'
   readonly title: TitleId | null
   readonly milestoneRelics?: readonly MilestoneRelic[]
   readonly training: readonly CombatTraining[]
@@ -185,6 +186,13 @@ export interface ExpeditionJournal {
 
 /** One atomic value prevents refresh from awarding a settled run twice. */
 export interface ExpeditionSave {
+  readonly campaign?: {
+    readonly journal: ExpeditionJournal | null
+    readonly records: readonly VariantRecord[]
+    readonly cleared: boolean
+    readonly lesson?: number
+  }
+
   readonly story?: StoryProgress
   readonly loadout?: CampLoadout
   readonly difficulty?: VariantDifficulty

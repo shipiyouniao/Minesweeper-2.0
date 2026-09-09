@@ -248,6 +248,9 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
 /** Decode only current departure options; obsolete runs never enter the game engine. */
 function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (!reader) return null
+  const originalCampaign = reader.string('campaign')
+  const campaign = originalCampaign === 'tower-road-v3' ? 'tower-road-v4' : originalCampaign
+  if (reader.value('campaign') !== undefined && campaign !== 'tower-road-v4') return null
   const rawTitle = reader.value('title')
   const title = parseTitle(reader.string('title'))
   if (rawTitle !== null && title === null) return null
@@ -262,6 +265,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (
     !integer(seed, 0xffffffff) ||
     !difficulty ||
+    (campaign === 'tower-road-v4' && (difficulty !== 'relaxed' || seed !== 0)) ||
     !profession ||
     typeof archive !== 'boolean' ||
     typeof battleRelics !== 'boolean' ||
@@ -304,6 +308,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     }
   }
   return {
+    ...(campaign === 'tower-road-v4' ? { campaign } : {}),
     seed,
     title,
     difficulty,
@@ -384,6 +389,11 @@ function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | nul
   for (const value of values) {
     const action = decodeExpeditionAction(value, bounds)
     if (!action) return null
+    if (
+      reader.child('departure')?.string('campaign') === 'tower-road-v3' &&
+      (action.type === 'relic' || action.type === 'descend')
+    )
+      return null
     actions.push(action)
   }
 
@@ -454,12 +464,29 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
   if (returnedSupplies !== null)
     returnedSupplies = Math.min(returnedSupplies, Number.MAX_SAFE_INTEGER - camp.supplies)
 
-  const journal = oldEnvelope || oldRules ? null : decodeJournal(raw)
+  const candidate = oldEnvelope || oldRules ? null : decodeJournal(raw)
+  const journal = candidate?.departure.campaign ? null : candidate
   const recovered = returnedSupplies === null && journalValue !== null && !journal
   const story = decodeStory(reader.value('story'))
   const loadout = decodeLoadout(reader.child('loadout'))
+  const campaignReader = reader.child('campaign')
+  const campaignJournal = decodeJournal(campaignReader?.child('journal') ?? null)
+  const campaignRecords = decodeRecords(campaignReader?.array('records') ?? null)
+  const campaign =
+    campaignReader && campaignRecords
+      ? {
+          journal: campaignJournal?.departure.campaign === 'tower-road-v4' ? campaignJournal : null,
+          records: campaignRecords,
+          cleared: campaignReader.value('cleared') === true,
+          lesson:
+            campaignReader.child('journal') && !campaignJournal
+              ? 0
+              : Math.max(0, Math.min(4, Math.trunc(campaignReader.number('lesson') ?? 0))),
+        }
+      : null
   const save: ExpeditionSave = {
     version: 4,
+    ...(campaign ? { campaign } : {}),
     camp:
       returnedSupplies === null ? camp : { ...camp, supplies: camp.supplies + returnedSupplies },
     journal,
@@ -468,7 +495,14 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
     ...(loadout ? { loadout } : {}),
     ...(difficulty ? { difficulty } : {}),
   }
-  return { save, migrated: oldEnvelope || oldRules, recovered, returnedSupplies }
+  return {
+    save,
+    migrated: oldEnvelope || oldRules,
+    recovered:
+      recovered ||
+      (!!campaignReader && campaignReader.value('journal') !== null && !campaignJournal),
+    returnedSupplies,
+  }
 }
 
 /** Decode camp choices separately from immutable active-departure snapshots. */

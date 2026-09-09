@@ -1,6 +1,6 @@
 # First chapter draft: the old watchtower
 
-Status: implementation proposal within the approved Roadmap II direction. Not playable yet; the current northern camp route remains unavailable. Working names and dialogue are subject to playtesting. This is the first Bastion-family arc, not a replacement with the later Lookout boss.
+Status: implementation proposal within the approved Roadmap II direction. The northern road, survey/report task, three quarry spaces, spindle retrieval, permanent lift repair and upper tower landing are playable locally; the prepared chapter stages below are not implemented yet. Working names and dialogue are subject to playtesting. This is the first Bastion-family arc, not a replacement with the later Lookout boss.
 
 ## Narrative promise
 
@@ -45,3 +45,17 @@ Internal floors represent connected spaces such as a loading yard, mine passage 
 The atlas has world, region and scene scales. A large scene map displays its complete known extent while the board viewport follows the traveler within it. Unexplored information remains hidden. Buildings and underground floors may load separately. Teleportation remains undecided and is not included.
 
 Permanent discoveries, repairs, quest outcomes and narrative completion belong to world progress; current floor state and carried attempt resources belong to the active stage. Failure cannot erase completed world improvements.
+
+## Local prepared-stage increment
+
+The upper landing now opens **Watchtower outer galleries**, a three-floor prepared exploration attempt. It uses the roguelite profession/tool dock, base 10 HP plus owned build effects, and the shared five-point mine damage rules. Its authored 9×9 boards contain 12, 14 and 15 mines, compared with the relaxed tier's 12–15; mandatory physical supply recovery prevents simply walking to a visible exit. All floors have public-clue, tool-free and damage-free solution tests. Difficulty equivalence beyond these structural baselines still needs human playtesting.
+
+World exploration remains separate and can be resumed while the stage is suspended. Returning through its entrance resumes the exact attempt. First clearance awards 50 supplies once; ordinary roguelite achievements and wins are not farmed by campaign attempts. The full five-stage mechanism graph, guardian stage and Recollection are still outstanding; this increment does not complete the chapter.
+
+The local framed layout has been replaced by `tower-road-v2`: all 81 coordinates are real board space, with no decorative wall ring. Walls are derived from safe cells outside the entrance-connected component, exactly as in roguelite. The first floor now includes a four-step in-place tool/skill lesson. It highlights public targets, adapts to the equipped profession, consumes real charges only on accepted actions, and remembers completion across world travel and reload. Players may dismiss it. Superseded local attempts retire without changing world or roguelite progress.
+
+### Local layout revision
+
+The v3 approach replaces alternating mine/clue rows with staggered clusters, edge hazards, and two caches in different parts of each board. Only the entrance flood is initially visible. Mine counts remain 12/14/15 on 9 by 9 boards. Public-clue traversal verifies all three floors without tools or damage; this establishes solvability, not a final difficulty rating. Prior local v2 attempts retire without changing world or roguelite progress.
+
+The v4 layout gives floor two a north-edge entrance and southwest exit, and floor three a south-edge entrance and northwest exit. Floor one is unchanged, so v3 journals that have not descended migrate with actions and lesson progress intact. Older second/third-floor journals retire instead of replaying on changed terrain.

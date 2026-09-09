@@ -2,6 +2,19 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'story.north-road': '营地北面的旧路',
+  'story.lift': '望楼升降台',
+  'story.world-road': '灯栖林地 · 探路',
+  'story.road-task': '主线 · 望楼的旧路',
+  'story.road-detail': '从营地北门出发，查探望楼升降台，再回营地向露米报告。报酬：20 物资。',
+  'story.north-start-1': '林子另一头有座旧升降台。望楼在上面，我们先看看路还通不通。',
+  'story.north-start-2': '如果记录还在，或许就能知道我怎么来到这里了。',
+  'story.north-found-1': '轨道还在，可轴心这里是空的……有人把零件拆走了？',
+  'story.north-found-2': '不是拆走的，断口上还有锈。先记下缺的这一块，回营地找找线索。',
+  'story.north-report-1': '升降台缺了根轴。能找到替换的吗？',
+  'story.north-report-2':
+    '旧采石场用过同样的机器。我把位置记下来，等出发的东西备齐，就从那边找起。',
+
   'story.atlas-watchtower': '旧望楼',
   'story.atlas-uncharted': '这片区域尚未测绘。',
   'story.atlas-zoom': '地图缩放',
@@ -30,7 +43,49 @@ export const zhMessages: MessageCatalog = {
   'story.quest-guide-detail': '走到营地向导身边，了解这里的情况。',
   'story.quest-location': '目的地：{place}',
   'story.flag-mouse': '在亮起的未揭开格子上点右键，插上标记。',
+  'story.quarry-yard': '旧采石场 · 装卸场',
+  'story.quarry-passage': '旧采石场 · 矿道',
+  'story.quarry-machine': '旧采石场 · 机房',
+  'story.tower-landing': '望楼 · 上层平台',
+  'story.spindle': '升降台轴芯',
+  'story.repair-task': '主线 · 让升降台转起来',
+  'story.repair-detail':
+    '从北路东侧进入旧采石场，穿过装卸场和矿道，在机房取回轴芯，再带回北路的升降台安装。',
+  'story.repair-return': '轴芯已经收好。回到北路，走到升降台旁安装。',
+  'story.climb-task': '主线 · 望楼上的灯',
+  'story.climb-detail': '乘修好的升降台上去，走到望楼门前查看告示。',
+  'story.quarry-lead':
+    '采石场在北路东边。穿过装卸场和矿道，机房里应该还留着旧机器。找根完整的轴，升降台就能用了。',
+  'story.spindle-found': '尺寸正好！我帮你抬一边，沿来路回去，把它装到升降台上。',
+  'story.lift-fixed': '卡进去了……转起来了！抓稳扶手，我们上去看看。',
+  'story.tower-arrival':
+    '告示说，撤离期间档案由守卫保管。记录还在就好，得先找到值守的人，问清楚怎么解除封锁。',
+  'campaign.lesson-move': '先走到亮起的已开格，再使用技能。',
+  'campaign.lesson-title': '关卡练习 · {step}/4',
+  'campaign.lesson-enter':
+    '这里是正式关卡。爱心换成了血条，基础 10 HP，踩雷扣 5 HP。下方能使用带来的道具和职业技能，我们来试一下。',
+  'campaign.lesson-probe':
+    '点下方探针，再点亮起的格子；也可以把探针拖到格子上。它会确认周围一片区域：金旗是雷，带圆点的格子已确认安全。',
+  'campaign.lesson-scan':
+    '点下方扫描，再点要检查的那一行，也可以拖进去。扫描会确认整行的雷和安全格。',
+  'campaign.lesson-skill': '现在试试下方的职业技能。按钮变灰时，点一下就能查看原因。',
+  'campaign.lesson-open':
+    '点亮起的安全格走过去打开。确认安全不等于已经开格；结合新露出的数字，再判断周围。道具有限，别一次全用掉。',
+  'campaign.lesson-begin': '开始练习',
+  'campaign.lesson-skip': '我会用了，收起提示',
+  'campaign.enter': '进入望楼外廊',
+  'campaign.title': '望楼外廊',
+  'campaign.abandon': '放弃探索',
+  'campaign.abandon-note': '放弃本次探索并离开关卡？下次进入将从第一层重新开始。',
+  'campaign.exit': '离开关卡',
+  'campaign.abandoned': '已放弃探索',
+  'campaign.leave': '返回大世界',
+  'campaign.objective': '回收本层补给 {count}/{total}，再前往出口。共三层，首次通关获得 50 物资。',
   'story.flag-touch': '长按亮起的未揭开格子，插上标记。',
+  'story.chord-mouse':
+    '右键点击亮起的「1」，就能一起打开它周围没插旗的格子。旗数要和数字相同；插错位置还是会踩雷。',
+  'story.chord-touch':
+    '长按亮起的「1」，就能一起打开它周围没插旗的格子。旗数要和数字相同；插错位置还是会踩雷。',
   'story.map-unvisited': '尚未到达',
   'story.return-bag': '这个行囊，应该能物归原主了。',
   'story.open-eyes': '睁开眼睛',
@@ -52,7 +107,7 @@ export const zhMessages: MessageCatalog = {
   'story.read-task': '点一下亮起的数字，观察它周围的八格。',
   'story.flag-line': '「1」表示周围八格里藏着一处魔结。这里只有一格没看清，给它留个记号。',
   'story.flag-task': '标记那格：右击、长按，或选下方「插旗」再点格子。',
-  'story.open-line': '看旗子左边的「1」，它周围的危险已经找齐了。亮起的那格可以放心翻开。',
+  'story.open-line': '看旗子左边的「1」，周围的那处危险已经标好了，不用再一格格挖。',
   'story.open-task': '选「探索」，翻开亮起的安全格。',
   'story.travel-line': '你能读懂这些痕迹……太好了。沿着安全的地面过来，我带你去营地。',
   'story.travel-task': '点已揭开的格子就能走过去。到灯下，再继续前进。',
@@ -66,7 +121,7 @@ export const zhMessages: MessageCatalog = {
   'story.guide-line':
     '回家的路啊……旧望楼曾记载过异界来客，只是那条路封了很多年。我去问问还有谁认得路。这张地图你拿着，先熟悉一下附近的路。',
   'story.camp-ready': '去工坊看看，认识其他探索者，或到告示板接些委托。',
-  'story.road-line': '通往旧望楼的道路仍在勘查。下一章将从这里出发。',
+  'story.road-line': '先去灯下找露米，问清路线，再带上地图出发。',
   'story.temporary': '肉鸽远征 · 临时入口',
   'story.temporary-note': '继续挑战现有远征与 BOSS。',
   'story.continue': '继续前进',
@@ -81,6 +136,7 @@ export const zhMessages: MessageCatalog = {
   'story.retry': '重走这段路',
   'story.satchel': '遗失的行囊',
   'story.satchel-found': '行囊收好了。带回营地可获得 30 物资。',
+  'story.all-tasks': '查看全部任务',
   'story.tasks': '剧情任务',
   'story.main-task': '主线 · 抵达灯栖营地',
   'story.side-task': '支线 · 找回遗失的行囊',

@@ -5,6 +5,7 @@ import { encodeStory, storyEnvelopeStatus } from './story-encoder.js'
 
 /** Owns mode-specific storage, containing browser quota/privacy failures at one boundary. */
 export class VariantRepository {
+  readonly campaignMode: boolean
   private readonly storage: StorageLike
   private expeditionCache: ExpeditionSave | null = null
   available = true
@@ -14,7 +15,8 @@ export class VariantRepository {
   storyReadOnly = false
 
   /** Accept the same storage port used by classic mode and test adapters. */
-  constructor(storage: StorageLike) {
+  constructor(storage: StorageLike, campaignMode = false) {
+    this.campaignMode = campaignMode
     this.storage = storage
   }
 
@@ -44,7 +46,19 @@ export class VariantRepository {
     this.returnedSupplies = loaded?.returnedSupplies ?? null
     this.recovered = restored || (loaded?.recovered ?? text !== null)
     this.expeditionCache = loaded?.save ?? null
-    return this.expeditionCache
+    return this.campaignMode && this.expeditionCache
+      ? {
+          ...this.expeditionCache,
+          journal: this.expeditionCache.campaign?.journal ?? null,
+          records: this.expeditionCache.campaign?.records ?? [],
+          difficulty: 'relaxed',
+        }
+      : this.expeditionCache
+  }
+
+  /** Project only the campaign attempt while retaining one atomic shared camp envelope. */
+  forCampaign(): VariantRepository {
+    return new VariantRepository(this.storage, true)
   }
 
   /** Load the paired-board envelope using its own schema decoder. */
@@ -57,6 +71,33 @@ export class VariantRepository {
 
   /** Commit camp and expedition settlement through their typed namespace. */
   saveExpedition(value: ExpeditionSave): void {
+    if (this.campaignMode) {
+      const shared = new VariantRepository(this.storage)
+      const latest = shared.expedition() ?? value
+      shared.saveExpedition({
+        ...latest,
+        camp: value.camp,
+        ...(value.story ? { story: value.story } : {}),
+        ...(value.loadout ? { loadout: value.loadout } : {}),
+        campaign: {
+          journal: value.journal,
+          records: value.records,
+          cleared: value.campaign?.cleared ?? false,
+          lesson: value.campaign?.lesson ?? 0,
+        },
+      })
+      this.expeditionCache = {
+        ...value,
+        campaign: {
+          journal: value.journal,
+          records: value.records,
+          cleared: value.campaign?.cleared ?? false,
+          lesson: value.campaign?.lesson ?? 0,
+        },
+      }
+      this.available = shared.available
+      return
+    }
     // Keep the active tab usable after a quota/privacy error, including its camp transition.
     this.expeditionCache = value
     this.write('expedition', value)

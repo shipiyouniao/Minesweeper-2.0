@@ -1,3 +1,4 @@
+import { recordStoryCampaign } from '../game/story-quests.js'
 import { EXPEDITION_RULES_REVISION } from '../persistence/expedition-format.js'
 import { addVariantRecord } from '../game/variant-difficulty.js'
 import { ownedRelicPacks } from '../game/relic-packs.js'
@@ -96,6 +97,42 @@ export class ExpeditionSession {
     return this.current
   }
 
+  /** Campaign uses the same controls with an independent attempt slot. */
+  get campaignMode(): boolean {
+    return this.repository.campaignMode
+  }
+
+  /** Tutorial state is independent of consumable resources and survives world return. */
+  get campaignLesson(): number {
+    let step = this.save.campaign?.lesson ?? 0
+    const actions = this.save.journal?.actions ?? []
+    if (
+      step === 1 &&
+      actions.some(
+        (action) => action.type === 'probe' || action.type === 'sweep' || action.type === 'sonar',
+      )
+    )
+      step = 2
+    if (step === 2 && actions.some((action) => action.type === 'skill')) step = 3
+    return step
+  }
+
+  /** Start or dismiss the first-floor practice without granting tools or changing the run. */
+  setCampaignLesson(step: number): void {
+    if (!this.campaignMode || !this.current) return
+    this.refreshShared()
+    this.save = {
+      ...this.save,
+      campaign: {
+        journal: this.save.journal,
+        records: this.save.records,
+        cleared: this.save.campaign?.cleared ?? false,
+        lesson: step === 0 ? 0 : step === 1 ? 1 : 4,
+      },
+    }
+    this.commit()
+  }
+
   /** Read permanent progress separately from temporary run resources. */
   get camp(): Camp {
     return this.save.camp
@@ -149,14 +186,22 @@ export class ExpeditionSession {
   ): boolean {
     this.refreshShared()
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
+    if (
+      this.repository.campaignMode &&
+      (this.save.campaign?.cleared ||
+        !this.save.story?.completed.includes('reach-tower') ||
+        this.save.story.world?.active !== 'tower-landing')
+    )
+      return false
     const departure: Departure = {
+      ...(this.repository.campaignMode ? { campaign: 'tower-road-v4' as const } : {}),
       title: milestoneProgress(this.camp).title ?? null,
       training: ownedCombatTraining(this.camp),
       battleRelics: this.camp.upgrades.includes('battle-manual'),
       packs: ownedRelicPacks(this.camp),
       milestoneRelics: ownedMilestoneRelics(this.camp),
-      difficulty,
-      seed: this.runtime.randomSeed(),
+      difficulty: this.repository.campaignMode ? 'relaxed' : difficulty,
+      seed: this.repository.campaignMode ? 0 : this.runtime.randomSeed(),
       profession,
       equipment: [...equipment],
       archive: this.camp.upgrades.includes('archive'),
@@ -164,6 +209,16 @@ export class ExpeditionSession {
     this.current = createExpedition(departure)
     this.save = {
       ...this.save,
+      ...(this.campaignMode
+        ? {
+            campaign: {
+              journal: null,
+              records: this.save.campaign?.records ?? [],
+              cleared: false,
+              lesson: 0,
+            },
+          }
+        : {}),
       difficulty,
       journal: {
         departure,
@@ -190,9 +245,43 @@ export class ExpeditionSession {
     const next = actExpedition(run, action)
     if (next === run) return false
     this.current = next
+    const camp = advanceMilestones(this.camp, run, next)
+    const lesson = this.campaignLesson
+    const nextLesson =
+      !this.campaignMode || run.floor !== 1
+        ? lesson
+        : lesson === 1 &&
+            (action.type === 'probe' || action.type === 'sweep' || action.type === 'sonar')
+          ? 2
+          : lesson === 2 && action.type === 'skill'
+            ? 3
+            : lesson === 3 &&
+                (action.type === 'reveal' || action.type === 'move') &&
+                run.surveyedCells.includes(action.index)
+              ? 4
+              : lesson
     this.save = {
       ...this.save,
-      camp: advanceMilestones(this.camp, run, next),
+      ...(this.campaignMode
+        ? {
+            campaign: {
+              journal,
+              records: this.save.records,
+              cleared: this.save.campaign?.cleared ?? false,
+              lesson: nextLesson,
+            },
+          }
+        : {}),
+      camp,
+      ...(this.campaignMode && this.save.story
+        ? {
+            story: recordStoryCampaign(
+              this.save.story,
+              milestoneProgress(this.camp),
+              milestoneProgress(camp),
+            ),
+          }
+        : {}),
       journal: {
         ...journal,
         actions: [...journal.actions, action],
@@ -202,7 +291,11 @@ export class ExpeditionSession {
     }
 
     if (next.phase === 'lost' || next.phase === 'won' || next.phase === 'retreated') {
-      const earned = expeditionEarnings(next)
+      const earned = this.repository.campaignMode
+        ? next.phase === 'won' && !this.save.campaign?.cleared
+          ? 50
+          : 0
+        : expeditionEarnings(next)
       const record: VariantRecord = {
         difficulty: next.departure.difficulty,
         date: this.runtime.date(),
@@ -214,6 +307,16 @@ export class ExpeditionSession {
       this.save = {
         ...this.save,
         version: 4,
+        ...(this.repository.campaignMode
+          ? {
+              campaign: {
+                journal: null,
+                records: this.save.records,
+                cleared: !!this.save.campaign?.cleared || next.phase === 'won',
+                lesson: this.campaignLesson,
+              },
+            }
+          : {}),
         difficulty: this.difficulty,
         journal: null,
         camp: {
@@ -277,6 +380,7 @@ export class ExpeditionSession {
     this.save = {
       ...this.save,
       camp: latest.camp,
+      ...(latest.campaign ? { campaign: latest.campaign } : {}),
       ...(latest.story ? { story: latest.story } : {}),
       ...(latest.loadout ? { loadout: latest.loadout } : {}),
     }

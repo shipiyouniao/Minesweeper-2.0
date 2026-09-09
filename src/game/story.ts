@@ -1,6 +1,6 @@
 import { neighbors } from './engine.js'
 import { adjacentSteps } from './variant-board.js'
-import { PROLOGUE_SCENES } from './story-content.js'
+import { PROLOGUE_SCENES, STORY_SCENES } from './story-content.js'
 import type { StoryAction, StoryBoard, StoryRun, StoryScene } from '../types/story.js'
 
 /** Derive numbers from an explicit map; artwork and scripting never supply clue values. */
@@ -41,7 +41,7 @@ export function buildStoryBoard(scene: StoryScene): StoryBoard {
 
 /** A departure starts at the first authored scene; retries do not regenerate terrain. */
 export function createStoryRun(floor = 0, health = 3, rescuedSupplies = false): StoryRun {
-  const scene = PROLOGUE_SCENES[floor]
+  const scene = STORY_SCENES[floor]
   if (!scene) throw new RangeError('Missing prologue scene')
   const board = buildStoryBoard(scene)
   return {
@@ -112,7 +112,7 @@ export function storyTeachingTarget(run: StoryRun): number | null {
   if (run.floor !== 0) return null
   if (!run.inspected) return run.board.scene.clue
   if (!run.practicedFlag) return run.board.scene.teachingMine
-  if (!run.practicedReveal) return run.board.scene.teachingSafe
+  if (!run.practicedReveal) return run.board.scene.safeClue
   return run.board.exit
 }
 
@@ -133,17 +133,24 @@ function revealStoryGround(board: StoryBoard, target: number): StoryBoard {
 /** Apply physical exploration, recoverable damage, teaching and explicit scene transitions. */
 export function actStory(run: StoryRun, action: StoryAction): StoryRun {
   if (action.type === 'return') {
+    if (run.floor > 3) return run
     if (run.phase === 'arrived') return { ...run, phase: 'exploring' }
     if (run.phase !== 'exploring' || run.floor === 0 || run.player !== run.board.entrance)
       return run
+    if (run.board.scene.id === 'north-road') return { ...run, phase: 'arrived' }
     return travelStory(run, run.floor - 1, true)
   }
   if (action.type === 'retry')
     return run.phase === 'fallen'
-      ? { ...createStoryRun(run.floor, 3, run.rescuedSupplies), visited: run.visited ?? [] }
+      ? {
+          ...createStoryRun(run.floor, 3, run.rescuedSupplies),
+          collected: run.collected,
+          visited: run.visited ?? [],
+        }
       : run
   if (run.phase !== 'exploring') return run
   if (action.type === 'continue') {
+    if (run.floor >= 3) return run
     if (run.player !== run.board.exit || !storyLessonComplete(run)) return run
     return run.floor === PROLOGUE_SCENES.length - 1
       ? { ...run, phase: 'arrived' }
@@ -151,6 +158,52 @@ export function actStory(run: StoryRun, action: StoryAction): StoryRun {
   }
   const cell = run.board.game.cells[action.index]
   if (!Number.isInteger(action.index) || !cell || run.board.walls.includes(action.index)) return run
+  if (action.type === 'chord') {
+    const around = neighbors(run.board.game.config, action.index).filter(
+      (index) => !run.board.walls.includes(index),
+    )
+    if (
+      cell.visibility !== 'revealed' ||
+      cell.adjacent === 0 ||
+      around.filter((index) => run.board.game.cells[index]!.visibility === 'flagged').length !==
+        cell.adjacent ||
+      !around.some((index) => run.board.game.cells[index]!.visibility === 'hidden') ||
+      !storyPath(run.board, run.player, action.index)
+    )
+      return run
+    // Approach the clue, then open its neighbors without walking onto pickups or exits.
+    let board = run.board
+    let health = run.health
+    const triggered = [...run.triggered]
+    for (const index of around) {
+      const target = board.game.cells[index]!
+      if (target.visibility !== 'hidden' || !health) continue
+      if (target.mine) {
+        health--
+        triggered.push(index)
+        board = {
+          ...board,
+          game: {
+            ...board.game,
+            cells: board.game.cells.map((entry, at) =>
+              at === index ? { ...entry, visibility: 'flagged' } : entry,
+            ),
+          },
+        }
+      } else board = revealStoryGround(board, index)
+    }
+    const safe = board.scene.teachingSafe
+    return {
+      ...run,
+      board,
+      health,
+      triggered,
+      player: action.index,
+      phase: health ? 'exploring' : 'fallen',
+      practicedReveal:
+        run.practicedReveal || (safe !== null && board.game.cells[safe]?.visibility === 'revealed'),
+    }
+  }
   if (action.type === 'inspect') {
     if (run.inspected || cell.visibility !== 'revealed' || action.index !== run.board.scene.clue)
       return run
@@ -223,7 +276,10 @@ function travelStory(run: StoryRun, floor: number, backwards: boolean): StoryRun
     rescuedSupplies: run.rescuedSupplies || run.collected,
     phase: 'exploring',
     player: backwards ? next.board.exit : next.board.entrance,
-    visited: [...visited.filter((scene) => scene.floor !== run.floor), snapshot],
+    visited: [
+      ...visited.filter((scene) => scene.floor !== run.floor && scene.floor !== floor),
+      snapshot,
+    ],
   }
 }
 

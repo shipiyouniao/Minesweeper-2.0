@@ -2,6 +2,22 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'story.north-road': '野営地北の旧道',
+  'story.lift': '望楼の昇降台',
+  'story.world-road': '灯りの森 · 下見',
+  'story.road-task': 'メイン · 望楼への旧道',
+  'story.road-detail':
+    '北門から旧道へ進み、望楼の昇降台を調べてから野営地のルミに報告しよう。報酬：物資20。',
+  'story.north-start-1':
+    '森の向こうに古い昇降台があるの。望楼はその上よ。まず道が通れるか見てみましょう。',
+  'story.north-start-2': '記録が残っていれば、どうやってここに来たのかわかるかもしれない。',
+  'story.north-found-1': 'レールは残っているけど、軸がない……誰かが外したのかな。',
+  'story.north-found-2':
+    '折れたところに錆があるわ。足りない部品を覚えて、野営地で聞いてみましょう。',
+  'story.north-report-1': '昇降台の軸が折れていたんだ。代わりは見つかるかな。',
+  'story.north-report-2':
+    '古い採石場でも同じ機械を使っていたわ。場所を記しておくね。準備ができたら、そこを探しましょう。',
+
   'story.atlas-watchtower': '古い見張り塔',
   'story.atlas-uncharted': 'この地域はまだ測量されていない。',
   'story.atlas-zoom': '地図の倍率',
@@ -30,7 +46,49 @@ export const jaMessages: MessageCatalog = {
   'story.quest-guide-detail': '野営地の案内人のそばへ行き、この場所について聞こう。',
   'story.quest-location': '目的地：{place}',
   'story.flag-mouse': '光る未開放マスを右クリックしてマークしましょう。',
+  'story.quarry-yard': '旧採石場・積み込み場',
+  'story.quarry-passage': '旧採石場・坑道',
+  'story.quarry-machine': '旧採石場・機械室',
+  'story.tower-landing': '見張り塔・上階',
+  'story.spindle': '昇降台の軸',
+  'story.repair-task': 'メイン・昇降台の修理',
+  'story.repair-detail':
+    '北の道の東から採石場へ。積み込み場と坑道を抜け、機械室の軸を回収して昇降台へ運ぼう。',
+  'story.repair-return': '軸を回収した。北の道に戻り、昇降台に取り付けよう。',
+  'story.climb-task': 'メイン・塔の上の灯',
+  'story.climb-detail': '修理した昇降台で上がり、塔の扉の掲示を読もう。',
+  'story.quarry-lead': '採石場は北の道の東。積み込み場と坑道の奥の機械室で、使える軸を探そう。',
+  'story.spindle-found': '大きさも合いそう！片側を持つよ。来た道を戻って昇降台に取り付けよう。',
+  'story.lift-fixed': 'はまった……動いた！手すりにつかまって、上へ行こう。',
+  'story.tower-arrival':
+    '避難中は守衛が記録庫を管理する、と書いてある。記録は残っている。係の人を探して封鎖の解除方法を聞こう。',
+  'campaign.lesson-move': '先に光る開放済みマスへ移動し、それからスキルを使おう。',
+  'campaign.lesson-title': 'ステージ練習・{step}/4',
+  'campaign.lesson-enter':
+    'ステージ内はハートではなくHPです。基本HPは10、地雷のダメージは5。下の道具と職業スキルを使ってみましょう。',
+  'campaign.lesson-probe':
+    '下の探針を選び、光るマスを押すか、探針をそこへドラッグ。金色の旗は地雷、点のあるマスは安全です。',
+  'campaign.lesson-scan':
+    'スキャンを選んで調べたい行のマスを押すか、そこへドラッグ。行全体の地雷と安全なマスを確認します。',
+  'campaign.lesson-skill': '次は下の職業スキル。灰色のときは押すと使えない理由が分かります。',
+  'campaign.lesson-open':
+    '光る安全なマスへ移動して開きましょう。安全確認と開放は別です。新しい数字から周囲を推理し、道具は使い切らず残しておこう。',
+  'campaign.lesson-begin': '練習する',
+  'campaign.lesson-skip': '使い方は分かったので閉じる',
+  'campaign.enter': '外回廊へ入る',
+  'campaign.title': '見張り塔・外回廊',
+  'campaign.abandon': '探索を断念',
+  'campaign.abandon-note': '今回の探索を断念してステージを出ますか？次回は第1層から再開します。',
+  'campaign.exit': 'ステージを出る',
+  'campaign.abandoned': '探索を断念しました',
+  'campaign.leave': '世界へ戻る',
+  'campaign.objective':
+    'この階の物資を回収 {count}/{total}、その後出口へ。全3階、初回クリアで物資50。',
   'story.flag-touch': '光る未開放マスを長押ししてマークしましょう。',
+  'story.chord-mouse':
+    '光る「1」を右クリックすると、周囲の旗がないマスをまとめて開けます。旗の数が数字と同じときに使えますが、旗の位置が間違っていると地雷に当たります。',
+  'story.chord-touch':
+    '光る「1」を長押しすると、周囲の旗がないマスをまとめて開けます。旗の数が数字と同じときに使えますが、旗の位置が間違っていると地雷に当たります。',
   'story.map-unvisited': '未到達',
   'story.return-bag': 'この鞄、持ち主に返せそうだね。',
   'story.open-eyes': '目を開ける',
@@ -53,7 +111,7 @@ export const jaMessages: MessageCatalog = {
   'story.flag-line': '「1」は周囲8マスに魔結が1つ。まだ見えないのは1マスだけ。そこに目印をつけて。',
   'story.flag-task': 'そのマスに旗を。右クリック・長押し、または下の「旗」を選んでタップ。',
   'story.open-line':
-    '旗の左の「1」を見て。周囲の危険はもう特定できたね。光るマスは安全に開けるよ。',
+    '旗の左の「1」を見て。危険な場所には旗が立ったから、残りはまとめて開けられるよ。',
   'story.open-task': '「探索」を選び、光る安全なマスを開こう。',
   'story.travel-line': 'この痕跡が読めるんだ……頼もしいね。安全な道をおいで。野営地まで案内するよ。',
   'story.travel-task': '開いたマスを選ぶと歩く。灯のもとに着いたら先へ進もう。',
@@ -68,7 +126,7 @@ export const jaMessages: MessageCatalog = {
   'story.guide-line':
     '帰り道か……古い見張り塔には異界から来た人の記録がある。でも、道は何年も閉ざされたまま。詳しい人を探してみるね。この地図を持っていって。近くの道を覚えるときに使って。',
   'story.camp-ready': '工房を訪ねたり、仲間と話したり、掲示板を覗いてみよう。',
-  'story.road-line': '見張り塔への道は調査中。次の章はここから始まる。',
+  'story.road-line': 'まず灯りのそばのルミに道を聞いて、地図を受け取ろう。',
   'story.temporary': 'ローグライト · 仮の入口',
   'story.temporary-note': '今までの遠征とボスに挑戦。',
   'story.continue': '先へ進む',
@@ -83,6 +141,7 @@ export const jaMessages: MessageCatalog = {
   'story.retry': 'この道をやり直す',
   'story.satchel': '落とし物の鞄',
   'story.satchel-found': '鞄を回収。野営地へ届けると物資30。',
+  'story.all-tasks': 'すべてのクエスト',
   'story.tasks': '物語の依頼',
   'story.main-task': 'メイン · 野営地へ',
   'story.side-task': 'サブ · 落とし物を届ける',

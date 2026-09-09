@@ -25,7 +25,7 @@ export function difficultyRewardPercent(difficulty: VariantDifficulty): number {
 
 /** Apply the selected difficulty to both normal settlement and update extraction. */
 export function expeditionRewardPercent(departure: Departure): number {
-  return difficultyRewardPercent(departure.difficulty)
+  return departure.campaign ? 100 : difficultyRewardPercent(departure.difficulty)
 }
 
 /** Bank whole supplies once, after applying the recorded difficulty rate. */
@@ -35,6 +35,10 @@ export function scaleSupplies(base: number, percent: number): number {
 
 /** Apply defeat retention before the bonus; unfinished runs never have a settlement. */
 export function expeditionReward(run: Expedition): ExpeditionReward {
+  if (run.departure.campaign) {
+    const total = run.phase === 'won' ? 50 : 0
+    return { base: total, bonus: 0, total, percent: 100 }
+  }
   let base = 0
 
   if (run.phase === 'won') base = run.loot + VICTORY_SUPPLIES

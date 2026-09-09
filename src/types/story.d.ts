@@ -16,7 +16,7 @@ export type StoryReaction = 'greet' | 'collect'
 
 /** Authored scenes share coordinates and movement without sharing a random generator. */
 export interface StoryScene {
-  readonly id: 'awakening' | 'trail' | 'approach' | 'camp'
+  readonly id: StorySceneId | 'camp'
   readonly rows: readonly string[]
   readonly clue: number | null
   readonly safeClue: number | null
@@ -36,7 +36,7 @@ export interface StoryBoard {
 
 /** Only accepted player actions enter the current content revision's journal. */
 export type StoryAction =
-  | { readonly type: 'visit' | 'flag' | 'inspect'; readonly index: number }
+  | { readonly type: 'visit' | 'flag' | 'inspect' | 'chord'; readonly index: number }
   | { readonly type: 'continue' }
   | { readonly type: 'return' }
   | { readonly type: 'retry' }
@@ -61,10 +61,16 @@ export interface StoryRun {
 export type StorySceneMemory = Omit<StoryRun, 'visited'>
 
 /** Permanent story objectives are separate from ordinary expedition milestones. */
-export type StoryTask = 'reach-camp' | 'lost-satchel' | 'meet-guide'
+export type StoryTask =
+  'reach-camp' | 'lost-satchel' | 'meet-guide' | 'survey-road' | 'repair-lift' | 'reach-tower'
 
 /** One envelope commits story rewards and the shared wallet together. */
+export type StoryCampaignMetric = 'travel' | 'chests' | 'floors' | 'bosses' | 'skills' | 'wins'
+export type StoryCampaignActivity = Partial<Readonly<Record<StoryCampaignMetric, number>>>
+
 export interface StoryProgress {
+  readonly campaignActivity?: StoryCampaignActivity
+  readonly world?: StoryWorldCheckpoint
   readonly facts?: readonly StoryFact[]
   readonly dialogue?: StoryDialogueProgress
   readonly accepted?: readonly StoryTask[]
@@ -90,6 +96,13 @@ export type StoryDialogueId =
   | 'arrival'
   | 'guide'
   | 'road'
+  | 'north-road-start'
+  | 'north-road-found'
+  | 'north-road-report'
+  | 'quarry-lead'
+  | 'spindle-found'
+  | 'lift-repaired'
+  | 'tower-arrival'
 
 export interface StoryDialogueProgress {
   readonly completed: readonly StoryDialogueId[]
@@ -97,7 +110,7 @@ export interface StoryDialogueProgress {
 }
 
 /** Versioned storage DTO. Runtime aliases are confined to the decoder/encoder boundary. */
-export interface StorySaveData {
+export interface LegacyStorySaveData {
   readonly schemaVersion: 2
   readonly travel: {
     readonly campReached: boolean
@@ -107,6 +120,7 @@ export interface StorySaveData {
     readonly origin: 'prologue' | 'surveyed-legacy'
   }
   readonly quests: {
+    readonly campaignActivity?: StoryCampaignActivity
     readonly facts: readonly StoryFact[]
     readonly accepted: readonly StoryTask[]
     readonly pinned: readonly StoryTask[]
@@ -138,6 +152,7 @@ export type StoryFeedback =
 
 /** One presentation snapshot contains only the selected scene and shared camp services. */
 export interface StoryViewState {
+  readonly campaignCleared?: boolean
   readonly language: Language
   readonly run: StoryRun | null
   readonly board: StoryBoard
@@ -153,11 +168,11 @@ export interface StoryViewState {
   readonly sound: boolean
   readonly storageAvailable: boolean
   readonly touchInput?: boolean
+  readonly selectedTask?: StoryTask | null
   readonly panel?: 'tasks' | 'map' | null
   readonly mapLevel?: 'local' | 'region' | 'world'
   readonly mapScene?: number
   readonly mapLegend?: boolean
-  readonly exhausted: boolean
 }
 
 /** Touch holds track their original cell and stop when the gesture becomes a scroll. */
@@ -171,10 +186,20 @@ export interface StoryHold {
 }
 
 /** Durable outcomes describe the fiction, independent of board coordinates or wording. */
-export type StoryFact = 'camp-reached' | 'satchel-secured' | 'satchel-delivered' | 'guide-met'
+export type StoryFact =
+  | 'camp-reached'
+  | 'satchel-secured'
+  | 'satchel-delivered'
+  | 'guide-met'
+  | 'lift-discovered'
+  | 'road-reported'
+  | 'spindle-secured'
+  | 'lift-restored'
+  | 'tower-reached'
 
 /** Content uses explicit prerequisite groups, never executable string expressions. */
 export type StoryCondition =
+  | { readonly kind: 'campaign'; readonly metric: StoryCampaignMetric; readonly target: number }
   | { readonly kind: 'fact'; readonly id: StoryFact }
   | { readonly kind: 'task'; readonly id: StoryTask }
   | { readonly kind: 'dialogue'; readonly id: StoryDialogueId }
@@ -189,3 +214,50 @@ export interface StoryTaskDefinition {
   readonly objective: StoryCondition
   readonly supplies: number
 }
+
+export type StorySceneId =
+  | 'awakening'
+  | 'trail'
+  | 'approach'
+  | 'north-road'
+  | 'quarry-yard'
+  | 'quarry-passage'
+  | 'quarry-machine'
+  | 'tower-landing'
+
+/** Only differences from authored terrain are stored; hazards and clue numbers are rebuilt. */
+export interface StorySceneCheckpoint {
+  readonly id: StorySceneId
+  readonly player: number
+  readonly health: number
+  readonly revealed: readonly number[]
+  readonly flagged: readonly number[]
+  readonly triggered: readonly number[]
+  readonly inspected: boolean
+  readonly practicedFlag: boolean
+  readonly practicedReveal: boolean
+  readonly collected: boolean
+  readonly rescuedSupplies: boolean
+  readonly phase: StoryRun['phase']
+}
+
+export interface StoryWorldCheckpoint {
+  readonly revision: number
+  readonly active: StorySceneId | null
+  readonly hasVisited: boolean
+  readonly scenes: readonly StorySceneCheckpoint[]
+}
+
+export interface StoryWorldSaveData {
+  readonly schemaVersion: 3
+  readonly travel: {
+    readonly campReached: boolean
+    readonly campPosition: number
+    readonly world: StoryWorldCheckpoint
+  }
+  readonly quests: LegacyStorySaveData['quests']
+  readonly inventory: LegacyStorySaveData['inventory']
+  readonly dialogue: StoryDialogueProgress
+}
+
+export type StorySaveData = LegacyStorySaveData | StoryWorldSaveData

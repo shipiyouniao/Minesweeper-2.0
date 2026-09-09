@@ -73,3 +73,92 @@ export const CAMP_SITES: readonly CampSite[] = [
   { index: 51, destination: 'guide', sprite: 'guardian-crests' },
   { index: 13, destination: 'road', sprite: 'exit' },
 ]
+
+/** Persistent overworld approach; the lift is a destination, not a prepared dungeon departure. */
+export const NORTH_ROAD_SCENE: StoryScene = {
+  id: 'north-road',
+  rows: [
+    '###########',
+    '#oo*oooooo#',
+    '#oooo...oo#',
+    '#oo..*..oE#',
+    '#Soo....oo#',
+    '#oo...*ooo#',
+    '#o*....ooo#',
+    '#ooooooooo#',
+    '###########',
+  ],
+  clue: null,
+  safeClue: null,
+  teachingMine: null,
+  teachingSafe: null,
+}
+
+/** Authored outer quarry spaces and the restored lift landing retain their exploration. */
+export const QUARRY_SCENES: readonly StoryScene[] = [
+  {
+    id: 'quarry-yard',
+    rows: [
+      '#########',
+      '#Soo....#',
+      '#ooo.*..#',
+      '#oo.....#',
+      '#o*..oo.#',
+      '#ooooooE#',
+      '#########',
+    ],
+    clue: null,
+    safeClue: null,
+    teachingMine: null,
+    teachingSafe: null,
+  },
+  {
+    id: 'quarry-passage',
+    rows: [
+      '#########',
+      '#Soo....#',
+      '#ooo.*..#',
+      '###o#####',
+      '#...oo..#',
+      '#.*.oooE#',
+      '#########',
+    ],
+    clue: null,
+    safeClue: null,
+    teachingMine: null,
+    teachingSafe: null,
+  },
+  {
+    id: 'quarry-machine',
+    rows: [
+      '#########',
+      '#Soo....#',
+      '#ooo.*..#',
+      '#oo.....#',
+      '#o*..oT.#',
+      '#ooooooo#',
+      '####E####',
+    ],
+    clue: null,
+    safeClue: null,
+    teachingMine: null,
+    teachingSafe: null,
+  },
+]
+export const TOWER_LANDING_SCENE: StoryScene = {
+  id: 'tower-landing',
+  rows: ['#########', '#oo..*..#', '#ooo....#', '#SoooooE#', '#ooo....#', '#o*.....#', '#########'],
+  clue: null,
+  safeClue: null,
+  teachingMine: null,
+  teachingSafe: null,
+}
+export const STORY_SCENES: readonly StoryScene[] = [
+  ...PROLOGUE_SCENES,
+  NORTH_ROAD_SCENE,
+  ...QUARRY_SCENES,
+  TOWER_LANDING_SCENE,
+]
+
+/** Additional north-road doorway; its coordinate is shared by movement and atlas rendering. */
+export const QUARRY_GATE = 75

@@ -1,6 +1,7 @@
+import { checkpointStory, restoreStoryWorld, storyWorldScenes } from '../game/story-checkpoint.js'
 import { recordStoryFacts, storyTaskIntroduced } from '../game/story-quests.js'
 import { CampSession } from './camp-session.js'
-import { CAMP_SCENE, STORY_REVISION } from '../game/story-content.js'
+import { CAMP_SCENE, QUARRY_GATE, STORY_REVISION } from '../game/story-content.js'
 import {
   actStory,
   buildStoryBoard,
@@ -21,41 +22,66 @@ import type {
 export class StorySession {
   readonly camp: CampSession
   private current: StoryRun | null = null
-  private actions: readonly StoryAction[] = []
 
   /** Restore current content only; retire old attempts to camp with one compensation. */
   constructor(camp: CampSession) {
     this.camp = camp
     const story = camp.story
-    if (story.journal && story.journal.revision !== STORY_REVISION) {
-      camp.saveStory({ ...story, arrived: true, journal: null }, 200)
+    if (story.world) {
+      if (story.world.revision !== STORY_REVISION) {
+        const active = story.world.active !== null
+        camp.saveStory(
+          {
+            ...story,
+            arrived: true,
+            journal: null,
+            world: { revision: STORY_REVISION, active: null, hasVisited: false, scenes: [] },
+          },
+          active ? 200 : 0,
+        )
+        return
+      }
+      this.current = restoreStoryWorld(story.world)
       return
     }
-    if (story.arrived && !story.journal) return
-    let run = story.routeLegacy
-      ? legacyStoryRoute(story.completed.includes('lost-satchel'))
-      : createStoryRun()
-    for (const action of story.journal?.actions ?? []) {
-      const next = actStory(run, action)
-      if (next === run) {
-        // Retain the last valid checkpoint rather than silently jumping to the opening.
-        break
-      }
-      run = next
-      this.actions = [...this.actions, action]
+    if (story.journal && story.journal.revision !== STORY_REVISION) {
+      camp.saveStory(
+        {
+          ...story,
+          arrived: true,
+          journal: null,
+          world: { revision: STORY_REVISION, active: null, hasVisited: false, scenes: [] },
+        },
+        200,
+      )
+      return
     }
-    this.current = run
-    this.persist()
+    const atCamp = story.arrived && !story.journal
+    const history = atCamp ? story.route : story.journal
+    let run =
+      story.routeLegacy || (atCamp && !history)
+        ? legacyStoryRoute(story.completed.includes('lost-satchel'))
+        : createStoryRun()
+    for (const action of history?.actions ?? []) {
+      const next = actStory(run, action)
+      if (next === run) break
+      run = next
+    }
+    if (atCamp) {
+      const checkpoint = checkpointStory(run)
+      const progress = { ...story, journal: null, world: { ...checkpoint, active: null } }
+      delete progress.route
+      delete progress.routeLegacy
+      camp.saveStory(progress)
+    } else {
+      this.current = run
+      this.persist()
+    }
   }
 
   /** Null identifies the persistent camp scene. */
   get run(): StoryRun | null {
     return this.current
-  }
-
-  /** A full journal exposes a restart instead of trapping the player in an inert scene. */
-  get exhausted(): boolean {
-    return this.current !== null && this.actions.length >= 3000
   }
 
   /** The southern camp gate reopens the preserved route, without awarding arrival again. */
@@ -67,38 +93,89 @@ export class StorySession {
       progress.campPosition !== buildStoryBoard(CAMP_SCENE).exit
     )
       return false
-    const legacy = progress.routeLegacy || !progress.route
-    let run = legacy
-      ? legacyStoryRoute(progress.completed.includes('lost-satchel'))
-      : createStoryRun()
-    const actions = progress.route?.actions ?? []
-    if (actions.length >= 3000) return false
-    for (const action of actions) {
-      const next = actStory(run, action)
-      if (next === run) return false
-      run = next
+    const world = progress.world
+    const saved =
+      world &&
+      (world.scenes.length === 0
+        ? legacyStoryRoute(progress.completed.includes('lost-satchel'))
+        : restoreStoryWorld(world, 'approach'))
+    if (!saved) return false
+    this.current = { ...saved, health: 3, player: saved.board.exit, phase: 'exploring' }
+    this.persist()
+    return true
+  }
+
+  /** Enter the northern world road after the guide has supplied its map. */
+  enterNorthRoad(): boolean {
+    const progress = this.camp.story
+    if (
+      this.current ||
+      progress.campPosition !== 13 ||
+      !progress.mapOwned ||
+      !progress.completed.includes('meet-guide') ||
+      !progress.world
+    )
+      return false
+    const saved = restoreStoryWorld(progress.world, 'north-road')
+    const initial = saved ?? { ...createStoryRun(3), visited: storyWorldScenes(progress.world) }
+    this.current = {
+      ...initial,
+      player: initial.board.entrance,
+      health: 3,
+      phase: 'exploring',
     }
-    if (run.phase !== 'arrived') return false
-    this.current = actStory(run, { type: 'return' })
-    this.actions = [...actions, { type: 'return' }]
-    if (legacy) this.camp.saveStory({ ...progress, routeLegacy: true })
     this.persist()
     return true
   }
 
   /** Save each accepted interaction before its presentation animation begins. */
   dispatch(action: StoryAction): boolean {
-    if (this.exhausted && action.type === 'retry') {
-      this.current = createStoryRun()
-      this.actions = []
-      this.persist(true)
-      return true
-    }
-    if (!this.current || this.exhausted) return false
+    if (!this.current) return false
     const next = actStory(this.current, action)
     if (next === this.current) return false
     this.current = next
-    this.actions = [...this.actions, action]
+    this.persist()
+    return true
+  }
+
+  /** Physical world doorways share their prerequisite checks with durable repair outcomes. */
+  travelWorld(): boolean {
+    const run = this.current
+    if (!run || run.phase !== 'exploring' || run.floor < 3) return false
+    const progress = this.camp.story
+    let floor: number | null = null
+    let target: number | null = null
+    if (run.floor === 3) {
+      if (run.player === run.board.entrance) return this.dispatch({ type: 'return' })
+      if (run.player === QUARRY_GATE && progress.accepted?.includes('repair-lift')) floor = 4
+      if (run.player === run.board.exit && progress.facts?.includes('spindle-secured')) {
+        if (!progress.facts.includes('lift-restored')) {
+          this.camp.saveStory(recordStoryFacts(progress, ['lift-restored']))
+          return true
+        }
+        if (progress.dialogue?.completed.includes('lift-repaired')) floor = 7
+      }
+    } else if (run.player === run.board.entrance) {
+      floor = run.floor === 7 ? 3 : run.floor - 1
+      target = run.floor === 4 ? QUARRY_GATE : createStoryRun(floor).board.exit
+    } else if (run.player === run.board.exit && run.floor < 6) floor = run.floor + 1
+    else if (run.floor === 6 && run.player === run.board.exit) {
+      floor = 5
+      target = createStoryRun(5).board.exit
+    }
+    if (floor === null) return false
+    const { visited = [], ...snapshot } = run
+    const saved = visited.find((scene) => scene.floor === floor) ?? createStoryRun(floor)
+    this.current = {
+      ...saved,
+      player: target ?? saved.board.entrance,
+      health: run.health,
+      phase: 'exploring',
+      visited: [
+        ...visited.filter((scene) => scene.floor !== floor && scene.floor !== run.floor),
+        snapshot,
+      ],
+    }
     this.persist()
     return true
   }
@@ -146,7 +223,17 @@ export class StorySession {
 
   /** Quest acceptance, map handover and event completion share one atomic save. */
   completeDialogue(id: StoryDialogueId): StoryTask | null {
-    const progress = this.camp.story
+    if (
+      id === 'north-road-report' &&
+      (this.current ||
+        !this.camp.story.facts?.includes('lift-discovered') ||
+        !adjacentSteps(buildStoryBoard(CAMP_SCENE).game, this.camp.story.campPosition).includes(51))
+    )
+      return null
+    const progress =
+      id === 'north-road-report'
+        ? recordStoryFacts(this.camp.story, ['road-reported'])
+        : this.camp.story
     if (progress.dialogue?.completed.includes(id)) return null
     const accept = storyTaskIntroduced(id, progress)
     this.camp.saveStory({
@@ -199,25 +286,35 @@ export class StorySession {
   }
 
   /** Arrival, journal removal and one-time rewards share a single storage write. */
-  private persist(resetRoute = false): void {
+  private persist(): void {
     const run = this.current
     if (!run) return
     const old = { ...this.camp.story }
-    if (resetRoute) {
-      delete old.route
-      delete old.routeLegacy
-    }
+    delete old.route
+    delete old.routeLegacy
     const arrived = run.phase === 'arrived'
     const progress: StoryProgress = {
       ...old,
       arrived,
-      journal: arrived ? null : { revision: STORY_REVISION, actions: this.actions },
-      ...(arrived ? { route: { revision: STORY_REVISION, actions: this.actions } } : {}),
+      journal: null,
+      world: checkpointStory(arrived ? { ...run, health: 3 } : run),
+      ...(arrived && run.board.scene.id === 'north-road' ? { campPosition: 13 } : {}),
     }
     this.camp.saveStory(
       recordStoryFacts(progress, [
-        ...(run.collected || run.rescuedSupplies ? ['satchel-secured' as const] : []),
+        ...((run.floor === 1 && run.collected) || run.rescuedSupplies
+          ? ['satchel-secured' as const]
+          : []),
+        ...(run.board.scene.id === 'quarry-machine' && run.collected
+          ? ['spindle-secured' as const]
+          : []),
+        ...(run.board.scene.id === 'tower-landing' && run.player === run.board.exit
+          ? ['tower-reached' as const]
+          : []),
         ...(arrived ? ['camp-reached' as const] : []),
+        ...(run.board.scene.id === 'north-road' && run.player === run.board.exit
+          ? ['lift-discovered' as const]
+          : []),
         ...(arrived && run.rescuedSupplies ? ['satchel-delivered' as const] : []),
       ]),
     )

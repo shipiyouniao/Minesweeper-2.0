@@ -10,7 +10,9 @@ import type { Expedition } from '../types/variants.js'
 
 /** Place boss rooms at the selected difficulty's authored checkpoints. */
 export function isEncounterFloor(run: Expedition): boolean {
-  return encounterTier(run.departure.difficulty).floors.includes(run.floor)
+  return (
+    !run.departure.campaign && encounterTier(run.departure.difficulty).floors.includes(run.floor)
+  )
 }
 
 /** Rotate eight distinct encounters from a seeded first boss without immediate repeats. */

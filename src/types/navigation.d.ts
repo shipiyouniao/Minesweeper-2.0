@@ -6,7 +6,7 @@ export type MenuPage = 'home' | 'free'
 /** A route names either a menu or one independently saved game. */
 export type AppRoute =
   | { readonly page: MenuPage }
-  | { readonly page: 'story' }
+  | { readonly page: 'story' | 'campaign' }
   | { readonly page: 'game'; readonly mode: Ruleset }
 
 /** Free play deliberately excludes the expedition's persistent progression loop. */

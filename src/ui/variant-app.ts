@@ -1,3 +1,6 @@
+import { professionSkillCopy, professionSkillStatus } from './profession-skill-copy.js'
+import { professionSkillAvailability } from '../game/profession-skills.js'
+import { routeHref } from './navigation.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
 import { cueForVitality } from '../audio/cues.js'
@@ -48,6 +51,7 @@ export class VariantApp implements VariantInputActions {
   private paused = false
   private pending: 'retreat' | 'restart' | null = null
   private pendingDifficulty: VariantDifficulty | null = null
+  private disposeCampaignLesson: (() => void) | null = null
   private moving = false
   private turnPerformance = false
   private walkGeneration = 0
@@ -398,6 +402,16 @@ export class VariantApp implements VariantInputActions {
           this.prologue.present(this.root, this.session.run, this.language, false, true)
         return
       case 'tutorial':
+        if (
+          this.session instanceof ExpeditionSession &&
+          this.session.campaignMode &&
+          this.session.run?.floor === 1 &&
+          this.session.run.phase === 'exploring'
+        ) {
+          this.session.setCampaignLesson(0)
+          this.render()
+          return
+        }
         this.view.showInformation('', '')
         startTutorial(
           this.root.querySelector<HTMLDialogElement>('dialog[open]')!,
@@ -535,6 +549,11 @@ export class VariantApp implements VariantInputActions {
         break
       case 'camp':
         if (this.session instanceof ExpeditionSession) {
+          if (this.session.campaignMode) {
+            this.session.returnToCamp()
+            this.root.querySelector<HTMLAnchorElement>('[data-campaign-return]')?.click()
+            return
+          }
           this.result(this.session.returnToCamp())
           this.campScreen = { ...this.campScreen, page: 'overview' }
         }
@@ -579,8 +598,12 @@ export class VariantApp implements VariantInputActions {
       case 'retreat':
         this.pending = 'retreat'
         this.view.confirm(
-          variantCopy(this.language).retreatNote,
-          variantCopy(this.language).retreat,
+          this.session instanceof ExpeditionSession && this.session.campaignMode
+            ? message(this.language, 'campaign.abandon-note')
+            : variantCopy(this.language).retreatNote,
+          this.session instanceof ExpeditionSession && this.session.campaignMode
+            ? message(this.language, 'campaign.abandon')
+            : variantCopy(this.language).retreat,
         )
         return
       case 'restart':
@@ -655,6 +678,7 @@ export class VariantApp implements VariantInputActions {
 
   /** Release all owned effects before routing to another game mode or hot reload. */
   dispose(): void {
+    this.disposeCampaignLesson?.()
     this.cancelMovement()
     this.session.persist()
     this.input.dispose()
@@ -678,6 +702,19 @@ export class VariantApp implements VariantInputActions {
     )
 
     if (this.session instanceof ExpeditionSession) {
+      if (this.session.campaignMode) {
+        const heading = this.root.querySelector('.variant-heading h2')
+        if (heading) heading.textContent = message(this.language, 'campaign.title')
+        if (!this.root.querySelector('[data-campaign-return]')) {
+          const link = document.createElement('a')
+          link.href = routeHref({ page: 'story' }, this.language)
+          link.dataset['route'] = ''
+          link.dataset['campaignReturn'] = ''
+          link.className = 'route-back mx-auto my-3 w-fit'
+          link.textContent = message(this.language, 'campaign.leave')
+          this.root.querySelector('.site-header')?.after(link)
+        }
+      }
       const run = this.session.run
       this.view.render(
         run
@@ -694,6 +731,7 @@ export class VariantApp implements VariantInputActions {
         run?.encounter?.kind === 'mirror' ? run.encounter.other.game : null,
         run,
       )
+      this.renderCampaignLesson()
       this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
       this.notices.observe(this.session.camp, this.language)
     } else {
@@ -701,6 +739,138 @@ export class VariantApp implements VariantInputActions {
       const a = state.phase === 'lost' ? { ...state.a, phase: 'lost' as const } : state.a
       const b = state.phase === 'lost' ? { ...state.b, phase: 'lost' as const } : state.b
       this.view.render(twinTemplate(this.language, state, this.inputMode), a, b, null)
+    }
+  }
+
+  /** Guide real tool and skill inputs; progress follows accepted actions, not pretend clicks. */
+  private renderCampaignLesson(): void {
+    this.disposeCampaignLesson?.()
+    this.disposeCampaignLesson = null
+    this.root.querySelector('.campaign-lesson')?.remove()
+    for (const element of this.root.querySelectorAll('.campaign-lesson-target'))
+      element.classList.remove('campaign-lesson-target')
+    if (!(this.session instanceof ExpeditionSession) || !this.session.campaignMode) return
+    const session = this.session
+    const run = session.run
+    const step = session.campaignLesson
+    if (!run || run.floor !== 1 || run.phase !== 'exploring' || step >= 4) return
+    const panel = document.createElement('section')
+    panel.className = 'campaign-lesson'
+    panel.dataset['lessonStep'] = String(step)
+    panel.setAttribute('aria-live', 'polite')
+    const heading = document.createElement('strong')
+    heading.textContent = message(this.language, 'campaign.lesson-title', { step: step + 1 })
+    const text = document.createElement('p')
+    const tool = run.probes > 0 ? 'probe' : run.scans > 0 ? 'scan' : 'skill'
+    const availability = professionSkillAvailability(run)
+    text.textContent =
+      step === 0
+        ? message(this.language, 'campaign.lesson-enter')
+        : step === 1
+          ? tool === 'skill'
+            ? message(this.language, 'campaign.lesson-skill') +
+              ' ' +
+              professionSkillCopy(this.language, run.departure.profession).note
+            : tool === 'probe'
+              ? message(this.language, 'campaign.lesson-probe')
+              : message(this.language, 'campaign.lesson-scan')
+          : step === 2
+            ? message(this.language, 'campaign.lesson-skill') +
+              ' ' +
+              professionSkillCopy(this.language, run.departure.profession).note +
+              (availability !== 'ready'
+                ? ' ' + professionSkillStatus(this.language, availability)
+                : '')
+            : message(this.language, 'campaign.lesson-open')
+    panel.append(heading, text)
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.textContent =
+      step === 0
+        ? message(this.language, 'campaign.lesson-begin')
+        : message(this.language, 'campaign.lesson-skip')
+    button.addEventListener('click', () => {
+      session.setCampaignLesson(step === 0 ? 1 : 4)
+      this.render()
+    })
+    panel.append(button)
+    const frame = this.root.querySelector<HTMLElement>('.variant-board-panel')
+    const viewport = frame?.querySelector<HTMLElement>('.board-viewport')
+    if (!frame || !viewport) return
+    frame.classList.add('campaign-guide-frame')
+    frame.append(panel)
+    if (step === 1 || step === 2)
+      this.root
+        .querySelector(`[data-control="${step === 1 ? tool : 'skill'}"]`)
+        ?.classList.add('campaign-lesson-target')
+    const targets = run.game.cells.flatMap((cell, index) =>
+      cell.visibility === 'hidden' &&
+      !run.walls.includes(index) &&
+      !run.confirmedMines.includes(index) &&
+      (step === 1 ? !run.surveyedCells.includes(index) : run.surveyedCells.includes(index)) &&
+      (step !== 3 || !!approachPath(run, index))
+        ? [index]
+        : [],
+    )
+    const width = run.game.config.width
+    const distance = (index: number) =>
+      Math.abs((index % width) - (run.player % width)) +
+      Math.abs(Math.floor(index / width) - Math.floor(run.player / width))
+    targets.sort((a, b) => distance(a) - distance(b))
+    if (step === 2 && availability !== 'ready') {
+      const position = run.game.cells.findIndex(
+        (cell, index) =>
+          cell.visibility === 'revealed' &&
+          index !== run.player &&
+          !run.walls.includes(index) &&
+          !!approachPath(run, index) &&
+          professionSkillAvailability({ ...run, player: index }) === 'ready',
+      )
+      if (position >= 0) {
+        this.root
+          .querySelector(`[data-cell="${position}"]`)
+          ?.classList.add('campaign-lesson-target')
+        text.textContent += ' ' + message(this.language, 'campaign.lesson-move')
+      }
+    }
+    if ((step === 1 || step === 3) && targets[0] !== undefined)
+      this.root
+        .querySelector(`[data-cell="${targets[0]}"]`)
+        ?.classList.add('campaign-lesson-target')
+    const positionGuide = () => {
+      const bounds = frame.getBoundingClientRect()
+      const board = viewport.getBoundingClientRect()
+      const target = frame.querySelector<HTMLElement>('[data-cell].campaign-lesson-target')
+      const tile = target?.getBoundingClientRect()
+      const leftEdge = board.left - bounds.left + 8
+      const rightEdge = board.right - bounds.left - 8
+      const topEdge = board.top - bounds.top + 8
+      const bottomEdge = board.bottom - bounds.top - 8
+      const w = panel.offsetWidth
+      const h = panel.offsetHeight
+      const x = tile ? tile.left + tile.width / 2 - bounds.left : (leftEdge + rightEdge) / 2
+      const left = Math.max(leftEdge, Math.min(x - w / 2, rightEdge - w))
+      let top = topEdge + (bottomEdge - topEdge - h) / 2
+      panel.removeAttribute('data-arrow')
+      if (tile) {
+        const below = tile.bottom - bounds.top + 14
+        const above = tile.top - bounds.top - h - 14
+        top = below + h <= bottomEdge ? below : Math.max(topEdge, above)
+        panel.dataset['arrow'] = top >= tile.bottom - bounds.top ? 'up' : 'down'
+        panel.style.setProperty('--guide-arrow', `${Math.max(18, Math.min(w - 18, x - left))}px`)
+      }
+      panel.style.left = `${left}px`
+      panel.style.top = `${Math.max(topEdge, top)}px`
+    }
+    const observer = new ResizeObserver(positionGuide)
+    observer.observe(frame)
+    observer.observe(panel)
+    viewport.addEventListener('scroll', positionGuide, { passive: true })
+    positionGuide()
+    this.disposeCampaignLesson = () => {
+      observer.disconnect()
+      viewport.removeEventListener('scroll', positionGuide)
+      frame.classList.remove('campaign-guide-frame')
     }
   }
 

@@ -2,6 +2,22 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'story.north-road': 'Old North Road',
+  'story.lift': 'Watchtower Lift',
+  'story.world-road': 'Lanternwood · Scouting',
+  'story.road-task': 'Main · The Watchtower Road',
+  'story.road-detail':
+    'Leave through the north gate, inspect the watchtower lift, then report to Lumi at camp. Reward: 20 supplies.',
+  'story.north-start-1':
+    'There is an old lift beyond the trees. The tower is above it. Let us see whether the road is still passable.',
+  'story.north-start-2': 'If the records survived, perhaps they can tell me how I arrived here.',
+  'story.north-found-1': 'The rails are intact, but the spindle is missing. Did someone take it?',
+  'story.north-found-2':
+    'Look at the rust on that broken edge. Note the missing part; we should ask around camp.',
+  'story.north-report-1': 'The lift needs a spindle. Can we find a replacement?',
+  'story.north-report-2':
+    'The old quarry used the same machines. I will mark its location. Once we are equipped, that is where we should look.',
+
   'story.atlas-watchtower': 'Old Watchtower',
   'story.atlas-uncharted': 'This area has not been mapped yet.',
   'story.atlas-zoom': 'Map zoom',
@@ -30,7 +46,54 @@ export const enMessages: MessageCatalog = {
   'story.quest-guide-detail': 'Speak with the guide at camp to learn about this place.',
   'story.quest-location': 'Location: {place}',
   'story.flag-mouse': 'Right-click the highlighted covered tile to mark it.',
+  'story.quarry-yard': 'Old quarry · Loading yard',
+  'story.quarry-passage': 'Old quarry · Passage',
+  'story.quarry-machine': 'Old quarry · Machinery room',
+  'story.tower-landing': 'Watchtower · Upper landing',
+  'story.spindle': 'Lift spindle',
+  'story.repair-task': 'Main · Restore the lift',
+  'story.repair-detail':
+    'Enter the quarry east of the northern road. Cross the yard and passage, collect the spindle in the machinery room, and install it at the lift.',
+  'story.repair-return':
+    'Spindle secured. Return to the northern road and approach the lift to install it.',
+  'story.climb-task': 'Main · A light above',
+  'story.climb-detail': 'Ride the repaired lift and read the notice at the watchtower door.',
+  'story.quarry-lead':
+    'The quarry is east of the northern road. Beyond the yard and passage, the machinery room should have an intact spindle for our lift.',
+  'story.spindle-found':
+    'A perfect fit! I will take this end. Back the way we came, then into the lift.',
+  'story.lift-fixed': 'It fits… and it is turning! Hold the rail. Let us head up.',
+  'story.tower-arrival':
+    'The notice says the guardian holds the archive during evacuation. The records are still here. We need the station staff to lift the closure.',
+  'campaign.lesson-move': 'Move to the highlighted revealed tile, then use your skill.',
+  'campaign.lesson-title': 'Stage practice · {step}/4',
+  'campaign.lesson-enter':
+    'Inside a stage you have HP instead of hearts: 10 base HP, and a mine deals 5 damage. Your tools and profession skill are below. Let us try them.',
+  'campaign.lesson-probe':
+    'Select the probe below, then the highlighted tile, or drag the probe onto it. It confirms a nearby area: gold flags are mines; dotted tiles are confirmed safe.',
+  'campaign.lesson-scan':
+    'Select the scanner, then a tile in the row you want to check, or drag it there. It confirms mines and safe tiles across that row.',
+  'campaign.lesson-skill':
+    'Now try your profession skill below. If it is grey, tap it to see why it is unavailable.',
+  'campaign.lesson-open':
+    'Walk to and open the highlighted safe tile. Confirmed safe is not yet revealed. Use the new numbers to reason about its neighbors, and save some tools for later.',
+  'campaign.lesson-begin': 'Try it',
+  'campaign.lesson-skip': 'I know this — hide tips',
+  'campaign.enter': 'Enter the outer galleries',
+  'campaign.title': 'Watchtower outer galleries',
+  'campaign.abandon': 'Abandon exploration',
+  'campaign.abandon-note':
+    'Abandon this attempt and leave the stage? Your next attempt will start on floor one.',
+  'campaign.exit': 'Leave stage',
+  'campaign.abandoned': 'Exploration abandoned',
+  'campaign.leave': 'Return to the world',
+  'campaign.objective':
+    'Collect this floor’s supplies {count}/{total}, then reach the exit. Three floors; first clear awards 50 supplies.',
   'story.flag-touch': 'Press and hold the highlighted covered tile to mark it.',
+  'story.chord-mouse':
+    'Right-click the highlighted 1 to open its unflagged neighbors together. The flag count must match the number; misplaced flags can still cause a mine hit.',
+  'story.chord-touch':
+    'Press and hold the highlighted 1 to open its unflagged neighbors together. The flag count must match the number; misplaced flags can still cause a mine hit.',
   'story.map-unvisited': 'Not visited',
   'story.return-bag': 'This bag should make it back to its owner.',
   'story.open-eyes': 'Open your eyes',
@@ -55,7 +118,7 @@ export const enMessages: MessageCatalog = {
     '“1” means one knot in these eight cells. Only one is still covered. Leave a warning there.',
   'story.flag-task': 'Flag the covered cell: right-click, hold, or choose Flag below and tap.',
   'story.open-line':
-    'Look at the “1” just left of the flag. Its danger is marked, so its other neighbors are safe. Open the glowing cell.',
+    'Look at the 1 left of the flag. Its danger is marked, so you can open the remaining neighbors together.',
   'story.open-task': 'Choose Explore, then open the lit safe cell.',
   'story.travel-line':
     'You can read the traces… That’s a rare gift. Come along the clear ground. I’ll take you to camp.',
@@ -90,6 +153,7 @@ export const enMessages: MessageCatalog = {
   'story.retry': 'Try this stretch again',
   'story.satchel': 'Lost satchel',
   'story.satchel-found': 'Satchel recovered. Bring it to camp for 30 supplies.',
+  'story.all-tasks': 'View all quests',
   'story.tasks': 'Story tasks',
   'story.main-task': 'Main · Reach Lanternrest',
   'story.side-task': 'Side · Return the lost satchel',

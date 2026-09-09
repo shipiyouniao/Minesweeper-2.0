@@ -1,6 +1,6 @@
 # Campaign, shared camp and reusable expedition floors
 
-Status: direction approved and tracked in [Roadmap II #55](https://github.com/shipiyouniao/minefarer/issues/55). The prologue and shared camp are implemented; the local foundation follow-up adds versioned story saves and typed prologue task conditions. The full chapter, persistent overworld and Recollection remain unimplemented. The requirements below replace the earlier proposal for separate campaign loadouts or normalized campaign equipment. Detailed chapter content, reward amounts and combination weights remain to be authored and playtested.
+Status: direction approved and tracked in [Roadmap II #55](https://github.com/shipiyouniao/minefarer/issues/55). The prologue and shared camp are implemented. The current follow-up adds compact scene checkpoints and a persistent northern road, quarry spindle retrieval, lift repair and tower landing. The full chapter, broader overworld and Recollection remain unimplemented. The requirements below replace the earlier proposal for separate campaign loadouts or normalized campaign equipment. Detailed chapter content, reward amounts and combination weights remain to be authored and playtested.
 
 [Roadmap II new modes and boss families](roadmap-2-mode-candidates.md) records the approved Lookout, Fleet and Islands additions and the requirement for visually distinct numeric clue kinds on mixed floors. Detailed parameters and story remain under discussion.
 

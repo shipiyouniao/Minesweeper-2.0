@@ -13,6 +13,30 @@ export function storyDialogueTemplate(state: StoryViewState): string {
 /** Brief exchanges respond to the scene while the current teaching objective stays beside them. */
 export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat[] {
   const { language, run } = state
+  const event = storyDialogueEvent(state)
+  if (event === 'quarry-lead')
+    return [{ speaker: 'lumi', line: message(language, 'story.quarry-lead'), gesture: 'point' }]
+  if (event === 'spindle-found')
+    return [{ speaker: 'lumi', line: message(language, 'story.spindle-found'), gesture: 'offer' }]
+  if (event === 'lift-repaired')
+    return [{ speaker: 'player', line: message(language, 'story.lift-fixed'), gesture: 'nod' }]
+  if (event === 'tower-arrival')
+    return [{ speaker: 'lumi', line: message(language, 'story.tower-arrival'), gesture: 'point' }]
+  if (event === 'north-road-start')
+    return [
+      { speaker: 'lumi', line: message(language, 'story.north-start-1'), gesture: 'point' },
+      { speaker: 'player', line: message(language, 'story.north-start-2'), gesture: 'nod' },
+    ]
+  if (event === 'north-road-found')
+    return [
+      { speaker: 'player', line: message(language, 'story.north-found-1'), gesture: 'point' },
+      { speaker: 'lumi', line: message(language, 'story.north-found-2'), gesture: 'steady' },
+    ]
+  if (event === 'north-road-report')
+    return [
+      { speaker: 'player', line: message(language, 'story.north-report-1'), gesture: 'nod' },
+      { speaker: 'lumi', line: message(language, 'story.north-report-2'), gesture: 'point' },
+    ]
   if (!run) {
     if (storyDialogueEvent(state) === 'road')
       return [{ speaker: 'lumi', line: message(language, 'story.road-line'), gesture: 'point' }]
@@ -70,6 +94,17 @@ export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat
       },
     ]
   if (!run.practicedReveal)
-    return [{ speaker: 'lumi', line: message(language, 'story.open-line'), gesture: 'point' }]
+    return [
+      {
+        speaker: 'lumi',
+        line:
+          message(language, 'story.open-line') +
+          ' ' +
+          (state.touchInput
+            ? message(language, 'story.chord-touch')
+            : message(language, 'story.chord-mouse')),
+        gesture: 'point',
+      },
+    ]
   return [{ speaker: 'lumi', line: message(language, 'story.travel-line'), gesture: 'nod' }]
 }

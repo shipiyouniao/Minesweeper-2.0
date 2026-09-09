@@ -1,5 +1,5 @@
 import { message } from '../i18n.js'
-import { storyTaskName } from './story-quests.js'
+import { storyTaskName, storyTaskScene } from './story-quests.js'
 import { CampSession } from '../application/camp-session.js'
 import { StorySession } from '../application/story-session.js'
 import { CAMP_SCENE, CAMP_SITES } from '../game/story-content.js'
@@ -45,6 +45,7 @@ export class StoryApp implements MountedGame {
   private animation: Animation | null = null
   private generation = 0
   private moving = false
+  private selectedTask: NonNullable<StoryViewState['selectedTask']> | null = null
   private panel: 'tasks' | 'map' | null = null
   private mapLevel: 'local' | 'region' | 'world' = 'local'
   private mapScene = 3
@@ -73,7 +74,7 @@ export class StoryApp implements MountedGame {
       root,
       sounds,
       this.session.run?.floor === 0 &&
-        this.session.camp.story.journal?.actions.length === 0 &&
+        !this.session.run.inspected &&
         !this.session.camp.story.dialogue?.active &&
         !this.session.camp.story.dialogue?.completed.includes('wake'),
     )
@@ -115,6 +116,7 @@ export class StoryApp implements MountedGame {
     const saved = progress.campPosition
     return {
       panel: this.panel,
+      selectedTask: this.selectedTask,
       mapLevel: this.mapLevel,
       mapScene: this.mapScene,
       mapLegend: this.mapLegend,
@@ -128,6 +130,7 @@ export class StoryApp implements MountedGame {
       loadout: this.session.camp.loadout,
       service: this.service,
       conversation: this.conversation,
+      campaignCleared: this.repository.expedition()?.campaign?.cleared ?? false,
       flagMode: this.flagMode,
       inspected:
         run?.practicedFlag && !run.practicedReveal
@@ -136,7 +139,6 @@ export class StoryApp implements MountedGame {
       feedback: this.feedback,
       sound: this.sounds.enabled,
       storageAvailable: this.repository.available,
-      exhausted: this.session.exhausted,
     }
   }
 
@@ -265,14 +267,26 @@ export class StoryApp implements MountedGame {
     const state = this.snapshot()
     const cell = state.board.game.cells[index]
     if (!cell || state.board.walls.includes(index)) return
+    if (
+      state.run?.floor === 7 &&
+      index === state.board.exit &&
+      this.session.camp.story.dialogue?.completed.includes('tower-arrival')
+    ) {
+      const entry = this.root.querySelector<HTMLAnchorElement>('[data-story-campaign]')
+      if (entry && state.player === index) {
+        entry.click()
+        return
+      }
+    }
     this.feedback = 'none'
-    if (state.run && flag) {
+    const chord = !!state.run && flag && cell.visibility === 'revealed'
+    if (state.run && flag && !chord) {
       const changed = this.session.dispatch({ type: 'flag', index })
       this.sounds.play(changed ? 'flag' : 'blocked')
       this.render()
       return
     }
-    if (state.run && cell.visibility === 'revealed' && cell.adjacent) {
+    if (state.run && !chord && cell.visibility === 'revealed' && cell.adjacent) {
       this.inspected = index
       if (this.session.dispatch({ type: 'inspect', index })) {
         this.sounds.play('confirm')
@@ -290,9 +304,9 @@ export class StoryApp implements MountedGame {
       return
     }
     const changed = state.run
-      ? this.session.dispatch({ type: 'visit', index })
+      ? this.session.dispatch({ type: chord ? 'chord' : 'visit', index })
       : this.session.moveCamp(index)
-    if (!changed && index !== state.player) {
+    if (!changed && (chord || index !== state.player)) {
       this.sounds.play('blocked')
       return
     }
@@ -301,12 +315,23 @@ export class StoryApp implements MountedGame {
     const animationPath = path.at(-1) === destination ? path : [...path, destination]
     const generation = ++this.generation
     this.moving = true
-    this.sounds.play(hurt ? 'loss' : cell.visibility === 'hidden' ? 'reveal' : 'navigate')
+    this.sounds.play(hurt ? 'loss' : chord || cell.visibility === 'hidden' ? 'reveal' : 'navigate')
     await this.walk(animationPath)
     if (generation !== this.generation) return
     this.moving = false
     this.feedback = hurt ? 'hurt' : 'none'
-    if (state.run && this.session.run?.player === this.session.run?.board.exit) {
+    if (state.run && state.run.floor >= 3 && !chord) {
+      if (this.session.travelWorld()) {
+        this.inspected = null
+        this.flagMode = false
+        this.panel = null
+      }
+    } else if (
+      state.run &&
+      !chord &&
+      state.run.board.scene.id !== 'north-road' &&
+      this.session.run?.player === this.session.run?.board.exit
+    ) {
       if (this.session.dispatch({ type: 'continue' })) {
         this.inspected = null
         this.flagMode = false
@@ -314,6 +339,7 @@ export class StoryApp implements MountedGame {
       } else this.feedback = 'lesson'
     } else if (
       state.run &&
+      !chord &&
       state.run.floor > 0 &&
       this.session.run?.player === this.session.run?.board.entrance
     ) {
@@ -333,8 +359,13 @@ export class StoryApp implements MountedGame {
       if (site?.destination === 'guide') {
         this.session.meetGuide()
         this.conversation = 'guide'
-      } else if (site?.destination === 'road') this.conversation = 'road'
-      else if (site)
+      } else if (site?.destination === 'road') {
+        if (this.session.enterNorthRoad()) {
+          this.conversation = null
+          this.inspected = null
+          this.panel = null
+        } else this.conversation = 'road'
+      } else if (site)
         this.service = { page: site.destination, category: 'all', selected: 'surveyor' }
     }
     this.render()
@@ -409,14 +440,23 @@ export class StoryApp implements MountedGame {
       const id = storyDialogueEvent(this.snapshot())
       if (!id) return
       if (this.performance.advance()) {
+        const beforeCompleted = this.session.camp.story.completed
         const hadMap = this.session.camp.story.mapOwned
         const task = this.session.completeDialogue(id)
+        const completed = this.session.camp.story.completed.find(
+          (task) => !beforeCompleted.includes(task),
+        )
         const map = !hadMap && this.session.camp.story.mapOwned
         this.render()
         if (task)
           this.questReveal(
             storyTaskName(this.language, task),
             message(this.language, 'story.quest-accepted'),
+          )
+        else if (completed)
+          this.questReveal(
+            storyTaskName(this.language, completed),
+            message(this.language, 'story.done'),
           )
         else if (map)
           this.questReveal(
@@ -441,6 +481,20 @@ export class StoryApp implements MountedGame {
       return
     }
     switch (button.dataset['storyAction']) {
+      case 'quest-map': {
+        const id = this.session.camp.story.accepted?.find((id) => id === button.dataset['task'])
+        if (!id) return
+        this.mapScene = storyTaskScene({ progress: this.session.camp.story }, id)
+        this.mapLevel = 'local'
+        this.mapLegend = false
+        this.panel = 'map'
+        break
+      }
+      case 'select-task': {
+        const id = this.session.camp.story.accepted?.find((id) => id === button.dataset['task'])
+        if (id) this.selectedTask = id
+        break
+      }
       case 'map-legend':
         this.mapLegend = !this.mapLegend
         break
@@ -455,7 +509,14 @@ export class StoryApp implements MountedGame {
         if (
           !Number.isInteger(scene) ||
           scene < 0 ||
-          scene > (this.session.camp.story.arrived ? 4 : (this.session.run?.floor ?? 3))
+          scene >
+            (this.session.camp.story.completed.includes('survey-road')
+              ? 8
+              : this.session.camp.story.facts?.includes('lift-discovered')
+                ? 8
+                : this.session.camp.story.arrived
+                  ? 4
+                  : (this.session.run?.floor ?? 3))
         )
           return
         this.mapScene = scene
@@ -465,7 +526,9 @@ export class StoryApp implements MountedGame {
       case 'tasks':
       case 'map':
         if (button.dataset['storyAction'] === 'map' && this.panel !== 'map') {
-          this.mapScene = this.session.run?.floor ?? 3
+          this.mapScene = this.session.run
+            ? this.session.run.floor + (this.session.run.floor >= 3 ? 1 : 0)
+            : 3
           this.mapLevel = 'local'
           this.mapLegend = false
         }
@@ -479,7 +542,14 @@ export class StoryApp implements MountedGame {
         break
       case 'pin': {
         const id = button.dataset['task']
-        if (id === 'reach-camp' || id === 'lost-satchel' || id === 'meet-guide')
+        if (
+          id === 'reach-camp' ||
+          id === 'lost-satchel' ||
+          id === 'meet-guide' ||
+          id === 'survey-road' ||
+          id === 'repair-lift' ||
+          id === 'reach-tower'
+        )
           this.session.togglePin(id)
         break
       }
@@ -510,9 +580,17 @@ export class StoryApp implements MountedGame {
     }
     this.sounds.play('confirm')
     this.render()
+    if (button.dataset['storyAction'] === 'select-task') {
+      const selected = this.root.querySelector<HTMLElement>(
+        '.story-journal-list [aria-pressed="true"]',
+      )
+      selected?.scrollIntoView({ block: 'nearest' })
+      selected?.focus({ preventScroll: true })
+    }
     if (
       button.dataset['storyAction'] === 'map-level' ||
-      button.dataset['storyAction'] === 'map-scene'
+      button.dataset['storyAction'] === 'map-scene' ||
+      button.dataset['storyAction'] === 'quest-map'
     )
       this.root.querySelector<HTMLElement>('.atlas-scale')?.focus({ preventScroll: true })
   }
@@ -582,6 +660,11 @@ export class StoryApp implements MountedGame {
         objective.textContent = touch
           ? message(this.language, 'story.flag-touch')
           : message(this.language, 'story.flag-mouse')
+      const chordGuidance = this.root.querySelector('[data-story-chord-guidance]')
+      if (chordGuidance)
+        chordGuidance.textContent = touch
+          ? message(this.language, 'story.chord-touch')
+          : message(this.language, 'story.chord-mouse')
     }
     if (event.pointerType === 'mouse' || !event.isPrimary || this.moving) return
     const cell =
