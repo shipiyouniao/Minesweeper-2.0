@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import { actSonar, createSonar } from '../../.native/tests/src/game/sonar.js'
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const key = 'minesweeper.sonar.v1'
 const seed = 31
 const browser = await chromium.launch({

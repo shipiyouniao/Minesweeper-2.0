@@ -4,7 +4,7 @@ import { TITLES } from '../../.native/tests/src/game/title-effects.js'
 import { titleEffectCopy } from '../../.native/tests/src/ui/title-copy.js'
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const key = 'minesweeper.variants.v1.expedition'
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || 'msedge',

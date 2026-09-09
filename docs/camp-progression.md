@@ -1,6 +1,6 @@
 # Camp progression: pricing and funding goals
 
-Camp progression is part of [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1). The current catalog has 26 purchases: 24 distinct gameplay unlocks and two capped, one-time trainings. Milestone-exclusive careers, equipment, relics and titles are earned separately. Long-term variety comes from professions, equipment, relic combinations and encounters.
+Camp progression is part of [Roadmap #1](https://github.com/shipiyouniao/minefarer/issues/1). The current catalog has 26 purchases: 24 distinct gameplay unlocks and two capped, one-time trainings. Milestone-exclusive careers, equipment, relics and titles are earned separately. Long-term variety comes from professions, equipment, relic combinations and encounters.
 
 ## Balance targets and purchase table
 

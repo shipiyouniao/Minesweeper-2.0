@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'msedge' })
 
 /** Inspect rendered surfaces, so cascade order is tested after styles are bundled. */

@@ -42,7 +42,7 @@ function modeIllustration(mode: FreeMode): string {
 /** Present two large destinations; entering Expedition restores its normal camp/run flow. */
 function homeCards(language: Language): string {
   return `<div class="home-destinations">
-    <a class="destination-card destination-expedition" data-route href="${routeHref({ page: 'game', mode: 'expedition' }, language)}">
+    <a class="destination-card destination-expedition" data-route href="${routeHref({ page: 'story' }, language)}">
       <span class="destination-index" aria-hidden="true">01 / EXPEDITION</span>
       <div class="expedition-art" aria-hidden="true"><span class="expedition-orbit"></span>${spriteImage('player', 'home-explorer')}${spriteImage('exit', 'home-stairs')}</div>
       <div class="destination-copy"><h2>${variantCopy(language).expedition}</h2><p>${message(language, 'home.expedition-note')}</p></div>
@@ -66,6 +66,6 @@ function freeCards(language: Language): string {
 export function homeTemplate(page: MenuPage, language: Language, sound: boolean): string {
   const t = translations[language]
   return `<header class="site-header ${sharedStyles['site-header']}"><div class="header-identity">${brandTemplate(language)}${page === 'free' ? `<a class="route-back" data-route href="${routeHref({ page: 'home' }, language)}">${icon('arrow')}<span>${message(language, 'home.back')}</span></a>` : ''}</div><nav aria-label="${message(language, 'home.settings')}"><button class="icon-button ${sharedStyles['icon-button']}" data-home-sound aria-label="${sound ? t.soundOn : t.soundOff}" aria-pressed="${sound}">${icon(sound ? 'volume' : 'volumeOff')}</button>${languageMenuTemplate(language)}</nav></header>
-    <main class="home-main" data-menu="${page}"><div class="home-heading"><p class="home-eyebrow">MINESWEEPER / 2.0</p><h1 tabindex="-1" data-route-heading>${page === 'home' ? message(language, 'home.title') : message(language, 'home.free')}</h1><p>${page === 'home' ? message(language, 'home.note') : message(language, 'home.directory-note')}</p></div>${page === 'home' ? homeCards(language) : freeCards(language)}</main>
-    <footer class="home-footer"><span>${message(language, 'home.saved')}</span><a href="https://github.com/shipiyouniao/Minesweeper-2.0" target="_blank" rel="noopener noreferrer">${t.source} ↗</a></footer>`
+    <main class="home-main" data-menu="${page}"><div class="home-heading"><p class="home-eyebrow">MINEFARER</p><h1 tabindex="-1" data-route-heading>${page === 'home' ? message(language, 'home.title') : message(language, 'home.free')}</h1><p>${page === 'home' ? message(language, 'home.note') : message(language, 'home.directory-note')}</p></div>${page === 'home' ? homeCards(language) : freeCards(language)}</main>
+    <footer class="home-footer"><span>${message(language, 'home.saved')}</span><a href="https://github.com/shipiyouniao/minefarer" target="_blank" rel="noopener noreferrer">${t.source} ↗</a></footer>`
 }

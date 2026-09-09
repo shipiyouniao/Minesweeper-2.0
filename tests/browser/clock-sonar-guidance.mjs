@@ -5,7 +5,7 @@ import { tutorialLesson } from '../../.native/app/ui/tutorial-lessons.js'
 import { createExpedition } from '../../.native/app/game/expedition.js'
 import { enterEncounter } from '../../.native/app/game/encounter-roster.js'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 await mkdir('.native/clock-sonar-ui', { recursive: true })
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || 'msedge',
@@ -119,7 +119,7 @@ try {
         await page.screenshot({ path: `.native/clock-sonar-ui/sonar-${width}.png`, fullPage: true })
       // Earn a fourth reading through real excavations, then recall it from the log.
       const excavationTargets = await page.evaluate(async () => {
-        const { createSonar, actSonar } = await import('/Minesweeper-2.0/.native/app/game/sonar.js')
+        const { createSonar, actSonar } = await import('/minefarer/.native/app/game/sonar.js')
         const journal = JSON.parse(localStorage.getItem('minesweeper.sonar.v1'))
         let state = journal.actions.reduce(actSonar, createSonar(journal.seed))
         const targets = []
@@ -135,7 +135,7 @@ try {
       })
       for (const index of excavationTargets) await page.locator(`[data-cell="${index}"]`).click()
       const mineCenter = await page.evaluate(async () => {
-        const { createSonar, actSonar } = await import('/Minesweeper-2.0/.native/app/game/sonar.js')
+        const { createSonar, actSonar } = await import('/minefarer/.native/app/game/sonar.js')
         const journal = JSON.parse(localStorage.getItem('minesweeper.sonar.v1'))
         const state = journal.actions.reduce(actSonar, createSonar(journal.seed))
         return state.game.cells.findIndex(
@@ -195,10 +195,7 @@ try {
         })
         const html = await page.evaluate(
           async ({ language, run }) =>
-            (await import('/Minesweeper-2.0/.native/app/ui/battle-guide.js')).battleGuide(
-              language,
-              run,
-            ),
+            (await import('/minefarer/.native/app/ui/battle-guide.js')).battleGuide(language, run),
           { language, run },
         )
         await page.evaluate((html) => {
@@ -229,7 +226,7 @@ try {
         await page.locator('#guide-test').evaluate((el) => el.remove())
       }
       const lastSafe = await page.evaluate(async () => {
-        const { createSonar, actSonar } = await import('/Minesweeper-2.0/.native/app/game/sonar.js')
+        const { createSonar, actSonar } = await import('/minefarer/.native/app/game/sonar.js')
         let state = actSonar(createSonar(31), { type: 'reveal', index: 0 })
         const reserved = state.game.cells.findIndex(
           (cell) => !cell.mine && cell.adjacent > 0 && cell.visibility === 'hidden',

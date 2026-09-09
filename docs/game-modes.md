@@ -4,6 +4,8 @@ Every mode in this document is approved for development. **Expedition**, **Twin 
 
 Relic Dungeon is part of Expedition, not a separate mode: it describes the multi-floor run, randomized relic choices, and permanent camp progression. With its permanent unlocks, Expedition is a **roguelite**.
 
+The next expansion is designed in [Campaign, shared camp and reusable expedition floors](campaign-and-expedition.md): Campaign and Roguelite will share camp progression, while story tasks govern authored chapters and reusable floor mechanics enrich both activities. This is planned work; the implemented rules below describe the current game.
+
 ## Shared design
 
 - Rulesets and difficulty are separate. The existing `mode` URL parameter still means classic difficulty. The new `ruleset` parameter accepts `classic`, `expedition`, `twin`, `sonar`, or `survey`.
@@ -172,7 +174,7 @@ The approved revision moves complete tiles and their annotations every three tac
 ## Delivery order and limits
 
 1. **Delivered:** ruleset routing, separate saves, configurable Expedition/camp progression, Twin boards, localization and regression coverage.
-2. **Current:** Tidekeeper playtesting and the [tracked expansion Roadmap](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1).
+2. **Current:** Tidekeeper playtesting and the [tracked expansion Roadmap](https://github.com/shipiyouniao/minefarer/issues/1).
 3. **Next:** tune the tide cadence, anchor choices and public-route pressure using playtest feedback before choosing another feature.
 
 Saves are local and disappear when browser storage is cleared. They are not an anti-cheat system. One active run per special ruleset is supported; simultaneous edits to one ruleset in multiple tabs use last-write-wins browser storage. Journals are bounded at 20,000 accepted actions to limit recovery work; Expedition can still extract at its limit and Twin/Sonar/Survey can restart. Storage failures are shown while in-memory play continues.

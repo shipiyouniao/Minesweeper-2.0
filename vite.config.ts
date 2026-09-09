@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   const entry = variant === 'legacy' ? '/src/main.ts' : '/.bench/ab/native/app/main.js'
 
   return {
-    base: '/Minesweeper-2.0/',
+    base: '/minefarer/',
     server: { host: '127.0.0.1', port: 5173, strictPort: true },
     preview: { host: '127.0.0.1', port: 4173, strictPort: true },
     cacheDir: benchmark ? `.bench/ab/cache-${variant}` : 'node_modules/.vite',

@@ -1,10 +1,10 @@
 {
-  "name": "minesweeper",
+  "name": "minefarer",
   "version": "2.0.0",
   "private": true,
   "license": "MIT",
   "type": "module",
-  "description": "A quiet game of logic. Minesweeper rebuilt with native TypeScript 7.",
+  "description": "A Minesweeper adventure, built as a TypeScript 7 native compiler experiment.",
   "engines": {
     "node": "^22.12.0 || >=24.0.0"
   },

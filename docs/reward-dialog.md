@@ -30,7 +30,7 @@ Prepare with `npm test`, `npm run build`, and `npm run preview -- --host 127.0.0
 
 - `PLAYWRIGHT_MODULE`: path to an existing Playwright installation; otherwise Node resolves `playwright` normally. This optional browser tool is not a production dependency.
 - `BROWSER_CHANNEL`: installed browser channel, such as `msedge`; otherwise use Playwright's Chromium.
-- `GAME_URL`: site base URL, including the trailing slash. The default is `http://127.0.0.1:4173/Minesweeper-2.0/`.
+- `GAME_URL`: site base URL, including the trailing slash. The default is `http://127.0.0.1:4173/minefarer/`.
 
 The checks cover ordinary/boss transitions, three/four/zero offers, native keyboard containment, dismissal and reopening, exactly-once selection, reload recovery, pause/resume, three languages, widths of 320/760/1280/3840 pixels, all three modes' wheel behavior, and both enlarged-board scroll boundaries. Victory, defeat and extraction checks additionally verify saved supplies, a single result record, cleared journals and no duplicate payout on modal/camp/reload navigation. Browser errors fail the run. Screenshots are written under `.native/reward-ui/`; `--before` captures the old inline layout when pointed at its release. The regular unit suite and both compiler pipelines remain separate required checks.
 

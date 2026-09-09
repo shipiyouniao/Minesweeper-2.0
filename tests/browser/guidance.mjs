@@ -5,7 +5,7 @@ import { mkdir } from 'node:fs/promises'
 import { tutorialLesson } from '../../.native/app/ui/tutorial-lessons.js'
 const require = createRequire(import.meta.url)
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const browser = await chromium.launch({
   headless: true,
   channel: process.env.BROWSER_CHANNEL || 'msedge',

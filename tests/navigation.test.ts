@@ -17,12 +17,11 @@ test('all explicit game links and old classic difficulty links keep their destin
 })
 
 test('menu and mode links resolve under Pages and round-trip without leaking tutorial parameters', () => {
-  const original =
-    'https://example.com/Minesweeper-2.0/?ruleset=classic&mode=expert&tutorial=classic'
+  const original = 'https://example.com/minefarer/?ruleset=classic&mode=expert&tutorial=classic'
   for (const language of ['en', 'zh', 'ja'] as const) {
-    for (const page of ['home', 'free'] as const) {
+    for (const page of ['home', 'free', 'story'] as const) {
       const target = new URL(routeHref({ page }, language), original)
-      assert.equal(target.pathname, '/Minesweeper-2.0/')
+      assert.equal(target.pathname, '/minefarer/')
       assert.equal(target.searchParams.get('lang'), language)
       assert.equal(target.searchParams.has('mode'), false)
       assert.equal(target.searchParams.has('tutorial'), false)

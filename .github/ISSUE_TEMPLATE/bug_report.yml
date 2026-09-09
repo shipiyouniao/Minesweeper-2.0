@@ -4,7 +4,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        For suspected vulnerabilities, use [private reporting](https://github.com/shipiyouniao/Minesweeper-2.0/security/advisories/new) instead of this public form.
+        For suspected vulnerabilities, use [private reporting](https://github.com/shipiyouniao/minefarer/security/advisories/new) instead of this public form.
   - type: textarea
     id: problem
     attributes:

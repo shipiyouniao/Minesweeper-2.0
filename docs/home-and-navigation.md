@@ -1,6 +1,6 @@
 # Home, navigation and glass surfaces
 
-The homepage separates **Expedition** from **Free play**. Expedition opens the existing camp or restores its saved run. Free play opens a directory for Classic, Twin boards, Sonar and Survey, each with a short rule description and a dedicated link. Mode switching is no longer a row of buttons above every game.
+The homepage separates **Expedition** from **Free play**. Expedition opens the authored prologue or, after arrival, the shared camp board. A temporary roguelite entrance preserves the existing camp menus and saved challenge until Recollection is ready. Free play opens a directory for Classic, Twin boards, Sonar and Survey. See the [prologue design](prologue.md) for the scene-based teaching and shared-save boundary.
 
 ![Homepage with Expedition and Free play](screenshots/home-after.png)
 
@@ -12,6 +12,7 @@ The homepage separates **Expedition** from **Free play**. Expedition opens the e
 | ----------------------------------------------- | -------------------------------- |
 | `?lang=en` or no query                          | Homepage                         |
 | `?page=free&lang=en`                            | Free play directory              |
+| `?page=story&lang=en`                           | Prologue or shared camp board    |
 | `?ruleset=expedition&lang=en`                   | Expedition camp or saved run     |
 | `?ruleset=classic`, `twin`, `sonar` or `survey` | Corresponding game               |
 | `?mode=expert`                                  | Existing Classic difficulty link |

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 import { createSurvey, actSurvey } from '../../.native/tests/src/game/survey.js'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:4173/minefarer/'
 const key = 'minesweeper.survey.v1'
 const initial = createSurvey(31, 'medium')
 const browser = await chromium.launch({

@@ -75,8 +75,8 @@ async function filesIn(directory, relative = '') {
 /** Verify a complete Pages artifact and report actual JS/CSS/total file sizes. */
 export async function inspectArtifacts(directory) {
   const html = await readFile(join(directory, 'index.html'), 'utf8')
-  const paths = [...html.matchAll(/(?:src|href)="(\/Minesweeper-2\.0\/[^"?#]+)"/g)].map((match) =>
-    match[1].replace('/Minesweeper-2.0/', ''),
+  const paths = [...html.matchAll(/(?:src|href)="(\/minefarer\/[^"?#]+)"/g)].map((match) =>
+    match[1].replace('/minefarer/', ''),
   )
 
   assert.ok(

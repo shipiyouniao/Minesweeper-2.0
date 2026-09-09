@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { battleFixture } from './battle-fixtures.mjs'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const fixture = battleFixture(53)
 assert.equal(fixture.entered.run.encounter.kind, 'echo')
 await mkdir('.native/echo-ui', { recursive: true })

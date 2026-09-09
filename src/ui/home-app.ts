@@ -50,9 +50,7 @@ export class HomeApp implements MountedGame {
     this.menu?.dispose()
     document.documentElement.lang = this.language === 'zh' ? 'zh-CN' : this.language
     document.title =
-      this.page === 'home'
-        ? 'Minesweeper 2.0'
-        : `${message(this.language, 'home.free')} · Minesweeper 2.0`
+      this.page === 'home' ? 'Minefarer' : `${message(this.language, 'home.free')} · Minefarer`
     this.root.innerHTML = homeTemplate(this.page, this.language, this.sounds.enabled)
     const picker = this.root.querySelector<HTMLElement>('.language-picker')
     if (!picker) throw new Error('Home language picker is missing')

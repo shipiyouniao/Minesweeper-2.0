@@ -2,11 +2,81 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'story.prologue': 'Prologue · A light in the mist',
+  'story.camp': 'Lanternrest',
+  'story.guide': 'Lumi',
+  'story.awakening': 'The unfamiliar clearing',
+  'story.trail': 'Along the old trail',
+  'story.approach': 'Lights beyond the trees',
+  'story.wake-line':
+    'You’re awake! Stay still a moment. Those lights on the ground are traces of leyline knots. Can you see that “1”?',
+  'story.read-task': 'Select the glowing number to inspect its eight neighboring cells.',
+  'story.flag-line':
+    '“1” means one knot in these eight cells. Only one is still covered. Leave a warning there.',
+  'story.flag-task': 'Flag the covered cell: right-click, hold, or choose Flag below and tap.',
+  'story.open-line':
+    'Look at the “1” just left of the flag. Its danger is marked, so its other neighbors are safe. Open the glowing cell.',
+  'story.open-task': 'Choose Explore, then open the lit safe cell.',
+  'story.travel-line':
+    'You can read the traces… That’s a rare gift. Come along the clear ground. I’ll take you to camp.',
+  'story.travel-task': 'Select a clear cell to walk there. Reach the lantern, then continue.',
+  'story.trail-line':
+    'Another world, you say? Let’s find you somewhere warm first. Empty ground opens into a whole clearing—try the covered patch ahead.',
+  'story.trail-task':
+    'Open the clearing, then reach the lantern. The lost satchel is an optional detour.',
+  'story.approach-line':
+    'There—Lanternrest. We keep its paths clear of knots. Tell me about your home when we get inside.',
+  'story.approach-task':
+    'Find a safe way to the camp lantern. Flags warn of danger; they do not remove it.',
+  'story.arrival-line':
+    'Here we are. There’s food by the fire, and a bed for tonight. Come find me by the southern lantern when you’ve caught your breath.',
+  'story.camp-task': 'Walk to Lumi by the southern lantern.',
+  'story.guide-line':
+    'A way home… The old watchtower kept records of crossings between worlds. Its road has been closed for years. I’ll ask who still knows the way. Until then, make yourself at home.',
+  'story.camp-ready': 'Visit the workshop, meet the other explorers, or browse the task board.',
+  'story.road-line':
+    'The watchtower road is still being charted. This is where the next chapter will begin.',
+  'story.temporary': 'Roguelite · temporary entrance',
+  'story.temporary-note': 'Play the existing expeditions and bosses.',
+  'story.continue': 'Continue along the trail',
+  'story.enter-camp': 'Enter Lanternrest',
+  'story.explore': 'Explore',
+  'story.flag': 'Flag',
+  'story.route': 'Reach this cell through revealed ground first.',
+  'story.lesson': 'Try the marked interaction before leaving.',
+  'story.hurt': 'A knot pulsed! One heart lost; its warning stays.',
+  'story.fallen': 'Lumi pulls you back to shelter. Rest, then try this stretch again.',
+  'story.restart': 'Restart prologue',
+  'story.retry': 'Try this stretch again',
+  'story.satchel': 'Lost satchel',
+  'story.satchel-found': 'Satchel recovered. Bring it to camp for 30 supplies.',
+  'story.tasks': 'Story tasks',
+  'story.main-task': 'Main · Reach Lanternrest',
+  'story.side-task': 'Side · Return the lost satchel',
+  'story.meet-task': 'Main · A place to stay',
+  'story.done': 'Completed',
+  'story.optional': 'Optional',
+  'story.pending': 'In progress',
+  'story.missed': 'Not recovered',
+  'story.back-camp': 'Back to the camp board',
+  'story.facility': 'Walk here to visit',
+  'story.lantern': 'Trail lantern',
+  'story.road': 'Watchtower road',
+  'story.wall': 'Woodland boundary',
+  'story.covered': 'Covered ground',
+  'story.safe': 'Clear ground',
+  'story.marked': 'Warning flag',
+  'story.pulse': 'Triggered leyline knot',
+  'story.clue': '{count} knots in the eight neighboring cells',
+  'story.health': 'Hearts',
+  'story.storage': 'Saving is unavailable. Keep this tab open to retain this session.',
+  'story.inspect': 'The outlined cells are this number’s eight neighbors.',
+
   'home.title': 'Choose your next game',
   'home.note': 'Set out on an expedition, or settle into a puzzle.',
   'home.free': 'Free play',
   'home.expedition-note':
-    'Choose your profession and gear. Explore the dungeon and take on its bosses.',
+    'Follow a light through the forest. Find your footing, and a place to call camp.',
   'home.free-note': 'Classic, Twin boards, Sonar and Survey. A puzzle at your own pace.',
   'home.enter-expedition': 'Enter expedition',
   'home.choose-mode': 'Explore modes',

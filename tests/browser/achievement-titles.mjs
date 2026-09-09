@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module'
 import { MILESTONES } from '../../.native/tests/src/game/milestones.js'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 import assert from 'node:assert/strict'
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || 'msedge',
@@ -86,9 +86,8 @@ for (const width of [390, 1280]) {
     3000,
   )
   await page.evaluate(async () => {
-    const { MilestoneNotices } =
-      await import('/Minesweeper-2.0/.native/app/ui/milestone-notices.js')
-    const { milestoneProgress } = await import('/Minesweeper-2.0/.native/app/game/milestones.js')
+    const { MilestoneNotices } = await import('/minefarer/.native/app/ui/milestone-notices.js')
+    const { milestoneProgress } = await import('/minefarer/.native/app/game/milestones.js')
     const empty = { supplies: 0, upgrades: [], completed: 0 }
     const notices = new MilestoneNotices()
     notices.observe(empty, 'zh')

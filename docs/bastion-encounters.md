@@ -2,7 +2,7 @@
 
 This document records the historical first encounter revision. The implementation below has been removed. Current play uses the [tactical encounters and build rules](tactical-builds.md); incompatible saved expeditions [return to camp](save-policy.md).
 
-The first encounter in [Roadmap #1](https://github.com/shipiyouniao/Minesweeper-2.0/issues/1) adds a separate turn-based room to Expedition. Ordinary floors retain free exploration. There are no real-time attacks or countdowns.
+The first encounter in [Roadmap #1](https://github.com/shipiyouniao/minefarer/issues/1) adds a separate turn-based room to Expedition. Ordinary floors retain free exploration. There are no real-time attacks or countdowns.
 
 ## Flow and difficulty
 

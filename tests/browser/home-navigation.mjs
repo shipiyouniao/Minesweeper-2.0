@@ -3,7 +3,7 @@ import { createRequire } from 'node:module'
 import { mkdirSync } from 'node:fs'
 
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'msedge' })
 const errors = []
 mkdirSync('.native/home-screenshots', { recursive: true })
@@ -100,7 +100,7 @@ try {
   await page.locator('.free-mode-card[href*="ruleset=classic"]').click()
   assert.equal(await page.locator('#sound-button').getAttribute('aria-pressed'), 'false')
   await page.locator('.brand').click()
-  assert.equal(await page.title(), 'Minesweeper 2.0')
+  assert.equal(await page.title(), 'Minefarer')
   assert.equal(await page.locator('[data-home-sound]').getAttribute('aria-pressed'), 'false')
   await page.reload()
   assert.equal(await page.locator('[data-menu="home"]').count(), 1)

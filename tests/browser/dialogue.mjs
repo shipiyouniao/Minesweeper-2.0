@@ -9,7 +9,7 @@ try {
       viewport: { width, height: 950 },
       hasTouch: width === 390,
     })
-    await page.goto('http://127.0.0.1:5173/Minesweeper-2.0/')
+    await page.goto('http://127.0.0.1:5173/minefarer/')
     const result = await page.evaluate(async () => {
       const { DialogueReveal } = await import('./.native/app/ui/dialogue-reveal.js')
       const { notesForCue } = await import('./.native/app/audio/cues.js')
@@ -94,7 +94,7 @@ try {
       (save) => localStorage.setItem('minesweeper.variants.v1.expedition', JSON.stringify(save)),
       battleFixture(51).entered.save,
     )
-    await page.goto('http://127.0.0.1:4173/Minesweeper-2.0/?ruleset=expedition&lang=zh')
+    await page.goto('http://127.0.0.1:4173/minefarer/?ruleset=expedition&lang=zh')
     await page.locator('[data-dialogue-text]').waitFor()
     const advance = page.locator('[data-scene="next"]')
     const footer = await page.locator('.prologue-footer > span').innerText()

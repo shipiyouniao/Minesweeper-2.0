@@ -4,7 +4,7 @@ import { battleFixture } from './battle-fixtures.mjs'
 import { defeatBattle } from '../../.native/tests/tests/battle-helpers.js'
 import { actExpedition } from '../../.native/tests/src/game/expedition.js'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
-const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
+const base = process.env.GAME_URL || 'http://127.0.0.1:5173/minefarer/'
 const fixture = battleFixture(49)
 let run = fixture.entered.run
 let turn

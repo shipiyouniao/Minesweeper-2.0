@@ -1,6 +1,6 @@
 # Board interaction and annotations
 
-This update addresses [issue #21](https://github.com/shipiyouniao/Minesweeper-2.0/issues/21). Notes belong to the player's reasoning. Confirmations record information obtained through gameplay. They are distinct in the model, visuals and accessible cell descriptions.
+This update addresses [issue #21](https://github.com/shipiyouniao/minefarer/issues/21). Notes belong to the player's reasoning. Confirmations record information obtained through gameplay. They are distinct in the model, visuals and accessible cell descriptions.
 
 ## Marks
 
