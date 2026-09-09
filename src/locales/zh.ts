@@ -2,6 +2,7 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'board.remaining-mines': '剩余雷数',
   'tide.held': '地板抵住了这次潮水，道路没有改变。',
   'tide.until': '{turns} 回合后涨潮',
   'tide.name': '执潮者',

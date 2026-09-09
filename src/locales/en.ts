@@ -2,6 +2,7 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'board.remaining-mines': 'Remaining mines',
   'tide.held': 'The floor resisted this tide. Your routes stay in place.',
   'tide.until': 'Tide in {turns} turns',
   'tide.name': 'Tidekeeper',

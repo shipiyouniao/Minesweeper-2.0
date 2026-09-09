@@ -2,6 +2,7 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'board.remaining-mines': '残り地雷数',
   'tide.held': '床が潮に耐えた。道はそのままだ。',
   'tide.until': '潮まで{turns}ターン',
   'tide.name': '潮の番人',

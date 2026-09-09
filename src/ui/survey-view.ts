@@ -11,6 +11,7 @@ import { BoardView } from './board-view.js'
 import { LanguageMenu } from './language-menu.js'
 import { startTutorial, stopTutorial } from './tutorial-player.js'
 import { surveyTemplate } from './survey-templates.js'
+import { remainingMines } from './mine-counter.js'
 
 /** Keep cells stable while public line counts, focus and modal state change around them. */
 export class SurveyView {
@@ -90,6 +91,10 @@ export class SurveyView {
   ): void {
     this.state = state
     this.paused = paused
+    const counter = this.element('[data-mine-count]')
+    const remaining = String(remainingMines(state.game))
+    if (counter.textContent !== remaining) counter.textContent = remaining
+
     const t = translations[this.language]
     this.board.render(state.game, paused || this.dialogOpen, t)
     this.element('.board-viewport').classList.toggle('obscured', paused)

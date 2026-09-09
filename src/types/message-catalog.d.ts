@@ -1,5 +1,6 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'board.remaining-mines': string
   readonly 'tide.held': string
   readonly 'tide.until': string
   readonly 'tide.name': string
