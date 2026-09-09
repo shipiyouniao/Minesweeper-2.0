@@ -97,7 +97,7 @@ test('all 24 achievement titles have finite identities, complete copy and no cur
   }
 })
 
-test('departure freezes one owned title across camp switches, refresh and the next run', () => {
+test('titles can change only at camp and stay frozen through exploration and refresh', () => {
   const storage = new MemoryStorage()
   new VariantRepository(storage).saveExpedition({
     version: 4,
@@ -108,13 +108,15 @@ test('departure freezes one owned title across camp switches, refresh and the ne
   let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   session.start('explorer', [])
   assert.equal(session.run!.health, 11)
-  assert.ok(session.equipTitle('field-unscathed'))
+  assert.equal(session.equipTitle('field-unscathed'), false)
+  assert.equal(session.equipTitle(null), false)
   const before = session.run
   assert.equal(before!.departure.title, 'veteran')
   session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
   assert.deepEqual(session.run, before)
   session.dispatch({ type: 'retreat' })
   session.returnToCamp()
+  assert.ok(session.equipTitle('field-unscathed'))
   session.start('explorer', [])
   assert.equal(session.run!.health, 10)
   assert.equal(session.run!.probes, 3)

@@ -1,5 +1,20 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'home.title': string
+  readonly 'home.note': string
+  readonly 'home.free': string
+  readonly 'home.expedition-note': string
+  readonly 'home.free-note': string
+  readonly 'home.enter-expedition': string
+  readonly 'home.choose-mode': string
+  readonly 'home.back': string
+  readonly 'home.settings': string
+  readonly 'home.directory-note': string
+  readonly 'home.saved': string
+  readonly 'home.classic-note': string
+  readonly 'home.twin-note': string
+  readonly 'home.sonar-note': string
+  readonly 'home.survey-note': string
   readonly 'board.remaining-mines': string
   readonly 'tide.held': string
   readonly 'tide.until': string
@@ -665,13 +680,11 @@ export interface MessageCatalog {
   readonly 'title-copy.the-third-chest-of-the-expedition-grants': string
   readonly 'title-copy.with-3-or-more-relics-reward-offers': string
   readonly 'title-copy.with-fewer-than-3-relics-reward-offers': string
-  readonly 'title-template.changes-apply-next-departure': string
   readonly 'title-template.choose-a-title': string
   readonly 'title-template.earn-titles-through-achievements': string
   readonly 'title-template.expedition-title': string
   readonly 'title-template.no-title': string
   readonly 'title-template.no-titles-earned-yet': string
-  readonly 'title-template.this-expedition': string
   readonly 'tutorial-lessons.a-probe-looks-ahead': string
   readonly 'tutorial-lessons.a-quiet-first-step': string
   readonly 'tutorial-lessons.alternate-between-local-clues-and-proven-mines': string

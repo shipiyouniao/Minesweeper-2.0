@@ -12,7 +12,9 @@
 
 Difficulty-based expedition income and authored balance scenarios are documented in [the reward table](docs/expedition-rewards.md).
 
-**UI styling:** [Tailwind utilities](docs/styling.md) style interface components using the existing palette. Native element defaults, board geometry and effects retain dedicated styles.
+**[Home and navigation](docs/home-and-navigation.md):** start with Expedition or Free play, then choose a puzzle in the free-mode directory. Returning to the menu keeps each saved game; direct game links and browser Back/Forward remain available. Titles are selected at camp and shown read-only during an expedition.
+
+**UI styling:** a restrained glass theme combines translucent panels, muted green surfaces and the dark tone of boss dialogue. Shared tokens and [Tailwind utilities](docs/styling.md) keep controls consistent; board numbers and tactical glyphs remain opaque and readable. Motion and transparency have accessible fallbacks.
 
 **Camp interface:** a compact departure overview opens separate profession, loadout, route and [shop screens](docs/camp-interface.md). Browse square item tiles by category, inspect effects in a detail panel, and purchase with a separate button. All 27 purchases are sorted by price; mobile details expand below the selected row.
 

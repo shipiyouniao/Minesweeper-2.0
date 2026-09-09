@@ -59,7 +59,7 @@ try {
       if (width < 500) await trigger.tap()
       else await trigger.click()
       const options = page.locator('.title-options')
-      assert.equal(await options.locator('small').count(), 22)
+      assert.equal(await options.locator('small').count(), TITLES.length)
       for (const id of TITLES)
         assert.equal(
           await options.locator(`[data-control="equip-title:${id}"] small`).innerText(),
@@ -72,21 +72,17 @@ try {
         titleEffectCopy(language, 'veteran'),
       )
       await page.locator('[data-control="camp-page:achievements"]').click()
-      assert.equal(await page.locator('.title-reward-effect').count(), 22)
-      assert.match(
-        await page.locator('[data-milestone="veteran"] .milestone-reward').innerText(),
-        /200/,
-      )
+      assert.equal(await page.locator('.title-reward-effect').count(), TITLES.length)
       await page.locator('[data-control="camp-page:overview"]').click()
       await page.locator('[data-control="start"]').click()
       await skipArrival(page)
       assert.equal((await saved(page)).journal.departure.title, 'veteran')
       assert.match(await page.locator('.vitality-heading strong').innerText(), /11\/11/)
-      await trigger.click()
-      await page.locator('[data-control="equip-title:field-unscathed"]').click()
-      assert.equal((await saved(page)).camp.milestones.title, 'field-unscathed')
+      assert.equal(await trigger.count(), 0)
+      assert.equal(await page.locator('[data-control^="equip-title:"]').count(), 0)
+      assert.equal((await saved(page)).camp.milestones.title, 'veteran')
       assert.equal((await saved(page)).journal.departure.title, 'veteran')
-      assert.equal(await page.locator('.active-title').getAttribute('data-active-title'), 'veteran')
+      assert.equal(await page.locator('.run-title').getAttribute('data-active-title'), 'veteran')
       assert.match(await page.locator('.vitality-heading strong').innerText(), /11\/11/)
       await page.reload()
       await skipArrival(page)
@@ -95,14 +91,15 @@ try {
       await page.locator('[data-control="retreat"]').click()
       await page.locator('dialog[open] [data-control="confirm"]').click()
       await page.locator('dialog[open] [data-control="camp"]').click()
+      await trigger.click()
+      await page.locator('[data-control="equip-title:field-unscathed"]').click()
       await page.locator('[data-control="start"]').click()
       await skipArrival(page)
       assert.equal((await saved(page)).journal.departure.title, 'field-unscathed')
       assert.match(await page.locator('.vitality-heading strong').innerText(), /10\/10/)
       assert.equal((await saved(page)).camp.supplies, 8765)
       if (language === 'zh') {
-        await trigger.scrollIntoViewIfNeeded()
-        await trigger.click()
+        await page.locator('.run-title').scrollIntoViewIfNeeded()
         await page.screenshot({ path: `.native/title-builds-${width}.png`, fullPage: true })
       }
       await context.close()

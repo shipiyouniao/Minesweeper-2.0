@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
-import { variantCopy } from '../../.native/app/ui/variant-copy.js'
+import { message } from '../../.native/app/i18n.js'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || 'msedge',
@@ -18,9 +18,16 @@ try {
     page.on('pageerror', (error) => errors.push(error.message))
     await page.goto(`${base}?ruleset=sonar&lang=zh`)
     await page.locator('[data-cell="0"]').click()
-    const sonarSave = await page.evaluate(() => localStorage.getItem('minesweeper.sonar.v1'))
+    const sonarSave = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('minesweeper.sonar.v1')),
+    )
     for (const mode of ['sonar', 'classic', 'twin', 'expedition']) {
-      await page.locator(`[data-ruleset="${mode}"]`).click()
+      await page.locator('.brand').click()
+      if (mode === 'expedition') await page.locator('.destination-expedition').click()
+      else {
+        await page.locator('.destination-free').click()
+        await page.locator(`.free-mode-card[href*="ruleset=${mode}"]`).click()
+      }
       for (const language of ['en', 'ja', 'zh']) {
         await page.locator('.language-trigger').click()
         await page.locator(`[data-language="${language}"]`).click()
@@ -30,12 +37,12 @@ try {
         )
         assert.equal(new URL(page.url()).searchParams.get('lang'), language)
         assert.equal(
-          await page.locator('[data-ruleset="expedition"]').innerText(),
-          variantCopy(language).expedition,
+          await page.locator('.route-back').innerText(),
+          mode === 'expedition' ? message(language, 'home.back') : message(language, 'home.free'),
         )
         assert.doesNotMatch(await page.locator('body').innerText(), /\{(?:p\d+|count)\}/)
-        assert.equal(
-          await page.evaluate(() => localStorage.getItem('minesweeper.sonar.v1')),
+        assert.deepEqual(
+          await page.evaluate(() => JSON.parse(localStorage.getItem('minesweeper.sonar.v1'))),
           sonarSave,
         )
       }

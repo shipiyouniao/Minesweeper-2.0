@@ -1,4 +1,3 @@
-import { sharedStyles } from './shared-styles.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { GameSession } from '../application/game-session.js'
 import { TwinSession } from '../application/twin-session.js'
@@ -8,41 +7,34 @@ import { browserRuntime } from '../platform/browser.js'
 import { VariantRepository } from '../persistence/variant-repository.js'
 import type { Repository } from '../storage.js'
 import type { Language } from '../types/localization.js'
-import type { MountedGame, Ruleset } from '../types/variants.js'
+import type { MountedGame } from '../types/variants.js'
+import type { AppRoute } from '../types/navigation.js'
 import { MinesweeperApp } from './minesweeper-app.js'
 import { VariantApp } from './variant-app.js'
-import { variantCopy } from './variant-copy.js'
 import { SonarSession } from '../application/sonar-session.js'
 import type { SonarRepository } from '../persistence/sonar-repository.js'
 import { SonarApp } from './sonar-app.js'
-import { sonarCopy } from './sonar-copy.js'
 import { SurveySession } from '../application/survey-session.js'
 import type { SurveyRepository } from '../persistence/survey-repository.js'
 import { SurveyApp } from './survey-app.js'
-import { message } from '../i18n.js'
+import { parseLanguage } from '../i18n.js'
+import { HomeApp } from './home-app.js'
+import { parseRoute, sameRoute } from './navigation.js'
 
-/** Parse public routing input independently from the classic difficulty parameter. */
-export function parseRuleset(value: string | null): Ruleset {
-  return value === 'expedition' || value === 'twin' || value === 'sonar' || value === 'survey'
-    ? value
-    : 'classic'
-}
-
-/** Owns exactly one mounted game and switches modes without erasing their save slots. */
+/** Own exactly one menu or game, checkpointing before navigation and restoring on return. */
 export class GameRouter implements MountedGame {
   private readonly repository: Repository
   private readonly variants: VariantRepository
   private readonly survey: SurveyRepository
   private readonly sonar: SonarRepository
   private language: Language
-  private readonly navigation: HTMLElement
   private readonly host: HTMLElement
   private readonly listeners = new AbortController()
   private active: MountedGame
-  private mode: Ruleset
+  private route: AppRoute
   private sounds: BrowserSoundEffects | null = null
 
-  /** Construct a persistent ruleset selector above the active game's independent shell. */
+  /** A bare URL starts at home; explicit game links retain their independent save slots. */
   constructor(
     root: HTMLElement,
     repository: Repository,
@@ -56,17 +48,14 @@ export class GameRouter implements MountedGame {
     this.survey = survey
     this.sonar = sonar
     this.language = language
-    root.innerHTML = `<nav class="ruleset-tabs ${sharedStyles['ruleset-tabs']}"></nav><div class="ruleset-host"></div>`
-    const navigation = root.querySelector<HTMLElement>('.ruleset-tabs')
+    root.innerHTML = '<div class="ruleset-host"></div>'
     const host = root.querySelector<HTMLElement>('.ruleset-host')
-    if (!navigation || !host) throw new Error('Ruleset router markup is incomplete')
-    this.navigation = navigation
+    if (!host) throw new Error('Route host is missing')
     this.host = host
-    this.mode = parseRuleset(new URLSearchParams(location.search).get('ruleset'))
+    this.route = parseRoute(location.search)
     this.active = this.mount()
-    this.renderNavigation()
-    navigation.addEventListener('click', this.select, { signal: this.listeners.signal })
-    navigation.addEventListener('keydown', this.navigate, { signal: this.listeners.signal })
+    root.addEventListener('click', this.select, { signal: this.listeners.signal })
+    window.addEventListener('popstate', this.restore, { signal: this.listeners.signal })
   }
 
   /** Dispose the active game before removing the routing listener. */
@@ -79,11 +68,28 @@ export class GameRouter implements MountedGame {
   private mount(): MountedGame {
     const sounds = new BrowserSoundEffects(this.repository.preferences().sound)
     this.sounds = sounds
-    if (this.mode === 'classic') {
+    this.host.dataset['page'] = this.route.page
+    if (this.route.page !== 'game') {
+      return new HomeApp(
+        this.host,
+        this.route.page,
+        this.language,
+        this.repository,
+        sounds,
+        this.languageChanged,
+      )
+    }
+
+    const mode = this.route.mode
+    if (mode === 'classic') {
       const difficulty = difficultyOf(
         new URLSearchParams(location.search).get('mode') ??
           this.repository.preferences().difficulty,
       )
+
+      // Remember direct-link choices so returning through the directory restores this save slot.
+      this.repository.setPreference({ key: 'difficulty', value: difficulty })
+
       return new MinesweeperApp(
         this.host,
         new GameSession(this.repository, browserRuntime, difficulty),
@@ -94,7 +100,7 @@ export class GameRouter implements MountedGame {
       )
     }
 
-    if (this.mode === 'survey')
+    if (mode === 'survey')
       return new SurveyApp(
         this.host,
         new SurveySession(this.survey, browserRuntime),
@@ -105,7 +111,7 @@ export class GameRouter implements MountedGame {
         this.languageChanged,
       )
 
-    if (this.mode === 'sonar')
+    if (mode === 'sonar')
       return new SonarApp(
         this.host,
         new SonarSession(this.sonar, browserRuntime),
@@ -117,7 +123,7 @@ export class GameRouter implements MountedGame {
       )
 
     const session =
-      this.mode === 'expedition'
+      mode === 'expedition'
         ? new ExpeditionSession(this.variants, browserRuntime)
         : new TwinSession(this.variants, browserRuntime)
     return new VariantApp(
@@ -131,42 +137,58 @@ export class GameRouter implements MountedGame {
     )
   }
 
-  /** Repaint only the small mode selector when selection or language changes. */
-  private renderNavigation(): void {
-    const t = variantCopy(this.language)
-    this.navigation.setAttribute('aria-label', t.modes)
-    this.navigation.innerHTML = `<span>${t.modes}</span>${(['classic', 'expedition', 'twin', 'sonar', 'survey'] as const).map((mode) => `<button data-ruleset="${mode}" aria-pressed="${mode === this.mode}">${mode === 'survey' ? message(this.language, 'survey.title') : mode === 'sonar' ? sonarCopy(this.language).title : t[mode]}</button>`).join('')}`
-  }
-
-  /** Save and dispose the current mode before activating another independent namespace. */
+  /** Intercept ordinary internal link activation while retaining open-in-new-tab gestures. */
   private readonly select = (event: MouseEvent): void => {
-    const button =
-      event.target instanceof Element ? event.target.closest<HTMLElement>('[data-ruleset]') : null
-    if (!button) return
-    const mode = parseRuleset(button.dataset['ruleset'] ?? null)
-    if (mode === this.mode) {
-      this.sounds?.play('tap')
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.altKey
+    )
       return
-    }
+    const link =
+      event.target instanceof Element
+        ? event.target.closest<HTMLAnchorElement>('a[data-route]')
+        : null
+    if (!link || link.target || link.hasAttribute('download')) return
+
+    const url = new URL(link.href)
+    if (url.origin !== location.origin || url.pathname !== location.pathname) return
+    event.preventDefault()
+    const route = parseRoute(url.search)
+    if (sameRoute(this.route, route)) return
+
+    // Persist while the old URL still describes the outgoing game's difficulty and language.
     this.active.dispose()
-    this.mode = mode
-    const url = new URL(location.href)
-    url.searchParams.set('ruleset', mode)
-    history.replaceState(null, '', url)
-    this.active = this.mount()
+    history.pushState(null, '', url)
+    this.show(route)
     this.sounds?.play('tap')
-    this.renderNavigation()
-    this.navigation.querySelector<HTMLButtonElement>(`[data-ruleset="${mode}"]`)?.focus()
   }
 
-  /** Keep navigation labels in sync with either mounted game's language control. */
+  /** Mount after disposal, reset the shared scroll host and provide a stable keyboard landing. */
+  private show(route: AppRoute): void {
+    this.route = route
+    this.active = this.mount()
+    this.host.scrollTo(0, 0)
+    const heading = this.host.querySelector<HTMLElement>('[data-route-heading], main h1, main h2')
+    if (heading) {
+      heading.tabIndex = -1
+      heading.focus({ preventScroll: true })
+    }
+  }
+
+  /** Browser Back and Forward use the same teardown as on-page navigation. */
+  private readonly restore = (): void => {
+    this.active.dispose()
+    const language = parseLanguage(new URLSearchParams(location.search).get('lang'))
+    if (language) this.language = language
+    this.show(parseRoute(location.search))
+  }
+
+  /** The active screen owns translation and preferences; future mounts reuse its language. */
   private readonly languageChanged = (language: Language): void => {
     this.language = language
-    this.renderNavigation()
-  }
-
-  /** Keep mode-selector keyboard traversal on the active game's mute-aware sound port. */
-  private readonly navigate = (event: KeyboardEvent): void => {
-    if (event.key === 'Tab') this.sounds?.play('navigate')
   }
 }

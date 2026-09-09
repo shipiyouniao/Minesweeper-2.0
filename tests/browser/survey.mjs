@@ -207,8 +207,8 @@ try {
       )
       assert.equal(await page.locator('.survey-sidebar').evaluate((e) => e.inert), true)
       await page.locator('.survey-pause [data-control="pause"]').click()
-      await page.locator('[data-ruleset="classic"]').click()
-      await page.locator('[data-ruleset="survey"]').click()
+      await page.locator('.route-back').click()
+      await page.locator('.free-mode-card[href*="ruleset=survey"]').click()
       assert.deepEqual(await saved(page), snapshot)
       for (const difficulty of ['medium', 'expert']) {
         await page.locator(`[data-survey-difficulty="${difficulty}"]`).click()

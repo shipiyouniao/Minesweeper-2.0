@@ -6,10 +6,6 @@ export const progressionStyles = {
     'tw:[margin:8px_0_0] tw:text-[0.8rem] tw:[line-height:1.6] tw:[overflow-wrap:anywhere]',
     'tw:[&_small]:block tw:[&_small]:[margin-top:3px] tw:[&_small]:text-[0.74rem] tw:[&_small]:[line-height:1.5] tw:[&_small]:text-[#737866]',
   ].join(' '),
-  'active-title': [
-    'tw:[&_p]:[margin:8px_0_0] tw:[&_p]:text-[0.8rem] tw:[&_p]:[line-height:1.6] tw:[&_p]:[overflow-wrap:anywhere]',
-    'tw:mt-2.5 tw:p-2.5 tw:[border-left:2px_solid_#9c804b] tw:bg-[#f5f3e9] tw:text-[0.8rem]',
-  ].join(' '),
   'title-options': [
     'tw:[&_small]:block tw:[&_small]:[margin-top:3px] tw:[&_small]:text-[0.74rem] tw:[&_small]:[line-height:1.5] tw:[&_small]:text-[#737866]',
     'tw:absolute tw:[z-index:40] tw:[top:calc(100%_+_6px)] tw:left-0 tw:right-0 tw:[padding:5px] tw:max-h-70 tw:overflow-y-auto tw:[overscroll-behavior:contain] tw:[scrollbar-width:thin] tw:[scrollbar-color:#bac1af_transparent] tw:border tw:border-solid tw:border-[#d8ddd1] tw:rounded-xl tw:bg-[#fffefa] tw:[box-shadow:0_12px_32px_#293b251c,0_2px_6px_#293b250a]',
