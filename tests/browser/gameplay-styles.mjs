@@ -5,7 +5,7 @@ const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODUL
 const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'msedge' })
 try {
-  for (const seed of [48, 49, 50, 45, 46, 47]) {
+  for (const seed of [54, 48, 49, 51, 52, 53]) {
     for (const width of [320, 390, 1440, 3840]) {
       const touch = width < 900
       const page = await browser.newPage({

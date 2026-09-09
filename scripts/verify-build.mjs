@@ -23,6 +23,9 @@ for (const file of [
 ])
   await stat(file)
 for (const sprite of [
+  'tidekeeper',
+  'tide-core',
+  'tide-anchor',
   'matrix-overseer',
   'matrix-crystal',
   'matrix-observe',

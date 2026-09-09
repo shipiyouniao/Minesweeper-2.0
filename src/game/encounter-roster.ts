@@ -1,4 +1,5 @@
 import { enterMatrix } from './matrix-battle.js'
+import { enterTide } from './tide-battle.js'
 import { enterEcho } from './echo-battle.js'
 import { encounterTier } from './encounter-tiers.js'
 import { enterBattle } from './battle-arena.js'
@@ -12,10 +13,11 @@ export function isEncounterFloor(run: Expedition): boolean {
   return encounterTier(run.departure.difficulty).floors.includes(run.floor)
 }
 
-/** Rotate seven distinct encounters from a seeded first boss without immediate repeats. */
+/** Rotate eight distinct encounters from a seeded first boss without immediate repeats. */
 export function enterEncounter(run: Expedition): Expedition {
   const checkpoint = encounterTier(run.departure.difficulty).floors.indexOf(run.floor)
-  const slot = (run.departure.seed + checkpoint) % 7
+  const slot = (run.departure.seed + checkpoint) % 8
+  if (slot === 7) return enterTide(run)
   if (slot === 6) return enterMatrix(run)
   if (slot === 5) return enterEcho(run)
   if (slot === 4) return enterClock(run)

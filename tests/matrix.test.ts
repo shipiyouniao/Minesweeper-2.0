@@ -349,7 +349,7 @@ test('Mouse, touch and keyboard commands parse finite observation and extraction
 test('Accepted extraction journals replay and settle Matrix achievements once', () => {
   const storage = new MemoryStorage(),
     runtime = new FakeRuntime()
-  runtime.seed = 55
+  runtime.seed = 54
   let session = new ExpeditionSession(new VariantRepository(storage), runtime)
   assert.ok(session.start('explorer', [], 'relaxed'))
   for (let count = 0; session.run?.phase !== 'boss' && count < 1000; count++) {

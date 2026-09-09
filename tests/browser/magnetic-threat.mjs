@@ -8,7 +8,7 @@ import { battleFixture } from './battle-fixtures.mjs'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
 const key = 'minesweeper.variants.v1.expedition'
-const fixture = battleFixture(52).entered
+const fixture = battleFixture(51).entered
 let run = fixture.run
 const actions = [...fixture.save.journal.actions]
 for (const action of defeatMagnetic(run)) {

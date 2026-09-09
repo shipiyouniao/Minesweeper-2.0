@@ -87,7 +87,7 @@ export interface Expedition extends Vitality {
   readonly encounter: TacticalEncounter | null
   /** Rebuilt from accepted skill intents; reset only on entering another floor. */
   readonly waymark?: { readonly index: number; readonly room: string } | undefined
-  readonly rift?: { readonly from: number; readonly to: number; readonly room: string }
+  readonly rift?: undefined | { readonly from: number; readonly to: number; readonly room: string }
   readonly skillUsed: boolean
   readonly departure: Departure
   readonly floor: number
@@ -132,6 +132,7 @@ export type ExpeditionAction =
         | 'probe'
         | 'interact'
         | 'sonar'
+        | 'anchor'
         | 'attune'
         | 'mark-crystal'
       readonly index: number

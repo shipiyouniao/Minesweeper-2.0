@@ -28,3 +28,7 @@ The fourth boss family adds original generated knight and anchor sprites, plus b
 ## Matrix Overseer
 
 The seventh boss family uses four original transparent generated assets: the automaton, collectible crystal, observation lens and attunement tool. See [the complete prompts and asset map](matrix-artwork.md). Frozen attack forecasts, crystal delivery beams and shield fractures use responsive overlays with reduced-motion support.
+
+## Tidekeeper
+
+The boss, tidal core and anchor are original generated PNG assets. See [Tidekeeper artwork and full prompts](tidekeeper-artwork.md).

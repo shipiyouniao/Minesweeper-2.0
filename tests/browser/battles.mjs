@@ -12,7 +12,7 @@ const base = process.env.GAME_URL || 'http://127.0.0.1:4173/Minesweeper-2.0/'
 const key = 'minesweeper.variants.v1.expedition'
 const output = new URL('../../.native/battle-ui/', import.meta.url)
 
-const fixtures = [battleFixture(49), battleFixture(50)]
+const fixtures = [battleFixture(48), battleFixture(49)]
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({
   channel: process.env.BROWSER_CHANNEL || undefined,

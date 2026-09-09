@@ -20,6 +20,7 @@ export type VariantCommand =
         | 'zoom'
         | 'camp'
         | 'sonar'
+        | 'anchor'
         | 'attune'
         | 'observe'
         | 'probe'

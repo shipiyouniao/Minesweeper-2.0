@@ -49,7 +49,7 @@ export class VariantApp implements VariantInputActions {
   private pending: 'retreat' | 'restart' | null = null
   private pendingDifficulty: VariantDifficulty | null = null
   private moving = false
-  private magneticPerformance = false
+  private turnPerformance = false
   private walkGeneration = 0
   private readonly notices = new MilestoneNotices()
   private readonly prologue: BossPrologue
@@ -272,13 +272,13 @@ export class VariantApp implements VariantInputActions {
 
   /** Discard pending movement before replacing or hiding its board. */
   private cancelMovement(): void {
-    const committed = this.magneticPerformance
-    this.magneticPerformance = false
+    const committed = this.turnPerformance
+    this.turnPerformance = false
     this.walkGeneration++
     this.moving = false
     this.view.cancelWalk()
     this.input.cancelTools()
-    // Magnetic turns are committed before their animation; help and language changes must see them.
+    // Animated turns are committed before their animation; help and language changes must see them.
     if (committed) this.render()
   }
 
@@ -300,10 +300,11 @@ export class VariantApp implements VariantInputActions {
     const run = this.session.run
     if (!run || this.paused || this.moving || this.view.dialogOpen) return
 
-    const plan = tool === 'attune' ? tacticalPlan(run, { type: 'attune', index }) : null
+    const plan =
+      tool === 'attune' || tool === 'anchor' ? tacticalPlan(run, { type: tool, index }) : null
     this.expedition(
-      tool === 'attune'
-        ? { type: 'attune', index }
+      tool === 'attune' || tool === 'anchor'
+        ? { type: tool, index }
         : tool === 'sonar'
           ? { type: 'sonar', index }
           : tool === 'probe'
@@ -350,7 +351,8 @@ export class VariantApp implements VariantInputActions {
       command.type !== 'probe' &&
       command.type !== 'scan' &&
       command.type !== 'sonar' &&
-      command.type !== 'attune'
+      command.type !== 'attune' &&
+      command.type !== 'anchor'
     )
       this.cancelMovement()
 
@@ -499,9 +501,10 @@ export class VariantApp implements VariantInputActions {
       case 'end-turn':
         if (
           this.session instanceof ExpeditionSession &&
-          this.session.run?.encounter?.kind === 'magnetic'
+          (this.session.run?.encounter?.kind === 'magnetic' ||
+            this.session.run?.encounter?.kind === 'tide')
         ) {
-          void this.magneticTurn()
+          void this.performBattleTurn()
           return
         }
         this.expedition({ type: 'end-turn' })
@@ -560,6 +563,7 @@ export class VariantApp implements VariantInputActions {
           this.result(this.session.purchase(command.value))
         break
       case 'sonar':
+      case 'anchor':
       case 'attune':
       case 'probe':
       case 'scan':
@@ -704,34 +708,44 @@ export class VariantApp implements VariantInputActions {
     const after = this.session.run
     const cue = before && after ? cueForVitality(before, after) : null
 
-    this.sounds.play(!changed ? 'blocked' : after?.phase === 'won' ? 'win' : (cue ?? 'confirm'))
+    this.sounds.play(
+      !changed
+        ? 'blocked'
+        : after?.phase === 'won'
+          ? 'win'
+          : (cue ?? (action.type === 'anchor' ? 'tide-anchor' : 'confirm')),
+    )
   }
 
   /** Commit the turn before its interruptible performance so cancellation cannot duplicate actions. */
-  private async magneticTurn(): Promise<void> {
+  private async performBattleTurn(): Promise<void> {
     if (!(this.session instanceof ExpeditionSession)) return
     const before = this.session.run
-    if (!before || before.encounter?.kind !== 'magnetic') return
+    if (!before || (before.encounter?.kind !== 'magnetic' && before.encounter?.kind !== 'tide'))
+      return
     const changed = this.session.dispatch({ type: 'end-turn' })
     const after = this.session.run
     if (!changed || !after) return
     const generation = ++this.walkGeneration
     this.moving = true
-    this.magneticPerformance = true
-    const forecast = before.encounter.forecast
+    this.turnPerformance = true
+    const forecast = before.encounter.kind === 'magnetic' ? before.encounter.forecast : null
     this.sounds.play(
-      forecast.kind === 'charge' && before.encounter.turn >= forecast.resolvesOn
-        ? 'magnet-charge'
-        : forecast.kind === 'field'
-          ? forecast.polarity === 'pull'
-            ? 'magnet-pull'
-            : 'magnet-push'
-          : 'confirm',
+      before.encounter.kind === 'tide' && before.encounter.turn % 3 === 0
+        ? 'tide-wave'
+        : forecast?.kind === 'charge' && before.encounter.turn >= forecast.resolvesOn
+          ? 'magnet-charge'
+          : forecast?.kind === 'field'
+            ? forecast.polarity === 'pull'
+              ? 'magnet-pull'
+              : 'magnet-push'
+            : 'confirm',
     )
-    await this.view.magneticTurn(before, after)
+    if (before.encounter.kind === 'tide') await this.view.tideTurn(before, after)
+    else await this.view.magneticTurn(before, after)
     if (generation !== this.walkGeneration) return
     this.moving = false
-    this.magneticPerformance = false
+    this.turnPerformance = false
     const cue = cueForVitality(before, after)
     if (cue) this.sounds.play(cue)
     this.render()

@@ -2,6 +2,35 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'tide.held': 'The floor resisted this tide. Your routes stay in place.',
+  'tide.until': 'Tide in {turns} turns',
+  'tide.name': 'Tidekeeper',
+  'tide.core': 'Tidal core · reveal this safe floor before anchoring it',
+  'tide.anchor': 'Anchor · 1 AP',
+  'tide.anchor-hint':
+    'Drag the anchor onto your floor or a revealed orthogonal neighbor, or select it and click the target. Its 3×3 area stays fixed for the next tide. Two anchors per tide; each costs 1 AP.',
+  'tide.hint':
+    'Reveal the tidal core and anchor its floor. The next tide returns through the core and breaks the shield.',
+  'tide.deduce':
+    'Use ordinary Minesweeper clues to reach the tidal core. Every three turns, the floor rearranges; your footing and anchored areas stay put.',
+  'tide.fight':
+    'Strike from an adjacent tile for 2 AP. At half health the shield returns: anchor the core again for a second countercurrent.',
+  'tide.shuffle-note':
+    'Mines, flags, revealed tiles and safety marks travel together. Numbers update; ordinary flags can still be wrong. Old sonar and area reports expire. Red attacks resolve before the tide, followed by the next forecast. Only End turn advances time.',
+  'tide.status': 'Tide in {turns} · Anchors {anchors}/2 · Armor {phase}/2',
+  'tide.open': 'Shield broken',
+  'tide.shield': 'Shield active',
+  'tide.anchored': 'Anchor set. The outlined floor stays fixed until the tide.',
+  'tide.shuffled': 'Tide passed. Read the new numbers.',
+  'tide.broken': 'Countercurrent! Shield broken.',
+  'tide.phase': 'End the turn to face the second armor section. Anchor the core again.',
+  'tide.scene-0': 'A floor that will not stay still',
+  'tide.scene-1':
+    'Brass tiles rise and drift past one another. Your boots hold a single square in place.',
+  'tide.scene-2': 'Count your steps. The third tide takes every road.',
+  'tide.scene-3': 'That core feeds the shield. An anchor might turn the current back.',
+  'tide.scene-4':
+    'Two anchors settle in your pack. Across the room, a narrow wave marks the next strike.',
   'matrix.quiet': 'Quiet turn',
   'matrix.open-hint': 'Shield broken. Approach the core and strike.',
   'matrix.hunt': 'Break the Matrix',

@@ -1,5 +1,27 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'tide.held': string
+  readonly 'tide.until': string
+  readonly 'tide.name': string
+  readonly 'tide.core': string
+  readonly 'tide.anchor': string
+  readonly 'tide.anchor-hint': string
+  readonly 'tide.hint': string
+  readonly 'tide.deduce': string
+  readonly 'tide.fight': string
+  readonly 'tide.shuffle-note': string
+  readonly 'tide.status': string
+  readonly 'tide.open': string
+  readonly 'tide.shield': string
+  readonly 'tide.anchored': string
+  readonly 'tide.shuffled': string
+  readonly 'tide.broken': string
+  readonly 'tide.phase': string
+  readonly 'tide.scene-0': string
+  readonly 'tide.scene-1': string
+  readonly 'tide.scene-2': string
+  readonly 'tide.scene-3': string
+  readonly 'tide.scene-4': string
   readonly 'matrix.quiet': string
   readonly 'matrix.open-hint': string
   readonly 'matrix.hunt': string

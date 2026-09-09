@@ -80,7 +80,7 @@ function fixtures() {
       },
     })
   }
-  for (const seed of [45, 46, 47, 48, 49]) {
+  for (const seed of [51, 52, 53, 54, 48]) {
     const c = withChord(battleFixture(seed).entered)
     list.push({
       ruleset: 'expedition',

@@ -11,7 +11,7 @@ const key = 'minesweeper.variants.v1.expedition'
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'msedge' })
 await mkdir('.native/combat-feedback', { recursive: true })
 try {
-  for (const seed of [49, 50, 51, 52, 60, 54, 55]) {
+  for (const seed of [48, 49, 50, 51, 60, 53, 54]) {
     const fixture = battleFixture(seed).entered
     let run = fixture.run
     const actions = [...fixture.save.journal.actions]
@@ -33,7 +33,7 @@ try {
       if (cases.length === 2) break
     }
     assert.equal(cases.length, 2, fixture.run.encounter.kind)
-    if (seed === 55) {
+    if (seed === 54) {
       let waiting = fixture.run
       const waits = [...fixture.save.journal.actions]
       for (let count = 0; count < 15; count++) {

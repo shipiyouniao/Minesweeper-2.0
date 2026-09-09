@@ -12,31 +12,37 @@ function excavationTarget(run: Expedition): number | null {
   const row = Math.floor(run.player / width)
   const column = run.player % width
   const remaining =
-    run.encounter?.kind === 'matrix'
-      ? [run.encounter.regions[run.encounter.phase - 1]!.indices[4]!]
-      : run.encounter?.kind === 'brood'
-        ? run.encounter.nests.filter((center) =>
-            [center, ...neighbors(run.game.config, center)].some(
-              (index) =>
-                run.game.cells[index]?.visibility !== 'revealed' &&
-                !run.confirmedMines.includes(index),
-            ),
-          )
-        : run.encounter?.kind === 'mirror'
-          ? run.encounter[run.encounter.active].seal.active
-            ? [run.encounter[run.encounter.active].seal.index]
-            : []
-          : run.encounter?.kind === 'magnetic'
-            ? run.encounter.anchors
-                .filter((anchor) => !anchor.calibrated)
-                .map((anchor) => anchor.index)
-            : run.encounter?.kind === 'clock'
-              ? run.encounter.hourglasses.filter((glass) => !glass.used).map((glass) => glass.index)
-              : run.encounter?.kind === 'echo'
-                ? [...run.encounter.bodies]
-                : run.encounter
-                  ? run.encounter.pylons.filter((pylon) => pylon.active).map((pylon) => pylon.index)
-                  : run.treasures.filter((index) => !run.collected.includes(index))
+    run.encounter?.kind === 'tide'
+      ? [run.encounter.core]
+      : run.encounter?.kind === 'matrix'
+        ? [run.encounter.regions[run.encounter.phase - 1]!.indices[4]!]
+        : run.encounter?.kind === 'brood'
+          ? run.encounter.nests.filter((center) =>
+              [center, ...neighbors(run.game.config, center)].some(
+                (index) =>
+                  run.game.cells[index]?.visibility !== 'revealed' &&
+                  !run.confirmedMines.includes(index),
+              ),
+            )
+          : run.encounter?.kind === 'mirror'
+            ? run.encounter[run.encounter.active].seal.active
+              ? [run.encounter[run.encounter.active].seal.index]
+              : []
+            : run.encounter?.kind === 'magnetic'
+              ? run.encounter.anchors
+                  .filter((anchor) => !anchor.calibrated)
+                  .map((anchor) => anchor.index)
+              : run.encounter?.kind === 'clock'
+                ? run.encounter.hourglasses
+                    .filter((glass) => !glass.used)
+                    .map((glass) => glass.index)
+                : run.encounter?.kind === 'echo'
+                  ? [...run.encounter.bodies]
+                  : run.encounter
+                    ? run.encounter.pylons
+                        .filter((pylon) => pylon.active)
+                        .map((pylon) => pylon.index)
+                    : run.treasures.filter((index) => !run.collected.includes(index))
 
   remaining.sort((a, b) => {
     const first = Math.abs(Math.floor(a / width) - row) + Math.abs((a % width) - column)

@@ -5,7 +5,7 @@ import { defeatBattle } from '../../.native/tests/tests/battle-helpers.js'
 import { actExpedition } from '../../.native/tests/src/game/expedition.js'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const base = process.env.GAME_URL || 'http://127.0.0.1:5173/Minesweeper-2.0/'
-const fixture = battleFixture(50)
+const fixture = battleFixture(49)
 let run = fixture.entered.run
 let turn
 for (const action of defeatBattle(run)) {
@@ -94,7 +94,7 @@ try {
       ['second-wind', 1],
       ['abyss-hourglass', 3],
     ]) {
-      const room = battleFixture(55).entered.run
+      const room = battleFixture(54).entered.run
       const before = {
         ...room,
         health,

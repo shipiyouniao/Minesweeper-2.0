@@ -54,6 +54,20 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
       message(language, 'battle-presentation.brace-reduces-this-turn-s-enemy-damage'),
     ],
   }
+  if (kind === 'tide')
+    return {
+      ...copy,
+      name: message(language, 'tide.name'),
+      hint: message(language, 'tide.hint'),
+      pylon: message(language, 'tide.core'),
+      disabled: message(language, 'tide.broken'),
+      help: [
+        message(language, 'tide.deduce'),
+        message(language, 'tide.anchor-hint'),
+        message(language, 'tide.fight'),
+        message(language, 'tide.shuffle-note'),
+      ],
+    }
   if (kind === 'matrix')
     return {
       ...copy,
@@ -93,6 +107,16 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
 
 /** Summarize the actual remaining objectives and core window, rather than a generic boss phase. */
 export function battleStatus(language: Language, encounter: TacticalEncounter): string {
+  if (encounter.kind === 'tide')
+    return (
+      message(language, 'tide.status', {
+        turns: 3 - ((encounter.turn - 1) % 3),
+        anchors: 2 - encounter.anchors.length,
+        phase: encounter.phase,
+      }) +
+      ' · ' +
+      (encounter.exposed ? message(language, 'tide.open') : message(language, 'tide.shield'))
+    )
   if (encounter.kind === 'matrix') {
     const status = message(language, 'matrix.status', {
       phase: encounter.phase,

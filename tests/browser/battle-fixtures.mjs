@@ -55,13 +55,17 @@ export function battleFixture(seed) {
   assert.equal(run.phase, 'boss')
   const entered = { run, save: save() }
   let objective
+  let anchor
   let prime
   let last
   for (const action of defeatBattle(run)) {
     const next = actExpedition(run, action)
+    if (!anchor && action.type === 'anchor') anchor = { save: save(), action, run, next }
     if (
       !objective &&
-      (next.encounter.event === 'disabled' || next.encounter.event === 'nest-destroyed')
+      (next.encounter.event === 'disabled' ||
+        next.encounter.event === 'nest-destroyed' ||
+        next.encounter.event === 'tide-broken')
     )
       objective = { save: save(), action, run, next }
     if (!prime && next.encounter.event === 'window-opened')
@@ -70,5 +74,5 @@ export function battleFixture(seed) {
     actions.push(action)
     run = next
   }
-  return { entered, objective, prime, last }
+  return { entered, objective, anchor, prime, last }
 }
