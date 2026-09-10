@@ -1,5 +1,5 @@
 import { recordStoryFacts, storyTaskReward } from '../game/story-quests.js'
-import type { FinaleSceneId } from '../types/chapter-finale.js'
+import type { CampaignSceneId } from '../types/campaign.js'
 import type { CampaignStageId } from '../types/campaign.js'
 import type { WaterwaySceneId } from '../types/waterway.js'
 import type { ObservatorySceneId } from '../types/observatory.js'
@@ -74,9 +74,10 @@ export class CampSession {
   }
 
   /** Restore task acceptance from durable discoveries, including already settled saves. */
-  acceptFinaleRoutes(): void {
+  acceptDiscoveredRoutes(): void {
     let story = this.story
     const tasks: readonly StoryTask[] = [
+      ...(story.facts?.includes('lift-discovered') ? ['rescue-toma' as const] : []),
       ...(story.facts?.includes('beacon-recovered') ? ['restore-west-line' as const] : []),
       ...(story.facts?.includes('west-line-restored') ? ['open-blockade' as const] : []),
     ]
@@ -95,8 +96,8 @@ export class CampSession {
     this.saveStory(story)
   }
 
-  /** Finish a recovered chapter ending without repeating settlement or changing another stage. */
-  completeFinaleScene(id: CampaignStageId, scene: FinaleSceneId): void {
+  /** Finish a recovered stage scene without repeating settlement or changing another stage. */
+  completeStageScene(id: CampaignStageId, scene: CampaignSceneId): void {
     const save = this.read()
     const progress = campaignProgress(save.campaign, id)
     if (!progress.cleared || progress.scenes.includes(scene)) return

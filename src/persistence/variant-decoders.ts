@@ -259,6 +259,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     campaign !== 'ridge-observatory-v1' &&
     campaign !== 'old-waterway-v1' &&
     campaign !== 'tower-control-v1' &&
+    campaign !== 'quarry-rescue-v1' &&
     campaign !== 'northwest-bastion-v1'
   )
     return null
@@ -324,6 +325,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     campaign === 'ridge-observatory-v1' ||
     campaign === 'old-waterway-v1' ||
     campaign === 'tower-control-v1' ||
+    campaign === 'quarry-rescue-v1' ||
     campaign === 'northwest-bastion-v1'
       ? { campaign }
       : {}),

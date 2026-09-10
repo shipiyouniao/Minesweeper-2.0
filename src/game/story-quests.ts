@@ -34,6 +34,7 @@ export function recordStoryCampaign(
 }
 
 export const STORY_FACTS: readonly StoryFact[] = [
+  'toma-rescued',
   'ridge-route',
   'ridge-surveyed',
   'beacon-recovered',
@@ -52,6 +53,14 @@ export const STORY_FACTS: readonly StoryFact[] = [
 ]
 
 export const STORY_TASKS: readonly StoryTaskDefinition[] = [
+  {
+    id: 'rescue-toma',
+    category: 'side',
+    introducedBy: 'quarry-branch',
+    prerequisite: { kind: 'fact', id: 'lift-discovered' },
+    objective: { kind: 'fact', id: 'toma-rescued' },
+    supplies: 0,
+  },
   {
     id: 'restore-west-line',
     category: 'main',

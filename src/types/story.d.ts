@@ -83,6 +83,7 @@ export type StoryTask =
   | 'survey-ridge'
   | 'find-beacon'
   | 'restore-west-line'
+  | 'rescue-toma'
   | 'open-blockade'
 
 /** One envelope commits story rewards and the shared wallet together. */
@@ -217,6 +218,7 @@ export type StoryFact =
   | 'beacon-recovered'
   | 'west-line-restored'
   | 'west-shortcut'
+  | 'toma-rescued'
   | 'chapter-one-cleared'
   | 'camp-reached'
   | 'satchel-secured'
@@ -241,7 +243,12 @@ export interface StoryTaskDefinition {
   readonly id: StoryTask
   readonly category: 'main' | 'side'
   readonly introducedBy:
-    StoryDialogueId | 'nia-route' | 'ridge-bearing' | 'beacon-bearing' | 'west-line'
+    | StoryDialogueId
+    | 'quarry-branch'
+    | 'nia-route'
+    | 'ridge-bearing'
+    | 'beacon-bearing'
+    | 'west-line'
   readonly prerequisite: StoryCondition
   readonly objective: StoryCondition
   readonly supplies: number

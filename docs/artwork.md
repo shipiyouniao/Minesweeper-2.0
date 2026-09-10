@@ -38,3 +38,7 @@ The boss, tidal core and anchor are original generated PNG assets. See [Tidekeep
 ## Chapter One control room
 
 The west-line control console is an original transparent PNG generated for the fifth campaign stage. See [the asset and complete generation prompt](chapter-finale-artwork.md). Bridge lowering and route transitions use local SVG/CSS animation with reduced-motion support.
+
+## Old-mine rescue
+
+The cart and Toma are original transparent chibi sprites, generated separately and stored unchanged. See [the complete prompts and asset map](quarry-rescue-artwork.md). Track geometry, route forecasts and cart movement use local SVG/HTML and the accepted gameplay path.

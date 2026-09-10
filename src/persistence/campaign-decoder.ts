@@ -1,3 +1,4 @@
+import { RAIL_SCENES } from '../game/rail-story.js'
 import { campaignStage, parseCampaignStage } from '../game/campaign-catalog.js'
 import { JsonObjectReader } from './json-reader.js'
 import type { CampaignSave, CampaignStageId, CampaignStageProgress } from '../types/campaign.js'
@@ -16,15 +17,17 @@ function decodeStage(
   const candidate = decoders.journal(reader.child('journal'))
   const journal = candidate?.departure.campaign === campaignStage(id).revision ? candidate : null
   const scenes = (
-    id === 'tower-control'
-      ? CONTROL_SCENES
-      : id === 'northwest-bastion'
-        ? BLOCKADE_SCENES
-        : id === 'old-waterway'
-          ? WATERWAY_SCENES
-          : id === 'ridge-observatory'
-            ? OBSERVATORY_SCENES
-            : SIGNAL_SCENES
+    id === 'quarry-rescue'
+      ? RAIL_SCENES
+      : id === 'tower-control'
+        ? CONTROL_SCENES
+        : id === 'northwest-bastion'
+          ? BLOCKADE_SCENES
+          : id === 'old-waterway'
+            ? WATERWAY_SCENES
+            : id === 'ridge-observatory'
+              ? OBSERVATORY_SCENES
+              : SIGNAL_SCENES
   ).filter((scene) => reader.array('scenes')?.includes(scene))
   return {
     id,

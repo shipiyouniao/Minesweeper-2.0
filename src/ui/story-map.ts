@@ -1,3 +1,5 @@
+import { cartImage, tomaImage } from './rail-view.js'
+import { RESCUE_GATE, TOMA_CAMP_CELL } from '../game/rail-story.js'
 import { northwestPortals } from '../game/northwest-world.js'
 import { worldSceneName } from './world-copy.js'
 import { CAMP_SITES, QUARRY_GATE } from '../game/story-content.js'
@@ -62,6 +64,11 @@ export function storyMap(state: StoryViewState): string {
             scene === 4 &&
             index === WATERWAY_GATE &&
             state.progress.facts?.includes('ridge-surveyed')
+          const rescue = content.id === 'quarry-yard' && index === RESCUE_GATE
+          const toma =
+            content.id === 'camp' &&
+            index === TOMA_CAMP_CELL &&
+            state.progress.facts?.includes('toma-rescued')
           const traveler = scene === current && index === state.player
           const entrance = terrain === 'S'
           const exit = terrain === 'E'
@@ -97,40 +104,48 @@ export function storyMap(state: StoryViewState): string {
                                 ? scene - 1
                                 : null
           const hidden = scene === current && state.board.game.cells[index]?.visibility === 'hidden'
-          const name = portal
-            ? worldSceneName(lang, portal.destination)
-            : waterway
-              ? message(lang, 'waterway.title')
-              : ridge
-                ? message(lang, 'ridge.title')
-                : destination !== null
-                  ? names[destination]!
+          const name = rescue
+            ? message(lang, 'rail.title')
+            : toma
+              ? message(lang, 'rail.toma')
+              : portal
+                ? worldSceneName(lang, portal.destination)
+                : waterway
+                  ? message(lang, 'waterway.title')
+                  : ridge
+                    ? message(lang, 'ridge.title')
+                    : destination !== null
+                      ? names[destination]!
+                      : site
+                        ? site.destination === 'guide'
+                          ? message(lang, 'story.guide')
+                          : site.destination === 'road'
+                            ? message(lang, 'story.road')
+                            : campPageName(lang, site.destination)
+                        : traveler
+                          ? position
+                          : exit
+                            ? message(lang, 'story.road')
+                            : terrain === '#'
+                              ? message(lang, 'story.atlas-tree')
+                              : ''
+          const marker = rescue
+            ? cartImage()
+            : toma
+              ? tomaImage()
+              : waterway
+                ? drainageImage()
+                : ridge
+                  ? observatoryImage()
                   : site
-                    ? site.destination === 'guide'
-                      ? message(lang, 'story.guide')
-                      : site.destination === 'road'
-                        ? message(lang, 'story.road')
-                        : campPageName(lang, site.destination)
-                    : traveler
-                      ? position
-                      : exit
-                        ? message(lang, 'story.road')
-                        : terrain === '#'
-                          ? message(lang, 'story.atlas-tree')
-                          : ''
-          const marker = waterway
-            ? drainageImage()
-            : ridge
-              ? observatoryImage()
-              : site
-                ? landmarkImage(site)
-                : destination !== null
-                  ? icon('arrow')
-                  : entrance
-                    ? '<span class="atlas-entry">○</span>'
-                    : ''
+                    ? landmarkImage(site)
+                    : destination !== null
+                      ? icon('arrow')
+                      : entrance
+                        ? '<span class="atlas-entry">○</span>'
+                        : ''
           const tag = destination !== null ? 'button' : 'div'
-          return `<${tag} class="atlas-tile ${destination !== null ? 'atlas-connection' : ''} ${terrain === '#' ? 'atlas-tree' : 'atlas-path'} ${hidden ? 'atlas-fog' : ''}" ${destination !== null ? `data-story-action="map-scene" data-scene="${destination}"` : ''} ${name ? `data-map-name="${escapeHtml(name)}"` : ''} ${site || destination !== null || traveler || ridge || waterway ? `role="button" tabindex="0" aria-label="${escapeHtml(name)}"` : ''}>${content.water?.includes(index) ? '<span class="atlas-river-tile"></span>' : terrain === '#' ? `<img src="${import.meta.env.BASE_URL}assets/story/tree.png" alt="" draggable="false">` : marker}${traveler ? `<span class="atlas-position" aria-label="${position}"></span>` : ''}${destination !== null ? `<span class="atlas-destination">${name}</span>` : ''}</${tag}>`
+          return `<${tag} class="atlas-tile ${destination !== null ? 'atlas-connection' : ''} ${terrain === '#' ? 'atlas-tree' : 'atlas-path'} ${hidden ? 'atlas-fog' : ''}" ${destination !== null ? `data-story-action="map-scene" data-scene="${destination}"` : ''} ${name ? `data-map-name="${escapeHtml(name)}"` : ''} ${site || destination !== null || traveler || ridge || waterway || rescue || toma ? `role="button" tabindex="0" aria-label="${escapeHtml(name)}"` : ''}>${content.water?.includes(index) ? '<span class="atlas-river-tile"></span>' : terrain === '#' ? `<img src="${import.meta.env.BASE_URL}assets/story/tree.png" alt="" draggable="false">` : marker}${traveler ? `<span class="atlas-position" aria-label="${position}"></span>` : ''}${destination !== null ? `<span class="atlas-destination">${name}</span>` : ''}</${tag}>`
         })
         .join('')
       landmarks =

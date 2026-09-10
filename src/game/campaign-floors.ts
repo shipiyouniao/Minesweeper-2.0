@@ -1,3 +1,4 @@
+import { railLayout } from './rail-layout.js'
 import { controlLayout, blockadeLayout } from './chapter-layout.js'
 import { campaignLayout } from './campaign-layout.js'
 import { signalLayout } from './signal-layout.js'
@@ -9,6 +10,8 @@ import type { DungeonLayout } from '../types/dungeon-generation.js'
 /** Resolve authored providers before the shared expedition engine creates an attempt. */
 export function campaignFloor(revision: CampaignRevision, floor: number): DungeonLayout {
   switch (revision) {
+    case 'quarry-rescue-v1':
+      return railLayout(floor)
     case 'tower-road-v4':
       return campaignLayout(floor)
     case 'tower-relay-v1':

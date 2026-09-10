@@ -25,6 +25,8 @@ export function dialogueTone(cue: DialogueCue): Tone {
       return syllable(980, 1120, 0.032)
     case 'dialogue-lumi':
       return syllable(720, 880, 0.035, 'triangle', 0.034)
+    case 'dialogue-toma':
+      return syllable(490, 390, 0.037, 'triangle', 0.038)
     case 'dialogue-nia':
       return syllable(890, 700, 0.036, 'triangle', 0.032)
     case 'dialogue-narrator':

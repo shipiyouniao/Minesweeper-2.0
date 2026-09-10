@@ -24,6 +24,7 @@ export function parseVariantCommand(value: string): VariantCommand | null {
   if (parts.length > 2) return null
   const [type, id] = parts
   switch (type) {
+    case 'rail-control':
     case 'matrix-pick':
     case 'mark-crystal':
     case 'attune-cell':

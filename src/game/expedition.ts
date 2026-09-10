@@ -1,5 +1,6 @@
 import { enterChapterGuardian } from './chapter-guardian.js'
 import { campaignFloor } from './campaign-floors.js'
+import { interactRail, railControl } from './floor-rail.js'
 import { interactPower, powerControl } from './floor-power.js'
 import { collectSignalRecord, floorObjectiveComplete, interactRelay } from './floor-circuits.js'
 import {
@@ -159,7 +160,9 @@ function createFloor(departure: Departure, floor: number): Expedition {
     steps: 0,
     phase: 'exploring',
   }
-  return run.circuits || run.power ? { ...run, game: revealDungeon(run, run.entrance) } : run
+  return run.circuits || run.power || run.rail
+    ? { ...run, game: revealDungeon(run, run.entrance) }
+    : run
 }
 
 /** Start a run with bounded career tools and the selected equipment allocation. */
@@ -374,9 +377,11 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
   if (action.type === 'relic') return takeRelic(run, action.relic)
   if (run.phase !== 'exploring') return run
   if (action.type === 'interact')
-    return powerControl(run, action.index)
-      ? interactPower(run, action.index)
-      : interactRelay(run, action.index)
+    return railControl(run, action.index)
+      ? interactRail(run, action.index)
+      : powerControl(run, action.index)
+        ? interactPower(run, action.index)
+        : interactRelay(run, action.index)
 
   switch (action.type) {
     case 'skill': {

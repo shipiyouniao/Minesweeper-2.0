@@ -1,9 +1,10 @@
+import type { RailSceneId } from './floor-rail.js'
 import type { ExpeditionJournal, VariantRecord } from './variants.js'
 import type { SignalSceneId } from './signal-story.js'
 import type { ObservatorySceneId } from './observatory.js'
 import type { FinaleSceneId } from './chapter-finale.js'
 import type { WaterwaySceneId } from './waterway.js'
-import type { StoryFact, StorySceneId } from './story.js'
+import type { StoryFact, StorySceneId, StoryTask } from './story.js'
 import type { JsonObjectReader } from '../persistence/json-reader.js'
 import type { JsonValue } from './json.js'
 
@@ -14,6 +15,7 @@ export type CampaignStageId =
   | 'ridge-observatory'
   | 'old-waterway'
   | 'tower-control'
+  | 'quarry-rescue'
   | 'northwest-bastion'
 export type CampaignRevision =
   | 'tower-road-v4'
@@ -21,8 +23,10 @@ export type CampaignRevision =
   | 'ridge-observatory-v1'
   | 'old-waterway-v1'
   | 'tower-control-v1'
+  | 'quarry-rescue-v1'
   | 'northwest-bastion-v1'
-export type CampaignSceneId = SignalSceneId | ObservatorySceneId | WaterwaySceneId | FinaleSceneId
+export type CampaignSceneId =
+  RailSceneId | SignalSceneId | ObservatorySceneId | WaterwaySceneId | FinaleSceneId
 
 /** The stage decoder reuses validated expedition formats without circular module dependencies. */
 export interface CampaignDecoders {
@@ -60,6 +64,7 @@ export interface CampaignStage {
   readonly id: CampaignStageId
   readonly revision: CampaignRevision
   readonly prerequisite: CampaignStageId | null
+  readonly entryTask: StoryTask
   readonly floors: number
   readonly outcome?: StoryFact
   readonly reward: number
