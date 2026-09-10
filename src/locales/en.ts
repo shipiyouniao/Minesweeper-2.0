@@ -2,6 +2,29 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'story.haul-load': 'Load the intact shaft onto the trolley first.',
+  'story.go-together':
+    'Then we look for her first. If there is a way home in those records, she can help me read it.',
+  'story.lift-answer': 'Two rings. Nia heard us. Hold the rail—we are going up.',
+  'story.brake': 'Loading brake',
+  'story.winch': 'Haul winch',
+  'story.haul-track': 'Haul track · lift',
+  'story.gate-closed': 'Closed machinery barrier',
+  'story.mechanism-done': 'Released',
+  'story.mechanism-operate': 'Operate',
+  'story.mechanism-locked': 'Isolate nearby knots',
+  'story.mechanism-help':
+    'Flag the knots around the {name}, uncover its other neighboring tiles, then operate it.',
+  'story.mechanism-ready': 'The {name} is ready. Approach and operate it.',
+  'story.brake-scene-1':
+    'That load is hanging right over the passage. Is the rope supposed to sound like that?',
+  'story.brake-scene-2':
+    'No. I will brace it. Clear the brake’s neighbors before touching the lever; a knot pulse could drop the load.',
+  'story.release-scene-1': 'It held. You can let go now.',
+  'story.release-scene-2': 'Gladly. Next time I say “I know this machine”, remind me of this rope.',
+  'story.winch-scene-1':
+    'An intact shaft, behind the guard. The winch can lift it clear and run the trolley back to the lift.',
+  'story.winch-scene-2': 'And I check the ground before you touch the machinery. I am learning.',
   'signal.title': 'An Answer in the Tower',
   'signal.floor-1': 'A Broken Call',
   'signal.floor-2': 'A Name Without a Home',
@@ -61,18 +84,17 @@ export const enMessages: MessageCatalog = {
   'story.lift': 'Watchtower Lift',
   'story.world-road': 'Lanternwood · Scouting',
   'story.road-task': 'Main · The Watchtower Road',
-  'story.road-detail':
-    'Leave through the north gate, inspect the watchtower lift, then report to Lumi at camp. Reward: 20 supplies.',
+  'story.road-detail': 'Reach the watchtower lift and inspect the damage. Reward: 20 supplies.',
   'story.north-start-1':
-    'There is an old lift beyond the trees. The tower is above it. Let us see whether the road is still passable.',
-  'story.north-start-2': 'If the records survived, perhaps they can tell me how I arrived here.',
-  'story.north-found-1': 'The rails are intact, but the spindle is missing. Did someone take it?',
+    'The tower flashed once last night. Nia always tests a lamp twice. I cannot stop thinking about that.',
+  'story.north-start-2': 'One flash still means someone is there. Let us get closer.',
+  'story.north-found-1': 'The shaft has snapped. The break is still bright—this happened recently.',
   'story.north-found-2':
-    'Look at the rust on that broken edge. Note the missing part; we should ask around camp.',
-  'story.north-report-1': 'The lift needs a spindle. Can we find a replacement?',
+    'So she could get up, but not down. There are wheel tracks toward the quarry. Those machines used the same shafts.',
+  'story.north-report-1':
+    'The lift broke after Nia went up. We found tracks leading to the quarry.',
   'story.north-report-2':
-    'The old quarry used the same machines. I will mark its location. Once we are equipped, that is where we should look.',
-
+    'Then we have a route. Take a breath here; the quarry will still be there when we are ready.',
   'story.atlas-watchtower': 'Old Watchtower',
   'story.atlas-uncharted': 'This area has not been mapped yet.',
   'story.atlas-zoom': 'Map zoom',
@@ -108,18 +130,18 @@ export const enMessages: MessageCatalog = {
   'story.spindle': 'Lift spindle',
   'story.repair-task': 'Main · Restore the lift',
   'story.repair-detail':
-    'Enter the quarry east of the northern road. Cross the yard and passage, collect the spindle in the machinery room, and install it at the lift.',
+    'Release the loading brake, reach the machine room and recover an intact shaft.',
   'story.repair-return':
-    'Spindle secured. Return to the northern road and approach the lift to install it.',
+    'Use the machine-room haul track to bring the shaft to the lift, then install it.',
   'story.climb-task': 'Main · A light above',
   'story.climb-detail': 'Ride the repaired lift and read the notice at the watchtower door.',
   'story.quarry-lead':
-    'The quarry is east of the northern road. Beyond the yard and passage, the machinery room should have an intact spindle for our lift.',
+    'Follow the tracks into the quarry. I will handle the old machinery; watch the ground for me.',
   'story.spindle-found':
-    'A perfect fit! I will take this end. Back the way we came, then into the lift.',
-  'story.lift-fixed': 'It fits… and it is turning! Hold the rail. Let us head up.',
+    'It fits. Onto the trolley! The winch is running, and this track comes out behind the lift.',
+  'story.lift-fixed': 'Hold it there… Yes! It is turning. Was that a bell above us?',
   'story.tower-arrival':
-    'The notice says the guardian holds the archive during evacuation. The records are still here. We need the station staff to lift the closure.',
+    '“Evacuation order: residents without a registered address must remain inside.” Nia only ever writes “beside the campfire”…',
   'campaign.lesson-move': 'Move to the highlighted revealed tile, then use your skill.',
   'campaign.lesson-title': 'Stage practice · {step}/4',
   'campaign.lesson-enter':
@@ -150,16 +172,16 @@ export const enMessages: MessageCatalog = {
   'story.chord-touch':
     'Press and hold the highlighted 1 to open its unflagged neighbors together. The flag count must match the number; misplaced flags can still cause a mine hit.',
   'story.map-unvisited': 'Not visited',
-  'story.return-bag': 'This bag should make it back to its owner.',
+  'story.return-bag': 'Let us leave her bag by the fire. She will see it when she gets back.',
   'story.open-eyes': 'Open your eyes',
   'story.dialogue-next': 'Continue',
   'story.dialogue-read': 'Show the whole line',
-  'story.where-am-i': 'Where… am I?',
-  'story.other-world': 'My home has nothing like these lights.',
-  'story.found-bag': 'Someone left a bag here.',
-  'story.keep-bag': 'Bring it along. Its owner may be waiting at camp.',
-  'story.home-question': 'Do you think there is a way back to my world?',
-  'story.thanks': 'Thank you, Lumi. I can finally catch my breath.',
+  'story.where-am-i': 'The door was right here. I was still holding the handle.',
+  'story.other-world': 'These numbers… I can read them. But none of this place is familiar.',
+  'story.found-bag': '“Nia” is scratched into the clasp. The bandages inside are still dry.',
+  'story.keep-bag': 'That is hers. She never leaves without it… Would you bring it along?',
+  'story.home-question': 'Was Nia looking for a way home too?',
+  'story.thanks': 'You keep looking at the northern road.',
   'story.prologue': 'Prologue · A light in the mist',
   'story.camp': 'Lanternrest',
   'story.guide': 'Lumi',
@@ -167,7 +189,7 @@ export const enMessages: MessageCatalog = {
   'story.trail': 'Along the old trail',
   'story.approach': 'Lights beyond the trees',
   'story.wake-line':
-    'You’re awake! Stay still a moment. Those lights on the ground are traces of leyline knots. Can you see that “1”?',
+    'A door? Only roots here. Keep your foot up—I just pulled you away from a knot. See that glowing “1”?',
   'story.read-task': 'Select the glowing number to inspect its eight neighboring cells.',
   'story.flag-line':
     '“1” means one knot in these eight cells. Only one is still covered. Leave a warning there.',
@@ -179,19 +201,19 @@ export const enMessages: MessageCatalog = {
     'You can read the traces… That’s a rare gift. Come along the clear ground. I’ll take you to camp.',
   'story.travel-task': 'Select a clear cell to walk there. Reach the lantern, then continue.',
   'story.trail-line':
-    'Another world, you say? Let’s find you somewhere warm first. Empty ground opens into a whole clearing—try the covered patch ahead.',
+    'Good. I know the way; you read the ground. Try the clear patch ahead. The light spreads through empty ground.',
   'story.trail-task':
     'Open the clearing, then reach the lantern. The lost satchel is an optional detour.',
   'story.approach-line':
-    'There—Lanternrest. We keep its paths clear of knots. Tell me about your home when we get inside.',
+    'There is our camp. Leave the stool beside the fire free. Nia always says it is the only one that does not wobble.',
   'story.approach-task':
     'Find a safe way to the camp lantern. Flags warn of danger; they do not remove it.',
   'story.arrival-line':
-    'Here we are. There’s food by the fire, and a bed for tonight. Come find me by the southern lantern when you’ve caught your breath.',
+    'Soup is still warm. Eat first. Then meet me by the southern lamp; there is something I should tell you.',
   'story.camp-task': 'Walk to Lumi by the southern lantern.',
   'story.guide-line':
-    'A way home… The old watchtower kept records of crossings between worlds. Its road has been closed for years. I’ll ask who still knows the way. Take this map and get to know the paths nearby.',
-  'story.camp-ready': 'Visit the workshop, meet the other explorers, or browse the task board.',
+    'No. The watchtower kept records of people from other worlds. She went to find a chart for me. She promised to be back before dark.',
+  'story.camp-ready': 'Prepare at the workshop, then take the northern road with Lumi.',
   'story.road-line':
     'The watchtower road is still being charted. This is where the next chapter will begin.',
   'story.temporary': 'Roguelite · temporary entrance',

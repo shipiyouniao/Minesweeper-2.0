@@ -4,6 +4,7 @@ import { CampSession } from '../src/application/camp-session.js'
 import { StorySession } from '../src/application/story-session.js'
 import { ExpeditionSession } from '../src/application/expedition-session.js'
 import { neighbors } from '../src/game/engine.js'
+import { clueIsolated } from '../src/game/clue-isolation.js'
 import { deduceMines } from '../src/game/mine-deduction.js'
 import { CAMP_SCENE, CAMP_SITES, PROLOGUE_SCENES } from '../src/game/story-content.js'
 import {
@@ -157,6 +158,17 @@ function solveFloor(
         continue
       dispatch({ type: 'visit', index })
       changed = true
+    }
+    for (const control of read().board.scene.mechanisms ?? []) {
+      const current = read()
+      if (
+        !current.operated.includes(control.index) &&
+        clueIsolated(current.board, control.index) &&
+        storyPath(current.board, current.player, control.index)
+      ) {
+        dispatch({ type: 'operate', index: control.index })
+        changed = true
+      }
     }
     if (!changed && !deduction.mines.length) break
   }
@@ -368,7 +380,7 @@ test('archive purchases preserve the frozen departure of a paused roguelite', ()
   assert.ok(resumed.camp.upgrades.includes('archive'))
 })
 
-test('a full legacy journal migrates to a checkpoint and keeps accepting actions', () => {
+test('a superseded legacy journal retires once instead of replaying the old route', () => {
   const repository = new VariantRepository(new MemoryStorage())
   const camp = new CampSession(repository)
   const actions: StoryAction[] = Array.from({ length: 3000 }, () => ({ type: 'flag', index: 22 }))
@@ -376,7 +388,12 @@ test('a full legacy journal migrates to a checkpoint and keeps accepting actions
   const session = new StorySession(new CampSession(repository))
   assert.equal(session.camp.story.journal, null)
   assert.ok(session.camp.story.world)
-  assert.equal(session.dispatch({ type: 'inspect', index: 12 }), true)
+  assert.equal(session.run, null)
+  assert.equal(session.camp.camp.supplies, 200)
+  session.moveCamp(51)
+  session.meetGuide()
+  session.completeDialogue('guide')
+  assert.equal(session.camp.story.mapOwned, true)
   assert.deepEqual(new StorySession(new CampSession(repository)).run, session.run)
 })
 
@@ -427,7 +444,7 @@ test('dialogue checkpoints survive reload and completion accepts a quest only on
   assert.deepEqual(session.camp.story.pinned, [])
 })
 
-test('a full legacy return route migrates without resetting the player or paying again', () => {
+test('a superseded return route retires once while keeping completed tasks', () => {
   const repository = new VariantRepository(new MemoryStorage())
   const camp = new CampSession(repository)
   const actions: StoryAction[] = [
@@ -444,16 +461,15 @@ test('a full legacy return route migrates without resetting the player or paying
   })
   const balance = camp.camp.supplies
   const session = new StorySession(camp)
-  assert.equal(session.run?.floor, 2)
+  assert.equal(session.run, null)
   assert.equal(camp.story.routeLegacy, undefined)
   assert.equal(camp.story.route, undefined)
   assert.equal(camp.story.journal, null)
-  assert.equal(session.dispatch({ type: 'flag', index: 13 }), true)
   assert.deepEqual(new StorySession(new CampSession(repository)).run, session.run)
-  assert.equal(camp.camp.supplies, balance)
+  assert.equal(camp.camp.supplies, balance + 200)
 })
 
-test('the northern overworld route is physically discovered, reported once and retained on return', () => {
+test('the northern road completes on site; an optional camp report cannot pay again', () => {
   const repository = new VariantRepository(new MemoryStorage())
   const camp = new CampSession(repository)
   camp.saveStory({
@@ -479,7 +495,7 @@ test('the northern overworld route is physically discovered, reported once and r
   session.dispatch({ type: 'visit', index: session.run!.board.exit })
   assert.ok(camp.story.facts?.includes('lift-discovered'))
   const board = session.run!.board
-  assert.ok(!camp.story.completed.includes('survey-road'))
+  assert.ok(camp.story.completed.includes('survey-road'))
   session.completeDialogue('north-road-found')
   session.dispatch({ type: 'visit', index: session.run!.board.entrance })
   assert.equal(session.dispatch({ type: 'return' }), true)
@@ -489,10 +505,10 @@ test('the northern overworld route is physically discovered, reported once and r
   const supplies = camp.camp.supplies
   session.completeDialogue('north-road-report')
   assert.ok(camp.story.completed.includes('survey-road'))
-  assert.equal(camp.camp.supplies, supplies + 20)
+  assert.equal(camp.camp.supplies, supplies)
   session = new StorySession(new CampSession(repository))
   session.completeDialogue('north-road-report')
-  assert.equal(camp.camp.supplies, supplies + 20)
+  assert.equal(camp.camp.supplies, supplies)
   session.moveCamp(13)
   assert.equal(session.enterNorthRoad(), true)
   assert.deepEqual(session.run!.board, board)
@@ -533,12 +549,9 @@ test('quarry spindle requires collection, repairs persist and the tower has a ph
   assert.equal(retry.collected, true, 'retry must not respawn a secured spindle')
   assert.ok(!session.camp.story.facts?.includes('lift-restored'))
   session.completeDialogue('spindle-found')
-  for (let floor = 6; floor >= 4; floor--) {
-    session.dispatch({ type: 'visit', index: session.run!.board.entrance })
-    assert.equal(session.travelWorld(), true)
-  }
+  assert.equal(session.travelWorld(), true)
   assert.equal(session.run!.floor, 3)
-  assert.equal(session.run!.player, 75)
+  assert.equal(session.run!.player, session.run!.board.exit)
   session.dispatch({ type: 'visit', index: session.run!.board.exit })
   assert.equal(session.travelWorld(), true)
   assert.ok(session.camp.story.completed.includes('repair-lift'))

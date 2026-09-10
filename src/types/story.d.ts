@@ -17,12 +17,20 @@ export type StoryReaction = 'greet' | 'collect'
 
 /** Authored scenes share coordinates and movement without sharing a random generator. */
 export interface StoryScene {
+  readonly mechanisms?: readonly StoryMechanism[]
   readonly id: StorySceneId | 'camp'
   readonly rows: readonly string[]
   readonly clue: number | null
   readonly safeClue: number | null
   readonly teachingMine: number | null
   readonly teachingSafe: number | null
+}
+
+/** Authored controls release safe terrain; their numbers still describe ordinary nearby hazards. */
+export interface StoryMechanism {
+  readonly kind: 'brake' | 'winch'
+  readonly index: number
+  readonly gate: number
 }
 
 /** A scene contains truthful clues; walls and landmarks are separate from hazard truth. */
@@ -37,13 +45,14 @@ export interface StoryBoard {
 
 /** Only accepted player actions enter the current content revision's journal. */
 export type StoryAction =
-  | { readonly type: 'visit' | 'flag' | 'inspect' | 'chord'; readonly index: number }
+  | { readonly type: 'visit' | 'flag' | 'inspect' | 'chord' | 'operate'; readonly index: number }
   | { readonly type: 'continue' }
   | { readonly type: 'return' }
   | { readonly type: 'retry' }
 
 /** Runtime state is rebuilt from authored content, never from serialized hidden cells. */
 export interface StoryRun {
+  readonly operated: readonly number[]
   readonly visited?: readonly StorySceneMemory[]
   readonly floor: number
   readonly board: StoryBoard
@@ -104,6 +113,9 @@ export type StoryDialogueId =
   | 'spindle-found'
   | 'lift-repaired'
   | 'tower-arrival'
+  | 'quarry-brake'
+  | 'quarry-release'
+  | 'quarry-winch'
 
 export interface StoryDialogueProgress {
   readonly completed: readonly StoryDialogueId[]
@@ -149,7 +161,7 @@ export interface CampSite {
 
 /** A rejected action can explain its cause without revealing covered hazards. */
 export type StoryFeedback =
-  'none' | 'route' | 'lesson' | 'hurt' | 'flag' | 'reveal' | 'arrive' | 'saved'
+  'none' | 'route' | 'lesson' | 'hurt' | 'flag' | 'reveal' | 'arrive' | 'saved' | 'cargo'
 
 /** One presentation snapshot contains only the selected scene and shared camp services. */
 export interface StoryViewState {
@@ -229,6 +241,7 @@ export type StorySceneId =
 
 /** Only differences from authored terrain are stored; hazards and clue numbers are rebuilt. */
 export interface StorySceneCheckpoint {
+  readonly operated: readonly number[]
   readonly id: StorySceneId
   readonly player: number
   readonly health: number

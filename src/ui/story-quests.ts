@@ -17,7 +17,7 @@ export function storyTaskName(language: Language, id: StoryTask): string {
 export function storyTaskScene(state: Pick<StoryViewState, 'progress'>, id: StoryTask): number {
   if (id === 'repair-lift') return state.progress.facts?.includes('spindle-secured') ? 4 : 7
   if (id === 'reach-tower') return 8
-  if (id === 'survey-road' && !state.progress.facts?.includes('lift-discovered')) return 4
+  if (id === 'survey-road') return 4
   if (id === 'lost-satchel') return 1
   return 3
 }

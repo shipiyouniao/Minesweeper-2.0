@@ -244,7 +244,7 @@ export class ExpeditionSession {
               records: this.stageProgress.records,
               cleared: false,
               lesson: this.stage.lesson ? 0 : 4,
-              scenes: [],
+              scenes: this.stageProgress.scenes,
             }),
           }
         : {}),

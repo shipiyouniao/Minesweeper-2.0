@@ -14,12 +14,30 @@ export function storyDialogueTemplate(state: StoryViewState): string {
 export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat[] {
   const { language, run } = state
   const event = storyDialogueEvent(state)
+  if (event === 'quarry-brake')
+    return [
+      { speaker: 'player', line: message(language, 'story.brake-scene-1'), gesture: 'point' },
+      { speaker: 'lumi', line: message(language, 'story.brake-scene-2'), gesture: 'steady' },
+    ]
+  if (event === 'quarry-release')
+    return [
+      { speaker: 'player', line: message(language, 'story.release-scene-1'), gesture: 'nod' },
+      { speaker: 'lumi', line: message(language, 'story.release-scene-2'), gesture: 'point' },
+    ]
+  if (event === 'quarry-winch')
+    return [
+      { speaker: 'lumi', line: message(language, 'story.winch-scene-1'), gesture: 'point' },
+      { speaker: 'player', line: message(language, 'story.winch-scene-2'), gesture: 'steady' },
+    ]
   if (event === 'quarry-lead')
     return [{ speaker: 'lumi', line: message(language, 'story.quarry-lead'), gesture: 'point' }]
   if (event === 'spindle-found')
     return [{ speaker: 'lumi', line: message(language, 'story.spindle-found'), gesture: 'offer' }]
   if (event === 'lift-repaired')
-    return [{ speaker: 'player', line: message(language, 'story.lift-fixed'), gesture: 'nod' }]
+    return [
+      { speaker: 'player', line: message(language, 'story.lift-fixed'), gesture: 'nod' },
+      { speaker: 'lumi', line: message(language, 'story.lift-answer'), gesture: 'point' },
+    ]
   if (event === 'tower-arrival')
     return [{ speaker: 'lumi', line: message(language, 'story.tower-arrival'), gesture: 'point' }]
   if (event === 'north-road-start')
@@ -44,6 +62,7 @@ export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat
       return [
         { speaker: 'player', line: message(language, 'story.home-question'), gesture: 'nod' },
         { speaker: 'lumi', line: message(language, 'story.guide-line'), gesture: 'steady' },
+        { speaker: 'player', line: message(language, 'story.go-together'), gesture: 'offer' },
       ]
     return [
       ...(state.progress.completed.includes('lost-satchel')

@@ -1,4 +1,5 @@
 import { campaignProgress } from '../game/campaign-catalog.js'
+import { clueIsolated } from '../game/clue-isolation.js'
 import { NIA_CAMP_CELL, pendingSignalScene } from '../game/signal-story.js'
 import { SignalPerformance } from './signal-performance.js'
 import { message } from '../i18n.js'
@@ -307,6 +308,17 @@ export class StoryApp implements MountedGame {
     }
     this.feedback = 'none'
     const chord = !!state.run && flag && cell.visibility === 'revealed'
+    const control = !flag
+      ? state.run?.board.scene.mechanisms?.find(
+          (entry) => entry.index === index && !state.run?.operated.includes(index),
+        )
+      : undefined
+    if (control && !clueIsolated(state.board, index)) {
+      this.inspected = index
+      this.sounds.play('blocked')
+      this.render()
+      return
+    }
     if (state.run && flag && !chord) {
       const changed = this.session.dispatch({ type: 'flag', index })
       this.sounds.play(changed ? 'flag' : 'blocked')
@@ -331,7 +343,7 @@ export class StoryApp implements MountedGame {
       return
     }
     const changed = state.run
-      ? this.session.dispatch({ type: chord ? 'chord' : 'visit', index })
+      ? this.session.dispatch({ type: control ? 'operate' : chord ? 'chord' : 'visit', index })
       : this.session.moveCamp(index)
     if (!changed && (chord || index !== state.player)) {
       this.sounds.play('blocked')
@@ -345,6 +357,20 @@ export class StoryApp implements MountedGame {
     this.sounds.play(hurt ? 'loss' : chord || cell.visibility === 'hidden' ? 'reveal' : 'navigate')
     await this.walk(animationPath)
     if (generation !== this.generation) return
+    if (control) {
+      this.sounds.play('confirm')
+      await this.performance.releaseGate(index, control.gate)
+      if (generation !== this.generation) return
+    }
+    if (
+      state.run?.floor === 6 &&
+      index === state.board.exit &&
+      this.session.run?.collected &&
+      !chord
+    ) {
+      await this.performance.haul()
+      if (generation !== this.generation) return
+    }
     this.moving = false
     this.feedback = hurt ? 'hurt' : 'none'
     if (state.run && state.run.floor >= 3 && !chord) {
@@ -352,7 +378,12 @@ export class StoryApp implements MountedGame {
         this.inspected = null
         this.flagMode = false
         this.panel = null
-      }
+      } else if (
+        state.run.floor === 6 &&
+        index === state.board.exit &&
+        !this.session.run?.collected
+      )
+        this.feedback = 'cargo'
     } else if (
       state.run &&
       !chord &&
@@ -504,7 +535,7 @@ export class StoryApp implements MountedGame {
     }
     const index = button.dataset['storyCell']
     if (index !== undefined) {
-      if (performance.now() < this.suppressClickUntil) {
+      if (event.detail !== 0 && performance.now() < this.suppressClickUntil) {
         event.preventDefault()
         return
       }
@@ -688,6 +719,8 @@ export class StoryApp implements MountedGame {
   /** Arm a hold only for a touch cell; scrolling past the threshold cancels it. */
   private readonly down = (event: PointerEvent): void => {
     this.sounds.unlock()
+    // A fresh press is a new intent; only the hold's synthetic follow-up click is suppressed.
+    if (event.isPrimary && !this.hold) this.suppressClickUntil = 0
     const touch = event.pointerType !== 'mouse'
     if (touch !== this.touchInput) {
       this.touchInput = touch

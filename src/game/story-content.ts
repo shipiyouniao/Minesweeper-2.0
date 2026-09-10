@@ -1,6 +1,6 @@
 import type { CampSite, StoryScene } from '../types/story.js'
 
-export const STORY_REVISION = 1
+export const STORY_REVISION = 2
 
 /** Symbols author real terrain: # wall, * knot, o open, . covered, S start, E exit, T satchel. */
 export const PROLOGUE_SCENES: readonly StoryScene[] = [
@@ -98,13 +98,14 @@ export const NORTH_ROAD_SCENE: StoryScene = {
 export const QUARRY_SCENES: readonly StoryScene[] = [
   {
     id: 'quarry-yard',
+    mechanisms: [{ kind: 'brake', index: 22, gate: 31 }],
     rows: [
       '#########',
-      '#Soo....#',
-      '#ooo.*..#',
-      '#oo.....#',
-      '#o*..oo.#',
-      '#ooooooE#',
+      '#Sooo*oo#',
+      '#oo.oooo#',
+      '####o####',
+      '#....oo.#',
+      '#.*.oooE#',
       '#########',
     ],
     clue: null,
@@ -130,11 +131,12 @@ export const QUARRY_SCENES: readonly StoryScene[] = [
   },
   {
     id: 'quarry-machine',
+    mechanisms: [{ kind: 'winch', index: 13, gate: 30 }],
     rows: [
       '#########',
-      '#Soo....#',
-      '#ooo.*..#',
-      '#oo.....#',
+      '#Soooooo#',
+      '#oo.*...#',
+      '###o#####',
       '#o*..oT.#',
       '#ooooooo#',
       '####E####',

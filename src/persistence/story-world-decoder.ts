@@ -1,6 +1,6 @@
 import { STORY_SCENE_IDS, restoreStoryWorld } from '../game/story-checkpoint.js'
 import { STORY_REVISION } from '../game/story-content.js'
-import { createStoryRun, storyLessonComplete } from '../game/story.js'
+import { buildStoryBoard, createStoryRun, storyLessonComplete } from '../game/story.js'
 import type { JsonValue } from '../types/json.js'
 import type { StorySceneCheckpoint, StoryWorldCheckpoint } from '../types/story.js'
 import { JsonObjectReader } from './json-reader.js'
@@ -28,8 +28,15 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
   const reader = JsonObjectReader.from(value)
   const id = STORY_SCENE_IDS.find((entry) => entry === reader?.string('id'))
   if (!reader || !id) return null
-  const initial = createStoryRun(STORY_SCENE_IDS.indexOf(id))
-  const size = initial.board.game.cells.length
+  const fresh = createStoryRun(STORY_SCENE_IDS.indexOf(id))
+  const size = fresh.board.game.cells.length
+  const operated = indices(reader.value('operated'), size)
+  if (
+    !operated ||
+    operated.some((index) => !fresh.board.scene.mechanisms?.some((entry) => entry.index === index))
+  )
+    return null
+  const initial = { ...fresh, board: buildStoryBoard(fresh.board.scene, operated) }
   const revealed = indices(reader.value('revealed'), size)
   const flagged = indices(reader.value('flagged'), size)
   const triggered = indices(reader.value('triggered'), size)
@@ -85,6 +92,7 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
     return null
   const checkpoint: StorySceneCheckpoint = {
     id,
+    operated,
     player,
     health,
     phase,

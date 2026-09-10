@@ -1,4 +1,6 @@
 import { pinnedStoryTasks, storyQuestPanel } from './story-quests.js'
+import { clueIsolated } from '../game/clue-isolation.js'
+import { storyGateTemplate, storyMechanismHint, storyMechanismName } from './story-mechanisms.js'
 import { campaignProgress, CAMPAIGN_STAGES } from '../game/campaign-catalog.js'
 import { NIA_CAMP_CELL } from '../game/signal-story.js'
 import { niaImage } from './signal-performance.js'
@@ -61,6 +63,9 @@ export function storySiteName(language: Language, site: CampSite): string {
 function cellTemplate(state: StoryViewState, index: number): string {
   const { board, language, run } = state
   const cell = board.game.cells[index]!
+  const gate = run ? storyGateTemplate(run, language, index) : null
+  if (gate) return gate
+  const control = run?.board.scene.mechanisms?.find((entry) => entry.index === index)
   if (board.walls.includes(index))
     return `<div class="story-tree" aria-hidden="true"><img src="${import.meta.env.BASE_URL}assets/story/tree.png" alt="" draggable="false"></div>`
   const site = run ? undefined : CAMP_SITES.find((entry) => entry.index === index)
@@ -101,6 +106,14 @@ function cellTemplate(state: StoryViewState, index: number): string {
   } else if (site) {
     label = storySiteName(language, site)
     content = site.destination === 'guide' ? storyGuideImage() : spriteImage(site.sprite)
+  } else if (control && run) {
+    const status = run.operated.includes(index)
+      ? message(language, 'story.mechanism-done')
+      : clueIsolated(board, index)
+        ? message(language, 'story.mechanism-operate')
+        : message(language, 'story.mechanism-locked')
+    label = storyMechanismName(language, control) + ' · ' + status
+    content = spriteImage(run.operated.includes(index) ? 'bastion-pylon-off' : 'bastion-pylon')
   } else if (quarryGate) {
     label = message(language, 'story.quarry-yard')
     content = spriteImage('workshop')
@@ -118,7 +131,7 @@ function cellTemplate(state: StoryViewState, index: number): string {
             : run.floor === 5
               ? message(language, 'story.quarry-machine')
               : run.floor === 6
-                ? message(language, 'story.quarry-passage')
+                ? message(language, 'story.haul-track')
                 : message(language, 'story.atlas-watchtower')
         : run?.board.scene.id === 'north-road'
           ? exit
@@ -139,12 +152,12 @@ function cellTemplate(state: StoryViewState, index: number): string {
     label = message(language, 'story.clue', { count: cell.adjacent })
     content = `<span class="story-clue">${cell.adjacent}</span>`
   }
-  if (number && (site || exit || entrance || quarryGate || treasure)) {
+  if (number && (site || exit || entrance || quarryGate || treasure || control)) {
     label += ` · ${message(language, 'story.clue', { count: number })}`
     if (index !== state.player) content += `<span class="story-clue-badge">${number}</span>`
   }
   const name = `${Math.floor(index / board.game.config.width) + 1}, ${(index % board.game.config.width) + 1}: ${label}`
-  return `<button class="story-cell ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance || quarryGate ? 'is-site' : ''}" data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance || quarryGate ? `<span class="story-site-label">${label}</span>` : ''}</button>`
+  return `<button class="story-cell ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance || quarryGate ? 'is-site' : ''}" ${control ? `data-story-mechanism="${index}" data-operated="${!!run?.operated.includes(index)}"` : ''} data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance || quarryGate ? `<span class="story-site-label">${label}</span>` : ''}</button>`
 }
 
 /** A single movable overlay keeps the chibi traveler above cell edges and clues. */
@@ -168,19 +181,21 @@ export function storyTemplate(state: StoryViewState): string {
   const { language, run } = state
   const t = translations[language]
   const notice =
-    state.feedback === 'route'
-      ? message(language, 'story.route')
-      : state.feedback === 'lesson'
-        ? message(language, 'story.lesson')
-        : state.inspected !== null
-          ? message(language, 'story.inspect')
-          : ''
+    state.feedback === 'cargo'
+      ? message(language, 'story.haul-load')
+      : state.feedback === 'route'
+        ? message(language, 'story.route')
+        : state.feedback === 'lesson'
+          ? message(language, 'story.lesson')
+          : state.inspected !== null
+            ? message(language, 'story.inspect')
+            : ''
   const hero = `${import.meta.env.BASE_URL}assets/story/camp-banner.png`
   return `<header class="site-header"><div class="header-identity">${brandTemplate(language)}<a class="route-back" data-route href="${routeHref({ page: 'home' }, language)}">${icon('arrow')}<span>${message(language, 'home.back')}</span></a></div><nav><a class="story-temporary" data-route href="${routeHref({ page: 'game', mode: 'expedition' }, language)}">${message(language, 'story.temporary')}</a><button class="icon-button" data-story-action="sound" aria-label="${state.sound ? t.soundOn : t.soundOff}" aria-pressed="${state.sound}">${icon(state.sound ? 'volume' : 'volumeOff')}</button>${languageMenuTemplate(language)}</nav></header>
   <main class="story-main" data-story-scene="${state.board.scene.id}">
     ${!state.storageAvailable ? `<p role="alert">${message(language, 'story.storage')}</p>` : ''}
     <section class="story-banner glass-panel" style="--story-hero:url('${hero}')"><div><p class="eyebrow">${run ? (run.floor < 3 ? message(language, 'story.prologue') : message(language, 'story.world-road')) : 'MINEFARER / CAMP'}</p><h1 data-route-heading>${sceneName(state)}</h1><p>${run ? (run.floor < 3 ? `${run.floor + 1} / 3` : message(language, 'story.atlas-woodland')) : `${new Intl.NumberFormat(language).format(state.camp.supplies)} ${variantCopy(language).supplies}`}</p></div></section>
-    ${state.service ? `<div class="story-service">${state.service.page === 'professions' ? titleTemplate(language, state.camp) : ''}${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, 'standard', state.service)}</div>` : `<div class="story-layout"><section class="story-stage glass-panel">${sceneBoard(state)}${notice ? `<p class="story-notice" role="status">${notice}</p>` : ''}</section><aside class="story-sidebar glass-panel">${pinnedStoryTasks(state)}${run ? '' : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>`}
+    ${state.service ? `<div class="story-service">${state.service.page === 'professions' ? titleTemplate(language, state.camp) : ''}${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, 'standard', state.service)}</div>` : `<div class="story-layout"><section class="story-stage glass-panel">${sceneBoard(state)}${run ? storyMechanismHint(run, language) : ''}${notice ? `<p class="story-notice" role="status">${notice}</p>` : ''}</section><aside class="story-sidebar glass-panel">${pinnedStoryTasks(state)}${run ? '' : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>`}
   </main>${storyDialogueTemplate(state)}${storyQuestPanel(state)}${state.service ? '' : sceneDock(state)}`
 }
 

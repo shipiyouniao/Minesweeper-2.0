@@ -1,4 +1,35 @@
 /* Story scenes keep their controls in a fixed dock, outside all filtered surfaces. */
+.story-mechanism-gate {
+  aspect-ratio: 1;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #8b766050;
+  border-radius: 8px;
+  background: repeating-linear-gradient(135deg, #a7937428 0 5px, #faf8f020 5px 10px);
+}
+.story-mechanism-gate img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+.story-cell[data-story-mechanism] {
+  border-color: #997d4799;
+  background: #ede6d4;
+}
+.story-cell[data-operated='true'] {
+  border-color: #6b927955;
+  background: #e1ece2;
+}
+.story-mechanism-hint {
+  margin: 14px 0 2px;
+  padding: 10px 12px;
+  border-left: 2px solid #997d4799;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
 .story-main {
   width: min(1180px, 94%);
   margin: 0 auto;

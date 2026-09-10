@@ -31,30 +31,14 @@ export class StorySession {
     if (story.world) {
       if (story.world.revision !== STORY_REVISION) {
         const active = story.world.active !== null
-        camp.saveStory(
-          {
-            ...story,
-            arrived: true,
-            journal: null,
-            world: { revision: STORY_REVISION, active: null, hasVisited: false, scenes: [] },
-          },
-          active ? 200 : 0,
-        )
+        camp.retireStoryWorld(active)
         return
       }
       this.current = restoreStoryWorld(story.world)
       return
     }
     if (story.journal && story.journal.revision !== STORY_REVISION) {
-      camp.saveStory(
-        {
-          ...story,
-          arrived: true,
-          journal: null,
-          world: { revision: STORY_REVISION, active: null, hasVisited: false, scenes: [] },
-        },
-        200,
-      )
+      camp.retireStoryWorld(true)
       return
     }
     const atCamp = story.arrived && !story.journal
@@ -161,8 +145,10 @@ export class StorySession {
       target = run.floor === 4 ? QUARRY_GATE : createStoryRun(floor).board.exit
     } else if (run.player === run.board.exit && run.floor < 6) floor = run.floor + 1
     else if (run.floor === 6 && run.player === run.board.exit) {
-      floor = 5
-      target = createStoryRun(5).board.exit
+      // The repaired haul track is a physical shortcut, available after recovering the spindle.
+      if (!run.collected || !run.operated.length) return false
+      floor = 3
+      target = createStoryRun(3).board.exit
     }
     if (floor === null) return false
     const { visited = [], ...snapshot } = run
