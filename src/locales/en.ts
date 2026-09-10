@@ -1700,5 +1700,5 @@ export const enMessages: MessageCatalog = {
   'rail.camp-2': 'What about your ankle?',
   'rail.camp-3':
     'Still resting it. Nothing wrong with my hands, though. Pull up a seat if you want to learn the engineer’s trade. We’ll start small.',
-  'rail.reward': '120 supplies received · Engineer unlocked',
+  'rail.reward': '120 supplies received · Engineer available at camp',
 }
