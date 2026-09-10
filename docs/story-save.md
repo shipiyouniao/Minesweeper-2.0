@@ -44,3 +44,11 @@ The campaign lesson stores a bounded step separately from its journal. Actual to
 Campaign accepted actions now advance shared missions and achievements. Story quests persist bounded campaign-only travel, chests, floors, bosses, skills and wins counters under quests.campaignActivity; campaign conditions can consume those counters. These deltas commit with the action journal and are never applied by replay or lifecycle saves. Existing quest content has no campaign-count objective yet.
 
 The fourth slot, `old-waterway`, uses `old-waterway-v1` and awards 140 supplies once. Its catalog entrance is the North Road pump; the prerequisite is a cleared Ridge Observatory and the `ridge-surveyed` fact. Returning to the world accepts `find-beacon` without another camp visit, also for existing completed-survey saves. Victory atomically records `beacon-recovered`, completes the task and settles the stage. Drainage uses the shared power journal; the attempt and ending ledger remain separate from all earlier stages. Adding this stage does not retire any current attempt or change the envelope version.
+
+## First chapter conclusion
+
+The fifth and sixth slots are `tower-control` (`tower-control-v1`) and `northwest-bastion` (`northwest-bastion-v1`). They settle 180 and 240 supplies once. Their `west-line-restored` and `chapter-one-cleared` facts complete the separately accepted story tasks in the same settlement write. Endings have individual replay ledgers and can resume after interrupted settlement.
+
+The additive `northwest-bridge` and `blockade-pass` scenes preserve the existing world content revision: no old scene or mine map changes. Named portal records define physical source and arrival coordinates. Crossing the bridge records `west-shortcut`; both directions of the camp shortcut preserve the entire world checkpoint. A shortcut return explicitly restores camp arrival state so equipment changes, services and a subsequent departure work normally. Map inspection alone never records travel or unlocks the shortcut.
+
+The guardian is a fixed third-floor Bastion encounter and replays from the stage journal. Equipment, title, training and two inter-floor relics remain active. Campaign attempts and endings do not replace a paused roguelite or earlier stage ledger. See [Chapter One finale](chapter-one-finale.md) for layout and behavior acceptance.

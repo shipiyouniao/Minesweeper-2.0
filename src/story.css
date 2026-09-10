@@ -1418,3 +1418,78 @@ dialog.story-dialogue .story-dialogue-next {
   background: #d5e6c8;
   border-color: #668e70;
 }
+
+/* The northwest route keeps geographic water separate from hidden hazard cells. */
+.story-river {
+  border-radius: 4px;
+  background: linear-gradient(140deg, #b4d2d1, #86b2b8);
+  box-shadow: inset 0 0 0 1px #ffffff40;
+}
+.story-cell.story-bridge-plank {
+  background: repeating-linear-gradient(90deg, #c9ba99 0, #c9ba99 20%, #ad9873 22%, #ad9873 25%);
+}
+.atlas-river-tile {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #94bbbf;
+}
+.atlas-west-route {
+  opacity: 0.15;
+}
+.atlas-west-route.is-powered {
+  opacity: 1;
+}
+.chapter-route-reveal {
+  margin: 0 1.3rem;
+  padding: 0.4rem 1rem;
+  border-radius: 16px;
+  background: #dce5df;
+  text-align: center;
+}
+.chapter-route-reveal svg {
+  display: block;
+  width: 100%;
+  max-height: 105px;
+}
+.chapter-route-reveal figcaption {
+  padding-bottom: 0.5rem;
+  font-size: 0.8rem;
+  color: #35544a;
+}
+.chapter-lowering-bridge {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: chapter-bridge-lower 1.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.chapter-route-light {
+  fill: #d5b666;
+  animation: chapter-route-power 1.8s ease-out both;
+}
+.chapter-guardian-restored [data-signal-portrait] img {
+  filter: drop-shadow(0 0 10px #a2caba);
+}
+@keyframes chapter-bridge-lower {
+  from {
+    transform: rotate(-75deg);
+  }
+  to {
+    transform: rotate(0);
+  }
+}
+@keyframes chapter-route-power {
+  from {
+    fill: #677a73;
+    opacity: 0.35;
+  }
+  to {
+    fill: #63ad91;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chapter-lowering-bridge,
+  .chapter-route-light {
+    animation: none;
+  }
+}

@@ -166,7 +166,8 @@
 
 /* Large authored chambers also fit the desktop's height; manual zoom stays available. */
 @media (min-width: 1000px) {
-  .variant-board-panel .board[data-power-purpose='drainage'] {
+  .variant-board-panel
+    .board:is([data-power-purpose='drainage'], [data-power-purpose='restoration']) {
     --cell-max: clamp(28px, calc((100svh - 480px) / var(--power-rows) - var(--gap)), 64px);
   }
 }

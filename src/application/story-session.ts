@@ -1,3 +1,5 @@
+import { northwestPortals } from '../game/northwest-world.js'
+import { STORY_SCENES } from '../game/story-content.js'
 import { NIA_CAMP_CELL } from '../game/signal-story.js'
 import { checkpointStory, restoreStoryWorld, storyWorldScenes } from '../game/story-checkpoint.js'
 import { recordStoryFacts, storyTaskIntroduced } from '../game/story-quests.js'
@@ -28,6 +30,7 @@ export class StorySession {
   constructor(camp: CampSession) {
     this.camp = camp
     camp.acceptWaterwayRoute()
+    camp.acceptFinaleRoutes()
     const story = camp.story
     if (story.world) {
       if (story.world.revision !== STORY_REVISION) {
@@ -124,10 +127,49 @@ export class StorySession {
     return true
   }
 
+  /** Cross a named world doorway while retaining explored cells and independent campaign attempts. */
+  travelNorthwest(): boolean {
+    const progress = this.camp.story
+    const run = this.current
+    if (run && run.phase !== 'exploring') return false
+    const portal = northwestPortals(run?.board.scene.id ?? 'camp', progress).find(
+      (entry) => entry.index === (run?.player ?? progress.campPosition),
+    )
+    if (!portal || !progress.world) return false
+    const world = run ? checkpointStory(run) : progress.world
+    const story = portal.outcome ? recordStoryFacts(progress, [portal.outcome]) : progress
+    if (portal.destination === 'camp') {
+      this.current = null
+      this.camp.saveStory({
+        ...story,
+        arrived: true,
+        campPosition: portal.arrival,
+        journal: null,
+        world: { ...world, active: null },
+      })
+      return true
+    }
+    const saved = restoreStoryWorld(world, portal.destination)
+    const initial = saved ?? {
+      ...createStoryRun(STORY_SCENES.findIndex((scene) => scene.id === portal.destination)),
+      visited: storyWorldScenes(world),
+    }
+    this.current = {
+      ...initial,
+      player: portal.arrival,
+      health: run?.health ?? 3,
+      phase: 'exploring',
+    }
+    this.camp.saveStory(story)
+    this.persist()
+    return true
+  }
+
   /** Physical world doorways share their prerequisite checks with durable repair outcomes. */
   travelWorld(): boolean {
+    if (this.travelNorthwest()) return true
     const run = this.current
-    if (!run || run.phase !== 'exploring' || run.floor < 3) return false
+    if (!run || run.phase !== 'exploring' || run.floor < 3 || run.floor > 7) return false
     const progress = this.camp.story
     let floor: number | null = null
     let target: number | null = null

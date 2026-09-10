@@ -1,3 +1,4 @@
+import { bridgeReveal } from './chapter-performance.js'
 import { DialogueReveal } from './dialogue-reveal.js'
 import { signalCopy, signalLines } from './signal-copy.js'
 import { message } from '../i18n.js'
@@ -58,6 +59,9 @@ export class SignalPerformance {
     dialog.setAttribute('aria-labelledby', 'signal-speaker')
     dialog.innerHTML = `<div class="signal-cast"><span data-signal-listener>${spriteImage(professionSprite(profession))}</span><span data-signal-portrait></span></div><div class="signal-dialogue-copy"><strong id="signal-speaker"></strong><p data-signal-line></p><button class="story-dialogue-next" data-signal-next>${t.continue} →</button></div>`
     root.append(dialog)
+    if (scene === 'control-restored')
+      dialog.querySelector('.signal-cast')!.insertAdjacentHTML('afterend', bridgeReveal(language))
+    if (scene === 'pass-open') dialog.classList.add('chapter-guardian-restored')
     if (
       scene === 'ridge-found' ||
       scene === 'ridge-camp' ||

@@ -4,6 +4,8 @@ import { signalCopy, signalLines } from './signal-copy.js'
 import { powerControl, powerReadiness } from '../game/floor-power.js'
 import { animatePowerChange } from './power-view.js'
 import { campaignName } from './campaign-copy.js'
+import { pendingFinaleScene } from '../game/chapter-finale.js'
+import { finaleLines } from './finale-copy.js'
 import { pendingWaterwayScene } from '../game/waterway-story.js'
 import { waterwayLines } from './waterway-copy.js'
 import { powerHint, observatoryLines } from './observatory-copy.js'
@@ -487,8 +489,19 @@ export class VariantApp implements VariantInputActions {
         this.inputMode = nextBoardMode(this.inputMode)
         break
       case 'prologue':
-        if (this.session instanceof ExpeditionSession)
-          this.prologue.present(this.root, this.session.run, this.language, false, true)
+        if (this.session instanceof ExpeditionSession) {
+          const run = this.session.run
+          if (run?.departure.campaign === 'northwest-bastion-v1')
+            this.signal.present(
+              this.root,
+              this.language,
+              'pass-guardian',
+              finaleLines(this.language, 'pass-guardian'),
+              run.departure.profession,
+              () => this.render(),
+            )
+          else this.prologue.present(this.root, run, this.language, false, true)
+        }
         return
       case 'tutorial':
         if (
@@ -831,7 +844,8 @@ export class VariantApp implements VariantInputActions {
       )
       this.renderCampaignLesson()
       this.renderSignalScene()
-      this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
+      if (!run?.departure.campaign)
+        this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
       this.notices.observe(this.session.camp, this.language)
     } else {
       const state = this.session.state
@@ -848,7 +862,8 @@ export class VariantApp implements VariantInputActions {
     const signalScene = pendingSignalScene(session.run, session.stageProgress)
     const ridgeScene = pendingObservatoryScene(session.run, session.stageProgress)
     const waterwayScene = pendingWaterwayScene(session.run, session.stageProgress)
-    const scene = signalScene ?? ridgeScene ?? waterwayScene
+    const finaleScene = pendingFinaleScene(session.run, session.stageProgress)
+    const scene = signalScene ?? ridgeScene ?? waterwayScene ?? finaleScene
     if (!scene) return
     this.view.closeDialog()
     this.signal.present(
@@ -861,7 +876,9 @@ export class VariantApp implements VariantInputActions {
           ? observatoryLines(this.language, ridgeScene)
           : waterwayScene
             ? waterwayLines(this.language, waterwayScene)
-            : [],
+            : finaleScene
+              ? finaleLines(this.language, finaleScene)
+              : [],
       session.run?.departure.profession ?? 'explorer',
       () => {
         session.completeCampaignScene(scene)
@@ -870,7 +887,8 @@ export class VariantApp implements VariantInputActions {
           session.run?.phase === 'won' &&
           !pendingSignalScene(session.run, session.stageProgress) &&
           !pendingObservatoryScene(session.run, session.stageProgress) &&
-          !pendingWaterwayScene(session.run, session.stageProgress)
+          !pendingWaterwayScene(session.run, session.stageProgress) &&
+          !pendingFinaleScene(session.run, session.stageProgress)
         )
           this.view.showExpeditionDialog()
       },

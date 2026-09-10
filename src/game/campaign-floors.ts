@@ -1,3 +1,4 @@
+import { controlLayout, blockadeLayout } from './chapter-layout.js'
 import { campaignLayout } from './campaign-layout.js'
 import { signalLayout } from './signal-layout.js'
 import { observatoryLayout } from './observatory-layout.js'
@@ -14,6 +15,10 @@ export function campaignFloor(revision: CampaignRevision, floor: number): Dungeo
       return signalLayout(floor)
     case 'ridge-observatory-v1':
       return observatoryLayout(floor)
+    case 'tower-control-v1':
+      return controlLayout(floor)
+    case 'northwest-bastion-v1':
+      return blockadeLayout(floor)
     case 'old-waterway-v1':
       return waterwayLayout(floor)
   }

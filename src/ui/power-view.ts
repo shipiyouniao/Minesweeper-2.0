@@ -1,3 +1,4 @@
+import { finaleFloorName } from './finale-copy.js'
 import { feedPowered, powerReadiness, powerObjectiveComplete } from '../game/floor-power.js'
 import { message } from '../i18n.js'
 import { waterwayFloorName } from './waterway-copy.js'
@@ -19,9 +20,16 @@ export function drainageImage(): string {
   return `<img class="dungeon-sprite drainage-pump" src="${import.meta.env.BASE_URL}assets/story/drainage-pump.png" alt="" width="128" height="128" draggable="false">`
 }
 
+/** A dedicated chibi console identifies restored lines in play, diagrams and world navigation. */
+export function consoleImage(): string {
+  return `<img class="dungeon-sprite control-console" src="${import.meta.env.BASE_URL}assets/story/control-console.png" alt="" width="128" height="128" draggable="false">`
+}
+
 /** Keep one current instruction and a compact reading counter above the shared board layout. */
 export function powerObjective(language: Language, run: Expedition): string {
   if (!run.power) return ''
+  if (run.power.purpose === 'restoration')
+    return `<section class="signal-objective power-objective" aria-live="polite"><strong>${finaleFloorName(language, run)}</strong><p>${powerObjectiveComplete(run.power) ? message(language, 'finale.exit-ready') : message(language, 'finale.objective')}</p><span>${message(language, 'finale.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
   const drainage = run.power.purpose === 'drainage'
   return `<section class="signal-objective power-objective" aria-live="polite"><strong>${drainage ? waterwayFloorName(language, run.floor) : observatoryFloorName(language, run.floor)}</strong><p>${powerObjectiveComplete(run.power) ? (drainage ? message(language, 'waterway.exit-ready') : message(language, 'ridge.exit-ready')) : drainage ? message(language, 'waterway.objective') : message(language, 'ridge.objective')}</p><span>${drainage ? message(language, 'waterway.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length }) : message(language, 'ridge.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
 }
@@ -57,9 +65,11 @@ export function renderFloorPower(root: HTMLElement, run: Expedition, language: L
     const name = junction
       ? message(language, 'ridge.junction')
       : receiver
-        ? power.purpose === 'drainage'
-          ? message(language, 'waterway.receiver')
-          : message(language, 'ridge.receiver')
+        ? power.purpose === 'restoration'
+          ? message(language, 'finale.receiver')
+          : power.purpose === 'drainage'
+            ? message(language, 'waterway.receiver')
+            : message(language, 'ridge.receiver')
         : message(language, 'ridge.door')
     const id = junction
       ? `${power.junctions.indexOf(junction) + 1}${junction.selected === null ? '—' : junction.selected === 0 ? 'A' : 'B'}`
@@ -80,9 +90,11 @@ export function renderFloorPower(root: HTMLElement, run: Expedition, language: L
     cell.insertAdjacentHTML(
       'afterbegin',
       receiver
-        ? power.purpose === 'drainage'
-          ? drainageImage()
-          : observatoryImage()
+        ? power.purpose === 'restoration'
+          ? consoleImage()
+          : power.purpose === 'drainage'
+            ? drainageImage()
+            : observatoryImage()
         : junction
           ? spriteImage('bastion-pylon')
           : live

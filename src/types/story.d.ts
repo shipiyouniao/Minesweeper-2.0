@@ -17,6 +17,8 @@ export type StoryReaction = 'greet' | 'collect'
 
 /** Authored scenes share coordinates and movement without sharing a random generator. */
 export interface StoryScene {
+  readonly water?: readonly number[]
+  readonly bridge?: readonly number[]
   readonly mechanisms?: readonly StoryMechanism[]
   readonly id: StorySceneId | 'camp'
   readonly rows: readonly string[]
@@ -80,6 +82,8 @@ export type StoryTask =
   | 'reach-tower'
   | 'survey-ridge'
   | 'find-beacon'
+  | 'restore-west-line'
+  | 'open-blockade'
 
 /** One envelope commits story rewards and the shared wallet together. */
 export type StoryCampaignMetric = 'travel' | 'chests' | 'floors' | 'bosses' | 'skills' | 'wins'
@@ -211,6 +215,9 @@ export type StoryFact =
   | 'ridge-route'
   | 'ridge-surveyed'
   | 'beacon-recovered'
+  | 'west-line-restored'
+  | 'west-shortcut'
+  | 'chapter-one-cleared'
   | 'camp-reached'
   | 'satchel-secured'
   | 'satchel-delivered'
@@ -233,7 +240,8 @@ export type StoryCondition =
 export interface StoryTaskDefinition {
   readonly id: StoryTask
   readonly category: 'main' | 'side'
-  readonly introducedBy: StoryDialogueId | 'nia-route' | 'ridge-bearing'
+  readonly introducedBy:
+    StoryDialogueId | 'nia-route' | 'ridge-bearing' | 'beacon-bearing' | 'west-line'
   readonly prerequisite: StoryCondition
   readonly objective: StoryCondition
   readonly supplies: number
@@ -248,6 +256,8 @@ export type StorySceneId =
   | 'quarry-passage'
   | 'quarry-machine'
   | 'tower-landing'
+  | 'northwest-bridge'
+  | 'blockade-pass'
 
 /** Only differences from authored terrain are stored; hazards and clue numbers are rebuilt. */
 export interface StorySceneCheckpoint {

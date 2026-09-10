@@ -1,11 +1,13 @@
 import { campaignProgress } from '../game/campaign-catalog.js'
 import { clueIsolated } from '../game/clue-isolation.js'
+import { storyAtlasUnlocked, storyAtlasIndex } from '../game/story-atlas.js'
+import { pendingFinaleScene } from '../game/chapter-finale.js'
+import { finaleLines } from './finale-copy.js'
+import { animateNorthwestArrival } from './chapter-performance.js'
 import { NIA_CAMP_CELL, pendingSignalScene } from '../game/signal-story.js'
 import { pendingObservatoryScene } from '../game/observatory-story.js'
 import { pendingWaterwayScene } from '../game/waterway-story.js'
-import { WATERWAY_GATE } from '../game/waterway-layout.js'
 import { waterwayLines } from './waterway-copy.js'
-import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
 import { observatoryLines } from './observatory-copy.js'
 import { SignalPerformance } from './signal-performance.js'
 import { message } from '../i18n.js'
@@ -209,6 +211,29 @@ export class StoryApp implements MountedGame {
           `[data-story-action="${control}"]${task ? `[data-task="${task}"]` : ''}`,
         )
         ?.focus({ preventScroll: true })
+    for (const id of ['tower-control', 'northwest-bastion'] as const) {
+      const progress = this.session.camp.stageProgress(id)
+      const scene =
+        pendingFinaleScene(null, progress) ??
+        (!state.run &&
+        id === 'northwest-bastion' &&
+        progress.cleared &&
+        !progress.scenes.includes('chapter-camp')
+          ? 'chapter-camp'
+          : null)
+      if (scene && !this.root.querySelector('dialog[open]'))
+        this.signal.present(
+          this.root,
+          this.language,
+          scene,
+          finaleLines(this.language, scene),
+          state.loadout.profession,
+          () => {
+            this.session.camp.completeFinaleScene(id, scene)
+            this.render()
+          },
+        )
+    }
     const waterwayScene = pendingWaterwayScene(null, this.session.camp.waterway)
     if (waterwayScene && !this.root.querySelector('dialog[open]'))
       this.signal.present(
@@ -328,20 +353,9 @@ export class StoryApp implements MountedGame {
     const state = this.snapshot()
     const cell = state.board.game.cells[index]
     if (!cell || state.board.walls.includes(index)) return
-    if (
-      !flag &&
-      ((state.run?.floor === 7 &&
-        index === state.board.exit &&
-        this.session.camp.story.dialogue?.completed.includes('tower-arrival')) ||
-        (state.run?.floor === 3 &&
-          index === OBSERVATORY_GATE &&
-          state.progress.facts?.includes('ridge-route')) ||
-        (state.run?.floor === 3 &&
-          index === WATERWAY_GATE &&
-          state.progress.facts?.includes('ridge-surveyed')))
-    ) {
+    if (!flag && state.run && state.player === index) {
       const entry = this.root.querySelector<HTMLAnchorElement>('[data-story-campaign]')
-      if (entry && state.player === index) {
+      if (entry) {
         entry.click()
         return
       }
@@ -453,6 +467,11 @@ export class StoryApp implements MountedGame {
         this.inspected = null
         this.panel = null
       }
+      if (this.session.travelNorthwest()) {
+        this.conversation = null
+        this.inspected = null
+        this.panel = null
+      }
       const site = CAMP_SITES.find((entry) => entry.index === index)
       if (site?.destination === 'guide') {
         this.session.meetGuide()
@@ -467,9 +486,27 @@ export class StoryApp implements MountedGame {
         this.service = { page: site.destination, category: 'all', selected: 'surveyor' }
     }
     this.render()
+    if (state.board.scene.id !== this.snapshot().board.scene.id) {
+      this.moving = true
+      await animateNorthwestArrival(this.root, this.snapshot().board.scene.id)
+      if (generation !== this.generation) return
+      this.moving = false
+    }
     if (!state.run && index === 51) this.performance.react('greet')
     if (!state.run && index === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared) {
-      if (this.session.camp.waterway.cleared)
+      if (this.session.camp.stageProgress('northwest-bastion').cleared)
+        this.signal.present(
+          this.root,
+          this.language,
+          'chapter-camp',
+          finaleLines(this.language, 'chapter-camp'),
+          state.loadout.profession,
+          () => {
+            this.session.camp.completeFinaleScene('northwest-bastion', 'chapter-camp')
+            this.render()
+          },
+        )
+      else if (this.session.camp.waterway.cleared)
         this.signal.present(
           this.root,
           this.language,
@@ -648,19 +685,7 @@ export class StoryApp implements MountedGame {
       }
       case 'map-scene': {
         const scene = Number(button.dataset['scene'])
-        if (
-          !Number.isInteger(scene) ||
-          scene < 0 ||
-          scene >
-            (this.session.camp.story.completed.includes('survey-road')
-              ? 8
-              : this.session.camp.story.facts?.includes('lift-discovered')
-                ? 8
-                : this.session.camp.story.arrived
-                  ? 4
-                  : (this.session.run?.floor ?? 3))
-        )
-          return
+        if (!storyAtlasUnlocked(this.session.camp.story, this.session.run, scene)) return
         this.mapScene = scene
         this.mapLevel = 'local'
         break
@@ -668,9 +693,7 @@ export class StoryApp implements MountedGame {
       case 'tasks':
       case 'map':
         if (button.dataset['storyAction'] === 'map' && this.panel !== 'map') {
-          this.mapScene = this.session.run
-            ? this.session.run.floor + (this.session.run.floor >= 3 ? 1 : 0)
-            : 3
+          this.mapScene = storyAtlasIndex(this.session.run?.board.scene.id ?? 'camp')
           this.mapLevel = 'local'
           this.mapLegend = false
         }
@@ -692,7 +715,9 @@ export class StoryApp implements MountedGame {
           id === 'repair-lift' ||
           id === 'reach-tower' ||
           id === 'survey-ridge' ||
-          id === 'find-beacon'
+          id === 'find-beacon' ||
+          id === 'restore-west-line' ||
+          id === 'open-blockade'
         )
           this.session.togglePin(id)
         break

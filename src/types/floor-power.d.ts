@@ -27,7 +27,7 @@ export interface PowerReceiver {
 
 export interface FloorPower {
   /** Both tasks use the same physical routing rules, with distinct instruments and feedback. */
-  readonly purpose: 'observation' | 'drainage'
+  readonly purpose: 'observation' | 'drainage' | 'restoration'
   readonly junctions: readonly PowerJunction[]
   readonly doors: readonly PowerDoor[]
   readonly receivers: readonly PowerReceiver[]

@@ -213,6 +213,7 @@ export function enterBattle(run: Expedition, kind: 'bastion' | 'brood'): Expedit
         ? {
             ...base,
             kind,
+            pattern: 'standard',
             pylons: layout.objectives.map((index) => ({ index, active: true })),
             mechanisms: layout.objectives.map((index, order) => ({
               index,

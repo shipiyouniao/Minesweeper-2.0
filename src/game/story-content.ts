@@ -1,3 +1,4 @@
+import { NORTHWEST_SCENES } from './northwest-world.js'
 import type { CampSite, StoryScene } from '../types/story.js'
 
 export const STORY_REVISION = 2
@@ -160,6 +161,7 @@ export const STORY_SCENES: readonly StoryScene[] = [
   NORTH_ROAD_SCENE,
   ...QUARRY_SCENES,
   TOWER_LANDING_SCENE,
+  ...NORTHWEST_SCENES,
 ]
 
 /** Additional north-road doorway; its coordinate is shared by movement and atlas rendering. */

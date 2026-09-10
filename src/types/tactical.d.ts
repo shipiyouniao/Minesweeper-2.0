@@ -72,6 +72,8 @@ export interface TacticalState {
 /** Armor controls belong to the guardian's encounter variant. */
 export interface BastionEncounter extends TacticalState {
   readonly kind: 'bastion'
+  /** Pursuit changes the announced cross origin below half health; movement never retargets it. */
+  readonly pattern: 'standard' | 'pursuit'
   readonly pylons: readonly ShieldPylon[]
   /** Regional controls open bounded core windows. */
   readonly mechanisms: readonly BattleMechanism[]

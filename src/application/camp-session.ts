@@ -1,4 +1,6 @@
 import { recordStoryFacts, storyTaskReward } from '../game/story-quests.js'
+import type { FinaleSceneId } from '../types/chapter-finale.js'
+import type { CampaignStageId } from '../types/campaign.js'
 import type { WaterwaySceneId } from '../types/waterway.js'
 import type { ObservatorySceneId } from '../types/observatory.js'
 import { STORY_REVISION } from '../game/story-content.js'
@@ -64,6 +66,44 @@ export class CampSession {
   /** The drainage expedition keeps its own attempt and once-only ending ledger. */
   get waterway(): CampaignStageProgress {
     return campaignProgress(this.read().campaign, 'old-waterway')
+  }
+
+  /** Read a stage without copying its journal into another campaign or the roguelite. */
+  stageProgress(id: CampaignStageId): CampaignStageProgress {
+    return campaignProgress(this.read().campaign, id)
+  }
+
+  /** Restore task acceptance from durable discoveries, including already settled saves. */
+  acceptFinaleRoutes(): void {
+    let story = this.story
+    const tasks: readonly StoryTask[] = [
+      ...(story.facts?.includes('beacon-recovered') ? ['restore-west-line' as const] : []),
+      ...(story.facts?.includes('west-line-restored') ? ['open-blockade' as const] : []),
+    ]
+    const fresh = tasks.filter(
+      (task) => !story.accepted?.includes(task) && !story.completed.includes(task),
+    )
+    if (!fresh.length) return
+    story = recordStoryFacts(
+      {
+        ...story,
+        accepted: [...(story.accepted ?? []), ...fresh],
+        pinned: [...(story.pinned ?? []), ...fresh],
+      },
+      [],
+    )
+    this.saveStory(story)
+  }
+
+  /** Finish a recovered chapter ending without repeating settlement or changing another stage. */
+  completeFinaleScene(id: CampaignStageId, scene: FinaleSceneId): void {
+    const save = this.read()
+    const progress = campaignProgress(save.campaign, id)
+    if (!progress.cleared || progress.scenes.includes(scene)) return
+    this.repository.saveExpedition({
+      ...save,
+      campaign: updateCampaign(save.campaign, { ...progress, scenes: [...progress.scenes, scene] }),
+    })
   }
 
   /** Accept the route at the survey site, including when loading an earlier completed survey. */

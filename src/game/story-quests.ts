@@ -37,6 +37,9 @@ export const STORY_FACTS: readonly StoryFact[] = [
   'ridge-route',
   'ridge-surveyed',
   'beacon-recovered',
+  'west-line-restored',
+  'west-shortcut',
+  'chapter-one-cleared',
   'camp-reached',
   'satchel-secured',
   'satchel-delivered',
@@ -49,6 +52,22 @@ export const STORY_FACTS: readonly StoryFact[] = [
 ]
 
 export const STORY_TASKS: readonly StoryTaskDefinition[] = [
+  {
+    id: 'restore-west-line',
+    category: 'main',
+    introducedBy: 'beacon-bearing',
+    prerequisite: { kind: 'fact', id: 'beacon-recovered' },
+    objective: { kind: 'fact', id: 'west-line-restored' },
+    supplies: 0,
+  },
+  {
+    id: 'open-blockade',
+    category: 'main',
+    introducedBy: 'west-line',
+    prerequisite: { kind: 'fact', id: 'west-line-restored' },
+    objective: { kind: 'fact', id: 'chapter-one-cleared' },
+    supplies: 0,
+  },
   {
     id: 'reach-camp',
     category: 'main',

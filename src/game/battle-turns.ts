@@ -130,6 +130,7 @@ function endTurn(run: Expedition): Expedition {
           encounter.boss,
           run.player,
           encounter.turn + 1,
+          encounter.pattern === 'pursuit' && encounter.health * 2 <= encounter.maxHealth,
         ),
         damage: weakened ? 3 : 5,
       },

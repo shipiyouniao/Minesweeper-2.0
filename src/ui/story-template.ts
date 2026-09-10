@@ -1,3 +1,5 @@
+import { northwestPortals, BASTION_GATE } from '../game/northwest-world.js'
+import { worldSceneName } from './world-copy.js'
 import { pinnedStoryTasks, storyQuestPanel } from './story-quests.js'
 import { clueIsolated } from '../game/clue-isolation.js'
 import { storyGateTemplate, storyMechanismHint, storyMechanismName } from './story-mechanisms.js'
@@ -8,7 +10,7 @@ import { signalCopy } from './signal-copy.js'
 import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
 import { WATERWAY_GATE } from '../game/waterway-layout.js'
 import { campaignName } from './campaign-copy.js'
-import { observatoryImage, drainageImage } from './power-view.js'
+import { observatoryImage, drainageImage, consoleImage } from './power-view.js'
 import { storyDialogueTemplate } from './story-dialogue.js'
 import { neighbors } from '../game/engine.js'
 import { CAMP_SITES, QUARRY_GATE } from '../game/story-content.js'
@@ -34,26 +36,7 @@ export function storyGuideImage(): string {
 
 /** Scene names remain literal catalog calls so localization checks cover every path. */
 function sceneName(state: StoryViewState): string {
-  switch (state.board.scene.id) {
-    case 'awakening':
-      return message(state.language, 'story.awakening')
-    case 'trail':
-      return message(state.language, 'story.trail')
-    case 'approach':
-      return message(state.language, 'story.approach')
-    case 'north-road':
-      return message(state.language, 'story.north-road')
-    case 'quarry-yard':
-      return message(state.language, 'story.quarry-yard')
-    case 'quarry-passage':
-      return message(state.language, 'story.quarry-passage')
-    case 'quarry-machine':
-      return message(state.language, 'story.quarry-machine')
-    case 'tower-landing':
-      return message(state.language, 'story.tower-landing')
-    case 'camp':
-      return message(state.language, 'story.camp')
-  }
+  return worldSceneName(state.language, state.board.scene.id)
 }
 
 /** Keep the persistent camp's landmarks aligned with their existing service names. */
@@ -69,6 +52,12 @@ function cellTemplate(state: StoryViewState, index: number): string {
   const cell = board.game.cells[index]!
   const gate = run ? storyGateTemplate(run, language, index) : null
   if (gate) return gate
+  if (board.scene.water?.includes(index))
+    return '<div class="story-river" aria-hidden="true"></div>'
+  const portal = northwestPortals(board.scene.id, state.progress).find(
+    (entry) => entry.index === index,
+  )
+  const bastionGate = board.scene.id === 'blockade-pass' && index === BASTION_GATE
   const control = run?.board.scene.mechanisms?.find((entry) => entry.index === index)
   if (board.walls.includes(index))
     return `<div class="story-tree" aria-hidden="true"><img src="${import.meta.env.BASE_URL}assets/story/tree.png" alt="" draggable="false"></div>`
@@ -122,6 +111,22 @@ function cellTemplate(state: StoryViewState, index: number): string {
         : message(language, 'story.mechanism-locked')
     label = storyMechanismName(language, control) + ' · ' + status
     content = spriteImage(run.operated.includes(index) ? 'bastion-pylon-off' : 'bastion-pylon')
+  } else if (portal) {
+    label =
+      portal.destination === 'camp'
+        ? message(language, 'finale.shortcut')
+        : worldSceneName(language, portal.destination)
+    content = spriteImage(portal.destination === 'camp' ? 'workshop' : 'exit')
+  } else if (bastionGate) {
+    label = message(language, 'finale.pass-title')
+    content = spriteImage('bastion')
+  } else if (
+    run?.board.scene.id === 'tower-landing' &&
+    exit &&
+    state.progress.facts?.includes('beacon-recovered')
+  ) {
+    label = message(language, 'finale.control-title')
+    content = consoleImage()
   } else if (waterwayGate) {
     label = message(language, 'waterway.title')
     content = drainageImage()
@@ -166,12 +171,24 @@ function cellTemplate(state: StoryViewState, index: number): string {
     label = message(language, 'story.clue', { count: cell.adjacent })
     content = `<span class="story-clue">${cell.adjacent}</span>`
   }
-  if (number && (site || exit || entrance || quarryGate || ridgeGate || treasure || control)) {
+  if (
+    number &&
+    (site ||
+      exit ||
+      entrance ||
+      quarryGate ||
+      ridgeGate ||
+      waterwayGate ||
+      portal ||
+      bastionGate ||
+      treasure ||
+      control)
+  ) {
     label += ` · ${message(language, 'story.clue', { count: number })}`
     if (index !== state.player) content += `<span class="story-clue-badge">${number}</span>`
   }
   const name = `${Math.floor(index / board.game.config.width) + 1}, ${(index % board.game.config.width) + 1}: ${label}`
-  return `<button class="story-cell ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance || quarryGate || ridgeGate ? 'is-site' : ''}" ${control ? `data-story-mechanism="${index}" data-operated="${!!run?.operated.includes(index)}"` : ''} data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance || quarryGate || ridgeGate ? `<span class="story-site-label">${label}</span>` : ''}</button>`
+  return `<button class="story-cell ${board.scene.bridge?.includes(index) ? 'story-bridge-plank' : ''} ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance || quarryGate || ridgeGate || waterwayGate || portal || bastionGate ? 'is-site' : ''}" ${control ? `data-story-mechanism="${index}" data-operated="${!!run?.operated.includes(index)}"` : ''} data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance || quarryGate || ridgeGate || waterwayGate || portal || bastionGate ? `<span class="story-site-label">${label}</span>` : ''}</button>`
 }
 
 /** A single movable overlay keeps the chibi traveler above cell edges and clues. */
