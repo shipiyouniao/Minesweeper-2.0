@@ -2,6 +2,8 @@ import { feedPowered, powerReadiness, powerObjectiveComplete } from '../game/flo
 import { message } from '../i18n.js'
 import { observatoryFloorName, powerHint } from './observatory-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
+import { icon } from '../icons.js'
+import { sharedStyles } from './shared-styles.js'
 import type { Expedition } from '../types/variants.js'
 import type { Language } from '../types/localization.js'
 import type { PowerFeed } from '../types/floor-power.js'
@@ -14,13 +16,7 @@ export function observatoryImage(): string {
 /** Keep one current instruction and a compact reading counter above the shared board layout. */
 export function powerObjective(language: Language, run: Expedition): string {
   if (!run.power) return ''
-  const network = run.power.junctions
-    .map(
-      (entry, index) =>
-        `<li>${message(language, 'ridge.junction')} ${index + 1} ${entry.input ? `← ${feedLabel(run, entry.input)}` : '⚡'} · ${entry.selected === null ? '—' : `${index + 1}${entry.selected === 0 ? 'A' : 'B'}`} ${!entry.input || feedPowered(run.power!, entry.input) ? '' : `(${message(language, 'ridge.closed')})`}</li>`,
-    )
-    .join('')
-  return `<section class="signal-objective power-objective" aria-live="polite"><strong>${observatoryFloorName(language, run.floor)}</strong><p>${powerObjectiveComplete(run.power) ? message(language, 'ridge.exit-ready') : message(language, 'ridge.objective')}</p><span>${message(language, 'ridge.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><details><summary>${message(language, 'ridge.network')}</summary><p>${message(language, 'ridge.rules')}</p><ul class="power-network">${network}</ul></details></section>`
+  return `<section class="signal-objective power-objective" aria-live="polite"><strong>${observatoryFloorName(language, run.floor)}</strong><p>${powerObjectiveComplete(run.power) ? message(language, 'ridge.exit-ready') : message(language, 'ridge.objective')}</p><span>${message(language, 'ridge.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
 }
 
 /** Identify a source and branch with text as well as color, including in accessible labels. */
