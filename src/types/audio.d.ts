@@ -5,6 +5,7 @@ export type InteractionCue = 'tap' | 'navigate' | 'dismiss' | 'blocked' | 'input
 export type DialogueCue =
   | 'dialogue-player'
   | 'dialogue-lumi'
+  | 'dialogue-nia'
   | 'dialogue-narrator'
   | 'dialogue-boss'
   | 'dialogue-surveyor'

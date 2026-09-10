@@ -24,7 +24,7 @@ camp.saveStory({
 const key = 'minesweeper.variants.v1.expedition',
   fixture = storage.getItem(key)
 const browser = await chromium.launch({ channel: 'msedge' })
-const base = 'http://127.0.0.1:4173/minefarer/'
+const base = process.env.GAME_URL ?? 'http://127.0.0.1:4173/minefarer/'
 try {
   for (const width of [390, 1440])
     for (const lang of ['zh', 'en', 'ja']) {
@@ -96,12 +96,12 @@ try {
       await page.locator('[data-campaign-return]').click()
       await page.locator('[data-story-campaign]').click()
       assert.equal(await page.locator('.campaign-lesson').count(), 0)
-      assert.deepEqual((await read()).campaign.journal, snapshot.campaign.journal)
+      assert.deepEqual((await read()).campaign.stages, snapshot.campaign.stages)
       assert.deepEqual((await read()).journal, before.journal)
       await page.reload()
       await page.locator('[data-control="skill"]').waitFor()
       assert.equal(await page.locator('.campaign-lesson').count(), 0)
-      assert.deepEqual((await read()).campaign.journal, snapshot.campaign.journal)
+      assert.deepEqual((await read()).campaign.stages, snapshot.campaign.stages)
       if (lang === 'zh')
         await page.screenshot({ path: `.native/story-screenshots/campaign-${width}.png` })
       assert.deepEqual(errors, [])

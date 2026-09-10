@@ -50,7 +50,7 @@ test('10,000 actions remain playable and save size depends on scene state, not p
   }
   assert.equal(storage.getItem(key)!.length, bytes)
   assert.equal(session.camp.story.journal, null)
-  assert.ok(storage.getItem(key)!.includes('"schemaVersion":3'))
+  assert.ok(storage.getItem(key)!.includes('"schemaVersion":4'))
   assert.ok(!storage.getItem(key)!.includes('"actions"'))
   assert.ok(storage.data.size <= 3)
 })
@@ -95,7 +95,7 @@ test('unknown future story versions remain untouched when the current client tri
   const storage = new MemoryStorage()
   const repository = new VariantRepository(storage)
   const session = new StorySession(new CampSession(repository))
-  const future = storage.getItem(key)!.replace('"schemaVersion":3', '"schemaVersion":99')
+  const future = storage.getItem(key)!.replace('"schemaVersion":4', '"schemaVersion":99')
   storage.setItem(key, future)
   const older = new VariantRepository(storage)
   older.saveExpedition(repository.expedition()!)

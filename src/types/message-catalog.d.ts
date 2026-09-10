@@ -1,5 +1,43 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'signal.title': string
+  readonly 'signal.floor-1': string
+  readonly 'signal.floor-2': string
+  readonly 'signal.floor-3': string
+  readonly 'signal.relay': string
+  readonly 'signal.gate': string
+  readonly 'signal.released': string
+  readonly 'signal.ready': string
+  readonly 'signal.solve': string
+  readonly 'signal.record': string
+  readonly 'signal.optional': string
+  readonly 'signal.continue': string
+  readonly 'signal.nia': string
+  readonly 'signal.player': string
+  readonly 'signal.lumi': string
+  readonly 'signal.guardian': string
+  readonly 'signal.complete': string
+  readonly 'signal.entry-1': string
+  readonly 'signal.entry-2': string
+  readonly 'signal.entry-3': string
+  readonly 'signal.connected-1': string
+  readonly 'signal.connected-2': string
+  readonly 'signal.connected-3': string
+  readonly 'signal.connected-4': string
+  readonly 'signal.archive-1': string
+  readonly 'signal.archive-2': string
+  readonly 'signal.archive-3': string
+  readonly 'signal.record-1': string
+  readonly 'signal.record-2': string
+  readonly 'signal.prison-1': string
+  readonly 'signal.prison-2': string
+  readonly 'signal.rescued-1': string
+  readonly 'signal.rescued-2': string
+  readonly 'signal.rescued-3-saved': string
+  readonly 'signal.rescued-3-skipped': string
+  readonly 'signal.camp-1': string
+  readonly 'signal.camp-2-saved': string
+  readonly 'signal.camp-2-skipped': string
   readonly 'story.north-road': string
   readonly 'story.lift': string
   readonly 'story.world-road': string

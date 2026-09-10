@@ -39,11 +39,16 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
   if (!reader) return undefined
   const source = reader
   const world =
-    reader.number('schemaVersion') === 3
+    reader.number('schemaVersion') === 3 || reader.number('schemaVersion') === 4
       ? decodeStoryWorld(reader.child('travel')?.value('world'))
       : null
-  if (reader.number('schemaVersion') === 3 && !world) return undefined
-  if (reader.number('schemaVersion') === 2 || reader.number('schemaVersion') === 3) {
+  if ((reader.number('schemaVersion') === 3 || reader.number('schemaVersion') === 4) && !world)
+    return undefined
+  if (
+    reader.number('schemaVersion') === 2 ||
+    reader.number('schemaVersion') === 3 ||
+    reader.number('schemaVersion') === 4
+  ) {
     const travel = reader.child('travel')
     const quests = reader.child('quests')
     if (!travel || !quests || !reader.child('inventory') || !reader.child('dialogue'))

@@ -2,6 +2,61 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'signal.title': 'An Answer in the Tower',
+  'signal.floor-1': 'A Broken Call',
+  'signal.floor-2': 'A Name Without a Home',
+  'signal.floor-3': 'Prisoner of an Old Order',
+  'signal.relay': 'Power relay',
+  'signal.gate': 'Sealed gate',
+  'signal.released': 'Power disconnected',
+  'signal.ready': 'Click the relay to release the gate',
+  'signal.solve':
+    'Use the relay’s number to flag mines and uncover its safe neighbors. Walk onto the relay and click it to cut the power.',
+  'signal.record': 'Outsider arrival record',
+  'signal.optional': 'Side passage · optional',
+  'signal.continue': 'Continue',
+  'signal.nia': 'Nia',
+  'signal.player': 'You',
+  'signal.lumi': 'Lumi',
+  'signal.guardian': 'Tower guardian',
+  'signal.complete': 'The route is open. Head onward.',
+  'signal.entry-1':
+    '…Third time knocking on this pipe. If you can hear me, don’t knock back. It will count you too.',
+  'signal.entry-2': 'Someone’s inside? Lumi, I thought this tower was abandoned.',
+  'signal.entry-3': 'The light on the gate is still on. Let’s disconnect the relay and find her.',
+  'signal.connected-1':
+    'Finally, a voice that isn’t my own echo. I’m Nia. I repair wiring. Currently being held captive by my wiring.',
+  'signal.connected-2':
+    'Evacuation procedure. Return to your registered home. Unregistered persons may not leave the tower.',
+  'signal.connected-3': 'I don’t even have an address in this world. It won’t let me out either.',
+  'signal.connected-4':
+    'Then let’s leave the paperwork for later. Keep climbing. I’ll watch the circuits from here.',
+  'signal.archive-1':
+    'The old registry is up to the left. That blue record says “arrival from another world.” No local address. Just like you.',
+  'signal.archive-2': 'Did they ever get home?',
+  'signal.archive-3':
+    'I got as far as “homeward beacon.” The side door has its own relay. You can reach the record, but don’t step on a mine for it. I remember where the beacon is.',
+  'signal.record-1':
+    '“Homeward trial, attempt seven. Beacon lit. No return confirmed.” …There’s a star chart on the back.',
+  'signal.record-2':
+    'Don’t fold that corner! All right, lecture later. That chart is a lot more useful than the address I memorized.',
+  'signal.prison-1':
+    'I can see you! Two circuits left. Don’t throw rocks at the guardian. I tried. It issued the rock a registration form.',
+  'signal.prison-2':
+    'It’s following an order nobody ever cancelled. First we get you out. Then we figure out how to wake up the rest of this tower.',
+  'signal.rescued-1': 'Registered home… not found. Evacuation route… released.',
+  'signal.rescued-2':
+    'Next time I’m writing “beside the campfire.” Thank you, both of you terrible rule-followers.',
+  'signal.rescued-3-saved':
+    'I’ll spread the chart out at camp. First we work out which sky it points to. Then we find that homeward beacon.',
+  'signal.rescued-3-skipped':
+    'It’s all right that the record stayed here. I’ll draw the route I remember at camp. We’ll find the homeward beacon together.',
+  'signal.camp-1':
+    'I’ve registered an address. Three paces right of the fire. If the guardian comes after me, you’re my witness.',
+  'signal.camp-2-saved':
+    'The chart is missing a corner, but I can read two observation points. When the road opens, we can compare them with the sky.',
+  'signal.camp-2-skipped':
+    'The beacon was north. Which fork in the road… give me a little longer. Perhaps someday we can recover the chart from the tower.',
   'story.north-road': 'Old North Road',
   'story.lift': 'Watchtower Lift',
   'story.world-road': 'Lanternwood · Scouting',

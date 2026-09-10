@@ -1,4 +1,6 @@
 import { storyTaskReward } from '../game/story-quests.js'
+import { campaignProgress, updateCampaign } from '../game/campaign-catalog.js'
+import type { CampaignStageProgress } from '../types/campaign.js'
 import { allowedDeparture, buyUpgrade, EMPTY_CAMP } from '../game/expedition.js'
 import { claimMilestone, equipTitle } from '../game/milestones.js'
 import { VariantRepository } from '../persistence/variant-repository.js'
@@ -44,6 +46,25 @@ export class CampSession {
   /** Return the same wallet, licenses and milestones used by the roguelite. */
   get camp(): Camp {
     return this.read().camp
+  }
+
+  /** A rescued resident and optional record are permanent stage outcomes in the shared camp. */
+  get signalRescue(): CampaignStageProgress {
+    return campaignProgress(this.read().campaign, 'tower-relay')
+  }
+
+  /** Recover an interrupted ending without rebuilding the retired run or repeating settlement. */
+  completeSignalRescue(): void {
+    const save = this.read()
+    const progress = campaignProgress(save.campaign, 'tower-relay')
+    if (!progress.cleared || progress.scenes.includes('rescued')) return
+    this.repository.saveExpedition({
+      ...save,
+      campaign: updateCampaign(save.campaign, {
+        ...progress,
+        scenes: [...progress.scenes, 'rescued'],
+      }),
+    })
   }
 
   /** Story attempts never borrow the roguelite journal slot. */

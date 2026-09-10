@@ -1,6 +1,6 @@
 # Story save contract
 
-The existing `minesweeper.variants.v1.expedition` storage key and outer version 4 remain unchanged. Story schema 3 is an additive envelope alongside the independent roguelite attempt and shared camp. This is a foundation increment, not completion of Roadmap II R2-01.
+The existing `minesweeper.variants.v1.expedition` storage key and outer version 4 remain unchanged. Story schema 4 retains the compact world envelope and protects the multi-stage campaign collection from older clients. Schema 3 is read without resetting its world. This is a foundation increment, not completion of Roadmap II R2-01.
 
 ## Ownership
 
@@ -29,13 +29,13 @@ Old completed/claimed tasks seed their corresponding durable facts during decodi
 
 Travel is no longer bounded by a 3,000-action journal. A 10,000-move reload test checks that serialized size remains unchanged when revisiting the same ground. Storage scales with visited cells/scenes, not elapsed playtime. The current catalog contains the three prologue scenes, northern road, three quarry spaces and tower landing. Future scenes must add stable content IDs and validation, not bypass the checkpoint decoder.
 
-The first campaign attempt now freezes its prepared departure independently of roguelite. Configurable Recollection, the full stage catalog and chapter dependency validation remain required before R2-01 can be marked complete.
+The two playable campaign stages now freeze their prepared departures independently of each other and roguelite. Configurable Recollection and complete chapter dependency validation remain required before R2-01 can be marked complete.
 
 ## Prepared campaign attempt
 
-The shared envelope now has an independent `campaign` field with its own journal, records and first-clear bit. Its departure identifies `tower-road-v4`, freezes the owned profession, equipment, title and training, and replays the same expedition action rules against authored terrain. The ordinary `journal` and records continue to belong to roguelite. A repository projection merges campaign writes with the latest shared envelope; ordinary session checkpoints also retain the latest campaign slot.
+The shared envelope contains `campaign: { schemaVersion: 1, stages: [...] }`. Every stable stage ID owns its journal, records, clear bit, lesson, completed performances and optional narrative outcomes. The catalog maps `tower-galleries` to `tower-road-v4` and `tower-relay` to `tower-relay-v1`. Departures freeze the owned profession, equipment, title and training and replay shared expedition actions against the selected authored terrain. The ordinary `journal` and records continue to belong to roguelite. A repository projection merges only the selected stage with the newest shared envelope; lifecycle saves preserve the other stages. The former single slot migrates once into the galleries entry.
 
-World return suspends the attempt; it does not heal, refill tools or rebuild the departure. Explicit retreat or defeat retires the attempt without a payout, so retry cannot farm room loot. First victory settles 50 supplies and the clear bit atomically; this first delivery does not offer replay after clearance. Unknown campaign content or newer engine revisions are write-protected. Three-heart world exploration and the campaign HP pool remain independent.
+World return suspends the attempt; it does not heal, refill tools or rebuild the departure. Explicit retreat or defeat retires the attempt without a payout, so retry cannot farm room loot. First victory settles the catalog reward and clear bit atomically: 50 supplies for galleries, 80 for signal rescue. The rescued resident and optional record settle with that same outcome. Completed stages currently cannot be replayed. Unknown campaign content or newer engine revisions are write-protected. Three-heart world exploration and the campaign HP pool remain independent.
 
 The campaign lesson stores a bounded step separately from its journal. Actual tool and skill intents advance the lesson; invalid clicks do not. A world return cannot reset it or grant practice resources.
 

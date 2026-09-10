@@ -1,4 +1,5 @@
 import type { Language } from '../types/localization.js'
+import { parseCampaignStage } from '../game/campaign-catalog.js'
 import type { AppRoute, FreeMode } from '../types/navigation.js'
 
 export const FREE_MODES: readonly FreeMode[] = ['classic', 'twin', 'sonar', 'survey']
@@ -6,7 +7,10 @@ export const FREE_MODES: readonly FreeMode[] = ['classic', 'twin', 'sonar', 'sur
 /** Decode only public route names; a bare or invalid link opens the homepage. */
 export function parseRoute(search: string): AppRoute {
   const params = new URLSearchParams(search)
-  if (params.get('page') === 'campaign') return { page: 'campaign' }
+  if (params.get('page') === 'campaign') {
+    const stage = parseCampaignStage(params.get('stage'))
+    return stage ? { page: 'campaign', stage } : { page: 'campaign' }
+  }
   if (params.get('page') === 'story') return { page: 'story' }
   if (params.get('page') === 'free') return { page: 'free' }
 
@@ -31,8 +35,10 @@ export function routeHref(route: AppRoute, language: Language): string {
   const params = new URLSearchParams()
   if (route.page === 'game') params.set('ruleset', route.mode)
   else if (route.page === 'free') params.set('page', 'free')
-  else if (route.page === 'campaign') params.set('page', 'campaign')
-  else if (route.page === 'story') params.set('page', 'story')
+  else if (route.page === 'campaign') {
+    params.set('page', 'campaign')
+    if (route.stage) params.set('stage', route.stage)
+  } else if (route.page === 'story') params.set('page', 'story')
   params.set('lang', language)
   return `?${params}`
 }
@@ -41,6 +47,9 @@ export function routeHref(route: AppRoute, language: Language): string {
 export function sameRoute(left: AppRoute, right: AppRoute): boolean {
   return (
     left.page === right.page &&
+    (left.page !== 'campaign' ||
+      (right.page === 'campaign' &&
+        (left.stage ?? 'tower-galleries') === (right.stage ?? 'tower-galleries'))) &&
     (left.page !== 'game' || (right.page === 'game' && left.mode === right.mode))
   )
 }

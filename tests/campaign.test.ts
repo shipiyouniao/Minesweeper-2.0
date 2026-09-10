@@ -69,7 +69,7 @@ test('campaign and roguelite preserve independent attempts and frozen build reso
   assert.deepEqual(repository.expedition()!.journal, original)
   assert.equal(restored.start('explorer', []), false)
   assert.equal(restored.dispatch({ type: 'retreat' }), true)
-  assert.equal(repository.expedition()!.campaign!.journal, null)
+  assert.equal(repository.forCampaign().expedition()!.journal, null)
   assert.deepEqual(repository.expedition()!.journal, original)
   assert.equal(repository.expedition()!.camp.supplies, balance)
 })
@@ -169,6 +169,7 @@ test('the obsolete framed campaign retires without changing the world or rogueli
   assert.equal(fresh.expedition()!.camp.supplies, original.camp.supplies)
   assert.equal(restored.start('explorer', []), true)
   assert.equal(restored.run!.departure.campaign, 'tower-road-v4')
+  assert.equal(fresh.available, true)
 })
 
 test('campaign layouts reveal only the entrance opening and distribute hazards across the board', () => {

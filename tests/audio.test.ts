@@ -115,6 +115,7 @@ test('character voices stay distinct and the existing dialogue is more audible w
       bossDialogueCue,
     ),
     'dialogue-lumi',
+    'dialogue-nia',
     'dialogue-narrator',
   ] as const
   const signatures = voices.map((cue) => {

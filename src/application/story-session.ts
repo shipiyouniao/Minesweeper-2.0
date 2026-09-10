@@ -1,3 +1,4 @@
+import { NIA_CAMP_CELL } from '../game/signal-story.js'
 import { checkpointStory, restoreStoryWorld, storyWorldScenes } from '../game/story-checkpoint.js'
 import { recordStoryFacts, storyTaskIntroduced } from '../game/story-quests.js'
 import { CampSession } from './camp-session.js'
@@ -257,13 +258,16 @@ export class StorySession {
   campPath(index: number): readonly number[] | null {
     const progress = this.camp.story
     const board = buildStoryBoard(CAMP_SCENE)
-    const player = board.walls.includes(progress.campPosition)
-      ? board.entrance
-      : progress.campPosition
+    const residents = this.camp.signalRescue.cleared ? [51, NIA_CAMP_CELL] : [51]
+    const player =
+      board.walls.includes(progress.campPosition) || residents.includes(progress.campPosition)
+        ? board.entrance
+        : progress.campPosition
     if (!progress.arrived) return null
-    const targets = index === 51 ? adjacentSteps(board.game, index) : [index]
+    const resident = index === NIA_CAMP_CELL && this.camp.signalRescue.cleared
+    const targets = index === 51 || resident ? adjacentSteps(board.game, index) : [index]
     const paths = targets.flatMap((target) => {
-      const path = storyPath(board, player, target)
+      const path = storyPath({ ...board, walls: [...board.walls, ...residents] }, player, target)
       return path ? [path] : []
     })
     return paths.sort((a, b) => a.length - b.length)[0] ?? null

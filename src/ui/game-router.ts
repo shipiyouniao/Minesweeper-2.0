@@ -71,7 +71,7 @@ export class GameRouter implements MountedGame {
     this.sounds = sounds
     this.host.dataset['page'] = this.route.page
     if (this.route.page === 'campaign') {
-      const repository = this.variants.forCampaign()
+      const repository = this.variants.forCampaign(this.route.stage)
       const session = new ExpeditionSession(repository, browserRuntime)
       if (!session.run)
         session.start(session.loadout.profession, session.loadout.equipment, 'relaxed')

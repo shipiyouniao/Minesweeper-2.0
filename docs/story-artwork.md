@@ -10,6 +10,7 @@ All four files below were created with the built-in image generation tool on Sep
 | `public/assets/story/camp-banner.png` | Scene atmosphere and README cover          | Existing `player.png` and `workshop.png` |
 | `public/assets/story/lantern.png`     | Trail exit                                 | Existing `workshop.png`                  |
 | `public/assets/story/tree.png`        | Forest boundary                            | Existing `workshop.png`                  |
+| `public/assets/story/nia.png`         | Nia in the tower, voiced dialogue and camp | Original Lumi guide sprite               |
 
 Reference files are the project's original assets in `public/assets/dungeon/`. The new outputs are original characters and props, not copies of characters from another game. CSS controls display size and reduced-motion effects; no image contains hidden game information or required instructional text.
 
@@ -28,3 +29,11 @@ Create ONE transparent game prop sprite matching this reference's cute polished 
 ## Tree prompt
 
 Create ONE transparent game terrain sprite in the same cute polished 3D toy-like fantasy style as this reference. One small rounded miniature evergreen tree, three soft rounded layered sage-green foliage tiers, tiny warm brown trunk and small ivory moss base. Simple chunky clean silhouette, soft clay-like and handcrafted material, three-quarter high-angle view, muted sage to forest green, soft daylight. Entire object centered inside canvas with 10% margin. A board boundary decoration for a friendly chibi Minesweeper adventure. True transparent RGBA background, no landscape or flat ground plane, no characters, no text, no grid, no frame.
+
+## Nia prompt
+
+Generated with the built-in image-generation tool using the original Lumi sprite as a style reference. The delivered 1254×1254 PNG has a verified transparent alpha channel. An initial checkerboard-background result was replaced with a transparent edit. Nia's short voice is original Web Audio synthesis, not a recording or imitation of a performer.
+
+Use the supplied game sprite only as a style, proportion and material reference. Create one new original character asset for Minefarer: Nia, an adult female watchtower signal technician and archivist with a wry, resourceful personality. Full-body chibi facing right, oversized head, simple cream oval face, two dark navy oval eyes, no visible nose or mouth, rounded mitten hands and stubby limbs. Burnt-orange hood with brass goggles, cream scarf, muted brick-red work tunic, brown satchel and boots. Carry a brass tuning wrench and a closed teal record booklet. Soft clay, cloth and leather rendering matching the reference, gentle upper-left light, clean silhouette readable at small sizes. No writing, border, badge, scenery or other character. Standalone square game sprite with true transparent alpha and compact margins.
+
+Transparency edit: preserve the character, remove the entire checkerboard background, and output a PNG with a genuinely transparent alpha channel outside the character. Keep clothing, wrench, book and crisp edges; do not draw a replacement checkerboard or colored background.

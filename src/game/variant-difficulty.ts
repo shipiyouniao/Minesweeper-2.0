@@ -1,4 +1,5 @@
 import type { Config } from '../types/game.js'
+import { campaignStage } from './campaign-catalog.js'
 import type { Departure, VariantRecord } from '../types/variants.js'
 import type { VariantDifficulty, VariantTier } from '../types/variant-difficulty.js'
 
@@ -75,7 +76,9 @@ export function twinConfig(difficulty?: VariantDifficulty): Config {
 
 /** Read expedition length from the selected tier. */
 export function expeditionFloors(departure: Departure): number {
-  return variantTier(departure.difficulty).floors
+  return departure.campaign
+    ? campaignStage(departure.campaign).floors
+    : variantTier(departure.difficulty).floors
 }
 
 /** Interpolate mine density across the selected expedition. */
