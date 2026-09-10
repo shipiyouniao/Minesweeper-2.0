@@ -1,5 +1,5 @@
 import { STORY_SCENES, STORY_REVISION } from './story-content.js'
-import { createStoryRun } from './story.js'
+import { buildStoryBoard, createStoryRun } from './story.js'
 import type {
   StoryRun,
   StorySceneCheckpoint,
@@ -24,6 +24,7 @@ function sceneCheckpoint(run: StorySceneMemory): StorySceneCheckpoint {
   const initial = createStoryRun(run.floor)
   return {
     id: STORY_SCENE_IDS[run.floor]!,
+    operated: run.operated,
     player: run.player,
     health: run.health,
     revealed: run.board.game.cells.flatMap((cell, index) =>
@@ -58,8 +59,10 @@ export function checkpointStory(run: StoryRun): StoryWorldCheckpoint {
 function restoreScene(saved: StorySceneCheckpoint): StorySceneMemory {
   const floor = STORY_SCENES.findIndex((scene) => scene.id === saved.id)
   const initial = createStoryRun(floor)
+  const board = buildStoryBoard(initial.board.scene, saved.operated)
   return {
     ...initial,
+    operated: saved.operated,
     player: saved.player,
     health: saved.health,
     triggered: saved.triggered,
@@ -70,10 +73,10 @@ function restoreScene(saved: StorySceneCheckpoint): StorySceneMemory {
     rescuedSupplies: saved.rescuedSupplies,
     phase: saved.phase,
     board: {
-      ...initial.board,
+      ...board,
       game: {
-        ...initial.board.game,
-        cells: initial.board.game.cells.map((cell, index) => ({
+        ...board.game,
+        cells: board.game.cells.map((cell, index) => ({
           ...cell,
           visibility: saved.flagged.includes(index)
             ? 'flagged'

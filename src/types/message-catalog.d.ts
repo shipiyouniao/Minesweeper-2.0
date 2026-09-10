@@ -1,5 +1,23 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'story.haul-load': string
+  readonly 'story.go-together': string
+  readonly 'story.lift-answer': string
+  readonly 'story.brake': string
+  readonly 'story.winch': string
+  readonly 'story.haul-track': string
+  readonly 'story.gate-closed': string
+  readonly 'story.mechanism-done': string
+  readonly 'story.mechanism-operate': string
+  readonly 'story.mechanism-locked': string
+  readonly 'story.mechanism-help': string
+  readonly 'story.mechanism-ready': string
+  readonly 'story.brake-scene-1': string
+  readonly 'story.brake-scene-2': string
+  readonly 'story.release-scene-1': string
+  readonly 'story.release-scene-2': string
+  readonly 'story.winch-scene-1': string
+  readonly 'story.winch-scene-2': string
   readonly 'signal.title': string
   readonly 'signal.floor-1': string
   readonly 'signal.floor-2': string

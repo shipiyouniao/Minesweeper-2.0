@@ -1,10 +1,10 @@
 # Story save contract
 
-The existing `minesweeper.variants.v1.expedition` storage key and outer version 4 remain unchanged. Story schema 4 retains the compact world envelope and protects the multi-stage campaign collection from older clients. Schema 3 is read without resetting its world. This is a foundation increment, not completion of Roadmap II R2-01.
+The existing `minesweeper.variants.v1.expedition` storage key and outer version 4 remain unchanged. Story schema 4 retains the compact world envelope and protects the multi-stage campaign collection from older clients. Older schemas remain readable; their terrain follows the content-revision retirement rule. World revision 2 adds the quarry controls and haul route described in [Opening route](opening-route.md). This is a foundation increment, not completion of Roadmap II R2-01.
 
 ## Ownership
 
-- `travel`: camp arrival, camp position and a versioned world checkpoint. The checkpoint stores an active scene ID and one bounded delta per visited scene: position, revealed/flagged cells, triggered hazards, health, teaching and pickup state. Mine positions, clue numbers, artwork and dialogue text are rebuilt from authored resources.
+- `travel`: camp arrival, camp position and a versioned world checkpoint. The checkpoint stores an active scene ID and one bounded delta per visited scene: position, revealed/flagged cells, triggered hazards, operated controls, health, teaching and pickup state. Mine positions, clue numbers, artwork and dialogue text are rebuilt from authored resources. Operated controls restore their open gates; unknown controls and closed-gate player positions are rejected.
 - `quests`: durable outcome facts plus accepted, pinned, completed and claimed stable task IDs. Objective completion and payout remain distinct records, committed with the shared wallet in one write.
 - `inventory`: permanent map ownership.
 - `dialogue`: completed event IDs and the active event/sentence index. Text and portraits remain localized content, never copied into saves.
@@ -15,7 +15,7 @@ Rendering and audio do not award rewards. Dialogue acceptance and narrative comp
 
 The decoder reads older flat and schema-2 story records and infers already completed narrative events from their durable quest outcomes. Old camp records that discarded their route cannot recover unknown original marks: they explicitly reopen the completed prologue as surveyed ground, without paying again.
 
-A current-revision legacy journal is replayed once into scene deltas, then removed together with its archived route and legacy origin. Invalid accepted intents retain their valid prefix. No subsequent move appends an action journal. Incompatible active content retires to camp with one compensation; an already retired camp is not paid again.
+A current-revision legacy journal is replayed once into scene deltas, then removed together with its archived route and legacy origin. Invalid accepted intents retain their valid prefix. No subsequent move appends an action journal. Incompatible active content retires to camp with 200 supplies once; an inactive or already retired world is not compensated. Retirement establishes camp access and consumes the arrival claim without paying it again. Shared purchases, other quest claims, campaign entries and the roguelite journal survive. No previous terrain engine is kept.
 
 Before replacing a supported save, the repository retains one previous complete envelope. The first legacy migration also retains one original copy. Backups replace fixed keys; they do not accumulate by playtime. Unsupported story schema versions and newer world content revisions are write-protected; an older client cannot retire or overwrite a newer world. A malformed envelope may recover from the supported backup. Storage failures remain visible rather than reporting a successful save.
 

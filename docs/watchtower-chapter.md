@@ -4,6 +4,8 @@ Status: a partial playable arc within Roadmap II. The northern road, quarry/lift
 
 ## Narrative promise
 
+The [opening route](opening-route.md) now introduces Nia's absence before the tower, completes the northern survey on site, and adds operated quarry gates plus a haul shortcut. The existing authored stages still follow this approach; the chapter table below is not expanded by counting each overworld room as a prepared stage.
+
 Lumi's lead is real: the watchtower kept arrival records for travelers from elsewhere. Its outer signal stations have failed, cutting off the people who maintained it. The protagonist helps restore the road to consult those records. The guardian protects the archive under an old evacuation order; it does not need to be evil or killed.
 
 The chapter resolves both problems. A supply route reopens, an archivist returns to camp, and the protagonist finds an earlier traveler's signed arrival record with a matching description of the crossing. The next lead is the relay that recorded that crossing. Do not destroy the record or reveal that the entire lead was meaningless merely to extend the story.

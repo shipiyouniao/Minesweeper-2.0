@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE)
 const browser = await chromium.launch({ channel: 'msedge' })
-const base = 'http://127.0.0.1:4173/minefarer/'
+const base = process.env.GAME_URL ?? 'http://127.0.0.1:4173/minefarer/'
 const key = 'minesweeper.variants.v1.expedition'
 try {
   for (const width of [390, 1440])
@@ -68,9 +68,18 @@ try {
       await finish()
       await visit(13, 'north-road')
       await visit(75, 'quarry-yard')
+      await page.locator('[data-story-cell="14"]').click({ button: 'right' })
+      await visit(21, 'quarry-yard')
+      await visit(22, 'quarry-yard')
+      await visit(40, 'quarry-yard')
       await visit(52, 'quarry-passage')
       await visit(39, 'quarry-passage')
       await visit(52, 'quarry-machine')
+      await visit(21, 'quarry-machine')
+      await page.locator('[data-story-cell="22"]').click({ button: 'right' })
+      await visit(23, 'quarry-machine')
+      await visit(13, 'quarry-machine')
+      await visit(39, 'quarry-machine')
       await visit(42, 'quarry-machine')
       await page.reload()
       await page.locator('[data-story-scene="quarry-machine"]').waitFor()

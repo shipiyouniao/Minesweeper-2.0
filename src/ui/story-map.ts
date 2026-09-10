@@ -94,7 +94,7 @@ export function storyMap(state: StoryViewState): string {
                   : scene === 8 && entrance
                     ? 4
                     : scene === 7 && exit
-                      ? 6
+                      ? 4
                       : scene === 8 && exit
                         ? null
                         : site?.destination === 'road'

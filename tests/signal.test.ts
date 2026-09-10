@@ -263,6 +263,22 @@ test('story events follow circuit and record outcomes rather than repeated visit
   )
 })
 
+test('retreat and retry retain completed dialogue without retaining the abandoned attempt', () => {
+  const repo = new VariantRepository(new MemoryStorage())
+  ready(repo)
+  const first = new ExpeditionSession(repo.forCampaign('tower-relay'), new FakeRuntime())
+  first.start('explorer', [])
+  first.completeCampaignScene('entry')
+  const balance = first.camp.supplies
+  assert.equal(first.dispatch({ type: 'retreat' }), true)
+  const retry = new ExpeditionSession(repo.forCampaign('tower-relay'), new FakeRuntime())
+  assert.equal(retry.start('explorer', []), true)
+  assert.equal(retry.run!.floor, 1)
+  assert.deepEqual(retry.stageProgress.scenes, ['entry'])
+  assert.equal(pendingSignalScene(retry.run, retry.stageProgress), null)
+  assert.equal(retry.camp.supplies, balance)
+})
+
 test('authored relay objectives and all safe floor cells remain connected after disconnection', () => {
   for (let floor = 1; floor <= 3; floor++) {
     const layout = signalLayout(floor)

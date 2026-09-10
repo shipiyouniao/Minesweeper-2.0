@@ -4,6 +4,7 @@ import { CampSession } from '../src/application/camp-session.js'
 import { StorySession } from '../src/application/story-session.js'
 import { checkpointStory, restoreStoryWorld } from '../src/game/story-checkpoint.js'
 import { actStory, createStoryRun } from '../src/game/story.js'
+import { STORY_REVISION } from '../src/game/story-content.js'
 import { parseJson } from '../src/persistence/json-reader.js'
 import { decodeStoryWorld } from '../src/persistence/story-world-decoder.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
@@ -109,7 +110,7 @@ test('a newer world revision is write-protected rather than retired by an older 
   const current = new VariantRepository(storage)
   new StorySession(new CampSession(current))
   const before = storage.getItem(key)!
-  const future = before.replace('"revision":1', '"revision":2')
+  const future = before.replace(`"revision":${STORY_REVISION}`, `"revision":${STORY_REVISION + 1}`)
   assert.notEqual(future, before)
   storage.setItem(key, future)
   const older = new VariantRepository(storage)

@@ -1,10 +1,11 @@
 import { neighbors } from './engine.js'
+import { clueIsolated } from './clue-isolation.js'
 import { adjacentSteps } from './variant-board.js'
 import { PROLOGUE_SCENES, STORY_SCENES } from './story-content.js'
 import type { StoryAction, StoryBoard, StoryRun, StoryScene } from '../types/story.js'
 
 /** Derive numbers from an explicit map; artwork and scripting never supply clue values. */
-export function buildStoryBoard(scene: StoryScene): StoryBoard {
+export function buildStoryBoard(scene: StoryScene, operated: readonly number[] = []): StoryBoard {
   const width = scene.rows[0]?.length ?? 0
   const symbols = scene.rows.join('')
   if (!width || scene.rows.some((row) => row.length !== width) || !/^[#*.oSET]+$/.test(symbols))
@@ -12,6 +13,16 @@ export function buildStoryBoard(scene: StoryScene): StoryBoard {
   const entrance = symbols.indexOf('S')
   const exit = symbols.indexOf('E')
   if (entrance < 0 || exit < 0) throw new Error('Scene requires an entrance and exit')
+  const mechanisms = scene.mechanisms ?? []
+  const gates = mechanisms
+    .filter((control) => !operated.includes(control.index))
+    .map((control) => control.gate)
+  if (
+    mechanisms.some((control) => symbols[control.index] !== 'o' || symbols[control.gate] !== 'o') ||
+    new Set(mechanisms.flatMap((control) => [control.index, control.gate])).size !==
+      mechanisms.length * 2
+  )
+    throw new Error('Invalid authored mechanism: ' + scene.id)
   const config = {
     width,
     height: scene.rows.length,
@@ -22,7 +33,7 @@ export function buildStoryBoard(scene: StoryScene): StoryBoard {
     entrance,
     exit,
     treasure: symbols.includes('T') ? symbols.indexOf('T') : null,
-    walls: [...symbols].flatMap((s, index) => (s === '#' ? [index] : [])),
+    walls: [...symbols].flatMap((s, index) => (s === '#' || gates.includes(index) ? [index] : [])),
     game: {
       config,
       seed: 0,
@@ -46,6 +57,7 @@ export function createStoryRun(floor = 0, health = 3, rescuedSupplies = false): 
   const board = buildStoryBoard(scene)
   return {
     floor,
+    operated: [],
     board,
     player: board.entrance,
     health,
@@ -144,6 +156,8 @@ export function actStory(run: StoryRun, action: StoryAction): StoryRun {
     return run.phase === 'fallen'
       ? {
           ...createStoryRun(run.floor, 3, run.rescuedSupplies),
+          operated: run.operated,
+          board: buildStoryBoard(run.board.scene, run.operated),
           collected: run.collected,
           visited: run.visited ?? [],
         }
@@ -158,6 +172,22 @@ export function actStory(run: StoryRun, action: StoryAction): StoryRun {
   }
   const cell = run.board.game.cells[action.index]
   if (!Number.isInteger(action.index) || !cell || run.board.walls.includes(action.index)) return run
+  if (action.type === 'operate') {
+    const control = run.board.scene.mechanisms?.find((entry) => entry.index === action.index)
+    if (
+      !control ||
+      run.operated.includes(control.index) ||
+      !clueIsolated(run.board, control.index) ||
+      !storyPath(run.board, run.player, control.index)
+    )
+      return run
+    return {
+      ...run,
+      player: control.index,
+      operated: [...run.operated, control.index],
+      board: { ...run.board, walls: run.board.walls.filter((index) => index !== control.gate) },
+    }
+  }
   if (action.type === 'chord') {
     const around = neighbors(run.board.game.config, action.index).filter(
       (index) => !run.board.walls.includes(index),

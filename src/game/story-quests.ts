@@ -82,13 +82,7 @@ export const STORY_TASKS: readonly StoryTaskDefinition[] = [
     category: 'main',
     introducedBy: 'north-road-start',
     prerequisite: { kind: 'task', id: 'meet-guide' },
-    objective: {
-      kind: 'all',
-      conditions: [
-        { kind: 'fact', id: 'lift-discovered' },
-        { kind: 'fact', id: 'road-reported' },
-      ],
-    },
+    objective: { kind: 'fact', id: 'lift-discovered' },
     supplies: 20,
   },
   {

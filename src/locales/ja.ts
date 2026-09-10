@@ -2,6 +2,27 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'story.haul-load': '先に無傷の軸を台車へ載せよう。',
+  'story.go-together': 'なら、先に彼女を探そう。帰り道が記録にあるなら、読むのを手伝ってもらえる。',
+  'story.lift-answer': '二回。ニアに聞こえたんだ。手すりにつかまって、上るよ。',
+  'story.brake': '荷積みブレーキ',
+  'story.winch': '運搬巻き上げ機',
+  'story.haul-track': '運搬軌道・昇降台',
+  'story.gate-closed': '閉じた機械の仕切り',
+  'story.mechanism-done': '解除済み',
+  'story.mechanism-operate': '操作可能',
+  'story.mechanism-locked': '周囲の魔結を隔離',
+  'story.mechanism-help': '{name}の周囲の魔結に旗を立て、残りの隣接マスを開いたら、装置を操作。',
+  'story.mechanism-ready': '{name}の準備完了。近づいて操作しよう。',
+  'story.brake-scene-1': '荷物が坑道の真上にぶら下がってる。ロープの音、あれで大丈夫？',
+  'story.brake-scene-2':
+    '大丈夫じゃない。私が支える。レバーの数字で周囲を確かめてから操作して。魔結の衝撃で荷物が落ちたら困るから。',
+  'story.release-scene-1': '止まった。もう手を離していいよ。',
+  'story.release-scene-2':
+    'そうさせてもらう。次に私が「この機械なら任せて」って言ったら、このロープのことを思い出させて。',
+  'story.winch-scene-1':
+    '無傷の軸が仕切りの向こうにある。巻き上げ機なら取り出せるし、台車を昇降台まで送れる。',
+  'story.winch-scene-2': '先に地面を調べて、それから機械だね。覚えたよ。',
   'signal.title': '塔からの返事',
   'signal.floor-1': '途切れた呼び声',
   'signal.floor-2': '帰る場所のない名前',
@@ -55,18 +76,15 @@ export const jaMessages: MessageCatalog = {
   'story.lift': '望楼の昇降台',
   'story.world-road': '灯りの森 · 下見',
   'story.road-task': 'メイン · 望楼への旧道',
-  'story.road-detail':
-    '北門から旧道へ進み、望楼の昇降台を調べてから野営地のルミに報告しよう。報酬：物資20。',
+  'story.road-detail': '望楼の昇降台へ行き、止まった原因を調べる。報酬：物資20。',
   'story.north-start-1':
-    '森の向こうに古い昇降台があるの。望楼はその上よ。まず道が通れるか見てみましょう。',
-  'story.north-start-2': '記録が残っていれば、どうやってここに来たのかわかるかもしれない。',
-  'story.north-found-1': 'レールは残っているけど、軸がない……誰かが外したのかな。',
+    '昨夜、望楼が一度だけ光った。ニアは灯りを試すとき、いつも二度やるんだ。それが気になって。',
+  'story.north-start-2': '一度でも光ったなら、誰かいる。近くまで行こう。',
+  'story.north-found-1': '軸が折れてる。断面がまだ光ってる……つい最近だ。',
   'story.north-found-2':
-    '折れたところに錆があるわ。足りない部品を覚えて、野営地で聞いてみましょう。',
-  'story.north-report-1': '昇降台の軸が折れていたんだ。代わりは見つかるかな。',
-  'story.north-report-2':
-    '古い採石場でも同じ機械を使っていたわ。場所を記しておくね。準備ができたら、そこを探しましょう。',
-
+    '上れたのに、下りられなくなったんだ。轍が採石場へ続いてる。あそこの機械も同じ軸を使ってたよ。',
+  'story.north-report-1': 'ニアが上ったあとで昇降台が壊れた。採石場へ続く轍も見つけたよ。',
+  'story.north-report-2': '行き先は決まったね。ここでひと息つこう。準備ができたら採石場へ。',
   'story.atlas-watchtower': '古い見張り塔',
   'story.atlas-uncharted': 'この地域はまだ測量されていない。',
   'story.atlas-zoom': '地図の倍率',
@@ -101,16 +119,16 @@ export const jaMessages: MessageCatalog = {
   'story.tower-landing': '見張り塔・上階',
   'story.spindle': '昇降台の軸',
   'story.repair-task': 'メイン・昇降台の修理',
-  'story.repair-detail':
-    '北の道の東から採石場へ。積み込み場と坑道を抜け、機械室の軸を回収して昇降台へ運ぼう。',
-  'story.repair-return': '軸を回収した。北の道に戻り、昇降台に取り付けよう。',
+  'story.repair-detail': '荷積み場のブレーキを解除し、坑道の先の機関室で無傷の軸を確保する。',
+  'story.repair-return': '機関室の運搬軌道で軸を昇降台まで送り、取り付ける。',
   'story.climb-task': 'メイン・塔の上の灯',
   'story.climb-detail': '修理した昇降台で上がり、塔の扉の掲示を読もう。',
-  'story.quarry-lead': '採石場は北の道の東。積み込み場と坑道の奥の機械室で、使える軸を探そう。',
-  'story.spindle-found': '大きさも合いそう！片側を持つよ。来た道を戻って昇降台に取り付けよう。',
-  'story.lift-fixed': 'はまった……動いた！手すりにつかまって、上へ行こう。',
+  'story.quarry-lead': '轍をたどって採石場へ。古い機械は私が見るから、足元の魔結をお願い。',
+  'story.spindle-found':
+    'ぴったり。台車に載せて！巻き上げ機は動いてる。この軌道は昇降台の裏につながってるよ。',
+  'story.lift-fixed': 'ここを支えて……よし、回った！上で鐘が鳴らなかった？',
   'story.tower-arrival':
-    '避難中は守衛が記録庫を管理する、と書いてある。記録は残っている。係の人を探して封鎖の解除方法を聞こう。',
+    '「避難命令：住所未登録の者は塔内に留まること」ニア、住所にはいつも「野営地の焚き火のそば」って……',
   'campaign.lesson-move': '先に光る開放済みマスへ移動し、それからスキルを使おう。',
   'campaign.lesson-title': 'ステージ練習・{step}/4',
   'campaign.lesson-enter':
@@ -139,23 +157,24 @@ export const jaMessages: MessageCatalog = {
   'story.chord-touch':
     '光る「1」を長押しすると、周囲の旗がないマスをまとめて開けます。旗の数が数字と同じときに使えますが、旗の位置が間違っていると地雷に当たります。',
   'story.map-unvisited': '未到達',
-  'story.return-bag': 'この鞄、持ち主に返せそうだね。',
+  'story.return-bag': '荷物は火のそばに置こう。帰ったらすぐ見つかるように。',
   'story.open-eyes': '目を開ける',
   'story.dialogue-next': '続ける',
   'story.dialogue-read': '全文を表示',
-  'story.where-am-i': 'ここは……どこ？',
-  'story.other-world': '故郷には……こんな光はなかった。',
-  'story.found-bag': '誰かの鞄が落ちている。',
-  'story.keep-bag': '持っていこう。持ち主が野営地で待っているかも。',
-  'story.home-question': '元の世界へ戻る道は、見つかるかな？',
-  'story.thanks': 'ありがとう、ルミ。やっと一息つけるよ。',
+  'story.where-am-i': '扉はここにあった。まだ取っ手を握っていたのに。',
+  'story.other-world': 'この数字は……読める。でも、この場所には見覚えがない。',
+  'story.found-bag': '留め金に「ニア」って。中の包帯はまだ乾いてる。',
+  'story.keep-bag': 'あの子のだ。出かけるときは必ず持ってるのに……持ってきてくれる？',
+  'story.home-question': 'ニアも帰り道を探していたの？',
+  'story.thanks': 'ずっと北の道を見てるね。',
   'story.prologue': '序章 · 霧の中の灯',
   'story.camp': '灯の宿営地',
   'story.guide': 'ルミ',
   'story.awakening': '見知らぬ木立',
   'story.trail': '古い小道',
   'story.approach': '木々の向こうの灯',
-  'story.wake-line': '目が覚めたね！まだ動かないで。地面の光は魔結の痕跡。その「1」、見える？',
+  'story.wake-line':
+    '扉？木の根しかないよ。足はまだ下ろさないで。魔結から引っぱり出したばかりだから。光る「1」が見える？',
   'story.read-task': '光る数字を選んで、周囲8マスを調べよう。',
   'story.flag-line': '「1」は周囲8マスに魔結が1つ。まだ見えないのは1マスだけ。そこに目印をつけて。',
   'story.flag-task': 'そのマスに旗を。右クリック・長押し、または下の「旗」を選んでタップ。',
@@ -165,16 +184,17 @@ export const jaMessages: MessageCatalog = {
   'story.travel-line': 'この痕跡が読めるんだ……頼もしいね。安全な道をおいで。野営地まで案内するよ。',
   'story.travel-task': '開いたマスを選ぶと歩く。灯のもとに着いたら先へ進もう。',
   'story.trail-line':
-    '別の世界から来たの？まずは休める場所へ。数字のない地面は周りも開くよ。前の区画を試して。',
+    'よかった。道は私が覚えてる。地面は任せたよ。前の空き地を開いてみて。何もない場所は続けて明るくなるから。',
   'story.trail-task': '空き地を開いて灯へ進もう。落とし物の鞄は寄り道で回収できる。',
-  'story.approach-line': 'ほら、灯の宿営地。中の道は安全だよ。着いたら、故郷の話を聞かせてね。',
+  'story.approach-line':
+    'あれが野営地。火の横の椅子は空けておこう。ニアはいつも、あれだけはがたつかないって言うんだ。',
   'story.approach-task': '安全な道を探して野営地の灯へ。旗は目印。魔結は消えない。',
   'story.arrival-line':
-    '着いたよ。焚き火に温かいスープがあるし、寝床もある。落ち着いたら南の灯で会おう。',
+    'スープ、まだ温かいよ。まずは飲んで。それから南の灯りのところへ。話しておきたいことがあるんだ。',
   'story.camp-task': '南の灯へ歩き、ルミと話そう。',
   'story.guide-line':
-    '帰り道か……古い見張り塔には異界から来た人の記録がある。でも、道は何年も閉ざされたまま。詳しい人を探してみるね。この地図を持っていって。近くの道を覚えるときに使って。',
-  'story.camp-ready': '工房を訪ねたり、仲間と話したり、掲示板を覗いてみよう。',
+    '違うよ。望楼には異郷から来た人の記録がある。私のために古い地図を探しに行ったんだ。暗くなる前に戻るって。',
+  'story.camp-ready': '工房で準備を整えたら、ルミと北の道へ。',
   'story.road-line': 'まず灯りのそばのルミに道を聞いて、地図を受け取ろう。',
   'story.temporary': 'ローグライト · 仮の入口',
   'story.temporary-note': '今までの遠征とボスに挑戦。',

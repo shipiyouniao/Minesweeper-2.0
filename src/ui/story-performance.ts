@@ -173,6 +173,45 @@ export class StoryPerformance {
     )
   }
 
+  /** Drain the gate after the accepted control operation, before any following dialogue. */
+  async releaseGate(index: number, gate: number): Promise<void> {
+    if (this.reduced.matches || document.hidden || this.disposed) return
+    const control = this.root.querySelector<HTMLElement>(`[data-story-cell="${index}"] img`)
+    const barrier = this.root.querySelector<HTMLElement>(`[data-story-gate="${gate}"] img`)
+    if (control)
+      this.animate(
+        control,
+        [{ transform: 'rotate(0)' }, { transform: 'rotate(18deg)' }, { transform: 'rotate(0)' }],
+        400,
+      )
+    if (barrier)
+      await this.animate(
+        barrier,
+        [
+          { opacity: 1, filter: 'brightness(1)' },
+          { opacity: 1, filter: 'brightness(2)', offset: 0.35 },
+          { opacity: 0, transform: 'translateY(35%) scaleY(.25)' },
+        ],
+        650,
+      ).finished.catch(() => {})
+  }
+
+  /** The winch carries the recovered axle out through the haul track before the scene changes. */
+  async haul(): Promise<void> {
+    if (this.reduced.matches || document.hidden || this.disposed) return
+    const player = this.root.querySelector<HTMLElement>('.story-traveler')
+    if (player)
+      await this.animate(
+        player,
+        [
+          { opacity: 1, transform: 'translateY(0)' },
+          { opacity: 1, transform: 'translateY(-7px) rotate(-4deg)', offset: 0.3 },
+          { opacity: 0, transform: 'translateY(45px) scale(.8)' },
+        ],
+        650,
+      ).finished.catch(() => {})
+  }
+
   /** Cancel every timer and animation when routing away; no detached speaker keeps sounding. */
   dispose(): void {
     this.disposed = true

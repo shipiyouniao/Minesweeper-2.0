@@ -1,4 +1,5 @@
 import { storyTaskReward } from '../game/story-quests.js'
+import { STORY_REVISION } from '../game/story-content.js'
 import { campaignProgress, updateCampaign } from '../game/campaign-catalog.js'
 import type { CampaignStageProgress } from '../types/campaign.js'
 import { allowedDeparture, buyUpgrade, EMPTY_CAMP } from '../game/expedition.js'
@@ -113,7 +114,33 @@ export class CampSession {
     return true
   }
 
-  /** Commit task completion and payment atomically; route unlocks need no Claim button. */
+  /** Retire old terrain once; camp access is restored without paying a second arrival reward. */
+  retireStoryWorld(active: boolean): void {
+    const save = this.read()
+    const story = save.story ?? EMPTY_STORY
+    const progress = {
+      ...story,
+      arrived: true,
+      journal: null,
+      world: { revision: STORY_REVISION, active: null, hasVisited: false, scenes: [] },
+      facts: [...new Set([...(story.facts ?? []), 'camp-reached' as const])],
+      completed: [...new Set([...story.completed, 'reach-camp' as const])],
+      claimed: [...new Set([...story.claimed, 'reach-camp' as const])],
+      dialogue: { completed: story.dialogue?.completed ?? [], active: null },
+    }
+    delete progress.route
+    delete progress.routeLegacy
+    this.repository.saveExpedition({
+      ...save,
+      story: progress,
+      camp: {
+        ...save.camp,
+        supplies: Math.min(Number.MAX_SAFE_INTEGER, save.camp.supplies + (active ? 200 : 0)),
+      },
+    })
+  }
+
+  /** Claim completed story rewards and checkpoint shared progress in one storage write. */
   saveStory(story: StoryProgress, compensation = 0): void {
     const save = this.read()
     const previous = save.story ?? EMPTY_STORY

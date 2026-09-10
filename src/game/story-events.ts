@@ -18,6 +18,9 @@ export const STORY_DIALOGUE_IDS: readonly StoryDialogueId[] = [
   'spindle-found',
   'lift-repaired',
   'tower-arrival',
+  'quarry-brake',
+  'quarry-release',
+  'quarry-winch',
 ]
 
 /** Stable event identity is independent of translated wording, portraits and DOM lifetime. */
@@ -25,9 +28,19 @@ export function storyDialogueEvent(state: StoryViewState): StoryDialogueId | nul
   const run = state.run
   if (state.service || run?.phase === 'fallen' || state.feedback === 'hurt') return null
   const seenEvents = state.progress.dialogue?.completed ?? []
-  if (state.progress.completed.includes('survey-road') && !seenEvents.includes('quarry-lead'))
+  if (
+    state.progress.completed.includes('survey-road') &&
+    !seenEvents.includes('quarry-lead') &&
+    (run?.board.scene.id !== 'north-road' || seenEvents.includes('north-road-found'))
+  )
     return 'quarry-lead'
   if (run && run.floor >= 3) {
+    if (run.board.scene.id === 'quarry-yard') {
+      if (!seenEvents.includes('quarry-brake')) return 'quarry-brake'
+      if (run.operated.length && !seenEvents.includes('quarry-release')) return 'quarry-release'
+    }
+    if (run.board.scene.id === 'quarry-machine' && !seenEvents.includes('quarry-winch'))
+      return 'quarry-winch'
     if (state.progress.facts?.includes('lift-restored') && !seenEvents.includes('lift-repaired'))
       return 'lift-repaired'
     if (

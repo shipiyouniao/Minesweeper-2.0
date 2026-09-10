@@ -1,4 +1,4 @@
-import { neighbors } from './engine.js'
+import { clueIsolated } from './clue-isolation.js'
 import { walkingPath } from './dungeon-path.js'
 import { recordTravel } from './exploration-relics.js'
 import type { FloorRelay } from '../types/floor-circuits.js'
@@ -6,13 +6,7 @@ import type { Expedition } from '../types/variants.js'
 
 /** Read only visible clues and player marks; a relay never leaks hidden mine truth. */
 export function relayReady(run: Expedition, relay: FloorRelay): boolean {
-  const cell = run.game.cells[relay.index]
-  if (!relay.active || cell?.visibility !== 'revealed') return false
-  const ring = neighbors(run.game.config, relay.index).filter((index) => !run.walls.includes(index))
-  const flags = ring.filter((index) => run.game.cells[index]?.visibility === 'flagged').length
-  return (
-    flags === cell.adjacent && ring.every((index) => run.game.cells[index]?.visibility !== 'hidden')
-  )
+  return relay.active && clueIsolated(run, relay.index)
 }
 
 /** Closing circuits is an explicit physical action, independent of flag placement. */
