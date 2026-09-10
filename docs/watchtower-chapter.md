@@ -1,6 +1,6 @@
 # First chapter: the old watchtower
 
-Status: the six-stage main route is playable. The prologue and persistent camp, northern road, quarry, lift and northwest bridge connect five exploration stages with a final guardian stage. This is the first Bastion-family arc, not the later Lookout boss. Optional side stages and later chapters remain Roadmap II work.
+Status: the six-stage main route is playable. The prologue and persistent camp, northern road, quarry, lift and northwest bridge connect five exploration stages with a final guardian stage. This is the first Bastion-family arc, not the later Lookout boss. The independent [old-mine rescue](quarry-rescue.md) adds three optional minecart puzzles and Toma as a camp resident. Further side stories and later chapters remain Roadmap II work.
 
 ## Main route
 
@@ -35,8 +35,8 @@ Current earlier stages and world scenes retain their revisions and mine maps. Ne
 
 ## Remaining chapter and roadmap work
 
-- The next chapter-completion priority is a genuine independent side route. The working direction is an old-mine rescue accessible before the guardian, with a separate entrance, multiple authored floors, its own resolution and a durable camp consequence. Its exact cast, puzzles and rewards remain content design; it is not playable in this increment.
-- The satchel, optional tower record and bridge shortcut are not substitutes for that route. The earlier cartographer pitch remains uncommitted, and no new camp resident is claimed here.
+- The old-mine rescue is playable from Quarry Yard before any main dungeon. Three authored floors combine ordinary clues with reversible minecart routing, passenger pickup and a required return trip. Toma joins camp; first completion gives 120 supplies and the engineer unlock if unowned.
+- The satchel, optional tower record and bridge shortcut remain incidental activities. The cartographer pitch is still uncommitted; additional independent branches can expand the chapter.
 - The western crossing and later chapter families remain to be authored.
 - Keep the temporary roguelite entrance until configurable Recollection is complete.
 - Roadmap II also retains mixed exploration families, free-play additions and community contribution work.

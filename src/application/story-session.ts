@@ -1,5 +1,6 @@
 import { northwestPortals } from '../game/northwest-world.js'
 import { STORY_SCENES } from '../game/story-content.js'
+import { TOMA_CAMP_CELL } from '../game/rail-story.js'
 import { NIA_CAMP_CELL } from '../game/signal-story.js'
 import { checkpointStory, restoreStoryWorld, storyWorldScenes } from '../game/story-checkpoint.js'
 import { recordStoryFacts, storyTaskIntroduced } from '../game/story-quests.js'
@@ -30,7 +31,7 @@ export class StorySession {
   constructor(camp: CampSession) {
     this.camp = camp
     camp.acceptWaterwayRoute()
-    camp.acceptFinaleRoutes()
+    camp.acceptDiscoveredRoutes()
     const story = camp.story
     if (story.world) {
       if (story.world.revision !== STORY_REVISION) {
@@ -287,13 +288,17 @@ export class StorySession {
   campPath(index: number): readonly number[] | null {
     const progress = this.camp.story
     const board = buildStoryBoard(CAMP_SCENE)
-    const residents = this.camp.signalRescue.cleared ? [51, NIA_CAMP_CELL] : [51]
+    const residents = [
+      51,
+      ...(this.camp.signalRescue.cleared ? [NIA_CAMP_CELL] : []),
+      ...(progress.facts?.includes('toma-rescued') ? [TOMA_CAMP_CELL] : []),
+    ]
     const player =
       board.walls.includes(progress.campPosition) || residents.includes(progress.campPosition)
         ? board.entrance
         : progress.campPosition
     if (!progress.arrived) return null
-    const resident = index === NIA_CAMP_CELL && this.camp.signalRescue.cleared
+    const resident = residents.includes(index)
     const targets = index === 51 || resident ? adjacentSteps(board.game, index) : [index]
     const paths = targets.flatMap((target) => {
       const path = storyPath({ ...board, walls: [...board.walls, ...residents] }, player, target)
@@ -351,6 +356,7 @@ export class StorySession {
         ...(arrived && run.rescuedSupplies ? ['satchel-delivered' as const] : []),
       ]),
     )
+    this.camp.acceptDiscoveredRoutes()
     if (arrived) this.current = null
   }
 }

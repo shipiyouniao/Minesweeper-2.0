@@ -1,0 +1,163 @@
+.rail-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.rail-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #b6c4ba;
+  border-radius: 0.7rem;
+  background: #f4f6ee;
+  color: #365b4c;
+}
+.rail-controls img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+.rail-controls svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+.rail-branch {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  padding: 0 2px;
+  border-radius: 3px;
+  background: #f6f4e7;
+  color: #766040;
+  font-size: max(9px, calc(var(--cell) * 0.21));
+  line-height: 1.15;
+  pointer-events: none;
+  z-index: 4;
+}
+.rail-board .landmark-clue {
+  z-index: 10;
+}
+.rail-board .flagged .rail-landmark,
+.rail-board .suspected-safe .rail-landmark {
+  opacity: 0.25;
+}
+.rail-objective small {
+  display: block;
+  color: #68776a;
+}
+.rail-board .cell {
+  isolation: isolate;
+}
+.rail-board .rail-moving-cell {
+  z-index: 30;
+}
+.rail-track-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  stroke: #ae946b;
+  stroke-width: 11;
+  fill: none;
+  opacity: 0.5;
+}
+.rail-forecast .rail-track-art {
+  stroke: #4b8f83;
+  opacity: 0.85;
+}
+.rail-landmark {
+  position: absolute;
+  inset: 14% 10% 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15em;
+  color: #785c35;
+  pointer-events: none;
+}
+.rail-landmark small {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: 0.48em;
+  font-weight: 700;
+  background: #f8f8ed;
+  border-radius: 0.2rem;
+  padding: 0 0.1em;
+}
+.rail-landmark img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+.rail-complete {
+  color: #397b68;
+  opacity: 0.65;
+}
+.rail-vehicle {
+  position: absolute;
+  inset: 8%;
+  pointer-events: none;
+  z-index: 8;
+}
+.rail-vehicle img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.rail-vehicle .rail-toma {
+  width: 70%;
+  height: 70%;
+  top: -18%;
+  left: 15%;
+}
+.rail-mini-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+  width: 170px;
+}
+.rail-mini-board span {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  background: #e8eee5;
+  border-radius: 5px;
+  color: #366758;
+}
+.rail-mini-board img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+}
+.board-viewport:has(.rail-board) {
+  max-height: min(70vh, 820px);
+}
+@media (max-width: 600px) {
+  .rail-mini-board {
+    width: 135px;
+  }
+}
+
+.rail-settlement {
+  margin: 0 1rem 1rem;
+  text-align: center;
+  color: #397b68;
+}
+@media (max-width: 600px) {
+  .rail-guide {
+    --picture-step-columns: minmax(0, 1fr);
+  }
+  .rail-guide .rail-mini-board {
+    width: 150px;
+    margin-inline: auto;
+  }
+}

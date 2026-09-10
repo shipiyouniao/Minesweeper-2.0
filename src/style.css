@@ -20,6 +20,7 @@
 @import './story-performance.css' layer(components);
 @import './signal.css' layer(components);
 @import './power.css' layer(components);
+@import './rail.css' layer(components);
 
 /* Resets stay below component styles and opt-in utilities. */
 @layer base {

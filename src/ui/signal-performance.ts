@@ -1,3 +1,4 @@
+import { tomaImage } from './rail-view.js'
 import { bridgeReveal } from './chapter-performance.js'
 import { DialogueReveal } from './dialogue-reveal.js'
 import { signalCopy, signalLines } from './signal-copy.js'
@@ -61,6 +62,13 @@ export class SignalPerformance {
     root.append(dialog)
     if (scene === 'control-restored')
       dialog.querySelector('.signal-cast')!.insertAdjacentHTML('afterend', bridgeReveal(language))
+    if (scene === 'rail-home')
+      dialog
+        .querySelector('.signal-cast')!
+        .insertAdjacentHTML(
+          'afterend',
+          `<p class="rail-settlement">${message(language, 'rail.reward')}</p>`,
+        )
     if (scene === 'pass-open') dialog.classList.add('chapter-guardian-restored')
     if (
       scene === 'ridge-found' ||
@@ -87,19 +95,30 @@ export class SignalPerformance {
       this.animation?.cancel()
       const portrait = dialog.querySelector<HTMLElement>('[data-signal-portrait]')!
       const listener = dialog.querySelector<HTMLElement>('[data-signal-listener]')!
+      const portraitSpeaker =
+        line.speaker === 'player'
+          ? (lines.find((entry) => entry.speaker !== 'player')?.speaker ?? 'nia')
+          : line.speaker
       // Keep the person being answered on screen while the player speaks.
       if (line.speaker !== 'player' || !portrait.firstElementChild)
         portrait.innerHTML =
-          line.speaker === 'lumi'
-            ? `<img src="${import.meta.env.BASE_URL}assets/story/guide.png" alt="" draggable="false">`
-            : line.speaker === 'guardian'
-              ? spriteImage('bastion')
-              : niaImage()
+          portraitSpeaker === 'toma'
+            ? tomaImage()
+            : portraitSpeaker === 'lumi'
+              ? `<img src="${import.meta.env.BASE_URL}assets/story/guide.png" alt="" draggable="false">`
+              : portraitSpeaker === 'guardian'
+                ? spriteImage('bastion')
+                : niaImage()
       // The first response has a silhouette; the face is revealed only after reconnecting the line.
-      portrait.classList.toggle('signal-radio', scene === 'entry' && line.speaker === 'nia')
+      portrait.classList.toggle(
+        'signal-radio',
+        (scene === 'entry' && line.speaker === 'nia') ||
+          ((scene === 'rail-entry' || scene === 'rail-brakes') && portraitSpeaker === 'toma'),
+      )
       portrait.classList.toggle('is-speaking', line.speaker !== 'player')
       listener.classList.toggle('is-speaking', line.speaker === 'player')
-      dialog.querySelector('#signal-speaker')!.textContent = t[line.speaker]
+      dialog.querySelector('#signal-speaker')!.textContent =
+        line.speaker === 'toma' ? message(language, 'rail.toma') : t[line.speaker]
       const active = line.speaker === 'player' ? listener : portrait
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
         this.animation = active.animate(
@@ -111,13 +130,15 @@ export class SignalPerformance {
           { duration: 420, easing: 'ease-out' },
         )
       const cue =
-        line.speaker === 'player'
-          ? playerDialogueCue(profession)
-          : line.speaker === 'guardian'
-            ? 'dialogue-boss'
-            : line.speaker === 'lumi'
-              ? 'dialogue-lumi'
-              : 'dialogue-nia'
+        line.speaker === 'toma'
+          ? 'dialogue-toma'
+          : line.speaker === 'player'
+            ? playerDialogueCue(profession)
+            : line.speaker === 'guardian'
+              ? 'dialogue-boss'
+              : line.speaker === 'lumi'
+                ? 'dialogue-lumi'
+                : 'dialogue-nia'
       this.reveal.start(
         dialog.querySelector<HTMLElement>('[data-signal-line]')!,
         line.text,

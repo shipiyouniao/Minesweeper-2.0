@@ -44,7 +44,7 @@ test('complete chapter settlements resume every intent and preserve shared camp 
           'west-shortcut',
         ]),
       )
-      camp.acceptFinaleRoutes()
+      camp.acceptDiscoveredRoutes()
     }
     let stage = new ExpeditionSession(repo.forCampaign(id), new FakeRuntime())
     assert.ok(stage.start('explorer', []))
@@ -59,7 +59,7 @@ test('complete chapter settlements resume every intent and preserve shared camp 
     assert.equal(stage.run?.phase, 'won')
     const ending = id === 'tower-control' ? 'control-restored' : 'pass-open'
     assert.equal(pendingFinaleScene(null, camp.stageProgress(id)), ending)
-    camp.completeFinaleScene(id, ending)
+    camp.completeStageScene(id, ending)
     assert.equal(pendingFinaleScene(null, camp.stageProgress(id)), null)
     assert.equal(
       new ExpeditionSession(repo.forCampaign(id), new FakeRuntime()).start('explorer', []),
@@ -153,6 +153,6 @@ test('every northwest portal terminates on authored safe floor and future chapte
   const future = storage.getItem(key)!.replaceAll('tower-control-v1', 'tower-control-v2')
   storage.setItem(key, future)
   assert.equal(storyEnvelopeStatus(future), 'unsupported')
-  new CampSession(new VariantRepository(storage)).acceptFinaleRoutes()
+  new CampSession(new VariantRepository(storage)).acceptDiscoveredRoutes()
   assert.equal(storage.getItem(key), future)
 })

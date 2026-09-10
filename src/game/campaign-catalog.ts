@@ -15,6 +15,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     prerequisite: null,
     floors: 3,
     reward: 50,
+    entryTask: 'reach-tower',
     lesson: true,
   },
   {
@@ -25,6 +26,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     prerequisite: 'tower-galleries',
     floors: 3,
     reward: 80,
+    entryTask: 'reach-tower',
     lesson: false,
   },
   {
@@ -36,6 +38,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     floors: 3,
     outcome: 'ridge-surveyed',
     reward: 100,
+    entryTask: 'reach-tower',
     lesson: false,
   },
   {
@@ -47,6 +50,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     floors: 3,
     outcome: 'beacon-recovered',
     reward: 140,
+    entryTask: 'reach-tower',
     lesson: false,
   },
   {
@@ -58,6 +62,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     floors: 3,
     outcome: 'west-line-restored',
     reward: 180,
+    entryTask: 'reach-tower',
     lesson: false,
   },
   {
@@ -69,13 +74,27 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     floors: 3,
     outcome: 'chapter-one-cleared',
     reward: 240,
+    entryTask: 'reach-tower',
+    lesson: false,
+  },
+  {
+    id: 'quarry-rescue',
+    entrance: { scene: 'quarry-yard', index: 25, fact: 'lift-discovered' },
+    bounds: { width: 17, height: 17 },
+    revision: 'quarry-rescue-v1',
+    prerequisite: null,
+    floors: 3,
+    outcome: 'toma-rescued',
+    reward: 120,
+    entryTask: 'survey-road',
     lesson: false,
   },
 ]
 
 /** Reject arbitrary route keys before selecting a save slot. */
 export function parseCampaignStage(value: string | null): CampaignStageId | null {
-  return value === 'tower-galleries' ||
+  return value === 'quarry-rescue' ||
+    value === 'tower-galleries' ||
     value === 'tower-relay' ||
     value === 'ridge-observatory' ||
     value === 'old-waterway' ||

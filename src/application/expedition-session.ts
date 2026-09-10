@@ -217,7 +217,7 @@ export class ExpeditionSession {
       (this.stageProgress.cleared ||
         (this.stage.prerequisite !== null &&
           !campaignProgress(this.save.campaign, this.stage.prerequisite).cleared) ||
-        !this.save.story?.completed.includes('reach-tower') ||
+        !this.save.story?.completed.includes(this.stage.entryTask) ||
         (this.stage.entrance.fact !== null &&
           !this.save.story.facts?.includes(this.stage.entrance.fact)) ||
         this.save.story.world?.active !== this.stage.entrance.scene ||
@@ -360,6 +360,13 @@ export class ExpeditionSession {
         camp: {
           ...this.camp,
           supplies: Math.min(Number.MAX_SAFE_INTEGER, this.camp.supplies + earned),
+          upgrades:
+            this.campaignMode &&
+            this.stage.id === 'quarry-rescue' &&
+            next.phase === 'won' &&
+            !this.camp.upgrades.includes('engineer')
+              ? [...this.camp.upgrades, 'engineer']
+              : this.camp.upgrades,
           completed: this.camp.completed + Number(next.phase === 'won'),
         },
         records: addVariantRecord(this.save.records, record),

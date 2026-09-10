@@ -1,8 +1,10 @@
+import { RESCUE_GATE, TOMA_CAMP_CELL } from '../game/rail-story.js'
 import { northwestPortals, BASTION_GATE } from '../game/northwest-world.js'
 import { worldSceneName } from './world-copy.js'
 import { pinnedStoryTasks, storyQuestPanel } from './story-quests.js'
 import { clueIsolated } from '../game/clue-isolation.js'
 import { storyGateTemplate, storyMechanismHint, storyMechanismName } from './story-mechanisms.js'
+import { cartImage, tomaImage } from './rail-view.js'
 import { campaignProgress, CAMPAIGN_STAGES } from '../game/campaign-catalog.js'
 import { NIA_CAMP_CELL } from '../game/signal-story.js'
 import { niaImage } from './signal-performance.js'
@@ -100,6 +102,12 @@ function cellTemplate(state: StoryViewState, index: number): string {
   ) {
     label = signalCopy(language).nia
     content = niaImage()
+  } else if (!run && index === TOMA_CAMP_CELL && state.progress.facts?.includes('toma-rescued')) {
+    label = message(language, 'rail.toma')
+    content = tomaImage()
+  } else if (run?.board.scene.id === 'quarry-yard' && index === RESCUE_GATE) {
+    label = message(language, 'rail.title')
+    content = cartImage()
   } else if (site) {
     label = storySiteName(language, site)
     content = site.destination === 'guide' ? storyGuideImage() : spriteImage(site.sprite)
@@ -237,6 +245,7 @@ function campaignEntries(state: StoryViewState): string {
   const available = CAMPAIGN_STAGES.filter((stage) => {
     const entrance = stage.entrance
     return (
+      state.progress.completed.includes(stage.entryTask) &&
       entrance.scene === run.board.scene.id &&
       run.player === (entrance.index ?? run.board.exit) &&
       (!entrance.fact || state.progress.facts?.includes(entrance.fact)) &&

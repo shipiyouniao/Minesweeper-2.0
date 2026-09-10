@@ -59,7 +59,7 @@ function guardianCheckpoint(ending) {
   const repo = new VariantRepository(storage),
     camp = new CampSession(repo)
   const world = createStoryRun(9)
-  camp.completeFinaleScene('tower-control', 'control-restored')
+  camp.completeStageScene('tower-control', 'control-restored')
   camp.saveStory(
     recordStoryFacts({ ...camp.story, world: checkpointStory({ ...world, player: 16 }) }, [
       'west-shortcut',
@@ -83,8 +83,8 @@ try {
   const stored = new MemoryStorage()
   stored.setItem(key, readFileSync('.native/northwest-bastion-ending-save.json', 'utf8'))
   const camp = new CampSession(new VariantRepository(stored))
-  camp.completeFinaleScene('northwest-bastion', 'pass-open')
-  camp.completeFinaleScene('northwest-bastion', 'chapter-camp')
+  camp.completeStageScene('northwest-bastion', 'pass-open')
+  camp.completeStageScene('northwest-bastion', 'chapter-camp')
   camp.saveStory({
     ...camp.story,
     arrived: true,

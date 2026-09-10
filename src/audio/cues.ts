@@ -40,6 +40,12 @@ function note(frequency: number, delay = 0, duration = 0.09): Tone {
 export function notesForCue(cue: SoundCue): readonly Tone[] {
   if (isDialogueCue(cue)) return [dialogueTone(cue)]
   switch (cue) {
+    case 'cart-roll':
+      return [0, 0.1, 0.21, 0.33, 0.46].map((delay) => ({
+        ...note(170, delay, 0.055),
+        endFrequency: 95,
+        gain: 0.045,
+      }))
     case 'power-switch':
       return [{ ...note(190, 0, 0.1), endFrequency: 410 }, note(740, 0.1, 0.12)]
     case 'beacon-signal':
@@ -122,6 +128,7 @@ export function cuePriority(cue: SoundCue): number {
     case 'heal':
     case 'sonar-pulse':
     case 'confirm':
+    case 'cart-roll':
     case 'power-switch':
     case 'beacon-signal':
     case 'reveal':

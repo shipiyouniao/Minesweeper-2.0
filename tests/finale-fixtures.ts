@@ -73,6 +73,6 @@ export function readyFinale(repo: VariantRepository): CampSession {
               : [],
     })
   repo.saveExpedition({ ...saved, campaign: campaign! })
-  camp.acceptFinaleRoutes()
+  camp.acceptDiscoveredRoutes()
   return camp
 }

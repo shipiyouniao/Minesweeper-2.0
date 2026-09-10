@@ -1,3 +1,5 @@
+import { pendingRailScene, TOMA_CAMP_CELL } from '../game/rail-story.js'
+import { railLines } from './rail-copy.js'
 import { campaignProgress } from '../game/campaign-catalog.js'
 import { clueIsolated } from '../game/clue-isolation.js'
 import { storyAtlasUnlocked, storyAtlasIndex } from '../game/story-atlas.js'
@@ -129,6 +131,7 @@ export class StoryApp implements MountedGame {
     const progress = this.session.camp.story
     const board = run?.board ?? buildStoryBoard(CAMP_SCENE)
     const saved =
+      (progress.campPosition === TOMA_CAMP_CELL && progress.facts?.includes('toma-rescued')) ||
       progress.campPosition === 51 ||
       (progress.campPosition === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared)
         ? board.entrance
@@ -211,6 +214,19 @@ export class StoryApp implements MountedGame {
           `[data-story-action="${control}"]${task ? `[data-task="${task}"]` : ''}`,
         )
         ?.focus({ preventScroll: true })
+    const railScene = pendingRailScene(null, this.session.camp.stageProgress('quarry-rescue'))
+    if (railScene && !this.root.querySelector('dialog[open]'))
+      this.signal.present(
+        this.root,
+        this.language,
+        railScene,
+        railLines(this.language, railScene),
+        state.loadout.profession,
+        () => {
+          this.session.camp.completeStageScene('quarry-rescue', railScene)
+          this.render()
+        },
+      )
     for (const id of ['tower-control', 'northwest-bastion'] as const) {
       const progress = this.session.camp.stageProgress(id)
       const scene =
@@ -229,7 +245,7 @@ export class StoryApp implements MountedGame {
           finaleLines(this.language, scene),
           state.loadout.profession,
           () => {
-            this.session.camp.completeFinaleScene(id, scene)
+            this.session.camp.completeStageScene(id, scene)
             this.render()
           },
         )
@@ -492,6 +508,19 @@ export class StoryApp implements MountedGame {
       if (generation !== this.generation) return
       this.moving = false
     }
+    if (!state.run && index === TOMA_CAMP_CELL && state.progress.facts?.includes('toma-rescued')) {
+      this.signal.present(
+        this.root,
+        this.language,
+        'rail-camp',
+        railLines(this.language, 'rail-camp'),
+        state.loadout.profession,
+        () => {
+          this.session.camp.completeStageScene('quarry-rescue', 'rail-camp')
+          this.render()
+        },
+      )
+    }
     if (!state.run && index === 51) this.performance.react('greet')
     if (!state.run && index === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared) {
       if (this.session.camp.stageProgress('northwest-bastion').cleared)
@@ -502,7 +531,7 @@ export class StoryApp implements MountedGame {
           finaleLines(this.language, 'chapter-camp'),
           state.loadout.profession,
           () => {
-            this.session.camp.completeFinaleScene('northwest-bastion', 'chapter-camp')
+            this.session.camp.completeStageScene('northwest-bastion', 'chapter-camp')
             this.render()
           },
         )
@@ -716,6 +745,7 @@ export class StoryApp implements MountedGame {
           id === 'reach-tower' ||
           id === 'survey-ridge' ||
           id === 'find-beacon' ||
+          id === 'rescue-toma' ||
           id === 'restore-west-line' ||
           id === 'open-blockade'
         )

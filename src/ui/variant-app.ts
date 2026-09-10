@@ -1,6 +1,11 @@
 import { pendingSignalScene } from '../game/signal-story.js'
 import { SignalPerformance } from './signal-performance.js'
 import { signalCopy, signalLines } from './signal-copy.js'
+import { railControl } from '../game/floor-rail.js'
+import { animateRailChange } from './rail-view.js'
+import { railGuide } from './rail-guide.js'
+import { pendingRailScene } from '../game/rail-story.js'
+import { railLines } from './rail-copy.js'
 import { powerControl, powerReadiness } from '../game/floor-power.js'
 import { animatePowerChange } from './power-view.js'
 import { campaignName } from './campaign-copy.js'
@@ -149,6 +154,7 @@ export class VariantApp implements VariantInputActions {
       const path = run ? approachPath(run, index) : null
       const relay = run?.circuits?.relays.find((entry) => entry.index === index && entry.active)
       const power = run && powerControl(run, index)
+      const rail = run && railControl(run, index)
       if (
         run &&
         power &&
@@ -176,7 +182,11 @@ export class VariantApp implements VariantInputActions {
         if (hint) hint.textContent = signalCopy(this.language).solve
         return
       }
-      if (!run || !path || (index === run.player && index !== run.exit && !relay && !power)) {
+      if (
+        !run ||
+        !path ||
+        (index === run.player && index !== run.exit && !relay && !power && !rail)
+      ) {
         this.sounds.play('blocked')
         return
       }
@@ -256,7 +266,8 @@ export class VariantApp implements VariantInputActions {
               ? 'flag'
               : move &&
                   previousRun &&
-                  (powerControl(previousRun, index) ||
+                  (railControl(previousRun, index) ||
+                    powerControl(previousRun, index) ||
                     previousRun.circuits?.relays.some(
                       (entry) => entry.index === index && entry.active,
                     ))
@@ -290,12 +301,18 @@ export class VariantApp implements VariantInputActions {
                 ? 'navigate'
                 : 'reveal',
     )
+    const railChanged =
+      !!previousRun?.rail &&
+      !!currentRun?.rail &&
+      previousRun.rail !== currentRun.rail &&
+      previousRun.floor === currentRun.floor
     const powerChanged =
       !!previousRun?.power &&
       !!currentRun?.power &&
       previousRun.power !== currentRun.power &&
       previousRun.floor === currentRun.floor
     const switched =
+      railChanged ||
       powerChanged ||
       (currentRun?.circuits?.relays.some(
         (relay) =>
@@ -306,15 +323,25 @@ export class VariantApp implements VariantInputActions {
     if (switched) {
       this.turnPerformance = true
       this.moving = true
-      this.sounds.play(powerChanged ? 'power-switch' : 'confirm')
+      this.sounds.play(
+        railChanged
+          ? currentRun?.rail?.travel.length
+            ? 'cart-roll'
+            : 'power-switch'
+          : powerChanged
+            ? 'power-switch'
+            : 'confirm',
+      )
     }
     this.render()
     if (switched) {
       const generation = this.walkGeneration
       void (
-        powerChanged
-          ? animatePowerChange(this.root, previousRun, currentRun)
-          : animateCircuitChange(this.root, previousRun, currentRun)
+        railChanged
+          ? animateRailChange(this.root, previousRun, currentRun)
+          : powerChanged
+            ? animatePowerChange(this.root, previousRun, currentRun)
+            : animateCircuitChange(this.root, previousRun, currentRun)
       ).then(() => {
         if (generation !== this.walkGeneration) return
         this.turnPerformance = false
@@ -522,6 +549,9 @@ export class VariantApp implements VariantInputActions {
           this.language,
         )
         return
+      case 'rail-control':
+        this.play('a', command.value, false)
+        return
       case 'help': {
         const t = variantCopy(this.language)
         if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
@@ -529,6 +559,10 @@ export class VariantApp implements VariantInputActions {
             message(this.language, 'variant-app.battle-reference'),
             battleGuide(this.language, this.session.run),
           )
+          return
+        }
+        if (this.session instanceof ExpeditionSession && this.session.run?.rail) {
+          this.view.showInformation(message(this.language, 'rail.help'), railGuide(this.language))
           return
         }
         if (this.session instanceof ExpeditionSession && this.session.run?.power) {
@@ -863,22 +897,25 @@ export class VariantApp implements VariantInputActions {
     const ridgeScene = pendingObservatoryScene(session.run, session.stageProgress)
     const waterwayScene = pendingWaterwayScene(session.run, session.stageProgress)
     const finaleScene = pendingFinaleScene(session.run, session.stageProgress)
-    const scene = signalScene ?? ridgeScene ?? waterwayScene ?? finaleScene
+    const railScene = pendingRailScene(session.run, session.stageProgress)
+    const scene = railScene ?? signalScene ?? ridgeScene ?? waterwayScene ?? finaleScene
     if (!scene) return
     this.view.closeDialog()
     this.signal.present(
       this.root,
       this.language,
       scene,
-      signalScene
-        ? signalLines(this.language, signalScene, !!session.run?.signalRecord)
-        : ridgeScene
-          ? observatoryLines(this.language, ridgeScene)
-          : waterwayScene
-            ? waterwayLines(this.language, waterwayScene)
-            : finaleScene
-              ? finaleLines(this.language, finaleScene)
-              : [],
+      railScene
+        ? railLines(this.language, railScene)
+        : signalScene
+          ? signalLines(this.language, signalScene, !!session.run?.signalRecord)
+          : ridgeScene
+            ? observatoryLines(this.language, ridgeScene)
+            : waterwayScene
+              ? waterwayLines(this.language, waterwayScene)
+              : finaleScene
+                ? finaleLines(this.language, finaleScene)
+                : [],
       session.run?.departure.profession ?? 'explorer',
       () => {
         session.completeCampaignScene(scene)
@@ -888,7 +925,8 @@ export class VariantApp implements VariantInputActions {
           !pendingSignalScene(session.run, session.stageProgress) &&
           !pendingObservatoryScene(session.run, session.stageProgress) &&
           !pendingWaterwayScene(session.run, session.stageProgress) &&
-          !pendingFinaleScene(session.run, session.stageProgress)
+          !pendingFinaleScene(session.run, session.stageProgress) &&
+          !pendingRailScene(session.run, session.stageProgress)
         )
           this.view.showExpeditionDialog()
       },

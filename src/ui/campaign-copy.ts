@@ -6,6 +6,8 @@ import type { Language } from '../types/localization.js'
 /** Keep stage names identical in world entrances, headings and result navigation. */
 export function campaignName(language: Language, stage: CampaignStageId): string {
   switch (stage) {
+    case 'quarry-rescue':
+      return message(language, 'rail.title')
     case 'tower-galleries':
       return message(language, 'campaign.title')
     case 'tower-relay':

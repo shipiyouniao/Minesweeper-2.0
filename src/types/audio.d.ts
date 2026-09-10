@@ -5,6 +5,7 @@ export type InteractionCue = 'tap' | 'navigate' | 'dismiss' | 'blocked' | 'input
 export type DialogueCue =
   | 'dialogue-player'
   | 'dialogue-lumi'
+  | 'dialogue-toma'
   | 'dialogue-nia'
   | 'dialogue-narrator'
   | 'dialogue-boss'
@@ -40,6 +41,7 @@ export type SoundCue =
   | 'magnet-push'
   | 'magnet-charge'
   | 'sonar-pulse'
+  | 'cart-roll'
   | 'power-switch'
   | 'beacon-signal'
   | DialogueCue

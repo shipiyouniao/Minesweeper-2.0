@@ -4,6 +4,7 @@ import type { StoryTask, StoryViewState } from '../types/story.js'
 import { storyMap } from './story-map.js'
 
 export function storyTaskName(language: Language, id: StoryTask): string {
+  if (id === 'rescue-toma') return message(language, 'rail.task')
   if (id === 'restore-west-line') return message(language, 'finale.control-task')
   if (id === 'open-blockade') return message(language, 'finale.pass-task')
   if (id === 'find-beacon') return message(language, 'waterway.task')
@@ -19,6 +20,7 @@ export function storyTaskName(language: Language, id: StoryTask): string {
 }
 
 export function storyTaskScene(state: Pick<StoryViewState, 'progress'>, id: StoryTask): number {
+  if (id === 'rescue-toma') return 5
   if (id === 'restore-west-line') return 8
   if (id === 'open-blockade') return state.progress.facts?.includes('west-shortcut') ? 10 : 9
   if (id === 'survey-ridge' || id === 'find-beacon') return 4
@@ -34,42 +36,46 @@ function quest(state: StoryViewState, id: StoryTask, expanded = false): string {
   const done = state.progress.completed.includes(id)
   const pinned = state.progress.pinned?.includes(id)
   const description =
-    id === 'restore-west-line'
-      ? message(lang, 'finale.control-detail')
-      : id === 'open-blockade'
-        ? message(lang, 'finale.pass-detail')
-        : id === 'find-beacon'
-          ? message(lang, 'waterway.task-detail')
-          : id === 'survey-ridge'
-            ? message(lang, 'ridge.task-detail')
-            : id === 'repair-lift'
-              ? state.progress.facts?.includes('spindle-secured')
-                ? message(lang, 'story.repair-return')
-                : message(lang, 'story.repair-detail')
-              : id === 'reach-tower'
-                ? message(lang, 'story.climb-detail')
-                : id === 'survey-road'
-                  ? message(lang, 'story.road-detail')
-                  : id === 'reach-camp'
-                    ? message(lang, 'story.quest-main-detail')
-                    : id === 'lost-satchel'
-                      ? message(lang, 'story.quest-side-detail')
-                      : message(lang, 'story.quest-guide-detail')
+    id === 'rescue-toma'
+      ? message(lang, 'rail.task-detail')
+      : id === 'restore-west-line'
+        ? message(lang, 'finale.control-detail')
+        : id === 'open-blockade'
+          ? message(lang, 'finale.pass-detail')
+          : id === 'find-beacon'
+            ? message(lang, 'waterway.task-detail')
+            : id === 'survey-ridge'
+              ? message(lang, 'ridge.task-detail')
+              : id === 'repair-lift'
+                ? state.progress.facts?.includes('spindle-secured')
+                  ? message(lang, 'story.repair-return')
+                  : message(lang, 'story.repair-detail')
+                : id === 'reach-tower'
+                  ? message(lang, 'story.climb-detail')
+                  : id === 'survey-road'
+                    ? message(lang, 'story.road-detail')
+                    : id === 'reach-camp'
+                      ? message(lang, 'story.quest-main-detail')
+                      : id === 'lost-satchel'
+                        ? message(lang, 'story.quest-side-detail')
+                        : message(lang, 'story.quest-guide-detail')
   const scene = storyTaskScene(state, id)
   const place =
-    scene === 9
-      ? message(lang, 'finale.bridge')
-      : scene === 10
-        ? message(lang, 'finale.pass')
-        : scene === 4
-          ? message(lang, 'story.north-road')
-          : scene === 7
-            ? message(lang, 'story.quarry-machine')
-            : scene === 8
-              ? message(lang, 'story.tower-landing')
-              : scene === 1
-                ? message(lang, 'story.trail')
-                : message(lang, 'story.camp')
+    scene === 5
+      ? message(lang, 'story.quarry-yard')
+      : scene === 9
+        ? message(lang, 'finale.bridge')
+        : scene === 10
+          ? message(lang, 'finale.pass')
+          : scene === 4
+            ? message(lang, 'story.north-road')
+            : scene === 7
+              ? message(lang, 'story.quarry-machine')
+              : scene === 8
+                ? message(lang, 'story.tower-landing')
+                : scene === 1
+                  ? message(lang, 'story.trail')
+                  : message(lang, 'story.camp')
   const detail = `<details class="story-quest" data-task="${id}"><summary><strong>${storyTaskName(lang, id)}</strong><small>${done ? message(lang, 'story.done') : message(lang, 'story.pending')}</small></summary><div class="story-quest-bubble"><p>${description}</p>${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.inspected && !state.run.practicedFlag ? `<p data-story-flag-guidance>${state.touchInput ? message(lang, 'story.flag-touch') : message(lang, 'story.flag-mouse')}</p>` : ''}${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.practicedFlag && !state.run.practicedReveal ? `<p data-story-chord-guidance>${state.touchInput ? message(lang, 'story.chord-touch') : message(lang, 'story.chord-mouse')}</p>` : ''}${id === 'lost-satchel' && !done && state.run?.collected ? `<p>${message(lang, 'story.satchel-found')}</p>` : ''}<p class="story-quest-place"><button class="story-quest-location" data-story-action="quest-map" data-task="${id}">${message(lang, 'story.quest-location', { place })}<span aria-hidden="true"> ↗</span></button></p>${done ? '' : `<button data-story-action="pin" data-task="${id}" aria-pressed="${!!pinned}">${pinned ? message(lang, 'story.unpin') : message(lang, 'story.pin')}</button>`}</div></details>`
   return expanded
     ? `<article class="story-quest-detail"><h3>${storyTaskName(lang, id)}</h3><span class="story-task-status">${done ? message(lang, 'story.done') : message(lang, 'story.pending')}</span>${detail.slice(detail.indexOf('<div class="story-quest-bubble">'), detail.lastIndexOf('</details>'))}</article>`
