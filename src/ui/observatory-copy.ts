@@ -2,10 +2,14 @@ import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
 import type { ObservatorySceneId } from '../types/observatory.js'
 import type { SignalLine } from '../types/signal-story.js'
-import type { PowerReadiness } from '../types/floor-power.js'
+import type { FloorPower, PowerReadiness } from '../types/floor-power.js'
 
 /** Mechanism feedback is short enough to read while keeping the board in view. */
-export function powerHint(language: Language, state: PowerReadiness): string {
+export function powerHint(
+  language: Language,
+  state: PowerReadiness,
+  purpose: FloorPower['purpose'] = 'observation',
+): string {
   switch (state) {
     case 'covered':
       return message(language, 'ridge.covered')
@@ -14,7 +18,9 @@ export function powerHint(language: Language, state: PowerReadiness): string {
     case 'unpowered':
       return message(language, 'ridge.unpowered')
     case 'recorded':
-      return message(language, 'ridge.recorded')
+      return purpose === 'drainage'
+        ? message(language, 'waterway.recorded')
+        : message(language, 'ridge.recorded')
     case 'ready':
       return message(language, 'ridge.ready')
   }

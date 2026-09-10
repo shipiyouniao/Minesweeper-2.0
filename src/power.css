@@ -153,3 +153,20 @@
   border-radius: 0.6rem;
   color: #2b685a;
 }
+
+/* A local waterline drops only after a pump action has been accepted. */
+.power-drain {
+  position: absolute;
+  inset: 35% 0 0;
+  pointer-events: none;
+  border-top: 2px solid #b9edf0;
+  background: linear-gradient(#5caeb6a6, #2c718799);
+  border-radius: 40% 40% 0 0;
+}
+
+/* Large authored chambers also fit the desktop's height; manual zoom stays available. */
+@media (min-width: 1000px) {
+  .variant-board-panel .board[data-power-purpose='drainage'] {
+    --cell-max: clamp(28px, calc((100svh - 480px) / var(--power-rows) - var(--gap)), 64px);
+  }
+}

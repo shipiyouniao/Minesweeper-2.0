@@ -1,4 +1,5 @@
 import { recordStoryFacts, storyTaskReward } from '../game/story-quests.js'
+import type { WaterwaySceneId } from '../types/waterway.js'
 import type { ObservatorySceneId } from '../types/observatory.js'
 import { STORY_REVISION } from '../game/story-content.js'
 import { campaignProgress, updateCampaign } from '../game/campaign-catalog.js'
@@ -58,6 +59,39 @@ export class CampSession {
   /** Keep observatory outcomes available after settlement removes the active journal. */
   get observatory(): CampaignStageProgress {
     return campaignProgress(this.read().campaign, 'ridge-observatory')
+  }
+
+  /** The drainage expedition keeps its own attempt and once-only ending ledger. */
+  get waterway(): CampaignStageProgress {
+    return campaignProgress(this.read().campaign, 'old-waterway')
+  }
+
+  /** Accept the route at the survey site, including when loading an earlier completed survey. */
+  acceptWaterwayRoute(): void {
+    const story = this.story
+    if (
+      !this.observatory.cleared ||
+      !story.facts?.includes('ridge-surveyed') ||
+      story.accepted?.includes('find-beacon') ||
+      story.completed.includes('find-beacon')
+    )
+      return
+    this.saveStory({
+      ...story,
+      accepted: [...(story.accepted ?? []), 'find-beacon'],
+      pinned: [...new Set([...(story.pinned ?? []), 'find-beacon' as const])],
+    })
+  }
+
+  /** Camp conversations can be replayed without changing the settled stage reward. */
+  completeWaterwayScene(scene: WaterwaySceneId): void {
+    const save = this.read()
+    const progress = campaignProgress(save.campaign, 'old-waterway')
+    if (!progress.cleared || progress.scenes.includes(scene)) return
+    this.repository.saveExpedition({
+      ...save,
+      campaign: updateCampaign(save.campaign, { ...progress, scenes: [...progress.scenes, scene] }),
+    })
   }
 
   /** Finishing Nia's camp conversation accepts the route once, without granting currency. */

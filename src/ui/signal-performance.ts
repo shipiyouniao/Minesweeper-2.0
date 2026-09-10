@@ -58,7 +58,12 @@ export class SignalPerformance {
     dialog.setAttribute('aria-labelledby', 'signal-speaker')
     dialog.innerHTML = `<div class="signal-cast"><span data-signal-listener>${spriteImage(professionSprite(profession))}</span><span data-signal-portrait></span></div><div class="signal-dialogue-copy"><strong id="signal-speaker"></strong><p data-signal-line></p><button class="story-dialogue-next" data-signal-next>${t.continue} →</button></div>`
     root.append(dialog)
-    if (scene === 'ridge-found' || scene === 'ridge-camp') {
+    if (
+      scene === 'ridge-found' ||
+      scene === 'ridge-camp' ||
+      scene === 'waterway-found' ||
+      scene === 'waterway-camp'
+    ) {
       const replay = document.createElement('button')
       replay.type = 'button'
       replay.className = 'ridge-recording'
@@ -78,12 +83,14 @@ export class SignalPerformance {
       this.animation?.cancel()
       const portrait = dialog.querySelector<HTMLElement>('[data-signal-portrait]')!
       const listener = dialog.querySelector<HTMLElement>('[data-signal-listener]')!
-      portrait.innerHTML =
-        line.speaker === 'lumi'
-          ? `<img src="${import.meta.env.BASE_URL}assets/story/guide.png" alt="" draggable="false">`
-          : line.speaker === 'guardian'
-            ? spriteImage('bastion')
-            : niaImage()
+      // Keep the person being answered on screen while the player speaks.
+      if (line.speaker !== 'player' || !portrait.firstElementChild)
+        portrait.innerHTML =
+          line.speaker === 'lumi'
+            ? `<img src="${import.meta.env.BASE_URL}assets/story/guide.png" alt="" draggable="false">`
+            : line.speaker === 'guardian'
+              ? spriteImage('bastion')
+              : niaImage()
       // The first response has a silhouette; the face is revealed only after reconnecting the line.
       portrait.classList.toggle('signal-radio', scene === 'entry' && line.speaker === 'nia')
       portrait.classList.toggle('is-speaking', line.speaker !== 'player')
@@ -126,7 +133,8 @@ export class SignalPerformance {
       }
     })
     dialog.showModal()
-    if (scene === 'ridge-found') this.sounds.play('beacon-signal')
+    if (scene === 'ridge-found' || scene === 'waterway-call' || scene === 'waterway-found')
+      this.sounds.play('beacon-signal')
     paint()
   }
 

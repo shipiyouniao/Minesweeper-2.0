@@ -1,6 +1,4 @@
-import { campaignLayout } from './campaign-layout.js'
-import { signalLayout } from './signal-layout.js'
-import { observatoryLayout } from './observatory-layout.js'
+import { campaignFloor } from './campaign-floors.js'
 import { interactPower, powerControl } from './floor-power.js'
 import { collectSignalRecord, floorObjectiveComplete, interactRelay } from './floor-circuits.js'
 import {
@@ -128,11 +126,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
   const seed = (departure.seed + Math.imul(floor, 0x9e3779b9)) >>> 0
   const config = expeditionConfig(departure, floor)
   const layout = departure.campaign
-    ? departure.campaign === 'ridge-observatory-v1'
-      ? observatoryLayout(floor)
-      : departure.campaign === 'tower-relay-v1'
-        ? signalLayout(floor)
-        : campaignLayout(floor)
+    ? campaignFloor(departure.campaign, floor)
     : generateDungeon(seed, config.mines, config.width, config.height)
   const run: Expedition = {
     ...layout,

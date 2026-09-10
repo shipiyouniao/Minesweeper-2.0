@@ -1,13 +1,17 @@
 import type { ExpeditionJournal, VariantRecord } from './variants.js'
 import type { SignalSceneId } from './signal-story.js'
 import type { ObservatorySceneId } from './observatory.js'
+import type { WaterwaySceneId } from './waterway.js'
+import type { StoryFact, StorySceneId } from './story.js'
 import type { JsonObjectReader } from '../persistence/json-reader.js'
 import type { JsonValue } from './json.js'
 
 /** Stable selection keys are separate from replay-sensitive content revisions. */
-export type CampaignStageId = 'tower-galleries' | 'tower-relay' | 'ridge-observatory'
-export type CampaignRevision = 'tower-road-v4' | 'tower-relay-v1' | 'ridge-observatory-v1'
-export type CampaignSceneId = SignalSceneId | ObservatorySceneId
+export type CampaignStageId =
+  'tower-galleries' | 'tower-relay' | 'ridge-observatory' | 'old-waterway'
+export type CampaignRevision =
+  'tower-road-v4' | 'tower-relay-v1' | 'ridge-observatory-v1' | 'old-waterway-v1'
+export type CampaignSceneId = SignalSceneId | ObservatorySceneId | WaterwaySceneId
 
 /** The stage decoder reuses validated expedition formats without circular module dependencies. */
 export interface CampaignDecoders {
@@ -34,6 +38,12 @@ export interface CampaignSave {
 
 /** Content and prerequisites belong to the catalog, not router conditionals. */
 export interface CampaignStage {
+  /** A stage belongs to a physical world location; null index shares the scene's existing entry flow. */
+  readonly entrance: {
+    readonly scene: StorySceneId
+    readonly index: number | null
+    readonly fact: StoryFact | null
+  }
   /** Largest authored room bounds the journal before exact per-floor replay validation. */
   readonly bounds: { readonly width: number; readonly height: number }
   readonly id: CampaignStageId

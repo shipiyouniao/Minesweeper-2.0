@@ -36,6 +36,7 @@ export function recordStoryCampaign(
 export const STORY_FACTS: readonly StoryFact[] = [
   'ridge-route',
   'ridge-surveyed',
+  'beacon-recovered',
   'camp-reached',
   'satchel-secured',
   'satchel-delivered',
@@ -100,6 +101,14 @@ export const STORY_TASKS: readonly StoryTaskDefinition[] = [
     introducedBy: 'lift-repaired',
     prerequisite: { kind: 'task', id: 'repair-lift' },
     objective: { kind: 'fact', id: 'tower-reached' },
+    supplies: 0,
+  },
+  {
+    id: 'find-beacon',
+    category: 'main',
+    introducedBy: 'ridge-bearing',
+    prerequisite: { kind: 'fact', id: 'ridge-surveyed' },
+    objective: { kind: 'fact', id: 'beacon-recovered' },
     supplies: 0,
   },
   {

@@ -1,5 +1,46 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'waterway.title': string
+  readonly 'waterway.task': string
+  readonly 'waterway.task-detail': string
+  readonly 'waterway.floor-1': string
+  readonly 'waterway.floor-2': string
+  readonly 'waterway.floor-3': string
+  readonly 'waterway.receiver': string
+  readonly 'waterway.recorded': string
+  readonly 'waterway.objective': string
+  readonly 'waterway.exit-ready': string
+  readonly 'waterway.progress': string
+  readonly 'waterway.guide-intro': string
+  readonly 'waterway.guide-record-title': string
+  readonly 'waterway.guide-record': string
+  readonly 'waterway.location': string
+  readonly 'waterway.entry-1': string
+  readonly 'waterway.entry-2': string
+  readonly 'waterway.entry-3': string
+  readonly 'waterway.drained-1': string
+  readonly 'waterway.drained-2': string
+  readonly 'waterway.drained-3': string
+  readonly 'waterway.locks-1': string
+  readonly 'waterway.locks-2': string
+  readonly 'waterway.locks-3': string
+  readonly 'waterway.call-1': string
+  readonly 'waterway.call-2': string
+  readonly 'waterway.call-3': string
+  readonly 'waterway.found-1': string
+  readonly 'waterway.found-2': string
+  readonly 'waterway.found-3': string
+  readonly 'waterway.found-4': string
+  readonly 'waterway.found-5': string
+  readonly 'waterway.found-6': string
+  readonly 'waterway.found-7': string
+  readonly 'waterway.found-8': string
+  readonly 'waterway.found-9': string
+  readonly 'waterway.camp-1': string
+  readonly 'waterway.camp-2': string
+  readonly 'waterway.camp-3': string
+  readonly 'waterway.camp-4': string
+
   readonly 'ridge.recording': string
   readonly 'ridge.location': string
   readonly 'ridge.title': string

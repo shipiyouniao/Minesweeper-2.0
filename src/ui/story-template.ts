@@ -6,7 +6,9 @@ import { NIA_CAMP_CELL } from '../game/signal-story.js'
 import { niaImage } from './signal-performance.js'
 import { signalCopy } from './signal-copy.js'
 import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
-import { observatoryImage } from './power-view.js'
+import { WATERWAY_GATE } from '../game/waterway-layout.js'
+import { campaignName } from './campaign-copy.js'
+import { observatoryImage, drainageImage } from './power-view.js'
 import { storyDialogueTemplate } from './story-dialogue.js'
 import { neighbors } from '../game/engine.js'
 import { CAMP_SITES, QUARRY_GATE } from '../game/story-content.js'
@@ -82,6 +84,8 @@ function cellTemplate(state: StoryViewState, index: number): string {
   const quarryGate = run?.floor === 3 && index === QUARRY_GATE
   const ridgeGate =
     run?.floor === 3 && index === OBSERVATORY_GATE && state.progress.facts?.includes('ridge-route')
+  const waterwayGate =
+    run?.floor === 3 && index === WATERWAY_GATE && state.progress.facts?.includes('ridge-surveyed')
   const exit = index === board.exit
   const entrance = run && run.floor > 0 && index === board.entrance
   const destinations = [
@@ -118,6 +122,9 @@ function cellTemplate(state: StoryViewState, index: number): string {
         : message(language, 'story.mechanism-locked')
     label = storyMechanismName(language, control) + ' · ' + status
     content = spriteImage(run.operated.includes(index) ? 'bastion-pylon-off' : 'bastion-pylon')
+  } else if (waterwayGate) {
+    label = message(language, 'waterway.title')
+    content = drainageImage()
   } else if (ridgeGate) {
     label = message(language, 'ridge.title')
     content = observatoryImage()
@@ -209,30 +216,17 @@ export function storyTemplate(state: StoryViewState): string {
 /** Show authored stages at their physical doorway; completed stages retain their own history. */
 function campaignEntries(state: StoryViewState): string {
   const { run, language } = state
-  if (
-    run?.floor === 3 &&
-    run.player === OBSERVATORY_GATE &&
-    state.progress.facts?.includes('ridge-route')
-  )
-    return campaignProgress(state.campaign, 'ridge-observatory').cleared
-      ? ''
-      : `<a data-route data-story-campaign class="story-primary" href="${routeHref({ page: 'campaign', stage: 'ridge-observatory' }, language)}">${message(language, 'ridge.title')} →</a>`
-  if (
-    !run ||
-    run.floor !== 7 ||
-    run.player !== run.board.exit ||
-    !state.progress.dialogue?.completed.includes('tower-arrival')
-  )
-    return ''
-  return `<div class="signal-stage-links">${CAMPAIGN_STAGES.filter(
-    (stage) =>
-      stage.id !== 'ridge-observatory' &&
+  if (!run) return ''
+  const available = CAMPAIGN_STAGES.filter((stage) => {
+    const entrance = stage.entrance
+    return (
+      entrance.scene === run.board.scene.id &&
+      run.player === (entrance.index ?? run.board.exit) &&
+      (!entrance.fact || state.progress.facts?.includes(entrance.fact)) &&
+      (entrance.index !== null || state.progress.dialogue?.completed.includes('tower-arrival')) &&
       !campaignProgress(state.campaign, stage.id).cleared &&
-      (stage.prerequisite === null || campaignProgress(state.campaign, stage.prerequisite).cleared),
-  )
-    .map(
-      (stage) =>
-        `<a data-route data-story-campaign class="story-primary" href="${routeHref({ page: 'campaign', stage: stage.id }, language)}">${stage.id === 'tower-galleries' ? message(language, 'campaign.enter') : signalCopy(language).title}</a>`,
+      (!stage.prerequisite || campaignProgress(state.campaign, stage.prerequisite).cleared)
     )
-    .join('')}</div>`
+  })
+  return `<div class="signal-stage-links">${available.map((stage) => `<a data-route data-story-campaign class="story-primary" href="${routeHref({ page: 'campaign', stage: stage.id }, language)}">${campaignName(language, stage.id)} →</a>`).join('')}</div>`
 }

@@ -1,3 +1,4 @@
+import type { DungeonLayout } from './dungeon-generation.js'
 /** A branch is identified by its physical junction, so components remain layout-independent. */
 export interface PowerFeed {
   readonly junction: number
@@ -25,9 +26,22 @@ export interface PowerReceiver {
 }
 
 export interface FloorPower {
+  /** Both tasks use the same physical routing rules, with distinct instruments and feedback. */
+  readonly purpose: 'observation' | 'drainage'
   readonly junctions: readonly PowerJunction[]
   readonly doors: readonly PowerDoor[]
   readonly receivers: readonly PowerReceiver[]
 }
 
+/** Authored terrain and routing are data; the loader owns clue construction. */
+export interface AuthoredPowerFloor {
+  readonly rows: readonly string[]
+  readonly power: FloorPower
+}
+
 export type PowerReadiness = 'covered' | 'clue' | 'unpowered' | 'recorded' | 'ready'
+
+/** A constructed power room supplies fixed game cells and its reversible network. */
+export interface PowerDungeonLayout extends DungeonLayout {
+  readonly power: FloorPower
+}

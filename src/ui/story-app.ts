@@ -2,6 +2,9 @@ import { campaignProgress } from '../game/campaign-catalog.js'
 import { clueIsolated } from '../game/clue-isolation.js'
 import { NIA_CAMP_CELL, pendingSignalScene } from '../game/signal-story.js'
 import { pendingObservatoryScene } from '../game/observatory-story.js'
+import { pendingWaterwayScene } from '../game/waterway-story.js'
+import { WATERWAY_GATE } from '../game/waterway-layout.js'
+import { waterwayLines } from './waterway-copy.js'
 import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
 import { observatoryLines } from './observatory-copy.js'
 import { SignalPerformance } from './signal-performance.js'
@@ -206,6 +209,19 @@ export class StoryApp implements MountedGame {
           `[data-story-action="${control}"]${task ? `[data-task="${task}"]` : ''}`,
         )
         ?.focus({ preventScroll: true })
+    const waterwayScene = pendingWaterwayScene(null, this.session.camp.waterway)
+    if (waterwayScene && !this.root.querySelector('dialog[open]'))
+      this.signal.present(
+        this.root,
+        this.language,
+        waterwayScene,
+        waterwayLines(this.language, waterwayScene),
+        state.loadout.profession,
+        () => {
+          this.session.camp.completeWaterwayScene(waterwayScene)
+          this.render()
+        },
+      )
     const observatory = this.session.camp.observatory
     const ridgeScene = pendingObservatoryScene(null, observatory)
     if (ridgeScene && !this.root.querySelector('dialog[open]'))
@@ -319,7 +335,10 @@ export class StoryApp implements MountedGame {
         this.session.camp.story.dialogue?.completed.includes('tower-arrival')) ||
         (state.run?.floor === 3 &&
           index === OBSERVATORY_GATE &&
-          state.progress.facts?.includes('ridge-route')))
+          state.progress.facts?.includes('ridge-route')) ||
+        (state.run?.floor === 3 &&
+          index === WATERWAY_GATE &&
+          state.progress.facts?.includes('ridge-surveyed')))
     ) {
       const entry = this.root.querySelector<HTMLAnchorElement>('[data-story-campaign]')
       if (entry && state.player === index) {
@@ -450,7 +469,19 @@ export class StoryApp implements MountedGame {
     this.render()
     if (!state.run && index === 51) this.performance.react('greet')
     if (!state.run && index === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared) {
-      if (this.session.camp.observatory.cleared)
+      if (this.session.camp.waterway.cleared)
+        this.signal.present(
+          this.root,
+          this.language,
+          'waterway-camp',
+          waterwayLines(this.language, 'waterway-camp'),
+          state.loadout.profession,
+          () => {
+            this.session.camp.completeWaterwayScene('waterway-camp')
+            this.render()
+          },
+        )
+      else if (this.session.camp.observatory.cleared)
         this.signal.present(
           this.root,
           this.language,
@@ -660,7 +691,8 @@ export class StoryApp implements MountedGame {
           id === 'survey-road' ||
           id === 'repair-lift' ||
           id === 'reach-tower' ||
-          id === 'survey-ridge'
+          id === 'survey-ridge' ||
+          id === 'find-beacon'
         )
           this.session.togglePin(id)
         break

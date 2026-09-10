@@ -256,7 +256,8 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     reader.value('campaign') !== undefined &&
     campaign !== 'tower-road-v4' &&
     campaign !== 'tower-relay-v1' &&
-    campaign !== 'ridge-observatory-v1'
+    campaign !== 'ridge-observatory-v1' &&
+    campaign !== 'old-waterway-v1'
   )
     return null
   const rawTitle = reader.value('title')
@@ -318,7 +319,8 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   return {
     ...(campaign === 'tower-road-v4' ||
     campaign === 'tower-relay-v1' ||
-    campaign === 'ridge-observatory-v1'
+    campaign === 'ridge-observatory-v1' ||
+    campaign === 'old-waterway-v1'
       ? { campaign }
       : {}),
     seed,

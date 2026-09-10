@@ -1,5 +1,6 @@
 import { feedPowered, powerReadiness, powerObjectiveComplete } from '../game/floor-power.js'
 import { message } from '../i18n.js'
+import { waterwayFloorName } from './waterway-copy.js'
 import { observatoryFloorName, powerHint } from './observatory-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { icon } from '../icons.js'
@@ -13,10 +14,16 @@ export function observatoryImage(): string {
   return `<img class="dungeon-sprite ridge-instrument" src="${import.meta.env.BASE_URL}assets/story/observatory.png" alt="" width="128" height="128" draggable="false">`
 }
 
+/** The drainage pump identifies the world entrance and every chamber's receiver. */
+export function drainageImage(): string {
+  return `<img class="dungeon-sprite drainage-pump" src="${import.meta.env.BASE_URL}assets/story/drainage-pump.png" alt="" width="128" height="128" draggable="false">`
+}
+
 /** Keep one current instruction and a compact reading counter above the shared board layout. */
 export function powerObjective(language: Language, run: Expedition): string {
   if (!run.power) return ''
-  return `<section class="signal-objective power-objective" aria-live="polite"><strong>${observatoryFloorName(language, run.floor)}</strong><p>${powerObjectiveComplete(run.power) ? message(language, 'ridge.exit-ready') : message(language, 'ridge.objective')}</p><span>${message(language, 'ridge.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
+  const drainage = run.power.purpose === 'drainage'
+  return `<section class="signal-objective power-objective" aria-live="polite"><strong>${drainage ? waterwayFloorName(language, run.floor) : observatoryFloorName(language, run.floor)}</strong><p>${powerObjectiveComplete(run.power) ? (drainage ? message(language, 'waterway.exit-ready') : message(language, 'ridge.exit-ready')) : drainage ? message(language, 'waterway.objective') : message(language, 'ridge.objective')}</p><span>${drainage ? message(language, 'waterway.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length }) : message(language, 'ridge.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
 }
 
 /** Identify a source and branch with text as well as color, including in accessible labels. */
@@ -28,6 +35,11 @@ function feedLabel(run: Expedition, input: PowerFeed): string {
 export function renderFloorPower(root: HTMLElement, run: Expedition, language: Language): void {
   const power = run.power
   if (!power) return
+  const board = root.querySelector<HTMLElement>('[data-side="a"]')
+  if (board) {
+    board.dataset['powerPurpose'] = power.purpose
+    board.style.setProperty('--power-rows', String(run.game.config.height))
+  }
   const controls = [
     ...power.junctions.map((entry) => ({ index: entry.index, kind: 'junction' as const })),
     ...power.receivers.map((entry) => ({ index: entry.index, kind: 'receiver' as const })),
@@ -45,14 +57,16 @@ export function renderFloorPower(root: HTMLElement, run: Expedition, language: L
     const name = junction
       ? message(language, 'ridge.junction')
       : receiver
-        ? message(language, 'ridge.receiver')
+        ? power.purpose === 'drainage'
+          ? message(language, 'waterway.receiver')
+          : message(language, 'ridge.receiver')
         : message(language, 'ridge.door')
     const id = junction
       ? `${power.junctions.indexOf(junction) + 1}${junction.selected === null ? '—' : junction.selected === 0 ? 'A' : 'B'}`
       : input
         ? feedLabel(run, input)
         : ''
-    const label = `${name} ${id} · ${door ? (live ? message(language, 'ridge.open') : message(language, 'ridge.closed')) : powerHint(language, powerReadiness(run, control.index))}`
+    const label = `${name} ${id} · ${door ? (live ? message(language, 'ridge.open') : message(language, 'ridge.closed')) : powerHint(language, powerReadiness(run, control.index), power.purpose)}`
     cell.classList.add('landmark-cell', 'power-cell', `power-${control.kind}`)
     cell.classList.toggle('power-live', live)
     cell.classList.toggle('power-recorded', !!receiver?.recorded)
@@ -66,7 +80,9 @@ export function renderFloorPower(root: HTMLElement, run: Expedition, language: L
     cell.insertAdjacentHTML(
       'afterbegin',
       receiver
-        ? observatoryImage()
+        ? power.purpose === 'drainage'
+          ? drainageImage()
+          : observatoryImage()
         : junction
           ? spriteImage('bastion-pylon')
           : live
@@ -110,20 +126,43 @@ export async function animatePowerChange(
     )
       targets.add(entry.index)
   const animations: Animation[] = []
+  const waterEffects: HTMLElement[] = []
   for (const index of targets) {
     const cell = root.querySelector<HTMLElement>(`[data-power-cell="${index}"]`)
     const picture = cell?.querySelector<HTMLElement>('img, .power-open')
+    // A completed pump visibly lowers its water while the handwheel turns.
+    const draining =
+      after.power.purpose === 'drainage' &&
+      after.power.receivers.some((entry) => entry.index === index && entry.recorded) &&
+      !before.power.receivers.find((entry) => entry.index === index)?.recorded
+    if (cell && draining) {
+      const water = document.createElement('span')
+      water.className = 'power-drain'
+      water.setAttribute('aria-hidden', 'true')
+      cell.append(water)
+      waterEffects.push(water)
+      animations.push(
+        water.animate(
+          [
+            { transform: 'translateY(0)', opacity: 0.7 },
+            { transform: 'translateY(100%)', opacity: 0 },
+          ],
+          { duration: 1000, easing: 'ease-in' },
+        ),
+      )
+    }
     const ordinal = [...targets].indexOf(index)
-    const frames = changed.some((entry) => entry.index === index)
-      ? [
-          { transform: 'rotate(-18deg)' },
-          { transform: 'rotate(12deg)' },
-          { transform: 'rotate(0)' },
-        ]
-      : [
-          { transform: 'scale(.78)', filter: 'brightness(1.9)' },
-          { transform: 'scale(1)', filter: 'brightness(1)' },
-        ]
+    const frames =
+      draining || changed.some((entry) => entry.index === index)
+        ? [
+            { transform: 'rotate(-18deg)' },
+            { transform: 'rotate(12deg)' },
+            { transform: 'rotate(0)' },
+          ]
+        : [
+            { transform: 'scale(.78)', filter: 'brightness(1.9)' },
+            { transform: 'scale(1)', filter: 'brightness(1)' },
+          ]
     const motion = picture?.animate(frames, {
       duration: 600,
       delay: ordinal * 60,
@@ -137,4 +176,5 @@ export async function animatePowerChange(
     if (flash) animations.push(flash)
   }
   await Promise.allSettled(animations.map((entry) => entry.finished))
+  for (const effect of waterEffects) effect.remove()
 }

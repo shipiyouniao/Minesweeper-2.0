@@ -27,6 +27,7 @@ export class StorySession {
   /** Restore current content only; retire old attempts to camp with one compensation. */
   constructor(camp: CampSession) {
     this.camp = camp
+    camp.acceptWaterwayRoute()
     const story = camp.story
     if (story.world) {
       if (story.world.revision !== STORY_REVISION) {
