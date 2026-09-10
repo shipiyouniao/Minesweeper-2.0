@@ -2,7 +2,6 @@ import { recordStoryCampaign } from '../game/story-quests.js'
 import { campaignProgress, campaignStage, updateCampaign } from '../game/campaign-catalog.js'
 import type { CampaignStage, CampaignStageProgress } from '../types/campaign.js'
 import type { CampaignSceneId } from '../types/campaign.js'
-import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
 import { recordStoryFacts } from '../game/story-quests.js'
 import { EXPEDITION_RULES_REVISION } from '../persistence/expedition-format.js'
 import { addVariantRecord } from '../game/variant-difficulty.js'
@@ -219,12 +218,12 @@ export class ExpeditionSession {
         (this.stage.prerequisite !== null &&
           !campaignProgress(this.save.campaign, this.stage.prerequisite).cleared) ||
         !this.save.story?.completed.includes('reach-tower') ||
-        (this.stage.id === 'ridge-observatory'
-          ? !this.save.story.facts?.includes('ridge-route') ||
-            this.save.story.world?.active !== 'north-road' ||
-            this.save.story.world.scenes.find((scene) => scene.id === 'north-road')?.player !==
-              OBSERVATORY_GATE
-          : this.save.story.world?.active !== 'tower-landing'))
+        (this.stage.entrance.fact !== null &&
+          !this.save.story.facts?.includes(this.stage.entrance.fact)) ||
+        this.save.story.world?.active !== this.stage.entrance.scene ||
+        (this.stage.entrance.index !== null &&
+          this.save.story.world?.scenes.find((scene) => scene.id === this.stage.entrance.scene)
+            ?.player !== this.stage.entrance.index))
     )
       return false
     const departure: Departure = {
@@ -365,10 +364,14 @@ export class ExpeditionSession {
         },
         records: addVariantRecord(this.save.records, record),
         ...(this.campaignMode &&
-        this.stage.id === 'ridge-observatory' &&
+        (this.stage.id === 'ridge-observatory' || this.stage.id === 'old-waterway') &&
         next.phase === 'won' &&
         this.save.story
-          ? { story: recordStoryFacts(this.save.story, ['ridge-surveyed']) }
+          ? {
+              story: recordStoryFacts(this.save.story, [
+                this.stage.id === 'old-waterway' ? 'beacon-recovered' : 'ridge-surveyed',
+              ]),
+            }
           : {}),
       }
     }

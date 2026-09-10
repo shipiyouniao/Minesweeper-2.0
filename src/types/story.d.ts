@@ -79,6 +79,7 @@ export type StoryTask =
   | 'repair-lift'
   | 'reach-tower'
   | 'survey-ridge'
+  | 'find-beacon'
 
 /** One envelope commits story rewards and the shared wallet together. */
 export type StoryCampaignMetric = 'travel' | 'chests' | 'floors' | 'bosses' | 'skills' | 'wins'
@@ -209,6 +210,7 @@ export interface StoryHold {
 export type StoryFact =
   | 'ridge-route'
   | 'ridge-surveyed'
+  | 'beacon-recovered'
   | 'camp-reached'
   | 'satchel-secured'
   | 'satchel-delivered'
@@ -231,7 +233,7 @@ export type StoryCondition =
 export interface StoryTaskDefinition {
   readonly id: StoryTask
   readonly category: 'main' | 'side'
-  readonly introducedBy: StoryDialogueId | 'nia-route'
+  readonly introducedBy: StoryDialogueId | 'nia-route' | 'ridge-bearing'
   readonly prerequisite: StoryCondition
   readonly objective: StoryCondition
   readonly supplies: number

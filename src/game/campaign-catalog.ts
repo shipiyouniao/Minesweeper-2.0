@@ -9,6 +9,7 @@ import type {
 export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
   {
     id: 'tower-galleries',
+    entrance: { scene: 'tower-landing', index: null, fact: null },
     bounds: { width: 9, height: 9 },
     revision: 'tower-road-v4',
     prerequisite: null,
@@ -18,6 +19,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
   },
   {
     id: 'tower-relay',
+    entrance: { scene: 'tower-landing', index: null, fact: null },
     bounds: { width: 9, height: 9 },
     revision: 'tower-relay-v1',
     prerequisite: 'tower-galleries',
@@ -27,6 +29,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
   },
   {
     id: 'ridge-observatory',
+    entrance: { scene: 'north-road', index: 86, fact: 'ridge-route' },
     bounds: { width: 13, height: 13 },
     revision: 'ridge-observatory-v1',
     prerequisite: 'tower-relay',
@@ -34,11 +37,24 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     reward: 100,
     lesson: false,
   },
+  {
+    id: 'old-waterway',
+    entrance: { scene: 'north-road', index: 81, fact: 'ridge-surveyed' },
+    bounds: { width: 19, height: 17 },
+    revision: 'old-waterway-v1',
+    prerequisite: 'ridge-observatory',
+    floors: 3,
+    reward: 140,
+    lesson: false,
+  },
 ]
 
 /** Reject arbitrary route keys before selecting a save slot. */
 export function parseCampaignStage(value: string | null): CampaignStageId | null {
-  return value === 'tower-galleries' || value === 'tower-relay' || value === 'ridge-observatory'
+  return value === 'tower-galleries' ||
+    value === 'tower-relay' ||
+    value === 'ridge-observatory' ||
+    value === 'old-waterway'
     ? value
     : null
 }

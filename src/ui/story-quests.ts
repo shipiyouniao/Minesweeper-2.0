@@ -4,6 +4,7 @@ import type { StoryTask, StoryViewState } from '../types/story.js'
 import { storyMap } from './story-map.js'
 
 export function storyTaskName(language: Language, id: StoryTask): string {
+  if (id === 'find-beacon') return message(language, 'waterway.task')
   if (id === 'survey-ridge') return message(language, 'ridge.task')
   if (id === 'repair-lift') return message(language, 'story.repair-task')
   if (id === 'reach-tower') return message(language, 'story.climb-task')
@@ -16,7 +17,7 @@ export function storyTaskName(language: Language, id: StoryTask): string {
 }
 
 export function storyTaskScene(state: Pick<StoryViewState, 'progress'>, id: StoryTask): number {
-  if (id === 'survey-ridge') return 4
+  if (id === 'survey-ridge' || id === 'find-beacon') return 4
   if (id === 'repair-lift') return state.progress.facts?.includes('spindle-secured') ? 4 : 7
   if (id === 'reach-tower') return 8
   if (id === 'survey-road') return 4
@@ -29,21 +30,23 @@ function quest(state: StoryViewState, id: StoryTask, expanded = false): string {
   const done = state.progress.completed.includes(id)
   const pinned = state.progress.pinned?.includes(id)
   const description =
-    id === 'survey-ridge'
-      ? message(lang, 'ridge.task-detail')
-      : id === 'repair-lift'
-        ? state.progress.facts?.includes('spindle-secured')
-          ? message(lang, 'story.repair-return')
-          : message(lang, 'story.repair-detail')
-        : id === 'reach-tower'
-          ? message(lang, 'story.climb-detail')
-          : id === 'survey-road'
-            ? message(lang, 'story.road-detail')
-            : id === 'reach-camp'
-              ? message(lang, 'story.quest-main-detail')
-              : id === 'lost-satchel'
-                ? message(lang, 'story.quest-side-detail')
-                : message(lang, 'story.quest-guide-detail')
+    id === 'find-beacon'
+      ? message(lang, 'waterway.task-detail')
+      : id === 'survey-ridge'
+        ? message(lang, 'ridge.task-detail')
+        : id === 'repair-lift'
+          ? state.progress.facts?.includes('spindle-secured')
+            ? message(lang, 'story.repair-return')
+            : message(lang, 'story.repair-detail')
+          : id === 'reach-tower'
+            ? message(lang, 'story.climb-detail')
+            : id === 'survey-road'
+              ? message(lang, 'story.road-detail')
+              : id === 'reach-camp'
+                ? message(lang, 'story.quest-main-detail')
+                : id === 'lost-satchel'
+                  ? message(lang, 'story.quest-side-detail')
+                  : message(lang, 'story.quest-guide-detail')
   const scene = storyTaskScene(state, id)
   const place =
     scene === 4

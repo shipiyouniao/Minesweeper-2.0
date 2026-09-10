@@ -3,6 +3,9 @@ import { SignalPerformance } from './signal-performance.js'
 import { signalCopy, signalLines } from './signal-copy.js'
 import { powerControl, powerReadiness } from '../game/floor-power.js'
 import { animatePowerChange } from './power-view.js'
+import { campaignName } from './campaign-copy.js'
+import { pendingWaterwayScene } from '../game/waterway-story.js'
+import { waterwayLines } from './waterway-copy.js'
 import { powerHint, observatoryLines } from './observatory-copy.js'
 import { pendingObservatoryScene } from '../game/observatory-story.js'
 import { relayReady } from '../game/floor-circuits.js'
@@ -152,7 +155,12 @@ export class VariantApp implements VariantInputActions {
       ) {
         this.sounds.play('blocked')
         const hint = this.root.querySelector('.power-objective p')
-        if (hint) hint.textContent = powerHint(this.language, powerReadiness(run, index))
+        if (hint)
+          hint.textContent = powerHint(
+            this.language,
+            powerReadiness(run, index),
+            run.power?.purpose,
+          )
         return
       }
       if (
@@ -794,13 +802,7 @@ export class VariantApp implements VariantInputActions {
     if (this.session instanceof ExpeditionSession) {
       if (this.session.campaignMode) {
         const heading = this.root.querySelector('.variant-heading h2')
-        if (heading)
-          heading.textContent =
-            this.session.stage.id === 'ridge-observatory'
-              ? message(this.language, 'ridge.title')
-              : this.session.stage.id === 'tower-relay'
-                ? signalCopy(this.language).title
-                : message(this.language, 'campaign.title')
+        if (heading) heading.textContent = campaignName(this.language, this.session.stage.id)
         if (!this.root.querySelector('[data-campaign-return]')) {
           const link = document.createElement('a')
           link.href = routeHref({ page: 'story' }, this.language)
@@ -845,7 +847,8 @@ export class VariantApp implements VariantInputActions {
     const session = this.session
     const signalScene = pendingSignalScene(session.run, session.stageProgress)
     const ridgeScene = pendingObservatoryScene(session.run, session.stageProgress)
-    const scene = signalScene ?? ridgeScene
+    const waterwayScene = pendingWaterwayScene(session.run, session.stageProgress)
+    const scene = signalScene ?? ridgeScene ?? waterwayScene
     if (!scene) return
     this.view.closeDialog()
     this.signal.present(
@@ -856,7 +859,9 @@ export class VariantApp implements VariantInputActions {
         ? signalLines(this.language, signalScene, !!session.run?.signalRecord)
         : ridgeScene
           ? observatoryLines(this.language, ridgeScene)
-          : [],
+          : waterwayScene
+            ? waterwayLines(this.language, waterwayScene)
+            : [],
       session.run?.departure.profession ?? 'explorer',
       () => {
         session.completeCampaignScene(scene)
@@ -864,7 +869,8 @@ export class VariantApp implements VariantInputActions {
         if (
           session.run?.phase === 'won' &&
           !pendingSignalScene(session.run, session.stageProgress) &&
-          !pendingObservatoryScene(session.run, session.stageProgress)
+          !pendingObservatoryScene(session.run, session.stageProgress) &&
+          !pendingWaterwayScene(session.run, session.stageProgress)
         )
           this.view.showExpeditionDialog()
       },
