@@ -17,7 +17,15 @@ export interface MessageCatalog {
   readonly 'ridge.exit-ready': string
   readonly 'ridge.progress': string
   readonly 'ridge.network': string
-  readonly 'ridge.rules': string
+  readonly 'ridge.guide-intro': string
+  readonly 'ridge.guide-clear-title': string
+  readonly 'ridge.guide-clear': string
+  readonly 'ridge.guide-switch-title': string
+  readonly 'ridge.guide-switch': string
+  readonly 'ridge.guide-record-title': string
+  readonly 'ridge.guide-record': string
+  readonly 'ridge.guide-upstream': string
+  readonly 'ridge.guide-wiring': string
   readonly 'ridge.junction': string
   readonly 'ridge.receiver': string
   readonly 'ridge.door': string

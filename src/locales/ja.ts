@@ -1373,8 +1373,19 @@ export const jaMessages: MessageCatalog = {
   'ridge.exit-ready': '観測完了。出口へ電力を送り、先へ進もう。',
   'ridge.progress': '観測 {count} / {total}',
   'ridge.network': '装置の使い方',
-  'ridge.rules':
-    '装置の隅の数字は通常のマインスイーパーと同じ。周囲の安全なマスを開き、地雷に旗を立ててから再度クリックすると、移動して操作する。切替器は A と B のどちらかに給電し、同じ番号の扉や観測装置につながる。手前の電源を切ると、その先も止まる。記録した観測結果は電力を切り替えても残る。探知道具では装置を操作できない。',
+  'ridge.guide-intro': '観測してから、扉へ電力を送ろう',
+  'ridge.guide-wiring': 'この階の接続',
+  'ridge.guide-clear-title': '装置の周りを解こう',
+  'ridge.guide-clear':
+    '装置と周囲の安全なマスを開き、地雷に旗を立てよう。隅の数字は普通のマインスイーパーと同じ。',
+  'ridge.guide-switch-title': 'クリックして切り替えよう',
+  'ridge.guide-switch':
+    '切替器をもう一度クリックすると、歩いて A・B を切り替える。1A は「1 番の切替器の A 側」だ。',
+  'ridge.guide-record-title': '記録してから扉へ',
+  'ridge.guide-record':
+    '観測装置に電力を送り、周囲を解いてからクリックして記録。全部記録したら扉側へ切り替えよう。電力を切っても記録は残る。',
+  'ridge.guide-upstream':
+    '奥の切替器にも手前からの電力が必要。道具でマスを調べても、装置の操作には歩いて近づこう。',
   'ridge.junction': '切替器',
   'ridge.receiver': '観測装置',
   'ridge.door': '扉',

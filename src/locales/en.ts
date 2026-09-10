@@ -1466,8 +1466,19 @@ export const enMessages: MessageCatalog = {
   'ridge.exit-ready': 'Readings complete. Route power to the exit and walk there.',
   'ridge.progress': 'Readings {count} / {total}',
   'ridge.network': 'How the devices work',
-  'ridge.rules':
-    'The small number on a device is an ordinary Minesweeper clue. Reveal its safe neighbors and flag the mines, then click the device again to walk over and operate it. Each numbered selector sends power to A or B; matching labels identify its doors and instruments. Changing the upstream supply also affects downstream selectors. Readings stay recorded when power is switched away. Inspect and probe tools reveal clues but do not operate a device.',
+  'ridge.guide-intro': 'Take readings, then power the gate',
+  'ridge.guide-wiring': 'This floor’s connections',
+  'ridge.guide-clear-title': 'Clear around the device',
+  'ridge.guide-clear':
+    'Reveal the device and its safe neighbors, then flag the mines. Its corner number is a normal Minesweeper clue.',
+  'ridge.guide-switch-title': 'Click to walk over and switch',
+  'ridge.guide-switch':
+    'Click the selector again to walk over and switch between A and B. A device labeled 1A uses selector 1’s A branch.',
+  'ridge.guide-record-title': 'Record, then power the exit',
+  'ridge.guide-record':
+    'Power the instrument and clear its neighbors, then click it to record. Take every reading before switching to the gate; records survive a power cut.',
+  'ridge.guide-upstream':
+    'Downstream selectors need upstream power. Tools can reveal clues, but you must walk over to operate a device.',
   'ridge.junction': 'Selector',
   'ridge.receiver': 'Instrument',
   'ridge.door': 'Gate',

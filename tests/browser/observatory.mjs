@@ -78,16 +78,62 @@ async function dialogue(page, keyboard = false) {
   assert.equal(await page.locator('.signal-dialogue[open]').count(), 0)
 }
 
+/** Help uses the shared modal without changing the run or stealing the return focus. */
+async function deviceGuide(page, width, language, floor = 1) {
+  const opener = page.locator('.power-help')
+  const before = await page.evaluate((key) => localStorage.getItem(key), key)
+  if (width <= 390) await opener.tap()
+  else {
+    await opener.focus()
+    await page.keyboard.press('Enter')
+  }
+
+  const modal = page.locator('dialog[open]:has(.power-guide)')
+  await modal.waitFor()
+  assert.equal(await modal.locator('.boss-picture-steps > li').count(), 3)
+  assert.deepEqual(
+    await modal.locator('.power-guide-feed').allTextContents(),
+    floor === 1 ? ['⚡'] : ['⚡', floor === 2 ? '1A' : '1B'],
+  )
+  await modal
+    .locator('img')
+    .evaluateAll((images) => Promise.all(images.map((image) => image.decode())))
+  assert.ok((await modal.locator('.ridge-instrument').count()) >= 3)
+  assert.equal(await modal.locator('details').count(), 0)
+  assert.equal(
+    await modal.evaluate((element) => element.scrollWidth > element.clientWidth + 1),
+    false,
+  )
+  await page.screenshot({
+    path: `.native/ridge-screenshots/guide-${width}-${language}-${floor}.png`,
+  })
+  await page.keyboard.press('c')
+  assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), before)
+  await page.keyboard.press('Escape')
+  assert.equal(await modal.count(), 0)
+  assert.equal(await opener.evaluate((element) => document.activeElement === element), true)
+
+  // The header entry must show the same contextual guide; the close button also works by touch.
+  await page.locator('[data-control="help"]').first().click()
+  await modal.waitFor()
+  const close = modal.locator('[data-control="cancel"]')
+  if (width <= 390) await close.tap()
+  else await close.click()
+  assert.equal(await modal.count(), 0)
+  assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), before)
+}
+
 try {
   for (const [width, language] of [
     [1440, 'zh'],
     [390, 'zh'],
     [390, 'en'],
+    [320, 'en'],
     [390, 'ja'],
   ]) {
     const page = await browser.newPage({
       viewport: { width, height: 950 },
-      hasTouch: width === 390,
+      hasTouch: width <= 390,
       reducedMotion: 'reduce',
     })
     const errors = []
@@ -113,6 +159,7 @@ try {
     await page.locator('[data-signal-scene="ridge-entry"]').waitFor()
     await page.screenshot({ path: `.native/ridge-screenshots/dialogue-${width}-${language}.png` })
     await dialogue(page)
+    await deviceGuide(page, width, language)
     let count = 0,
       floor = 1
     for (const action of actions) {
@@ -121,7 +168,7 @@ try {
         floor++
       } else {
         const cell = page.locator(`[data-side="a"] [data-cell="${action.index}"]`)
-        if (action.type === 'flag' && width === 390) {
+        if (action.type === 'flag' && width <= 390) {
           await cell.scrollIntoViewIfNeeded()
           const box = await cell.boundingBox(),
             cdp = await page.context().newCDPSession(page)
@@ -133,7 +180,7 @@ try {
           await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
           await cdp.detach()
         } else if (action.type === 'flag') await cell.click({ button: 'right' })
-        else if (width === 390) await cell.tap()
+        else if (width <= 390) await cell.tap()
         else await cell.click()
       }
       count++
@@ -153,6 +200,7 @@ try {
         await page.locator('[data-signal-scene="ridge-found"]').waitFor()
       }
       await dialogue(page)
+      if (action.type === 'relic') await deviceGuide(page, width, language, floor)
       if (action.type === 'interact') {
         await page.screenshot({
           path: `.native/ridge-screenshots/board-${width}-${language}-${floor}.png`,

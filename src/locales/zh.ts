@@ -1327,8 +1327,16 @@ export const zhMessages: MessageCatalog = {
   'ridge.exit-ready': '观测完成，把电接到出口那边就能走了。',
   'ridge.progress': '观测 {count} / {total}',
   'ridge.network': '机关怎么用',
-  'ridge.rules':
-    '机关角上的数字还是普通扫雷数字。先挖开周围安全格、标好雷，再点机关，角色会走过去操作。换向器每次在 A、B 两路间切换；门和观测仪上的标号表示它接在哪一路。上游断电，下游也会停。已经记下的观测结果不会丢。探测道具可以帮忙看格子，操作机关还得亲自过去。',
+  'ridge.guide-intro': '先观测，再换路开门',
+  'ridge.guide-wiring': '本层接线',
+  'ridge.guide-clear-title': '解开机关周围',
+  'ridge.guide-clear': '挖开机关和周围的安全格，把雷标出来。角上的数字按普通扫雷来读。',
+  'ridge.guide-switch-title': '点机关，走过去切换',
+  'ridge.guide-switch': '再点换向器，角色会走过去切换 A、B 两路。1A 就是 1 号换向器的 A 路。',
+  'ridge.guide-record-title': '观测完，再接通出口',
+  'ridge.guide-record':
+    '观测仪有电、周围解开后，点它记录。全部记好，再换路开门；断电不会丢掉记录。',
+  'ridge.guide-upstream': '后面的换向器也要靠上游供电。探测道具能帮忙看格子，操作机关还得走过去。',
   'ridge.junction': '换向器',
   'ridge.receiver': '观测仪',
   'ridge.door': '闸门',

@@ -22,6 +22,23 @@ Nia accompanies the measurement work through voiced exchanges. The protagonist a
 
 The atlas preserves the beacon location after clearance. Nia's subsequent camp conversation and the ending both offer a **Listen to the beacon** button. The recording is an original synthesized three-note cue and follows the shared mute preference. Selector turns, downstream power changes and instrument readings animate after accepted interactions. Dialogue uses the existing chibi cast, distinct voices, typewriter controls and reduced-motion behavior.
 
+**How the devices work** opens the shared boss-reference modal from the objective bar or the header help button. Three illustrated cards explain clearing a device's neighbors, walking over to switch A/B, and recording before powering the exit. The examples reuse the existing character, selector, gate and telescope artwork; three-column diagrams keep the devices legible on phones. Escape and the close button return to play without changing the action journal.
+
+The compact connection diagram below the cards preserves each selector's upstream branch: selector 2 receives **1A** on floor two and **1B** on floor three. These are public connections, independent of the current switch position.
+
+<details>
+<summary>Device guide: before and after</summary>
+
+Before: the objective expanded into a paragraph and a wiring list.
+
+![Previous inline device instructions](images/device-guide-before.png)
+
+After: a modal with illustrated steps, using the boss guide's presentation.
+
+![Illustrated device guide](images/device-guide-after.png)
+
+</details>
+
 The water-channel entrance is **not playable yet**. This delivery completes three of the chapter's five planned exploration stages; two exploration stages and the concluding boss stage remain.
 
 ## Ownership and persistence
@@ -40,5 +57,7 @@ The power component is reusable by other floor providers. Procedural placement a
 `tests/observatory-helpers.ts` provides a public-information solution: it uses visible clue deductions and the published routing labels, never hidden mine bits to choose an excavation. Both compiler suites exercise all three floors, ordinary damage rules, closed-gate rejection, safe connectivity, truthful clues, rerouting, persistent readings and per-action journal restoration. Session tests cover prerequisite gates, prior-stage/roguelite preservation, one-time settlement, retry dialogue and future-version write protection.
 
 `tests/browser/observatory.mjs` traverses Nia's camp conversation and the real stage entrance, then solves the stage through browser controls at desktop and phone sizes. It covers right-click and touch-hold flags, tap/click operation, mid-run reload, interrupted ending, camp recording and atlas result. English and Japanese receive entry/device checks. The normal-motion keyboard path and audio/mute checks use the same presentation and input owners.
+
+The same browser check opens the device guide through touch and keyboard input, verifies its images and narrow layout, checks both help entries, and closes it with Escape and the close button. The saved run must remain identical while the modal is open and after dismissal; focus returns to the initiating control.
 
 The original instrument asset and generation prompt are recorded in [Story artwork](story-artwork.md). The full chapter remains tracked in [Roadmap II](https://github.com/shipiyouniao/minefarer/issues/55).

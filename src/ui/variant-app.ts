@@ -28,6 +28,7 @@ import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import type { VariantCommand, VariantInputActions } from '../types/variant-ui.js'
 import type { BoardSide, Equipment, ExpeditionAction, Profession } from '../types/variants.js'
 import { battleGuide } from './battle-guide.js'
+import { powerGuide } from './power-guide.js'
 import { secondaryBoardAction } from './board-actions.js'
 import { nextBoardMode } from './board-controls.js'
 import { boardHelpTemplate } from './board-help.js'
@@ -506,6 +507,13 @@ export class VariantApp implements VariantInputActions {
           this.view.showInformation(
             message(this.language, 'variant-app.battle-reference'),
             battleGuide(this.language, this.session.run),
+          )
+          return
+        }
+        if (this.session instanceof ExpeditionSession && this.session.run?.power) {
+          this.view.showInformation(
+            message(this.language, 'ridge.network'),
+            powerGuide(this.language, this.session.run.power),
           )
           return
         }

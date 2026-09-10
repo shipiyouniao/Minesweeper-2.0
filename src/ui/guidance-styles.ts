@@ -171,7 +171,7 @@ export const guidanceStyles = {
     'tw:[&_p]:flex tw:[&_p]:[gap:9px] tw:[&_p]:[line-height:1.6] tw:[&_p]:[margin:14px_0_0]',
     'tw:[&_b]:text-[#47785a]',
     'tw:[@media(max-width:_620px)]:[grid-template-columns:1fr]',
-    'tw:[@media(max-width:_620px)]:[&_li]:grid tw:[@media(max-width:_620px)]:[&_li]:[grid-template-columns:minmax(110px,_40%)_1fr] tw:[@media(max-width:_620px)]:[&_li]:gap-3 tw:[@media(max-width:_620px)]:[&_li]:items-center',
+    'tw:[@media(max-width:_620px)]:[&_li]:grid tw:[@media(max-width:_620px)]:[&_li]:[grid-template-columns:var(--picture-step-columns,_minmax(110px,_40%)_1fr)] tw:[@media(max-width:_620px)]:[&_li]:gap-3 tw:[@media(max-width:_620px)]:[&_li]:items-center',
     'tw:[@media(max-width:_620px)]:[&_p]:m-0',
   ].join(' '),
   'boss-mini-board': [
