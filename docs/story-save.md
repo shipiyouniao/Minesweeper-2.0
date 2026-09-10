@@ -29,9 +29,11 @@ Old completed/claimed tasks seed their corresponding durable facts during decodi
 
 Travel is no longer bounded by a 3,000-action journal. A 10,000-move reload test checks that serialized size remains unchanged when revisiting the same ground. Storage scales with visited cells/scenes, not elapsed playtime. The current catalog contains the three prologue scenes, northern road, three quarry spaces and tower landing. Future scenes must add stable content IDs and validation, not bypass the checkpoint decoder.
 
-The two playable campaign stages now freeze their prepared departures independently of each other and roguelite. Configurable Recollection and complete chapter dependency validation remain required before R2-01 can be marked complete.
+The three playable campaign stages now freeze their prepared departures independently of each other and roguelite. Configurable Recollection and complete chapter dependency validation remain required before R2-01 can be marked complete.
 
 ## Prepared campaign attempt
+
+The third slot, `ridge-observatory`, uses content revision `ridge-observatory-v1` and a once-only 100-supply clear reward. Its `ridge-route` fact comes from Nia's completed camp conversation; `ridge-surveyed` settles with the clear bit. These facts survive replay and complete the route task without a second currency payment. The catalog now also declares the maximum authored width/height for journal decoding; exact replay still rejects actions outside the current floor. Power selection and recorded readings rebuild from the journal, while completed dialogue remains in the stage ledger.
 
 The shared envelope contains `campaign: { schemaVersion: 1, stages: [...] }`. Every stable stage ID owns its journal, records, clear bit, lesson, completed performances and optional narrative outcomes. The catalog maps `tower-galleries` to `tower-road-v4` and `tower-relay` to `tower-relay-v1`. Departures freeze the owned profession, equipment, title and training and replay shared expedition actions against the selected authored terrain. The ordinary `journal` and records continue to belong to roguelite. A repository projection merges only the selected stage with the newest shared envelope; lifecycle saves preserve the other stages. The former single slot migrates once into the galleries entry.
 

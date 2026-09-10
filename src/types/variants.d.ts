@@ -1,6 +1,7 @@
 import type { ExpeditionSonar } from './echo.js'
 import type { CampaignRevision, CampaignSave } from './campaign.js'
 import type { FloorCircuits } from './floor-circuits.js'
+import type { FloorPower } from './floor-power.js'
 import type { VariantDifficulty } from './variant-difficulty.js'
 import type { TacticalEncounter } from './tactical.js'
 import type { Vitality } from './vitality.js'
@@ -86,6 +87,7 @@ export interface Departure {
 
 /** A complete floor state; reachability is derived from revealed safe cells. */
 export interface Expedition extends Vitality {
+  readonly power?: FloorPower
   readonly circuits?: FloorCircuits
   /** Carried between floors; serialized state is always reconstructed from intents. */
   readonly signalRecord?: boolean

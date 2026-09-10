@@ -72,7 +72,13 @@ export type StorySceneMemory = Omit<StoryRun, 'visited'>
 
 /** Permanent story objectives are separate from ordinary expedition milestones. */
 export type StoryTask =
-  'reach-camp' | 'lost-satchel' | 'meet-guide' | 'survey-road' | 'repair-lift' | 'reach-tower'
+  | 'reach-camp'
+  | 'lost-satchel'
+  | 'meet-guide'
+  | 'survey-road'
+  | 'repair-lift'
+  | 'reach-tower'
+  | 'survey-ridge'
 
 /** One envelope commits story rewards and the shared wallet together. */
 export type StoryCampaignMetric = 'travel' | 'chests' | 'floors' | 'bosses' | 'skills' | 'wins'
@@ -201,6 +207,8 @@ export interface StoryHold {
 
 /** Durable outcomes describe the fiction, independent of board coordinates or wording. */
 export type StoryFact =
+  | 'ridge-route'
+  | 'ridge-surveyed'
   | 'camp-reached'
   | 'satchel-secured'
   | 'satchel-delivered'
@@ -223,7 +231,7 @@ export type StoryCondition =
 export interface StoryTaskDefinition {
   readonly id: StoryTask
   readonly category: 'main' | 'side'
-  readonly introducedBy: StoryDialogueId
+  readonly introducedBy: StoryDialogueId | 'nia-route'
   readonly prerequisite: StoryCondition
   readonly objective: StoryCondition
   readonly supplies: number

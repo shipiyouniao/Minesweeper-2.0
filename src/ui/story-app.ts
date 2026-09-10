@@ -1,6 +1,9 @@
 import { campaignProgress } from '../game/campaign-catalog.js'
 import { clueIsolated } from '../game/clue-isolation.js'
 import { NIA_CAMP_CELL, pendingSignalScene } from '../game/signal-story.js'
+import { pendingObservatoryScene } from '../game/observatory-story.js'
+import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
+import { observatoryLines } from './observatory-copy.js'
 import { SignalPerformance } from './signal-performance.js'
 import { message } from '../i18n.js'
 import { storyTaskName, storyTaskScene } from './story-quests.js'
@@ -203,6 +206,20 @@ export class StoryApp implements MountedGame {
           `[data-story-action="${control}"]${task ? `[data-task="${task}"]` : ''}`,
         )
         ?.focus({ preventScroll: true })
+    const observatory = this.session.camp.observatory
+    const ridgeScene = pendingObservatoryScene(null, observatory)
+    if (ridgeScene && !this.root.querySelector('dialog[open]'))
+      this.signal.present(
+        this.root,
+        this.language,
+        ridgeScene,
+        observatoryLines(this.language, ridgeScene),
+        state.loadout.profession,
+        () => {
+          this.session.camp.completeObservatoryScene(ridgeScene)
+          this.render()
+        },
+      )
     const rescue = this.session.camp.signalRescue
     if (pendingSignalScene(null, rescue) === 'rescued' && !this.root.querySelector('dialog[open]'))
       this.signal.show(
@@ -296,9 +313,13 @@ export class StoryApp implements MountedGame {
     const cell = state.board.game.cells[index]
     if (!cell || state.board.walls.includes(index)) return
     if (
-      state.run?.floor === 7 &&
-      index === state.board.exit &&
-      this.session.camp.story.dialogue?.completed.includes('tower-arrival')
+      !flag &&
+      ((state.run?.floor === 7 &&
+        index === state.board.exit &&
+        this.session.camp.story.dialogue?.completed.includes('tower-arrival')) ||
+        (state.run?.floor === 3 &&
+          index === OBSERVATORY_GATE &&
+          state.progress.facts?.includes('ridge-route')))
     ) {
       const entry = this.root.querySelector<HTMLAnchorElement>('[data-story-campaign]')
       if (entry && state.player === index) {
@@ -428,15 +449,38 @@ export class StoryApp implements MountedGame {
     }
     this.render()
     if (!state.run && index === 51) this.performance.react('greet')
-    if (!state.run && index === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared)
-      this.signal.show(
-        this.root,
-        this.language,
-        'camp',
-        this.session.camp.signalRescue.recordSaved,
-        state.loadout.profession,
-        () => this.render(),
-      )
+    if (!state.run && index === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared) {
+      if (this.session.camp.observatory.cleared)
+        this.signal.present(
+          this.root,
+          this.language,
+          'ridge-camp',
+          observatoryLines(this.language, 'ridge-camp'),
+          state.loadout.profession,
+          () => {
+            this.session.camp.completeObservatoryScene('ridge-camp')
+            this.render()
+          },
+        )
+      else
+        this.signal.show(
+          this.root,
+          this.language,
+          'camp',
+          this.session.camp.signalRescue.recordSaved,
+          state.loadout.profession,
+          () => {
+            const accepted = this.session.camp.story.facts?.includes('ridge-route')
+            this.session.camp.acceptRidgeRoute()
+            this.render()
+            if (!accepted)
+              this.questReveal(
+                message(this.language, 'ridge.task'),
+                message(this.language, 'ridge.title'),
+              )
+          },
+        )
+    }
     if (
       state.run &&
       state.run.floor === this.session.run?.floor &&
@@ -615,7 +659,8 @@ export class StoryApp implements MountedGame {
           id === 'meet-guide' ||
           id === 'survey-road' ||
           id === 'repair-lift' ||
-          id === 'reach-tower'
+          id === 'reach-tower' ||
+          id === 'survey-ridge'
         )
           this.session.togglePin(id)
         break

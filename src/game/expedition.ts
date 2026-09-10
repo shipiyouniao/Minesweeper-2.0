@@ -1,5 +1,7 @@
 import { campaignLayout } from './campaign-layout.js'
 import { signalLayout } from './signal-layout.js'
+import { observatoryLayout } from './observatory-layout.js'
+import { interactPower, powerControl } from './floor-power.js'
 import { collectSignalRecord, floorObjectiveComplete, interactRelay } from './floor-circuits.js'
 import {
   EMPTY_EXPEDITION_SONAR,
@@ -126,9 +128,11 @@ function createFloor(departure: Departure, floor: number): Expedition {
   const seed = (departure.seed + Math.imul(floor, 0x9e3779b9)) >>> 0
   const config = expeditionConfig(departure, floor)
   const layout = departure.campaign
-    ? departure.campaign === 'tower-relay-v1'
-      ? signalLayout(floor)
-      : campaignLayout(floor)
+    ? departure.campaign === 'ridge-observatory-v1'
+      ? observatoryLayout(floor)
+      : departure.campaign === 'tower-relay-v1'
+        ? signalLayout(floor)
+        : campaignLayout(floor)
     : generateDungeon(seed, config.mines, config.width, config.height)
   const run: Expedition = {
     ...layout,
@@ -160,7 +164,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
     steps: 0,
     phase: 'exploring',
   }
-  return run.circuits ? { ...run, game: revealDungeon(run, run.entrance) } : run
+  return run.circuits || run.power ? { ...run, game: revealDungeon(run, run.entrance) } : run
 }
 
 /** Start a run with bounded career tools and the selected equipment allocation. */
@@ -373,7 +377,10 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
     return run.phase === 'reward' && run.offers.length === 0 ? advanceFloor(run) : run
   if (action.type === 'relic') return takeRelic(run, action.relic)
   if (run.phase !== 'exploring') return run
-  if (action.type === 'interact') return interactRelay(run, action.index)
+  if (action.type === 'interact')
+    return powerControl(run, action.index)
+      ? interactPower(run, action.index)
+      : interactRelay(run, action.index)
 
   switch (action.type) {
     case 'skill': {

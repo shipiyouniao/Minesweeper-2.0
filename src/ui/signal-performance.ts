@@ -1,10 +1,12 @@
 import { DialogueReveal } from './dialogue-reveal.js'
 import { signalCopy, signalLines } from './signal-copy.js'
+import { message } from '../i18n.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { professionSprite } from './profession-presentation.js'
 import { playerDialogueCue } from '../audio/dialogue-voices.js'
 import type { Language } from '../types/localization.js'
-import type { SignalSceneId } from '../types/signal-story.js'
+import type { SignalLine, SignalSceneId } from '../types/signal-story.js'
+import type { CampaignSceneId } from '../types/campaign.js'
 import type { Profession } from '../types/variants.js'
 import type { SoundEffects } from '../types/audio.js'
 
@@ -35,16 +37,39 @@ export class SignalPerformance {
     profession: Profession,
     completed: () => void,
   ): void {
+    this.present(root, language, scene, signalLines(language, scene, record), profession, completed)
+  }
+
+  /** Stage scripts supply their own reached event; voice, pacing and motion stay shared. */
+  present(
+    root: HTMLElement,
+    language: Language,
+    scene: CampaignSceneId,
+    lines: readonly SignalLine[],
+    profession: Profession,
+    completed: () => void,
+  ): void {
     if (this.dialog?.isConnected) return
     this.dispose()
     const t = signalCopy(language)
-    const lines = signalLines(language, scene, record)
     const dialog = document.createElement('dialog')
     dialog.className = 'signal-dialogue'
     dialog.dataset['signalScene'] = scene
     dialog.setAttribute('aria-labelledby', 'signal-speaker')
     dialog.innerHTML = `<div class="signal-cast"><span data-signal-listener>${spriteImage(professionSprite(profession))}</span><span data-signal-portrait></span></div><div class="signal-dialogue-copy"><strong id="signal-speaker"></strong><p data-signal-line></p><button class="story-dialogue-next" data-signal-next>${t.continue} →</button></div>`
     root.append(dialog)
+    if (scene === 'ridge-found' || scene === 'ridge-camp') {
+      const replay = document.createElement('button')
+      replay.type = 'button'
+      replay.className = 'ridge-recording'
+      replay.dataset['beaconReplay'] = ''
+      replay.textContent = message(language, 'ridge.recording')
+      replay.addEventListener('click', () => {
+        this.sounds.unlock()
+        this.sounds.play('beacon-signal')
+      })
+      dialog.querySelector('[data-signal-next]')!.before(replay)
+    }
     this.dialog = dialog
     let beat = 0
     const paint = (): void => {
@@ -90,7 +115,7 @@ export class SignalPerformance {
       )
     }
     dialog.addEventListener('cancel', (event) => event.preventDefault())
-    dialog.querySelector('button')!.addEventListener('click', () => {
+    dialog.querySelector('[data-signal-next]')!.addEventListener('click', () => {
       this.sounds.unlock()
       if (this.reveal.finish()) return
       this.sounds.play('confirm')
@@ -101,6 +126,7 @@ export class SignalPerformance {
       }
     })
     dialog.showModal()
+    if (scene === 'ridge-found') this.sounds.play('beacon-signal')
     paint()
   }
 
