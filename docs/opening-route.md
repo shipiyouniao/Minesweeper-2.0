@@ -1,6 +1,6 @@
 # Opening route: an unanswered promise
 
-The opening now leads from a personal question into a concrete rescue lead. Lumi pulled the protagonist away from a knot, but she is also waiting for Nia, who promised to return from the watchtower before dark. The optional satchel identifies its absent owner; the empty stool, a single light from the tower, and its evacuation notice develop that lead before the prepared stages begin. These are playable draft scenes, open to feedback rather than a settled ending for the project.
+The opening now leads from a personal question into a concrete rescue lead. Lumi pulled the protagonist away from a knot, but she is also waiting for Nia, who promised to return from the watchtower before dark. The optional satchel identifies its absent owner; Lumi's concern, a single light from the tower, and its evacuation notice develop that lead before the prepared stages begin. These are playable draft scenes, open to feedback rather than a settled ending for the project.
 
 ## Playable sequence
 
@@ -24,6 +24,12 @@ The brake and winch show ordinary eight-neighbor mine clues. Their controls requ
 Closed guards are visible, impassable terrain and stop zero expansion. Operation opens only the safe gate and retains its actual clue; it neither changes hazards nor reveals the next room. Controls use the established Bastion pylon/core assets. The pylon turns, the barrier flashes and lowers, then dialogue resumes. The haul departure animates the traveler before switching scenes. Keyboard, click and touch use the same accepted action; reduced motion skips only presentation.
 
 The new dialogue remains short, voiced and skippable line by line. Lumi helps with machinery and reacts to its consequences, rather than merely issuing the next destination. The later signal rescue remains the payoff: Nia returns to camp and comments on the optional record.
+
+### Dialogue voice
+
+Write Chinese dialogue as spoken Chinese in the scene, without copying English sentence structure. Read the exchange in speaker order: questions need replies, references need a clear subject, and a character can only respond to information they have learned. Lumi gives practical help and shows concern; the protagonist asks ordinary questions; Nia knows the machinery and can complain about being trapped. The guardian deliberately retains its impersonal command voice.
+
+Prefer a specific reaction to injury, a stuck door or a friend's return over a metaphor, a closing slogan or a joke on every beat. Let a relieved character thank their rescuers plainly. Keep numbers and input instructions explicit in teaching and interface hints. Copy revisions do not reset completed dialogue or retire saves.
 
 ## Persistence and checks
 
