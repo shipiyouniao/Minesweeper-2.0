@@ -1587,5 +1587,5 @@ export const jaMessages: MessageCatalog = {
   'rail.camp-2': '足のほうは？',
   'rail.camp-3':
     '足はまだ休ませてる。手は元気だ。技師の仕事を覚えたいなら座れよ。簡単なのから教える。',
-  'rail.reward': '物資120を獲得 · 技師が解放',
+  'rail.reward': '物資120を獲得 · キャンプで技師を選択可能',
 }

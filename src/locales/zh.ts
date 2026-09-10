@@ -1524,5 +1524,5 @@ export const zhMessages: MessageCatalog = {
   'rail.camp-1': '来得正好。绞盘我修好了，这回往哪儿拉都不响。',
   'rail.camp-2': '你的脚呢？',
   'rail.camp-3': '脚还得歇着。手又没坏。想学工程师的活儿，就坐过来，我从最简单的教。',
-  'rail.reward': '获得 120 物资 · 工程师已解锁',
+  'rail.reward': '获得 120 物资 · 可在营地选择工程师',
 }
