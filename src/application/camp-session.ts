@@ -1,4 +1,5 @@
-import { storyTaskReward } from '../game/story-quests.js'
+import { recordStoryFacts, storyTaskReward } from '../game/story-quests.js'
+import type { ObservatorySceneId } from '../types/observatory.js'
 import { STORY_REVISION } from '../game/story-content.js'
 import { campaignProgress, updateCampaign } from '../game/campaign-catalog.js'
 import type { CampaignStageProgress } from '../types/campaign.js'
@@ -52,6 +53,41 @@ export class CampSession {
   /** A rescued resident and optional record are permanent stage outcomes in the shared camp. */
   get signalRescue(): CampaignStageProgress {
     return campaignProgress(this.read().campaign, 'tower-relay')
+  }
+
+  /** Keep observatory outcomes available after settlement removes the active journal. */
+  get observatory(): CampaignStageProgress {
+    return campaignProgress(this.read().campaign, 'ridge-observatory')
+  }
+
+  /** Finishing Nia's camp conversation accepts the route once, without granting currency. */
+  acceptRidgeRoute(): void {
+    if (!this.signalRescue.cleared || this.story.facts?.includes('ridge-route')) return
+    const story = this.story
+    this.saveStory(
+      recordStoryFacts(
+        {
+          ...story,
+          accepted: [...new Set([...(story.accepted ?? []), 'survey-ridge' as const])],
+          pinned: [...new Set([...(story.pinned ?? []), 'survey-ridge' as const])],
+        },
+        ['ridge-route'],
+      ),
+    )
+  }
+
+  /** Recovery and later camp conversation share the same once-only performance ledger. */
+  completeObservatoryScene(scene: ObservatorySceneId): void {
+    const save = this.read()
+    const progress = campaignProgress(save.campaign, 'ridge-observatory')
+    if (!progress.cleared || progress.scenes.includes(scene)) return
+    this.repository.saveExpedition({
+      ...save,
+      campaign: updateCampaign(save.campaign, {
+        ...progress,
+        scenes: [...progress.scenes, scene],
+      }),
+    })
   }
 
   /** Recover an interrupted ending without rebuilding the retired run or repeating settlement. */

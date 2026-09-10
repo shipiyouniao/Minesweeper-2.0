@@ -8,6 +8,8 @@ import {
   QUARRY_GATE,
 } from '../game/story-content.js'
 import { message } from '../i18n.js'
+import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
+import { observatoryImage } from './power-view.js'
 import { icon } from '../icons.js'
 import type { CampSite, StoryViewState } from '../types/story.js'
 import { campPageName } from './camp-copy.js'
@@ -81,6 +83,10 @@ export function storyMap(state: StoryViewState): string {
         .split('')
         .map((terrain, index) => {
           const site = scene === 3 ? CAMP_SITES.find((entry) => entry.index === index) : undefined
+          const ridge =
+            scene === 4 &&
+            index === OBSERVATORY_GATE &&
+            state.progress.facts?.includes('ridge-route')
           const traveler = scene === current && index === state.player
           const entrance = terrain === 'S'
           const exit = terrain === 'E'
@@ -107,8 +113,9 @@ export function storyMap(state: StoryViewState): string {
                               ? scene - 1
                               : null
           const hidden = scene === current && state.board.game.cells[index]?.visibility === 'hidden'
-          const name =
-            destination !== null
+          const name = ridge
+            ? message(lang, 'ridge.title')
+            : destination !== null
               ? names[destination]!
               : site
                 ? site.destination === 'guide'
@@ -123,15 +130,17 @@ export function storyMap(state: StoryViewState): string {
                     : terrain === '#'
                       ? message(lang, 'story.atlas-tree')
                       : ''
-          const marker = site
-            ? landmarkImage(site)
-            : destination !== null
-              ? icon('arrow')
-              : entrance
-                ? '<span class="atlas-entry">○</span>'
-                : ''
+          const marker = ridge
+            ? observatoryImage()
+            : site
+              ? landmarkImage(site)
+              : destination !== null
+                ? icon('arrow')
+                : entrance
+                  ? '<span class="atlas-entry">○</span>'
+                  : ''
           const tag = destination !== null ? 'button' : 'div'
-          return `<${tag} class="atlas-tile ${destination !== null ? 'atlas-connection' : ''} ${terrain === '#' ? 'atlas-tree' : 'atlas-path'} ${hidden ? 'atlas-fog' : ''}" ${destination !== null ? `data-story-action="map-scene" data-scene="${destination}"` : ''} ${name ? `data-map-name="${escapeHtml(name)}"` : ''} ${site || destination !== null || traveler ? `role="button" tabindex="0" aria-label="${escapeHtml(name)}"` : ''}>${terrain === '#' ? `<img src="${import.meta.env.BASE_URL}assets/story/tree.png" alt="" draggable="false">` : marker}${traveler ? `<span class="atlas-position" aria-label="${position}"></span>` : ''}${destination !== null ? `<span class="atlas-destination">${name}</span>` : ''}</${tag}>`
+          return `<${tag} class="atlas-tile ${destination !== null ? 'atlas-connection' : ''} ${terrain === '#' ? 'atlas-tree' : 'atlas-path'} ${hidden ? 'atlas-fog' : ''}" ${destination !== null ? `data-story-action="map-scene" data-scene="${destination}"` : ''} ${name ? `data-map-name="${escapeHtml(name)}"` : ''} ${site || destination !== null || traveler || ridge ? `role="button" tabindex="0" aria-label="${escapeHtml(name)}"` : ''}>${terrain === '#' ? `<img src="${import.meta.env.BASE_URL}assets/story/tree.png" alt="" draggable="false">` : marker}${traveler ? `<span class="atlas-position" aria-label="${position}"></span>` : ''}${destination !== null ? `<span class="atlas-destination">${name}</span>` : ''}</${tag}>`
         })
         .join('')
       landmarks =
@@ -168,7 +177,7 @@ export function storyMap(state: StoryViewState): string {
   }
   const legend = `<div class="atlas-legend-control"><button class="atlas-legend-toggle" data-story-action="map-legend" aria-expanded="${!!state.mapLegend}" aria-controls="story-map-legend">${message(lang, 'story.atlas-legend')} ${state.mapLegend ? '−' : '+'}</button>${state.mapLegend ? `<div class="atlas-legend" id="story-map-legend"><span><i class="atlas-position"></i>${position}: ${names[current]}</span><span><i class="atlas-route-key"></i>${message(lang, 'story.atlas-route')}</span>${landmarks ? `<ul class="atlas-landmarks">${landmarks}</ul>` : ''}</div>` : ''}</div>`
   const zoom = `<div class="atlas-zoom"><button data-map-zoom="out" aria-label="${message(lang, 'story.atlas-zoom-out')}">−</button><input type="range" min="100" max="400" step="5" value="100" aria-label="${message(lang, 'story.atlas-zoom')}"><button data-map-zoom="in" aria-label="${message(lang, 'story.atlas-zoom-in')}">+</button><output class="atlas-zoom-value">100%</output><button data-map-zoom="reset">${message(lang, 'story.atlas-fit')}</button></div>`
-  return `<div class="story-map" data-map-level="${level}" data-map-scene="${scene}"><div class="atlas-toolbar">${back}${scale}</div><div class="atlas-heading"><h3>${title}</h3></div><div class="atlas-canvas"><div class="atlas-viewport" data-enter-label="${message(lang, 'story.atlas-enter')}"><div class="atlas-scene">${drawing}</div></div>${legend}</div>${zoom}</div>`
+  return `<div class="story-map" data-map-level="${level}" data-map-scene="${scene}"><div class="atlas-toolbar">${back}${scale}</div><div class="atlas-heading"><h3>${title}</h3>${state.progress.facts?.includes('ridge-surveyed') ? `<p data-ridge-location>${message(lang, 'ridge.location')}</p>` : ''}</div><div class="atlas-canvas"><div class="atlas-viewport" data-enter-label="${message(lang, 'story.atlas-enter')}"><div class="atlas-scene">${drawing}</div></div>${legend}</div>${zoom}</div>`
 }
 
 /** Coastline and distant, uncharted land give the known region a place in the world. */

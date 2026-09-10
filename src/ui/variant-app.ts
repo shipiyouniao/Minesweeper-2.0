@@ -1,6 +1,10 @@
 import { pendingSignalScene } from '../game/signal-story.js'
 import { SignalPerformance } from './signal-performance.js'
-import { signalCopy } from './signal-copy.js'
+import { signalCopy, signalLines } from './signal-copy.js'
+import { powerControl, powerReadiness } from '../game/floor-power.js'
+import { animatePowerChange } from './power-view.js'
+import { powerHint, observatoryLines } from './observatory-copy.js'
+import { pendingObservatoryScene } from '../game/observatory-story.js'
 import { relayReady } from '../game/floor-circuits.js'
 import { animateCircuitChange } from './floor-circuit-view.js'
 import { professionSkillCopy, professionSkillStatus } from './profession-skill-copy.js'
@@ -138,6 +142,18 @@ export class VariantApp implements VariantInputActions {
       }
       const path = run ? approachPath(run, index) : null
       const relay = run?.circuits?.relays.find((entry) => entry.index === index && entry.active)
+      const power = run && powerControl(run, index)
+      if (
+        run &&
+        power &&
+        run.game.cells[index]?.visibility === 'revealed' &&
+        powerReadiness(run, index) !== 'ready'
+      ) {
+        this.sounds.play('blocked')
+        const hint = this.root.querySelector('.power-objective p')
+        if (hint) hint.textContent = powerHint(this.language, powerReadiness(run, index))
+        return
+      }
       if (
         run &&
         relay &&
@@ -149,7 +165,7 @@ export class VariantApp implements VariantInputActions {
         if (hint) hint.textContent = signalCopy(this.language).solve
         return
       }
-      if (!run || !path || (index === run.player && index !== run.exit && !relay)) {
+      if (!run || !path || (index === run.player && index !== run.exit && !relay && !power)) {
         this.sounds.play('blocked')
         return
       }
@@ -228,9 +244,11 @@ export class VariantApp implements VariantInputActions {
             type: flag
               ? 'flag'
               : move &&
-                  previousRun?.circuits?.relays.some(
-                    (entry) => entry.index === index && entry.active,
-                  )
+                  previousRun &&
+                  (powerControl(previousRun, index) ||
+                    previousRun.circuits?.relays.some(
+                      (entry) => entry.index === index && entry.active,
+                    ))
                 ? 'interact'
                 : move
                   ? 'move'
@@ -261,21 +279,32 @@ export class VariantApp implements VariantInputActions {
                 ? 'navigate'
                 : 'reveal',
     )
+    const powerChanged =
+      !!previousRun?.power &&
+      !!currentRun?.power &&
+      previousRun.power !== currentRun.power &&
+      previousRun.floor === currentRun.floor
     const switched =
-      currentRun?.circuits?.relays.some(
+      powerChanged ||
+      (currentRun?.circuits?.relays.some(
         (relay) =>
           !relay.active &&
           previousRun?.circuits?.relays.find((entry) => entry.index === relay.index)?.active,
-      ) ?? false
+      ) ??
+        false)
     if (switched) {
       this.turnPerformance = true
       this.moving = true
-      this.sounds.play('confirm')
+      this.sounds.play(powerChanged ? 'power-switch' : 'confirm')
     }
     this.render()
     if (switched) {
       const generation = this.walkGeneration
-      void animateCircuitChange(this.root, previousRun, currentRun).then(() => {
+      void (
+        powerChanged
+          ? animatePowerChange(this.root, previousRun, currentRun)
+          : animateCircuitChange(this.root, previousRun, currentRun)
+      ).then(() => {
         if (generation !== this.walkGeneration) return
         this.turnPerformance = false
         this.moving = false
@@ -759,9 +788,11 @@ export class VariantApp implements VariantInputActions {
         const heading = this.root.querySelector('.variant-heading h2')
         if (heading)
           heading.textContent =
-            this.session.stage.id === 'tower-relay'
-              ? signalCopy(this.language).title
-              : message(this.language, 'campaign.title')
+            this.session.stage.id === 'ridge-observatory'
+              ? message(this.language, 'ridge.title')
+              : this.session.stage.id === 'tower-relay'
+                ? signalCopy(this.language).title
+                : message(this.language, 'campaign.title')
         if (!this.root.querySelector('[data-campaign-return]')) {
           const link = document.createElement('a')
           link.href = routeHref({ page: 'story' }, this.language)
@@ -804,19 +835,29 @@ export class VariantApp implements VariantInputActions {
   private renderSignalScene(): void {
     if (!(this.session instanceof ExpeditionSession) || this.paused || this.turnPerformance) return
     const session = this.session
-    const scene = pendingSignalScene(session.run, session.stageProgress)
+    const signalScene = pendingSignalScene(session.run, session.stageProgress)
+    const ridgeScene = pendingObservatoryScene(session.run, session.stageProgress)
+    const scene = signalScene ?? ridgeScene
     if (!scene) return
     this.view.closeDialog()
-    this.signal.show(
+    this.signal.present(
       this.root,
       this.language,
       scene,
-      !!session.run?.signalRecord,
+      signalScene
+        ? signalLines(this.language, signalScene, !!session.run?.signalRecord)
+        : ridgeScene
+          ? observatoryLines(this.language, ridgeScene)
+          : [],
       session.run?.departure.profession ?? 'explorer',
       () => {
         session.completeCampaignScene(scene)
         this.render()
-        if (session.run?.phase === 'won' && !pendingSignalScene(session.run, session.stageProgress))
+        if (
+          session.run?.phase === 'won' &&
+          !pendingSignalScene(session.run, session.stageProgress) &&
+          !pendingObservatoryScene(session.run, session.stageProgress)
+        )
           this.view.showExpeditionDialog()
       },
     )

@@ -1,4 +1,5 @@
 import { renderFloorCircuits } from './floor-circuit-view.js'
+import { renderFloorPower } from './power-view.js'
 import { TideBoard, markTideCell, animateTideAnchor } from './tide-board.js'
 import { animateBattleInteractions } from './battle-interactions.js'
 import { animateBattleFeedback } from './battle-feedback.js'
@@ -713,6 +714,7 @@ export class VariantView {
     }
     const grid = this.content.querySelector<HTMLElement>(`[data-side="${side}"]`)
     if (side === 'a') renderFloorCircuits(this.content, run, this.language)
+    if (side === 'a') renderFloorPower(this.content, run, this.language)
     if (side === 'a') {
       const marker = (index: number, className: string, label: string): void => {
         const cell = grid?.querySelector<HTMLElement>(`[data-cell="${index}"]`)

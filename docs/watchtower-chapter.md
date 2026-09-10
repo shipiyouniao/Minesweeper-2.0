@@ -1,6 +1,6 @@
 # First chapter draft: the old watchtower
 
-Status: a partial playable arc within Roadmap II. The northern road, quarry/lift route, upper landing and three-floor outer galleries are implemented. The second prepared stage, [An Answer in the Tower](tower-signal-rescue.md), adds a three-floor relay encounter, Nia's rescue, an optional homeward record and a permanent speaking camp resident. The main-route table below remains a planning draft, not a list of shipped stages. Working names, later ordering and dialogue remain subject to playtesting. This is the first Bastion-family arc, not the later Lookout boss.
+Status: a partial playable arc within Roadmap II. The northern road, quarry/lift route and upper landing lead into the chapter. Three prepared stages are delivered: the outer galleries, [An Answer in the Tower](tower-signal-rescue.md) and [Ridge Observatory](ridge-observatory.md), each with three authored floors. They establish the tower route, rescue Nia and locate the homeward beacon beside the old water channel. Two exploration stages and the concluding boss stage remain. This is the first Bastion-family arc, not the later Lookout boss.
 
 ## Narrative promise
 
@@ -14,14 +14,14 @@ The chapter resolves both problems. A supply route reopens, an archivist returns
 
 Each stage is a prepared departure with three authored floors; the boss stage has four. The intervening overworld paths persist and are distinct from these attempts.
 
-| Stage ID         | Working name             | Playable objective                                                                                                     | Persistent outcome                                                                        |
-| ---------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `tower-road`     | The unlit road           | Follow safe traces to two roadside signal posts and physically activate both. Reaching the exit alone is insufficient. | The road is known and its lamps work; the lift approach becomes available.                |
-| `tower-quarry`   | The abandoned quarry     | Recover a power spindle and carry it to the lift control. A remotely revealed spindle is not collected.                | The repaired lift permanently opens access to the upper trail.                            |
-| `tower-stations` | Signals across the ridge | Observe protected passages, disconnect their power and reach the isolated station operator.                            | The operator supplies the archive route and a guardian access record.                     |
-| `tower-waterway` | Under the supply bridge  | Reach and secure the flooded maintenance controls from safe ground; activate the two independent sections.             | The maintenance approach opens. Repair persists when returning to camp.                   |
-| `tower-archive`  | A name in the ledger     | Reach the records clerk and recover the arrival register from a protected room.                                        | The register is secured; the final guardian route becomes available.                      |
-| `tower-guardian` | The keeper's order       | Cross three preparation floors, then disable powered defenses during the established Bastion encounter.                | The guardian stands down; the archive opens and the chapter's homeward lead is delivered. |
+| Stage ID            | Working name            | Playable objective                                                                                         | Persistent outcome                                                                        |
+| ------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `tower-galleries`   | Outer galleries         | Secure the caches and navigate three authored boards, learning shared expedition tools.                    | The inner tower route becomes available. Delivered.                                       |
+| `tower-relay`       | An Answer in the Tower  | Disconnect relay gates, rescue Nia and optionally recover the outsider record.                             | Nia becomes a speaking camp resident. Delivered.                                          |
+| `ridge-observatory` | Ridge Observatory       | Route power, solve device clues and record bearings across three stations.                                 | The beacon location and its recorded sound remain available at camp. Delivered.           |
+| `tower-waterway`    | Under the supply bridge | Reach and secure the flooded maintenance controls from safe ground; activate the two independent sections. | The maintenance approach opens. Repair persists when returning to camp.                   |
+| `tower-archive`     | A name in the ledger    | Reach the records clerk and recover the arrival register from a protected room.                            | The register is secured; the final guardian route becomes available.                      |
+| `tower-guardian`    | The keeper's order      | Cross three preparation floors, then disable powered defenses during the established Bastion encounter.    | The guardian stands down; the archive opens and the chapter's homeward lead is delivered. |
 
 The task graph uses named completion, secured-item and mechanism outcomes. Required controls must be reachable with guaranteed starting tools. Optional upgrades and side tasks offer alternatives without becoming hidden mandatory gates. Each floor requires a public-clue solution test before integration.
 

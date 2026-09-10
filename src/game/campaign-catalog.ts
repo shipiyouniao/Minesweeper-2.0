@@ -9,6 +9,7 @@ import type {
 export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
   {
     id: 'tower-galleries',
+    bounds: { width: 9, height: 9 },
     revision: 'tower-road-v4',
     prerequisite: null,
     floors: 3,
@@ -17,17 +18,29 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
   },
   {
     id: 'tower-relay',
+    bounds: { width: 9, height: 9 },
     revision: 'tower-relay-v1',
     prerequisite: 'tower-galleries',
     floors: 3,
     reward: 80,
     lesson: false,
   },
+  {
+    id: 'ridge-observatory',
+    bounds: { width: 13, height: 13 },
+    revision: 'ridge-observatory-v1',
+    prerequisite: 'tower-relay',
+    floors: 3,
+    reward: 100,
+    lesson: false,
+  },
 ]
 
 /** Reject arbitrary route keys before selecting a save slot. */
 export function parseCampaignStage(value: string | null): CampaignStageId | null {
-  return value === 'tower-galleries' || value === 'tower-relay' ? value : null
+  return value === 'tower-galleries' || value === 'tower-relay' || value === 'ridge-observatory'
+    ? value
+    : null
 }
 
 /** Resolve finite content identities in either routing or replay context. */

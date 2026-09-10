@@ -2,7 +2,6 @@ import type { MilestoneProgress } from '../types/milestones.js'
 import type {
   StoryCondition,
   StoryCampaignMetric,
-  StoryDialogueId,
   StoryFact,
   StoryProgress,
   StoryTask,
@@ -35,6 +34,8 @@ export function recordStoryCampaign(
 }
 
 export const STORY_FACTS: readonly StoryFact[] = [
+  'ridge-route',
+  'ridge-surveyed',
   'camp-reached',
   'satchel-secured',
   'satchel-delivered',
@@ -101,6 +102,14 @@ export const STORY_TASKS: readonly StoryTaskDefinition[] = [
     objective: { kind: 'fact', id: 'tower-reached' },
     supplies: 0,
   },
+  {
+    id: 'survey-ridge',
+    category: 'main',
+    introducedBy: 'nia-route',
+    prerequisite: { kind: 'fact', id: 'ridge-route' },
+    objective: { kind: 'fact', id: 'ridge-surveyed' },
+    supplies: 0,
+  },
 ]
 
 /** Completed objectives unlock routes even before a separate reward has been claimed. */
@@ -123,7 +132,7 @@ export function storyConditionMet(condition: StoryCondition, progress: StoryProg
 
 /** Accept at the authored conversation boundary; replay never accepts a duplicate. */
 export function storyTaskIntroduced(
-  id: StoryDialogueId,
+  id: StoryTaskDefinition['introducedBy'],
   progress: StoryProgress,
 ): StoryTask | null {
   return (

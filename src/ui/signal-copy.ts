@@ -83,6 +83,8 @@ export function signalLines(
             ? message(language, 'signal.camp-2-saved')
             : message(language, 'signal.camp-2-skipped'),
         },
+        { speaker: 'player', text: message(language, 'signal.camp-3') },
+        { speaker: 'nia', text: message(language, 'signal.camp-4') },
       ]
   }
 }

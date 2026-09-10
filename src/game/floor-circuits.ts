@@ -1,4 +1,5 @@
 import { clueIsolated } from './clue-isolation.js'
+import { powerObjectiveComplete } from './floor-power.js'
 import { walkingPath } from './dungeon-path.js'
 import { recordTravel } from './exploration-relics.js'
 import type { FloorRelay } from '../types/floor-circuits.js'
@@ -56,6 +57,7 @@ export function collectSignalRecord(run: Expedition, path: readonly number[]): E
 
 /** Exit rules use mechanism outcomes instead of requiring every optional collectible. */
 export function floorObjectiveComplete(run: Expedition): boolean {
+  if (run.power) return powerObjectiveComplete(run.power)
   if (run.circuits) return run.circuits.relays.every((relay) => relay.optional || !relay.active)
   return !run.departure.campaign || run.treasures.every((index) => run.collected.includes(index))
 }

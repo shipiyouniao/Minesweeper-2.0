@@ -5,6 +5,8 @@ import { campaignProgress, CAMPAIGN_STAGES } from '../game/campaign-catalog.js'
 import { NIA_CAMP_CELL } from '../game/signal-story.js'
 import { niaImage } from './signal-performance.js'
 import { signalCopy } from './signal-copy.js'
+import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
+import { observatoryImage } from './power-view.js'
 import { storyDialogueTemplate } from './story-dialogue.js'
 import { neighbors } from '../game/engine.js'
 import { CAMP_SITES, QUARRY_GATE } from '../game/story-content.js'
@@ -78,6 +80,8 @@ function cellTemplate(state: StoryViewState, index: number): string {
   const flagged = cell.visibility === 'flagged'
   const covered = cell.visibility === 'hidden'
   const quarryGate = run?.floor === 3 && index === QUARRY_GATE
+  const ridgeGate =
+    run?.floor === 3 && index === OBSERVATORY_GATE && state.progress.facts?.includes('ridge-route')
   const exit = index === board.exit
   const entrance = run && run.floor > 0 && index === board.entrance
   const destinations = [
@@ -114,6 +118,9 @@ function cellTemplate(state: StoryViewState, index: number): string {
         : message(language, 'story.mechanism-locked')
     label = storyMechanismName(language, control) + ' · ' + status
     content = spriteImage(run.operated.includes(index) ? 'bastion-pylon-off' : 'bastion-pylon')
+  } else if (ridgeGate) {
+    label = message(language, 'ridge.title')
+    content = observatoryImage()
   } else if (quarryGate) {
     label = message(language, 'story.quarry-yard')
     content = spriteImage('workshop')
@@ -152,12 +159,12 @@ function cellTemplate(state: StoryViewState, index: number): string {
     label = message(language, 'story.clue', { count: cell.adjacent })
     content = `<span class="story-clue">${cell.adjacent}</span>`
   }
-  if (number && (site || exit || entrance || quarryGate || treasure || control)) {
+  if (number && (site || exit || entrance || quarryGate || ridgeGate || treasure || control)) {
     label += ` · ${message(language, 'story.clue', { count: number })}`
     if (index !== state.player) content += `<span class="story-clue-badge">${number}</span>`
   }
   const name = `${Math.floor(index / board.game.config.width) + 1}, ${(index % board.game.config.width) + 1}: ${label}`
-  return `<button class="story-cell ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance || quarryGate ? 'is-site' : ''}" ${control ? `data-story-mechanism="${index}" data-operated="${!!run?.operated.includes(index)}"` : ''} data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance || quarryGate ? `<span class="story-site-label">${label}</span>` : ''}</button>`
+  return `<button class="story-cell ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance || quarryGate || ridgeGate ? 'is-site' : ''}" ${control ? `data-story-mechanism="${index}" data-operated="${!!run?.operated.includes(index)}"` : ''} data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance || quarryGate || ridgeGate ? `<span class="story-site-label">${label}</span>` : ''}</button>`
 }
 
 /** A single movable overlay keeps the chibi traveler above cell edges and clues. */
@@ -203,6 +210,14 @@ export function storyTemplate(state: StoryViewState): string {
 function campaignEntries(state: StoryViewState): string {
   const { run, language } = state
   if (
+    run?.floor === 3 &&
+    run.player === OBSERVATORY_GATE &&
+    state.progress.facts?.includes('ridge-route')
+  )
+    return campaignProgress(state.campaign, 'ridge-observatory').cleared
+      ? ''
+      : `<a data-route data-story-campaign class="story-primary" href="${routeHref({ page: 'campaign', stage: 'ridge-observatory' }, language)}">${message(language, 'ridge.title')} →</a>`
+  if (
     !run ||
     run.floor !== 7 ||
     run.player !== run.board.exit ||
@@ -211,6 +226,7 @@ function campaignEntries(state: StoryViewState): string {
     return ''
   return `<div class="signal-stage-links">${CAMPAIGN_STAGES.filter(
     (stage) =>
+      stage.id !== 'ridge-observatory' &&
       !campaignProgress(state.campaign, stage.id).cleared &&
       (stage.prerequisite === null || campaignProgress(state.campaign, stage.prerequisite).cleared),
   )

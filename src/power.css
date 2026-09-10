@@ -1,0 +1,71 @@
+.power-cell {
+  isolation: isolate;
+}
+.power-cell .dungeon-sprite {
+  width: 88%;
+  height: 88%;
+  margin: auto;
+}
+.power-cell:not(.power-live) .dungeon-sprite {
+  filter: saturate(0.25) brightness(0.85);
+}
+.power-label {
+  position: absolute;
+  left: 2px;
+  top: 1px;
+  padding: 1px 2px;
+  border-radius: 4px;
+  background: rgb(255 255 248 / 92%);
+  color: #334f49;
+  font-size: max(9px, calc(var(--cell) * 0.2));
+  white-space: nowrap;
+  width: max-content;
+  font-weight: 750;
+  line-height: 1;
+  z-index: 3;
+  pointer-events: none;
+}
+.power-live .power-label {
+  color: #1b725f;
+}
+.power-recorded {
+  box-shadow: inset 0 0 0 2px #438876;
+}
+.power-ready {
+  box-shadow: inset 0 0 0 2px #c6a45b;
+}
+.power-network {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 0.6rem;
+}
+.power-recorded .power-label {
+  background: #246452;
+  color: #fff;
+}
+.power-open {
+  color: #34796b;
+  font-size: 1.4em;
+}
+.power-objective details {
+  font-size: 0.8rem;
+  color: #64746c;
+}
+.power-objective summary {
+  cursor: pointer;
+  width: fit-content;
+}
+.ridge-recording {
+  display: block;
+  margin: 0.6rem 0;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #b4c9bd;
+  border-radius: 0.6rem;
+  color: #2b685a;
+}
+.power-objective details p {
+  max-width: 52rem;
+  line-height: 1.65;
+  margin-top: 0.5rem;
+}

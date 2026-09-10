@@ -77,9 +77,9 @@ export const enMessages: MessageCatalog = {
   'signal.camp-1':
     'I’ve registered an address. Three paces right of the fire. If the guardian comes after me, you’re my witness.',
   'signal.camp-2-saved':
-    'The chart is missing a corner, but I can read two observation points. When the road opens, we can compare them with the sky.',
+    'Those two marks are the old ridge observatory. The edge is torn, but the instrument positions are still readable.',
   'signal.camp-2-skipped':
-    'The beacon was north. Which fork in the road… give me a little longer. Perhaps someday we can recover the chart from the tower.',
+    'I drew the route from memory. We can take fresh readings at the ridge observatory, even without the original chart.',
   'story.north-road': 'Old North Road',
   'story.lift': 'Watchtower Lift',
   'story.world-road': 'Lanternwood · Scouting',
@@ -1450,4 +1450,66 @@ export const enMessages: MessageCatalog = {
   'variant-view.rift-landing': 'Rift landing',
   'variant-view.suppressor-lowers-future-attacks-to-3': 'Suppressor · lowers future attacks to 3',
   'variant-view.two-way-rift': 'Two-way rift',
+  'ridge.title': 'Ridge Observatory',
+  'ridge.task': 'Locate the homeward beacon',
+  'ridge.task-detail':
+    'Take the southern turn on the North Road to the ridge observatory. Restore its instruments with Nia and locate the beacon.',
+  'ridge.floor-1': '1 · The split supply',
+  'ridge.floor-2': '2 · The upper relay',
+  'ridge.floor-3': '3 · Two bearings',
+  'ridge.covered': 'Reveal this device first.',
+  'ridge.clue': 'Open the safe neighbors and flag the mines around this device.',
+  'ridge.unpowered': 'No power. Check the upstream selector.',
+  'ridge.recorded': 'Reading recorded.',
+  'ridge.ready': 'Click to walk here and operate.',
+  'ridge.objective': 'Solve the device clues, route power and record each instrument.',
+  'ridge.exit-ready': 'Readings complete. Route power to the exit and walk there.',
+  'ridge.progress': 'Readings {count} / {total}',
+  'ridge.network': 'How the devices work',
+  'ridge.rules':
+    'The small number on a device is an ordinary Minesweeper clue. Reveal its safe neighbors and flag the mines, then click the device again to walk over and operate it. Each numbered selector sends power to A or B; matching labels identify its doors and instruments. Changing the upstream supply also affects downstream selectors. Readings stay recorded when power is switched away. Inspect and probe tools reveal clues but do not operate a device.',
+  'ridge.junction': 'Selector',
+  'ridge.receiver': 'Instrument',
+  'ridge.door': 'Gate',
+  'ridge.open': 'Open',
+  'ridge.closed': 'Closed',
+  'ridge.entry-1':
+    'There it is. The cable splits here: one branch for the instrument, one for the gate. This old supply cannot run both.',
+  'ridge.entry-2': 'So we take a reading, then switch it over to open the gate?',
+  'ridge.entry-3':
+    'Exactly. Clear the hazards around each device before touching it. I will write down the readings; you will not have to keep the instruments on.',
+  'ridge.reading-1':
+    'It is moving! This is the beacon marked on the chart. It is still sending a signal.',
+  'ridge.reading-2': 'Then it has not broken down?',
+  'ridge.reading-3':
+    'At least the transmitter works. We have a direction now. The upper instrument can tell us how far away it is.',
+  'ridge.pair-1':
+    'Another selector. It gets its power from the one downstairs. Leave that first cable connected while we work up here.',
+  'ridge.pair-2': 'You have been here before, right? Did these gates always keep slamming shut?',
+  'ridge.pair-3':
+    'No. The tower ordered every station into lockdown. I thought I could fix it alone. You saw how that went.',
+  'ridge.beacon-1':
+    'Both of these point at the same beacon. Take one reading from each and we can place it on the map.',
+  'ridge.beacon-2': 'Nia, stay where I can see you this time.',
+  'ridge.beacon-3':
+    'I am staying right here. And do not switch my instrument off before I finish writing!',
+  'ridge.found-1':
+    'Got it. Under the watchtower, beside the old water channel. I have marked the exact spot.',
+  'ridge.found-2': 'Wait. That sound... I heard it just before I woke up in the woods.',
+  'ridge.found-3':
+    'This one? It repeats when we tune to the beacon. Then that is where we should look.',
+  'ridge.found-4': 'Keep the recording. I want to hear it again when we get back.',
+  'ridge.found-5':
+    'Already recording. Take the map too. We will find the way into that water channel together.',
+  'ridge.camp-1':
+    'I copied the recording. Yours is with the map. You looked shaken up there. Feeling any better?',
+  'ridge.camp-2': 'Better. I still cannot place the sound, but I know I have heard it.',
+  'ridge.camp-3':
+    'Then we will listen again later. The location is safe on the map. Get some rest; I will ask Lumi about the old water channel.',
+  'signal.camp-3': 'Can we find it from this chart?',
+  'signal.camp-4':
+    'The ridge instruments can locate it. There is a turn south of the North Road, marked with a telescope. I will come with you.',
+  'ridge.recording': 'Listen to the beacon',
+  'ridge.location':
+    'Beacon located · beneath the watchtower, beside the old water channel. Its entrance is not open yet.',
 }

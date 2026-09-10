@@ -1,5 +1,51 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'ridge.recording': string
+  readonly 'ridge.location': string
+  readonly 'ridge.title': string
+  readonly 'ridge.task': string
+  readonly 'ridge.task-detail': string
+  readonly 'ridge.floor-1': string
+  readonly 'ridge.floor-2': string
+  readonly 'ridge.floor-3': string
+  readonly 'ridge.covered': string
+  readonly 'ridge.clue': string
+  readonly 'ridge.unpowered': string
+  readonly 'ridge.recorded': string
+  readonly 'ridge.ready': string
+  readonly 'ridge.objective': string
+  readonly 'ridge.exit-ready': string
+  readonly 'ridge.progress': string
+  readonly 'ridge.network': string
+  readonly 'ridge.rules': string
+  readonly 'ridge.junction': string
+  readonly 'ridge.receiver': string
+  readonly 'ridge.door': string
+  readonly 'ridge.open': string
+  readonly 'ridge.closed': string
+  readonly 'ridge.entry-1': string
+  readonly 'ridge.entry-2': string
+  readonly 'ridge.entry-3': string
+  readonly 'ridge.reading-1': string
+  readonly 'ridge.reading-2': string
+  readonly 'ridge.reading-3': string
+  readonly 'ridge.pair-1': string
+  readonly 'ridge.pair-2': string
+  readonly 'ridge.pair-3': string
+  readonly 'ridge.beacon-1': string
+  readonly 'ridge.beacon-2': string
+  readonly 'ridge.beacon-3': string
+  readonly 'ridge.found-1': string
+  readonly 'ridge.found-2': string
+  readonly 'ridge.found-3': string
+  readonly 'ridge.found-4': string
+  readonly 'ridge.found-5': string
+  readonly 'ridge.camp-1': string
+  readonly 'ridge.camp-2': string
+  readonly 'ridge.camp-3': string
+  readonly 'signal.camp-3': string
+  readonly 'signal.camp-4': string
+
   readonly 'story.haul-load': string
   readonly 'story.go-together': string
   readonly 'story.lift-answer': string

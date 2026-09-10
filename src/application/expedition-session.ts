@@ -1,7 +1,9 @@
 import { recordStoryCampaign } from '../game/story-quests.js'
 import { campaignProgress, campaignStage, updateCampaign } from '../game/campaign-catalog.js'
 import type { CampaignStage, CampaignStageProgress } from '../types/campaign.js'
-import type { SignalSceneId } from '../types/signal-story.js'
+import type { CampaignSceneId } from '../types/campaign.js'
+import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
+import { recordStoryFacts } from '../game/story-quests.js'
 import { EXPEDITION_RULES_REVISION } from '../persistence/expedition-format.js'
 import { addVariantRecord } from '../game/variant-difficulty.js'
 import { ownedRelicPacks } from '../game/relic-packs.js'
@@ -116,7 +118,7 @@ export class ExpeditionSession {
   }
 
   /** A completed performance is durable; unfinished lines can replay after re-entry. */
-  completeCampaignScene(id: SignalSceneId): void {
+  completeCampaignScene(id: CampaignSceneId): void {
     if (!this.campaignMode || this.stageProgress.scenes.includes(id)) return
     this.refreshShared()
     this.save = {
@@ -217,7 +219,12 @@ export class ExpeditionSession {
         (this.stage.prerequisite !== null &&
           !campaignProgress(this.save.campaign, this.stage.prerequisite).cleared) ||
         !this.save.story?.completed.includes('reach-tower') ||
-        this.save.story.world?.active !== 'tower-landing')
+        (this.stage.id === 'ridge-observatory'
+          ? !this.save.story.facts?.includes('ridge-route') ||
+            this.save.story.world?.active !== 'north-road' ||
+            this.save.story.world.scenes.find((scene) => scene.id === 'north-road')?.player !==
+              OBSERVATORY_GATE
+          : this.save.story.world?.active !== 'tower-landing'))
     )
       return false
     const departure: Departure = {
@@ -357,6 +364,12 @@ export class ExpeditionSession {
           completed: this.camp.completed + Number(next.phase === 'won'),
         },
         records: addVariantRecord(this.save.records, record),
+        ...(this.campaignMode &&
+        this.stage.id === 'ridge-observatory' &&
+        next.phase === 'won' &&
+        this.save.story
+          ? { story: recordStoryFacts(this.save.story, ['ridge-surveyed']) }
+          : {}),
       }
     }
 

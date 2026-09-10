@@ -40,6 +40,8 @@ export type SoundCue =
   | 'magnet-push'
   | 'magnet-charge'
   | 'sonar-pulse'
+  | 'power-switch'
+  | 'beacon-signal'
   | DialogueCue
 
 /** A short oscillator envelope, expressed in seconds and hertz. */

@@ -2,6 +2,7 @@ import { campaignStage, parseCampaignStage } from '../game/campaign-catalog.js'
 import { JsonObjectReader } from './json-reader.js'
 import type { CampaignSave, CampaignStageId, CampaignStageProgress } from '../types/campaign.js'
 import { SIGNAL_SCENES } from '../game/signal-story.js'
+import { OBSERVATORY_SCENES } from '../game/observatory-story.js'
 import type { CampaignDecoders } from '../types/campaign.js'
 
 /** Construct a stage record from validated intent history and finite content identities. */
@@ -12,7 +13,9 @@ function decodeStage(
 ): CampaignStageProgress {
   const candidate = decoders.journal(reader.child('journal'))
   const journal = candidate?.departure.campaign === campaignStage(id).revision ? candidate : null
-  const scenes = SIGNAL_SCENES.filter((id) => reader.array('scenes')?.includes(id))
+  const scenes = (id === 'ridge-observatory' ? OBSERVATORY_SCENES : SIGNAL_SCENES).filter((scene) =>
+    reader.array('scenes')?.includes(scene),
+  )
   return {
     id,
     journal,

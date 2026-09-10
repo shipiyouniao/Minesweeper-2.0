@@ -1,4 +1,5 @@
 import { decodeCampaign, campaignWasRecovered } from './campaign-decoder.js'
+import { campaignStage } from '../game/campaign-catalog.js'
 import { MILESTONES } from '../game/milestones.js'
 import { decodeStory } from './story-decoder.js'
 import type { CampLoadout } from '../types/story.js'
@@ -254,7 +255,8 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (
     reader.value('campaign') !== undefined &&
     campaign !== 'tower-road-v4' &&
-    campaign !== 'tower-relay-v1'
+    campaign !== 'tower-relay-v1' &&
+    campaign !== 'ridge-observatory-v1'
   )
     return null
   const rawTitle = reader.value('title')
@@ -314,7 +316,11 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     }
   }
   return {
-    ...(campaign === 'tower-road-v4' || campaign === 'tower-relay-v1' ? { campaign } : {}),
+    ...(campaign === 'tower-road-v4' ||
+    campaign === 'tower-relay-v1' ||
+    campaign === 'ridge-observatory-v1'
+      ? { campaign }
+      : {}),
     seed,
     title,
     difficulty,
@@ -386,11 +392,13 @@ export function decodeJournal(reader: JsonObjectReader | null): ExpeditionJourna
   const ordinary = expeditionConfig(departure, 1)
   const arena = encounterTier(departure.difficulty).config
   // Decode the broad dimension envelope; replay still validates each action against its actual room.
-  const bounds = {
-    ...ordinary,
-    width: Math.max(ordinary.width, arena.width),
-    height: Math.max(ordinary.height, arena.height),
-  }
+  const bounds = departure.campaign
+    ? { ...ordinary, ...campaignStage(departure.campaign).bounds }
+    : {
+        ...ordinary,
+        width: Math.max(ordinary.width, arena.width),
+        height: Math.max(ordinary.height, arena.height),
+      }
 
   for (const value of values) {
     const action = decodeExpeditionAction(value, bounds)
