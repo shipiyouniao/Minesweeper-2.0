@@ -12,6 +12,10 @@ export function campaignName(language: Language, stage: CampaignStageId): string
       return signalCopy(language).title
     case 'ridge-observatory':
       return message(language, 'ridge.title')
+    case 'tower-control':
+      return message(language, 'finale.control-title')
+    case 'northwest-bastion':
+      return message(language, 'finale.pass-title')
     case 'old-waterway':
       return message(language, 'waterway.title')
   }

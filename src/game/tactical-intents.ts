@@ -8,9 +8,11 @@ export function bastionIntent(
   boss: number,
   player: number,
   turn: number,
+  pursuit = false,
 ): TacticalIntent {
   const kind = turn % 3 === 1 ? 'row' : turn % 3 === 2 ? 'column' : 'cross'
-  const origin = kind === 'cross' ? boss : player
+  // The damaged campaign guardian aims its late cross at the last accepted player position.
+  const origin = kind === 'cross' && !pursuit ? boss : player
   const row = Math.floor(origin / config.width)
   const column = origin % config.width
   const targets = Array.from({ length: config.width * config.height }, (_, index) => index).filter(

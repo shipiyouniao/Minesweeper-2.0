@@ -34,3 +34,7 @@ The seventh boss family uses four original transparent generated assets: the aut
 ## Tidekeeper
 
 The boss, tidal core and anchor are original generated PNG assets. See [Tidekeeper artwork and full prompts](tidekeeper-artwork.md).
+
+## Chapter One control room
+
+The west-line control console is an original transparent PNG generated for the fifth campaign stage. See [the asset and complete generation prompt](chapter-finale-artwork.md). Bridge lowering and route transitions use local SVG/CSS animation with reduced-motion support.

@@ -1,3 +1,4 @@
+import { enterChapterGuardian } from './chapter-guardian.js'
 import { campaignFloor } from './campaign-floors.js'
 import { interactPower, powerControl } from './floor-power.js'
 import { collectSignalRecord, floorObjectiveComplete, interactRelay } from './floor-circuits.js'
@@ -360,7 +361,8 @@ function advanceFloor(run: Expedition, relic?: Relic): Expedition {
 
   if (relics.includes('compass')) result = scoutExit(result)
 
-  return result
+  const entered = enterChapterGuardian(result)
+  return entered === result ? result : applyTitleEntry(entered)
 }
 
 /** Pure expedition transition, including explicit extraction and inter-floor reward selection. */

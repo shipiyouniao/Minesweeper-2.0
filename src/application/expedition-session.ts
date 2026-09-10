@@ -363,14 +363,9 @@ export class ExpeditionSession {
           completed: this.camp.completed + Number(next.phase === 'won'),
         },
         records: addVariantRecord(this.save.records, record),
-        ...(this.campaignMode &&
-        (this.stage.id === 'ridge-observatory' || this.stage.id === 'old-waterway') &&
-        next.phase === 'won' &&
-        this.save.story
+        ...(this.campaignMode && this.stage.outcome && next.phase === 'won' && this.save.story
           ? {
-              story: recordStoryFacts(this.save.story, [
-                this.stage.id === 'old-waterway' ? 'beacon-recovered' : 'ridge-surveyed',
-              ]),
+              story: recordStoryFacts(this.save.story, [this.stage.outcome]),
             }
           : {}),
       }

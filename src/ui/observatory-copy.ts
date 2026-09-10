@@ -18,9 +18,11 @@ export function powerHint(
     case 'unpowered':
       return message(language, 'ridge.unpowered')
     case 'recorded':
-      return purpose === 'drainage'
-        ? message(language, 'waterway.recorded')
-        : message(language, 'ridge.recorded')
+      return purpose === 'restoration'
+        ? message(language, 'finale.recorded')
+        : purpose === 'drainage'
+          ? message(language, 'waterway.recorded')
+          : message(language, 'ridge.recorded')
     case 'ready':
       return message(language, 'ridge.ready')
   }

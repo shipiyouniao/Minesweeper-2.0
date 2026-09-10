@@ -1567,4 +1567,83 @@ export const enMessages: MessageCatalog = {
   'waterway.camp-2': 'The waterway’s clear. And the guardian finally spoke to us.',
   'waterway.camp-3': 'It says the door is locked to keep something inside.',
   'waterway.camp-4': 'Then stock up before you go back. I’ll be here when you return.',
+  'finale.control-title': 'Control Room',
+  'finale.pass-title': 'Northwest Bastion',
+  'finale.bridge': 'Northwest Old Bridge',
+  'finale.pass': 'Blockade Approach',
+  'finale.shortcut': 'Camp shortcut',
+  'finale.control-task': 'Restore the west line',
+  'finale.control-detail':
+    'Return to the old tower control room and restore power to the northwest bridge and blockade.',
+  'finale.pass-task': 'Open the northwest blockade',
+  'finale.pass-detail':
+    'Cross the old bridge from the northwest exit of North Road and find out why the guardian is still blocking the pass.',
+  'finale.control-1': 'Floor 1 · Bridge supply',
+  'finale.control-2': 'Floor 2 · Alarm circuit',
+  'finale.control-3': 'Floor 3 · West-line control',
+  'finale.pass-1': 'Floor 1 · Outer watch',
+  'finale.pass-2': 'Floor 2 · Sealed gallery',
+  'finale.pass-3': 'Floor 3 · The guardian’s gate',
+  'finale.receiver': 'Line console',
+  'finale.guardian-pressure':
+    'Strike while exposed. At half health, cross attacks target your position when announced. Save two points to leave both lines; brace if you cannot get clear.',
+  'finale.recorded': 'Connected',
+  'finale.objective': 'Connect the consoles on this floor, then open the exit.',
+  'finale.exit-ready': 'The line is live. You can reach the exit.',
+  'finale.progress': 'Connected {count} / {total}',
+  'finale.guide-intro': 'Isolate the nearby knots before powering a console.',
+  'finale.guide-title': 'Connect the line',
+  'finale.guide-record':
+    'Walk to a powered console and click it to connect. You may then switch branches; completed connections stay complete.',
+  'finale.location': 'The northwest bridge is down. Beyond it, a shortcut leads back to camp.',
+  'finale.ending-location': 'The northwest blockade is open. Chapter One complete.',
+  'finale.control-entry-1':
+    'Here it is. The bridge, the blockade, even the waterway beacon—all wired through here.',
+  'finale.control-entry-2': 'If we cut the main power, will the guardian stop?',
+  'finale.control-entry-3': 'Do not cut it. This line is also holding the gate shut.',
+  'finale.control-entry-4': 'Heard you. One circuit at a time. We leave the main switch alone.',
+  'finale.control-line-1': 'The bridge light is on. Why is the blockade still red?',
+  'finale.control-line-2':
+    'Look—this empty room is reporting someone inside. The alarm circuit is damaged.',
+  'finale.control-line-3': 'So it thinks someone is still trapped in there.',
+  'finale.control-heart-1':
+    'It is not a loose wire. Knots have worked their way into the gate circuit.',
+  'finale.control-heart-2': 'The gate is moving again. Hurry.',
+  'finale.control-heart-3': 'Hold on. As soon as the bridge is down, we are coming over.',
+  'finale.control-restored-1': 'There! Listen—the bridge is lowering.',
+  'finale.control-restored-2':
+    'Take the west side of the bridge. Stay away from the front gate… I cannot control my arm.',
+  'finale.control-restored-3': 'Got it. Try not to mistake us for someone breaking in.',
+  'finale.control-restored-4':
+    'Bring the map. If the path beyond the bridge is clear, we can use it to get back to camp.',
+  'finale.pass-entry-1': 'Same consoles as the tower, but all the lines lead farther in.',
+  'finale.pass-entry-2':
+    'Let us fix these first. If it shuts the gate again, we need a way back out.',
+  'finale.pass-warning-1':
+    'There are two shield pylons ahead. Locate the knots beside them before disconnecting the circuits.',
+  'finale.pass-warning-2': 'Like the consoles we just used?',
+  'finale.pass-warning-3': 'Yes. Read the numbers and mark the knots first. No forcing it.',
+  'finale.pass-guardian-1': 'Stop. Do not stand in front of me. It is moving again.',
+  'finale.pass-guardian-2': 'We are here to fix this. Can you show me where to dodge?',
+  'finale.pass-guardian-3': 'Where the floor lights up. Get clear of those tiles.',
+  'finale.pass-guardian-4':
+    'Once both pylons are disconnected, open the chest plate. I will handle the wiring.',
+  'finale.pass-open-1': 'Done! Stop hitting it—the line is connected.',
+  'finale.pass-open-2': '…My arm is mine again. The gate has stopped pushing back.',
+  'finale.pass-open-3': 'You have been fighting this gate the whole time?',
+  'finale.pass-open-4':
+    'Knots were caught in the circuit. The harder I pushed, the tighter they packed.',
+  'finale.pass-open-5': 'No wonder the alarm never stopped. Next time it jams, call for help.',
+  'finale.pass-open-6':
+    'You… I remember your voice. That night, someone called for help from the rift at the old western crossing.',
+  'finale.pass-open-7': 'Me? You saw where I came from?',
+  'finale.pass-open-8': 'I did. I recorded the location, but the rift has closed.',
+  'finale.pass-open-9': 'That is still more than I had. Show me the location.',
+  'finale.pass-open-10': 'Camp first. Your hands are shaking. I will go with you tomorrow.',
+  'finale.chapter-camp-1': 'There you are. The pot is still warm. Eat first.',
+  'finale.chapter-camp-2':
+    'The bridge and the pass are open. Tomorrow, no more hauling supplies around the mountain.',
+  'finale.chapter-camp-3': 'And we found out where I arrived. Somewhere west of here.',
+  'finale.chapter-camp-4': 'Tell me tomorrow. Tonight, you are staying right here.',
+  'finale.chapter-camp-5': '…All right. Make mine a big bowl.',
 }

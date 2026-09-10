@@ -17,6 +17,8 @@ export const STORY_SCENE_IDS: readonly StorySceneId[] = [
   'quarry-passage',
   'quarry-machine',
   'tower-landing',
+  'northwest-bridge',
+  'blockade-pass',
 ]
 
 /** Encode one bounded scene delta rather than each step taken through that scene. */

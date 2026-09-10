@@ -34,6 +34,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     revision: 'ridge-observatory-v1',
     prerequisite: 'tower-relay',
     floors: 3,
+    outcome: 'ridge-surveyed',
     reward: 100,
     lesson: false,
   },
@@ -44,7 +45,30 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     revision: 'old-waterway-v1',
     prerequisite: 'ridge-observatory',
     floors: 3,
+    outcome: 'beacon-recovered',
     reward: 140,
+    lesson: false,
+  },
+  {
+    id: 'tower-control',
+    entrance: { scene: 'tower-landing', index: 34, fact: 'beacon-recovered' },
+    bounds: { width: 19, height: 19 },
+    revision: 'tower-control-v1',
+    prerequisite: 'old-waterway',
+    floors: 3,
+    outcome: 'west-line-restored',
+    reward: 180,
+    lesson: false,
+  },
+  {
+    id: 'northwest-bastion',
+    entrance: { scene: 'blockade-pass', index: 16, fact: 'west-shortcut' },
+    bounds: { width: 19, height: 17 },
+    revision: 'northwest-bastion-v1',
+    prerequisite: 'tower-control',
+    floors: 3,
+    outcome: 'chapter-one-cleared',
+    reward: 240,
     lesson: false,
   },
 ]
@@ -54,7 +78,9 @@ export function parseCampaignStage(value: string | null): CampaignStageId | null
   return value === 'tower-galleries' ||
     value === 'tower-relay' ||
     value === 'ridge-observatory' ||
-    value === 'old-waterway'
+    value === 'old-waterway' ||
+    value === 'tower-control' ||
+    value === 'northwest-bastion'
     ? value
     : null
 }

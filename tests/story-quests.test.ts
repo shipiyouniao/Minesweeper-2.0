@@ -56,7 +56,8 @@ test('a satchel must be secured and delivered; repeated facts cannot repeat a re
 
 test('authored tasks reject dependency cycles, missing nodes and duplicate identities', () => {
   assert.deepEqual(validateStoryTasks(STORY_TASKS), [])
-  assert.ok(validateStoryTasks([STORY_TASKS[2]!]).some((error) => error.includes('Missing')))
+  const dependent = STORY_TASKS.find((task) => task.id === 'meet-guide')!
+  assert.ok(validateStoryTasks([dependent]).some((error) => error.includes('Missing')))
   assert.ok(
     validateStoryTasks([...STORY_TASKS, STORY_TASKS[0]!]).some((error) =>
       error.includes('Duplicate'),

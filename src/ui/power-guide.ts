@@ -2,19 +2,20 @@ import { icon } from '../icons.js'
 import { message } from '../i18n.js'
 import { spriteImage } from './dungeon-sprites.js'
 import { guidanceStyles } from './guidance-styles.js'
-import { observatoryImage, drainageImage } from './power-view.js'
+import { observatoryImage, drainageImage, consoleImage } from './power-view.js'
 import type { Language } from '../types/localization.js'
 import type { FloorPower } from '../types/floor-power.js'
 
 /** Explain device operation in the same illustrated modal used for boss encounters. */
 export function powerGuide(language: Language, power: FloorPower): string {
   const drainage = power.purpose === 'drainage'
+  const restoration = power.purpose === 'restoration'
   return `<article class="battle-guide power-guide ${guidanceStyles['battle-guide']}">
-    <header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${drainage ? drainageImage() : observatoryImage()}<div><h3>${drainage ? message(language, 'waterway.title') : message(language, 'ridge.title')}</h3><p>${drainage ? message(language, 'waterway.guide-intro') : message(language, 'ridge.guide-intro')}</p></div></header>
+    <header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${restoration ? consoleImage() : drainage ? drainageImage() : observatoryImage()}<div><h3>${restoration ? message(language, 'finale.control-title') : drainage ? message(language, 'waterway.title') : message(language, 'ridge.title')}</h3><p>${restoration ? message(language, 'finale.guide-intro') : drainage ? message(language, 'waterway.guide-intro') : message(language, 'ridge.guide-intro')}</p></div></header>
     <ol class="boss-picture-steps ${guidanceStyles['boss-picture-steps']}">
       ${guideStep(1, message(language, 'ridge.guide-clear-title'), message(language, 'ridge.guide-clear'), cluePicture())}
-      ${guideStep(2, message(language, 'ridge.guide-switch-title'), message(language, 'ridge.guide-switch'), routePicture(false, drainage))}
-      ${guideStep(3, drainage ? message(language, 'waterway.guide-record-title') : message(language, 'ridge.guide-record-title'), drainage ? message(language, 'waterway.guide-record') : message(language, 'ridge.guide-record'), routePicture(true, drainage))}
+      ${guideStep(2, message(language, 'ridge.guide-switch-title'), message(language, 'ridge.guide-switch'), routePicture(false, power.purpose))}
+      ${guideStep(3, restoration ? message(language, 'finale.guide-title') : drainage ? message(language, 'waterway.guide-record-title') : message(language, 'ridge.guide-record-title'), restoration ? message(language, 'finale.guide-record') : drainage ? message(language, 'waterway.guide-record') : message(language, 'ridge.guide-record'), routePicture(true, power.purpose))}
     </ol>
     ${wiringPicture(language, power)}
     <p class="boss-cost-line ${guidanceStyles['boss-cost-line']}">${message(language, 'ridge.guide-upstream')}</p>
@@ -61,8 +62,10 @@ function cluePicture(): string {
 }
 
 /** The same branch labels show the change from recording on A to opening the gate on B. */
-function routePicture(recorded: boolean, drainage: boolean): string {
-  const instrument = `${drainage ? drainageImage() : observatoryImage()}<small>${recorded ? '✓ ' : ''}1A</small>`
+function routePicture(recorded: boolean, purpose: FloorPower['purpose']): string {
+  const drainage = purpose === 'drainage'
+  const restoration = purpose === 'restoration'
+  const instrument = `${restoration ? consoleImage() : drainage ? drainageImage() : observatoryImage()}<small>${recorded ? '✓ ' : ''}1A</small>`
   const gate = `${recorded ? '<i class="power-open">⌁</i>' : spriteImage('bastion-core')}<small>1B</small>`
 
   return miniBoard([

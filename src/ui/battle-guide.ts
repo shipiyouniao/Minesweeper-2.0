@@ -45,7 +45,10 @@ export function battleGuide(language: Language, run: Expedition): string {
                   symbol: '↗',
                 },
                 {
-                  text: message(language, 'battle-guide.strike-while-exposed-leave-the-red-cells'),
+                  text:
+                    boss.pattern === 'pursuit'
+                      ? message(language, 'finale.guardian-pressure')
+                      : message(language, 'battle-guide.strike-while-exposed-leave-the-red-cells'),
                   prop: 'bastion-strike',
                   symbol: '→',
                 },
@@ -150,8 +153,10 @@ export function battleGuide(language: Language, run: Expedition): string {
               (boss.kind === 'clock' && index > 0) ||
               (boss.kind === 'magnetic' && index === 1) ||
               (index === 2 && boss.kind !== 'mirror')
-            const danger = retreat && [6, 7, 8, 11, 12, 13].includes(cell)
-            return `<span class="${danger ? 'mini-danger' : ''} ${boss.kind === 'clock' && index === 1 && cell === 7 ? 'mini-echo' : ''}">${cell === (retreat ? 0 : 5) ? spriteImage('player') : cell === 7 ? spriteImage(entry.prop) : cell === 9 ? spriteImage(bossSprite(boss)) : retreat && cell === 5 ? '↑' : !retreat && (cell === 6 || cell === 8) ? entry.symbol : danger && cell === 12 ? '!' : ''}</span>`
+            const pursuit = boss.kind === 'bastion' && boss.pattern === 'pursuit' && index === 2
+            const danger =
+              retreat && (pursuit ? [2, 5, 6, 7, 8, 9, 12] : [6, 7, 8, 11, 12, 13]).includes(cell)
+            return `<span class="${danger ? 'mini-danger' : ''} ${boss.kind === 'clock' && index === 1 && cell === 7 ? 'mini-echo' : ''}">${cell === (pursuit ? 1 : retreat ? 0 : 5) ? spriteImage('player') : cell === 7 ? spriteImage(entry.prop) : cell === 9 ? spriteImage(bossSprite(boss)) : retreat && cell === (pursuit ? 6 : 5) ? '↑' : !retreat && (cell === 6 || cell === 8) ? entry.symbol : danger && cell === 12 ? '!' : ''}</span>`
           },
         ).join('')}</div><p><b>${index + 1}</b>${entry.text}</p></li>`,
     )
