@@ -18,6 +18,7 @@
 @import './story.css' layer(components);
 @import './tiles.css' layer(components);
 @import './story-performance.css' layer(components);
+@import './signal.css' layer(components);
 
 /* Resets stay below component styles and opt-in utilities. */
 @layer base {

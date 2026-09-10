@@ -1,4 +1,6 @@
 import { campaignLayout } from './campaign-layout.js'
+import { signalLayout } from './signal-layout.js'
+import { collectSignalRecord, floorObjectiveComplete, interactRelay } from './floor-circuits.js'
 import {
   EMPTY_EXPEDITION_SONAR,
   useExpeditionSonar,
@@ -124,9 +126,11 @@ function createFloor(departure: Departure, floor: number): Expedition {
   const seed = (departure.seed + Math.imul(floor, 0x9e3779b9)) >>> 0
   const config = expeditionConfig(departure, floor)
   const layout = departure.campaign
-    ? campaignLayout(floor)
+    ? departure.campaign === 'tower-relay-v1'
+      ? signalLayout(floor)
+      : campaignLayout(floor)
     : generateDungeon(seed, config.mines, config.width, config.height)
-  return {
+  const run: Expedition = {
     ...layout,
     encounter: null,
     sonar: { ...EMPTY_EXPEDITION_SONAR, charges: departure.equipment.includes('sonar') ? 2 : 0 },
@@ -156,6 +160,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
     steps: 0,
     phase: 'exploring',
   }
+  return run.circuits ? { ...run, game: revealDungeon(run, run.entrance) } : run
 }
 
 /** Start a run with bounded career tools and the selected equipment allocation. */
@@ -234,7 +239,7 @@ function collectTreasures(run: Expedition, path: readonly number[]): Expedition 
       run,
       recordTravel(
         {
-          ...run,
+          ...collectSignalRecord(run, path),
           collected,
           loot:
             run.loot + fresh * (run.relics.includes('purse') ? PURSE_SUPPLIES : TREASURE_SUPPLIES),
@@ -310,8 +315,7 @@ function movePlayer(run: Expedition, index: number): Expedition {
 /** Commit an exit reward only for a living explorer that actually reached the stairs. */
 function finishAtExit(run: Expedition): Expedition {
   if (run.phase !== 'exploring' || run.player !== run.exit) return run
-  if (run.departure.campaign && run.treasures.some((index) => !run.collected.includes(index)))
-    return run
+  if (!floorObjectiveComplete(run)) return run
   if (!run.encounter && isEncounterFloor(run)) return applyTitleEntry(enterEncounter(run))
   return completeFloor(run)
 }
@@ -342,6 +346,7 @@ function advanceFloor(run: Expedition, relic?: Relic): Expedition {
   const growth = titleHealth(run.departure, next.floor) - titleHealth(run.departure, run.floor)
   let result: Expedition = {
     ...next,
+    ...(run.signalRecord ? { signalRecord: true } : {}),
     relics,
     sonar: { ...run.sonar, loan: 0, loanProgress: 0, readings: [] },
     runTriggers: run.runTriggers,
@@ -368,6 +373,7 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
     return run.phase === 'reward' && run.offers.length === 0 ? advanceFloor(run) : run
   if (action.type === 'relic') return takeRelic(run, action.relic)
   if (run.phase !== 'exploring') return run
+  if (action.type === 'interact') return interactRelay(run, action.index)
 
   switch (action.type) {
     case 'skill': {

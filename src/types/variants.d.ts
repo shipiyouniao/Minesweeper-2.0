@@ -1,4 +1,6 @@
 import type { ExpeditionSonar } from './echo.js'
+import type { CampaignRevision, CampaignSave } from './campaign.js'
+import type { FloorCircuits } from './floor-circuits.js'
 import type { VariantDifficulty } from './variant-difficulty.js'
 import type { TacticalEncounter } from './tactical.js'
 import type { Vitality } from './vitality.js'
@@ -69,7 +71,7 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
-  readonly campaign?: 'tower-road-v4'
+  readonly campaign?: CampaignRevision
   readonly title: TitleId | null
   readonly milestoneRelics?: readonly MilestoneRelic[]
   readonly training: readonly CombatTraining[]
@@ -84,6 +86,9 @@ export interface Departure {
 
 /** A complete floor state; reachability is derived from revealed safe cells. */
 export interface Expedition extends Vitality {
+  readonly circuits?: FloorCircuits
+  /** Carried between floors; serialized state is always reconstructed from intents. */
+  readonly signalRecord?: boolean
   readonly sonar: ExpeditionSonar
   readonly titleProgress: TitleProgress
   readonly encounter: TacticalEncounter | null
@@ -186,12 +191,7 @@ export interface ExpeditionJournal {
 
 /** One atomic value prevents refresh from awarding a settled run twice. */
 export interface ExpeditionSave {
-  readonly campaign?: {
-    readonly journal: ExpeditionJournal | null
-    readonly records: readonly VariantRecord[]
-    readonly cleared: boolean
-    readonly lesson?: number
-  }
+  readonly campaign?: CampaignSave
 
   readonly story?: StoryProgress
   readonly loadout?: CampLoadout

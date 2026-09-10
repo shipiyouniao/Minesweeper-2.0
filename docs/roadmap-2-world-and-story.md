@@ -52,6 +52,10 @@ The starting story is a displaced outsider seeking a route home, helped by a loc
 
 Build region-sized arcs with their own residents, conflict, investigation, side tasks and resolution. A repaired supply route, a reunited family, a new camp resident or a changed town is a meaningful conclusion even while the larger journey continues. Some bosses are aggressors, some are rivals, and some defend people or obey an outdated duty; their stories need not all end in death or share one corruption explanation.
 
+Do not make repeated fetch-and-report trips the default chapter structure. Each substantial encounter should pose a question, change the situation through playable inference or a mechanism, and leave a visible human or world consequence. Dialogue should reveal a character's particular priorities and react to what the player has done. Ordinary travel can connect encounters; walking between three quest markers is not itself an encounter.
+
+The [tower signal rescue](tower-signal-rescue.md) begins applying this rule: reconnecting a circuit exposes a trapped person's predicament, an optional registry branch preserves a homeward clue, and the rescue adds a speaking camp resident. This does not yet redesign all existing world errands or complete the first chapter.
+
 The first major arc should provide a real answer about the protagonist's arrival and a consequential lead toward home. Later arcs can reveal new places and deepen relationships. Do not repeatedly promise a return portal and invalidate it solely to prolong development. Knowing how to return can create a later decision about responsibilities and attachment; long-term updates do not require permanent narrative stalling.
 
 Recollection can be presented as a reconstruction of the expedition party's experiences. A fictional instrument or practitioner reweaves known regions and opponents into new trials. Its specific name, reward explanation and operator remain to be chosen. Real campaign routes persist, while reconstructed challenges can randomize without claiming that an already rescued settlement has been destroyed again.

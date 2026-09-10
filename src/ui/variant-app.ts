@@ -1,3 +1,8 @@
+import { pendingSignalScene } from '../game/signal-story.js'
+import { SignalPerformance } from './signal-performance.js'
+import { signalCopy } from './signal-copy.js'
+import { relayReady } from '../game/floor-circuits.js'
+import { animateCircuitChange } from './floor-circuit-view.js'
 import { professionSkillCopy, professionSkillStatus } from './profession-skill-copy.js'
 import { professionSkillAvailability } from '../game/profession-skills.js'
 import { routeHref } from './navigation.js'
@@ -57,6 +62,7 @@ export class VariantApp implements VariantInputActions {
   private walkGeneration = 0
   private readonly notices = new MilestoneNotices()
   private readonly prologue: BossPrologue
+  private readonly signal: SignalPerformance
 
   /** Wire one active mode, sharing only browser preferences and the sound port. */
   constructor(
@@ -79,6 +85,7 @@ export class VariantApp implements VariantInputActions {
     this.language = language
     this.sounds = sounds
     this.prologue = new BossPrologue(sounds)
+    this.signal = new SignalPerformance(sounds)
     this.onLanguage = onLanguage
     this.view = this.createView()
     this.input = new VariantInput(root, this)
@@ -130,7 +137,19 @@ export class VariantApp implements VariantInputActions {
         return
       }
       const path = run ? approachPath(run, index) : null
-      if (!run || !path || (index === run.player && index !== run.exit)) {
+      const relay = run?.circuits?.relays.find((entry) => entry.index === index && entry.active)
+      if (
+        run &&
+        relay &&
+        run.game.cells[index]?.visibility === 'revealed' &&
+        !relayReady(run, relay)
+      ) {
+        this.sounds.play('blocked')
+        const hint = this.root.querySelector('.signal-objective p')
+        if (hint) hint.textContent = signalCopy(this.language).solve
+        return
+      }
+      if (!run || !path || (index === run.player && index !== run.exit && !relay)) {
         this.sounds.play('blocked')
         return
       }
@@ -205,7 +224,19 @@ export class VariantApp implements VariantInputActions {
     const changed =
       this.session instanceof TwinSession
         ? this.session.dispatch({ side, type: flag ? 'flag' : 'reveal', index })
-        : this.session.dispatch({ type: flag ? 'flag' : move ? 'move' : 'reveal', index })
+        : this.session.dispatch({
+            type: flag
+              ? 'flag'
+              : move &&
+                  previousRun?.circuits?.relays.some(
+                    (entry) => entry.index === index && entry.active,
+                  )
+                ? 'interact'
+                : move
+                  ? 'move'
+                  : 'reveal',
+            index,
+          })
     if (!changed) {
       this.sounds.play('blocked')
       return
@@ -230,7 +261,27 @@ export class VariantApp implements VariantInputActions {
                 ? 'navigate'
                 : 'reveal',
     )
+    const switched =
+      currentRun?.circuits?.relays.some(
+        (relay) =>
+          !relay.active &&
+          previousRun?.circuits?.relays.find((entry) => entry.index === relay.index)?.active,
+      ) ?? false
+    if (switched) {
+      this.turnPerformance = true
+      this.moving = true
+      this.sounds.play('confirm')
+    }
     this.render()
+    if (switched) {
+      const generation = this.walkGeneration
+      void animateCircuitChange(this.root, previousRun, currentRun).then(() => {
+        if (generation !== this.walkGeneration) return
+        this.turnPerformance = false
+        this.moving = false
+        this.renderSignalScene()
+      })
+    }
   }
 
   /** Keep the session atomic while an interruptible, visible path animation runs. */
@@ -405,6 +456,7 @@ export class VariantApp implements VariantInputActions {
         if (
           this.session instanceof ExpeditionSession &&
           this.session.campaignMode &&
+          this.session.stage.lesson &&
           this.session.run?.floor === 1 &&
           this.session.run.phase === 'exploring'
         ) {
@@ -684,6 +736,7 @@ export class VariantApp implements VariantInputActions {
     this.input.dispose()
     this.view.dispose()
     this.prologue.dispose()
+    this.signal.dispose()
     this.notices.dispose()
     this.sounds.dispose()
   }
@@ -704,7 +757,11 @@ export class VariantApp implements VariantInputActions {
     if (this.session instanceof ExpeditionSession) {
       if (this.session.campaignMode) {
         const heading = this.root.querySelector('.variant-heading h2')
-        if (heading) heading.textContent = message(this.language, 'campaign.title')
+        if (heading)
+          heading.textContent =
+            this.session.stage.id === 'tower-relay'
+              ? signalCopy(this.language).title
+              : message(this.language, 'campaign.title')
         if (!this.root.querySelector('[data-campaign-return]')) {
           const link = document.createElement('a')
           link.href = routeHref({ page: 'story' }, this.language)
@@ -732,6 +789,7 @@ export class VariantApp implements VariantInputActions {
         run,
       )
       this.renderCampaignLesson()
+      this.renderSignalScene()
       this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
       this.notices.observe(this.session.camp, this.language)
     } else {
@@ -740,6 +798,28 @@ export class VariantApp implements VariantInputActions {
       const b = state.phase === 'lost' ? { ...state.b, phase: 'lost' as const } : state.b
       this.view.render(twinTemplate(this.language, state, this.inputMode), a, b, null)
     }
+  }
+
+  /** Only accepted floor outcomes unlock dialogue; dismissed scenes never grant gameplay rewards. */
+  private renderSignalScene(): void {
+    if (!(this.session instanceof ExpeditionSession) || this.paused || this.turnPerformance) return
+    const session = this.session
+    const scene = pendingSignalScene(session.run, session.stageProgress)
+    if (!scene) return
+    this.view.closeDialog()
+    this.signal.show(
+      this.root,
+      this.language,
+      scene,
+      !!session.run?.signalRecord,
+      session.run?.departure.profession ?? 'explorer',
+      () => {
+        session.completeCampaignScene(scene)
+        this.render()
+        if (session.run?.phase === 'won' && !pendingSignalScene(session.run, session.stageProgress))
+          this.view.showExpeditionDialog()
+      },
+    )
   }
 
   /** Guide real tool and skill inputs; progress follows accepted actions, not pretend clicks. */

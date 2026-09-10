@@ -1,0 +1,124 @@
+.signal-dialogue {
+  width: min(38rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 1.4rem;
+  border: 1px solid rgb(255 255 255 / 65%);
+  border-radius: 1.5rem;
+  color: var(--text, #263e36);
+  background: rgb(249 250 242 / 93%);
+  box-shadow: 0 22px 70px rgb(25 45 38 / 20%);
+  backdrop-filter: blur(20px);
+}
+.signal-dialogue::backdrop {
+  background: rgb(23 40 35 / 38%);
+  backdrop-filter: blur(5px);
+}
+.signal-cast {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  height: 9rem;
+  padding-inline: 1rem;
+}
+.signal-cast > span {
+  display: grid;
+  place-items: center;
+  width: 8rem;
+  height: 8rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.signal-cast > .is-speaking {
+  opacity: 1;
+}
+.signal-cast img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.signal-cast .dungeon-sprite {
+  width: 100%;
+  height: 100%;
+}
+.signal-cast .signal-radio {
+  filter: brightness(0.25);
+}
+.signal-dialogue-copy {
+  padding: 1.1rem;
+  background: rgb(255 255 255 / 65%);
+  border: 1px solid #dce3d8;
+  border-radius: 1rem;
+}
+.signal-dialogue-copy p {
+  min-height: 4.5em;
+  line-height: 1.8;
+  margin-block: 0.7rem;
+}
+.signal-dialogue-copy button {
+  display: block;
+  margin-left: auto;
+  min-height: 2.75rem;
+}
+.signal-objective {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  margin: 0.5rem 0 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #d8e2d8;
+  border-radius: 1rem;
+  background: rgb(249 250 241 / 65%);
+}
+.signal-objective p {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+.signal-objective strong {
+  font-size: 0.9rem;
+}
+.signal-relay {
+  box-shadow: inset 0 0 0 1px #bba165;
+}
+.signal-ready {
+  box-shadow:
+    inset 0 0 0 2px #349183,
+    0 0 10px #34918340;
+}
+.signal-off .dungeon-sprite {
+  opacity: 0.7;
+}
+.signal-gate.signal-gate {
+  background: #e6decb;
+}
+.signal-gate.signal-released {
+  background: #e2eee4;
+}
+.signal-open-gate {
+  color: #388777;
+  font-size: 1.6em;
+}
+.signal-rescue .signal-nia {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.story-cell .signal-nia {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.signal-stage-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .signal-cast > span {
+    transition: none;
+  }
+}

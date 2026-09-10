@@ -2,10 +2,13 @@ import type { ExpeditionSave, TwinSave, VariantSave } from '../types/variants.js
 import type { StorageLike } from '../types/storage.js'
 import { loadExpeditionSave, decodeTwinSave } from './variant-decoders.js'
 import { encodeStory, storyEnvelopeStatus } from './story-encoder.js'
+import { campaignProgress, updateCampaign } from '../game/campaign-catalog.js'
+import type { CampaignStageId } from '../types/campaign.js'
 
 /** Owns mode-specific storage, containing browser quota/privacy failures at one boundary. */
 export class VariantRepository {
   readonly campaignMode: boolean
+  readonly campaignStage: CampaignStageId
   private readonly storage: StorageLike
   private expeditionCache: ExpeditionSave | null = null
   available = true
@@ -15,14 +18,19 @@ export class VariantRepository {
   storyReadOnly = false
 
   /** Accept the same storage port used by classic mode and test adapters. */
-  constructor(storage: StorageLike, campaignMode = false) {
+  constructor(
+    storage: StorageLike,
+    campaignMode = false,
+    stage: CampaignStageId = 'tower-galleries',
+  ) {
     this.campaignMode = campaignMode
+    this.campaignStage = stage
     this.storage = storage
   }
 
   /** Load the camp and expedition envelope without accessing any classic slot. */
   expedition(): ExpeditionSave | null {
-    if (!this.available && this.expeditionCache) return this.expeditionCache
+    if (!this.available && this.expeditionCache) return this.project()
     let text = this.read('expedition')
     const status = storyEnvelopeStatus(text)
     let restored = false
@@ -40,25 +48,30 @@ export class VariantRepository {
         this.available = false
       }
     }
-    if (!this.available && this.expeditionCache) return this.expeditionCache
+    if (!this.available && this.expeditionCache) return this.project()
     const loaded = loadExpeditionSave(text)
     this.migrated = loaded?.migrated ?? false
     this.returnedSupplies = loaded?.returnedSupplies ?? null
     this.recovered = restored || (loaded?.recovered ?? text !== null)
     this.expeditionCache = loaded?.save ?? null
+    return this.project()
+  }
+
+  /** Storage failures retain the selected stage projection instead of exposing a roguelite journal. */
+  private project(): ExpeditionSave | null {
     return this.campaignMode && this.expeditionCache
       ? {
           ...this.expeditionCache,
-          journal: this.expeditionCache.campaign?.journal ?? null,
-          records: this.expeditionCache.campaign?.records ?? [],
+          journal: campaignProgress(this.expeditionCache.campaign, this.campaignStage).journal,
+          records: campaignProgress(this.expeditionCache.campaign, this.campaignStage).records,
           difficulty: 'relaxed',
         }
       : this.expeditionCache
   }
 
   /** Project only the campaign attempt while retaining one atomic shared camp envelope. */
-  forCampaign(): VariantRepository {
-    return new VariantRepository(this.storage, true)
+  forCampaign(stage: CampaignStageId = 'tower-galleries'): VariantRepository {
+    return new VariantRepository(this.storage, true, stage)
   }
 
   /** Load the paired-board envelope using its own schema decoder. */
@@ -74,26 +87,21 @@ export class VariantRepository {
     if (this.campaignMode) {
       const shared = new VariantRepository(this.storage)
       const latest = shared.expedition() ?? value
+      const campaign = updateCampaign(latest.campaign, {
+        ...campaignProgress(value.campaign, this.campaignStage),
+        journal: value.journal,
+        records: value.records,
+      })
       shared.saveExpedition({
         ...latest,
         camp: value.camp,
         ...(value.story ? { story: value.story } : {}),
         ...(value.loadout ? { loadout: value.loadout } : {}),
-        campaign: {
-          journal: value.journal,
-          records: value.records,
-          cleared: value.campaign?.cleared ?? false,
-          lesson: value.campaign?.lesson ?? 0,
-        },
+        campaign,
       })
       this.expeditionCache = {
         ...value,
-        campaign: {
-          journal: value.journal,
-          records: value.records,
-          cleared: value.campaign?.cleared ?? false,
-          lesson: value.campaign?.lesson ?? 0,
-        },
+        campaign,
       }
       this.available = shared.available
       return

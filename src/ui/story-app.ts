@@ -1,3 +1,6 @@
+import { campaignProgress } from '../game/campaign-catalog.js'
+import { NIA_CAMP_CELL, pendingSignalScene } from '../game/signal-story.js'
+import { SignalPerformance } from './signal-performance.js'
 import { message } from '../i18n.js'
 import { storyTaskName, storyTaskScene } from './story-quests.js'
 import { CampSession } from '../application/camp-session.js'
@@ -38,6 +41,7 @@ export class StoryApp implements MountedGame {
   private readonly listeners = new AbortController()
   private readonly rightClick: BoardRightClick
   private readonly performance: StoryPerformance
+  private readonly signal: SignalPerformance
   private languageMenu: LanguageMenu | null = null
   private titleMenu: TitleMenu | null = null
   private hold: StoryHold | null = null
@@ -68,6 +72,7 @@ export class StoryApp implements MountedGame {
     this.preferences = preferences
     this.language = language
     this.sounds = sounds
+    this.signal = new SignalPerformance(sounds)
     this.onLanguage = onLanguage
     this.session = new StorySession(new CampSession(repository))
     this.performance = new StoryPerformance(
@@ -101,6 +106,7 @@ export class StoryApp implements MountedGame {
     this.animation?.cancel()
     this.cancelHold()
     this.performance.dispose()
+    this.signal.dispose()
     this.listeners.abort()
     this.rightClick.dispose()
     this.languageMenu?.dispose()
@@ -113,7 +119,11 @@ export class StoryApp implements MountedGame {
     const run = this.session.run
     const progress = this.session.camp.story
     const board = run?.board ?? buildStoryBoard(CAMP_SCENE)
-    const saved = progress.campPosition
+    const saved =
+      progress.campPosition === 51 ||
+      (progress.campPosition === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared)
+        ? board.entrance
+        : progress.campPosition
     return {
       panel: this.panel,
       selectedTask: this.selectedTask,
@@ -130,7 +140,11 @@ export class StoryApp implements MountedGame {
       loadout: this.session.camp.loadout,
       service: this.service,
       conversation: this.conversation,
-      campaignCleared: this.repository.expedition()?.campaign?.cleared ?? false,
+      campaignCleared: campaignProgress(this.repository.expedition()?.campaign, 'tower-galleries')
+        .cleared,
+      ...(this.repository.expedition()?.campaign
+        ? { campaign: this.repository.expedition()!.campaign! }
+        : {}),
       flagMode: this.flagMode,
       inspected:
         run?.practicedFlag && !run.practicedReveal
@@ -188,6 +202,19 @@ export class StoryApp implements MountedGame {
           `[data-story-action="${control}"]${task ? `[data-task="${task}"]` : ''}`,
         )
         ?.focus({ preventScroll: true })
+    const rescue = this.session.camp.signalRescue
+    if (pendingSignalScene(null, rescue) === 'rescued' && !this.root.querySelector('dialog[open]'))
+      this.signal.show(
+        this.root,
+        this.language,
+        'rescued',
+        rescue.recordSaved,
+        state.loadout.profession,
+        () => {
+          this.session.camp.completeSignalRescue()
+          this.render()
+        },
+      )
   }
 
   /** Route finite service commands through the existing catalogs and shared camp operations. */
@@ -260,7 +287,7 @@ export class StoryApp implements MountedGame {
 
   /** Apply one scene action; route preview/animation never reads covered mine locations. */
   private async activate(index: number, flag: boolean): Promise<void> {
-    if (this.root.querySelector('dialog.story-dialogue[open]')) return
+    if (this.root.querySelector('dialog.story-dialogue[open], dialog.signal-dialogue[open]')) return
     if (this.moving || this.performance.busy || !Number.isInteger(index)) return
     if (this.session.run?.floor === 0 && !this.session.camp.story.accepted?.includes('reach-camp'))
       return
@@ -370,6 +397,15 @@ export class StoryApp implements MountedGame {
     }
     this.render()
     if (!state.run && index === 51) this.performance.react('greet')
+    if (!state.run && index === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared)
+      this.signal.show(
+        this.root,
+        this.language,
+        'camp',
+        this.session.camp.signalRescue.recordSaved,
+        state.loadout.profession,
+        () => this.render(),
+      )
     if (
       state.run &&
       state.run.floor === this.session.run?.floor &&

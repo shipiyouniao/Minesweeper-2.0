@@ -1,4 +1,7 @@
 import { recordStoryCampaign } from '../game/story-quests.js'
+import { campaignProgress, campaignStage, updateCampaign } from '../game/campaign-catalog.js'
+import type { CampaignStage, CampaignStageProgress } from '../types/campaign.js'
+import type { SignalSceneId } from '../types/signal-story.js'
 import { EXPEDITION_RULES_REVISION } from '../persistence/expedition-format.js'
 import { addVariantRecord } from '../game/variant-difficulty.js'
 import { ownedRelicPacks } from '../game/relic-packs.js'
@@ -102,9 +105,33 @@ export class ExpeditionSession {
     return this.repository.campaignMode
   }
 
+  /** Resolve content from the selected repository slot, never from a mutable menu choice. */
+  get stage(): CampaignStage {
+    return campaignStage(this.repository.campaignStage)
+  }
+
+  /** Read the selected stage's progress without duplicating its authoritative save record. */
+  get stageProgress(): CampaignStageProgress {
+    return campaignProgress(this.save.campaign, this.stage.id)
+  }
+
+  /** A completed performance is durable; unfinished lines can replay after re-entry. */
+  completeCampaignScene(id: SignalSceneId): void {
+    if (!this.campaignMode || this.stageProgress.scenes.includes(id)) return
+    this.refreshShared()
+    this.save = {
+      ...this.save,
+      campaign: updateCampaign(this.save.campaign, {
+        ...this.stageProgress,
+        scenes: [...this.stageProgress.scenes, id],
+      }),
+    }
+    this.commit()
+  }
+
   /** Tutorial state is independent of consumable resources and survives world return. */
   get campaignLesson(): number {
-    let step = this.save.campaign?.lesson ?? 0
+    let step = this.stageProgress.lesson
     const actions = this.save.journal?.actions ?? []
     if (
       step === 1 &&
@@ -123,12 +150,10 @@ export class ExpeditionSession {
     this.refreshShared()
     this.save = {
       ...this.save,
-      campaign: {
-        journal: this.save.journal,
-        records: this.save.records,
-        cleared: this.save.campaign?.cleared ?? false,
+      campaign: updateCampaign(this.save.campaign, {
+        ...this.stageProgress,
         lesson: step === 0 ? 0 : step === 1 ? 1 : 4,
-      },
+      }),
     }
     this.commit()
   }
@@ -188,13 +213,15 @@ export class ExpeditionSession {
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
     if (
       this.repository.campaignMode &&
-      (this.save.campaign?.cleared ||
+      (this.stageProgress.cleared ||
+        (this.stage.prerequisite !== null &&
+          !campaignProgress(this.save.campaign, this.stage.prerequisite).cleared) ||
         !this.save.story?.completed.includes('reach-tower') ||
         this.save.story.world?.active !== 'tower-landing')
     )
       return false
     const departure: Departure = {
-      ...(this.repository.campaignMode ? { campaign: 'tower-road-v4' as const } : {}),
+      ...(this.repository.campaignMode ? { campaign: this.stage.revision } : {}),
       title: milestoneProgress(this.camp).title ?? null,
       training: ownedCombatTraining(this.camp),
       battleRelics: this.camp.upgrades.includes('battle-manual'),
@@ -211,12 +238,14 @@ export class ExpeditionSession {
       ...this.save,
       ...(this.campaignMode
         ? {
-            campaign: {
+            campaign: updateCampaign(this.save.campaign, {
+              ...this.stageProgress,
               journal: null,
-              records: this.save.campaign?.records ?? [],
+              records: this.stageProgress.records,
               cleared: false,
-              lesson: 0,
-            },
+              lesson: this.stage.lesson ? 0 : 4,
+              scenes: [],
+            }),
           }
         : {}),
       difficulty,
@@ -264,12 +293,12 @@ export class ExpeditionSession {
       ...this.save,
       ...(this.campaignMode
         ? {
-            campaign: {
+            campaign: updateCampaign(this.save.campaign, {
+              ...this.stageProgress,
               journal,
               records: this.save.records,
-              cleared: this.save.campaign?.cleared ?? false,
               lesson: nextLesson,
-            },
+            }),
           }
         : {}),
       camp,
@@ -292,8 +321,8 @@ export class ExpeditionSession {
 
     if (next.phase === 'lost' || next.phase === 'won' || next.phase === 'retreated') {
       const earned = this.repository.campaignMode
-        ? next.phase === 'won' && !this.save.campaign?.cleared
-          ? 50
+        ? next.phase === 'won' && !this.stageProgress.cleared
+          ? this.stage.reward
           : 0
         : expeditionEarnings(next)
       const record: VariantRecord = {
@@ -309,12 +338,15 @@ export class ExpeditionSession {
         version: 4,
         ...(this.repository.campaignMode
           ? {
-              campaign: {
+              campaign: updateCampaign(this.save.campaign, {
+                ...this.stageProgress,
                 journal: null,
                 records: this.save.records,
-                cleared: !!this.save.campaign?.cleared || next.phase === 'won',
+                cleared: this.stageProgress.cleared || next.phase === 'won',
                 lesson: this.campaignLesson,
-              },
+                recordSaved:
+                  this.stageProgress.recordSaved || (next.phase === 'won' && !!next.signalRecord),
+              }),
             }
           : {}),
         difficulty: this.difficulty,

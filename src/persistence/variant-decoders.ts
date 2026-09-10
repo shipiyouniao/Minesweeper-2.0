@@ -1,3 +1,4 @@
+import { decodeCampaign, campaignWasRecovered } from './campaign-decoder.js'
 import { MILESTONES } from '../game/milestones.js'
 import { decodeStory } from './story-decoder.js'
 import type { CampLoadout } from '../types/story.js'
@@ -250,7 +251,12 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (!reader) return null
   const originalCampaign = reader.string('campaign')
   const campaign = originalCampaign === 'tower-road-v3' ? 'tower-road-v4' : originalCampaign
-  if (reader.value('campaign') !== undefined && campaign !== 'tower-road-v4') return null
+  if (
+    reader.value('campaign') !== undefined &&
+    campaign !== 'tower-road-v4' &&
+    campaign !== 'tower-relay-v1'
+  )
+    return null
   const rawTitle = reader.value('title')
   const title = parseTitle(reader.string('title'))
   if (rawTitle !== null && title === null) return null
@@ -265,7 +271,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (
     !integer(seed, 0xffffffff) ||
     !difficulty ||
-    (campaign === 'tower-road-v4' && (difficulty !== 'relaxed' || seed !== 0)) ||
+    (campaign !== null && (difficulty !== 'relaxed' || seed !== 0)) ||
     !profession ||
     typeof archive !== 'boolean' ||
     typeof battleRelics !== 'boolean' ||
@@ -308,7 +314,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     }
   }
   return {
-    ...(campaign === 'tower-road-v4' ? { campaign } : {}),
+    ...(campaign === 'tower-road-v4' || campaign === 'tower-relay-v1' ? { campaign } : {}),
     seed,
     title,
     difficulty,
@@ -369,7 +375,7 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
 }
 
 /** Decode a bounded replay journal, rejecting the whole run when any intent is malformed. */
-function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | null {
+export function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | null {
   if (!reader || reader.number('rulesRevision') !== EXPEDITION_RULES_REVISION) return null
   const returnSupplies = reader.number('returnSupplies')
   if (!integer(returnSupplies, 10000)) return null
@@ -401,7 +407,7 @@ function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | nul
 }
 
 /** Retain a bounded list of fully valid records; no player-provided HTML is stored. */
-function decodeRecords(values: readonly JsonValue[] | null): VariantRecord[] | null {
+export function decodeRecords(values: readonly JsonValue[] | null): VariantRecord[] | null {
   if (!values || values.length > 60) return null
   const records: VariantRecord[] = []
 
@@ -470,20 +476,10 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
   const story = decodeStory(reader.value('story'))
   const loadout = decodeLoadout(reader.child('loadout'))
   const campaignReader = reader.child('campaign')
-  const campaignJournal = decodeJournal(campaignReader?.child('journal') ?? null)
-  const campaignRecords = decodeRecords(campaignReader?.array('records') ?? null)
-  const campaign =
-    campaignReader && campaignRecords
-      ? {
-          journal: campaignJournal?.departure.campaign === 'tower-road-v4' ? campaignJournal : null,
-          records: campaignRecords,
-          cleared: campaignReader.value('cleared') === true,
-          lesson:
-            campaignReader.child('journal') && !campaignJournal
-              ? 0
-              : Math.max(0, Math.min(4, Math.trunc(campaignReader.number('lesson') ?? 0))),
-        }
-      : null
+  const campaign = decodeCampaign(campaignReader, {
+    journal: decodeJournal,
+    records: decodeRecords,
+  })
   const save: ExpeditionSave = {
     version: 4,
     ...(campaign ? { campaign } : {}),
@@ -498,9 +494,7 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
   return {
     save,
     migrated: oldEnvelope || oldRules,
-    recovered:
-      recovered ||
-      (!!campaignReader && campaignReader.value('journal') !== null && !campaignJournal),
+    recovered: recovered || campaignWasRecovered(campaignReader, campaign),
     returnedSupplies,
   }
 }

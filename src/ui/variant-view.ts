@@ -1,3 +1,4 @@
+import { renderFloorCircuits } from './floor-circuit-view.js'
 import { TideBoard, markTideCell, animateTideAnchor } from './tide-board.js'
 import { animateBattleInteractions } from './battle-interactions.js'
 import { animateBattleFeedback } from './battle-feedback.js'
@@ -140,7 +141,7 @@ export class VariantView {
     return (
       this.dialog.open ||
       this.expeditionDialog.open ||
-      Boolean(this.root.querySelector('dialog[data-prologue][open]'))
+      Boolean(this.root.querySelector('dialog[data-prologue][open], dialog.signal-dialogue[open]'))
     )
   }
 
@@ -711,6 +712,7 @@ export class VariantView {
         cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + t.frontier)
     }
     const grid = this.content.querySelector<HTMLElement>(`[data-side="${side}"]`)
+    if (side === 'a') renderFloorCircuits(this.content, run, this.language)
     if (side === 'a') {
       const marker = (index: number, className: string, label: string): void => {
         const cell = grid?.querySelector<HTMLElement>(`[data-cell="${index}"]`)

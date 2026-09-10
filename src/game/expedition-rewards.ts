@@ -1,4 +1,5 @@
 import type { Departure, Expedition } from '../types/variants.js'
+import { campaignStage } from './campaign-catalog.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import type { ExpeditionReward } from '../types/expedition-rewards.js'
 
@@ -36,7 +37,7 @@ export function scaleSupplies(base: number, percent: number): number {
 /** Apply defeat retention before the bonus; unfinished runs never have a settlement. */
 export function expeditionReward(run: Expedition): ExpeditionReward {
   if (run.departure.campaign) {
-    const total = run.phase === 'won' ? 50 : 0
+    const total = run.phase === 'won' ? campaignStage(run.departure.campaign).reward : 0
     return { base: total, bonus: 0, total, percent: 100 }
   }
   let base = 0

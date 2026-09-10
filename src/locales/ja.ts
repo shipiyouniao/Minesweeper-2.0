@@ -2,6 +2,55 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'signal.title': '塔からの返事',
+  'signal.floor-1': '途切れた呼び声',
+  'signal.floor-2': '帰る場所のない名前',
+  'signal.floor-3': '古い命令の囚人',
+  'signal.relay': '給電器',
+  'signal.gate': '封鎖扉',
+  'signal.released': '給電停止',
+  'signal.ready': '給電器を押して封鎖を解除',
+  'signal.solve':
+    '給電器の数字から地雷を旗で示し、周囲の安全マスを開く。給電器まで歩いて押すと扉が開く。',
+  'signal.record': '異郷からの来訪記録',
+  'signal.optional': '寄り道 · 任意',
+  'signal.continue': '次へ',
+  'signal.nia': 'ニア',
+  'signal.player': 'あなた',
+  'signal.lumi': 'ルミ',
+  'signal.guardian': '塔の守衛',
+  'signal.complete': '道が開いた。先へ進もう。',
+  'signal.entry-1': '……配管を叩くのは三度目。聞こえたら、叩き返さないで。あなたまで数えられる。',
+  'signal.entry-2': '中に誰かいる？ ルミ、この塔は廃墟じゃなかったの？',
+  'signal.entry-3': '扉の灯りが生きてる。給電器を止めて、中へ行こう。',
+  'signal.connected-1':
+    'やっと自分の声以外が聞こえた。私はニア。配線修理が仕事。その配線に閉じ込められたけど。',
+  'signal.connected-2': '退避手順。登録住所へ帰還せよ。未登録者の退塔を禁ずる。',
+  'signal.connected-3': 'この世界に住所なんてない。僕も出してもらえないんだ。',
+  'signal.connected-4': 'じゃあ書類は後回し。上へ来て。こっちで配線を見張ってる。',
+  'signal.archive-1':
+    '左上は古い登録室。青い記録には「異郷からの客」。あなたと同じ、こちらに住所のない人。',
+  'signal.archive-2': 'その人たちは帰れたの？',
+  'signal.archive-3':
+    '「帰還の灯台」までは読めた。横の扉にも給電線がある。取りに行けるけど、地雷を踏む必要はない。灯台の場所は覚えてる。',
+  'signal.record-1': '「帰還試験、第七回。灯火を確認。帰還者はまだいない」……後ろに星図がある。',
+  'signal.record-2':
+    'そこの角、折らないで！ ……出てから話そう。その星図なら、私の覚え書きより役に立つ。',
+  'signal.prison-1':
+    '見えた！ あと二本。守衛に石を投げないでね。やってみたけど、石にも登録用紙を出してきた。',
+  'signal.prison-2':
+    '取り消されないままの命令を守ってるんだね。まず君を外へ。その後で、この塔も目を覚まさせよう。',
+  'signal.rescued-1': '登録住所……該当なし。退避経路……解放。',
+  'signal.rescued-2': '次は「野営地の焚き火のそば」って書く。ありがとう、手順を守らない二人。',
+  'signal.rescued-3-saved':
+    '野営地で星図を広げよう。まず、どの夜空を示すか調べる。それから帰還の灯台へ。',
+  'signal.rescued-3-skipped':
+    '記録が塔に残っても大丈夫。覚えている道を野営地で描くよ。帰還の灯台、一緒に探そう。',
+  'signal.camp-1': '住所を登録したよ。焚き火から右へ三歩。守衛が来たら証人になってね。',
+  'signal.camp-2-saved':
+    '星図の角が欠けてる。でも観測点は二つ読める。道が通じたら、空と照らし合わせよう。',
+  'signal.camp-2-skipped':
+    '灯台は北にあるはず。どの分かれ道だったか……もう少し考えさせて。いつか塔の星図も取り戻せるといいね。',
   'story.north-road': '野営地北の旧道',
   'story.lift': '望楼の昇降台',
   'story.world-road': '灯りの森 · 下見',

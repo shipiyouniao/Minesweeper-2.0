@@ -1,3 +1,4 @@
+import type { CampaignSave } from './campaign.js'
 import type { Game } from './game.js'
 import type { Equipment, Profession } from './variants.js'
 import type { CampScreen } from './camp-navigation.js'
@@ -153,6 +154,7 @@ export type StoryFeedback =
 /** One presentation snapshot contains only the selected scene and shared camp services. */
 export interface StoryViewState {
   readonly campaignCleared?: boolean
+  readonly campaign?: CampaignSave
   readonly language: Language
   readonly run: StoryRun | null
   readonly board: StoryBoard
@@ -249,7 +251,7 @@ export interface StoryWorldCheckpoint {
 }
 
 export interface StoryWorldSaveData {
-  readonly schemaVersion: 3
+  readonly schemaVersion: 4
   readonly travel: {
     readonly campReached: boolean
     readonly campPosition: number

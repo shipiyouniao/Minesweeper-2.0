@@ -1,4 +1,8 @@
 import { pinnedStoryTasks, storyQuestPanel } from './story-quests.js'
+import { campaignProgress, CAMPAIGN_STAGES } from '../game/campaign-catalog.js'
+import { NIA_CAMP_CELL } from '../game/signal-story.js'
+import { niaImage } from './signal-performance.js'
+import { signalCopy } from './signal-copy.js'
 import { storyDialogueTemplate } from './story-dialogue.js'
 import { neighbors } from '../game/engine.js'
 import { CAMP_SITES, QUARRY_GATE } from '../game/story-content.js'
@@ -87,6 +91,13 @@ function cellTemplate(state: StoryViewState, index: number): string {
   } else if (flagged) {
     label = message(language, 'story.marked')
     content = icon('flag')
+  } else if (
+    !run &&
+    index === NIA_CAMP_CELL &&
+    campaignProgress(state.campaign, 'tower-relay').cleared
+  ) {
+    label = signalCopy(language).nia
+    content = niaImage()
   } else if (site) {
     label = storySiteName(language, site)
     content = site.destination === 'guide' ? storyGuideImage() : spriteImage(site.sprite)
@@ -149,7 +160,7 @@ function sceneBoard(state: StoryViewState): string {
 function sceneDock(state: StoryViewState): string {
   const language = state.language
   const run = state.run
-  return `<footer class="story-dock"><div class="story-dock-inner">${run ? `<div class="story-modes" role="group" aria-label="${message(language, 'story.explore')}"><button data-story-action="explore" aria-pressed="${!state.flagMode}">${icon('pointer')}${message(language, 'story.explore')}</button><button data-story-action="flag" aria-pressed="${state.flagMode}">${icon('flag')}${message(language, 'story.flag')}</button></div>${!state.campaignCleared && run.floor === 7 && run.player === run.board.exit && state.progress.dialogue?.completed.includes('tower-arrival') ? `<a data-route data-story-campaign class="story-primary" href="${routeHref({ page: 'campaign' }, language)}">${message(language, 'campaign.enter')}</a>` : ''}${run.phase === 'fallen' ? `<button class="story-primary" data-story-action="retry">${message(language, 'story.retry')}</button>` : ''}` : ''}<button data-story-action="map" class="${state.progress.mapOwned ? '' : 'is-unavailable'}">${icon('globe')}${message(language, 'story.map')}${state.progress.mapOwned ? '' : ' · —'}</button><div class="story-resources"><span class="story-vitals"><span>${message(language, 'story.health')}</span><strong class="story-hearts" role="img" aria-label="${message(language, 'story.health')}: ${run?.health ?? 3} / 3">${'♥'.repeat(run?.health ?? 3)}${'♡'.repeat(3 - (run?.health ?? 3))}</strong></span><span class="story-wallet" aria-label="${variantCopy(language).supplies}">${spriteImage('treasure')}<span>${variantCopy(language).supplies}<strong>${new Intl.NumberFormat(language).format(state.camp.supplies)}</strong></span></span></div></div></footer>`
+  return `<footer class="story-dock"><div class="story-dock-inner">${run ? `<div class="story-modes" role="group" aria-label="${message(language, 'story.explore')}"><button data-story-action="explore" aria-pressed="${!state.flagMode}">${icon('pointer')}${message(language, 'story.explore')}</button><button data-story-action="flag" aria-pressed="${state.flagMode}">${icon('flag')}${message(language, 'story.flag')}</button></div>${campaignEntries(state)}${run.phase === 'fallen' ? `<button class="story-primary" data-story-action="retry">${message(language, 'story.retry')}</button>` : ''}` : ''}<button data-story-action="map" class="${state.progress.mapOwned ? '' : 'is-unavailable'}">${icon('globe')}${message(language, 'story.map')}${state.progress.mapOwned ? '' : ' · —'}</button><div class="story-resources"><span class="story-vitals"><span>${message(language, 'story.health')}</span><strong class="story-hearts" role="img" aria-label="${message(language, 'story.health')}: ${run?.health ?? 3} / 3">${'♥'.repeat(run?.health ?? 3)}${'♡'.repeat(3 - (run?.health ?? 3))}</strong></span><span class="story-wallet" aria-label="${variantCopy(language).supplies}">${spriteImage('treasure')}<span>${variantCopy(language).supplies}<strong>${new Intl.NumberFormat(language).format(state.camp.supplies)}</strong></span></span></div></div></footer>`
 }
 
 /** Camp services reuse the existing purchasing and loadout templates instead of duplicating them. */
@@ -171,4 +182,26 @@ export function storyTemplate(state: StoryViewState): string {
     <section class="story-banner glass-panel" style="--story-hero:url('${hero}')"><div><p class="eyebrow">${run ? (run.floor < 3 ? message(language, 'story.prologue') : message(language, 'story.world-road')) : 'MINEFARER / CAMP'}</p><h1 data-route-heading>${sceneName(state)}</h1><p>${run ? (run.floor < 3 ? `${run.floor + 1} / 3` : message(language, 'story.atlas-woodland')) : `${new Intl.NumberFormat(language).format(state.camp.supplies)} ${variantCopy(language).supplies}`}</p></div></section>
     ${state.service ? `<div class="story-service">${state.service.page === 'professions' ? titleTemplate(language, state.camp) : ''}${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, 'standard', state.service)}</div>` : `<div class="story-layout"><section class="story-stage glass-panel">${sceneBoard(state)}${notice ? `<p class="story-notice" role="status">${notice}</p>` : ''}</section><aside class="story-sidebar glass-panel">${pinnedStoryTasks(state)}${run ? '' : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>`}
   </main>${storyDialogueTemplate(state)}${storyQuestPanel(state)}${state.service ? '' : sceneDock(state)}`
+}
+
+/** Show authored stages at their physical doorway; completed stages retain their own history. */
+function campaignEntries(state: StoryViewState): string {
+  const { run, language } = state
+  if (
+    !run ||
+    run.floor !== 7 ||
+    run.player !== run.board.exit ||
+    !state.progress.dialogue?.completed.includes('tower-arrival')
+  )
+    return ''
+  return `<div class="signal-stage-links">${CAMPAIGN_STAGES.filter(
+    (stage) =>
+      !campaignProgress(state.campaign, stage.id).cleared &&
+      (stage.prerequisite === null || campaignProgress(state.campaign, stage.prerequisite).cleared),
+  )
+    .map(
+      (stage) =>
+        `<a data-route data-story-campaign class="story-primary" href="${routeHref({ page: 'campaign', stage: stage.id }, language)}">${stage.id === 'tower-galleries' ? message(language, 'campaign.enter') : signalCopy(language).title}</a>`,
+    )
+    .join('')}</div>`
 }

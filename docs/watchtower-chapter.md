@@ -1,6 +1,6 @@
 # First chapter draft: the old watchtower
 
-Status: implementation proposal within the approved Roadmap II direction. The northern road, survey/report task, three quarry spaces, spindle retrieval, permanent lift repair and upper tower landing are playable locally; the prepared chapter stages below are not implemented yet. Working names and dialogue are subject to playtesting. This is the first Bastion-family arc, not a replacement with the later Lookout boss.
+Status: a partial playable arc within Roadmap II. The northern road, quarry/lift route, upper landing and three-floor outer galleries are implemented. The second prepared stage, [An Answer in the Tower](tower-signal-rescue.md), adds a three-floor relay encounter, Nia's rescue, an optional homeward record and a permanent speaking camp resident. The main-route table below remains a planning draft, not a list of shipped stages. Working names, later ordering and dialogue remain subject to playtesting. This is the first Bastion-family arc, not the later Lookout boss.
 
 ## Narrative promise
 
@@ -47,6 +47,8 @@ The atlas has world, region and scene scales. A large scene map displays its com
 Permanent discoveries, repairs, quest outcomes and narrative completion belong to world progress; current floor state and carried attempt resources belong to the active stage. Failure cannot erase completed world improvements.
 
 ## Local prepared-stage increment
+
+The stable playable catalog now contains `tower-galleries` and `tower-relay`, each with three floors and its own resumable attempt. Their rewards are 50 and 80 supplies respectively, each once. World road/quarry spaces do not count as additional prepared stages. The five exploration stages, boss stage and full task graph are still incomplete. Future content should use the catalog and independent progress entries rather than adding another meaning to a global campaign flag.
 
 The upper landing now opens **Watchtower outer galleries**, a three-floor prepared exploration attempt. It uses the roguelite profession/tool dock, base 10 HP plus owned build effects, and the shared five-point mine damage rules. Its authored 9×9 boards contain 12, 14 and 15 mines, compared with the relaxed tier's 12–15; mandatory physical supply recovery prevents simply walking to a visible exit. All floors have public-clue, tool-free and damage-free solution tests. Difficulty equivalence beyond these structural baselines still needs human playtesting.
 
