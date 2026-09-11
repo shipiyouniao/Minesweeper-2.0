@@ -112,13 +112,14 @@ export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat
   if (run.floor === 2)
     return [{ speaker: 'lumi', line: message(language, 'story.approach-line'), gesture: 'greet' }]
 
-  if (!run.inspected)
+  // The event also owns restored beats and actions completed ahead of the suggested order.
+  if (event === 'wake')
     return [
       { speaker: 'player', line: message(language, 'story.where-am-i'), gesture: 'wake' },
       { speaker: 'lumi', line: message(language, 'story.wake-line'), gesture: 'greet' },
     ]
 
-  if (!run.practicedFlag)
+  if (event === 'flag')
     return [
       {
         speaker: 'lumi',
@@ -132,7 +133,7 @@ export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat
       },
     ]
 
-  if (!run.practicedReveal)
+  if (event === 'open')
     return [
       {
         speaker: 'lumi',
@@ -146,5 +147,7 @@ export function storyDialogue(state: StoryViewState): readonly StoryDialogueBeat
       },
     ]
 
-  return [{ speaker: 'lumi', line: message(language, 'story.travel-line'), gesture: 'nod' }]
+  return event === 'travel'
+    ? [{ speaker: 'lumi', line: message(language, 'story.travel-line'), gesture: 'nod' }]
+    : []
 }

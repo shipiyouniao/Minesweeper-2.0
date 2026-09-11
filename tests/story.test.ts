@@ -13,11 +13,43 @@ import {
   createStoryRun,
   storyLessonComplete,
   storyPath,
+  storyTeachingStep,
+  storyTeachingTarget,
 } from '../src/game/story.js'
 import { decodeStory } from '../src/persistence/story-decoder.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
 import type { StoryAction, StoryRun } from '../src/types/story.js'
 import { FakeRuntime, MemoryStorage } from './helpers.js'
+
+test('prologue coaching resumes demonstrated actions and ends when the player leaves the clearing', () => {
+  const initial = createStoryRun()
+  assert.equal(storyTeachingStep(initial), 'inspect')
+  const inspected = actStory(initial, { type: 'inspect', index: 12 })
+  assert.equal(storyTeachingStep(inspected), 'flag')
+  const openedEarly = actStory(initial, { type: 'visit', index: 31 })
+  const marked = actStory(openedEarly, { type: 'flag', index: 22 })
+  assert.equal(storyTeachingStep(marked), 'travel')
+  assert.equal(storyTeachingStep({ ...marked, phase: 'fallen' }), null)
+  assert.equal(storyTeachingStep({ ...marked, visited: [createStoryRun(1)] }), null)
+  assert.equal(storyTeachingTarget({ ...marked, visited: [createStoryRun(1)] }), null)
+})
+
+test('early marking and safe opening satisfy the prologue without mandatory clue inspection', () => {
+  const marked = actStory(createStoryRun(), { type: 'flag', index: 22 })
+  assert.equal(marked.inspected, false)
+  assert.equal(storyLessonComplete(marked), false)
+  assert.equal(storyTeachingTarget(marked), 21)
+  assert.equal(storyTeachingStep(marked), 'open')
+
+  let opened = actStory(marked, { type: 'chord', index: 21 })
+  assert.equal(opened.inspected, false)
+  assert.equal(storyLessonComplete(opened), true)
+  assert.equal(storyTeachingTarget(opened), opened.board.exit)
+  for (const index of [31, 32, 34]) opened = actStory(opened, { type: 'visit', index })
+  const continued = actStory(opened, { type: 'continue' })
+  assert.equal(continued.floor, 1)
+  assert.equal(continued.health, 3)
+})
 
 test('story chords require matching flags and preserve physical pickup and travel', () => {
   const initial = createStoryRun()

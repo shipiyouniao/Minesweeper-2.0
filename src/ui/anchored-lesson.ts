@@ -1,11 +1,15 @@
+import type { LessonSurface } from '../types/anchored-lesson.js'
+
 /** Mount an in-scene guide and keep it inside the visible board while its target scrolls. */
 export function mountAnchoredLesson(
   root: HTMLElement,
   panel: HTMLElement,
   selector: string,
+  surface?: LessonSurface,
 ): () => void {
-  const frame = root.querySelector<HTMLElement>('.variant-board-panel')
-  const viewport = frame?.querySelector<HTMLElement>('.board-viewport')
+  const frame = surface?.frame ?? root.querySelector<HTMLElement>('.variant-board-panel')
+  const viewport = surface?.viewport ?? frame?.querySelector<HTMLElement>('.board-viewport')
+  const dock = surface ? surface.dock : root.querySelector<HTMLElement>('.action-dock')
   if (!frame || !viewport) return () => {}
 
   const target = root.querySelector<HTMLElement>(selector)
@@ -19,8 +23,7 @@ export function mountAnchoredLesson(
   const position = (): void => {
     const bounds = frame.getBoundingClientRect()
     const board = viewport.getBoundingClientRect()
-    const dock = root.querySelector<HTMLElement>('.action-dock')?.getBoundingClientRect()
-    const visibleBottom = Math.min(innerHeight, dock?.top ?? innerHeight)
+    const visibleBottom = Math.min(innerHeight, dock?.getBoundingClientRect().top ?? innerHeight)
     // The guide belongs to the board: scrolling to the sidebar must not pin it over other content.
     if (Math.min(board.bottom, visibleBottom) - Math.max(board.top, 0) < 96) {
       panel.hidden = true
@@ -35,8 +38,14 @@ export function mountAnchoredLesson(
     const topEdge = Math.max(board.top, 0) - bounds.top + 8
     const bottomEdge = Math.min(board.bottom, visibleBottom) - bounds.top - 8
 
-    panel.style.maxHeight = `${Math.max(80, bottomEdge - topEdge)}px`
-    panel.style.overflowY = 'auto'
+    // Measure the unbounded card first; scrolling a fitting card would clip its arrow.
+    const availableHeight = Math.max(80, bottomEdge - topEdge)
+
+    panel.style.maxHeight = ''
+    const needsScroll = panel.offsetHeight > availableHeight
+
+    panel.style.maxHeight = `${availableHeight}px`
+    panel.style.overflowY = needsScroll ? 'auto' : 'visible'
 
     const width = panel.offsetWidth
     const height = panel.offsetHeight

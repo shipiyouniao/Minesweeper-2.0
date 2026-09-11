@@ -20,15 +20,13 @@ export function storyGateTemplate(run: StoryRun, language: Language, index: numb
   return `<div class="story-mechanism-gate" data-story-gate="${index}" role="img" aria-label="${escapeHtml(message(language, 'story.gate-closed'))}">${spriteImage('bastion-core')}</div>`
 }
 
-/** Explain the current physical objective next to the board instead of opening another tutorial. */
-export function storyMechanismHint(run: StoryRun, language: Language): string {
+/** Describe the current quarry control for the repair task's expandable detail. */
+export function storyMechanismObjective(run: StoryRun, language: Language): string {
   const control = run.board.scene.mechanisms?.find((entry) => !run.operated.includes(entry.index))
   if (!control) return ''
 
   const ready = clueIsolated(run.board, control.index)
-  const text = ready
+  return ready
     ? message(language, 'story.mechanism-ready', { name: storyMechanismName(language, control) })
     : message(language, 'story.mechanism-help', { name: storyMechanismName(language, control) })
-
-  return `<p class="story-mechanism-hint" data-mechanism-hint>${text}</p>`
 }

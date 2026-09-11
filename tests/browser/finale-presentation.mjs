@@ -152,6 +152,7 @@ try {
     await page
       .locator('[data-atlas-route="north-road:northwest-bridge"][data-route-state="open"]')
       .waitFor()
+    assert.equal(await page.locator('.atlas-heading p').count(), 0)
     const before = await page.evaluate((key) => localStorage.getItem(key), key)
     for (const scene of [9, 10]) {
       await page.locator('[data-map-zoom="reset"]').click()
@@ -160,9 +161,15 @@ try {
       await page.locator(`.atlas-node[data-scene="${scene}"]`).focus()
       await page.keyboard.press('Enter')
       await page.locator(`[data-map-level="local"][data-map-scene="${scene}"]`).waitFor()
+      assert.equal(await page.locator('.atlas-heading p').count(), 0)
       assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), before)
       await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
     }
+    await page.locator('[data-story-action="close-panel"]').click()
+    await page.locator('[data-story-action="tasks"]').click()
+    await page.locator('[data-story-action="select-task"][data-task="open-blockade"]').click()
+    await page.locator('.story-quest-detail .story-task-status').waitFor()
+    assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), before)
     await seed(page, guardian, `?page=campaign&stage=northwest-bastion&lang=${language}`)
     await page.locator('[data-control="help"]').first().click()
     const battleGuide = page.locator('dialog[open]')

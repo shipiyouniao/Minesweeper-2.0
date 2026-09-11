@@ -43,7 +43,7 @@ const DESTINATIONS: readonly CampPage[] = [
 ]
 const CATEGORIES: readonly ShopCategory[] = ['all', 'professions', 'equipment', 'relics', 'camp']
 
-/** Give the four navigation entries recognizable existing artwork. */
+/** Give navigation entries recognizable existing artwork. */
 function destinationSprite(page: CampPage): DungeonSprite {
   switch (page) {
     case 'professions':
@@ -59,22 +59,6 @@ function destinationSprite(page: CampPage): DungeonSprite {
   }
 }
 
-/** Describe each destination in one short line. */
-function destinationNote(language: Language, page: CampPage): string {
-  switch (page) {
-    case 'professions':
-      return campLabel(language, 'professionHelp')
-    case 'equipment':
-      return campLabel(language, 'equipmentHelp')
-    case 'missions':
-      return message(language, 'camp-template.explore-complete-goals-claim-exclusive-gear')
-    case 'achievements':
-      return message(language, 'camp-template.long-term-milestones-with-lasting-rewards')
-    default:
-      return campLabel(language, 'shopHelp')
-  }
-}
-
 /** Summarize the actual selected loadout without rendering every possible choice. */
 function loadoutSummary(language: Language, equipment: readonly Equipment[]): string {
   if (!equipment.length)
@@ -83,7 +67,7 @@ function loadoutSummary(language: Language, equipment: readonly Equipment[]): st
   return `<ul class="camp-loadout-summary ${campStyles['camp-loadout-summary']}">${equipment.map((item) => `<li>${spriteImage(combatSprite(item))}<span>${equipmentCopy(language, item).name}</span></li>`).join('')}</ul>`
 }
 
-/** Keep the landing screen about the next departure, with editing behind four destinations. */
+/** Keep departure choices visible and use named navigation entries for their editing screens. */
 function overviewTemplate(
   language: Language,
   camp: Camp,
@@ -105,7 +89,7 @@ function overviewTemplate(
       <div class="camp-route-summary ${campStyles['camp-route-summary']}"><div><span>${t.difficulty}</span><strong>${difficultyCopy(language, difficulty)}</strong></div><p>${tier.size} × ${tier.size} · ${message(language, 'camp-copy.count-floors', { count: tier.floors })}<br>${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p></div>
       <button class="primary-button ${sharedStyles['primary-button']}" data-control="start">${t.start} ↗</button>
     </section>
-    <nav class="camp-destinations ${campStyles['camp-destinations']}" aria-label="${t.camp}">${DESTINATIONS.map((page) => `<button class="camp-destination ${campStyles['camp-destination']}" data-control="camp-page:${page}">${spriteImage(destinationSprite(page))}<span><strong>${campPageName(language, page)}${(page === 'missions' || page === 'achievements') && milestoneReadyCount(camp, page) ? ` <span class="milestone-badge ${campStyles['milestone-badge']}">${milestoneReadyCount(camp, page)} ${message(language, 'camp-template.ready')}</span>` : ''}</strong><small>${destinationNote(language, page)}</small></span><span aria-hidden="true">↗</span></button>`).join('')}</nav>
+    <nav class="camp-destinations ${campStyles['camp-destinations']}" aria-label="${t.camp}">${DESTINATIONS.map((page) => `<button class="camp-destination ${campStyles['camp-destination']}" data-control="camp-page:${page}">${spriteImage(destinationSprite(page))}<span><strong>${campPageName(language, page)}${(page === 'missions' || page === 'achievements') && milestoneReadyCount(camp, page) ? ` <span class="milestone-badge ${campStyles['milestone-badge']}">${milestoneReadyCount(camp, page)} ${message(language, 'camp-template.ready')}</span>` : ''}</strong></span><span aria-hidden="true">↗</span></button>`).join('')}</nav>
   </div><p class="camp-history-summary ${campStyles['camp-history-summary']}">${t.departures} ${camp.completed} · ${message(language, 'camp-copy.count-unlocked', { count: camp.upgrades.length })}</p>`
 }
 

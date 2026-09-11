@@ -36,7 +36,7 @@ export class StoryPerformance {
 
     const signal = this.events.signal
 
-    document.addEventListener('visibilitychange', this.quiet, { signal })
+    document.addEventListener('visibilitychange', this.visibilityChanged, { signal })
     this.reduced.addEventListener('change', this.reduceMotion, { signal })
   }
 
@@ -404,6 +404,10 @@ export class StoryPerformance {
         ),
       )
 
+    // An embedded browser may mount the page before making it visible. Keep the opening
+    // at its first frame until the player can see it, rather than spending it in the background.
+    if (document.hidden) for (const animation of this.eyes) animation.pause()
+
     void this.eyes[0]!.finished.then(
       () => this.skipOpening(),
       () => {},
@@ -426,13 +430,23 @@ export class StoryPerformance {
     return animation
   }
 
-  /** Background pages keep the complete line but stop all speech immediately. */
-  private readonly quiet = (): void => {
-    if (!document.hidden) return
+  /** Pause the opening while hidden; ordinary dialogue stops speaking and keeps its complete line. */
+  private readonly visibilityChanged = (): void => {
+    if (!document.hidden) {
+      if (this.awakening)
+        for (const animation of this.eyes) if (animation.playState === 'paused') animation.play()
 
-    this.skipOpening()
-    this.reveal.finish()
+      return
+    }
+
     this.sounds.stop()
+    if (this.awakening) {
+      for (const animation of this.eyes) animation.pause()
+
+      return
+    }
+
+    this.reveal.finish()
     for (const animation of this.animations) animation.cancel()
   }
 

@@ -103,7 +103,7 @@ export function storyDialogueEvent(state: StoryViewState): StoryDialogueId | nul
         ? run.collected
           ? 'satchel'
           : 'trail'
-        : !run.inspected
+        : !run.inspected && !run.practicedFlag
           ? 'wake'
           : !run.practicedFlag
             ? 'flag'

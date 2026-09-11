@@ -22,14 +22,6 @@
   border-color: #6b927955;
   background: #e1ece2;
 }
-.story-mechanism-hint {
-  margin: 14px 0 2px;
-  padding: 10px 12px;
-  border-left: 2px solid #997d4799;
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.6;
-}
 .story-main {
   width: min(1180px, 94%);
   margin: 0 auto;
@@ -1205,6 +1197,15 @@ dialog.story-dialogue .story-dialogue-next {
 .campaign-lesson-target {
   outline: 3px solid #ca921e !important;
   outline-offset: 2px;
+}
+
+/* Practice advances on the board; the card must never capture a tile gesture. */
+.story-lesson {
+  padding: 10px 12px;
+  pointer-events: none;
+}
+.story-lesson p {
+  margin-bottom: 0;
 }
 
 .story-tasks > header {

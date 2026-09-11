@@ -8,24 +8,6 @@ import { worldSceneName } from './world-copy.js'
 import { escapeHtml } from './presentation.js'
 import type { StoryViewState } from '../types/story.js'
 
-/** Explain the latest permanent world change without mutating route or quest progress. */
-function worldOutcome(state: StoryViewState): string {
-  const { language, progress } = state
-  if (progress.facts?.includes('chapter-one-cleared'))
-    return `<p data-chapter-location>${message(language, 'finale.ending-location')}</p>`
-
-  if (progress.facts?.includes('west-line-restored'))
-    return `<p data-west-location>${message(language, 'finale.location')}</p>`
-
-  if (progress.facts?.includes('beacon-recovered'))
-    return `<p data-waterway-location>${message(language, 'waterway.location')}</p>`
-
-  if (progress.facts?.includes('ridge-surveyed'))
-    return `<p data-ridge-location>${message(language, 'ridge.location')}</p>`
-
-  return ''
-}
-
 /** Compose the map shell; local boards, geographic tiles and camera input have separate owners. */
 export function storyMap(state: StoryViewState): string {
   const lang = state.language
@@ -50,5 +32,5 @@ export function storyMap(state: StoryViewState): string {
   const legend = `<div class="atlas-legend-control"><button class="atlas-legend-toggle" data-story-action="map-legend" aria-label="${legendLabel}" title="${legendLabel}" aria-expanded="${!!state.mapLegend}" aria-controls="story-map-legend">${icon('layers')}</button>${state.mapLegend ? `<div class="atlas-legend" id="story-map-legend"><span><i class="atlas-position"></i>${position}: ${worldSceneName(lang, STORY_ATLAS_SCENES[current]?.id ?? 'camp')}</span><span><i class="atlas-route-key"></i>${message(lang, 'story.atlas-route')}</span>${routeLegend}${map.landmarks ? `<ul class="atlas-landmarks">${map.landmarks}</ul>` : ''}</div>` : ''}</div>`
   const zoom = `<div class="atlas-zoom"><button data-map-zoom="out" aria-label="${message(lang, 'story.atlas-zoom-out')}">−</button><input type="range" min="${ATLAS_ZOOM.min * 100}" max="${ATLAS_ZOOM.max * 100}" step="${ATLAS_ZOOM.step * 100}" value="100" aria-label="${message(lang, 'story.atlas-zoom')}"><button data-map-zoom="in" aria-label="${message(lang, 'story.atlas-zoom-in')}">+</button><output class="atlas-zoom-value">100%</output><button data-map-zoom="reset">${message(lang, 'story.atlas-fit')}</button>${legend}</div>`
 
-  return `<div class="story-map" data-map-level="${level}" data-map-scene="${scene}"><div class="atlas-toolbar">${navigation}</div><div class="atlas-heading"><h3>${escapeHtml(title)}</h3>${worldOutcome(state)}</div><div class="atlas-canvas"><div class="atlas-viewport" tabindex="0" role="group" aria-label="${escapeHtml(title)}" data-enter-label="${message(lang, 'story.atlas-enter')}"><div class="atlas-scene">${map.drawing}</div></div></div>${zoom}</div>`
+  return `<div class="story-map" data-map-level="${level}" data-map-scene="${scene}"><div class="atlas-toolbar">${navigation}</div><div class="atlas-heading"><h3>${escapeHtml(title)}</h3></div><div class="atlas-canvas"><div class="atlas-viewport" tabindex="0" role="group" aria-label="${escapeHtml(title)}" data-enter-label="${message(lang, 'story.atlas-enter')}"><div class="atlas-scene">${map.drawing}</div></div></div>${zoom}</div>`
 }

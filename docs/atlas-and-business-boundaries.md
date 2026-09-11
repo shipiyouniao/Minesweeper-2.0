@@ -26,6 +26,12 @@ Mouse wheel, range controls, zoom buttons, keyboard navigation, dragging and two
 
 Task details now compose the same description fragment into compact and expanded containers. They no longer locate and cut HTML strings to reuse a subsection.
 
+The journal owns task steps, chapter completion and unlock outcomes. The atlas communicates access through its places and route states, without a permanent story-progress paragraph. Quarry mechanism objectives appear inside the repair task's expandable detail. Camp navigation uses destination names and claimable reward badges; item effects and loadout limits stay in their editing screens. Immediate action feedback and the existing interactive tutorials remain tied to the operation they explain.
+
+The opening eyelid animation pauses when its page is hidden, including when a host browser mounts the page in the background. It resumes when visible; explicit skip, reduced-motion preferences and restored dialogue keep their existing behavior. The prologue recognizes marking and safe opening performed before the suggested clue inspection, so its teaching target and dialogue advance with the player's demonstrated actions. Standing at the exit with both actions completed no longer requires a return trip to inspect one specific numeral.
+
+The prologue's floating practice card reuses the campaign and battle guide's anchor positioning. Its four prompts follow actual inspection, marking, safe opening and departure; touch instructions use long presses. The game owns the next step and highlighted tile, while `story-lesson.ts` owns localized presentation. Dialogue and journal views hide the card, and leaving the clearing ends it. No separate tutorial save or completion button is needed.
+
 ## Repository-wide review and maintenance
 
 The review traversed the TypeScript source tree for named behavior documentation, declaration placement, dependency direction and dense procedural blocks. Missing purpose comments were completed and validation, calculation, effects and return phases were separated. Existing functional rules and object-owned sessions remain the architecture; no parallel game engine or compatibility implementation was added.
