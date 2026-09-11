@@ -74,20 +74,24 @@ export class SonarApp implements SonarInputActions {
   /** Apply a normal board action or explicitly confirm a selected scan target. */
   play(index: number): void {
     if (this.blocked) return
+
     if (this.armed) {
       this.scan(index)
       return
     }
+
     this.apply(index, this.mode)
   }
 
   /** Right-click/hold share the existing public mark cycle and quick-open rule. */
   secondary(index: number): void {
     if (this.blocked) return
+
     if (this.armed) {
       this.cancelTarget()
       return
     }
+
     const action = secondaryBoardAction(this.session.state.game, index)
     if (action) this.apply(index, action)
   }
@@ -95,6 +99,7 @@ export class SonarApp implements SonarInputActions {
   /** Direct keyboard annotations remain explicit and cancel a pending scan first. */
   direct(index: number, type: 'flag' | 'mark-safe' | 'chord'): void {
     if (this.blocked) return
+
     this.cancelTarget()
     this.apply(index, type)
   }
@@ -102,6 +107,7 @@ export class SonarApp implements SonarInputActions {
   /** Route presentation commands while keeping restart confirmation separate from rule transitions. */
   command(command: SonarCommand): void {
     if (command.type !== 'sound') this.sounds.play(command.type === 'close' ? 'dismiss' : 'tap')
+
     const t = translations[this.language]
     switch (command.type) {
       case 'sound':
@@ -180,6 +186,7 @@ export class SonarApp implements SonarInputActions {
         this.view.closeDialog()
         return
     }
+
     this.render()
     if (command.type === 'reading')
       this.root
@@ -209,6 +216,7 @@ export class SonarApp implements SonarInputActions {
   /** Cancel both logical targeting and its visible frame. */
   cancelTarget(): void {
     if (!this.armed) return
+
     this.armed = false
     this.message = ''
     this.sounds.play('dismiss')
@@ -256,18 +264,24 @@ export class SonarApp implements SonarInputActions {
       this.armed = false
       this.sounds.play('confirm')
       this.render()
+
       return
     }
+
     if (!this.session.dispatch({ type: 'scan', index })) {
       this.message = sonarCharges(state) <= 0 ? sonarCopy(this.language).exhausted : ''
       this.sounds.play('blocked')
       this.render()
+
       return
     }
+
     this.selected = [...this.selected, this.session.state.readings.length - 1].slice(-2)
     this.armed = false
+
     const reading = this.session.state.readings.at(-1)!
     const s = sonarCopy(this.language)
+
     this.message = `${s.reading} ${this.session.state.readings.length}: ${reading.mines} ${s.mines}`
     this.render()
     this.view.animateScan(index)
@@ -282,8 +296,10 @@ export class SonarApp implements SonarInputActions {
       this.sounds.play('blocked')
       return
     }
+
     this.message = ''
     this.render()
+
     const after = this.session.state.game
     const cue =
       type === 'mark-safe'
@@ -292,6 +308,7 @@ export class SonarApp implements SonarInputActions {
           : 'unflag'
         : cueForMove(before, after, index)
     if (cue) this.sounds.play(cue)
+
     this.showResult()
   }
 
@@ -301,6 +318,7 @@ export class SonarApp implements SonarInputActions {
     if (after.phase === 'won' || after.phase === 'lost') {
       const t = translations[this.language]
       const s = sonarCopy(this.language)
+
       this.showDialog(
         `<h2 id="sonar-dialog-title" tabindex="-1">${after.phase === 'won' ? s.win : s.loss}</h2><p>${s.moves}: ${this.session.state.moves} · ${s.scans}: ${this.session.state.readings.length}</p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="close">${t.close}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="new">${t.restart}</button></div>`,
       )
@@ -310,6 +328,7 @@ export class SonarApp implements SonarInputActions {
   /** Restart only the current mode, preserving its independent best-result table. */
   private restart(): void {
     if (this.pendingDifficulty === null) return
+
     this.input.cancelGesture()
     this.session.restart(this.pendingDifficulty)
     this.pendingDifficulty = null
@@ -326,12 +345,15 @@ export class SonarApp implements SonarInputActions {
   /** Remount locale text while preserving the puzzle, scan selection and roving board focus. */
   private readonly changeLanguage = (language: Language): void => {
     const focus = this.view.focusIndex
+
     this.input.cancelGesture()
     this.language = language
     this.message = ''
     this.armed = false
     this.preferences.setPreference({ key: 'language', value: language })
+
     const url = new URL(location.href)
+
     url.searchParams.set('lang', language)
     history.replaceState(null, '', url)
     this.view.dispose()
@@ -388,6 +410,7 @@ export class SonarApp implements SonarInputActions {
     const message = this.session.atMoveLimit
       ? s.limit
       : this.message || (state.game.phase === 'ready' ? s.opening : '')
+
     this.view.render(
       state,
       this.paused,

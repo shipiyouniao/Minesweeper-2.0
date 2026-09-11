@@ -16,6 +16,7 @@
 @import './combat-feedback.css' layer(components);
 @import './shell.css' layer(components);
 @import './story.css' layer(components);
+@import './atlas.css' layer(components);
 @import './tiles.css' layer(components);
 @import './story-performance.css' layer(components);
 @import './signal.css' layer(components);

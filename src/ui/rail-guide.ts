@@ -36,5 +36,6 @@ export function railGuide(language: Language): string {
     message(language, 'rail.guide-brake'),
     message(language, 'rail.guide-rescue'),
   ]
+
   return `<article class="battle-guide rail-guide ${guidanceStyles['battle-guide']}"><header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${cartImage()}<div><h3>${message(language, 'rail.title')}</h3><p>${message(language, 'rail.guide-intro')}</p></div></header><ol class="boss-picture-steps ${guidanceStyles['boss-picture-steps']}">${pictures.map((picture, i) => `<li>${picture}<p><b>${i + 1}</b> ${instructions[i]}</p></li>`).join('')}</ol></article>`
 }

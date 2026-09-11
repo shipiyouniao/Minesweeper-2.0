@@ -97,5 +97,6 @@ export const OBSERVATORY_FLOORS: readonly AuthoredPowerFloor[] = [
 export function observatoryLayout(floor: number): DungeonLayout & { readonly power: FloorPower } {
   const content = OBSERVATORY_FLOORS[floor - 1]
   if (!content) throw new RangeError('Unknown observatory floor')
+
   return authoredPowerLayout(content)
 }

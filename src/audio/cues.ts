@@ -6,7 +6,9 @@ import { dialogueTone, isDialogueCue } from './dialogue-voices.js'
 /** Describe visible resource changes only; audio must never inspect an unrevealed cell. */
 export function cueForVitality(before: Vitality, after: Vitality): SoundCue | null {
   if (after.health < before.health) return after.health === 0 ? 'loss' : 'damage'
+
   if (after.shields !== before.shields) return 'shield'
+
   if (after.health > before.health) return 'heal'
 
   return null
@@ -19,13 +21,16 @@ export function cueForMove(before: Game, after: Game, index: number): SoundCue |
   }
 
   if (after.phase === 'won') return 'win'
+
   if (after.phase === 'lost') return 'loss'
 
   const previous = before.cells[index]
   const current = after.cells[index]
 
   if (!previous || !current) return null
+
   if (current.visibility === 'flagged') return 'flag'
+
   if (previous.visibility === 'flagged') return 'unflag'
 
   return 'reveal'

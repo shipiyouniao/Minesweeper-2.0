@@ -13,6 +13,7 @@ import { professionSprite } from './profession-presentation.js'
 /** Keep a compact visual phase key directly above this arena. */
 export function magneticPlaybar(language: Language, run: Expedition): string {
   if (run.encounter?.kind !== 'magnetic' || run.phase !== 'boss') return ''
+
   const forecast = run.encounter.forecast
   const symbol =
     forecast.kind === 'charge'
@@ -22,6 +23,7 @@ export function magneticPlaybar(language: Language, run: Expedition): string {
         : forecast.polarity === 'pull'
           ? '→│←'
           : '←│→'
+
   return `<div class="magnetic-playbar ${sharedStyles['magnetic-playbar']}"><div class="magnetic-key ${sharedStyles['magnetic-key']}" data-polarity="${forecast.kind === 'field' ? forecast.polarity : forecast.kind}"><span class="magnetic-symbol ${sharedStyles['magnetic-symbol']} ${forecast.kind === 'field' && forecast.axis === 'vertical' ? 'vertical' : ''}" aria-hidden="true">${symbol}</span><strong>${magneticStatus(language, run.encounter)}</strong></div></div>`
 }
 
@@ -34,12 +36,16 @@ export function markMagneticCell(
 ): void {
   const encounter = run.encounter
   if (encounter?.kind !== 'magnetic') return
+
   if (encounter.craters.includes(index)) {
     cell.classList.add('magnetic-crater')
+
     const label = message(language, 'magnetic-board.detonated-mine-walkable-crater')
+
     cell.title = label
     cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
   }
+
   if (index === encounter.boss) {
     cell.classList.add('magnetic-boss')
     cell.classList.toggle('magnetic-exposed', encounter.exposedUntil >= encounter.turn)
@@ -48,17 +54,23 @@ export function markMagneticCell(
       'beforeend',
       '<span class="magnetic-core-ring" aria-hidden="true"></span>',
     )
+
     return
   }
+
   const anchor = encounter.anchors.find((entry) => entry.index === index)
   if (!anchor) return
+
   const revealed = run.game.cells[index]?.visibility === 'revealed'
+
   cell.classList.add('landmark-cell', 'magnetic-anchor')
   cell.classList.toggle('magnetic-calibrated', anchor.calibrated)
   cell.innerHTML = `${spriteImage('magnetic-anchor')}${revealed ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
+
   const label = anchor.calibrated
     ? message(language, 'magnetic-board.calibrated-anchor-enter-to-ground-click-again')
     : message(language, 'magnetic-board.anchor-reveal-and-flag-surrounding-mines')
+
   cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
 }
 
@@ -90,9 +102,12 @@ export class MagneticBoard {
         ? { ...run, encounter: run.encounter }
         : null
     if (!this.run) return
+
     this.draw()
+
     const grid = this.grid()
     if (!grid) return
+
     this.observer = new ResizeObserver(() => {
       if (this.animations.length) this.cancel()
       this.draw()
@@ -115,32 +130,40 @@ export class MagneticBoard {
     const run = this.run
     const grid = this.grid()
     if (!run || !grid) return
+
     this.restoreLanding()
     grid.querySelector('.magnetic-overlay')?.remove()
     for (const mark of grid.querySelectorAll('.magnetic-arrow')) mark.remove()
+
     for (const cell of grid.querySelectorAll(
       '.magnetic-landing, .magnetic-grounded, .magnetic-blast-warning',
     ))
       cell.classList.remove('magnetic-landing', 'magnetic-grounded', 'magnetic-blast-warning')
+
     const forecast = run.encounter.forecast
     if (forecast.kind === 'charge')
       for (const index of [forecast.anchor, ...neighbors(run.game.config, forecast.anchor)])
         this.cell(index)?.classList.add('magnetic-blast-warning')
+
     grid.dataset['magnetic'] = forecast.kind === 'field' ? forecast.polarity : forecast.kind
+
     const projection = magneticProjection(run)
     const rotation = { left: '180deg', right: '0deg', up: '-90deg', down: '90deg', none: '0deg' }
     if (forecast.kind === 'field') {
       for (const cell of grid.querySelectorAll<HTMLElement>('[data-cell]')) {
         const index = Number(cell.dataset['cell'])
         if (run.walls.includes(index)) continue
+
         const vector = magneticProjection(run, index)
         if (vector.direction === 'none') continue
+
         cell.insertAdjacentHTML(
           'beforeend',
           `<span class="magnetic-arrow" style="--magnetic-angle:${rotation[vector.direction]}" aria-hidden="true">›</span>`,
         )
       }
     }
+
     const path = forecast.kind === 'charge' ? forecast.path : projection.path
     const points = path
       .flatMap((index) => {
@@ -152,11 +175,13 @@ export class MagneticBoard {
       .join(' ')
     const target = this.cell(path.at(-1) ?? run.player)
     const overlay = document.createElement('div')
+
     overlay.className = `magnetic-overlay ${forecast.kind === 'charge' ? 'magnetic-charge' : projection.landing === 'known' ? '' : 'magnetic-uncertain'}`
     overlay.setAttribute('aria-hidden', 'true')
     overlay.innerHTML = `<svg class="magnetic-lines" width="100%" height="100%" viewBox="0 0 ${grid.offsetWidth} ${grid.offsetHeight}"><defs><marker id="magnetic-arrowhead" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L6,3.5 L0,7" fill="none" stroke="currentColor" stroke-width="1.4" /></marker></defs>${path.length > 1 ? `<polyline class="magnetic-trail-halo" points="${points}" /><polyline class="magnetic-trail" points="${points}" marker-end="url(#magnetic-arrowhead)" />` : ''}</svg>`
     if (target && path.length > 1) {
       const ghost = document.createElement('div')
+
       ghost.className = 'magnetic-ghost'
       ghost.style.cssText = `left:${target.offsetLeft}px;top:${target.offsetTop}px;width:${target.offsetWidth}px;height:${target.offsetHeight}px`
       ghost.innerHTML = spriteImage(
@@ -167,15 +192,19 @@ export class MagneticBoard {
       this.landing = target
       this.landingTitle = target.getAttribute('title')
       this.landingDescription = target.getAttribute('aria-description')
+
       const label =
         forecast.kind === 'charge'
           ? magneticStatus(this.language, run.encounter)
           : magneticLandingCopy(this.language, projection)
+
       target.setAttribute('aria-description', label)
       target.title = this.landingTitle ? `${label}; ${this.landingTitle}` : label
     }
+
     if (forecast.kind === 'field' && projection.anchored)
       this.cell(run.player)?.classList.add('magnetic-grounded')
+
     grid.append(overlay)
   }
 
@@ -183,10 +212,13 @@ export class MagneticBoard {
   private restoreLanding(): void {
     const cell = this.landing
     if (!cell) return
+
     if (this.landingTitle === null) cell.removeAttribute('title')
     else cell.setAttribute('title', this.landingTitle)
+
     if (this.landingDescription === null) cell.removeAttribute('aria-description')
     else cell.setAttribute('aria-description', this.landingDescription)
+
     cell.classList.remove('magnetic-landing')
     this.landing = null
     this.landingTitle = null
@@ -202,19 +234,24 @@ export class MagneticBoard {
     const grid = this.grid()
     const first = this.cell(path[0] ?? -1)
     if (!grid || !first || path.length < 2) return null
+
     const actor = document.createElement('img')
+
     actor.src = sprite
     actor.className = 'magnetic-actor'
     actor.alt = ''
     actor.style.width = `${first.offsetWidth}px`
     actor.style.height = `${first.offsetHeight}px`
     grid.append(actor)
+
     const frames: Keyframe[] = path.flatMap((index) => {
       const cell = this.cell(index)
       return cell ? [{ transform: `translate(${cell.offsetLeft}px, ${cell.offsetTop}px)` }] : []
     })
     const animation = actor.animate(frames, { duration, fill: 'forwards', easing: 'linear' })
+
     this.animations.push(animation)
+
     return animation
   }
 
@@ -229,27 +266,36 @@ export class MagneticBoard {
       !grid
     )
       return
+
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
     this.cancel()
+
     const generation = this.generation
     const resolution = encounter.resolution
     const field = before.encounter.forecast
     if (resolution.outcome === 'recovered' && field.kind !== 'field') return
+
     grid.classList.add('magnetic-performing')
     grid.dataset['performance'] = 'gather'
+
     const buildup = grid.animate([{ filter: 'brightness(1)' }, { filter: 'brightness(1.09)' }], {
       duration: 260,
       easing: 'ease-in',
       fill: 'forwards',
     })
+
     this.animations.push(buildup)
     try {
       await buildup.finished
       if (generation !== this.generation) return
+
       grid.dataset['performance'] = 'move'
+
       const motions: Animation[] = []
       if (resolution.playerPath.length > 1) {
         grid.classList.add('magnetic-player-moving')
+
         const motion = this.animateActor(
           resolution.playerPath,
           spriteUrl(professionSprite(before.departure.profession)),
@@ -257,8 +303,10 @@ export class MagneticBoard {
         )
         if (motion) motions.push(motion)
       }
+
       if (resolution.bossPath.length > 1) {
         grid.classList.add('magnetic-knight-moving')
+
         const motion = this.animateActor(
           resolution.bossPath,
           spriteUrl('magnetic-knight'),
@@ -266,18 +314,24 @@ export class MagneticBoard {
         )
         if (motion) motions.push(motion)
       }
+
       await Promise.all(motions.map((animation) => animation.finished))
       if (generation !== this.generation) return
+
       grid.dataset['performance'] = 'impact'
+
       const blasts: Animation[] = []
       for (const index of resolution.blastCells) {
         const cell = this.cell(index)
         if (!cell) continue
+
         const burst = document.createElement('div')
         const mine = resolution.detonatedMines.includes(index)
+
         burst.className = `magnetic-blast ${mine ? 'magnetic-mine-explosion' : ''}`
         burst.style.cssText = `left:${cell.offsetLeft}px;top:${cell.offsetTop}px;width:${cell.offsetWidth}px;height:${cell.offsetHeight}px`
         grid.append(burst)
+
         const animation = burst.animate(
           [
             { transform: 'scale(.25)', opacity: 0 },
@@ -286,15 +340,19 @@ export class MagneticBoard {
           ],
           { duration: 650, easing: 'ease-out' },
         )
+
         this.animations.push(animation)
         blasts.push(animation)
       }
+
       const impact = this.cell(resolution.impact ?? resolution.playerPath.at(-1) ?? before.player)
       if (impact) {
         const ring = document.createElement('div')
+
         ring.className = `magnetic-impact ${resolution.outcome === 'overloaded' ? 'magnetic-overload' : ''}`
         ring.style.cssText = `left:${impact.offsetLeft}px;top:${impact.offsetTop}px;width:${impact.offsetWidth}px;height:${impact.offsetHeight}px`
         grid.append(ring)
+
         const animation = ring.animate(
           [
             { transform: 'scale(.45)', opacity: 1 },
@@ -302,9 +360,11 @@ export class MagneticBoard {
           ],
           { duration: 420, easing: 'ease-out' },
         )
+
         this.animations.push(animation)
         await animation.finished
       }
+
       await Promise.all(blasts.map((animation) => animation.finished))
     } catch {
       // Pausing, resizing or unmounting cancels presentation after the journal is already committed.
@@ -317,14 +377,18 @@ export class MagneticBoard {
   cancel(): void {
     this.generation++
     for (const animation of this.animations) animation.cancel()
+
     this.animations = []
+
     const grid = this.grid()
+
     grid?.classList.remove(
       'magnetic-performing',
       'magnetic-player-moving',
       'magnetic-knight-moving',
     )
     if (grid) delete grid.dataset['performance']
+
     for (const actor of this.root.querySelectorAll(
       '.magnetic-actor, .magnetic-impact, .magnetic-blast',
     ))

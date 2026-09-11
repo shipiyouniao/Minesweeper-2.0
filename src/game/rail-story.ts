@@ -18,11 +18,17 @@ export function pendingRailScene(
   progress: CampaignStageProgress,
 ): RailSceneId | null {
   if (progress.id !== 'quarry-rescue') return null
+
   if (!run) return progress.cleared && !progress.scenes.includes('rail-home') ? 'rail-home' : null
+
   if (run.phase === 'lost' || run.phase === 'retreated') return null
+
   const reached: RailSceneId[] = ['rail-entry']
   if (run.floor >= 2) reached.push('rail-brakes')
+
   if (run.floor >= 3) reached.push('rail-rescue')
+
   if (run.phase === 'won') reached.push('rail-home')
+
   return reached.find((scene) => !progress.scenes.includes(scene)) ?? null
 }

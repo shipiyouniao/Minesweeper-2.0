@@ -43,7 +43,9 @@ export class SonarView {
     this.state = state
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
     root.innerHTML = sonarTemplate(language, state)
+
     const tutorial = this.element<HTMLButtonElement>('.tutorial-entry')
+
     tutorial.dataset['control'] = 'help'
     tutorial.textContent = sonarCopy(language).help
     this.board = new BoardView(this.element('.board'), state.game.config, focus)
@@ -54,6 +56,7 @@ export class SonarView {
       () => {
         onClose()
         if (this.returnFocus?.isConnected) this.returnFocus.focus({ preventScroll: true })
+
         this.returnFocus = null
       },
       { signal: this.listeners.signal },
@@ -91,12 +94,14 @@ export class SonarView {
   ): void {
     this.state = state
     this.selected = selected
+
     const counter = this.element('[data-mine-count]')
     const remaining = String(remainingMines(state.game))
     if (counter.textContent !== remaining) counter.textContent = remaining
 
     const t = translations[this.language]
     const s = sonarCopy(this.language)
+
     this.board.render(state.game, paused || this.dialogOpen, t)
     for (const cell of this.root.querySelectorAll<HTMLElement>('[data-cell]')) {
       const index = Number(cell.dataset['cell'])
@@ -104,13 +109,16 @@ export class SonarView {
       const confirmed =
         state.readings.some((reading) => reading.center === Number(cell.dataset['cell'])) &&
         state.game.cells[Number(cell.dataset['cell'])]?.mine
+
       cell.classList.toggle('sonar-confirmed-mine', Boolean(confirmed))
       if (confirmed)
         cell.setAttribute(
           'aria-label',
           coordinate + translate(this.language, 'sonar-view.confirmed-mine'),
         )
+
       const masked = sonarObscured(state, Number(cell.dataset['cell']))
+
       cell.classList.toggle('sonar-obscured', masked)
       if (masked) {
         cell.textContent = '≈'
@@ -121,6 +129,7 @@ export class SonarView {
         )
       }
     }
+
     this.element('.board-viewport').classList.toggle('obscured', paused)
     this.element('.sonar-pause').hidden = !paused
     this.element('.sonar-sidebar').inert = paused
@@ -141,9 +150,12 @@ export class SonarView {
       'data-control',
     )
     if (mode === 'reveal') this.element('.mode-cycle').setAttribute('title', s.revealHint)
+
     this.element('.sonar-charge-count').textContent = String(sonarCharges(state))
+
     const scan = this.element<HTMLButtonElement>('[data-control="scan"]')
     // At zero charges targeting still recalls previous centers, but never reveals a new reading.
+
     scan.disabled = paused || state.game.phase !== 'playing'
     scan.setAttribute('aria-pressed', String(targeting))
     this.element('.sonar-target-hint').textContent = paused
@@ -151,12 +163,15 @@ export class SonarView {
       : targeting
         ? s.aim
         : message || (mode === 'reveal' ? s.revealHint : boardControlHint(this.language, mode))
+
     const audio = this.element('[data-control="sound"]')
+
     audio.innerHTML = icon(sound ? 'volume' : 'volumeOff')
     audio.setAttribute('aria-pressed', String(sound))
     audio.setAttribute('title', sound ? t.soundOn : t.soundOff)
     this.element('[data-control="pause"]').innerHTML = icon(paused ? 'play' : 'pause')
     if (!targeting || paused) this.target = null
+
     this.renderOverlay()
   }
 
@@ -197,7 +212,9 @@ export class SonarView {
   toggleZoom(): void {
     this.enlarged = !this.enlarged
     this.element('.sonar-board-panel').classList.toggle('sonar-enlarged', this.enlarged)
+
     const label = this.enlarged ? sonarCopy(this.language).fit : sonarCopy(this.language).zoom
+
     this.element('[data-control="zoom"]').setAttribute('aria-label', label)
     this.stopPulse()
   }
@@ -206,9 +223,11 @@ export class SonarView {
   animateScan(center: number): void {
     this.stopPulse()
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
     const cell = this.element<HTMLElement>(`[data-cell="${center}"]`).getBoundingClientRect()
     const wrap = this.element('.sonar-grid-wrap').getBoundingClientRect()
     const pulse = this.element('.sonar-pulse')
+
     pulse.style.left = `${cell.x - wrap.x + cell.width / 2}px`
     pulse.style.top = `${cell.y - wrap.y + cell.height / 2}px`
     pulse.style.width = pulse.style.height = `${cell.width * 4}px`
@@ -234,8 +253,10 @@ export class SonarView {
     if (!this.dialog.open)
       this.returnFocus =
         document.activeElement instanceof HTMLElement ? document.activeElement : null
+
     this.element('.sonar-dialog-content').innerHTML = content
     if (!this.dialog.open) this.dialog.showModal()
+
     this.dialog.querySelector<HTMLElement>('#sonar-dialog-title')?.focus()
   }
 
@@ -258,14 +279,18 @@ export class SonarView {
     const overlay = this.element<SVGSVGElement>('.sonar-overlay')
     const wrap = this.element('.sonar-grid-wrap').getBoundingClientRect()
     if (!wrap.width || !wrap.height) return
+
     overlay.setAttribute('viewBox', `0 0 ${wrap.width} ${wrap.height}`)
+
     const fragments: string[] = []
     for (const index of this.selected) {
       const reading = this.state.readings[index]
       if (reading)
         fragments.push(this.regionShape(reading.center, `sonar-color-${index % 3}`, index + 1))
     }
+
     if (this.target !== null) fragments.push(this.regionShape(this.target, 'sonar-preview', null))
+
     overlay.innerHTML = fragments.join('')
   }
 
@@ -275,11 +300,13 @@ export class SonarView {
     const first = region[0]
     const last = region.at(-1)
     if (first === undefined || last === undefined) return ''
+
     const origin = this.element('.sonar-grid-wrap').getBoundingClientRect()
     const a = this.element(`[data-cell="${first}"]`).getBoundingClientRect()
     const b = this.element(`[data-cell="${last}"]`).getBoundingClientRect()
     const x = a.x - origin.x + 1
     const y = a.y - origin.y + 1
+
     return `<g class="${className}"><rect x="${x}" y="${y}" width="${b.right - a.left - 2}" height="${b.bottom - a.top - 2}" rx="5"/>${label === null ? '' : `<circle cx="${x + 9}" cy="${y + 9}" r="8"/><text x="${x + 9}" y="${y + 12}">${label}</text>`}</g>`
   }
 
@@ -287,6 +314,7 @@ export class SonarView {
   private element<T extends Element = HTMLElement>(selector: string): T {
     const element = this.root.querySelector<T>(selector)
     if (!element) throw new Error(`Missing Sonar element: ${selector}`)
+
     return element
   }
 }

@@ -31,6 +31,7 @@ export function clockStatus(language: Language, encounter: ClockEncounter): stri
       : encounter.health <= encounter.maxHealth / 2
         ? message(language, 'clock-copy.dual-countdown')
         : message(language, 'clock-copy.delayed-casting')
+
   return `${phase} · ${message(language, 'clock-copy.hourglasses-3', { p0: count })}`
 }
 

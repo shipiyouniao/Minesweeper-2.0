@@ -55,5 +55,6 @@ export function boardControlsTemplate(
           ? t.markSafe
           : t.quickReveal
   const cycle = message(language, 'board-controls.tap-to-cycle')
+
   return `<button class="dock-slot mode-cycle" ${attribute}="cycle-mode" data-mode="${mode}" aria-label="${label} · ${cycle}" title="${boardControlHint(language, mode)}">${icon(mode === 'flag' ? 'flag' : mode === 'mark-safe' ? 'check' : 'pointer')}<strong>${label}</strong><small>${cycle} ↻</small></button>`
 }

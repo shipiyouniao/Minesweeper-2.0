@@ -13,6 +13,7 @@ export function authoredRailLayout(content: AuthoredRailFloor): RailDungeonLayou
     0,
     entrance,
   )
+
   return {
     entrance,
     exit: symbols.indexOf('E'),
@@ -34,5 +35,6 @@ export function authoredRailLayout(content: AuthoredRailFloor): RailDungeonLayou
 export function railLayout(floor: number): RailDungeonLayout {
   const content = RAIL_FLOORS[floor - 1]
   if (!content) throw new RangeError('Invalid rescue floor')
+
   return authoredRailLayout(content)
 }

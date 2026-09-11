@@ -4,6 +4,7 @@ import type { MagneticExpedition, MagneticForecast, MagneticProjection } from '.
 /** Alternate two directed pulses and a quiet turn; the next cycle rotates both axes. */
 export function magneticForecast(turn: number, exposedUntil: number): MagneticForecast {
   if (turn <= exposedUntil || turn % 3 === 0) return { kind: 'recovery' }
+
   const rotated = Math.floor((turn - 1) / 3) % 2 === 1
   const pull = turn % 3 === 1
 
@@ -47,15 +48,19 @@ export function magneticProjection(
     // Attraction stops on the neutral axis instead of crossing it and oscillating.
     const currentCoordinate = horizontal ? current % width : Math.floor(current / width)
     if (forecast.polarity === 'pull' && currentCoordinate === center) break
+
     const next = current + sign * (horizontal ? 1 : width)
     if (!adjacentSteps(game, current).includes(next) || run.walls.includes(next)) {
       collision = true
       break
     }
+
     path.push(next)
     if (encounter.anchors.some((anchor) => anchor.index === next && anchor.calibrated)) break
+
     if (run.confirmedMines.includes(next)) break
   }
+
   const landing = path.slice(1).some((cell) => run.confirmedMines.includes(cell))
     ? 'mine'
     : path
@@ -74,6 +79,7 @@ export function magneticProjection(
 export function magneticLurePath(run: MagneticExpedition, target: number): number[] | null {
   const start = run.encounter.boss
   if (run.game.cells[target]?.visibility !== 'revealed') return null
+
   const previous = new Map<number, number | null>([[start, null]])
   const queue = [start]
   for (const index of queue) {
@@ -85,16 +91,21 @@ export function magneticLurePath(run: MagneticExpedition, target: number): numbe
         run.game.cells[next]?.visibility !== 'revealed'
       )
         continue
+
       previous.set(next, index)
       queue.push(next)
     }
   }
+
   if (!previous.has(target)) return null
+
   const path: number[] = []
   for (let cursor: number | null = target; cursor !== null; cursor = previous.get(cursor) ?? null)
     path.push(cursor)
+
   path.reverse()
 
   // A second station creates real repositioning; an adjacent knight cannot build up momentum.
+
   return path.length >= 3 ? path : null
 }

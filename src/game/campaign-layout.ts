@@ -44,6 +44,7 @@ export const CAMPAIGN_FLOORS: readonly (readonly string[])[] = [
 export function campaignLayout(floor: number): DungeonLayout {
   const rows = CAMPAIGN_FLOORS[floor - 1]
   if (!rows) throw new RangeError('Unknown campaign floor')
+
   const board = buildStoryBoard({
     id: 'camp',
     rows,
@@ -55,6 +56,7 @@ export function campaignLayout(floor: number): DungeonLayout {
   const mines = new Set(board.game.cells.flatMap((cell, index) => (cell.mine ? [index] : [])))
   const game = placedBoard(board.game.config, mines, 0, board.entrance)
   const reachable = connectedFloor(game, board.entrance)
+
   return {
     game: {
       ...game,

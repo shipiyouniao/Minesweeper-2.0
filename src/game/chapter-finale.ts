@@ -23,12 +23,18 @@ export function pendingFinaleScene(
 ): FinaleSceneId | null {
   const control = progress.id === 'tower-control'
   if (!control && progress.id !== 'northwest-bastion') return null
+
   const ending = control ? 'control-restored' : 'pass-open'
   if (!run) return progress.cleared && !progress.scenes.includes(ending) ? ending : null
+
   if (run.phase === 'lost' || run.phase === 'retreated') return null
+
   const scenes: FinaleSceneId[] = [control ? 'control-entry' : 'pass-entry']
   if (run.floor >= 2) scenes.push(control ? 'control-line' : 'pass-warning')
+
   if (run.floor >= 3) scenes.push(control ? 'control-heart' : 'pass-guardian')
+
   if (run.phase === 'won') scenes.push(ending)
+
   return scenes.find((scene) => !progress.scenes.includes(scene)) ?? null
 }

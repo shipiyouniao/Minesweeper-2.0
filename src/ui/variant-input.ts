@@ -22,6 +22,7 @@ import type { DungeonTool } from '../types/dungeon-ui.js'
 export function parseVariantCommand(value: string): VariantCommand | null {
   const parts = value.split(':')
   if (parts.length > 2) return null
+
   const [type, id] = parts
   switch (type) {
     case 'rail-control':
@@ -123,7 +124,9 @@ function cellTarget(target: EventTarget | null): VariantCellTarget | null {
   const side = grid?.dataset['side']
   const text = cell?.dataset['cell']
   if ((side !== 'a' && side !== 'b') || text === undefined || !/^\d+$/.test(text)) return null
+
   const index = Number(text)
+
   return index >= 0 && index < Number(grid?.dataset['cells']) ? { side, index } : null
 }
 
@@ -149,7 +152,9 @@ export class VariantInput {
       }
     })
     this.tools = new DungeonToolController(root, actions)
+
     const options = { signal: this.listeners.signal }
+
     root.addEventListener('click', this.click, options)
     root.addEventListener('contextmenu', this.context, options)
     root.addEventListener('focusin', this.focus, options)
@@ -184,12 +189,16 @@ export class VariantInput {
       event.preventDefault()
       return
     }
+
     const cell = cellTarget(event.target)
     if (cell) {
       if (cell.side === 'a' && this.tools.activate(cell.index)) return
+
       this.actions.play(cell.side, cell.index)
+
       return
     }
+
     const target =
       event.target instanceof Element ? event.target.closest<HTMLElement>('[data-control]') : null
     const command = parseVariantCommand(target?.dataset['control'] ?? '')
@@ -202,12 +211,15 @@ export class VariantInput {
   private readonly context = (event: MouseEvent): void => {
     const cell = cellTarget(event.target)
     if (!cell) return
+
     event.preventDefault()
     if (this.hold) {
       this.activateHold()
       return
     }
+
     if (performance.now() < this.suppressUntil) return
+
     this.actions.secondary(cell.side, cell.index)
   }
 
@@ -218,7 +230,9 @@ export class VariantInput {
       this.actions.focus(cell.side, cell.index)
       // Touch focus must not shrink the above-board route hint and move the tapped row.
       if (this.hold || performance.now() < this.touchUntil) return
+
       if (cell.side === 'a') this.tools.preview(cell.index)
+
       this.actions.previewRoute(cell.side === 'a' ? cell.index : null)
     }
   }
@@ -226,7 +240,9 @@ export class VariantInput {
   /** Let mouse users inspect the same route and cost shown by keyboard focus. */
   private readonly hover = (event: PointerEvent): void => {
     if (event.pointerType !== 'mouse' || this.hold || performance.now() < this.touchUntil) return
+
     const cell = cellTarget(event.target)
+
     this.actions.previewRoute(cell?.side === 'a' ? cell.index : null)
   }
 
@@ -239,12 +255,14 @@ export class VariantInput {
       this.tools.cancel()
       this.actions.feedback('dismiss')
     }
+
     this.actions.unlock()
     if (
       event.key === 'Tab' &&
       !(event.target instanceof Element && event.target.closest('.language-picker'))
     )
       this.actions.feedback('navigate')
+
     const cell = cellTarget(event.target)
     if (
       !cell ||
@@ -255,6 +273,7 @@ export class VariantInput {
       event.metaKey
     )
       return
+
     const key = event.key.toLowerCase()
     const navigation = parseNavigation(key)
 
@@ -290,11 +309,14 @@ export class VariantInput {
       this.cancelHold()
       return
     }
+
     this.endHold()
     this.suppressUntil = 0
     this.touchUntil = event.pointerType === 'mouse' ? 0 : performance.now() + 700
+
     const target = cellTarget(event.target)
     if (!target || event.pointerType === 'mouse' || event.button !== 0) return
+
     this.hold = {
       pointerId: event.pointerId,
       target,
@@ -309,6 +331,7 @@ export class VariantInput {
   private readonly activateHold = (): void => {
     const hold = this.hold
     if (!hold || hold.cancelled || this.tools.armed) return
+
     this.cancelHold()
     this.suppressUntil = performance.now() + 700
     this.actions.secondary(hold.target.side, hold.target.index)
@@ -332,6 +355,7 @@ export class VariantInput {
   /** Browser-owned scrolling or pinch gestures must not leave a pending flag timer. */
   private readonly pointerCancel = (event: PointerEvent): void => {
     if (this.hold?.pointerId !== event.pointerId) return
+
     this.cancelHold()
     this.endHold()
   }
@@ -351,6 +375,7 @@ export class VariantInput {
       this.touchUntil = performance.now() + 700
       if (this.hold.cancelled) this.suppressUntil = this.touchUntil
     }
+
     this.hold = null
   }
 

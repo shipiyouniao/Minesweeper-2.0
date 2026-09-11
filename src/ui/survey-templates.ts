@@ -54,5 +54,6 @@ export function surveyRecordsTemplate(
 ): string {
   const t = translations[language]
   const entries = records.filter((record) => record.difficulty === difficulty)
+
   return `<h2 id="survey-dialog-title" tabindex="-1">${message(language, 'survey.title')} · ${t.records}</h2>${surveyDifficulties(language, difficulty, true)}<p>${message(language, 'survey.rank-hint')}</p>${entries.length ? `<ol class="tw:my-5 tw:grid tw:gap-3 tw:list-none tw:p-0">${entries.map((record) => `<li class="tw:flex tw:justify-between tw:gap-4"><time>${new Date(record.date).toLocaleDateString(language === 'zh' ? 'zh-CN' : language)}</time><span>${message(language, 'survey.moves')} <strong>${record.moves.toLocaleString(language)}</strong></span></li>`).join('')}</ol>` : `<p>${message(language, 'survey.no-records')}</p>`}<button class="primary-button ${sharedStyles['primary-button']}" data-control="close">${t.close}</button>`
 }

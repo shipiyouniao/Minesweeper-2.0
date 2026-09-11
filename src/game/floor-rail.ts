@@ -20,6 +20,7 @@ function nextTrack(rail: FloorRail, index: number, previous: number | null): num
     return previous === turnout.stem || previous === null
       ? turnout.branches[turnout.selected]
       : turnout.stem
+
   return (
     rail.tracks
       .find((entry) => entry.index === index)
@@ -31,6 +32,7 @@ function nextTrack(rail: FloorRail, index: number, previous: number | null): num
 export function railMotion(run: Expedition, reverse = false): RailMotion {
   const rail = run.rail
   if (!rail) return { path: [], previous: null, stop: 'buffer' }
+
   const path = [rail.cart]
   let previous = rail.previous
   let index = rail.cart
@@ -39,16 +41,21 @@ export function railMotion(run: Expedition, reverse = false): RailMotion {
     const cell = run.game.cells[next]
     if (!cell || cell.visibility !== 'revealed')
       return { path, previous, stop: cell?.visibility === 'flagged' ? 'blocked' : 'covered' }
+
     if (run.walls.includes(next) || cell.mine) return { path, previous, stop: 'blocked' }
+
     path.push(next)
     previous = index
     index = next
     if (rail.turnouts.some((entry) => entry.index === index))
       return { path, previous, stop: 'turnout' }
+
     if (rail.stations.some((entry) => entry.index === index))
       return { path, previous, stop: 'station' }
+
     next = nextTrack(rail, index, previous)
   }
+
   return { path, previous, stop: 'buffer' }
 }
 
@@ -64,6 +71,7 @@ function arrive(run: Expedition, rail: FloorRail): Expedition {
   const opened = rail.doors.filter((door) =>
     stations.some((station) => station.index === door.station && station.visited),
   )
+
   return {
     ...run,
     rail: { ...rail, stations },
@@ -82,8 +90,10 @@ export function interactRail(run: Expedition, index: number): Expedition {
   const rail = run.rail
   if (!rail || !railControl(run, index) || run.game.cells[index]?.visibility !== 'revealed')
     return run
+
   const walking = walkingPath(run, index)
   if (!walking) return run
+
   const turnout = rail.turnouts.find((entry) => entry.index === index)
   let updated: FloorRail
   if (turnout) {
@@ -97,6 +107,7 @@ export function interactRail(run: Expedition, index: number): Expedition {
   } else {
     const motion = railMotion(run, index === rail.reverse)
     if (motion.path.length < 2) return run
+
     updated = {
       ...rail,
       cart: motion.path[motion.path.length - 1]!,
@@ -104,6 +115,7 @@ export function interactRail(run: Expedition, index: number): Expedition {
       travel: motion.path,
     }
   }
+
   return recordTravel(arrive({ ...run, player: index, steps: run.steps + 1 }, updated), walking)
 }
 

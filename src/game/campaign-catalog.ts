@@ -108,6 +108,7 @@ export function parseCampaignStage(value: string | null): CampaignStageId | null
 export function campaignStage(id: CampaignStageId | CampaignRevision): CampaignStage {
   const stage = CAMPAIGN_STAGES.find((entry) => entry.id === id || entry.revision === id)
   if (!stage) throw new RangeError('Unknown campaign stage')
+
   return stage
 }
 

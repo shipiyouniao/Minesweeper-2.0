@@ -1,5 +1,6 @@
 /** The complete set of original application icons. */
 export type Icon =
+  | 'layers'
   | 'flag'
   | 'mine'
   | 'reset'
@@ -20,6 +21,7 @@ export type Icon =
 
 /** Each icon has one authored SVG fragment. */
 export interface IconPaths {
+  readonly layers: string
   readonly flag: string
   readonly mine: string
   readonly reset: string

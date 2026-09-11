@@ -26,7 +26,9 @@ export class DungeonToolController {
   constructor(root: HTMLElement, actions: VariantInputActions) {
     this.root = root
     this.actions = actions
+
     const options = { signal: this.listeners.signal }
+
     root.addEventListener('pointerdown', this.down, options)
     root.addEventListener('pointermove', this.move, options)
     root.addEventListener('pointerup', this.up, options)
@@ -52,9 +54,12 @@ export class DungeonToolController {
   /** Consume a tap or native keyboard activation as an explicit cell target. */
   activate(index: number): boolean {
     if (!this.selected) return false
+
     const tool = this.selected
+
     this.cancel()
     this.actions.useTool(tool, index)
+
     return true
   }
 
@@ -91,6 +96,7 @@ export class DungeonToolController {
       event.button !== 0
     )
       return
+
     this.actions.unlock()
     this.drag = {
       pointerId: event.pointerId,
@@ -109,9 +115,12 @@ export class DungeonToolController {
       if (this.selected) this.actions.previewTool(this.selected, index)
       return
     }
+
     if (event.pointerId !== this.drag.pointerId) return
+
     if (Math.hypot(event.clientX - this.drag.originX, event.clientY - this.drag.originY) > 6)
       this.drag.moved = true
+
     if (this.drag.moved) this.actions.previewTool(this.drag.tool, index)
   }
 
@@ -119,10 +128,14 @@ export class DungeonToolController {
   private readonly up = (event: PointerEvent): void => {
     const drag = this.drag
     if (!drag || drag.pointerId !== event.pointerId) return
+
     this.drag = null
     if (!drag.moved) return
+
     this.suppressUntil = performance.now() + 350
+
     const index = this.cellAt(event.clientX, event.clientY)
+
     this.selected = null
     this.actions.previewTool(null, null)
     if (index !== null) this.actions.useTool(drag.tool, index)
@@ -138,7 +151,9 @@ export class DungeonToolController {
       element.closest<HTMLElement>('[data-side]')?.dataset['side'] !== 'a'
     )
       return null
+
     const index = Number(element.dataset['cell'])
+
     return Number.isInteger(index) &&
       index >= 0 &&
       index < Number(element.closest<HTMLElement>('[data-side]')?.dataset['cells'])

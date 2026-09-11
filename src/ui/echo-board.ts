@@ -13,10 +13,12 @@ export function markEchoCell(
 ): void {
   const e = run.encounter
   if (e?.kind !== 'echo') return
+
   const common = translations[language]
   const coordinates = `${common.row} ${Math.floor(index / run.game.config.width) + 1}, ${common.column} ${(index % run.game.config.width) + 1}`
   if (e.bodies.includes(index)) {
     const candidates = echoCandidates(run)
+
     cell.classList.remove('wall-cell')
     cell.classList.add('boss-cell', 'echo-body')
     cell.classList.toggle('echo-excluded', !candidates.includes(index))
@@ -32,9 +34,11 @@ export function markEchoCell(
     cell.classList.add('echo-obscured')
     cell.removeAttribute('data-number')
     cell.removeAttribute('title')
+
     const clue = cell.querySelector<HTMLElement>('.landmark-clue')
     if (clue) clue.textContent = '≈'
     else if (!cell.querySelector('img')) cell.textContent = '≈'
+
     cell.setAttribute('aria-label', `${coordinates}, ${message(language, 'echo.obscured')}`)
   }
 }
@@ -43,6 +47,7 @@ export function markEchoCell(
 export function expeditionReadings(language: Language, run: Expedition): string {
   const e = run.encounter?.kind === 'echo' ? run.encounter : null
   if (!e && !run.departure.equipment.includes('sonar')) return ''
+
   const items = run.sonar.readings
     .filter(
       (reading) =>
@@ -62,12 +67,14 @@ export function expeditionReadings(language: Language, run: Expedition): string 
             : reading.resonance
               ? message(language, 'echo.present')
               : message(language, 'echo.absent')
+
       return `<li class="tw:py-1"><button class="tw:block tw:w-full tw:rounded-lg tw:border tw:border-solid tw:border-transparent tw:bg-transparent tw:p-1.5 tw:text-start tw:text-ink tw:hover:bg-accent-soft tw:hover:border-accent-line tw:focus-visible:bg-accent-soft tw:focus-visible:border-accent-line tw:aria-pressed:bg-accent-soft tw:aria-pressed:border-accent-line" type="button" data-sonar-reading="${reading.center}"><span>${mine}</span>${resonance ? `<small class="tw:block tw:text-accent">${resonance}</small>` : ''}</button></li>`
     })
     .join('')
   const status = e
     ? message(language, 'echo.loan', { charges: run.sonar.loan, progress: run.sonar.loanProgress })
     : `${message(language, 'sonar-equipment.name')} · ${run.sonar.charges}/3 · ${run.sonar.progress}/12`
+
   return `<section class="expedition-sonar-log tw:rounded-panel tw:border tw:border-solid tw:border-line tw:bg-surface tw:p-3 tw:text-caption"><strong>${status}</strong>${
     e
       ? `<p class="tw:my-2">${message(language, 'echo.candidates', {

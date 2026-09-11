@@ -40,6 +40,7 @@ export function riftLandings(run: Expedition): number[] {
     const y = row + dy * 2,
       x = column + dx * 2
     if (x < 0 || y < 0 || x >= width || y >= height) continue
+
     const wall = (row + dy) * width + column + dx,
       landing = y * width + x
     if (
@@ -49,13 +50,16 @@ export function riftLandings(run: Expedition): number[] {
     )
       targets.push(landing)
   }
+
   return targets
 }
 
 /** Derive whether the current room offers a legal placement, return or rift landing. */
 export function mobilityReady(run: Expedition): boolean {
   if (run.departure.profession === 'riftwalker') return riftLandings(run).length > 0
+
   const mark = currentWaymark(run)
+
   return mark === null || (mark !== run.player && clearLanding(run, mark))
 }
 
@@ -66,8 +70,10 @@ export function walkingNeighbors(run: Expedition, index: number): number[] {
   if (!rift || rift.room !== skillRoom(run)) return ordinary
   // A tide carries both ends of an established portal. Their arithmetic midpoint no longer
   // identifies the original crossed obstacle, and cannot invalidate the already-paid link.
+
   if (run.encounter?.kind !== 'tide' && (rift.from + rift.to) / 2 === run.encounter?.boss)
     return ordinary
+
   return index === rift.from
     ? [...ordinary, rift.to]
     : index === rift.to
@@ -81,9 +87,12 @@ export function useMobilitySkill(run: Expedition, index?: number): Expedition {
     const mark = currentWaymark(run)
     if (mark === null)
       return { ...run, waymark: { index: run.player, room: skillRoom(run) }, steps: run.steps + 1 }
+
     return { ...run, player: mark, waymark: undefined, skillUsed: true, steps: run.steps + 1 }
   }
+
   if (index === undefined || !riftLandings(run).includes(index)) return run
+
   return {
     ...run,
     rift: { from: run.player, to: index, room: skillRoom(run) },

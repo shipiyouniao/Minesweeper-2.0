@@ -10,6 +10,7 @@ import { spriteImage } from './dungeon-sprites.js'
 export function mirrorPreview(run: Expedition): Expedition | null {
   const encounter = run.encounter
   if (encounter?.kind !== 'mirror') return null
+
   return {
     ...run,
     ...encounter.other,
@@ -25,10 +26,12 @@ export function mirrorPreview(run: Expedition): Expedition | null {
 export function mirrorBoardLabel(language: Language, run: Expedition, active: boolean): string {
   const encounter = run.encounter
   if (encounter?.kind !== 'mirror') return ''
+
   const side = active ? encounter.active : oppositeMirror(encounter.active)
   const purpose = active
     ? message(language, 'mirror-board.explore-here')
     : message(language, 'mirror-board.compare-shift-to-play')
+
   return `${mirrorName(language, side)} · ${purpose}`
 }
 
@@ -41,15 +44,20 @@ export function markMirrorCell(
 ): void {
   const encounter = run.encounter
   if (encounter?.kind !== 'mirror') return
+
   const twin = encounter[encounter.active]
   if (index === encounter.boss) cell.classList.toggle('mirror-fallen', twin.health === 0)
+
   if (index !== twin.seal.index) return
+
   cell.classList.add('landmark-cell', 'mirror-seal')
   cell.classList.toggle('mirror-inert', !twin.seal.active)
+
   const label = twin.seal.active
     ? message(language, 'mirror-board.seal-protects-the-opposite-twin')
     : message(language, 'mirror-board.seal-disabled')
   const revealed = run.game.cells[index]?.visibility === 'revealed'
+
   cell.innerHTML = `${spriteImage('mirror-seal')}${revealed ? `<span class="landmark-clue">${run.game.cells[index]?.adjacent ?? 0}</span>` : ''}`
   cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
   cell.title = label

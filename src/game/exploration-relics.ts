@@ -25,6 +25,7 @@ export function applyToolRelics(
     (after.phase !== 'exploring' && after.phase !== 'boss')
   )
     return after
+
   let result = after
   const discoveries = roomDiscoveries(after) - roomDiscoveries(before)
 
@@ -36,6 +37,7 @@ export function applyToolRelics(
   ) {
     result = { ...claim(result, 'probe-recycler'), probes: Math.min(4, result.probes + 1) }
   }
+
   if (action.type === 'sweep' && after.scans < before.scans) {
     if (discoveries >= 2 && available(result, 'spare-coil'))
       result = { ...claim(result, 'spare-coil'), probes: Math.min(4, result.probes + 1) }
@@ -43,6 +45,7 @@ export function applyToolRelics(
     if (before.probes === 0 && available(result, 'emergency-gears'))
       result = { ...claim(result, 'emergency-gears'), probes: Math.min(4, result.probes + 2) }
   }
+
   if (
     action.type === 'skill' &&
     !before.skillUsed &&
@@ -51,5 +54,6 @@ export function applyToolRelics(
   ) {
     result = { ...claim(result, 'skill-capacitor'), scans: Math.min(4, result.scans + 1) }
   }
+
   return result
 }

@@ -20,6 +20,7 @@ export class MilestoneNotices {
   observe(camp: Camp, language: Language): void {
     this.language = language
     if (this.previous) this.queue.push(...milestoneNotices(this.previous, camp))
+
     this.previous = camp
     if (this.queue.length && this.timer === null) this.tick()
   }
@@ -27,13 +28,16 @@ export class MilestoneNotices {
   /** Display one queued notice at a time and suspend its lifetime while the game is obscured. */
   private tick(): void {
     this.timer = null
+
     const paused = document.hidden || document.querySelector('dialog[open]') !== null
     if (this.card) this.card.hidden = paused
+
     if (!paused) {
       if (this.card && this.remaining <= 0) {
         this.card.remove()
         this.card = null
       }
+
       if (!this.card) {
         const notice = this.queue.shift()
         if (notice) {
@@ -52,14 +56,17 @@ export class MilestoneNotices {
           this.remaining = 4500
         }
       }
+
       this.remaining -= 250
     }
+
     if (this.card || this.queue.length) this.timer = setTimeout(() => this.tick(), 250)
   }
 
   /** Cancel the pending tick and remove transient notices when their owner is disposed. */
   dispose(): void {
     if (this.timer !== null) clearTimeout(this.timer)
+
     this.card?.remove()
     this.card = null
     this.timer = null

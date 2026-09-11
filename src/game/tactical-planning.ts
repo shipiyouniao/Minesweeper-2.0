@@ -24,6 +24,7 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
           : 'interact',
       index,
     }
+
   if (encounter) {
     if (
       encounter.kind === 'clock' &&
@@ -44,6 +45,7 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
       (run.player === index || adjacentSteps(run.game, run.player).includes(index))
     )
       return { type: 'interact', index }
+
     if (
       encounter.kind === 'mirror' &&
       encounter[encounter.active].seal.active &&
@@ -52,6 +54,7 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
       (run.player === index || adjacentSteps(run.game, run.player).includes(index))
     )
       return { type: 'interact', index }
+
     if (
       encounter.kind === 'bastion' &&
       encounter.pylons.some((pylon) => pylon.index === index && pylon.active)
@@ -60,6 +63,7 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
       if (run.player === index || adjacentSteps(run.game, run.player).includes(index))
         return { type: 'interact', index }
     }
+
     if (
       encounter.kind === 'bastion' &&
       index === encounter.boss &&
@@ -67,6 +71,7 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
       encounter.exposedUntil < encounter.turn
     )
       return { type: 'interact', index }
+
     if (
       encounter.kind === 'brood' &&
       encounter.nests.includes(index) &&
@@ -75,7 +80,9 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
     )
       return { type: 'interact', index }
   }
+
   if (run.encounter?.boss === index) return { type: 'attack' }
+
   if (
     ((run.encounter?.kind === 'bastion' &&
       run.encounter.pylons.some((pylon) => pylon.index === index && pylon.active)) ||
@@ -83,6 +90,7 @@ export function tacticalCellAction(run: Expedition, index: number): ExpeditionAc
     adjacentSteps(run.game, run.player).includes(index)
   )
     return { type: 'interact', index }
+
   return { type: run.game.cells[index]?.visibility === 'revealed' ? 'move' : 'reveal', index }
 }
 
@@ -91,6 +99,7 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
   const encounter = run.encounter
   if (!encounter || run.phase !== 'boss')
     return { path: [], cost: 0, allowed: false, reason: 'inactive' }
+
   let path: readonly number[] = []
   let cost = 1
   let reason: TacticalReason = 'ready'
@@ -122,6 +131,7 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
         cost = route.length - 1 + Number(action.type === 'reveal')
         if (action.type === 'move') cost = walkingPointCost(run, route.length - 1)
       }
+
       break
     }
     case 'attune':
@@ -130,6 +140,7 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
         reason = 'inactive'
         break
       }
+
       const region = activeRegion({ ...run, encounter })
       if (!Number.isInteger(action.index) || !region.indices.includes(action.index))
         reason = 'matrix-region'
@@ -153,7 +164,9 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
         )
           reason = 'adjacent'
       }
+
       if (action.type === 'mark-crystal') cost = 0
+
       break
     }
     case 'sonar':
@@ -214,13 +227,16 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
         reason = 'inactive'
         break
       }
+
       if (encounter.kind === 'echo') {
         const candidates = echoCandidates(run)
         if (candidates.length !== 1 || candidates[0] !== action.index) reason = 'echo-locate'
         else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
         else if (encounter.exposedUntil >= encounter.turn) reason = 'used'
+
         break
       }
+
       if (encounter.kind === 'clock') {
         if (
           !encounter.hourglasses.some((glass) => glass.index === action.index && !glass.used) ||
@@ -235,6 +251,7 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
           reason = 'adjacent'
         break
       }
+
       const core = encounter.kind === 'bastion' && action.index === encounter.boss
       if (encounter.kind === 'magnetic') {
         const anchor = encounter.anchors.find((entry) => entry.index === action.index)
@@ -255,8 +272,10 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
         )
           reason = 'flags'
         else if (!magneticLurePath({ ...run, encounter }, action.index)) reason = 'magnet-route'
+
         break
       }
+
       const objective =
         encounter.kind === 'bastion'
           ? encounter.pylons.some((pylon) => pylon.index === action.index && pylon.active)
@@ -270,6 +289,7 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
         else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
         break
       }
+
       if (objective) {
         if (run.game.cells[action.index]?.visibility !== 'revealed') reason = 'path'
         else if (
@@ -285,11 +305,13 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
           reason = 'flags'
         break
       }
+
       if (encounter.kind === 'brood') {
         if (!occupied(run, action.index) || run.walls.includes(action.index)) reason = 'used'
         else if (!adjacentSteps(run.game, run.player).includes(action.index)) reason = 'adjacent'
         break
       }
+
       reason = 'used'
       break
     }
@@ -313,5 +335,6 @@ export function tacticalPlan(run: Expedition, action: ExpeditionAction): Tactica
   }
 
   if (reason === 'ready' && cost > encounter.points) reason = 'points'
+
   return { path, cost, allowed: reason === 'ready', reason }
 }

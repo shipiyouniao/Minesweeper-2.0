@@ -69,6 +69,7 @@ export class SurveyApp implements SurveyInputActions {
   /** Right-click/hold share the existing public mark cycle and quick-open rule. */
   secondary(index: number): void {
     if (this.blocked) return
+
     const action = secondaryBoardAction(this.session.state.game, index)
     if (action) this.apply({ index, type: action })
   }
@@ -88,6 +89,7 @@ export class SurveyApp implements SurveyInputActions {
   /** Route presentation commands while keeping restart confirmation separate from rule transitions. */
   command(command: SurveyCommand): void {
     if (command.type !== 'sound') this.sounds.play(command.type === 'close' ? 'dismiss' : 'tap')
+
     const t = translations[this.language]
     switch (command.type) {
       case 'sound':
@@ -143,6 +145,7 @@ export class SurveyApp implements SurveyInputActions {
         this.view.closeDialog()
         return
     }
+
     this.render()
     if (command.type === 'cycle-mode')
       this.root.querySelector<HTMLButtonElement>('.mode-cycle')?.focus({ preventScroll: true })
@@ -157,6 +160,7 @@ export class SurveyApp implements SurveyInputActions {
   /** Forward shared board geometry and use mute-aware feedback for edges and movement. */
   navigate(index: number, key: NavigationKey): void {
     const result = this.view.navigate(index, key)
+
     this.preview(this.view.focusIndex)
     this.sounds.play(result === 'moved' ? 'navigate' : 'blocked')
   }
@@ -206,7 +210,9 @@ export class SurveyApp implements SurveyInputActions {
       this.sounds.play('blocked')
       return
     }
+
     this.render()
+
     const after = this.session.state.game
     const cue =
       action.type === 'mark-safe'
@@ -223,6 +229,7 @@ export class SurveyApp implements SurveyInputActions {
               : action.index,
           )
     if (cue) this.sounds.play(cue)
+
     this.showResult()
   }
 
@@ -240,6 +247,7 @@ export class SurveyApp implements SurveyInputActions {
   /** Restart only the current mode, preserving its independent best-result table. */
   private restart(): void {
     if (this.pendingDifficulty === null) return
+
     this.input.cancelGesture()
     this.session.restart(this.pendingDifficulty)
     this.pendingDifficulty = null
@@ -253,10 +261,13 @@ export class SurveyApp implements SurveyInputActions {
   /** Remount locale text while preserving the puzzle and roving board focus. */
   private readonly changeLanguage = (language: Language): void => {
     const focus = this.view.focusIndex
+
     this.input.cancelGesture()
     this.language = language
     this.preferences.setPreference({ key: 'language', value: language })
+
     const url = new URL(location.href)
+
     url.searchParams.set('lang', language)
     history.replaceState(null, '', url)
     this.view.dispose()

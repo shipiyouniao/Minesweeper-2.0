@@ -11,7 +11,9 @@ function revealCost(run: Expedition, index: number): number {
     const plan = tacticalPlan(run, { type: 'reveal', index })
     return plan.allowed ? plan.cost : Infinity
   }
+
   const path = approachPath(run, index)
+
   return path ? path.length : Infinity
 }
 
@@ -22,11 +24,14 @@ export function chordExpedition(
   apply: ExploreTransition,
 ): Expedition {
   if (!Number.isInteger(index) || index < 0 || index >= run.game.cells.length) return run
+
   if ((run.phase !== 'exploring' && run.phase !== 'boss') || occupied(run, index)) return run
+
   const confirmedSafe = run.surveyedCells.filter((other) => !run.confirmedMines.includes(other))
   const targets = chordTargets(run.game, index, confirmedSafe).filter(
     (other) => !occupied(run, other),
   )
+
   return revealBatch(run, targets, apply)
 }
 
@@ -56,6 +61,7 @@ export function revealBatch(
     if (!target) break
 
     const before = next
+
     next = apply(before, { type: 'reveal', index: target.index })
     if (
       next === before ||
@@ -66,5 +72,6 @@ export function revealBatch(
   }
 
   // Notes are a single accepted intent even if no physical reveal can be afforded.
+
   return next !== run && next.steps === run.steps ? { ...next, steps: next.steps + 1 } : next
 }

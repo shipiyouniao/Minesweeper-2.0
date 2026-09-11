@@ -1,3 +1,4 @@
+import { campSiteImage } from './story-assets.js'
 import { RESCUE_GATE, TOMA_CAMP_CELL } from '../game/rail-story.js'
 import { northwestPortals, BASTION_GATE } from '../game/northwest-world.js'
 import { worldSceneName } from './world-copy.js'
@@ -31,11 +32,6 @@ import { brandTemplate, languageMenuTemplate } from './templates.js'
 import { titleTemplate } from './title-template.js'
 import { equipmentCopy, professionCopy, variantCopy } from './variant-copy.js'
 
-/** Use a single original guide sprite in dialogue and on the camp board. */
-export function storyGuideImage(): string {
-  return `<img class="story-guide" src="${import.meta.env.BASE_URL}assets/story/guide.png" alt="" width="128" height="128" draggable="false">`
-}
-
 /** Scene names remain literal catalog calls so localization checks cover every path. */
 function sceneName(state: StoryViewState): string {
   return worldSceneName(state.language, state.board.scene.id)
@@ -44,7 +40,9 @@ function sceneName(state: StoryViewState): string {
 /** Keep the persistent camp's landmarks aligned with their existing service names. */
 export function storySiteName(language: Language, site: CampSite): string {
   if (site.destination === 'guide') return message(language, 'story.guide')
+
   if (site.destination === 'road') return message(language, 'story.road')
+
   return campPageName(language, site.destination)
 }
 
@@ -54,8 +52,10 @@ function cellTemplate(state: StoryViewState, index: number): string {
   const cell = board.game.cells[index]!
   const gate = run ? storyGateTemplate(run, language, index) : null
   if (gate) return gate
+
   if (board.scene.water?.includes(index))
     return '<div class="story-river" aria-hidden="true"></div>'
+
   const portal = northwestPortals(board.scene.id, state.progress).find(
     (entry) => entry.index === index,
   )
@@ -63,6 +63,7 @@ function cellTemplate(state: StoryViewState, index: number): string {
   const control = run?.board.scene.mechanisms?.find((entry) => entry.index === index)
   if (board.walls.includes(index))
     return `<div class="story-tree" aria-hidden="true"><img src="${import.meta.env.BASE_URL}assets/story/tree.png" alt="" draggable="false"></div>`
+
   const site = run ? undefined : CAMP_SITES.find((entry) => entry.index === index)
   const lit = run
     ? storyTeachingTarget(run) === index
@@ -110,13 +111,14 @@ function cellTemplate(state: StoryViewState, index: number): string {
     content = cartImage()
   } else if (site) {
     label = storySiteName(language, site)
-    content = site.destination === 'guide' ? storyGuideImage() : spriteImage(site.sprite)
+    content = campSiteImage(site)
   } else if (control && run) {
     const status = run.operated.includes(index)
       ? message(language, 'story.mechanism-done')
       : clueIsolated(board, index)
         ? message(language, 'story.mechanism-operate')
         : message(language, 'story.mechanism-locked')
+
     label = storyMechanismName(language, control) + ' · ' + status
     content = spriteImage(run.operated.includes(index) ? 'bastion-pylon-off' : 'bastion-pylon')
   } else if (portal) {
@@ -179,6 +181,7 @@ function cellTemplate(state: StoryViewState, index: number): string {
     label = message(language, 'story.clue', { count: cell.adjacent })
     content = `<span class="story-clue">${cell.adjacent}</span>`
   }
+
   if (
     number &&
     (site ||
@@ -195,7 +198,9 @@ function cellTemplate(state: StoryViewState, index: number): string {
     label += ` · ${message(language, 'story.clue', { count: number })}`
     if (index !== state.player) content += `<span class="story-clue-badge">${number}</span>`
   }
+
   const name = `${Math.floor(index / board.game.config.width) + 1}, ${(index % board.game.config.width) + 1}: ${label}`
+
   return `<button class="story-cell ${board.scene.bridge?.includes(index) ? 'story-bridge-plank' : ''} ${covered ? 'is-covered' : 'is-open'} ${flagged ? 'is-flagged' : ''} ${triggered ? 'is-triggered' : ''} ${lit ? 'is-teaching' : ''} ${scoped ? 'is-scope' : ''} ${site || exit || entrance || quarryGate || ridgeGate || waterwayGate || portal || bastionGate ? 'is-site' : ''}" ${control ? `data-story-mechanism="${index}" data-operated="${!!run?.operated.includes(index)}"` : ''} data-number="${number}" data-cell="${index}" data-story-cell="${index}" tabindex="${index === state.player ? 0 : -1}" aria-label="${escapeHtml(name)}" ${run?.phase === 'fallen' ? 'disabled' : ''}>${content}${site || exit || entrance || quarryGate || ridgeGate || waterwayGate || portal || bastionGate ? `<span class="story-site-label">${label}</span>` : ''}</button>`
 }
 
@@ -205,6 +210,7 @@ function sceneBoard(state: StoryViewState): string {
   const player = state.run ? 'player' : professionSprite(state.loadout.profession)
   const cell = state.board.game.cells[state.player]!
   const number = cell.visibility === 'revealed' && !cell.mine ? cell.adjacent : 0
+
   return `<div class="story-board" role="group" aria-label="${sceneName(state)}" style="--columns:${width};--rows:${state.board.game.config.height}">${state.board.game.cells.map((_cell, index) => cellTemplate(state, index)).join('')}<div class="story-traveler" aria-hidden="true" data-number="${number}" data-player="${state.player}" style="--player-x:${state.player % width};--player-y:${Math.floor(state.player / width)}">${spriteImage(player)}${number ? `<span class="story-clue-badge">${number}</span>` : ''}</div></div>`
 }
 
@@ -212,6 +218,7 @@ function sceneBoard(state: StoryViewState): string {
 function sceneDock(state: StoryViewState): string {
   const language = state.language
   const run = state.run
+
   return `<footer class="story-dock"><div class="story-dock-inner">${run ? `<div class="story-modes" role="group" aria-label="${message(language, 'story.explore')}"><button data-story-action="explore" aria-pressed="${!state.flagMode}">${icon('pointer')}${message(language, 'story.explore')}</button><button data-story-action="flag" aria-pressed="${state.flagMode}">${icon('flag')}${message(language, 'story.flag')}</button></div>${campaignEntries(state)}${run.phase === 'fallen' ? `<button class="story-primary" data-story-action="retry">${message(language, 'story.retry')}</button>` : ''}` : ''}<button data-story-action="map" class="${state.progress.mapOwned ? '' : 'is-unavailable'}">${icon('globe')}${message(language, 'story.map')}${state.progress.mapOwned ? '' : ' · —'}</button><div class="story-resources"><span class="story-vitals"><span>${message(language, 'story.health')}</span><strong class="story-hearts" role="img" aria-label="${message(language, 'story.health')}: ${run?.health ?? 3} / 3">${'♥'.repeat(run?.health ?? 3)}${'♡'.repeat(3 - (run?.health ?? 3))}</strong></span><span class="story-wallet" aria-label="${variantCopy(language).supplies}">${spriteImage('treasure')}<span>${variantCopy(language).supplies}<strong>${new Intl.NumberFormat(language).format(state.camp.supplies)}</strong></span></span></div></div></footer>`
 }
 
@@ -230,6 +237,7 @@ export function storyTemplate(state: StoryViewState): string {
             ? message(language, 'story.inspect')
             : ''
   const hero = `${import.meta.env.BASE_URL}assets/story/camp-banner.png`
+
   return `<header class="site-header"><div class="header-identity">${brandTemplate(language)}<a class="route-back" data-route href="${routeHref({ page: 'home' }, language)}">${icon('arrow')}<span>${message(language, 'home.back')}</span></a></div><nav><a class="story-temporary" data-route href="${routeHref({ page: 'game', mode: 'expedition' }, language)}">${message(language, 'story.temporary')}</a><button class="icon-button" data-story-action="sound" aria-label="${state.sound ? t.soundOn : t.soundOff}" aria-pressed="${state.sound}">${icon(state.sound ? 'volume' : 'volumeOff')}</button>${languageMenuTemplate(language)}</nav></header>
   <main class="story-main" data-story-scene="${state.board.scene.id}">
     ${!state.storageAvailable ? `<p role="alert">${message(language, 'story.storage')}</p>` : ''}
@@ -242,6 +250,7 @@ export function storyTemplate(state: StoryViewState): string {
 function campaignEntries(state: StoryViewState): string {
   const { run, language } = state
   if (!run) return ''
+
   const available = CAMPAIGN_STAGES.filter((stage) => {
     const entrance = stage.entrance
     return (
@@ -254,5 +263,6 @@ function campaignEntries(state: StoryViewState): string {
       (!stage.prerequisite || campaignProgress(state.campaign, stage.prerequisite).cleared)
     )
   })
+
   return `<div class="signal-stage-links">${available.map((stage) => `<a data-route data-story-campaign class="story-primary" href="${routeHref({ page: 'campaign', stage: stage.id }, language)}">${campaignName(language, stage.id)} →</a>`).join('')}</div>`
 }

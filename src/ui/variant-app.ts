@@ -97,6 +97,7 @@ export class VariantApp implements VariantInputActions {
       this.profession = session.loadout.profession
       this.equipment = session.loadout.equipment
     }
+
     this.repository = repository
     this.preferences = preferences
     this.language = language
@@ -113,17 +114,21 @@ export class VariantApp implements VariantInputActions {
   play(side: BoardSide, index: number, flag?: boolean): void {
     if (side === 'a' && this.view.observingCell(index)) {
       if (this.paused || this.view.dialogOpen || this.moving) return
+
       if (flag || (flag === undefined && this.inputMode === 'flag')) {
         this.input.cancelTools()
         this.expedition({ type: 'mark-crystal', index })
         this.render()
       } else void this.collectObserved(index)
+
       return
     }
+
     if (flag === undefined && (this.inputMode === 'mark-safe' || this.inputMode === 'chord')) {
       this.cellCommand(side, index, this.inputMode)
       return
     }
+
     flag ??= this.inputMode === 'flag'
     if (
       this.paused ||
@@ -134,25 +139,32 @@ export class VariantApp implements VariantInputActions {
       this.sounds.play('blocked')
       return
     }
+
     if (this.session instanceof ExpeditionSession && !flag) {
       const run = this.session.run
       if (run?.phase === 'boss') {
         const action = tacticalCellAction(run, index)
         const plan = tacticalPlan(run, action)
+
         this.view.previewRoute(index)
         if (!plan.allowed) {
           this.sounds.play('blocked')
           return
         }
+
         if (action.type !== 'move' && action.type !== 'reveal') {
           this.input.cancelTools()
           this.expedition(action)
           this.render()
+
           return
         }
+
         void this.walkAndPlay(index, plan.path, action.type === 'move')
+
         return
       }
+
       const path = run ? approachPath(run, index) : null
       const relay = run?.circuits?.relays.find((entry) => entry.index === index && entry.active)
       const power = run && powerControl(run, index)
@@ -164,6 +176,7 @@ export class VariantApp implements VariantInputActions {
         powerReadiness(run, index) !== 'ready'
       ) {
         this.sounds.play('blocked')
+
         const hint = this.root.querySelector('.power-objective p')
         if (hint)
           hint.textContent = powerHint(
@@ -171,8 +184,10 @@ export class VariantApp implements VariantInputActions {
             powerReadiness(run, index),
             run.power?.purpose,
           )
+
         return
       }
+
       if (
         run &&
         relay &&
@@ -180,10 +195,13 @@ export class VariantApp implements VariantInputActions {
         !relayReady(run, relay)
       ) {
         this.sounds.play('blocked')
+
         const hint = this.root.querySelector('.signal-objective p')
         if (hint) hint.textContent = signalCopy(this.language).solve
+
         return
       }
+
       if (
         !run ||
         !path ||
@@ -192,9 +210,12 @@ export class VariantApp implements VariantInputActions {
         this.sounds.play('blocked')
         return
       }
+
       void this.walkAndPlay(index, path, run.game.cells[index]?.visibility === 'revealed')
+
       return
     }
+
     this.commitPlay(side, index, flag)
   }
 
@@ -204,9 +225,11 @@ export class VariantApp implements VariantInputActions {
       this.play(side, index, true)
       return
     }
+
     const game =
       this.session instanceof TwinSession ? this.session.state[side] : this.session.run?.game
     if (!game) return
+
     const action = secondaryBoardAction(game, index)
     if (action === 'flag') this.play(side, index, true)
     else if (action) this.cellCommand(side, index, action)
@@ -220,6 +243,7 @@ export class VariantApp implements VariantInputActions {
   /** Dispatch a bounded batch whose individual reveals retain normal costs. */
   chord(side: BoardSide, index: number): void {
     if (!this.cellCommand(side, index, 'chord')) return
+
     const run = this.session instanceof ExpeditionSession ? this.session.run : null
     if (run && (run.phase === 'exploring' || run.phase === 'boss') && !this.view.dialogOpen)
       this.view.focusPlayer()
@@ -234,6 +258,7 @@ export class VariantApp implements VariantInputActions {
       (this.session instanceof ExpeditionSession && side === 'b')
     )
       return false
+
     this.input.cancelTools()
     if (this.session instanceof ExpeditionSession) this.expedition({ type, index })
     else {
@@ -250,7 +275,9 @@ export class VariantApp implements VariantInputActions {
                 : 'flag',
       )
     }
+
     this.render()
+
     return true
   }
 
@@ -288,6 +315,7 @@ export class VariantApp implements VariantInputActions {
       this.session instanceof TwinSession ? this.session.state.phase : this.session.run?.phase
     const currentRun = this.session instanceof ExpeditionSession ? this.session.run : null
     const vitalityCue = previousRun && currentRun ? cueForVitality(previousRun, currentRun) : null
+
     this.sounds.play(
       phase === 'lost'
         ? 'loss'
@@ -303,6 +331,7 @@ export class VariantApp implements VariantInputActions {
                 ? 'navigate'
                 : 'reveal',
     )
+
     const railChanged =
       !!previousRun?.rail &&
       !!currentRun?.rail &&
@@ -335,6 +364,7 @@ export class VariantApp implements VariantInputActions {
             : 'confirm',
       )
     }
+
     this.render()
     if (switched) {
       const generation = this.walkGeneration
@@ -346,6 +376,7 @@ export class VariantApp implements VariantInputActions {
             : animateCircuitChange(this.root, previousRun, currentRun)
       ).then(() => {
         if (generation !== this.walkGeneration) return
+
         this.turnPerformance = false
         this.moving = false
         this.renderSignalScene()
@@ -356,11 +387,15 @@ export class VariantApp implements VariantInputActions {
   /** Keep the session atomic while an interruptible, visible path animation runs. */
   private async walkAndPlay(index: number, path: readonly number[], move: boolean): Promise<void> {
     this.input.cancelTools()
+
     const generation = ++this.walkGeneration
+
     this.moving = true
     this.sounds.play('navigate')
+
     const finished = await this.view.walk(path)
     if (generation !== this.walkGeneration) return
+
     this.moving = false
     if (finished) this.commitPlay('a', index, false, move)
   }
@@ -368,23 +403,31 @@ export class VariantApp implements VariantInputActions {
   /** Walk/reveal and collect through the same checked, replayable actions as the tools. */
   private async collectObserved(index: number): Promise<void> {
     if (!(this.session instanceof ExpeditionSession)) return
+
     const run = this.session.run
     if (!run || run.encounter?.kind !== 'matrix') return
+
     const used = run.encounter.collected.includes(index) || run.encounter.empty.includes(index)
     if (run.player === index) {
       if (!used) this.useTool('attune', index)
       return
     }
+
     const action = tacticalCellAction(run, index)
     const plan = tacticalPlan(run, action)
     if (action.type !== 'move' && action.type !== 'reveal') return
+
     if (!plan.allowed || plan.cost + Number(!used) > run.encounter.points) {
       this.sounds.play('blocked')
       this.view.explainTactical(plan.allowed ? { ...plan, allowed: false, reason: 'points' } : plan)
+
       return
     }
+
     const generation = this.walkGeneration + 1
+
     await this.walkAndPlay(index, plan.path, action.type === 'move')
+
     const current = this.session.run
     if (
       !used &&
@@ -401,6 +444,7 @@ export class VariantApp implements VariantInputActions {
   /** Discard pending movement before replacing or hiding its board. */
   private cancelMovement(): void {
     const committed = this.turnPerformance
+
     this.turnPerformance = false
     this.walkGeneration++
     this.moving = false
@@ -425,11 +469,13 @@ export class VariantApp implements VariantInputActions {
   /** Consume a targeted tool through the replayable domain action. */
   useTool(tool: DungeonTool, index: number): void {
     if (!(this.session instanceof ExpeditionSession)) return
+
     const run = this.session.run
     if (!run || this.paused || this.moving || this.view.dialogOpen) return
 
     const plan =
       tool === 'attune' || tool === 'anchor' ? tacticalPlan(run, { type: tool, index }) : null
+
     this.expedition(
       tool === 'attune' || tool === 'anchor'
         ? { type: tool, index }
@@ -460,6 +506,7 @@ export class VariantApp implements VariantInputActions {
       command.type !== 'cancel'
     )
       return
+
     if (
       this.paused &&
       command.type !== 'pause' &&
@@ -470,7 +517,9 @@ export class VariantApp implements VariantInputActions {
       command.type !== 'confirm'
     )
       return
+
     if (command.type !== 'sound') this.sounds.play(command.type === 'cancel' ? 'dismiss' : 'tap')
+
     if (
       this.moving &&
       command.type !== 'sound' &&
@@ -479,6 +528,7 @@ export class VariantApp implements VariantInputActions {
       command.type !== 'records'
     )
       return
+
     if (
       command.type !== 'probe' &&
       command.type !== 'scan' &&
@@ -543,6 +593,7 @@ export class VariantApp implements VariantInputActions {
           this.render()
           // Help may open from the sidebar below the board; bring the real lesson back into view.
           this.root.querySelector('.variant-board-panel')?.scrollIntoView({ block: 'start' })
+
           return
         }
         if (
@@ -554,6 +605,7 @@ export class VariantApp implements VariantInputActions {
         ) {
           this.session.setCampaignLesson(0)
           this.render()
+
           return
         }
         this.view.showInformation('', '')
@@ -575,10 +627,12 @@ export class VariantApp implements VariantInputActions {
           )
           return
         }
+
         if (this.session instanceof ExpeditionSession && this.session.run?.rail) {
           this.view.showInformation(message(this.language, 'rail.help'), railGuide(this.language))
           return
         }
+
         if (this.session instanceof ExpeditionSession && this.session.run?.power) {
           this.view.showInformation(
             message(this.language, 'ridge.network'),
@@ -586,10 +640,12 @@ export class VariantApp implements VariantInputActions {
           )
           return
         }
+
         this.view.showInformation(
           translations[this.language].how,
           `<p>${this.session instanceof ExpeditionSession ? t.expeditionHelp : t.twinHelp}</p>${boardHelpTemplate(this.language, this.session instanceof ExpeditionSession)}${this.session instanceof ExpeditionSession ? `<p>${battleHealthCopy(this.language)}</p><p>${t.toolHint}</p><p>${t.probeHint}</p><p>${t.scanHint}</p>` : ''}`,
         )
+
         return
       }
       case 'records':
@@ -637,6 +693,7 @@ export class VariantApp implements VariantInputActions {
           button.parentElement?.toggleAttribute('data-skill-tip')
           return
         }
+
         if (button?.hasAttribute('data-select-target')) {
           const panel = this.root.querySelector<HTMLElement>('.dock-skill-panel')
           if (panel) {
@@ -648,8 +705,10 @@ export class VariantApp implements VariantInputActions {
                 )
                 ?.focus({ preventScroll: true })
           }
+
           return
         }
+
         this.expedition({ type: 'skill' })
         break
       }
@@ -696,6 +755,7 @@ export class VariantApp implements VariantInputActions {
               translations[this.language].confirmNote,
               translations[this.language].restart,
             )
+
             return
           }
           this.session.restart(command.value)
@@ -710,8 +770,10 @@ export class VariantApp implements VariantInputActions {
           if (this.session.campaignMode) {
             this.session.returnToCamp()
             this.root.querySelector<HTMLAnchorElement>('[data-campaign-return]')?.click()
+
             return
           }
+
           this.result(this.session.returnToCamp())
           this.campScreen = { ...this.campScreen, page: 'overview' }
         }
@@ -772,6 +834,7 @@ export class VariantApp implements VariantInputActions {
             translations[this.language].confirmNote,
             translations[this.language].restart,
           )
+
           return
         }
         if (this.session instanceof TwinSession) this.session.restart()
@@ -864,8 +927,10 @@ export class VariantApp implements VariantInputActions {
       if (this.session.campaignMode) {
         const heading = this.root.querySelector('.variant-heading h2')
         if (heading) heading.textContent = campaignName(this.language, this.session.stage.id)
+
         if (!this.root.querySelector('[data-campaign-return]')) {
           const link = document.createElement('a')
+
           link.href = routeHref({ page: 'story' }, this.language)
           link.dataset['route'] = ''
           link.dataset['campaignReturn'] = ''
@@ -874,7 +939,9 @@ export class VariantApp implements VariantInputActions {
           this.root.querySelector('.site-header')?.after(link)
         }
       }
+
       const run = this.session.run
+
       this.view.render(
         run
           ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.inputMode)
@@ -906,13 +973,16 @@ export class VariantApp implements VariantInputActions {
           },
         )
       }
+
       if (!run?.departure.campaign)
         this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
+
       this.notices.observe(this.session.camp, this.language)
     } else {
       const state = this.session.state
       const a = state.phase === 'lost' ? { ...state.a, phase: 'lost' as const } : state.a
       const b = state.phase === 'lost' ? { ...state.b, phase: 'lost' as const } : state.b
+
       this.view.render(twinTemplate(this.language, state, this.inputMode), a, b, null)
     }
   }
@@ -920,6 +990,7 @@ export class VariantApp implements VariantInputActions {
   /** Only accepted floor outcomes unlock dialogue; dismissed scenes never grant gameplay rewards. */
   private renderSignalScene(): void {
     if (!(this.session instanceof ExpeditionSession) || this.paused || this.turnPerformance) return
+
     const session = this.session
     const signalScene = pendingSignalScene(session.run, session.stageProgress)
     const ridgeScene = pendingObservatoryScene(session.run, session.stageProgress)
@@ -928,6 +999,7 @@ export class VariantApp implements VariantInputActions {
     const railScene = pendingRailScene(session.run, session.stageProgress)
     const scene = railScene ?? signalScene ?? ridgeScene ?? waterwayScene ?? finaleScene
     if (!scene) return
+
     this.view.closeDialog()
     this.signal.present(
       this.root,
@@ -968,20 +1040,28 @@ export class VariantApp implements VariantInputActions {
     this.root.querySelector('.campaign-lesson')?.remove()
     for (const element of this.root.querySelectorAll('.campaign-lesson-target'))
       element.classList.remove('campaign-lesson-target')
+
     if (!(this.session instanceof ExpeditionSession) || !this.session.campaignMode) return
+
     const session = this.session
     const run = session.run
     const step = session.campaignLesson
     if (!run || run.floor !== 1 || run.phase !== 'exploring' || step >= 4) return
+
     const panel = document.createElement('section')
+
     panel.className = 'campaign-lesson'
     panel.dataset['lessonStep'] = String(step)
     panel.setAttribute('aria-live', 'polite')
+
     const heading = document.createElement('strong')
+
     heading.textContent = message(this.language, 'campaign.lesson-title', { step: step + 1 })
+
     const text = document.createElement('p')
     const tool = run.probes > 0 ? 'probe' : run.scans > 0 ? 'scan' : 'skill'
     const availability = professionSkillAvailability(run)
+
     text.textContent =
       step === 0
         ? message(this.language, 'campaign.lesson-enter')
@@ -1002,7 +1082,9 @@ export class VariantApp implements VariantInputActions {
                 : '')
             : message(this.language, 'campaign.lesson-open')
     panel.append(heading, text)
+
     const button = document.createElement('button')
+
     button.type = 'button'
     button.textContent =
       step === 0
@@ -1013,15 +1095,18 @@ export class VariantApp implements VariantInputActions {
       this.render()
     })
     panel.append(button)
+
     const frame = this.root.querySelector<HTMLElement>('.variant-board-panel')
     const viewport = frame?.querySelector<HTMLElement>('.board-viewport')
     if (!frame || !viewport) return
+
     frame.classList.add('campaign-guide-frame')
     frame.append(panel)
     if (step === 1 || step === 2)
       this.root
         .querySelector(`[data-control="${step === 1 ? tool : 'skill'}"]`)
         ?.classList.add('campaign-lesson-target')
+
     const targets = run.game.cells.flatMap((cell, index) =>
       cell.visibility === 'hidden' &&
       !run.walls.includes(index) &&
@@ -1032,9 +1117,11 @@ export class VariantApp implements VariantInputActions {
         : [],
     )
     const width = run.game.config.width
+    /** Rank legal teaching targets by visible walking distance from the current player. */
     const distance = (index: number) =>
       Math.abs((index % width) - (run.player % width)) +
       Math.abs(Math.floor(index / width) - Math.floor(run.player / width))
+
     targets.sort((a, b) => distance(a) - distance(b))
     if (step === 2 && availability !== 'ready') {
       const position = run.game.cells.findIndex(
@@ -1052,10 +1139,12 @@ export class VariantApp implements VariantInputActions {
         text.textContent += ' ' + message(this.language, 'campaign.lesson-move')
       }
     }
+
     if ((step === 1 || step === 3) && targets[0] !== undefined)
       this.root
         .querySelector(`[data-cell="${targets[0]}"]`)
         ?.classList.add('campaign-lesson-target')
+
     this.disposeCampaignLesson = mountAnchoredLesson(
       this.root,
       panel,
@@ -1066,6 +1155,7 @@ export class VariantApp implements VariantInputActions {
   /** Apply expedition-only commands and choose feedback from the resulting phase. */
   private expedition(action: ExpeditionAction): void {
     if (!(this.session instanceof ExpeditionSession)) return
+
     const before = this.session.run
     const changed = this.session.dispatch(action)
     const after = this.session.run
@@ -1083,16 +1173,22 @@ export class VariantApp implements VariantInputActions {
   /** Commit the turn before its interruptible performance so cancellation cannot duplicate actions. */
   private async performBattleTurn(): Promise<void> {
     if (!(this.session instanceof ExpeditionSession)) return
+
     const before = this.session.run
     if (!before || (before.encounter?.kind !== 'magnetic' && before.encounter?.kind !== 'tide'))
       return
+
     const changed = this.session.dispatch({ type: 'end-turn' })
     const after = this.session.run
     if (!changed || !after) return
+
     const generation = ++this.walkGeneration
+
     this.moving = true
     this.turnPerformance = true
+
     const forecast = before.encounter.kind === 'magnetic' ? before.encounter.forecast : null
+
     this.sounds.play(
       before.encounter.kind === 'tide' && before.encounter.turn % 3 === 0
         ? 'tide-wave'
@@ -1106,11 +1202,15 @@ export class VariantApp implements VariantInputActions {
     )
     if (before.encounter.kind === 'tide') await this.view.tideTurn(before, after)
     else await this.view.magneticTurn(before, after)
+
     if (generation !== this.walkGeneration) return
+
     this.moving = false
     this.turnPerformance = false
+
     const cue = cueForVitality(before, after)
     if (cue) this.sounds.play(cue)
+
     this.render()
   }
 
@@ -1135,7 +1235,9 @@ export class VariantApp implements VariantInputActions {
     this.cancelMovement()
     this.language = language
     this.preferences.setPreference({ key: 'language', value: language })
+
     const url = new URL(location.href)
+
     url.searchParams.set('lang', language)
     history.replaceState(null, '', url)
     this.view.dispose()

@@ -22,6 +22,7 @@ function action(value: JsonValue): StoryAction | null {
   const reader = JsonObjectReader.from(value)
   const type = reader?.string('type')
   if (type === 'continue' || type === 'retry' || type === 'return') return { type }
+
   const index = reader?.number('index') ?? -1
   if (
     (type === 'visit' || type === 'flag' || type === 'inspect') &&
@@ -30,6 +31,7 @@ function action(value: JsonValue): StoryAction | null {
     index < 63
   )
     return { type, index }
+
   return null
 }
 
@@ -37,6 +39,7 @@ function action(value: JsonValue): StoryAction | null {
 export function decodeStory(value: JsonValue | undefined): StoryProgress | undefined {
   let reader = JsonObjectReader.from(value)
   if (!reader) return undefined
+
   const source = reader
   const world =
     reader.number('schemaVersion') === 3 || reader.number('schemaVersion') === 4
@@ -44,6 +47,7 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
       : null
   if ((reader.number('schemaVersion') === 3 || reader.number('schemaVersion') === 4) && !world)
     return undefined
+
   if (
     reader.number('schemaVersion') === 2 ||
     reader.number('schemaVersion') === 3 ||
@@ -53,6 +57,7 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
     const quests = reader.child('quests')
     if (!travel || !quests || !reader.child('inventory') || !reader.child('dialogue'))
       return undefined
+
     reader = JsonObjectReader.from({
       campaignActivity: quests.value('campaignActivity') ?? null,
       facts: quests.value('facts') ?? [],
@@ -68,6 +73,7 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
       mapOwned: source.child('inventory')?.value('mapOwned') ?? false,
     })!
   } else if (reader.value('schemaVersion') !== undefined) return undefined
+
   const completed = [
     ...new Set(
       (reader.array('completed') ?? []).flatMap((v) => {
@@ -85,6 +91,7 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
     ),
   ]
   for (const id of claimed) if (!completed.includes(id)) completed.push(id)
+
   const raw = reader.child('journal')
   const revision = raw?.number('revision') ?? -1
   const validRevision = Number.isInteger(revision) && revision >= 0 && revision <= 1_000_000
@@ -114,16 +121,21 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
     : []
   if (!dialogue) {
     if (accepted.includes('reach-camp')) seen.push('wake')
+
     if (accepted.includes('lost-satchel')) seen.push('trail')
+
     if (completed.includes('lost-satchel')) seen.push('satchel')
+
     if (reader.value('arrived') === true || completed.includes('reach-camp'))
       seen.push('wake', 'flag', 'open', 'travel', 'trail', 'approach', 'arrival')
+
     if (
       reader.value('mapOwned') === true ||
       (reader.value('mapOwned') === undefined && completed.includes('meet-guide'))
     )
       seen.push('guide')
   }
+
   const pending = dialogue?.child('active')
   const pendingId = STORY_DIALOGUE_IDS.find((id) => id === pending?.string('id'))
   const beat = pending?.number('beat') ?? -1
@@ -134,6 +146,7 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
     if (amount !== undefined && amount !== null && Number.isSafeInteger(amount) && amount >= 0)
       campaignActivity[metric] = Math.min(1e9, amount)
   }
+
   return {
     ...(activity ? { campaignActivity } : {}),
     ...(world ? { world } : {}),

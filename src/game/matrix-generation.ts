@@ -12,6 +12,7 @@ function crystalPatterns(): readonly MatrixRegion[] {
   for (let mask = 0; mask < 512; mask++) {
     const crystals = indices.filter((index) => mask & (1 << index))
     if (crystals.length !== 3 && crystals.length !== 4) continue
+
     const rows = [0, 1, 2].map((row) =>
       surveyRuns([0, 1, 2].map((col) => crystals.includes(row * 3 + col))),
     )
@@ -27,6 +28,7 @@ function crystalPatterns(): readonly MatrixRegion[] {
     if (!solved.contradiction && !solved.cells.includes('unresolved'))
       patterns.push({ indices, crystals, rows, columns })
   }
+
   return patterns
 }
 
@@ -39,9 +41,11 @@ function distances(game: Game, start: number, blocked: ReadonlySet<number>): Map
   for (const index of queue)
     for (const next of adjacentSteps(game, index)) {
       if (found.has(next) || blocked.has(next) || game.cells[next]!.mine) continue
+
       found.set(next, found.get(index)! + 1)
       queue.push(next)
     }
+
   return found
 }
 
@@ -68,6 +72,7 @@ function observationRegion(
     }),
   )
   if (!pattern) return null
+
   return { ...pattern, indices, crystals: pattern.crystals.map((local) => indices[local]!) }
 }
 
@@ -103,6 +108,7 @@ function candidate(config: Config, seed: number): MatrixLayout | null {
     seed ^ 0xb055,
   )[0]
   if (boss === undefined) return null
+
   const obstacles = new Set([boss])
   // Safe rocks vary paths; disconnected islands become explicit walls rather than unreachable floor.
   for (const index of shuffled(
@@ -116,6 +122,7 @@ function candidate(config: Config, seed: number): MatrixLayout | null {
     seed ^ 0x70c,
   ).slice(0, 3))
     obstacles.add(index)
+
   const reached = distances(placed, entrance, obstacles)
   const walls = indices.filter(
     (index) => obstacles.has(index) || (!mines.has(index) && !reached.has(index)),
@@ -129,11 +136,13 @@ function candidate(config: Config, seed: number): MatrixLayout | null {
   }
   if (game.cells.filter((cell) => cell.visibility === 'revealed').length > indices.length * 0.5)
     return null
+
   const solved = solveBattle(game, walls, entrance)
   const approaches = adjacentSteps(game, boss).filter(
     (index) => !walls.includes(index) && solved.cells[index]!.visibility === 'revealed',
   )
   if (approaches.length < 2) return null
+
   const fromBoss = distances(game, approaches[0]!, new Set(walls))
   const origins = shuffled(
     indices.filter(
@@ -152,17 +161,21 @@ function candidate(config: Config, seed: number): MatrixLayout | null {
     )
       continue
     // Every crystal is deducibly reachable; at least two choices are near the boss.
+
     if (
       region.crystals.filter(
         (index) => (fromBoss.get(index) ?? Infinity) <= 4 && (reached.get(index) ?? Infinity) <= 9,
       ).length < 2
     )
       continue
+
     if (!region.crystals.some((index) => game.cells[index]!.visibility === 'hidden')) continue
+
     regions.push(region)
     if (regions.length === 2)
       return { game, walls, entrance, boss, regions: [regions[0]!, regions[1]!] }
   }
+
   return null
 }
 

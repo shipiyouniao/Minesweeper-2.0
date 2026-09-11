@@ -42,6 +42,7 @@ export function roomTravel(run: Expedition): number {
 export function shareMirrorKnowledge(run: Expedition): Expedition {
   const encounter = run.encounter
   if (encounter?.kind !== 'mirror') return run
+
   const other = encounter.other
   const activeSafe = other.confirmedMines.filter(
     (index) => !run.walls.includes(index) && !run.surveyedCells.includes(index),

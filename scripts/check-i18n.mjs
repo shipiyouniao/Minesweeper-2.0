@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises'
 import ts from 'typescript-legacy'
+import { join, dirname, resolve } from 'node:path'
 
 const failures = []
 /** Read literal catalogs without executing application code. */
@@ -15,10 +16,14 @@ async function catalog(language) {
     .declarations[0]
   if (!declaration || !ts.isObjectLiteralExpression(declaration.initializer))
     throw new Error(`Invalid catalog: ${filename}`)
+  const keys = new Set()
   return Object.fromEntries(
     declaration.initializer.properties.map((property) => {
       if (!ts.isPropertyAssignment(property) || !ts.isStringLiteral(property.initializer))
         throw new Error(`Catalog messages must be plain strings: ${filename}`)
+      if (keys.has(property.name.text))
+        failures.push(`${filename}: duplicate message key ${property.name.text}`)
+      keys.add(property.name.text)
       return [property.name.text, property.initializer.text]
     }),
   )
@@ -40,17 +45,26 @@ for (const [index, messages] of catalogs.entries()) {
       failures.push(`${key}: translated parameter names differ`)
   }
 }
+/** Inspect nested UI modules as the presentation layer grows, not just its top-level files. */
+async function uiFiles(directory) {
+  const files = []
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name)
+    if (entry.isDirectory()) files.push(...(await uiFiles(path)))
+    else if (entry.name.endsWith('.ts')) files.push(path)
+  }
+  return files
+}
+
 /** Enforce catalog calls and prevent new inline multilingual copy in UI modules. */
-for (const file of await readdir('src/ui')) {
-  if (!file.endsWith('.ts')) continue
-  const filename = `src/ui/${file}`
+for (const filename of await uiFiles('src/ui')) {
   const text = await readFile(filename, 'utf8')
   const source = ts.createSourceFile(filename, text, ts.ScriptTarget.Latest, true)
   const functions = new Set()
   for (const node of source.statements)
     if (
       ts.isImportDeclaration(node) &&
-      node.moduleSpecifier.text === '../i18n.js' &&
+      resolve(dirname(filename), node.moduleSpecifier.text) === resolve('src/i18n.js') &&
       node.importClause?.namedBindings &&
       ts.isNamedImports(node.importClause.namedBindings)
     ) {

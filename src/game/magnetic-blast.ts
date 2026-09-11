@@ -14,6 +14,7 @@ export function blastMagnetic(run: MagneticExpedition, anchor: number): Magnetic
     ...cell,
     adjacent: neighbors(run.game.config, index).filter((other) => cleared[other]?.mine).length,
   }))
+
   return {
     ...run,
     game: pruneSafeMarks({

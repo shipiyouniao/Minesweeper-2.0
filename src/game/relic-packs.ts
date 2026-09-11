@@ -42,8 +42,12 @@ export function ownedRelicPacks(camp: Camp): RelicPack[] {
 export function relicPool(departure: Departure): Relic[] {
   const base: Relic[] = ['lantern', 'lens', 'aegis', 'purse']
   if (departure.archive) base.push('compass', 'salvage')
+
   for (const pack of RELIC_PACKS) if (departure.packs.includes(pack.id)) base.push(...pack.relics)
+
   if (departure.battleRelics) base.push('tempered-edge', 'layered-armor', 'tactics-hourglass')
+
   base.push(...(departure.milestoneRelics ?? []))
+
   return base
 }

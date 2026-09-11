@@ -63,6 +63,7 @@ export class ExpeditionSession {
     }
     // Commit the camp credit and removal of the obsolete journal in one storage write.
     if (repository.migrated || repository.recovered) this.commit()
+
     const journal = this.save.journal
     if (!journal) return
 
@@ -86,8 +87,10 @@ export class ExpeditionSession {
           valid = false
           break
         }
+
         run = next
       }
+
       if (valid && (run.phase === 'exploring' || run.phase === 'boss' || run.phase === 'reward'))
         this.current = run
     }
@@ -122,6 +125,7 @@ export class ExpeditionSession {
   /** A completed performance is durable; unfinished lines can replay after re-entry. */
   completeCampaignScene(id: CampaignSceneId): void {
     if (!this.campaignMode || this.stageProgress.scenes.includes(id)) return
+
     this.refreshShared()
     this.save = {
       ...this.save,
@@ -144,13 +148,16 @@ export class ExpeditionSession {
       )
     )
       step = 2
+
     if (step === 2 && actions.some((action) => action.type === 'skill')) step = 3
+
     return step
   }
 
   /** Start or dismiss the first-floor practice without granting tools or changing the run. */
   setCampaignLesson(step: number): void {
     if (!this.campaignMode || !this.current) return
+
     this.refreshShared()
     this.save = {
       ...this.save,
@@ -179,6 +186,7 @@ export class ExpeditionSession {
   selectLoadout(loadout: CampLoadout): void {
     this.refreshShared()
     if (this.current || !allowedDeparture(this.camp, loadout.profession, loadout.equipment)) return
+
     this.save = { ...this.save, loadout }
     this.commit()
   }
@@ -215,6 +223,7 @@ export class ExpeditionSession {
   ): boolean {
     this.refreshShared()
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
+
     if (
       this.repository.campaignMode &&
       (this.stageProgress.cleared ||
@@ -229,6 +238,7 @@ export class ExpeditionSession {
             ?.player !== this.stage.entrance.index))
     )
       return false
+
     const departure: Departure = {
       ...(this.repository.campaignMode ? { campaign: this.stage.revision } : {}),
       title: milestoneProgress(this.camp).title ?? null,
@@ -242,6 +252,7 @@ export class ExpeditionSession {
       equipment: [...equipment],
       archive: this.camp.upgrades.includes('archive'),
     }
+
     this.current = createExpedition(departure)
     this.save = {
       ...this.save,
@@ -266,12 +277,14 @@ export class ExpeditionSession {
       },
     }
     this.commit()
+
     return true
   }
 
   /** Apply a legal intent and settle terminal outcomes in the same persistence write. */
   dispatch(action: ExpeditionAction): boolean {
     this.refreshShared()
+
     const run = this.current
     const journal = this.save.journal
     if (
@@ -280,9 +293,12 @@ export class ExpeditionSession {
       (journal.actions.length >= MAX_ACTIONS - 1 && action.type !== 'retreat')
     )
       return false
+
     const next = actExpedition(run, action)
     if (next === run) return false
+
     this.current = next
+
     const progressedCamp = advanceMilestones(this.camp, run, next)
     const camp = run.encounter
       ? {
@@ -304,6 +320,7 @@ export class ExpeditionSession {
                 run.surveyedCells.includes(action.index)
               ? 4
               : lesson
+
     this.save = {
       ...this.save,
       ...(this.campaignMode
@@ -348,6 +365,7 @@ export class ExpeditionSession {
         depth: next.floor,
         earned,
       }
+
       this.save = {
         ...this.save,
         version: 4,
@@ -383,6 +401,7 @@ export class ExpeditionSession {
     }
 
     this.commit()
+
     return true
   }
 
@@ -396,7 +415,9 @@ export class ExpeditionSession {
   /** Return from the terminal result to camp without awarding anything a second time. */
   returnToCamp(): boolean {
     if (!this.current || this.save.journal) return false
+
     this.current = null
+
     return true
   }
 
@@ -404,10 +425,13 @@ export class ExpeditionSession {
   purchase(upgrade: Upgrade): boolean {
     this.refreshShared()
     if (this.current) return false
+
     const camp = buyUpgrade(this.camp, upgrade)
     if (camp === this.camp) return false
+
     this.save = { ...this.save, camp }
     this.commit()
+
     return true
   }
 
@@ -418,8 +442,10 @@ export class ExpeditionSession {
 
     const camp = equipTitle(this.camp, id)
     if (camp === this.camp) return false
+
     this.save = { ...this.save, camp }
     this.commit()
+
     return true
   }
 
@@ -427,10 +453,13 @@ export class ExpeditionSession {
   claim(id: MilestoneId): boolean {
     this.refreshShared()
     if (this.current) return false
+
     const camp = claimMilestone(this.camp, id)
     if (camp === this.camp) return false
+
     this.save = { ...this.save, camp }
     this.commit()
+
     return true
   }
 
@@ -438,6 +467,7 @@ export class ExpeditionSession {
   private refreshShared(): void {
     const latest = this.repository.expedition()
     if (!latest) return
+
     this.save = {
       ...this.save,
       camp: latest.camp,

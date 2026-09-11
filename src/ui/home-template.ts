@@ -11,7 +11,9 @@ import { variantCopy } from './variant-copy.js'
 /** Keep mode names identical in the directory and their game screens. */
 export function freeModeName(language: Language, mode: FreeMode): string {
   if (mode === 'sonar') return message(language, 'sonar-copy.sonar')
+
   if (mode === 'survey') return message(language, 'survey.title')
+
   return variantCopy(language)[mode]
 }
 

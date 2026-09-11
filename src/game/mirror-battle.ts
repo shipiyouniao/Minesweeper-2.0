@@ -15,18 +15,22 @@ function mirrorIntent(
 ): TacticalIntent {
   // A shared third-turn recharge guarantees attack opportunities even in narrow numbered lanes.
   if (turn % 3 === 0) return { kind: 'row', targets: [], damage: 0 }
+
   const beat = turn - Math.floor(turn / 3)
   const width = room.game.config.width
   const x = room.player % width
   const y = Math.floor(room.player / width)
   const targets = room.game.cells.flatMap((_, index) => {
     if (room.walls.includes(index)) return []
+
     const dx = (index % width) - x
     const dy = Math.floor(index / width) - y
     const hit =
       side === 'dawn' ? (beat % 2 ? dy === 0 : dx === 0) : beat % 2 ? dx === dy : dx === -dy
+
     return hit ? [index] : []
   })
+
   return { kind: side === 'dawn' ? (beat % 2 ? 'row' : 'column') : 'cross', targets, damage }
 }
 
@@ -37,6 +41,7 @@ export function forecastMirror(run: MirrorExpedition): MirrorExpedition {
   const activeAlive = encounter[encounter.active].health > 0
   const otherAlive = encounter[opposite].health > 0
   const damage = activeAlive && otherAlive ? 5 : 7
+
   return {
     ...run,
     encounter: {
@@ -63,6 +68,7 @@ export function enterMirror(run: Expedition): Expedition {
     (run.departure.seed ^ Math.imul(run.floor, 0x85ebca6b)) >>> 0,
   )
   const health = 10 + tier.health
+
   return forecastMirror({
     ...run,
     sonar: { ...run.sonar, readings: [], loan: 0, loanProgress: 0 },
@@ -117,6 +123,7 @@ export function shiftMirror(run: MirrorExpedition): Expedition {
 export function disableMirrorSeal(run: MirrorExpedition): Expedition {
   const encounter = run.encounter
   const twin = encounter[encounter.active]
+
   return {
     ...run,
     encounter: {
@@ -134,6 +141,7 @@ export function strikeMirror(run: MirrorExpedition, damage: number): Expedition 
   const health = Math.max(0, twin.health - damage)
   const lastDamage = twin.health - health
   const total = encounter.health - lastDamage
+
   return {
     ...run,
     encounter: {

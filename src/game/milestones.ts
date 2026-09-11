@@ -429,15 +429,20 @@ export function milestoneValue(camp: Camp, entry: MilestoneDefinition): number {
   const progress = milestoneProgress(camp)
   if (entry.metric === 'bossKill')
     return Number(entry.bossKind !== undefined && progress.bossKinds.includes(entry.bossKind))
+
   if (entry.metric === 'challenge') return Number(progress.challenges?.includes(entry.id) === true)
+
   if (entry.metric === 'wins') return Math.max(camp.completed, progress.wins)
+
   const value = progress[entry.metric]
+
   return typeof value === 'number' ? value : value.length
 }
 
 /** Never run during replay; accepted actions and their cumulative counters commit together. */
 export function advanceMilestones(camp: Camp, before: Expedition, after: Expedition): Camp {
   if (before === after) return camp
+
   const progress = milestoneProgress(camp)
   const sameFloor = before.floor === after.floor
   const completedFloor =
@@ -484,6 +489,7 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
       b.turn > a.turn &&
       b.resolution?.impact != null &&
       before.game.cells[b.resolution.impact]?.mine === true
+
     attempt = {
       ...attempt,
       failed: attempt.failed || cut || hit,
@@ -500,6 +506,7 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
         (b?.kind === 'magnetic' && (b.resolution?.detonatedMines.length ?? 0) > 0),
     }
   }
+
   const earned: MilestoneId[] = []
   if (boss && known && attempt) {
     if (
@@ -508,23 +515,33 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
       after.encounter.empty.length === 0
     )
       earned.push('matrix-precise')
+
     if (boss === 'echo' && !attempt.hurt) earned.push('echo-flawless')
+
     if (boss === 'echo' && after.encounter?.kind === 'echo' && after.encounter.pulsesUsed <= 6)
       earned.push('echo-precise')
+
     if (boss === 'brood' && !attempt.failed) earned.push('web-untouched')
+
     if (boss === 'magnetic' && !attempt.failed) earned.push('field-unscathed')
+
     if (boss === 'bastion' && !attempt.hurt) earned.push('bastion-flawless')
+
     if (boss === 'mirror' && !attempt.hurt) earned.push('mirror-flawless')
+
     if (
       boss === 'clock' &&
       after.encounter?.kind === 'clock' &&
       after.encounter.hourglasses.filter((glass) => glass.used).length === 1
     )
       earned.push('clock-no-glass')
+
     if (boss === 'magnetic' && attempt.blasted) earned.push('magnetic-demolition')
+
     if (after.encounter?.kind === 'brood' && after.encounter.nests.length > 0)
       earned.push('brood-nest-spared')
   }
+
   const stairsPath = enteringBoss ? approachPath(before, before.exit) : null
   const chests = enteringBoss
     ? before.treasures.filter(
@@ -533,8 +550,10 @@ export function advanceMilestones(camp: Camp, before: Expedition, after: Expedit
     : sameFloor
       ? after.collected.filter((index) => !before.collected.includes(index)).length
       : 0
+  /** Saturate accepted counter increments so corrupted or oversized histories cannot overflow progress. */
   const add = (value: number, increment: number): number =>
     Math.min(1e9, value + Math.max(0, increment))
+
   return {
     ...camp,
     milestones: {
@@ -566,6 +585,7 @@ export function claimMilestone(camp: Camp, id: MilestoneId): Camp {
   const progress = milestoneProgress(camp)
   if (!entry || progress.claimed.includes(id) || milestoneValue(camp, entry) < entry.target)
     return camp
+
   return {
     ...camp,
     supplies: Math.min(Number.MAX_SAFE_INTEGER, camp.supplies + entry.supplies),
@@ -590,6 +610,7 @@ export function ownedMilestoneRelics(camp: Camp): MilestoneRelic[] {
 /** Reward careers are licenses, never purchasable camp upgrades. */
 export function ownsProfession(camp: Camp, profession: Profession): boolean {
   if (profession === 'rescuer') return camp.storyProfessions?.includes('rescuer') ?? false
+
   if (profession === 'waymarker' || profession === 'riftwalker')
     return MILESTONES.some(
       (entry) =>
@@ -597,6 +618,7 @@ export function ownsProfession(camp: Camp, profession: Profession): boolean {
         entry.reward.id === profession &&
         milestoneProgress(camp).claimed.includes(entry.id),
     )
+
   return profession === 'explorer' || camp.upgrades.includes(profession)
 }
 
@@ -623,6 +645,8 @@ export function ownedTitles(camp: Camp): TitleId[] {
 export function equipTitle(camp: Camp, id: MilestoneId | null): Camp {
   const title = parseTitle(id)
   if (id !== null && (title === null || !ownedTitles(camp).includes(title))) return camp
+
   if ((milestoneProgress(camp).title ?? null) === title) return camp
+
   return { ...camp, milestones: { ...milestoneProgress(camp), title } }
 }

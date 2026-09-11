@@ -9,7 +9,9 @@ import type { Language } from '../types/localization.js'
 export function renderFloorCircuits(root: HTMLElement, run: Expedition, language: Language): void {
   const circuits = run.circuits
   if (!circuits) return
+
   const t = signalCopy(language)
+  /** Resolve the active board cell used to position circuit landmarks and effects. */
   const cellAt = (index: number): HTMLElement | null =>
     root.querySelector(`[data-side="a"] [data-cell="${index}"]`)
   for (const relay of circuits.relays) {
@@ -19,6 +21,7 @@ export function renderFloorCircuits(root: HTMLElement, run: Expedition, language
       const revealed = run.game.cells[relay.index]?.visibility === 'revealed'
       const ready = relayReady(run, relay)
       const label = `${t.relay}${relay.optional ? ` · ${t.optional}` : ''} · ${!relay.active ? t.released : ready ? t.ready : t.solve}`
+
       cell.classList.add('signal-relay', 'landmark-cell')
       cell.classList.toggle('signal-ready', ready)
       cell.classList.toggle('signal-off', !relay.active)
@@ -27,11 +30,13 @@ export function renderFloorCircuits(root: HTMLElement, run: Expedition, language
       cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
       if (revealed)
         cell.innerHTML = `<span class="landmark-clue">${run.game.cells[relay.index]?.adjacent || ''}</span>`
+
       cell.insertAdjacentHTML(
         'afterbegin',
         spriteImage(relay.active ? 'bastion-pylon' : 'bastion-pylon-off'),
       )
     }
+
     if (gate) {
       gate.classList.add('signal-gate', 'landmark-cell')
       gate.classList.toggle('signal-released', !relay.active)
@@ -43,8 +48,10 @@ export function renderFloorCircuits(root: HTMLElement, run: Expedition, language
         : `<span class="signal-open-gate" aria-hidden="true">⌁</span><span class="landmark-clue">${run.game.cells[relay.gate]?.adjacent || ''}</span>`
     }
   }
+
   if (circuits.record !== null && !circuits.recordTaken) {
     const cell = cellAt(circuits.record)
+
     cell?.classList.add('landmark-cell', 'signal-record')
     cell?.insertAdjacentHTML('afterbegin', spriteImage('survey-notes'))
     if (cell) {
@@ -52,6 +59,7 @@ export function renderFloorCircuits(root: HTMLElement, run: Expedition, language
       cell.setAttribute('aria-label', cell.title)
     }
   }
+
   if (run.departure.campaign === 'tower-relay-v1' && run.floor === 3) {
     const cell = cellAt(run.exit)
     if (cell) {
@@ -76,6 +84,7 @@ export async function animateCircuitChange(
     matchMedia('(prefers-reduced-motion: reduce)').matches
   )
     return
+
   const animations: Animation[] = []
   for (const relay of after.circuits.relays) {
     if (
@@ -94,5 +103,6 @@ export async function animateCircuitChange(
       if (animation) animations.push(animation)
     }
   }
+
   await Promise.allSettled(animations.map((animation) => animation.finished))
 }

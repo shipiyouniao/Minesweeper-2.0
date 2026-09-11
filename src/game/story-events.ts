@@ -27,6 +27,7 @@ export const STORY_DIALOGUE_IDS: readonly StoryDialogueId[] = [
 export function storyDialogueEvent(state: StoryViewState): StoryDialogueId | null {
   const run = state.run
   if (state.service || run?.phase === 'fallen' || state.feedback === 'hurt') return null
+
   const seenEvents = state.progress.dialogue?.completed ?? []
   if (
     state.progress.completed.includes('survey-road') &&
@@ -34,32 +35,41 @@ export function storyDialogueEvent(state: StoryViewState): StoryDialogueId | nul
     (run?.board.scene.id !== 'north-road' || seenEvents.includes('north-road-found'))
   )
     return 'quarry-lead'
+
   if (run && run.floor >= 3) {
     if (run.board.scene.id === 'quarry-yard') {
       if (!seenEvents.includes('quarry-brake')) return 'quarry-brake'
       if (run.operated.length && !seenEvents.includes('quarry-release')) return 'quarry-release'
     }
+
     if (run.board.scene.id === 'quarry-machine' && !seenEvents.includes('quarry-winch'))
       return 'quarry-winch'
+
     if (state.progress.facts?.includes('lift-restored') && !seenEvents.includes('lift-repaired'))
       return 'lift-repaired'
+
     if (
       run.collected &&
       run.board.scene.id === 'quarry-machine' &&
       !seenEvents.includes('spindle-found')
     )
       return 'spindle-found'
+
     if (state.progress.facts?.includes('tower-reached') && !seenEvents.includes('tower-arrival'))
       return 'tower-arrival'
+
     if (run.floor > 3) return null
   }
+
   if (run?.board.scene.id === 'north-road') {
     const seen = state.progress.dialogue?.completed ?? []
     if (!seen.includes('north-road-start')) return 'north-road-start'
+
     return state.progress.facts?.includes('lift-discovered') && !seen.includes('north-road-found')
       ? 'north-road-found'
       : null
   }
+
   if (
     !run &&
     state.conversation === 'guide' &&
@@ -67,6 +77,7 @@ export function storyDialogueEvent(state: StoryViewState): StoryDialogueId | nul
     !state.progress.dialogue?.completed.includes('north-road-report')
   )
     return 'north-road-report'
+
   const active = state.progress.dialogue?.active?.id
   if (active && !state.progress.dialogue?.completed.includes(active)) {
     const scene =
@@ -79,6 +90,7 @@ export function storyDialogueEvent(state: StoryViewState): StoryDialogueId | nul
             : 3
     if (scene === (run?.floor ?? 3)) return active
   }
+
   const id: StoryDialogueId = !run
     ? state.conversation === 'road'
       ? 'road'
@@ -98,5 +110,6 @@ export function storyDialogueEvent(state: StoryViewState): StoryDialogueId | nul
             : !run.practicedReveal
               ? 'open'
               : 'travel'
+
   return state.progress.dialogue?.completed.includes(id) ? null : id
 }

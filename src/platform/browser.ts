@@ -27,6 +27,7 @@ export const browserRuntime: SessionRuntime = {
   /** Seed deterministic placement with browser-provided randomness for each game. */
   randomSeed(): number {
     const values = new Uint32Array(1)
+
     crypto.getRandomValues(values)
 
     return values[0] ?? 0

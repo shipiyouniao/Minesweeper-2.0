@@ -19,6 +19,7 @@ export function enterClock(run: Expedition): Expedition {
     (run.departure.seed ^ Math.imul(run.floor, 0x85ebca6b)) >>> 0,
   )
   const health = 20 + tier.health * 2
+
   return forecastClock({
     ...run,
     sonar: { ...run.sonar, readings: [], loan: 0, loanProgress: 0 },
@@ -67,6 +68,7 @@ export function redirectClock(run: ClockExpedition, index: number): Expedition {
     .sort((a, b) => a.resolvesOn - b.resolvesOn || a.id - b.id)[0]
   if (!target || !run.encounter.hourglasses.some((glass) => glass.index === index && !glass.used))
     return run
+
   return clockIntent({
     ...run,
     encounter: {
@@ -135,5 +137,6 @@ export function advanceClock(run: ClockExpedition): Expedition {
     },
   }
   const ready = { ...next, encounter: { ...next.encounter, points: combatStats(next).actions } }
+
   return alive && health > 0 ? forecastClock(ready) : clockIntent(ready)
 }

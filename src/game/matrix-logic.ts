@@ -19,11 +19,13 @@ export function matrixHealthFloor(run: MatrixExpedition): number {
 /** Use the run solver's occupancy vocabulary for crystals, never concealed mine identities. */
 export function crystalKnowledge(run: MatrixExpedition, index: number): SurveyKnowledge {
   if (run.encounter.collected.includes(index)) return 'mine'
+
   if (
     run.encounter.empty.includes(index) ||
     run.walls.includes(index) ||
     run.confirmedMines.includes(index)
   )
     return 'safe'
+
   return run.encounter.notes.includes(index) ? 'mine' : 'unresolved'
 }

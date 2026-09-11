@@ -32,20 +32,27 @@ export class StorySession {
     this.camp = camp
     camp.acceptWaterwayRoute()
     camp.acceptDiscoveredRoutes()
+
     const story = camp.story
     if (story.world) {
       if (story.world.revision !== STORY_REVISION) {
         const active = story.world.active !== null
+
         camp.retireStoryWorld(active)
+
         return
       }
+
       this.current = restoreStoryWorld(story.world)
+
       return
     }
+
     if (story.journal && story.journal.revision !== STORY_REVISION) {
       camp.retireStoryWorld(true)
       return
     }
+
     const atCamp = story.arrived && !story.journal
     const history = atCamp ? story.route : story.journal
     let run =
@@ -55,11 +62,14 @@ export class StorySession {
     for (const action of history?.actions ?? []) {
       const next = actStory(run, action)
       if (next === run) break
+
       run = next
     }
+
     if (atCamp) {
       const checkpoint = checkpointStory(run)
       const progress = { ...story, journal: null, world: { ...checkpoint, active: null } }
+
       delete progress.route
       delete progress.routeLegacy
       camp.saveStory(progress)
@@ -83,6 +93,7 @@ export class StorySession {
       progress.campPosition !== buildStoryBoard(CAMP_SCENE).exit
     )
       return false
+
     const world = progress.world
     const saved =
       world &&
@@ -90,8 +101,10 @@ export class StorySession {
         ? legacyStoryRoute(progress.completed.includes('lost-satchel'))
         : restoreStoryWorld(world, 'approach'))
     if (!saved) return false
+
     this.current = { ...saved, health: 3, player: saved.board.exit, phase: 'exploring' }
     this.persist()
+
     return true
   }
 
@@ -106,8 +119,10 @@ export class StorySession {
       !progress.world
     )
       return false
+
     const saved = restoreStoryWorld(progress.world, 'north-road')
     const initial = saved ?? { ...createStoryRun(3), visited: storyWorldScenes(progress.world) }
+
     this.current = {
       ...initial,
       player: initial.board.entrance,
@@ -115,16 +130,20 @@ export class StorySession {
       phase: 'exploring',
     }
     this.persist()
+
     return true
   }
 
   /** Save each accepted interaction before its presentation animation begins. */
   dispatch(action: StoryAction): boolean {
     if (!this.current) return false
+
     const next = actStory(this.current, action)
     if (next === this.current) return false
+
     this.current = next
     this.persist()
+
     return true
   }
 
@@ -133,10 +152,12 @@ export class StorySession {
     const progress = this.camp.story
     const run = this.current
     if (run && run.phase !== 'exploring') return false
+
     const portal = northwestPortals(run?.board.scene.id ?? 'camp', progress).find(
       (entry) => entry.index === (run?.player ?? progress.campPosition),
     )
     if (!portal || !progress.world) return false
+
     const world = run ? checkpointStory(run) : progress.world
     const story = portal.outcome ? recordStoryFacts(progress, [portal.outcome]) : progress
     if (portal.destination === 'camp') {
@@ -148,13 +169,16 @@ export class StorySession {
         journal: null,
         world: { ...world, active: null },
       })
+
       return true
     }
+
     const saved = restoreStoryWorld(world, portal.destination)
     const initial = saved ?? {
       ...createStoryRun(STORY_SCENES.findIndex((scene) => scene.id === portal.destination)),
       visited: storyWorldScenes(world),
     }
+
     this.current = {
       ...initial,
       player: portal.arrival,
@@ -163,20 +187,25 @@ export class StorySession {
     }
     this.camp.saveStory(story)
     this.persist()
+
     return true
   }
 
   /** Physical world doorways share their prerequisite checks with durable repair outcomes. */
   travelWorld(): boolean {
     if (this.travelNorthwest()) return true
+
     const run = this.current
     if (!run || run.phase !== 'exploring' || run.floor < 3 || run.floor > 7) return false
+
     const progress = this.camp.story
     let floor: number | null = null
     let target: number | null = null
     if (run.floor === 3) {
       if (run.player === run.board.entrance) return this.dispatch({ type: 'return' })
+
       if (run.player === QUARRY_GATE && progress.accepted?.includes('repair-lift')) floor = 4
+
       if (run.player === run.board.exit && progress.facts?.includes('spindle-secured')) {
         if (!progress.facts.includes('lift-restored')) {
           this.camp.saveStory(recordStoryFacts(progress, ['lift-restored']))
@@ -191,12 +220,16 @@ export class StorySession {
     else if (run.floor === 6 && run.player === run.board.exit) {
       // The repaired haul track is a physical shortcut, available after recovering the spindle.
       if (!run.collected || !run.operated.length) return false
+
       floor = 3
       target = createStoryRun(3).board.exit
     }
+
     if (floor === null) return false
+
     const { visited = [], ...snapshot } = run
     const saved = visited.find((scene) => scene.floor === floor) ?? createStoryRun(floor)
+
     this.current = {
       ...saved,
       player: target ?? saved.board.entrance,
@@ -208,6 +241,7 @@ export class StorySession {
       ],
     }
     this.persist()
+
     return true
   }
 
@@ -223,11 +257,13 @@ export class StorySession {
           : null
     const id = event ? storyTaskIntroduced(event, progress) : null
     if (!id || progress.accepted?.includes(id) || progress.completed.includes(id)) return null
+
     this.camp.saveStory({
       ...progress,
       accepted: [...(progress.accepted ?? []), id],
       pinned: [...(progress.pinned ?? []), id],
     })
+
     return id
   }
 
@@ -235,7 +271,9 @@ export class StorySession {
   togglePin(id: StoryTask): void {
     const progress = this.camp.story
     if (!progress.accepted?.includes(id) || progress.completed.includes(id)) return
+
     const pinned = progress.pinned ?? []
+
     this.camp.saveStory({
       ...progress,
       pinned: pinned.includes(id) ? pinned.filter((task) => task !== id) : [...pinned, id],
@@ -246,6 +284,7 @@ export class StorySession {
   checkpointDialogue(id: StoryDialogueId, beat: number): void {
     const progress = this.camp.story
     if (progress.dialogue?.completed.includes(id)) return
+
     this.camp.saveStory({
       ...progress,
       dialogue: { completed: progress.dialogue?.completed ?? [], active: { id, beat } },
@@ -261,12 +300,15 @@ export class StorySession {
         !adjacentSteps(buildStoryBoard(CAMP_SCENE).game, this.camp.story.campPosition).includes(51))
     )
       return null
+
     const progress =
       id === 'north-road-report'
         ? recordStoryFacts(this.camp.story, ['road-reported'])
         : this.camp.story
     if (progress.dialogue?.completed.includes(id)) return null
+
     const accept = storyTaskIntroduced(id, progress)
+
     this.camp.saveStory({
       ...progress,
       accepted: accept ? [...(progress.accepted ?? []), accept] : (progress.accepted ?? []),
@@ -274,6 +316,7 @@ export class StorySession {
       mapOwned: progress.mapOwned || (id === 'guide' && progress.completed.includes('meet-guide')),
       dialogue: { completed: [...(progress.dialogue?.completed ?? []), id], active: null },
     })
+
     return accept
   }
 
@@ -298,12 +341,14 @@ export class StorySession {
         ? board.entrance
         : progress.campPosition
     if (!progress.arrived) return null
+
     const resident = residents.includes(index)
     const targets = index === 51 || resident ? adjacentSteps(board.game, index) : [index]
     const paths = targets.flatMap((target) => {
       const path = storyPath({ ...board, walls: [...board.walls, ...residents] }, player, target)
       return path ? [path] : []
     })
+
     return paths.sort((a, b) => a.length - b.length)[0] ?? null
   }
 
@@ -311,7 +356,9 @@ export class StorySession {
   moveCamp(index: number): boolean {
     const path = this.campPath(index)
     if (!path) return false
+
     this.camp.saveStory({ ...this.camp.story, campPosition: path.at(-1)! })
+
     return true
   }
 
@@ -320,6 +367,7 @@ export class StorySession {
     const progress = this.camp.story
     const board = buildStoryBoard(CAMP_SCENE)
     if (!progress.arrived || !adjacentSteps(board.game, progress.campPosition).includes(51)) return
+
     this.camp.saveStory(recordStoryFacts(progress, ['guide-met']))
   }
 
@@ -327,9 +375,12 @@ export class StorySession {
   private persist(): void {
     const run = this.current
     if (!run) return
+
     const old = { ...this.camp.story }
+
     delete old.route
     delete old.routeLegacy
+
     const arrived = run.phase === 'arrived'
     const progress: StoryProgress = {
       ...old,
@@ -338,6 +389,7 @@ export class StorySession {
       world: checkpointStory(arrived ? { ...run, health: 3 } : run),
       ...(arrived && run.board.scene.id === 'north-road' ? { campPosition: 13 } : {}),
     }
+
     this.camp.saveStory(
       recordStoryFacts(progress, [
         ...((run.floor === 1 && run.collected) || run.rescuedSupplies

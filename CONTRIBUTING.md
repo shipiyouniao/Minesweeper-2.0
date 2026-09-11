@@ -49,7 +49,7 @@ npm run check
 node scripts/verify-build.mjs
 ```
 
-These check formatting, declaration conventions, strict types, behavioral tests, the native production build, Pages paths, and the emitted declaration graph. Add or adjust a regression test when changing behavior; documentation and artwork changes generally do not need new behavior tests.
+These check formatting, declaration conventions, named-function documentation, inward dependency boundaries, three-language message contracts, strict types, behavioral tests, the native production build, Pages paths, and the emitted declaration graph. Add or adjust a regression test when changing behavior; documentation and artwork changes generally do not need new behavior tests.
 
 For UI changes, also try the affected interaction in a browser, including keyboard controls and a narrow viewport when relevant. For persistence changes, check both restored progress and unavailable storage.
 

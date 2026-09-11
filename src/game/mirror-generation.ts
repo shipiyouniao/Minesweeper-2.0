@@ -18,11 +18,14 @@ function connected(
     for (const next of adjacentSteps(game, index)) {
       const cell = game.cells[next]!
       if (reached.has(next) || walls.includes(next)) continue
+
       if (revealed ? cell.visibility !== 'revealed' : cell.mine) continue
+
       reached.add(next)
       queue.push(next)
     }
   }
+
   return reached
 }
 
@@ -57,6 +60,7 @@ function solveRoom(room: MirrorRoom, game: Game, partner: Game, entrance: number
       ),
     ),
   )
+
   return {
     ...opened,
     cells: opened.cells.map((cell, index) =>
@@ -73,9 +77,11 @@ export function solveMirror(layout: MirrorLayout): MirrorSolution {
     const nextDawn = solveRoom(layout.dawn, dawn, dusk, layout.entrance)
     const nextDusk = solveRoom(layout.dusk, dusk, nextDawn, layout.entrance)
     if (nextDawn === dawn && nextDusk === dusk) break
+
     dawn = nextDawn
     dusk = nextDusk
   }
+
   return { dawn, dusk }
 }
 
@@ -85,6 +91,7 @@ function createRoom(game: Game, entrance: number, boss: number): MirrorRoom {
   const walls = game.cells.flatMap((cell, index) =>
     !cell.mine && !reached.has(index) ? [index] : [],
   )
+
   return {
     game: openArena(
       game,
@@ -118,6 +125,7 @@ function sealIndex(room: MirrorRoom, entrance: number, boss: number, seed: numbe
       ? [index]
       : []
   })
+
   return shuffled(candidates, seed)[0] ?? null
 }
 
@@ -128,6 +136,7 @@ function candidate(config: Config, seed: number): MirrorLayout | null {
     indices.filter((index) => {
       const x = index % config.width
       const y = Math.floor(index / config.width)
+
       return (
         x > 0 &&
         x < config.width - 1 &&
@@ -171,6 +180,7 @@ function candidate(config: Config, seed: number): MirrorLayout | null {
   )
   const boss = bosses[0]
   if (boss === undefined) return null
+
   const dawn = createRoom(dawnGame, entrance, boss)
   const dusk = createRoom(duskGame, entrance, boss)
   if (
@@ -184,9 +194,11 @@ function candidate(config: Config, seed: number): MirrorLayout | null {
     )
   )
     return null
+
   const dawnSeal = sealIndex(dawn, entrance, boss, seed ^ 0xada)
   const duskSeal = sealIndex(dusk, entrance, boss, seed ^ 0xbdb)
   if (dawnSeal === null || duskSeal === null) return null
+
   const layout = { dawn, dusk, entrance, boss, dawnSeal, duskSeal }
   const solved = solveMirror(layout)
   for (const side of ['dawn', 'dusk'] as const) {
@@ -198,6 +210,7 @@ function candidate(config: Config, seed: number): MirrorLayout | null {
     )
       return null
   }
+
   return layout
 }
 

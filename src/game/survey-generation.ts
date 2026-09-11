@@ -25,12 +25,16 @@ export function generateSurvey(config: Config, seed: number): SurveyLayout {
       const result = deduceSurvey(config, rows, columns, facts)
       const next = order.find((index) => !mines.has(index) && result.cells[index] === 'unresolved')
       if (next === undefined) break
+
       opening.push(next)
       facts = result.cells.map((cell, index) => (index === next ? 'safe' : cell))
       if (best && opening.length >= best.opening.length) break
     }
+
     if (!best || opening.length < best.opening.length) best = { mines, rows, columns, opening }
+
     if (!best.opening.length) break
   }
+
   return best!
 }

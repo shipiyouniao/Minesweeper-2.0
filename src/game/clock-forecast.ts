@@ -22,16 +22,20 @@ export function clockEscapeExists(run: ClockExpedition, spells = run.encounter.s
           if (!occupied(run, other) && run.game.cells[other]?.visibility === 'revealed')
             expanded.add(other)
         }
+
       positions = expanded
     }
+
     const danger = new Set(
       spells
         .filter((spell) => !spell.redirected && spell.resolvesOn === turn)
         .flatMap((spell) => [...spell.targets]),
     )
+
     positions = new Set([...positions].filter((index) => !danger.has(index)))
     if (!positions.size) return false
   }
+
   return true
 }
 
@@ -78,11 +82,13 @@ export function forecastClock(run: ClockExpedition): ClockExpedition {
           redirected: false,
         }
         if (!clockEscapeExists(run, [...spells, spell])) continue
+
         spells.push(spell)
         nextSpell++
         break
       }
     }
   }
+
   return clockIntent({ ...run, encounter: { ...e, spells, nextSpell } })
 }

@@ -224,8 +224,10 @@ export function relicCopy(language: Language, relic: Relic): VariantDescription 
 /** Describe finite camp unlocks without hiding their actual gameplay consequence. */
 export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescription {
   if (upgrade === 'sonar') return equipmentCopy(language, 'sonar')
+
   const combat = parseCombatPurchase(upgrade)
   if (combat) return combatPurchaseCopy(language, combat)
+
   if (
     upgrade === 'surveyor' ||
     upgrade === 'engineer' ||
@@ -234,8 +236,10 @@ export function upgradeCopy(language: Language, upgrade: Upgrade): VariantDescri
     upgrade === 'sentinel'
   )
     return professionCopy(language, upgrade)
+
   const pack = parseRelicPack(upgrade)
   if (pack) return relicPackCopy(language, pack)
+
   return upgrade === 'workshop'
     ? {
         name: message(language, 'variant-copy.workshop'),

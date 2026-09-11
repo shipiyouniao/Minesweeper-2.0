@@ -29,6 +29,7 @@ export class GameSession {
     this.mode = mode
 
     const saved = repository.load(mode)
+
     this.game = saved?.game ?? this.fresh(this.configFor(mode))
     this.clock.reset(saved?.elapsed ?? 0)
     this.paused = this.game.phase === 'playing'
@@ -79,6 +80,7 @@ export class GameSession {
     }
 
     this.persist()
+
     return true
   }
 
@@ -92,6 +94,7 @@ export class GameSession {
     this.persist()
 
     // Load after saving so reselecting the same difficulty cannot restore stale progress.
+
     const saved = custom ? null : this.repository.load(mode)
     const next = saved?.game ?? this.fresh(custom ?? this.configFor(mode))
 
@@ -174,6 +177,7 @@ export class GameSession {
     }
 
     const name = value.trim().slice(0, 32) || 'Player'
+
     this.currentScore = { ...this.currentScore, name }
 
     this.repository.record(this.mode, this.currentScore)

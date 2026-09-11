@@ -7,6 +7,7 @@ import type { Relic } from '../types/variants.js'
 export function relicSprite(relic: Relic): DungeonSprite {
   const pack = RELIC_PACKS.find((entry) => entry.relics.some((candidate) => candidate === relic))
   if (pack) return pack.id
+
   switch (relic) {
     case 'chest-beacon':
       return 'prospector-seals'

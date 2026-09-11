@@ -91,6 +91,7 @@ export class MinesweeperApp implements InputActions {
     }
 
     this.render()
+
     const state = this.session.state
     const cue = cueForMove(before, state.game, index)
     if (type === 'mark-safe')
@@ -192,7 +193,9 @@ export class MinesweeperApp implements InputActions {
     this.repository.setPreference({ key: 'language', value: this.language })
 
     // A manual choice replaces an old link override, including when storage is unavailable.
+
     const url = new URL(location.href)
+
     url.searchParams.set('lang', value)
     history.replaceState(null, '', url)
     this.sounds.play('confirm')
@@ -219,6 +222,7 @@ export class MinesweeperApp implements InputActions {
       if (!validConfig(config)) {
         this.sounds.play('blocked')
         this.view.showCustomError(translations[this.language].invalid)
+
         return
       }
 

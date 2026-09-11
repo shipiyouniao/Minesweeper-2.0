@@ -65,6 +65,7 @@ function openingHasMineDeduction(game: Game, walls: ReadonlySet<number>): boolea
         (other) => !known.has(other) && !walls.has(other),
       )
       if (count > 0 && count === hidden.length) return true
+
       if (count !== 0) continue
 
       for (const other of hidden) {
@@ -74,8 +75,10 @@ function openingHasMineDeduction(game: Game, walls: ReadonlySet<number>): boolea
         }
       }
     }
+
     if (!changed) return false
   }
+
   return false
 }
 
@@ -91,10 +94,12 @@ function finishLayout(
   for (const index of queue) {
     for (const next of adjacentSteps(game, index)) {
       if (distance.has(next) || walls.has(next) || game.cells[next]?.mine) continue
+
       distance.set(next, (distance.get(index) ?? 0) + 1)
       queue.push(next)
     }
   }
+
   const furthest = Math.max(...distance.values())
   const candidates = [...distance.keys()].filter(
     (index) => (distance.get(index) ?? 0) >= Math.max(6, furthest - 2),
@@ -102,6 +107,7 @@ function finishLayout(
   const exit = shuffled(candidates, seed ^ 0xe817)[0]
   // A small enclosed component can satisfy clue checks but still leave no room for a journey.
   if (exit === undefined) return null
+
   const treasures = shuffled(
     [...distance.keys()].filter(
       (index) => index !== entrance && index !== exit && (distance.get(index) ?? 0) >= 3,
@@ -114,6 +120,7 @@ function finishLayout(
       walls.has(index) ? { ...cell, visibility: 'hidden' } : cell,
     ),
   }
+
   return { game: terrain, entrance, exit, walls: [...walls], treasures }
 }
 
@@ -147,5 +154,6 @@ function fallbackLayout(
   // the facing clue has exactly three unknown neighbors, all guaranteed mines.
   const layout = finishLayout(game, entrance, new Set(), seed)
   if (!layout) throw new Error('Connected fallback must have distant reachable stairs')
+
   return layout
 }

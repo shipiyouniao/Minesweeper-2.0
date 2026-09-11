@@ -30,6 +30,7 @@ function forecastRun(run: MagneticExpedition): MagneticExpedition {
       encounter: { ...run.encounter, intent: { kind: 'cross', targets, damage: 5 } },
     }
   }
+
   const encounter = {
     ...run.encounter,
     forecast: magneticForecast(run.encounter.turn, run.encounter.exposedUntil),
@@ -37,7 +38,9 @@ function forecastRun(run: MagneticExpedition): MagneticExpedition {
   const draft = { ...run, encounter }
   const targets = run.game.cells.flatMap((_, index) => {
     if (run.walls.includes(index)) return []
+
     const projection = magneticProjection(draft, index)
+
     return projection.path.length > 1 || projection.collision ? [index] : []
   })
 
@@ -102,6 +105,7 @@ export function lureMagnetic(run: MagneticExpedition, index: number): Expedition
   const anchor = run.encounter.anchors.find((entry) => entry.index === index)
   const path = magneticLurePath(run, index)
   if (!anchor || !path) return run
+
   if (
     !anchor.calibrated &&
     !neighbors(run.game.config, index).every((other) => {
@@ -112,6 +116,7 @@ export function lureMagnetic(run: MagneticExpedition, index: number): Expedition
     return { ...injureMagnetic(run, 5, null), encounter: { ...run.encounter, event: 'misfire' } }
 
   const discovered = anchor.calibrated ? run : inspectArea(run, neighbors(run.game.config, index))
+
   return {
     ...discovered,
     encounter: {
@@ -152,15 +157,20 @@ function resolveField(run: MagneticExpedition): Expedition {
       break
     }
     // An ordinary flag is a hypothesis, not a physical barrier to forced movement.
+
     const game = cell.visibility === 'flagged' ? act(next.game, { type: 'flag', index }) : next.game
+
     next = { ...next, game: revealDungeon({ ...next, game }, index), player: index }
     path.push(index)
   }
+
   if (impact === null && projection.collision) {
     next = injureMagnetic(next, incomingCombatDamage(next, 3), null)
     impact = next.player
   }
+
   next = recordTravel(next, path)
+
   const outcome =
     impact !== null
       ? 'collision'
@@ -169,6 +179,7 @@ function resolveField(run: MagneticExpedition): Expedition {
         : path.length > 1
           ? 'shifted'
           : 'recovered'
+
   return finishTurn(next, run, {
     turn: run.encounter.turn,
     playerPath: path,
@@ -184,6 +195,7 @@ function resolveField(run: MagneticExpedition): Expedition {
 function resolveCharge(run: MagneticExpedition): Expedition {
   const { encounter } = run
   if (encounter.forecast.kind !== 'charge') return run
+
   const { path, anchor } = encounter.forecast
   const hit = path.slice(1).includes(run.player)
   let next: Expedition = hit ? injureMagnetic(run, incomingCombatDamage(run, 5), null) : run
@@ -194,10 +206,12 @@ function resolveCharge(run: MagneticExpedition): Expedition {
   if (!blocked) {
     if (blastCells.includes(run.player) && next.phase !== 'lost')
       next = injureMagnetic(next, incomingCombatDamage(next, 5), null)
+
     const damage = Math.min(6 + Math.min(3, detonatedMines.length), encounter.health - 1)
     const cells = next.game.cells.map((cell, index) =>
       index === encounter.boss ? { ...cell, visibility: 'revealed' as const } : cell,
     )
+
     next = blastMagnetic(
       {
         ...next,
@@ -235,6 +249,7 @@ function finishTurn(
 ): Expedition {
   const encounter = next.encounter
   if (encounter?.kind !== 'magnetic') return next
+
   const result: MagneticExpedition = {
     ...next,
     steps: before.steps + 1,
@@ -255,6 +270,7 @@ function finishTurn(
     },
   }
   const forecast = forecastRun(result)
+
   return {
     ...forecast,
     encounter: { ...forecast.encounter, points: combatStats(forecast).actions },

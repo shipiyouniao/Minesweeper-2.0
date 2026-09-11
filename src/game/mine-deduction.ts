@@ -8,16 +8,19 @@ export function deduceMines(game: Game, walls: readonly number[]): MineDeduction
   for (let index = 0; index < game.cells.length; index++) {
     const cell = game.cells[index]
     if (!cell || cell.visibility !== 'revealed' || walls.includes(index)) continue
+
     const ring = neighbors(game.config, index).filter((other) => !walls.includes(other))
     const hidden = ring.filter((other) => game.cells[other]?.visibility === 'hidden')
     const flagged = ring.filter((other) => game.cells[other]?.visibility === 'flagged').length
     if (hidden.length) constraints.push({ cells: hidden, mines: cell.adjacent - flagged })
   }
+
   const safe = new Set<number>()
   const mines = new Set<number>()
   for (const constraint of constraints) collect(constraint, safe, mines)
 
   // Subtract nested clue sets, e.g. {a,b}=1 and {a,b,c}=1 proves c safe.
+
   for (const small of constraints) {
     for (const large of constraints) {
       if (
@@ -35,6 +38,7 @@ export function deduceMines(game: Game, walls: readonly number[]): MineDeduction
       )
     }
   }
+
   return { safe: [...safe], mines: [...mines] }
 }
 

@@ -52,8 +52,10 @@ export class HomeApp implements MountedGame {
     document.title =
       this.page === 'home' ? 'Minefarer' : `${message(this.language, 'home.free')} · Minefarer`
     this.root.innerHTML = homeTemplate(this.page, this.language, this.sounds.enabled)
+
     const picker = this.root.querySelector<HTMLElement>('.language-picker')
     if (!picker) throw new Error('Home language picker is missing')
+
     this.menu = new LanguageMenu(picker, this.selectLanguage, this.feedback)
   }
 
@@ -61,7 +63,9 @@ export class HomeApp implements MountedGame {
   private readonly selectLanguage = (language: Language): void => {
     this.language = language
     this.preferences.setPreference({ key: 'language', value: language })
+
     const url = new URL(location.href)
+
     url.searchParams.set('lang', language)
     history.replaceState(null, '', url)
     this.onLanguage(language)
@@ -73,6 +77,7 @@ export class HomeApp implements MountedGame {
   /** Apply the same mute setting across the homepage and every independent mode. */
   private readonly click = (event: MouseEvent): void => {
     if (!(event.target instanceof Element) || !event.target.closest('[data-home-sound]')) return
+
     this.sounds.setEnabled(!this.sounds.enabled)
     this.preferences.setPreference({ key: 'sound', value: this.sounds.enabled })
     this.render()

@@ -57,6 +57,7 @@ export class BoardView {
     }
 
     // Inert prevents keyboard interaction with the board hidden by the pause cover.
+
     this.root.inert = paused
   }
 
@@ -85,6 +86,7 @@ export class BoardView {
     if (next === index) return 'edge'
 
     cell.focus({ preventScroll: false })
+
     return 'moved'
   }
 
@@ -95,12 +97,14 @@ export class BoardView {
 
     for (let row = 0; row < this.config.height; row++) {
       const line = document.createElement('div')
+
       line.className = 'board-row'
       line.setAttribute('role', 'row')
 
       for (let column = 0; column < this.config.width; column++) {
         const index = row * this.config.width + column
         const button = document.createElement('button')
+
         button.type = 'button'
         button.className = 'cell'
         button.dataset['cell'] = String(index)

@@ -43,11 +43,14 @@ export function mirrorDefense(
 ): string {
   const opposite = oppositeMirror(side)
   if (encounter[side].health === 0) return message(language, 'mirror-copy.defeated')
+
   if (encounter[opposite].seal.active)
     return message(language, 'mirror-copy.protected-by-seal', {
       p0: mirrorName(language, opposite),
     })
+
   if (encounter.lastStruck === side && encounter[opposite].health > 0)
     return message(language, 'mirror-copy.reflecting-strike-the-other-twin')
+
   return message(language, 'mirror-copy.exposed')
 }

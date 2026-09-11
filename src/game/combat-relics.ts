@@ -23,6 +23,7 @@ export function applyCombatRelics(
 ): Expedition {
   if (!before.encounter || !after.encounter || after === before || after.phase !== 'boss')
     return after
+
   let result = after
 
   if (action.type === 'move') {
@@ -37,8 +38,10 @@ export function applyCombatRelics(
         },
       }
   }
+
   if (action.type === 'attack' && available(result, 'duelist-edge'))
     result = claim(result, 'duelist-edge')
+
   if (
     (action.type === 'interact' || action.type === 'attune') &&
     after.encounter.event === 'disabled' &&
@@ -58,6 +61,7 @@ export function applyCombatRelics(
       },
     }
   }
+
   if (action.type !== 'end-turn') return result
 
   if (
@@ -65,6 +69,7 @@ export function applyCombatRelics(
     available(result, 'shelter-cloak')
   )
     result = { ...claim(result, 'shelter-cloak'), shields: Math.min(2, result.shields + 1) }
+
   if (before.encounter.points >= 1 && available(result, 'reserve-watch')) {
     result = claim(result, 'reserve-watch')
     result = {
@@ -75,16 +80,20 @@ export function applyCombatRelics(
       },
     }
   }
+
   if (before.encounter.turn === 3 && available(result, 'second-hand'))
     result = {
       ...claim(result, 'second-hand'),
       probes: Math.min(4, result.probes + 1),
       scans: Math.min(4, result.scans + 1),
     }
+
   if (after.encounter.event === 'tide-broken') {
     const sigil = available(result, 'breach-sigil')
     if (sigil) result = claim(result, 'breach-sigil')
+
     const focus = result.departure.equipment.includes('focus-lens')
+
     result = {
       ...result,
       encounter: {
@@ -97,5 +106,6 @@ export function applyCombatRelics(
       },
     }
   }
+
   return result
 }

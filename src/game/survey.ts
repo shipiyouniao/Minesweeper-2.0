@@ -23,6 +23,7 @@ export const SURVEY_PRESETS: PresetBoards = {
 export function createSurvey(seed: number, difficulty: RankedDifficulty = 'easy'): Survey {
   const config = SURVEY_PRESETS[difficulty]
   const layout = generateSurvey(config, seed >>> 0)
+
   return {
     difficulty,
     game: {
@@ -62,6 +63,7 @@ export function surveyChordTargets(state: Survey, index: number): readonly numbe
       axis === 'row' ? Math.floor(index / state.game.config.width) : index % state.game.config.width
     for (const at of surveyLineTargets(state, axis, line)) targets.add(at)
   }
+
   return [...targets].sort((a, b) => a - b)
 }
 
@@ -73,7 +75,9 @@ export function surveyLineTargets(
 ): readonly number[] {
   const reading = surveyLine(state, axis, line)
   if (reading.total === null) return []
+
   const filled = !reading.conflict && reading.total === reading.flags
+
   return surveyIndices(state.game.config, axis, line).filter(
     (index) =>
       state.game.cells[index]?.visibility === 'hidden' &&
@@ -90,10 +94,12 @@ export function actSurvey(state: Survey, action: SurveyAction): Survey {
       : action.index
   const cell = before.cells[source]
   if (!Number.isInteger(action.index) || !cell || before.phase !== 'playing') return state
+
   if (action.type === 'flag' || action.type === 'mark-safe') {
     const game = act(before, action)
     return game === before ? state : { ...state, game, moves: state.moves + 1 }
   }
+
   const targets =
     action.type === 'chord-line'
       ? surveyLineTargets(state, action.axis, action.index)
@@ -113,8 +119,10 @@ export function actSurvey(state: Survey, action: SurveyAction): Survey {
       break
     }
   }
+
   const won =
     exploded === null && cells.every((entry) => entry.mine || entry.visibility === 'revealed')
+
   return {
     ...state,
     moves: state.moves + 1,
@@ -136,11 +144,13 @@ export function surveyLine(state: Survey, axis: 'row' | 'column', line: number):
   const runs = (axis === 'row' ? state.rows : state.columns)[line]
   if (!Number.isInteger(line) || !runs)
     return { runs: [], total: null, flags: 0, covered: 0, conflict: false, complete: false }
+
   const cells = surveyIndices(state.game.config, axis, line).map(
     (index) => state.game.cells[index]!,
   )
   const knowledge = cells.map(surveyKnowledge)
   const contradiction = deduceSurveyLine(runs, knowledge).contradiction
+
   return {
     runs,
     total: runs.reduce((sum, run) => sum + run, 0),

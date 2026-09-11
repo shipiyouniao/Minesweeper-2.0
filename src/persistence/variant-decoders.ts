@@ -139,6 +139,7 @@ function integer(value: number | null, maximum: number): value is number {
 /** Recover additive progress fields independently; valid camp money and claims survive damage. */
 function decodeMilestones(value: JsonValue, completed: number): MilestoneProgress {
   const reader = JsonObjectReader.from(value)
+  /** Recover each bounded counter independently so one malformed field does not erase other progress. */
   const count = (key: string): number => {
     const value = reader?.number(key) ?? null
     return integer(value, 1e9) ? value : 0
@@ -165,6 +166,7 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
       !bossKinds.includes(value)
     )
       bossKinds.push(value)
+
   const rawAttempt = JsonObjectReader.from(reader?.value('attempt'))
   const kind = rawAttempt?.string('kind')
   const seed = rawAttempt?.number('seed') ?? null
@@ -198,6 +200,7 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
     const entry = MILESTONES.find((item) => item.id === value && item.metric === 'challenge')
     return entry ? [entry.id] : []
   })
+
   return {
     attempt,
     challenges,
@@ -223,6 +226,7 @@ function decodeMilestones(value: JsonValue, completed: number): MilestoneProgres
 /** Build a camp value from currency, ownership and successful expedition count. */
 function decodeCamp(reader: JsonObjectReader | null): Camp | null {
   if (!reader) return null
+
   const supplies = reader.number('supplies')
   const completed = reader.number('completed')
   const values = reader.array('upgrades')
@@ -233,15 +237,18 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
     values.length > UPGRADES.length
   )
     return null
+
   const upgrades: Upgrade[] = []
 
   for (const value of values) {
     const upgrade = parseUpgrade(typeof value === 'string' ? value : null)
     if (!upgrade || upgrades.includes(upgrade)) return null
+
     upgrades.push(upgrade)
   }
 
   const progress = reader.value('milestones')
+
   return {
     supplies,
     completed,
@@ -259,6 +266,7 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
 /** Decode only current departure options; obsolete runs never enter the game engine. */
 function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   if (!reader) return null
+
   const originalCampaign = reader.string('campaign')
   const campaign = originalCampaign === 'tower-road-v3' ? 'tower-road-v4' : originalCampaign
   if (
@@ -272,9 +280,11 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     campaign !== 'northwest-bastion-v1'
   )
     return null
+
   const rawTitle = reader.value('title')
   const title = parseTitle(reader.string('title'))
   if (rawTitle !== null && title === null) return null
+
   const seed = reader.number('seed')
   const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const profession = parseProfession(reader.string('profession'))
@@ -305,29 +315,38 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   for (const value of values) {
     const item = parseEquipment(typeof value === 'string' ? value : null)
     if (!item || equipment.includes(item)) return null
+
     equipment.push(item)
   }
+
   for (const value of trainingValues) {
     const item = parseCombatTraining(typeof value === 'string' ? value : null)
     if (!item || training.includes(item)) return null
+
     training.push(item)
   }
+
   for (const value of packValues) {
     const item = parseRelicPack(typeof value === 'string' ? value : null)
     if (!item || packs.includes(item)) return null
+
     packs.push(item)
   }
+
   const rawMilestones = reader.value('milestoneRelics')
   const milestoneRelics: MilestoneRelic[] = []
   if (rawMilestones !== undefined) {
     const values = reader.array('milestoneRelics')
     if (!values || values.length > MILESTONE_RELICS.length) return null
+
     for (const value of values) {
       const relic = parseMilestoneRelic(typeof value === 'string' ? value : null)
       if (!relic || milestoneRelics.includes(relic)) return null
+
       milestoneRelics.push(relic)
     }
   }
+
   return {
     ...(campaign === 'tower-road-v4' ||
     campaign === 'tower-relay-v1' ||
@@ -355,6 +374,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
 function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAction | null {
   const reader = JsonObjectReader.from(value)
   if (!reader) return null
+
   const type = reader.string('type')
 
   switch (type) {
@@ -378,7 +398,9 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
     }
     case 'skill': {
       if (reader.value('index') === undefined) return { type }
+
       const index = reader.number('index')
+
       return integer(index, config.width * config.height - 1) ? { type, index } : null
     }
     case 'descend':
@@ -400,11 +422,14 @@ function decodeExpeditionAction(value: JsonValue, config: Config): ExpeditionAct
 /** Decode a bounded replay journal, rejecting the whole run when any intent is malformed. */
 export function decodeJournal(reader: JsonObjectReader | null): ExpeditionJournal | null {
   if (!reader || reader.number('rulesRevision') !== EXPEDITION_RULES_REVISION) return null
+
   const returnSupplies = reader.number('returnSupplies')
   if (!integer(returnSupplies, 10000)) return null
+
   const departure = decodeDeparture(reader.child('departure'))
   const values = reader.array('actions')
   if (!departure || !values || values.length > MAX_ACTIONS) return null
+
   const actions: ExpeditionAction[] = []
   const ordinary = expeditionConfig(departure, 1)
   const arena = encounterTier(departure.difficulty).config
@@ -420,11 +445,13 @@ export function decodeJournal(reader: JsonObjectReader | null): ExpeditionJourna
   for (const value of values) {
     const action = decodeExpeditionAction(value, bounds)
     if (!action) return null
+
     if (
       reader.child('departure')?.string('campaign') === 'tower-road-v3' &&
       (action.type === 'relic' || action.type === 'descend')
     )
       return null
+
     actions.push(action)
   }
 
@@ -434,13 +461,16 @@ export function decodeJournal(reader: JsonObjectReader | null): ExpeditionJourna
 /** Retain a bounded list of fully valid records; no player-provided HTML is stored. */
 export function decodeRecords(values: readonly JsonValue[] | null): VariantRecord[] | null {
   if (!values || values.length > 60) return null
+
   const records: VariantRecord[] = []
 
   for (const value of values) {
     const reader = JsonObjectReader.from(value)
     if (!reader) return null
+
     const difficulty = parseVariantDifficulty(reader.string('difficulty'))
     if (reader.value('difficulty') !== undefined && !difficulty) return null
+
     const date = reader.string('date')
     const outcome = reader.string('outcome')
     const steps = reader.number('steps')
@@ -456,6 +486,7 @@ export function decodeRecords(values: readonly JsonValue[] | null): VariantRecor
       !integer(earned, 10000)
     )
       return null
+
     records.push({ date, outcome, steps, depth, earned, ...(difficulty ? { difficulty } : {}) })
   }
 
@@ -465,7 +496,9 @@ export function decodeRecords(values: readonly JsonValue[] | null): VariantRecor
 /** Reject oversized or incompatible envelopes before allocating replay work. */
 function envelope(text: string | null, version = 1): JsonObjectReader | null {
   if (!text || text.length > 1500000) return null
+
   const reader = JsonObjectReader.from(parseJson(text))
+
   return reader?.number('version') === version ? reader : null
 }
 
@@ -473,9 +506,11 @@ function envelope(text: string | null, version = 1): JsonObjectReader | null {
 export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
   const reader = envelope(text, 4) ?? envelope(text, 3) ?? envelope(text, 2) ?? envelope(text, 1)
   if (!reader) return null
+
   const camp = decodeCamp(reader.child('camp'))
   const records = decodeRecords(reader.array('records'))
   if (!camp || !records) return null
+
   const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const journalValue = reader.value('journal')
   const raw = reader.child('journal')
@@ -492,6 +527,7 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
   }
 
   // Crediting a valid camp must never produce a balance that the next load rejects.
+
   if (returnedSupplies !== null)
     returnedSupplies = Math.min(returnedSupplies, Number.MAX_SAFE_INTEGER - camp.supplies)
 
@@ -518,6 +554,7 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
     ...(loadout ? { loadout } : {}),
     ...(difficulty ? { difficulty } : {}),
   }
+
   return {
     save,
     migrated: oldEnvelope || oldRules,
@@ -532,6 +569,7 @@ function decodeLoadout(reader: JsonObjectReader | null): CampLoadout | null {
   const equipment = (reader?.array('equipment') ?? []).map((v) =>
     parseEquipment(typeof v === 'string' ? v : null),
   )
+
   return profession && equipment.length <= 3 && equipment.every((v): v is Equipment => v !== null)
     ? { profession, equipment: [...new Set(equipment)] }
     : null
@@ -546,6 +584,7 @@ export function decodeExpeditionSave(text: string | null): ExpeditionSave | null
 function decodeTwinAction(value: JsonValue, config: Config): TwinAction | null {
   const reader = JsonObjectReader.from(value)
   if (!reader) return null
+
   const side = reader.string('side')
   const type = reader.string('type')
   const index = reader.number('index')
@@ -561,6 +600,7 @@ function decodeTwinAction(value: JsonValue, config: Config): TwinAction | null {
 export function decodeTwinSave(text: string | null): TwinSave | null {
   const reader = envelope(text)
   if (!reader) return null
+
   const seed = reader.number('seed')
   const settled = reader.value('settled')
   const rules = reader.value('rules')
@@ -571,6 +611,7 @@ export function decodeTwinSave(text: string | null): TwinSave | null {
       : rules !== undefined || reader.value('difficulty') !== undefined
   )
     return null
+
   const records = decodeRecords(reader.array('records'))
   const values = reader.array('actions')
   if (
@@ -581,11 +622,13 @@ export function decodeTwinSave(text: string | null): TwinSave | null {
     values.length > MAX_ACTIONS
   )
     return null
+
   const actions: TwinAction[] = []
 
   for (const value of values) {
     const action = decodeTwinAction(value, twinConfig(difficulty ?? undefined))
     if (!action) return null
+
     actions.push(action)
   }
 

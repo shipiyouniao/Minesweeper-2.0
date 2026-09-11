@@ -310,6 +310,10 @@ export interface MessageCatalog {
   readonly 'story.atlas-zoom-out': string
   readonly 'story.atlas-fit': string
   readonly 'story.atlas-tree': string
+  readonly 'story.atlas-district-trail': string
+  readonly 'story.atlas-district-camp': string
+  readonly 'story.atlas-district-quarry': string
+  readonly 'story.atlas-district-west': string
   readonly 'story.atlas-world': string
   readonly 'story.atlas-legend': string
   readonly 'story.atlas-region': string

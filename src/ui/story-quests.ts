@@ -1,17 +1,29 @@
+import { storyAtlasIndex } from '../game/story-atlas.js'
+import { storyTaskLocation } from '../game/story-task-location.js'
+import { worldSceneName } from './world-copy.js'
 import { message, translations } from '../i18n.js'
 import type { Language } from '../types/localization.js'
 import type { StoryTask, StoryViewState } from '../types/story.js'
 import { storyMap } from './story-map.js'
 
+/** Resolve an authored task to its localized journal title. */
 export function storyTaskName(language: Language, id: StoryTask): string {
   if (id === 'rescue-toma') return message(language, 'rail.task')
+
   if (id === 'restore-west-line') return message(language, 'finale.control-task')
+
   if (id === 'open-blockade') return message(language, 'finale.pass-task')
+
   if (id === 'find-beacon') return message(language, 'waterway.task')
+
   if (id === 'survey-ridge') return message(language, 'ridge.task')
+
   if (id === 'repair-lift') return message(language, 'story.repair-task')
+
   if (id === 'reach-tower') return message(language, 'story.climb-task')
+
   if (id === 'survey-road') return message(language, 'story.road-task')
+
   return id === 'reach-camp'
     ? message(language, 'story.main-task')
     : id === 'lost-satchel'
@@ -19,18 +31,12 @@ export function storyTaskName(language: Language, id: StoryTask): string {
       : message(language, 'story.meet-task')
 }
 
+/** Locate a task on the atlas without moving the player or satisfying route prerequisites. */
 export function storyTaskScene(state: Pick<StoryViewState, 'progress'>, id: StoryTask): number {
-  if (id === 'rescue-toma') return 5
-  if (id === 'restore-west-line') return 8
-  if (id === 'open-blockade') return state.progress.facts?.includes('west-shortcut') ? 10 : 9
-  if (id === 'survey-ridge' || id === 'find-beacon') return 4
-  if (id === 'repair-lift') return state.progress.facts?.includes('spindle-secured') ? 4 : 7
-  if (id === 'reach-tower') return 8
-  if (id === 'survey-road') return 4
-  if (id === 'lost-satchel') return 1
-  return 3
+  return storyAtlasIndex(storyTaskLocation(state.progress, id))
 }
 
+/** Present one accepted task with its current objective, location and optional pin action. */
 function quest(state: StoryViewState, id: StoryTask, expanded = false): string {
   const lang = state.language
   const done = state.progress.completed.includes(id)
@@ -59,29 +65,15 @@ function quest(state: StoryViewState, id: StoryTask, expanded = false): string {
                       : id === 'lost-satchel'
                         ? message(lang, 'story.quest-side-detail')
                         : message(lang, 'story.quest-guide-detail')
-  const scene = storyTaskScene(state, id)
-  const place =
-    scene === 5
-      ? message(lang, 'story.quarry-yard')
-      : scene === 9
-        ? message(lang, 'finale.bridge')
-        : scene === 10
-          ? message(lang, 'finale.pass')
-          : scene === 4
-            ? message(lang, 'story.north-road')
-            : scene === 7
-              ? message(lang, 'story.quarry-machine')
-              : scene === 8
-                ? message(lang, 'story.tower-landing')
-                : scene === 1
-                  ? message(lang, 'story.trail')
-                  : message(lang, 'story.camp')
-  const detail = `<details class="story-quest" data-task="${id}"><summary><strong>${storyTaskName(lang, id)}</strong><small>${done ? message(lang, 'story.done') : message(lang, 'story.pending')}</small></summary><div class="story-quest-bubble"><p>${description}</p>${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.inspected && !state.run.practicedFlag ? `<p data-story-flag-guidance>${state.touchInput ? message(lang, 'story.flag-touch') : message(lang, 'story.flag-mouse')}</p>` : ''}${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.practicedFlag && !state.run.practicedReveal ? `<p data-story-chord-guidance>${state.touchInput ? message(lang, 'story.chord-touch') : message(lang, 'story.chord-mouse')}</p>` : ''}${id === 'lost-satchel' && !done && state.run?.collected ? `<p>${message(lang, 'story.satchel-found')}</p>` : ''}<p class="story-quest-place"><button class="story-quest-location" data-story-action="quest-map" data-task="${id}">${message(lang, 'story.quest-location', { place })}<span aria-hidden="true"> ↗</span></button></p>${done ? '' : `<button data-story-action="pin" data-task="${id}" aria-pressed="${!!pinned}">${pinned ? message(lang, 'story.unpin') : message(lang, 'story.pin')}</button>`}</div></details>`
+  const place = worldSceneName(lang, storyTaskLocation(state.progress, id))
+  const detail = `<div class="story-quest-bubble"><p>${description}</p>${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.inspected && !state.run.practicedFlag ? `<p data-story-flag-guidance>${state.touchInput ? message(lang, 'story.flag-touch') : message(lang, 'story.flag-mouse')}</p>` : ''}${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.practicedFlag && !state.run.practicedReveal ? `<p data-story-chord-guidance>${state.touchInput ? message(lang, 'story.chord-touch') : message(lang, 'story.chord-mouse')}</p>` : ''}${id === 'lost-satchel' && !done && state.run?.collected ? `<p>${message(lang, 'story.satchel-found')}</p>` : ''}<p class="story-quest-place"><button class="story-quest-location" data-story-action="quest-map" data-task="${id}">${message(lang, 'story.quest-location', { place })}<span aria-hidden="true"> ↗</span></button></p>${done ? '' : `<button data-story-action="pin" data-task="${id}" aria-pressed="${!!pinned}">${pinned ? message(lang, 'story.unpin') : message(lang, 'story.pin')}</button>`}</div>`
+
   return expanded
-    ? `<article class="story-quest-detail"><h3>${storyTaskName(lang, id)}</h3><span class="story-task-status">${done ? message(lang, 'story.done') : message(lang, 'story.pending')}</span>${detail.slice(detail.indexOf('<div class="story-quest-bubble">'), detail.lastIndexOf('</details>'))}</article>`
-    : detail
+    ? `<article class="story-quest-detail"><h3>${storyTaskName(lang, id)}</h3><span class="story-task-status">${done ? message(lang, 'story.done') : message(lang, 'story.pending')}</span>${detail}</article>`
+    : `<details class="story-quest" data-task="${id}"><summary><strong>${storyTaskName(lang, id)}</strong><small>${done ? message(lang, 'story.done') : message(lang, 'story.pending')}</small></summary>${detail}</details>`
 }
 
+/** Show unfinished pinned objectives in the scene while completed tasks remain in the journal. */
 export function pinnedStoryTasks(state: StoryViewState): string {
   const ids = (state.progress.accepted ?? []).filter(
     (id) => state.progress.pinned?.includes(id) && !state.progress.completed.includes(id),
@@ -89,8 +81,10 @@ export function pinnedStoryTasks(state: StoryViewState): string {
   return `<section class="story-tasks"><header><h2>${message(state.language, 'story.tasks')}</h2><button class="story-all-tasks" data-story-action="tasks">${message(state.language, 'story.all-tasks')} ↗</button></header>${ids.length ? ids.map((id) => quest(state, id)).join('') : `<p>${message(state.language, 'story.no-quests')}</p>`}</section>`
 }
 
+/** Compose the task journal or owned atlas without constructing a gameplay session. */
 export function storyQuestPanel(state: StoryViewState): string {
   if (!state.panel) return ''
+
   const lang = state.language
   const accepted = state.progress.accepted ?? []
   const ordered = [
@@ -106,5 +100,6 @@ export function storyQuestPanel(state: StoryViewState): string {
       : !state.progress.mapOwned
         ? `<p>${message(lang, 'story.no-map')}</p>`
         : storyMap(state)
+
   return `<section class="story-quest-panel ${state.panel === 'tasks' ? 'story-journal' : state.progress.mapOwned ? 'story-atlas' : ''} glass-panel" aria-label="${title}"><header><h2>${title}</h2><button data-story-action="close-panel" aria-label="${translations[lang].close}">×</button></header>${content}</section>`
 }

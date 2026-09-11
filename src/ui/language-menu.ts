@@ -30,6 +30,7 @@ export class LanguageMenu {
     this.onFeedback = onFeedback
 
     const options = { signal: this.listeners.signal }
+
     trigger.addEventListener('click', this.toggle, options)
     panel.addEventListener('click', this.select, options)
     root.addEventListener('keydown', this.handleKey, options)
@@ -108,6 +109,7 @@ export class LanguageMenu {
       }
 
       this.onFeedback('navigate')
+
       return
     }
 
@@ -116,6 +118,7 @@ export class LanguageMenu {
       event.stopPropagation()
       this.close(true)
       this.focus()
+
       return
     }
 
@@ -133,6 +136,7 @@ export class LanguageMenu {
     let next = index + (event.key === 'ArrowDown' ? 1 : -1)
 
     if (event.key === 'Home') next = 0
+
     if (event.key === 'End') next = this.options.length - 1
 
     this.focusOption(next)

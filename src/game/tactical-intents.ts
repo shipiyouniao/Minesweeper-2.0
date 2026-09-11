@@ -18,10 +18,13 @@ export function bastionIntent(
   const targets = Array.from({ length: config.width * config.height }, (_, index) => index).filter(
     (index) => {
       if (walls.includes(index)) return false
+
       const sameRow = Math.floor(index / config.width) === row
       const sameColumn = index % config.width === column
+
       return kind === 'row' ? sameRow : kind === 'column' ? sameColumn : sameRow || sameColumn
     },
   )
+
   return { kind, targets, damage: 1 }
 }

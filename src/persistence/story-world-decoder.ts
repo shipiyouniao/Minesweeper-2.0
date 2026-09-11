@@ -8,6 +8,7 @@ import { JsonObjectReader } from './json-reader.js'
 /** Reject duplicate or invalid indices rather than silently changing the player's knowledge. */
 function indices(value: JsonValue | undefined, size: number): readonly number[] | null {
   if (!Array.isArray(value) || value.length > size) return null
+
   const result: number[] = []
   for (const index of value) {
     if (
@@ -20,6 +21,7 @@ function indices(value: JsonValue | undefined, size: number): readonly number[] 
       return null
     result.push(index)
   }
+
   return result
 }
 
@@ -28,6 +30,7 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
   const reader = JsonObjectReader.from(value)
   const id = STORY_SCENE_IDS.find((entry) => entry === reader?.string('id'))
   if (!reader || !id) return null
+
   const fresh = createStoryRun(STORY_SCENE_IDS.indexOf(id))
   const size = fresh.board.game.cells.length
   const operated = indices(reader.value('operated'), size)
@@ -36,6 +39,7 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
     operated.some((index) => !fresh.board.scene.mechanisms?.some((entry) => entry.index === index))
   )
     return null
+
   const initial = { ...fresh, board: buildStoryBoard(fresh.board.scene, operated) }
   const revealed = indices(reader.value('revealed'), size)
   const flagged = indices(reader.value('flagged'), size)
@@ -57,6 +61,7 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
     (phase === 'fallen') !== (health === 0)
   )
     return null
+
   for (const key of [
     'inspected',
     'practicedFlag',
@@ -65,6 +70,7 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
     'rescuedSupplies',
   ])
     if (typeof reader.value(key) !== 'boolean') return null
+
   const cells = initial.board.game.cells
   if (
     revealed.some(
@@ -90,6 +96,7 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
           cells[initial.board.treasure]!.visibility !== 'revealed')))
   )
     return null
+
   const checkpoint: StorySceneCheckpoint = {
     id,
     operated,
@@ -111,6 +118,7 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
     !(id === 'north-road' && player === initial.board.entrance)
   )
     return null
+
   const run = restoreStoryWorld({
     revision: STORY_REVISION,
     active: id,
@@ -118,6 +126,7 @@ function scene(value: JsonValue): StorySceneCheckpoint | null {
     scenes: [checkpoint],
   })!
   if (phase === 'arrived' && !storyLessonComplete(run)) return null
+
   return checkpoint
 }
 
@@ -135,8 +144,10 @@ export function decodeStoryWorld(value: JsonValue | undefined): StoryWorldCheckp
     (active !== null && !id)
   )
     return null
+
   if (revision !== STORY_REVISION)
     return { revision, active: id ?? null, hasVisited: false, scenes: [] }
+
   const values = reader.array('scenes')
   if (
     !values ||
@@ -144,17 +155,21 @@ export function decodeStoryWorld(value: JsonValue | undefined): StoryWorldCheckp
     typeof reader.value('hasVisited') !== 'boolean'
   )
     return null
+
   const scenes: StorySceneCheckpoint[] = []
   for (const value of values) {
     const checkpoint = scene(value)
     if (!checkpoint || scenes.some((entry) => entry.id === checkpoint.id)) return null
+
     scenes.push(checkpoint)
   }
+
   if (
     id &&
     (!scenes.some((entry) => entry.id === id) ||
       scenes.find((entry) => entry.id === id)!.phase === 'arrived')
   )
     return null
+
   return { revision, active: id ?? null, hasVisited: reader.value('hasVisited') === true, scenes }
 }

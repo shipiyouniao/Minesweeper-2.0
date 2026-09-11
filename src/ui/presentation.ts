@@ -52,6 +52,7 @@ export function cellContent(cell: Cell, ended: boolean, messages: Messages): Cel
   }
 
   // Covered cells must not disclose their clue or mine through HTML or ARIA text.
+
   return { html: '', label: messages.closed }
 }
 

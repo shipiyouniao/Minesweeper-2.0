@@ -22,14 +22,18 @@ export function animateExitOpening(
     !exitIsOpen(after)
   )
     return
+
   const cell = root.querySelector<HTMLElement>(`[data-side="a"] [data-cell="${after.exit}"]`)
   if (!cell || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
   const overlay = document.createElement('span')
+
   overlay.className = 'exit-opening'
   overlay.setAttribute('aria-hidden', 'true')
   overlay.innerHTML = spriteImage('exit-closed')
   cell.append(overlay)
   // The frame stays aligned while the closed doorway gives way to the original open asset.
+
   const delay = after.rail ? Math.min(1800, after.rail.travel.length * 140) : 0
   const animation = overlay.animate([{ opacity: 1 }, { opacity: 1, offset: 0.2 }, { opacity: 0 }], {
     duration: 850,
@@ -37,6 +41,7 @@ export function animateExitOpening(
     fill: 'backwards',
     easing: 'ease-in-out',
   })
+
   cell.animate(
     [
       { filter: 'brightness(1)' },

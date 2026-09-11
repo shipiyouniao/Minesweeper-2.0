@@ -11,9 +11,11 @@ export function anchorArea(config: Config, index: number): readonly number[] {
 
 /** Move complete tile records and every piece of tile-specific knowledge together. */
 export function permuteTide(run: TideExpedition, permutation: readonly number[]): TideExpedition {
+  /** Carry tile-bound knowledge through the same permutation as the terrain. */
   const map = (indices: readonly number[]): number[] => indices.map((index) => permutation[index]!)
   const cells = [...run.game.cells]
   for (const [from, to] of permutation.entries()) cells[to] = run.game.cells[from]!
+
   const game: Game = {
     ...run.game,
     cells: cells.map((cell, index) => ({
@@ -55,11 +57,14 @@ function connected(run: TideExpedition, game: Game): boolean {
   for (const index of queue) {
     for (const other of adjacentSteps(game, index)) {
       if (found.has(other) || run.walls.includes(other) || game.cells[other]!.mine) continue
+
       if (game.cells[other]!.visibility !== 'revealed') continue
+
       found.add(other)
       queue.push(other)
     }
   }
+
   return game.cells.every(
     (cell, index) => cell.mine || run.walls.includes(index) || found.has(index),
   )
@@ -107,10 +112,12 @@ export function shuffleTide(run: TideExpedition): TideExpedition {
     )
     const permutation = [...indices]
     for (const [offset, from] of movable.entries()) permutation[from] = destinations[offset]!
+
     const candidate = permuteTide(run, permutation)
     if (playable(candidate)) return candidate
   }
 
   // A fully anchored or unusually constrained board may resist a tide; no unsafe fallback.
+
   return { ...run, encounter: { ...run.encounter, permutation: indices } }
 }

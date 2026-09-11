@@ -130,6 +130,7 @@ export class BrowserSoundEffects implements SoundEffects {
       }
 
       const voice = scheduleTone(context, tone, context.currentTime)
+
       this.voices.add(voice)
       voice.oscillator.addEventListener('ended', () => this.voices.delete(voice), { once: true })
     }
@@ -145,6 +146,7 @@ export class BrowserSoundEffects implements SoundEffects {
       gain.cancelAndHoldAtTime(now)
     } else {
       const level = gain.value
+
       gain.cancelScheduledValues(now)
       gain.setValueAtTime(level, now)
     }

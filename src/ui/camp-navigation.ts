@@ -40,9 +40,13 @@ export function parseShopCategory(value: string | undefined): ShopCategory | nul
 /** Classify licenses by their effect so filtering never hides a purchase from All. */
 export function shopCategory(item: Upgrade): ShopCategory {
   if (PROFESSIONS.some((profession) => profession === item)) return 'professions'
+
   if (item === 'sonar') return 'equipment'
+
   if (parseCombatEquipment(item)) return 'equipment'
+
   if (parseRelicPack(item) || item === 'archive' || item === 'battle-manual') return 'relics'
+
   return 'camp'
 }
 
@@ -56,6 +60,7 @@ export function shopItems(category: ShopCategory): Upgrade[] {
 /** Resolve existing artwork through typed catalog entries. */
 export function shopSprite(item: Upgrade): DungeonSprite {
   if (item === 'sonar') return 'sonar'
+
   const profession = PROFESSIONS.find((career) => career === item)
   if (profession) return professionSprite(profession)
 

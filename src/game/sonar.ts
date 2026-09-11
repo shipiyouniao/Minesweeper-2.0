@@ -38,6 +38,7 @@ export function actSonar(state: Sonar, action: SonarAction): Sonar {
     if (!region.length) return state
 
     // Flags and safe notes are hypotheses: neither changes the measured physical total.
+
     const mines = region.filter((index) => state.game.cells[index]?.mine).length
     const cells = state.game.cells.map((cell, index) =>
       index === action.index
@@ -53,6 +54,7 @@ export function actSonar(state: Sonar, action: SonarAction): Sonar {
       safeMarks: state.game.safeMarks.filter((index) => index !== action.index),
       phase: won ? 'won' : 'playing',
     }
+
     return { ...state, game, readings: [...state.readings, { center: action.index, mines }] }
   }
 
@@ -68,7 +70,9 @@ export function actSonar(state: Sonar, action: SonarAction): Sonar {
     sonarObscured(state, action.index)
   )
     return state
+
   const game = act(state.game, action)
+
   return game === state.game
     ? state
     : {
@@ -99,6 +103,7 @@ export function compareSonar(
   const b = sonarRegion(config, right.center)
   const aSet = new Set(a)
   const bSet = new Set(b)
+
   return {
     common: a.filter((index) => bSet.has(index)),
     leftOnly: a.filter((index) => !bSet.has(index)),

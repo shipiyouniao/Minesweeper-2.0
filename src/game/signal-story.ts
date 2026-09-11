@@ -20,6 +20,7 @@ export function pendingSignalScene(
 ): SignalSceneId | null {
   if (!run && progress.id === 'tower-relay' && progress.cleared)
     return progress.scenes.includes('rescued') ? null : 'rescued'
+
   if (
     !run ||
     run.departure.campaign !== 'tower-relay-v1' ||
@@ -27,11 +28,17 @@ export function pendingSignalScene(
     run.phase === 'retreated'
   )
     return null
+
   const reached: SignalSceneId[] = ['entry']
   if (run.floor > 1 || run.circuits?.relays[0]?.active === false) reached.push('connected')
+
   if (run.floor >= 2) reached.push('archive')
+
   if (run.signalRecord) reached.push('record')
+
   if (run.floor >= 3) reached.push('prison')
+
   if (run.phase === 'won') reached.push('rescued')
+
   return reached.find((id) => !progress.scenes.includes(id)) ?? null
 }

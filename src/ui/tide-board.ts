@@ -8,7 +8,9 @@ import type { Language } from '../types/localization.js'
 /** Keep the next tide visible above the board when the sidebar stacks below it. */
 export function tidePlaybar(language: Language, run: Expedition): string {
   if (run.encounter?.kind !== 'tide' || run.phase !== 'boss') return ''
+
   const turns = 3 - ((run.encounter.turn - 1) % 3)
+
   return `<div class="tide-playbar" data-tide-due="${turns === 1}"><span class="tide-clock" aria-hidden="true">${[1, 2, 3].map((step) => `<i class="${step <= turns ? 'lit' : ''}"></i>`).join('')}</span><strong>${message(language, 'tide.until', { turns })}</strong><span>${run.encounter.exposed ? message(language, 'tide.open') : message(language, 'tide.shield')}</span></div>`
 }
 
@@ -21,23 +23,28 @@ export function markTideCell(
 ): void {
   const e = run.encounter
   if (e?.kind !== 'tide') return
+
   cell.classList.toggle(
     'tide-fixed',
     e.anchors.some((center) => anchorArea(run.game.config, center).includes(index)),
   )
   if (index === e.boss) cell.classList.add(e.exposed ? 'tide-exposed' : 'tide-shielded')
+
   if (index === e.core) {
     cell.classList.add('landmark-cell', 'tide-core')
+
     const clue =
       run.game.cells[index]!.visibility === 'revealed'
         ? `<span class="landmark-clue">${run.game.cells[index]!.adjacent}</span>`
         : ''
+
     cell.innerHTML = `${spriteImage('tide-core')}${clue}`
     cell.setAttribute(
       'aria-label',
       `${cell.getAttribute('aria-label')}, ${message(language, 'tide.core')}`,
     )
   }
+
   if (e.anchors.includes(index)) {
     cell.insertAdjacentHTML(
       'beforeend',
@@ -61,13 +68,16 @@ export function animateTideAnchor(
     before.encounter.turn !== after.encounter.turn
   )
     return
+
   const previous = before.encounter
   for (const index of after.encounter.anchors.filter(
     (center) => !previous.anchors.includes(center),
   )) {
     const cell = root.querySelector<HTMLElement>(`[data-side="a"] [data-cell="${index}"]`)
     if (!cell) continue
+
     const drop = document.createElement('span')
+
     drop.className = 'tide-anchor-drop'
     drop.setAttribute('aria-hidden', 'true')
     drop.innerHTML = `${spriteImage('tide-anchor')}<i class="tide-chain tide-chain-x"></i><i class="tide-chain tide-chain-y"></i>`
@@ -76,6 +86,7 @@ export function animateTideAnchor(
     for (const target of anchorArea(after.game.config, index)) {
       const tile = root.querySelector<HTMLElement>(`[data-side="a"] [data-cell="${target}"]`)
       const glow = document.createElement('span')
+
       glow.className = 'tide-anchor-glow'
       glow.setAttribute('aria-hidden', 'true')
       tile?.append(glow)
@@ -108,17 +119,21 @@ export class TideBoard {
       easing: 'cubic-bezier(.4,0,.2,1)',
       fill: 'forwards',
     })
+
     this.animations.push(animation)
+
     return animation
   }
 
   /** Mount a decorative layer which cannot intercept mouse or touch input. */
   private layer(parent: HTMLElement, className: string): HTMLElement {
     const layer = document.createElement('span')
+
     layer.className = className
     layer.setAttribute('aria-hidden', 'true')
     parent.append(layer)
     this.layers.push(layer)
+
     return layer
   }
 
@@ -126,19 +141,24 @@ export class TideBoard {
   async perform(before: Expedition, after: Expedition): Promise<void> {
     this.cancel()
     if (before.encounter?.kind !== 'tide' || after.encounter?.kind !== 'tide') return
+
     const generation = this.generation
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
     const grid = this.root.querySelector<HTMLElement>('[data-side="a"]')
     const boss = this.cell(before.encounter.boss)
     if (!grid || !boss) return
+
     grid.classList.add('tide-performing')
+
     const e = before.encounter
 
     try {
       const strikes = e.intent.targets.flatMap((index) => {
         const cell = this.cell(index)
         if (!cell) return []
+
         const layer = this.layer(cell, 'tide-strike')
+
         return [
           this.animate(
             layer,
@@ -162,6 +182,7 @@ export class TideBoard {
             ],
         reduced ? 140 : 360,
       )
+
       await Promise.all([...strikes, windup].map((animation) => animation.finished))
       if (
         generation !== this.generation ||
@@ -184,11 +205,14 @@ export class TideBoard {
       )
       const moving = after.encounter.permutation.flatMap((to, from) => {
         if (to === from) return []
+
         const source = this.cell(from)
         const target = this.cell(to)
         if (!source || !target) return []
+
         const x = target.offsetLeft - source.offsetLeft
         const y = target.offsetTop - source.offsetTop
+
         return [
           this.animate(
             source,
@@ -206,16 +230,19 @@ export class TideBoard {
           ),
         ]
       })
+
       await Promise.all([sweep, ...moving].map((animation) => animation.finished))
       if (generation !== this.generation || !after.encounter.countercurrent) return
 
       const core = this.cell(e.core)
       if (!core) return
+
       const beam = this.layer(grid, 'tide-countercurrent')
       const x = core.offsetLeft + core.offsetWidth / 2
       const y = core.offsetTop + core.offsetHeight / 2
       const dx = boss.offsetLeft + boss.offsetWidth / 2 - x
       const dy = boss.offsetTop + boss.offsetHeight / 2 - y
+
       beam.style.cssText = `left:${x}px;top:${y}px;width:${Math.hypot(dx, dy)}px;rotate:${Math.atan2(dy, dx)}rad`
       await this.animate(
         beam,
@@ -227,7 +254,9 @@ export class TideBoard {
         reduced ? 140 : 440,
       ).finished
       if (generation !== this.generation) return
+
       const shield = this.layer(boss, 'tide-shield-break')
+
       await this.animate(
         shield,
         [
@@ -248,8 +277,10 @@ export class TideBoard {
     this.generation++
     this.root.querySelector('.tide-performing')?.classList.remove('tide-performing')
     for (const animation of this.animations) animation.cancel()
+
     this.animations.length = 0
     for (const layer of this.layers) layer.remove()
+
     this.layers.length = 0
   }
 }

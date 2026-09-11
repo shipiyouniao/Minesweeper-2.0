@@ -30,6 +30,7 @@ export function professionSkillTemplate(language: Language, run: Expedition): st
   const rift = run.departure.profession === 'riftwalker' || rescuer
   const ready = status === 'ready' && (!run.encounter || run.encounter.points > 0)
 
+  /** Format the selected tool target with one-based board coordinates. */
   const coordinate = (index: number): string =>
     `${Math.floor(index / run.game.config.width) + 1}, ${(index % run.game.config.width) + 1}`
   const anchor = currentWaymark(run)
@@ -53,5 +54,6 @@ export function professionSkillTemplate(language: Language, run: Expedition): st
     status === 'ready' && !ready
       ? message(language, 'profession-skill-template.not-enough-action-points-end-your-turn')
       : professionSkillStatus(language, status)
+
   return `<div class="dock-skill ${gameplayStyles['dock-skill']}"><button class="dock-slot inventory-tool ${sharedStyles['inventory-tool']} skill-button" data-control="skill" ${rift ? 'data-select-target="true"' : ''} aria-disabled="${!ready}" aria-label="${copy.name}" aria-describedby="skill-tooltip">${spriteImage(professionSkillSprite(run.departure.profession))}<strong>${copy.name}</strong></button><div class="skill-bubble ${gameplayStyles['skill-bubble']}" id="skill-tooltip" role="tooltip">${escapeHtml(ready ? note : reason)}</div><div class="dock-skill-panel ${gameplayStyles['dock-skill-panel']}" hidden><section class="profession-skill ${sharedStyles['profession-skill']}" data-control="skill-panel" tabindex="-1" aria-label="${copy.name}"><strong>${copy.name}</strong><p id="skill-description">${note}</p>${state}${targets}<p role="status">${reason}</p></section></div></div>`
 }

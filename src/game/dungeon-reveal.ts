@@ -10,10 +10,13 @@ export function revealDungeon(run: Expedition, index: number): Game {
   for (let cursor = 0; cursor < queue.length; cursor++) {
     const target = queue[cursor]
     if (target === undefined || run.walls.includes(target)) continue
+
     const cell = cells[target]
     if (!cell || cell.visibility !== 'hidden') continue
+
     cells[target] = { ...cell, visibility: 'revealed' }
     if (cell.mine) return pruneSafeMarks({ ...run.game, cells, phase: 'lost', exploded: target })
+
     if (cell.adjacent === 0) queue.push(...neighbors(run.game.config, target))
   }
 

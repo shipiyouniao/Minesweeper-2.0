@@ -85,18 +85,22 @@ export class VariantView {
     this.root = root
     this.feedback = feedback
     this.language = language
+
     const t = variantCopy(language)
     const common = translations[language]
+
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
     root.innerHTML = `${siteHeaderTemplate(language, 'data-control', mode)}
       <main class="variant-main ${mode}"><div class="game-heading ${sharedStyles['game-heading']} variant-heading ${sharedStyles['variant-heading']}"><h2>${mode === 'expedition' ? t.expedition : t.twin}</h2><div class="game-heading-actions ${sharedStyles['game-heading-actions']}"><button class="icon-button ${sharedStyles['icon-button']}" data-control="sound" aria-label="${common.sound}" aria-pressed="true">${icon('volume')}</button><button class="icon-button ${sharedStyles['icon-button']}" data-control="pause" aria-label="${common.pause}">${icon('pause')}</button></div></div>
       <p class="variant-storage ${sharedStyles['variant-storage']}" role="status"></p><div class="variant-pause ${sharedStyles['variant-pause']}" hidden><p>${common.paused}</p><button class="primary-button ${sharedStyles['primary-button']}" data-control="pause">${common.resume}</button></div><div class="variant-content"></div></main>
       <dialog aria-labelledby="variant-dialog-title"><h2 id="variant-dialog-title">${common.confirmTitle}</h2><p></p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="cancel">${common.cancel}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="confirm">${common.start}</button></div></dialog>`
+
     const content = root.querySelector<HTMLElement>('.variant-content')
     const status = root.querySelector<HTMLElement>('.variant-storage')
     const dialog = root.querySelector<HTMLDialogElement>('dialog')
     const picker = root.querySelector<HTMLElement>('.language-picker')
     if (!content || !status || !dialog || !picker) throw new Error('Variant shell is incomplete')
+
     root.addEventListener(
       'click',
       (event) => {
@@ -105,11 +109,13 @@ export class VariantView {
             ? event.target.closest<HTMLElement>('[data-sonar-reading]')
             : null
         if (!button || !this.config) return
+
         const region = sonarRegion(this.config, Number(button.dataset['sonarReading']))
         for (const cell of this.content.querySelectorAll<HTMLElement>(
           '[data-side="a"] [data-cell]',
         ))
           cell.classList.toggle('sonar-observed', region.includes(Number(cell.dataset['cell'])))
+
         for (const entry of this.content.querySelectorAll<HTMLElement>('[data-sonar-reading]'))
           entry.setAttribute('aria-pressed', String(entry === button))
       },
@@ -168,7 +174,9 @@ export class VariantView {
   /** Replace content and restore a still-existing control or cell focus after repaint. */
   render(html: string, a: Game | null, b: Game | null, expedition: Expedition | null): void {
     this.resize?.disconnect()
+
     const previous = this.expedition
+
     this.animateClock = Boolean(
       previous?.encounter?.kind === 'clock' &&
       expedition?.encounter?.kind === 'clock' &&
@@ -179,6 +187,7 @@ export class VariantView {
     this.config = a?.config ?? null
     this.expedition = expedition
     this.targetingTool = false
+
     const oldA = this.content
       .querySelector<HTMLElement>('[data-side="a"]')
       ?.closest<HTMLElement>('.board-viewport')
@@ -198,6 +207,7 @@ export class VariantView {
       this.focusA = expedition?.player ?? 0
       this.focusB = 0
     }
+
     const active =
       document.activeElement instanceof HTMLElement && this.content.contains(document.activeElement)
         ? document.activeElement
@@ -210,6 +220,7 @@ export class VariantView {
     const relicOpen =
       this.content.querySelector<HTMLDetailsElement>('[data-relic-menu]')?.open ?? false
     const heading = this.root.querySelector<HTMLElement>('.variant-heading')
+
     heading?.remove()
     this.titleMenu?.dispose()
     this.content.innerHTML = html
@@ -218,15 +229,21 @@ export class VariantView {
       if (overview) overview.prepend(heading)
       else this.content.before(heading)
     }
+
     const titlePicker = this.content.querySelector<HTMLElement>('.title-cabinet')
+
     this.titleMenu = titlePicker ? new TitleMenu(titlePicker, this.feedback) : null
+
     const relicMenu = this.content.querySelector<HTMLDetailsElement>('[data-relic-menu]')
     if (relicMenu) relicMenu.open = relicOpen
+
     this.a = this.board('a', a, this.focusA)
     this.b = this.board('b', b, this.focusB)
     this.applyZoom()
     if (expedition) this.markExpedition(expedition)
+
     if (expedition?.encounter) this.markTactical(expedition)
+
     this.magnetic.render(expedition)
     this.matrix.render(expedition)
     animateMatrixExtraction(this.content, previous, expedition)
@@ -235,12 +252,14 @@ export class VariantView {
     animateTideAnchor(this.content, previous, expedition)
     animateExitOpening(this.content, previous, expedition)
     animateRescue(this.content, previous, expedition)
+
     const comparison = expedition ? mirrorPreview(expedition) : null
     if (comparison) {
       this.markExpedition(comparison, 'b')
       this.markTactical(comparison, 'b')
       this.content.querySelector('[data-side="b"]')?.setAttribute('aria-readonly', 'true')
     }
+
     if (sameBoard) {
       this.content
         .querySelector('[data-side="a"]')
@@ -264,6 +283,7 @@ export class VariantView {
     // A completed purchase becomes disabled; retain focus on the inspected item's tile.
     if ((!target || target.hasAttribute('disabled')) && fallback)
       target = this.content.querySelector<HTMLElement>(`[data-control="${CSS.escape(fallback)}"]`)
+
     if (target && !target.hasAttribute('disabled')) target.focus({ preventScroll: true })
     else if (active)
       this.content
@@ -276,6 +296,7 @@ export class VariantView {
   /** Announce a new camp screen and bring its heading into view after explicit navigation. */
   focusCampHeading(): void {
     const heading = this.content.querySelector<HTMLElement>('.camp-panel h1')
+
     heading?.focus({ preventScroll: true })
     heading?.scrollIntoView({ block: 'nearest' })
   }
@@ -297,6 +318,7 @@ export class VariantView {
     returnedSupplies: number | null = null,
   ): void {
     const common = translations[this.language]
+
     this.status.textContent = atMoveLimit
       ? variantCopy(this.language).journalLimit
       : returnedSupplies !== null && available
@@ -308,6 +330,7 @@ export class VariantView {
             : migrated
               ? variantCopy(this.language).migrated
               : ''
+
     const button = this.root.querySelector<HTMLButtonElement>('[data-control="sound"]')
     if (button) {
       button.innerHTML = icon(sound ? 'volume' : 'volumeOff')
@@ -315,10 +338,13 @@ export class VariantView {
       button.title = sound ? common.soundOn : common.soundOff
       button.setAttribute('aria-pressed', String(sound))
     }
+
     const cover = this.root.querySelector<HTMLElement>('.variant-pause')
     if (cover) cover.hidden = !paused
+
     this.content.hidden = paused
     this.content.inert = paused
+
     const pause = this.root.querySelector<HTMLButtonElement>(
       '.variant-heading [data-control="pause"]',
     )
@@ -353,10 +379,13 @@ export class VariantView {
   /** Show an application-owned confirmation using the browser's focus-trapping dialog. */
   confirm(message: string, label: string): void {
     this.dialog.innerHTML = `<h2 id="variant-dialog-title">${translations[this.language].confirmTitle}</h2><p></p><div class="dialog-actions ${sharedStyles['dialog-actions']}"><button class="secondary-button ${sharedStyles['secondary-button']}" data-control="cancel">${translations[this.language].cancel}</button><button class="primary-button ${sharedStyles['primary-button']}" data-control="confirm"></button></div>`
+
     const paragraph = this.dialog.querySelector('p')
     if (paragraph) paragraph.textContent = message
+
     const button = this.dialog.querySelector<HTMLButtonElement>('[data-control="confirm"]')
     if (button) button.textContent = label
+
     this.dialog.showModal()
   }
 
@@ -370,11 +399,14 @@ export class VariantView {
   previewTool(tool: DungeonTool | null, index: number | null): void {
     this.targetingTool = tool !== null
     if (tool) this.previewRoute(null)
+
     const config = this.config
     if (!config) return
+
     const area = index === null ? [] : tool === 'attune' ? [index] : probeArea(config, index)
     for (const button of this.content.querySelectorAll<HTMLElement>('[data-tool]'))
       button.setAttribute('aria-pressed', String(button.dataset['tool'] === tool))
+
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]'))
       cell.classList.toggle(
         'tool-target',
@@ -385,8 +417,10 @@ export class VariantView {
               Math.floor(Number(cell.dataset['cell']) / config.width) ===
                 Math.floor(index / config.width),
       )
+
     const hint = this.content.querySelector<HTMLElement>('.tool-hint')
     if (!hint) return
+
     const copy = variantCopy(this.language)
     if (!tool) {
       hint.textContent = copy.toolHint
@@ -411,6 +445,7 @@ export class VariantView {
     const common = translations[this.language]
     const row = `${common.row} ${Math.floor(index / config.width) + 1}`
     const column = `${common.column} ${(index % config.width) + 1}`
+
     hint.textContent =
       tool === 'probe' || tool === 'sonar' || tool === 'attune' || tool === 'anchor'
         ? `${description} · ${row} · ${column}`
@@ -421,6 +456,7 @@ export class VariantView {
   previewRoute(index: number | null): void {
     const run = this.expedition
     if (!run || run.phase !== 'boss') return
+
     const plan =
       index !== null && !this.targetingTool
         ? tacticalPlan(run, tacticalCellAction(run, index))
@@ -428,9 +464,11 @@ export class VariantView {
     const route = new Set(plan?.path ?? [])
     for (const cell of this.content.querySelectorAll<HTMLElement>('[data-side="a"] [data-cell]')) {
       const onRoute = route.has(Number(cell.dataset['cell']))
+
       cell.classList.toggle('tactical-route', onRoute)
       cell.classList.toggle('tactical-unaffordable', Boolean(plan && !plan.allowed && onRoute))
     }
+
     const hint = this.content.querySelector<HTMLElement>('.tactical-plan')
     if (hint)
       hint.textContent = plan
@@ -442,6 +480,7 @@ export class VariantView {
   private markTactical(run: Expedition, side: BoardSide = 'a'): void {
     const encounter = run.encounter
     if (!encounter) return
+
     const t = tacticalCopy(this.language, encounter.kind)
     for (const cell of this.content.querySelectorAll<HTMLElement>(
       `[data-side="${side}"] [data-cell]`,
@@ -456,12 +495,15 @@ export class VariantView {
         cell.classList.add('boss-cell')
         cell.removeAttribute('aria-disabled')
         cell.innerHTML = spriteImage(bossSprite(encounter))
+
         const name =
           encounter.kind === 'mirror' ? mirrorName(this.language, encounter.active) : t.name
         const vitality = encounter.kind === 'mirror' ? encounter[encounter.active] : encounter
+
         cell.setAttribute('aria-label', `${name}, ${vitality.health} / ${vitality.maxHealth}`)
       } else if (pylon) {
         cell.classList.add('landmark-cell', 'pylon-cell')
+
         const mechanism =
           encounter.kind === 'bastion'
             ? encounter.mechanisms?.find((entry) => entry.index === index)
@@ -480,6 +522,7 @@ export class VariantView {
           `${cell.getAttribute('aria-label')}, ${pylon.active ? t.pylon : t.disabled}`,
         )
       }
+
       markTideCell(this.language, run, cell, index)
       markMatrixCell(this.language, run, cell, index)
       markEchoCell(this.language, run, cell, index)
@@ -499,7 +542,9 @@ export class VariantView {
         (encounter.kind !== 'magnetic' || encounter.forecast.kind === 'charge')
       ) {
         cell.classList.add('tactical-danger')
+
         const danger = `${t.danger} · ${battleThreat(encounter, index, run.game.config)}`
+
         cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${danger}`)
         cell.title = encounter.kind === 'clock' ? `${cell.title}; ${danger}` : danger
       }
@@ -515,13 +560,16 @@ export class VariantView {
   /** Restore the chosen zoom after every content repaint. */
   private applyZoom(): void {
     this.content.classList.toggle('enlarged-boards', this.enlarged)
+
     const button = this.content.querySelector<HTMLButtonElement>('[data-control="zoom"]')
     if (button) {
       const copy = variantCopy(this.language)
       const label = this.enlarged ? copy.fit : copy.zoom
+
       button.setAttribute('aria-label', label)
       button.setAttribute('title', label)
       button.setAttribute('aria-pressed', String(this.enlarged))
+
       const symbol = button.querySelector('span')
       if (symbol) symbol.textContent = this.enlarged ? '−' : '+'
     }
@@ -532,13 +580,16 @@ export class VariantView {
     const player = this.content.querySelector<HTMLElement>('.dungeon-player')
     if (!player || path.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches)
       return true
+
     const frames: Keyframe[] = []
     for (const index of path) {
       const cell = this.content.querySelector<HTMLElement>(`[data-side="a"] [data-cell="${index}"]`)
       if (!cell) return false
+
       frames.push({ transform: `translate(${cell.offsetLeft}px, ${cell.offsetTop}px)` })
       cell.classList.add('walk-route')
     }
+
     this.walking = player.animate(frames, {
       duration: Math.min(1800, (path.length - 1) * 100),
       fill: 'forwards',
@@ -614,10 +665,13 @@ export class VariantView {
   focusPlayer(): void {
     const run = this.expedition
     if (!run) return
+
     this.focus('a', run.player)
+
     const cell = this.content.querySelector<HTMLElement>(
       `[data-side="a"] [data-cell="${run.player}"]`,
     )
+
     cell?.focus({ preventScroll: true })
     cell?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
   }
@@ -645,9 +699,13 @@ export class VariantView {
   private board(side: BoardSide, game: Game | null, index: number): BoardView | null {
     const element = this.content.querySelector<HTMLElement>(`[data-side="${side}"]`)
     if (!element || !game) return null
+
     element.dataset['cells'] = String(game.cells.length)
+
     const view = new BoardView(element, game.config, Math.min(index, game.cells.length - 1))
+
     view.render(game, false, translations[this.language])
+
     return view
   }
 
@@ -661,7 +719,9 @@ export class VariantView {
       const index = Number(cell.dataset['cell'])
       const treasure = run.treasures.includes(index)
       if (index === run.exit) cell.dataset['exitState'] = exitIsOpen(run) ? 'open' : 'closed'
+
       cell.classList.toggle('frontier', run.phase === 'exploring' && frontier.has(index))
+
       const wall = run.walls.includes(index)
       const mark = wall
         ? 'wall'
@@ -698,15 +758,20 @@ export class VariantView {
         } else if (mark === 'mine') cell.innerHTML = ''
         else if (run.game.cells[index]?.visibility === 'revealed' && !run.game.cells[index]?.mine)
           cell.innerHTML = `<span class="landmark-clue">${run.game.cells[index]?.adjacent || ''}</span>`
+
         cell.insertAdjacentHTML('afterbegin', spriteImage(mark))
       }
+
       if (label) cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + label)
+
       const triggered = run.triggeredMines.includes(index)
       const confirmed = run.confirmedMines.includes(index)
       const surveyedSafe = run.surveyedCells.includes(index) && !confirmed && !wall
+
       cell.classList.toggle('confirmed-mine', confirmed && !triggered)
       cell.classList.toggle('triggered-mine', triggered)
       if (triggered) cell.innerHTML = icon('mine')
+
       cell.classList.toggle(
         'surveyed-safe',
         surveyedSafe && run.game.cells[index]?.visibility === 'hidden',
@@ -717,19 +782,27 @@ export class VariantView {
           : confirmed
             ? t.confirmedMine
             : t.confirmedSafe
+
         cell.title = knowledge
         cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + knowledge)
       }
+
       if (frontier.has(index))
         cell.setAttribute('aria-label', cell.getAttribute('aria-label') + ', ' + t.frontier)
     }
+
     const grid = this.content.querySelector<HTMLElement>(`[data-side="${side}"]`)
     if (side === 'a') renderFloorCircuits(this.content, run, this.language)
+
     if (side === 'a') renderFloorRail(this.content, run, this.language)
+
     if (side === 'a') renderFloorPower(this.content, run, this.language)
+
     if (side === 'a') {
+      /** Decorate a public mobility landmark while preserving existing title and accessibility text. */
       const marker = (index: number, className: string, label: string): void => {
         const cell = grid?.querySelector<HTMLElement>(`[data-cell="${index}"]`)
+
         cell?.classList.add(className)
         if (cell) {
           cell.title = [cell.title, label].filter(Boolean).join(' · ')
@@ -742,16 +815,20 @@ export class VariantView {
       const anchor = currentWaymark(run)
       if (anchor !== null)
         marker(anchor, 'mobility-anchor', message(this.language, 'variant-view.return-anchor'))
+
       if (run.rift?.room === skillRoom(run))
         for (const index of [run.rift.from, run.rift.to])
           marker(index, 'mobility-rift', message(this.language, 'variant-view.two-way-rift'))
+
       if (run.departure.profession === 'riftwalker' && !run.skillUsed)
         for (const index of riftLandings(run))
           marker(index, 'mobility-landing', message(this.language, 'variant-view.rift-landing'))
+
       if (run.departure.profession === 'rescuer' && !run.skillUsed)
         for (const index of rescueLandings(run))
           marker(index, 'mobility-landing', message(this.language, 'rescuer.landing'))
     }
+
     const current = grid?.querySelector<HTMLElement>(`[data-cell="${run.player}"]`)
     if (side === 'b') {
       current?.classList.add('mirror-parked')
@@ -759,18 +836,26 @@ export class VariantView {
         'beforeend',
         `<span class="landmark-player">${spriteImage(professionSprite(run.departure.profession))}</span>`,
       )
+
       return
     }
+
     if (grid && current) {
       current.classList.add('player-cell')
+
       const profession = professionCopy(this.language, run.departure.profession).name
+
       current.setAttribute(
         'aria-label',
         [current.getAttribute('aria-label'), profession].filter(Boolean).join(', '),
       )
+
       const player = document.createElement('div')
+
       player.className = 'dungeon-player'
+
       const clue = echoObscured(run, run.player) ? '≈' : (run.game.cells[run.player]?.adjacent ?? 0)
+
       player.dataset['number'] = String(clue)
       player.innerHTML = `${spriteImage(professionSprite(run.departure.profession))}${clue ? `<span class="landmark-clue">${clue}</span>` : ''}`
       player.style.width = `${current.offsetWidth}px`
@@ -778,10 +863,13 @@ export class VariantView {
       player.style.transform = `translate(${current.offsetLeft}px, ${current.offsetTop}px)`
       player.setAttribute('aria-hidden', 'true')
       grid.append(player)
+
       let width = current.offsetWidth
       /** Reanchor the sprite after responsive cell geometry changes. */
+
       this.resize = new ResizeObserver(() => {
         if (width !== current.offsetWidth) this.cancelWalk()
+
         width = current.offsetWidth
         player.style.width = `${width}px`
         player.style.height = `${current.offsetHeight}px`

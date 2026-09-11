@@ -11,11 +11,13 @@ export function tacticalHint(language: Language, run: Expedition): string {
   const encounter = run.encounter
   if (encounter?.kind === 'tide')
     return encounter.exposed ? message(language, 'tide.fight') : message(language, 'tide.hint')
+
   if (encounter?.kind !== 'matrix' || run.phase !== 'boss')
     return tacticalCopy(language, encounter?.kind).hint
 
   const matrix = { ...run, encounter }
   if (encounter.health <= matrixHealthFloor(matrix)) return message(language, 'matrix.phase')
+
   return encounter.exposed
     ? message(language, 'matrix.open-hint')
     : message(language, 'matrix.shield')
@@ -79,10 +81,13 @@ export function tacticalPlanCopy(language: Language, plan: TacticalPlan): string
 export function tacticalEventCopy(language: Language, encounter: TacticalEncounter): string {
   if (encounter.kind === 'magnetic' && encounter.event === 'braced')
     return message(language, 'tactical-copy.grounded-resist-the-pulse-and-reduce-enemy')
+
   if (encounter.event === 'braced')
     return message(language, 'tactical-copy.braced-reduce-enemy-damage-by-3-this')
+
   if (encounter.event === 'misfire')
     return message(language, 'tactical-copy.calibration-failed-5-damage')
+
   switch (encounter.event) {
     case 'tide-anchored':
       return message(language, 'tide.anchored')

@@ -43,6 +43,7 @@ export const SIGNAL_FLOORS: readonly (readonly string[])[] = [
 export function signalLayout(floor: number): DungeonLayout & { readonly circuits: FloorCircuits } {
   const rows = SIGNAL_FLOORS[floor - 1]
   if (!rows) throw new RangeError('Unknown signal floor')
+
   const symbols = [...rows.join('')]
   const mines = new Set(symbols.flatMap((symbol, index) => (symbol === '*' ? [index] : [])))
   const entrance = symbols.indexOf('S')
@@ -57,6 +58,7 @@ export function signalLayout(floor: number): DungeonLayout & { readonly circuits
       optional: true,
       active: true,
     })
+
   if (symbols.includes('P'))
     relays.push({
       index: symbols.indexOf('P'),

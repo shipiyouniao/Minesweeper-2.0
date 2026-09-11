@@ -28,9 +28,12 @@ export function consoleImage(): string {
 /** Keep one current instruction and a compact reading counter above the shared board layout. */
 export function powerObjective(language: Language, run: Expedition): string {
   if (!run.power) return ''
+
   if (run.power.purpose === 'restoration')
     return `<section class="signal-objective power-objective" aria-live="polite"><strong>${finaleFloorName(language, run)}</strong><p>${powerObjectiveComplete(run.power) ? message(language, 'finale.exit-ready') : message(language, 'finale.objective')}</p><span>${message(language, 'finale.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
+
   const drainage = run.power.purpose === 'drainage'
+
   return `<section class="signal-objective power-objective" aria-live="polite"><strong>${drainage ? waterwayFloorName(language, run.floor) : observatoryFloorName(language, run.floor)}</strong><p>${powerObjectiveComplete(run.power) ? (drainage ? message(language, 'waterway.exit-ready') : message(language, 'ridge.exit-ready')) : drainage ? message(language, 'waterway.objective') : message(language, 'ridge.objective')}</p><span>${drainage ? message(language, 'waterway.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length }) : message(language, 'ridge.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
 }
 
@@ -43,11 +46,13 @@ function feedLabel(run: Expedition, input: PowerFeed): string {
 export function renderFloorPower(root: HTMLElement, run: Expedition, language: Language): void {
   const power = run.power
   if (!power) return
+
   const board = root.querySelector<HTMLElement>('[data-side="a"]')
   if (board) {
     board.dataset['powerPurpose'] = power.purpose
     board.style.setProperty('--power-rows', String(run.game.config.height))
   }
+
   const controls = [
     ...power.junctions.map((entry) => ({ index: entry.index, kind: 'junction' as const })),
     ...power.receivers.map((entry) => ({ index: entry.index, kind: 'receiver' as const })),
@@ -56,6 +61,7 @@ export function renderFloorPower(root: HTMLElement, run: Expedition, language: L
   for (const control of controls) {
     const cell = root.querySelector<HTMLElement>(`[data-side="a"] [data-cell="${control.index}"]`)
     if (!cell) continue
+
     const junction = power.junctions.find((entry) => entry.index === control.index)
     const receiver = power.receivers.find((entry) => entry.index === control.index)
     const door = power.doors.find((entry) => entry.index === control.index)
@@ -77,6 +83,7 @@ export function renderFloorPower(root: HTMLElement, run: Expedition, language: L
         ? feedLabel(run, input)
         : ''
     const label = `${name} ${id} · ${door ? (live ? message(language, 'ridge.open') : message(language, 'ridge.closed')) : powerHint(language, powerReadiness(run, control.index), power.purpose)}`
+
     cell.classList.add('landmark-cell', 'power-cell', `power-${control.kind}`)
     cell.classList.toggle('power-live', live)
     cell.classList.toggle('power-recorded', !!receiver?.recorded)
@@ -87,6 +94,7 @@ export function renderFloorPower(root: HTMLElement, run: Expedition, language: L
     cell.setAttribute('aria-label', `${cell.getAttribute('aria-label')}, ${label}`)
     if (revealed || door)
       cell.innerHTML = `<span class="landmark-clue">${revealed ? run.game.cells[control.index]?.adjacent || '' : ''}</span>`
+
     cell.insertAdjacentHTML(
       'afterbegin',
       receiver
@@ -122,6 +130,7 @@ export async function animatePowerChange(
     matchMedia('(prefers-reduced-motion: reduce)').matches
   )
     return
+
   const changed = after.power.junctions.filter(
     (entry) =>
       entry.selected !== before.power?.junctions.find((old) => old.index === entry.index)?.selected,
@@ -131,12 +140,14 @@ export async function animatePowerChange(
     if (feedPowered(before.power, entry.input) !== feedPowered(after.power, entry.input))
       targets.add(entry.index)
   }
+
   for (const entry of after.power.receivers)
     if (
       entry.recorded &&
       !before.power.receivers.find((old) => old.index === entry.index)?.recorded
     )
       targets.add(entry.index)
+
   const animations: Animation[] = []
   const waterEffects: HTMLElement[] = []
   for (const index of targets) {
@@ -149,6 +160,7 @@ export async function animatePowerChange(
       !before.power.receivers.find((entry) => entry.index === index)?.recorded
     if (cell && draining) {
       const water = document.createElement('span')
+
       water.className = 'power-drain'
       water.setAttribute('aria-hidden', 'true')
       cell.append(water)
@@ -163,6 +175,7 @@ export async function animatePowerChange(
         ),
       )
     }
+
     const ordinal = [...targets].indexOf(index)
     const frames =
       draining || changed.some((entry) => entry.index === index)
@@ -185,8 +198,10 @@ export async function animatePowerChange(
       { duration: 750, delay: ordinal * 60 },
     )
     if (motion) animations.push(motion)
+
     if (flash) animations.push(flash)
   }
+
   await Promise.allSettled(animations.map((entry) => entry.finished))
   for (const effect of waterEffects) effect.remove()
 }

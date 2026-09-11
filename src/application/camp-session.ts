@@ -45,6 +45,7 @@ export class CampSession {
       records: [],
     }
     if (this.repository.migrated || this.repository.recovered) this.repository.saveExpedition(save)
+
     return save
   }
 
@@ -85,6 +86,7 @@ export class CampSession {
       (task) => !story.accepted?.includes(task) && !story.completed.includes(task),
     )
     if (!fresh.length) return
+
     story = recordStoryFacts(
       {
         ...story,
@@ -101,6 +103,7 @@ export class CampSession {
     const save = this.read()
     const progress = campaignProgress(save.campaign, id)
     if (!progress.cleared || progress.scenes.includes(scene)) return
+
     this.repository.saveExpedition({
       ...save,
       campaign: updateCampaign(save.campaign, { ...progress, scenes: [...progress.scenes, scene] }),
@@ -117,6 +120,7 @@ export class CampSession {
       story.completed.includes('find-beacon')
     )
       return
+
     this.saveStory({
       ...story,
       accepted: [...(story.accepted ?? []), 'find-beacon'],
@@ -129,6 +133,7 @@ export class CampSession {
     const save = this.read()
     const progress = campaignProgress(save.campaign, 'old-waterway')
     if (!progress.cleared || progress.scenes.includes(scene)) return
+
     this.repository.saveExpedition({
       ...save,
       campaign: updateCampaign(save.campaign, { ...progress, scenes: [...progress.scenes, scene] }),
@@ -138,7 +143,9 @@ export class CampSession {
   /** Finishing Nia's camp conversation accepts the route once, without granting currency. */
   acceptRidgeRoute(): void {
     if (!this.signalRescue.cleared || this.story.facts?.includes('ridge-route')) return
+
     const story = this.story
+
     this.saveStory(
       recordStoryFacts(
         {
@@ -156,6 +163,7 @@ export class CampSession {
     const save = this.read()
     const progress = campaignProgress(save.campaign, 'ridge-observatory')
     if (!progress.cleared || progress.scenes.includes(scene)) return
+
     this.repository.saveExpedition({
       ...save,
       campaign: updateCampaign(save.campaign, {
@@ -170,6 +178,7 @@ export class CampSession {
     const save = this.read()
     const progress = campaignProgress(save.campaign, 'tower-relay')
     if (!progress.cleared || progress.scenes.includes('rescued')) return
+
     this.repository.saveExpedition({
       ...save,
       campaign: updateCampaign(save.campaign, {
@@ -188,6 +197,7 @@ export class CampSession {
   get loadout(): CampLoadout {
     const save = this.read()
     const loadout = save.loadout
+
     return loadout && allowedDeparture(save.camp, loadout.profession, loadout.equipment)
       ? loadout
       : { profession: 'explorer', equipment: [] }
@@ -197,7 +207,9 @@ export class CampSession {
   selectLoadout(loadout: CampLoadout): boolean {
     const save = this.read()
     if (!allowedDeparture(save.camp, loadout.profession, loadout.equipment)) return false
+
     this.repository.saveExpedition({ ...save, loadout })
+
     return true
   }
 
@@ -221,7 +233,9 @@ export class CampSession {
     const save = this.read()
     const camp = change(save.camp)
     if (camp === save.camp) return false
+
     this.repository.saveExpedition({ ...save, camp })
+
     return true
   }
 
@@ -239,6 +253,7 @@ export class CampSession {
       claimed: [...new Set([...story.claimed, 'reach-camp' as const])],
       dialogue: { completed: story.dialogue?.completed ?? [], active: null },
     }
+
     delete progress.route
     delete progress.routeLegacy
     this.repository.saveExpedition({
@@ -259,10 +274,13 @@ export class CampSession {
     let earned = compensation
     for (const id of story.completed) {
       if (claimed.includes(id)) continue
+
       claimed.push(id)
       earned += storyTaskReward(id)
     }
+
     const completed: StoryTask[] = [...new Set([...previous.completed, ...story.completed])]
+
     this.repository.saveExpedition({
       ...save,
       story: { ...story, arrived: story.arrived || previous.arrived, completed, claimed },

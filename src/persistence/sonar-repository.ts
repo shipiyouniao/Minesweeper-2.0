@@ -22,10 +22,12 @@ function integer(value: number | null, low: number, high: number): value is numb
 /** Preserve valid wins even when an unrelated active journal needs to be discarded. */
 function decodeRecords(values: readonly JsonValue[] | null): readonly SonarRecord[] {
   if (!values || values.length > 30) return []
+
   const records: SonarRecord[] = []
   for (const value of values) {
     const reader = JsonObjectReader.from(value)
     if (!reader) continue
+
     const id = reader.string('id')
     const date = reader.string('date')
     const difficulty = sonarDifficulty(reader.string('difficulty'))
@@ -42,8 +44,10 @@ function decodeRecords(values: readonly JsonValue[] | null): readonly SonarRecor
       records.some((record) => record.id === id)
     )
       continue
+
     records.push({ id, date, difficulty, moves, scans })
   }
+
   return rankSonarRecords(records)
 }
 
@@ -66,9 +70,11 @@ export function rankSonarRecords(records: readonly SonarRecord[]): readonly Sona
 function decodeAction(value: JsonValue, size: number): SonarAction | null {
   const reader = JsonObjectReader.from(value)
   if (!reader) return null
+
   const type = reader.string('type')
   const index = reader.number('index')
   if (!integer(index, 0, size - 1)) return null
+
   switch (type) {
     case 'scan':
     case 'reveal':
@@ -97,6 +103,7 @@ export class SonarRepository {
   load(): SonarSave | null {
     this.records = []
     this.recovered = false
+
     let text: string | null
     try {
       text = this.storage.getItem(SONAR_STORAGE_KEY)
@@ -104,12 +111,16 @@ export class SonarRepository {
       this.available = false
       return null
     }
+
     if (text === null) return null
 
     this.recovered = true
+
     const reader = JsonObjectReader.from(parseJson(text))
     if (!reader) return null
+
     this.records = decodeRecords(reader.array('records'))
+
     const difficulty = sonarDifficulty(reader.string('difficulty'))
     const seed = reader.number('seed')
     const settled = reader.value('settled')
@@ -129,9 +140,12 @@ export class SonarRepository {
     for (const value of values) {
       const action = decodeAction(value, config.width * config.height)
       if (!action) return null
+
       actions.push(action)
     }
+
     this.recovered = false
+
     return { version: 2, difficulty, seed, actions, settled, records: this.records }
   }
 

@@ -32,6 +32,7 @@ export function milestonesTemplate(
 ): string {
   const claimed = milestoneProgress(camp).claimed
   const number = new Intl.NumberFormat(language)
+
   return `<p class="milestone-summary" role="status">${message(language, 'milestone-template.ready-to-claim')} · ${milestoneReadyCount(camp, kind)}</p>
     <div class="milestone-grid ${campStyles['milestone-grid']}">${MILESTONES.filter(
       (entry) => entry.kind === kind,
@@ -59,6 +60,7 @@ export function milestonesTemplate(
               : reward
                 ? relicSprite(reward.id)
                 : 'treasure'
+
         return `<article class="milestone-card ${campStyles['milestone-card']} ${done ? 'is-claimed' : ready ? 'is-ready' : ''}" data-milestone="${entry.id}">
         <div class="milestone-heading ${campStyles['milestone-heading']}">${spriteImage(sprite)}<div><p class="eyebrow ${sharedStyles['eyebrow']}">${done ? message(language, 'milestone-template.claimed') : ready ? message(language, 'milestone-template.completed') : message(language, 'milestone-template.in-progress')}</p><h2>${copy.name}</h2></div></div>
         <p>${copy.note}</p><div class="milestone-progress ${campStyles['milestone-progress']}"><progress max="${entry.target}" value="${value}" aria-label="${copy.name}"></progress><span>${number.format(value)} / ${number.format(entry.target)}</span></div>

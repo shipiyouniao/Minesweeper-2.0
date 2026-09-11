@@ -40,6 +40,7 @@ export function expeditionReward(run: Expedition): ExpeditionReward {
     const total = run.phase === 'won' ? campaignStage(run.departure.campaign).reward : 0
     return { base: total, bonus: 0, total, percent: 100 }
   }
+
   let base = 0
 
   if (run.phase === 'won') base = run.loot + VICTORY_SUPPLIES

@@ -64,7 +64,9 @@ export function randomIndex(seed: number): (bound: number) => number {
 
     do {
       state = (state + 0x6d2b79f5) >>> 0
+
       let mixed = Math.imul(state ^ (state >>> 15), state | 1)
+
       mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61)
       value = (mixed ^ (mixed >>> 14)) >>> 0
     } while (value >= limit)
@@ -86,6 +88,7 @@ export function minePositions(config: Config, firstClick: number, seed: number):
 
   // Excluding the neighborhood before shuffling guarantees the safe opening
   // without retrying layouts or moving mines after clues have been calculated.
+
   const safe = new Set([firstClick, ...neighbors(config, firstClick)])
   const candidates = Array.from(
     { length: config.width * config.height },
@@ -182,9 +185,11 @@ function revealTargets(game: Game, action: Action, original: Cell): readonly num
   if (targets.length) return targets
 
   // A matched number click remains accepted when its neighbors are already open.
+
   const flags = neighbors(game.config, action.index).filter(
     (index) => game.cells[index]?.visibility === 'flagged',
   ).length
+
   return original.visibility === 'revealed' && original.adjacent > 0 && flags === original.adjacent
     ? targets
     : null
@@ -255,7 +260,9 @@ export function act(game: Game, action: Action): Game {
 
   if (action.type === 'mark-safe') {
     if (original.visibility === 'revealed') return game
+
     const marked = game.safeMarks.includes(action.index)
+
     return {
       ...game,
       safeMarks: marked
@@ -300,9 +307,11 @@ export function chordTargets(
 ): readonly number[] {
   const cell = game.cells[index]
   if (!Number.isInteger(index) || !cell || cell.visibility !== 'revealed') return []
+
   const around = neighbors(game.config, index)
   const flags = around.filter((other) => game.cells[other]?.visibility === 'flagged').length
   // Keep neighbor order stable, and never inspect hidden mine values to validate a player note.
+
   return around.filter(
     (other) =>
       game.cells[other]?.visibility === 'hidden' &&

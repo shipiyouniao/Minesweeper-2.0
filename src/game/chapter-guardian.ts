@@ -36,6 +36,7 @@ export function guardianLayout(): DungeonLayout {
     0,
     entrance,
   )
+
   return {
     game: {
       ...game,

@@ -52,9 +52,12 @@ export class SignalPerformance {
     completed: () => void,
   ): void {
     if (this.dialog?.isConnected) return
+
     this.dispose()
+
     const t = signalCopy(language)
     const dialog = document.createElement('dialog')
+
     dialog.className = 'signal-dialogue'
     dialog.dataset['signalScene'] = scene
     dialog.setAttribute('aria-labelledby', 'signal-speaker')
@@ -62,6 +65,7 @@ export class SignalPerformance {
     root.append(dialog)
     if (scene === 'control-restored')
       dialog.querySelector('.signal-cast')!.insertAdjacentHTML('afterend', bridgeReveal(language))
+
     if (scene === 'rail-home')
       dialog
         .querySelector('.signal-cast')!
@@ -69,7 +73,9 @@ export class SignalPerformance {
           'afterend',
           `<div class="rail-settlement"><span class="rail-reward-portrait">${spriteImage('rescuer')}</span><p>${message(language, 'rail.reward')}</p></div>`,
         )
+
     if (scene === 'pass-open') dialog.classList.add('chapter-guardian-restored')
+
     if (
       scene === 'ridge-found' ||
       scene === 'ridge-camp' ||
@@ -77,6 +83,7 @@ export class SignalPerformance {
       scene === 'waterway-camp'
     ) {
       const replay = document.createElement('button')
+
       replay.type = 'button'
       replay.className = 'ridge-recording'
       replay.dataset['beaconReplay'] = ''
@@ -87,12 +94,17 @@ export class SignalPerformance {
       })
       dialog.querySelector('[data-signal-next]')!.before(replay)
     }
+
     this.dialog = dialog
+
     let beat = 0
+    /** Present the current dialogue beat, preserving the listener and restarting only its speaker animation. */
     const paint = (): void => {
       const line = lines[beat]
       if (!line) return
+
       this.animation?.cancel()
+
       const portrait = dialog.querySelector<HTMLElement>('[data-signal-portrait]')!
       const listener = dialog.querySelector<HTMLElement>('[data-signal-listener]')!
       const portraitSpeaker =
@@ -110,6 +122,7 @@ export class SignalPerformance {
                 ? spriteImage('bastion')
                 : niaImage()
       // The first response has a silhouette; the face is revealed only after reconnecting the line.
+
       portrait.classList.toggle(
         'signal-radio',
         (scene === 'entry' && line.speaker === 'nia') ||
@@ -119,6 +132,7 @@ export class SignalPerformance {
       listener.classList.toggle('is-speaking', line.speaker === 'player')
       dialog.querySelector('#signal-speaker')!.textContent =
         line.speaker === 'toma' ? message(language, 'rail.toma') : t[line.speaker]
+
       const active = line.speaker === 'player' ? listener : portrait
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
         this.animation = active.animate(
@@ -129,6 +143,7 @@ export class SignalPerformance {
           ],
           { duration: 420, easing: 'ease-out' },
         )
+
       const cue =
         line.speaker === 'toma'
           ? 'dialogue-toma'
@@ -139,6 +154,7 @@ export class SignalPerformance {
               : line.speaker === 'lumi'
                 ? 'dialogue-lumi'
                 : 'dialogue-nia'
+
       this.reveal.start(
         dialog.querySelector<HTMLElement>('[data-signal-line]')!,
         line.text,
@@ -146,10 +162,12 @@ export class SignalPerformance {
         language,
       )
     }
+
     dialog.addEventListener('cancel', (event) => event.preventDefault())
     dialog.querySelector('[data-signal-next]')!.addEventListener('click', () => {
       this.sounds.unlock()
       if (this.reveal.finish()) return
+
       this.sounds.play('confirm')
       if (++beat < lines.length) paint()
       else {
@@ -160,6 +178,7 @@ export class SignalPerformance {
     dialog.showModal()
     if (scene === 'ridge-found' || scene === 'waterway-call' || scene === 'waterway-found')
       this.sounds.play('beacon-signal')
+
     paint()
   }
 

@@ -15,11 +15,13 @@ export function openArena(
   for (const index of queue) {
     const cell = cells[index]
     if (!cell || cell.mine || walls.includes(index) || visited.has(index)) continue
+
     visited.add(index)
     cells[index] = { ...cell, visibility: 'revealed' }
     // Rings are excluded only from direct reveal seeds, not from ordinary blank expansion.
     // Safe ring cells may open; mines always remain covered until a player earns information.
     if (cell.adjacent === 0) queue.push(...neighbors(placed.config, index))
   }
+
   return { ...placed, cells, phase: 'playing' }
 }

@@ -46,7 +46,9 @@ export class SurveyInput {
       actions.unlock()
       if (!actions.blocked) actions.secondary(Number(cell.dataset['cell']))
     })
+
     const options = { signal: this.listeners.signal }
+
     root.addEventListener('click', this.click, options)
     root.addEventListener('keydown', this.key, options)
     root.addEventListener('focusin', this.focus, options)
@@ -77,6 +79,7 @@ export class SurveyInput {
       this.hold.cancelled = true
       this.suppressUntil = performance.now() + 700
     }
+
     this.rightClick.cancel()
   }
 
@@ -91,9 +94,12 @@ export class SurveyInput {
   /** Route known buttons; touch cell activations are handled exactly once on pointer release. */
   private readonly click = (event: MouseEvent): void => {
     if (!(event.target instanceof Element)) return
+
     const button = event.target.closest<HTMLButtonElement>('button')
     if (!button) return
+
     this.actions.unlock()
+
     const header = this.header(button)
     if (header) {
       // One click opens the line; ignore the second click of a double-click and synthetic touch clicks.
@@ -101,12 +107,14 @@ export class SurveyInput {
         this.actions.openLine(header.axis, header.line)
       return
     }
+
     const cell = button.dataset['cell']
     if (cell !== undefined) {
       if (!this.actions.blocked && performance.now() >= this.suppressUntil)
         this.actions.play(Number(cell))
       return
     }
+
     const difficulty = surveyDifficulty(button.dataset['surveyDifficulty'] ?? null)
     const record = surveyDifficulty(button.dataset['surveyRecord'] ?? null)
     if (difficulty) this.actions.command({ type: 'difficulty', value: difficulty })
@@ -131,22 +139,30 @@ export class SurveyInput {
         ))
     )
       return
+
     if (event.key === 'Tab') this.actions.feedback('navigate')
+
     const key = event.key.toLowerCase()
     if (key === 'p' || key === 'n') {
       event.preventDefault()
       this.actions.command({ type: key === 'p' ? 'pause' : 'new' })
+
       return
     }
+
     if (this.actions.blocked) return
+
     const header = this.header(event.target)
     if (header && (key === 'enter' || key === ' ' || key === 'c')) {
       event.preventDefault()
       if (!event.repeat) this.actions.openLine(header.axis, header.line)
+
       return
     }
+
     const cell = this.cell(event.target)
     if (!cell) return
+
     const index = Number(cell.dataset['cell'])
     const navigation = parseNavigation(key)
     if (navigation) {
@@ -165,6 +181,7 @@ export class SurveyInput {
   private readonly focus = (event: FocusEvent): void => {
     const cell = this.cell(event.target)
     if (cell) this.actions.focus(Number(cell.dataset['cell']))
+
     const header = this.header(event.target)
     if (header) this.actions.previewLine(header.axis, header.line)
   }
@@ -172,12 +189,15 @@ export class SurveyInput {
   /** Pointer hover highlights public row and column headers without taking a game action. */
   private readonly over = (event: PointerEvent): void => {
     if (event.pointerType !== 'mouse') return
+
     const header = this.header(event.target)
     if (header) {
       this.actions.previewLine(header.axis, header.line)
       return
     }
+
     const cell = this.cell(event.target)
+
     this.actions.preview(cell ? Number(cell.dataset['cell']) : null)
   }
 
@@ -194,6 +214,7 @@ export class SurveyInput {
       this.actions.blocked
     )
       return
+
     const header = this.header(event.target)
     if (header) {
       this.suppressUntil = performance.now() + 700
@@ -205,10 +226,13 @@ export class SurveyInput {
         started: performance.now(),
       }
       this.actions.previewLine(header.axis, header.line)
+
       return
     }
+
     const cell = this.cell(event.target)
     if (!cell) return
+
     const hold: SurveyHold = {
       pointer: event.pointerId,
       index: Number(cell.dataset['cell']),
@@ -217,10 +241,12 @@ export class SurveyInput {
       cancelled: false,
       acted: false,
     }
+
     this.hold = hold
     this.actions.focus(hold.index)
     this.timer = window.setTimeout(() => {
       if (this.hold !== hold || hold.cancelled || this.actions.blocked) return
+
       hold.acted = true
       this.suppressUntil = performance.now() + 700
       this.actions.secondary(hold.index)
@@ -247,8 +273,10 @@ export class SurveyInput {
       this.finishHeaderTap(event)
       return
     }
+
     const hold = this.hold
     if (!hold || hold.pointer !== event.pointerId) return
+
     clearTimeout(this.timer)
     this.hold = null
     this.suppressUntil = performance.now() + 700
@@ -264,8 +292,11 @@ export class SurveyInput {
   /** Open the touched clue on one short, stationary tap and suppress the browser's duplicate click. */
   private finishHeaderTap(event: PointerEvent): void {
     const hold = this.headerHold
+
     this.headerHold = null
+
     const now = performance.now()
+
     this.suppressUntil = now + 700
     if (
       !hold ||
@@ -274,6 +305,7 @@ export class SurveyInput {
       Math.hypot(event.clientX - hold.x, event.clientY - hold.y) > 10
     )
       return
+
     this.actions.openLine(hold.axis, hold.line)
   }
 
@@ -281,6 +313,7 @@ export class SurveyInput {
   private readonly contextMenu = (event: MouseEvent): void => {
     const cell = this.cell(event.target)
     if (!cell) return
+
     event.preventDefault()
     if (!this.hold && performance.now() >= this.suppressUntil && !this.actions.blocked)
       this.actions.secondary(Number(cell.dataset['cell']))
@@ -305,8 +338,10 @@ export class SurveyInput {
         ? target.closest<HTMLElement>('.survey-line[data-axis][data-line]')
         : null
     if (!element || !this.root.contains(element)) return null
+
     const axis = element.dataset['axis']
     const line = Number(element.dataset['line'])
+
     return (axis === 'row' || axis === 'column') && Number.isInteger(line) && line >= 0
       ? { axis, line }
       : null

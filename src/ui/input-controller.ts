@@ -22,6 +22,7 @@ export class InputController {
       this.actions.prepareAudio()
       this.actions.secondary(Number(cell.dataset['cell']))
     })
+
     const options = { signal: this.listeners.signal }
 
     root.addEventListener('click', this.handleClick, options)
@@ -115,6 +116,7 @@ export class InputController {
   private readonly handleSubmit = (event: SubmitEvent): void => {
     if (event.target instanceof HTMLFormElement) {
       event.preventDefault()
+
       const submission = parseSubmission(event.target.id, new FormData(event.target))
 
       if (submission) {
@@ -175,6 +177,7 @@ export class InputController {
     if (key === 'p' || key === 'n') {
       event.preventDefault()
       this.actions.command(key === 'p' ? 'pause' : 'new')
+
       return
     }
 
@@ -209,7 +212,9 @@ export class InputController {
       return
     }
     // A real new press must not inherit suppression of the preceding hold's synthetic click.
+
     this.lastTouchAction = -Infinity
+
     const cell = this.cellTarget(event.target)
 
     if (!cell) {
@@ -217,6 +222,7 @@ export class InputController {
     }
 
     // Touch holds run later; unlock now while browser user activation is still available.
+
     this.actions.prepareAudio()
     if (event.pointerType === 'mouse') return
 

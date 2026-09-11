@@ -8,7 +8,7 @@ Status: direction approved and tracked in [Roadmap II #55](https://github.com/sh
 
 ## Player structure
 
-The homepage continues to offer Expedition and Free play. Expedition opens **one shared camp presented as an explorable board**. Its paths lead to facilities, task-givers, the persistent overworld and stage entrances. A camp landmark opens **Recollection**, the existing roguelite adapted into configurable challenges. Players choose difficulty and checked board-mechanic/boss pools unlocked through campaign progress. This replaces the earlier design of two parallel departure menus with a campaign-independent roguelite catalog.
+The homepage continues to offer Expedition and Free play. Expedition opens **the current regional camp presented as an explorable board**. Each chapter is planned to have its own physical camp, while all camps share party ownership and progression. Its paths lead to facilities, task-givers, the persistent overworld and stage entrances. Beginning in Chapter Two, a camp landmark is planned to open **Recollection**, the existing roguelite adapted into configurable challenges. Players choose difficulty and checked board-mechanic/boss pools unlocked through campaign progress. This replaces the earlier design of two parallel departure menus with a campaign-independent roguelite catalog.
 
 The camp owns supplies, purchased equipment, professions, titles, training, unlocked relic pools, ordinary missions and achievements. Purchases, claims and equipment effects work in both activities. Campaign must not silently replace an owned build with preset statistics or maintain a second shop. Departure snapshots continue to freeze the selected profession, title and loadout for that attempt; later camp purchases affect later departures.
 

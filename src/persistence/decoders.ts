@@ -19,6 +19,7 @@ function decodeConfig(reader: JsonObjectReader | null): Config | null {
   }
 
   const config: Config = { width, height, mines }
+
   return validConfig(config) ? config : null
 }
 
@@ -54,6 +55,7 @@ function decodeSnapshotValue(value: JsonValue): GameSnapshot | null {
   }
 
   // Null is a valid untouched board; a missing or malformed first-click field is not.
+
   if (firstClick === null && reader.value('firstClick') !== null) {
     return null
   }
@@ -84,6 +86,7 @@ function decodeSnapshotValue(value: JsonValue): GameSnapshot | null {
   }
 
   if (!rawMarks || rawMarks.length > cellCount) return null
+
   const safeMarks: number[] = []
   const seenMarks = new Set<number>()
 
@@ -97,6 +100,7 @@ function decodeSnapshotValue(value: JsonValue): GameSnapshot | null {
       seenMarks.has(index)
     )
       return null
+
     seenMarks.add(index)
     safeMarks.push(index)
   }
@@ -189,6 +193,7 @@ function decodeLegacyScore(value: JsonValue, index: number): Score | null {
   }
 
   const seconds = Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3])
+
   return {
     id: `legacy-${index}`,
     name,

@@ -13,7 +13,9 @@ export function broodCellLabel(
     return message(language, 'brood-copy.egg-hatches-in-turns-clear-adjacent-for', {
       p0: egg.turns,
     })
+
   if (encounter.webs.includes(index))
     return message(language, 'brood-copy.web-clear-adjacent-for-1-ap')
+
   return message(language, 'brood-copy.hatchling-clear-adjacent-for-1-ap')
 }
