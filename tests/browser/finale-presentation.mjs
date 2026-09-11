@@ -149,6 +149,9 @@ try {
     await seed(page, completed, `?page=story&lang=${language}`)
     await page.locator('[data-story-action="map"]').click()
     await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
+    await page
+      .locator('[data-atlas-route="north-road:northwest-bridge"][data-route-state="open"]')
+      .waitFor()
     const before = await page.evaluate((key) => localStorage.getItem(key), key)
     for (const scene of [9, 10]) {
       await page.locator('[data-map-zoom="reset"]').click()

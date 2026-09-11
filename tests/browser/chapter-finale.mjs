@@ -183,7 +183,9 @@ try {
     )
     await page.locator('[data-story-action="map"]').click()
     await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
-    await page.locator('[data-west-route="true"]').waitFor()
+    await page
+      .locator('[data-atlas-route="north-road:northwest-bridge"][data-route-state="open"]')
+      .waitFor()
     assert.equal(await page.locator('[data-scene="9"]').isDisabled(), false)
     assert.equal(await page.locator('[data-scene="10"]').isDisabled(), false)
     await page.screenshot({ path: `.native/finale-screenshots/world-${width}.png` })
