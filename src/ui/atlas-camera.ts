@@ -3,15 +3,12 @@ import type {
   AtlasDetail,
   AtlasLevel,
   AtlasPoint,
-  AtlasRegion,
   AtlasTile,
   AtlasViewport,
 } from '../types/atlas.js'
 
-/** World charts allow enough magnification to inspect their embedded regional geography. */
-export function atlasMaxZoom(level: AtlasLevel): number {
-  return level === 'world' ? 8 : 4
-}
+/** The slider, wheel, pinch and focus controls all use this one magnification range. */
+export const ATLAS_ZOOM = { min: 1, max: 5, step: 0.05 }
 
 /** Clamp translation so panning cannot expose an empty strip outside the chart. */
 export function clampAtlasCamera(camera: AtlasCamera, size: AtlasViewport): AtlasCamera {
@@ -33,9 +30,8 @@ export function zoomAtlas(
   value: number,
   anchor: AtlasPoint,
   size: AtlasViewport,
-  level: AtlasLevel,
 ): AtlasCamera {
-  const zoom = Math.max(1, Math.min(atlasMaxZoom(level), value))
+  const zoom = Math.max(ATLAS_ZOOM.min, Math.min(ATLAS_ZOOM.max, value))
   return clampAtlasCamera(
     {
       zoom,
@@ -48,8 +44,7 @@ export function zoomAtlas(
 
 /** Coarse charts show areas; local destinations appear only when there is room to read them. */
 export function atlasDetail(level: AtlasLevel, zoom: number): AtlasDetail {
-  if (level === 'world') return zoom < 2 ? 'regions' : zoom < 3.5 ? 'districts' : 'places'
-  return level === 'region' && zoom < 1.7 ? 'districts' : 'places'
+  return level === 'world' && zoom < 1.7 ? 'districts' : 'places'
 }
 
 /** Enumerate only intersecting quadtree tiles, including a small seam margin at tile boundaries. */
@@ -77,18 +72,4 @@ export function visibleAtlasTiles(camera: AtlasCamera, size: AtlasViewport): Atl
   }
 
   return tiles
-}
-
-/** Embed the known region in the western landmass using the same transform for every marker. */
-export function atlasPosition(
-  point: AtlasPoint,
-  level: AtlasLevel,
-  region: AtlasRegion,
-): AtlasPoint {
-  return level === 'world'
-    ? {
-        x: region.x + (point.x * region.width) / 100,
-        y: region.y + (point.y * region.height) / 100,
-      }
-    : point
 }

@@ -14,16 +14,9 @@ export interface AtlasCamera {
   readonly x: number
   readonly y: number
 }
-export type AtlasLevel = 'local' | 'region' | 'world'
-export type AtlasDetail = 'regions' | 'districts' | 'places'
+export type AtlasLevel = 'local' | 'world'
+export type AtlasDetail = 'districts' | 'places'
 export type AtlasDistrict = 'woodland' | 'camp' | 'quarry' | 'west'
-
-/** Region placement maps local 0–100 coordinates into an authored world rectangle. */
-export interface AtlasRegion extends AtlasPoint {
-  readonly id: 'woodland'
-  readonly width: number
-  readonly height: number
-}
 
 /** Named locations prevent catalog insertion from silently moving unrelated markers. */
 export interface AtlasPlace extends AtlasPoint {
@@ -31,6 +24,16 @@ export interface AtlasPlace extends AtlasPoint {
   readonly district: AtlasDistrict
   readonly picture: 'tree' | 'lantern' | 'workshop' | 'treasure'
 }
+
+/** Authored bends connect physical entrances; a haul track can only be followed in one direction. */
+export interface AtlasRoute {
+  readonly from: StoryScene['id']
+  readonly to: StoryScene['id']
+  readonly via: readonly AtlasPoint[]
+  readonly access?: 'guide' | 'quarry' | 'lift' | 'haul' | 'northwest'
+  readonly oneWay?: boolean
+}
+export type AtlasRouteState = 'open' | 'closed' | 'uncharted'
 
 /** A visible vector tile owns one quadtree address and its source rectangle. */
 export interface AtlasTile {

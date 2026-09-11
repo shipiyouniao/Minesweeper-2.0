@@ -151,4 +151,4 @@ Sonar has its own pure rule module, SonarSession and SonarRepository. SonarApp, 
 
 ## Atlas and shared scene presentation
 
-The [atlas and business-boundary guide](atlas-and-business-boundaries.md) describes named geographic content, visible vector tiles, semantic zoom, typed gesture state, shared scene transitions and facility artwork. It also records the repository-wide readability pass and the enforced documentation, layering and i18n gates.
+The [atlas and business-boundary guide](atlas-and-business-boundaries.md) describes the two-level world/scene atlas, its connected route graph, shared physical-access gates, visible vector tiles, semantic zoom and typed gesture state. It also covers shared scene transitions and facility artwork, the repository-wide readability pass and the enforced documentation, layering and i18n gates.

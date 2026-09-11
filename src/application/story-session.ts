@@ -1,4 +1,10 @@
 import { northwestPortals } from '../game/northwest-world.js'
+import {
+  canEnterNorthRoad,
+  canEnterQuarry,
+  canUseHaulTrack,
+  canUseStoryLift,
+} from '../game/story-world-access.js'
 import { STORY_SCENES } from '../game/story-content.js'
 import { TOMA_CAMP_CELL } from '../game/rail-story.js'
 import { NIA_CAMP_CELL } from '../game/signal-story.js'
@@ -114,8 +120,7 @@ export class StorySession {
     if (
       this.current ||
       progress.campPosition !== 13 ||
-      !progress.mapOwned ||
-      !progress.completed.includes('meet-guide') ||
+      !canEnterNorthRoad(progress) ||
       !progress.world
     )
       return false
@@ -204,14 +209,14 @@ export class StorySession {
     if (run.floor === 3) {
       if (run.player === run.board.entrance) return this.dispatch({ type: 'return' })
 
-      if (run.player === QUARRY_GATE && progress.accepted?.includes('repair-lift')) floor = 4
+      if (run.player === QUARRY_GATE && canEnterQuarry(progress)) floor = 4
 
       if (run.player === run.board.exit && progress.facts?.includes('spindle-secured')) {
         if (!progress.facts.includes('lift-restored')) {
           this.camp.saveStory(recordStoryFacts(progress, ['lift-restored']))
           return true
         }
-        if (progress.dialogue?.completed.includes('lift-repaired')) floor = 7
+        if (canUseStoryLift(progress)) floor = 7
       }
     } else if (run.player === run.board.entrance) {
       floor = run.floor === 7 ? 3 : run.floor - 1
@@ -219,7 +224,7 @@ export class StorySession {
     } else if (run.player === run.board.exit && run.floor < 6) floor = run.floor + 1
     else if (run.floor === 6 && run.player === run.board.exit) {
       // The repaired haul track is a physical shortcut, available after recovering the spindle.
-      if (!run.collected || !run.operated.length) return false
+      if (!canUseHaulTrack(run.collected, run.operated)) return false
 
       floor = 3
       target = createStoryRun(3).board.exit

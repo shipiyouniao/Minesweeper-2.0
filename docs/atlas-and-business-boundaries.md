@@ -1,25 +1,22 @@
 # Atlas detail and business-code boundaries
 
-The atlas now renders its world and region charts as visible vector tiles. At a distant scale it shows regions or districts; zooming in replaces these with individual locations. A location opens its local map through the existing discovery gate. This is map navigation only: it cannot move the traveler, grant a task, unlock an entrance or modify either attempt.
+The atlas has two navigation levels: **World** and **Local area**. The world is one continuous tiled chart. At a distant scale it shows districts and their connected roads; zooming in replaces district labels with individual locations. Selecting a location opens its scene map through the existing discovery gate. There is no intermediate regional page. Map navigation cannot move the traveler, grant a task, unlock an entrance or modify either attempt.
 
-The same early-camp checkpoint at 100% regional zoom, before and after this change:
-
-| Previous map                                                                    | Regional overview                                                             |
-| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| ![All location markers and an overlaid legend control](images/atlas-before.png) | ![Area markers and an icon-only legend below the map](images/atlas-after.png) |
+![The continuous world map with connected routes](images/atlas-world.png)
 
 ## Geographic data and presentation
 
-- `game/atlas-catalog.ts` owns named places, district membership, artwork choices and the region's world placement. A new catalog entry does not renumber unrelated geographic connections.
+- `game/atlas-catalog.ts` owns named world positions, district membership, artwork choices and the route graph. Its 12 connections cover all 11 current places; authored bends separate through roads and shortcuts. A new catalog entry does not renumber unrelated geographic connections.
 - `game/atlas-connections.ts` resolves named local-map connections and shares northwest portal requirements with physical travel. `game/story-task-location.ts` resolves task locations from permanent outcomes.
-- `ui/atlas-camera.ts` contains pure camera clamping, anchored zoom, semantic detail selection and visible quadtree address calculations. The world supports 1–8× zoom and the region/local maps 1–4×.
-- `ui/atlas-terrain.ts` owns the existing original vector artwork. Tiles select source rectangles from it, preserving sharp edges at every level; no third-party tile service, network API or new bitmap generation is involved.
+- `game/atlas-routes.ts` resolves open, closed and uncharted routes. `game/story-world-access.ts` supplies the same guide, quarry, lift and haul-track conditions to the atlas and physical travel. Northwest routes use the existing portal requirements. The haul-track return is explicitly one-way.
+- `ui/atlas-camera.ts` contains pure camera clamping, anchored zoom, semantic detail selection and visible quadtree address calculations. Both maps use one 100–500% range. The slider, buttons, wheel, keyboard, pinch and district focus share its bounds; the slider's entire track is usable, with no inherited text-field padding.
+- `ui/atlas-world-terrain.ts` owns the original vector terrain. Tiles select source rectangles from it, preserving sharp edges at every level; no third-party tile service or network API is involved. `ui/atlas-route-layer.ts` draws continuous roads and location dots from the graph above the terrain, so paths and destinations cannot drift into separate coordinate systems.
 - `ui/atlas-tiles.ts` retains intersecting tile elements and removes addresses outside the viewport. It switches accessible marker layers with the same zoom state. Hidden layers are inert and cannot receive keyboard focus.
 - `ui/atlas-chart.ts` renders named geographic markers; `ui/atlas-local.ts` renders local boards; `ui/story-map.ts` composes the map shell. Neither camera input nor templates own campaign progress.
 
 The transparent, icon-only legend control lives in the zoom bar outside the drawing. Its accessible name, expanded state and localized legend remain available. Labels and destination icons retain a readable screen size while geography zooms. Each map remembers its camera during the current UI session, including when returning from a submap.
 
-Mouse wheel, range controls, zoom buttons, keyboard navigation, dragging and two-finger pinch all use the same camera math. A gesture is explicitly idle, panning, pinching or waiting for remaining fingers to lift. Finishing a pinch cannot activate a location underneath it. Outer-map destinations use one click or tap; local landmark descriptions retain their inspect-and-open interaction.
+Mouse wheel, range controls, zoom buttons, keyboard navigation, dragging and two-finger pinch all use the same camera math. A gesture is explicitly idle, panning, pinching or waiting for remaining fingers to lift. Finishing a pinch cannot activate a location underneath it; a fresh pointer gesture immediately restores deliberate clicking. World destinations use one click or tap; local landmark descriptions retain their inspect-and-open interaction. District focus uses discovered members so an unexplored location cannot pull the known destination off screen.
 
 ## Shared presentation ownership
 
@@ -45,4 +42,4 @@ The formal Recollection facility is planned for the beginning of Chapter Two, in
 
 ## Verification
 
-Camera tests cover anchored zoom, edge bounds, tile coverage across viewport sizes, catalog completeness, discovery gates and task destinations. Browser checks cover narrow and 4K layouts, three languages, native touch pinch with delayed release, direct location activation, camera restoration, transparent controls, keyboard use and unchanged serialized saves. Chapter-finale checks exercise the discovered northwest maps and physical route independently.
+Camera tests cover anchored zoom, edge bounds, tile coverage across viewport sizes, catalog completeness, discovery gates and task destinations. Route tests verify that every location is connected through actual scene doorways, the haul return remains one-way, and route states respect repair and dialogue checkpoints. Browser checks cover narrow and 4K layouts, three languages, actual slider drags and endpoint clicks/taps, native touch pinch with delayed release, direct location activation, camera restoration, transparent controls, keyboard use and unchanged serialized saves. Chapter-finale checks exercise the discovered northwest maps and physical route independently.

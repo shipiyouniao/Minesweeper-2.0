@@ -62,7 +62,7 @@ export class StoryApp implements MountedGame {
   private moving = false
   private selectedTask: NonNullable<StoryViewState['selectedTask']> | null = null
   private panel: 'tasks' | 'map' | null = null
-  private mapLevel: 'local' | 'region' | 'world' = 'local'
+  private mapLevel: NonNullable<StoryViewState['mapLevel']> = 'local'
   private mapScene = storyAtlasIndex('camp')
   private mapLegend = false
   private readonly mapControls = new StoryMapControls()
@@ -790,7 +790,7 @@ export class StoryApp implements MountedGame {
         break
       case 'map-level': {
         const level = button.dataset['level']
-        if (level !== 'local' && level !== 'region' && level !== 'world') return
+        if (level !== 'local' && level !== 'world') return
 
         this.mapLevel = level
         break
@@ -879,7 +879,9 @@ export class StoryApp implements MountedGame {
       button.dataset['storyAction'] === 'map-scene' ||
       button.dataset['storyAction'] === 'quest-map'
     )
-      this.root.querySelector<HTMLElement>('.atlas-scale')?.focus({ preventScroll: true })
+      this.root
+        .querySelector<HTMLElement>('.atlas-level[aria-pressed="true"]')
+        ?.focus({ preventScroll: true })
   }
 
   /** Maintain roving focus while leaving browser scrolling and all nonboard keys alone. */

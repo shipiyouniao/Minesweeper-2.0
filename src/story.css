@@ -729,26 +729,6 @@ dialog.story-dialogue .story-dialogue-next {
   gap: 10px;
   margin: 18px 0;
 }
-.atlas-scale {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: 1px solid #365947;
-  border-radius: 9px;
-  background: #365947;
-  color: #fff9df;
-  box-shadow: 0 2px 5px #28442f20;
-  cursor: pointer;
-}
-.atlas-scale .icon {
-  width: 17px;
-  height: 17px;
-}
-.atlas-scale:hover {
-  background: #456b55;
-}
 .atlas-canvas {
   position: relative;
 }
@@ -939,7 +919,6 @@ dialog.story-dialogue .story-dialogue-next {
   border-color: #365947;
 }
 .atlas-node:focus-visible,
-.atlas-scale:focus-visible,
 .atlas-legend-toggle:focus-visible,
 .atlas-back:focus-visible {
   outline: 3px solid #456d63;
@@ -948,16 +927,6 @@ dialog.story-dialogue .story-dialogue-next {
 .atlas-node:disabled {
   opacity: 0.45;
   cursor: default;
-}
-.atlas-region-node {
-  max-width: 45%;
-}
-.atlas-unknown {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  font-size: 12px;
-  letter-spacing: 0.15em;
-  color: #758578;
 }
 .atlas-compass {
   position: absolute;
