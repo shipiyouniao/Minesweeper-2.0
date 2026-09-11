@@ -16,6 +16,7 @@ export function interactRelay(run: Expedition, index: number): Expedition {
   const circuits = run.circuits
   const relay = circuits?.relays.find((entry) => entry.index === index && entry.active)
   if (!circuits || !relay || !relayReady(run, relay)) return run
+
   const path = walkingPath(run, index)
   if (!path) return run
 
@@ -53,13 +54,17 @@ export function collectSignalRecord(run: Expedition, path: readonly number[]): E
     !path.includes(circuits.record)
   )
     return run
+
   return { ...run, signalRecord: true, circuits: { ...circuits, recordTaken: true } }
 }
 
 /** Exit rules use mechanism outcomes instead of requiring every optional collectible. */
 export function floorObjectiveComplete(run: Expedition): boolean {
   if (run.rail) return railObjectiveComplete(run.rail)
+
   if (run.power) return powerObjectiveComplete(run.power)
+
   if (run.circuits) return run.circuits.relays.every((relay) => relay.optional || !relay.active)
+
   return !run.departure.campaign || run.treasures.every((index) => run.collected.includes(index))
 }

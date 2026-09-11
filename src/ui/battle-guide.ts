@@ -143,6 +143,7 @@ export function battleGuide(language: Language, run: Expedition): string {
                       },
                     ]
   const copy = battleCopy(language, boss.kind)
+
   return `<article class="battle-guide ${guidanceStyles['battle-guide']} battle-guide-visual"><header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${spriteImage(bossSprite(boss))}<div><h3>${copy.name}</h3><p>${message(language, 'battle-guide.three-moves-to-learn-the-fight')}</p></div></header><ol class="boss-picture-steps ${guidanceStyles['boss-picture-steps']}">${steps
     .map(
       (entry, index) =>
@@ -156,6 +157,7 @@ export function battleGuide(language: Language, run: Expedition): string {
             const pursuit = boss.kind === 'bastion' && boss.pattern === 'pursuit' && index === 2
             const danger =
               retreat && (pursuit ? [2, 5, 6, 7, 8, 9, 12] : [6, 7, 8, 11, 12, 13]).includes(cell)
+
             return `<span class="${danger ? 'mini-danger' : ''} ${boss.kind === 'clock' && index === 1 && cell === 7 ? 'mini-echo' : ''}">${cell === (pursuit ? 1 : retreat ? 0 : 5) ? spriteImage('player') : cell === 7 ? spriteImage(entry.prop) : cell === 9 ? spriteImage(bossSprite(boss)) : retreat && cell === (pursuit ? 6 : 5) ? '↑' : !retreat && (cell === 6 || cell === 8) ? entry.symbol : danger && cell === 12 ? '!' : ''}</span>`
           },
         ).join('')}</div><p><b>${index + 1}</b>${entry.text}</p></li>`,

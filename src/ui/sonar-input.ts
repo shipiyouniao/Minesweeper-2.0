@@ -42,7 +42,9 @@ export class SonarInput {
       actions.unlock()
       if (!actions.blocked) actions.secondary(Number(cell.dataset['cell']))
     })
+
     const options = { signal: this.listeners.signal }
+
     root.addEventListener('click', this.click, options)
     root.addEventListener('keydown', this.key, options)
     root.addEventListener('focusin', this.focus, options)
@@ -70,6 +72,7 @@ export class SonarInput {
       this.dragSuppressUntil = performance.now() + 700
       this.actions.cancelTarget()
     }
+
     this.drag = null
     clearTimeout(this.timer)
     this.timer = undefined
@@ -77,6 +80,7 @@ export class SonarInput {
       this.hold.cancelled = true
       this.suppressUntil = performance.now() + 700
     }
+
     this.rightClick.cancel()
   }
 
@@ -91,15 +95,19 @@ export class SonarInput {
   /** Route known buttons; touch cell activations are handled exactly once on pointer release. */
   private readonly click = (event: MouseEvent): void => {
     if (performance.now() < this.dragSuppressUntil || !(event.target instanceof Element)) return
+
     const button = event.target.closest<HTMLButtonElement>('button')
     if (!button) return
+
     this.actions.unlock()
+
     const cell = button.dataset['cell']
     if (cell !== undefined) {
       if (!this.actions.blocked && performance.now() >= this.suppressUntil)
         this.actions.play(Number(cell))
       return
     }
+
     const difficulty = sonarDifficulty(button.dataset['sonarDifficulty'] ?? null)
     const record = sonarDifficulty(button.dataset['sonarRecord'] ?? null)
     const reading = button.dataset['sonarReading']
@@ -127,25 +135,34 @@ export class SonarInput {
         ))
     )
       return
+
     if (event.key === 'Tab') this.actions.feedback('navigate')
+
     const key = event.key.toLowerCase()
     if (key === 'escape') {
       this.actions.cancelTarget()
       return
     }
+
     if (key === 'p' || key === 'n') {
       event.preventDefault()
       this.actions.command({ type: key === 'p' ? 'pause' : 'new' })
+
       return
     }
+
     if (this.actions.blocked) return
+
     if (key === 'q') {
       event.preventDefault()
       this.actions.command({ type: 'scan' })
+
       return
     }
+
     const cell = this.cell(event.target)
     if (!cell) return
+
     const index = Number(cell.dataset['cell'])
     const navigation = parseNavigation(key)
     if (navigation) {
@@ -169,7 +186,9 @@ export class SonarInput {
   /** Pointer hover previews only geometry; it never requests a reading. */
   private readonly over = (event: PointerEvent): void => {
     if (event.pointerType !== 'mouse') return
+
     const cell = this.cell(event.target)
+
     this.actions.preview(cell ? Number(cell.dataset['cell']) : null)
   }
 
@@ -179,6 +198,7 @@ export class SonarInput {
     this.cancelGesture()
     this.hold = null
     this.suppressUntil = 0
+
     const instrument =
       event.target instanceof Element
         ? event.target.closest<HTMLButtonElement>('[data-control="scan"]')
@@ -192,8 +212,10 @@ export class SonarInput {
     ) {
       this.drag = { pointer: event.pointerId, x: event.clientX, y: event.clientY, moved: false }
       instrument.setPointerCapture(event.pointerId)
+
       return
     }
+
     if (
       !event.isPrimary ||
       event.button !== 0 ||
@@ -201,8 +223,10 @@ export class SonarInput {
       this.actions.blocked
     )
       return
+
     const cell = this.cell(event.target)
     if (!cell) return
+
     const hold: SonarHold = {
       pointer: event.pointerId,
       index: Number(cell.dataset['cell']),
@@ -211,11 +235,14 @@ export class SonarInput {
       cancelled: false,
       acted: false,
     }
+
     this.hold = hold
     this.actions.focus(hold.index)
     if (this.actions.targeting) return
+
     this.timer = window.setTimeout(() => {
       if (this.hold !== hold || hold.cancelled || this.actions.blocked) return
+
       hold.acted = true
       this.suppressUntil = performance.now() + 700
       this.actions.secondary(hold.index)
@@ -228,6 +255,7 @@ export class SonarInput {
       if (Math.hypot(event.clientX - this.drag.x, event.clientY - this.drag.y) > 6) {
         this.drag.moved = true
         if (!this.actions.targeting) this.actions.command({ type: 'scan' })
+
         this.actions.preview(this.cellAt(event.clientX, event.clientY))
       }
       return
@@ -243,17 +271,23 @@ export class SonarInput {
   private readonly up = (event: PointerEvent): void => {
     if (this.drag?.pointer === event.pointerId) {
       const moved = this.drag.moved
+
       this.drag = null
       if (!moved) return
+
       this.dragSuppressUntil = performance.now() + 700
+
       const index = this.cellAt(event.clientX, event.clientY)
       if (index !== null && !this.actions.blocked && this.actions.targeting)
         this.actions.play(index)
       else this.actions.cancelTarget()
+
       return
     }
+
     const hold = this.hold
     if (!hold || hold.pointer !== event.pointerId) return
+
     clearTimeout(this.timer)
     this.hold = null
     this.suppressUntil = performance.now() + 700
@@ -270,6 +304,7 @@ export class SonarInput {
   private readonly contextMenu = (event: MouseEvent): void => {
     const cell = this.cell(event.target)
     if (!cell) return
+
     event.preventDefault()
     if (!this.hold && performance.now() >= this.suppressUntil && !this.actions.blocked)
       this.actions.secondary(Number(cell.dataset['cell']))

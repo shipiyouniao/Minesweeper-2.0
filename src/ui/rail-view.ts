@@ -25,6 +25,7 @@ export function railProp(kind: 'winch' | 'lever' | 'brake'): string {
 export function railObjective(language: Language, run: Expedition): string {
   const rail = run.rail
   if (!rail) return ''
+
   const name =
     run.floor === 1
       ? message(language, 'rail.floor-1')
@@ -36,6 +37,7 @@ export function railObjective(language: Language, run: Expedition): string {
     : run.floor === 3
       ? message(language, 'rail.objective-rescue')
       : message(language, 'rail.objective')
+
   return `<section class="signal-objective rail-objective" aria-live="polite"><strong>${name}</strong><p>${objective}</p><div class="rail-controls"><button data-control="rail-control:${rail.drive}" title="${message(language, 'rail.drive-detail')}">${railProp('winch')}<span>▷ ${message(language, 'rail.drive')}</span></button><button data-control="rail-control:${rail.reverse}" title="${message(language, 'rail.reverse-detail')}">${railProp('winch')}<span>↶ ${message(language, 'rail.reverse')}</span></button>${rail.turnouts.map((entry, i) => `<button data-control="rail-control:${entry.index}" aria-label="${message(language, 'rail.turnout')} ${i + 1}: ${entry.selected ? 'B' : 'A'}">${railProp('lever')}<span>${i + 1}${entry.selected ? 'B' : 'A'}</span></button>`).join('')}<button class="secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'rail.help')}</button></div><span>${message(language, 'rail.progress', { count: rail.stations.filter((station) => station.visited).length, total: rail.stations.length })}</span><small data-rail-feedback>${railStopHint(language, run)}</small></section>`
 }
 
@@ -43,7 +45,9 @@ export function railObjective(language: Language, run: Expedition): string {
 export function renderFloorRail(root: HTMLElement, run: Expedition, language: Language): void {
   const rail = run.rail
   if (!rail) return
+
   const board = root.querySelector<HTMLElement>('[data-side="a"]')
+
   board?.classList.add('rail-board')
   // Put numbers above larger landmarks; ordinary flags keep their normal center position.
   for (const index of [
@@ -57,10 +61,12 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
     if (cell && run.game.cells[index]?.visibility === 'revealed' && !run.game.cells[index]?.mine)
       cell.innerHTML = `<span class="landmark-clue">${run.game.cells[index]?.adjacent || ''}</span>`
   }
+
   const forecast = railMotion(run).path
   for (const track of rail.tracks) {
     const cell = board?.querySelector<HTMLElement>(`[data-cell="${track.index}"]`)
     if (!cell) continue
+
     const x = track.index % run.game.config.width
     const y = Math.floor(track.index / run.game.config.width)
     const paths = track.neighbors
@@ -69,6 +75,7 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
           `<path d="M50 50 L${50 + 50 * ((index % run.game.config.width) - x)} ${50 + 50 * (Math.floor(index / run.game.config.width) - y)}"/>`,
       )
       .join('')
+
     cell.classList.add('rail-track')
     cell.classList.toggle('rail-forecast', forecast.includes(track.index))
     cell.insertAdjacentHTML(
@@ -76,6 +83,7 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
       `<svg class="rail-track-art" viewBox="0 0 100 100" aria-hidden="true">${paths}</svg>`,
     )
   }
+
   for (const index of [
     rail.drive,
     rail.reverse,
@@ -84,6 +92,7 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
   ]) {
     const cell = board?.querySelector<HTMLElement>(`[data-cell="${index}"]`)
     if (!cell) continue
+
     const turnout = rail.turnouts.find((entry) => entry.index === index)
     const station = rail.stations.find((entry) => entry.index === index)
     const label = turnout
@@ -93,12 +102,14 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
         : index === rail.drive
           ? message(language, 'rail.drive')
           : message(language, 'rail.reverse')
+
     cell.dataset['railCell'] = String(index)
     cell.title = label
     cell.setAttribute(
       'aria-label',
       `${cell.getAttribute('aria-label')}, ${label}${station?.visited ? ' ✓' : ''}`,
     )
+
     const picture = turnout
       ? `${railProp('lever')}<small>${rail.turnouts.indexOf(turnout) + 1}${turnout.selected ? 'B' : 'A'}</small>`
       : station
@@ -108,11 +119,13 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
         : index === rail.drive
           ? `${railProp('winch')}<small>▷</small>`
           : `${railProp('winch')}<small>↶</small>`
+
     cell.insertAdjacentHTML(
       'beforeend',
       `<span class="rail-landmark ${station?.visited ? 'rail-complete' : ''}">${picture}</span>`,
     )
   }
+
   for (const [ordinal, turnout] of rail.turnouts.entries())
     for (const [branch, index] of turnout.branches.entries())
       board
@@ -121,16 +134,19 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
           'beforeend',
           `<small class="rail-branch">${ordinal + 1}${branch ? 'B' : 'A'}</small>`,
         )
+
   for (const door of rail.doors) {
     const ordinal = rail.stations.findIndex((station) => station.index === door.station) + 1
     board
       ?.querySelector(`[data-cell="${door.index}"]`)
       ?.insertAdjacentHTML('beforeend', `<small class="rail-branch">${ordinal}</small>`)
   }
+
   const cart = board?.querySelector<HTMLElement>(`[data-cell="${rail.cart}"]`)
   const passenger =
     rail.stations.some((station) => station.kind === 'passenger' && station.visited) &&
     !railObjectiveComplete(rail)
+
   cart?.insertAdjacentHTML(
     'beforeend',
     `<span class="rail-vehicle" data-rail-vehicle>${passenger ? tomaImage() : ''}${cartImage()}</span>`,
@@ -150,9 +166,11 @@ export async function animateRailChange(
     matchMedia('(prefers-reduced-motion: reduce)').matches
   )
     return
+
   const rail = after.rail
   const vehicle = root.querySelector<HTMLElement>('[data-rail-vehicle]')
   if (!vehicle) return
+
   const boarding = rail.stations.find(
     (station) =>
       station.kind === 'passenger' &&
@@ -169,8 +187,11 @@ export async function animateRailChange(
     : null
   // Presentation follows the trip: the waiting miner boards only once the cart reaches him.
   if (boarding && passenger) passenger.style.visibility = 'hidden'
+
   if (platform) platform.innerHTML = tomaImage()
+
   if (unloading) vehicle.insertAdjacentHTML('afterbegin', tomaImage())
+
   const endpoint = vehicle.getBoundingClientRect()
   const target = root
     .querySelector<HTMLElement>(`[data-side="a"] [data-cell="${rail.cart}"]`)
@@ -196,6 +217,7 @@ export async function animateRailChange(
     if (boarding && passenger) {
       passenger.style.visibility = ''
       if (platform) platform.innerHTML = '✓'
+
       await Promise.allSettled([
         passenger.animate(
           [
@@ -206,6 +228,7 @@ export async function animateRailChange(
         ).finished,
       ])
     }
+
     if (unloading) {
       const leaving = vehicle.querySelector<HTMLElement>('.rail-toma')
       if (leaving) {

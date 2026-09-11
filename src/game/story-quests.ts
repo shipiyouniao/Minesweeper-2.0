@@ -30,6 +30,7 @@ export function recordStoryCampaign(
     const delta = Math.max(0, after[metric] - before[metric])
     if (delta > 0) campaignActivity[metric] = Math.min(1e9, (campaignActivity[metric] ?? 0) + delta)
   }
+
   return recordStoryFacts({ ...progress, campaignActivity }, [])
 }
 
@@ -198,6 +199,7 @@ export function recordStoryFacts(
     )
       completed.push(task.id)
   }
+
   return { ...next, completed, pinned: (next.pinned ?? []).filter((id) => !completed.includes(id)) }
 }
 
@@ -220,21 +222,25 @@ export function validateStoryTasks(tasks: readonly StoryTaskDefinition[]): reado
   const ids = new Set<StoryTask>()
   for (const task of tasks) {
     if (ids.has(task.id)) errors.push(`Duplicate task: ${task.id}`)
+
     ids.add(task.id)
     if (!Number.isSafeInteger(task.supplies) || task.supplies < 0)
       errors.push(`Invalid reward: ${task.id}`)
   }
   /** Traverse every reference, including outcomes that could conceal a circular dependency. */
+
   function visit(id: StoryTask, path: readonly StoryTask[]): void {
     if (path.includes(id)) {
       errors.push(`Circular task: ${[...path, id].join(' -> ')}`)
       return
     }
+
     const task = tasks.find((entry) => entry.id === id)
     if (!task) {
       errors.push(`Missing task: ${id}`)
       return
     }
+
     for (const dependency of [
       ...conditionTasks(task.prerequisite),
       ...conditionTasks(task.objective),
@@ -242,5 +248,6 @@ export function validateStoryTasks(tasks: readonly StoryTaskDefinition[]): reado
       visit(dependency, [...path, id])
   }
   for (const task of tasks) visit(task.id, [])
+
   return [...new Set(errors)]
 }

@@ -50,7 +50,9 @@ export class SurveyView {
     this.menu = new LanguageMenu(this.element('.language-picker'), onLanguage, feedback)
     this.dialog = this.element<HTMLDialogElement>('.survey-dialog')
     this.buildHeaders()
+
     const grid = this.element('.survey-grid')
+
     grid.style.setProperty(
       '--row-runs',
       String(Math.max(...state.rows.map((runs) => runs.length), 1)),
@@ -61,6 +63,7 @@ export class SurveyView {
       () => {
         onClose()
         if (this.returnFocus?.isConnected) this.returnFocus.focus({ preventScroll: true })
+
         this.returnFocus = null
       },
       { signal: this.listeners.signal },
@@ -91,11 +94,13 @@ export class SurveyView {
   ): void {
     this.state = state
     this.paused = paused
+
     const counter = this.element('[data-mine-count]')
     const remaining = String(remainingMines(state.game))
     if (counter.textContent !== remaining) counter.textContent = remaining
 
     const t = translations[this.language]
+
     this.board.render(state.game, paused || this.dialogOpen, t)
     this.element('.board-viewport').classList.toggle('obscured', paused)
     this.element('.survey-pause').hidden = !paused
@@ -116,6 +121,7 @@ export class SurveyView {
           : boardControlHint(this.language, mode)
     if (mode === 'chord')
       this.element('.mode-cycle').setAttribute('title', message(this.language, 'survey.chord'))
+
     this.element('.survey-counters').innerHTML =
       `<div><span class="tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted">${message(this.language, 'survey.moves')}</span><strong class="tw:block tw:text-[clamp(24px,1.6vw,32px)] tw:mt-1">${state.moves.toLocaleString(this.language)}</strong></div><div><span class="tw:text-[clamp(12px,0.8vw,16px)] tw:text-muted">${message(this.language, 'survey.remaining')}</span><strong class="tw:block tw:text-[clamp(24px,1.6vw,32px)] tw:mt-1">${stats(state.game).remaining}</strong></div>`
     this.element('.survey-status').textContent = limited
@@ -123,11 +129,15 @@ export class SurveyView {
       : state.moves === 0
         ? message(this.language, 'survey.opening')
         : ''
+
     const audio = this.element('[data-control="sound"]')
+
     audio.innerHTML = icon(sound ? 'volume' : 'volumeOff')
     audio.setAttribute('aria-pressed', String(sound))
     audio.setAttribute('title', sound ? t.soundOn : t.soundOff)
+
     const pause = this.element('[data-control="pause"]')
+
     pause.innerHTML = icon(paused ? 'play' : 'pause')
     pause.setAttribute('aria-label', paused ? t.resume : t.pause)
     this.renderHeaders()
@@ -161,10 +171,12 @@ export class SurveyView {
   toggleZoom(): void {
     this.enlarged = !this.enlarged
     this.element('.survey-board-panel').classList.toggle('survey-enlarged', this.enlarged)
+
     const button = this.element('[data-control="zoom"]')
     const label = this.enlarged
       ? message(this.language, 'survey.fit')
       : message(this.language, 'survey.zoom')
+
     button.setAttribute('aria-label', label)
     button.setAttribute('title', label)
     button.setAttribute('aria-pressed', String(this.enlarged))
@@ -187,8 +199,10 @@ export class SurveyView {
     if (!this.dialog.open)
       this.returnFocus =
         document.activeElement instanceof HTMLElement ? document.activeElement : null
+
     this.element('.survey-dialog-content').innerHTML = content
     if (!this.dialog.open) this.dialog.showModal()
+
     this.dialog.querySelector<HTMLElement>('#survey-dialog-title')?.focus()
   }
 
@@ -248,6 +262,7 @@ export class SurveyView {
             runs: line.runs.join(', ') || '0',
             flags: line.flags,
           })
+
           header.innerHTML = `<span class="tw:sr-only">${label}</span><span class="survey-runs" aria-hidden="true">${(line.runs.length ? line.runs : [0]).map((run) => `<strong>${run}</strong>`).join('')}</span>`
           header.setAttribute('aria-label', label)
           header.setAttribute('aria-description', message(this.language, 'survey.line-action'))
@@ -255,6 +270,7 @@ export class SurveyView {
           header.dataset['over'] = String(line.conflict)
           header.dataset['complete'] = String(line.complete)
         }
+
         header.dataset['active'] = String(index === (axis === 'row' ? row : column))
         header.setAttribute(
           'aria-disabled',
@@ -264,6 +280,7 @@ export class SurveyView {
           focused.push(header.getAttribute('aria-label') ?? '')
       }
     }
+
     for (const cell of this.root.querySelectorAll<HTMLElement>('[data-cell]')) {
       const index = Number(cell.dataset['cell'])
       cell.classList.toggle(
@@ -272,6 +289,7 @@ export class SurveyView {
           index % this.state.game.config.width === column,
       )
     }
+
     this.element('.survey-focus').textContent = focused.join(' · ')
     this.clueState = this.state
   }
@@ -280,6 +298,7 @@ export class SurveyView {
   private element<T extends Element = HTMLElement>(selector: string): T {
     const element = this.root.querySelector<T>(selector)
     if (!element) throw new Error(`Missing Survey element: ${selector}`)
+
     return element
   }
 }

@@ -99,18 +99,21 @@ export class AppView {
     this.element('#best').textContent = best ? formatTime(best.milliseconds) : '—'
 
     const pauseButton = this.element<HTMLButtonElement>('#pause-button')
+
     pauseButton.disabled = game.phase !== 'playing'
     pauseButton.innerHTML = icon(paused ? 'play' : 'pause')
     pauseButton.setAttribute('aria-label', paused ? messages.resume : messages.pause)
 
     const cycleFocused =
       document.activeElement === this.root.querySelector('[data-action="cycle-mode"]')
+
     this.element('.action-dock').innerHTML = boardControlsTemplate(
       language,
       inputMode,
       'data-action',
     )
     if (cycleFocused) this.element('[data-action="cycle-mode"]').focus({ preventScroll: true })
+
     this.renderTime(state.elapsed, storageAvailable)
   }
 
@@ -124,6 +127,7 @@ export class AppView {
   renderSound(enabled: boolean, language: Language): void {
     const button = this.element<HTMLButtonElement>('#sound-button')
     const messages = translations[language]
+
     button.innerHTML = icon(enabled ? 'volume' : 'volumeOff')
     button.setAttribute('aria-pressed', String(enabled))
     button.title = enabled ? messages.soundOn : messages.soundOff
@@ -142,7 +146,9 @@ export class AppView {
   /** Replace modal content, preserving an already-open dialog and its focus scope. */
   showDialog(content: string): void {
     this.closeLanguage()
+
     const dialog = this.element<HTMLDialogElement>('#dialog')
+
     this.element('#dialog-content').innerHTML = content
 
     if (!dialog.open) {

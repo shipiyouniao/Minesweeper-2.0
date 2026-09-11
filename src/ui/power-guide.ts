@@ -10,6 +10,7 @@ import type { FloorPower } from '../types/floor-power.js'
 export function powerGuide(language: Language, power: FloorPower): string {
   const drainage = power.purpose === 'drainage'
   const restoration = power.purpose === 'restoration'
+
   return `<article class="battle-guide power-guide ${guidanceStyles['battle-guide']}">
     <header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${restoration ? consoleImage() : drainage ? drainageImage() : observatoryImage()}<div><h3>${restoration ? message(language, 'finale.control-title') : drainage ? message(language, 'waterway.title') : message(language, 'ridge.title')}</h3><p>${restoration ? message(language, 'finale.guide-intro') : drainage ? message(language, 'waterway.guide-intro') : message(language, 'ridge.guide-intro')}</p></div></header>
     <ol class="boss-picture-steps ${guidanceStyles['boss-picture-steps']}">

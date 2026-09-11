@@ -57,6 +57,7 @@ export function enterMatrix(run: Expedition): Expedition {
       lastAttuned: null,
     },
   }
+
   return forecastMatrix({
     ...next,
     encounter: { ...next.encounter, points: combatStats(next).actions },
@@ -84,6 +85,7 @@ function forecastMatrix(run: MatrixExpedition): MatrixExpedition {
   // Do not announce an unavoidable hit from a cul-de-sac with no publicly known exit.
   if (targets.includes(run.player) && !exits.some((index) => !targets.includes(index)))
     targets = exits.length ? [run.player] : []
+
   return { ...run, encounter: { ...e, intent: { kind: axis, targets, damage: 4 } } }
 }
 
@@ -93,6 +95,7 @@ export function attuneMatrix(run: MatrixExpedition, index: number): MatrixExpedi
   const found = activeRegion(run).crystals.includes(index)
   const collected = found ? [...e.collected, index] : e.collected
   const charged = found && matrixCharge(run) === 1
+
   return {
     ...run,
     encounter: {
@@ -114,6 +117,7 @@ export function noteMatrix(run: MatrixExpedition, index: number): MatrixExpediti
   const notes = e.notes.includes(index)
     ? e.notes.filter((note) => note !== index)
     : [...e.notes, index]
+
   return { ...run, encounter: { ...e, notes, event: 'acted' } }
 }
 
@@ -121,6 +125,7 @@ export function noteMatrix(run: MatrixExpedition, index: number): MatrixExpediti
 export function strikeMatrix(run: MatrixExpedition, damage: number): MatrixExpedition {
   const e = run.encounter
   const health = Math.max(matrixHealthFloor(run), e.health - damage)
+
   return {
     ...run,
     encounter: {
@@ -158,6 +163,7 @@ export function advanceMatrix(run: MatrixExpedition): MatrixExpedition {
     },
   }
   if (next.phase === 'lost') return next
+
   return forecastMatrix({
     ...next,
     encounter: { ...next.encounter, points: combatStats(next).actions },

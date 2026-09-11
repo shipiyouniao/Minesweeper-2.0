@@ -6,6 +6,7 @@ import type { Ruleset } from '../types/variants.js'
 
 /** Lessons teach one ruleset on deterministic practice boards, never a live saved run. */
 export function tutorialLesson(mode: Ruleset, language: Language): TutorialDefinition {
+  /** Resolve an authored tutorial coordinate within the displayed practice board. */
   const cell = (
     title: string,
     text: string,
@@ -101,6 +102,7 @@ export function tutorialLesson(mode: Ruleset, language: Language): TutorialDefin
       ],
       ending: message(language, 'survey.lesson-ending'),
     }
+
   if (mode === 'sonar')
     return {
       mode,
@@ -123,6 +125,7 @@ export function tutorialLesson(mode: Ruleset, language: Language): TutorialDefin
       ],
       ending: message(language, 'tutorial-lessons.start-with-3-pulses-four-successful-safe'),
     }
+
   if (mode === 'classic')
     return {
       mode,
@@ -164,6 +167,7 @@ export function tutorialLesson(mode: Ruleset, language: Language): TutorialDefin
       ],
       ending: message(language, 'tutorial-lessons.you-read-clues-marked-mines-and-opened'),
     }
+
   if (mode === 'twin')
     return {
       mode,
@@ -197,6 +201,7 @@ export function tutorialLesson(mode: Ruleset, language: Language): TutorialDefin
       ],
       ending: message(language, 'tutorial-lessons.alternate-between-local-clues-and-proven-mines'),
     }
+
   return {
     mode,
     title: message(language, 'tutorial-lessons.expedition-leave-camp'),

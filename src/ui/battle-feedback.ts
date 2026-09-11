@@ -11,7 +11,9 @@ function cellAt(root: HTMLElement, index: number): HTMLElement | null {
 /** Remove transient layers on completion; repaint/teardown also removes their owning cells. */
 function effect(cell: HTMLElement | null, kind: string, text = '', delay = 0): void {
   if (!cell) return
+
   const layer = document.createElement('span')
+
   layer.className = `combat-fx ${kind}`
   layer.setAttribute('aria-hidden', 'true')
   layer.textContent = text
@@ -25,6 +27,7 @@ function windup(cell: HTMLElement | null, kind: EncounterKind, reduced: boolean)
   const actor =
     cell?.querySelector<HTMLElement>(':scope > img, .landmark-sprite, .dungeon-sprite') ?? cell
   if (!actor) return
+
   const poses = {
     tide: ['scale(1)', 'translateY(-12%) scale(1.1)', 'translateY(12%)', 'none'],
     bastion: [
@@ -43,6 +46,7 @@ function windup(cell: HTMLElement | null, kind: EncounterKind, reduced: boolean)
   const frames = reduced
     ? [{ opacity: 1 }, { opacity: 0.65 }, { opacity: 1 }]
     : poses[kind].map((transform) => ({ transform }))
+
   actor.animate(frames, { duration: reduced ? 180 : 520, easing: 'ease-in-out' })
 }
 
@@ -61,12 +65,14 @@ export function animateBattleFeedback(
     before.encounter.kind !== after.encounter.kind
   )
     return
+
   const enemy = before.encounter
   const next = after.encounter
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
   const turn = next.turn > enemy.turn || (after.phase === 'lost' && next.event === 'hit')
   // MagneticBoard has already played movement and impacts before this repaint.
   if (turn && enemy.kind === 'magnetic') return
+
   const bossDamage = Math.max(0, enemy.health - next.health)
   const playerDamage = Math.max(0, before.health - after.health)
   const revived = after.runTriggers.some(
@@ -100,10 +106,12 @@ export function animateBattleFeedback(
               ]
             : [enemy.boss]
       for (const index of sources) windup(cellAt(root, index), enemy.kind, reduced)
+
       for (const index of targets)
         effect(cellAt(root, index), `combat-impact combat-${enemy.kind}`, '', reduced ? 0 : 240)
     }
   }
+
   if (bossDamage > 0) {
     const boss = cellAt(root, next.boss)
     if (!turn && (next.event === 'struck' || next.event === 'defeated')) {
@@ -115,6 +123,7 @@ export function animateBattleFeedback(
           dy = to.y - from.y
         const length = Math.max(1, Math.hypot(dx, dy))
         const actor = root.querySelector<HTMLElement>('.dungeon-player') ?? player
+
         actor.animate(
           [
             { translate: '0 0' },
@@ -124,14 +133,18 @@ export function animateBattleFeedback(
           { duration: 300 },
         )
       }
+
       effect(boss, 'combat-slash', '', reduced ? 0 : 100)
     }
+
     effect(boss, `combat-boss-hit combat-${enemy.kind}`, '', reduced ? 0 : 180)
     if (!(turn && next.kind === 'clock' && next.resolution?.echoDamage))
       effect(boss, 'combat-damage', `−${bossDamage}`, reduced ? 0 : 200)
   }
+
   if (playerDamage > 0 || revived) {
     const player = cellAt(root, after.player)
+
     effect(player, 'combat-player-hit', '', turn && !reduced ? 260 : 0)
     if (!revived)
       effect(
@@ -140,6 +153,7 @@ export function animateBattleFeedback(
         `−${playerDamage}`,
         turn && !reduced ? 280 : 0,
       )
+
     const actor = root.querySelector<HTMLElement>('.dungeon-player')
     if (actor && !reduced)
       actor.animate(

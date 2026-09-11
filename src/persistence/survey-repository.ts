@@ -22,10 +22,12 @@ function integer(value: number | null, low: number, high: number): value is numb
 /** Preserve valid wins even when an unrelated active journal needs to be discarded. */
 function decodeRecords(values: readonly JsonValue[] | null): readonly SurveyRecord[] {
   if (!values || values.length > 30) return []
+
   const records: SurveyRecord[] = []
   for (const value of values) {
     const reader = JsonObjectReader.from(value)
     if (!reader) continue
+
     const id = reader.string('id')
     const date = reader.string('date')
     const difficulty = surveyDifficulty(reader.string('difficulty'))
@@ -40,8 +42,10 @@ function decodeRecords(values: readonly JsonValue[] | null): readonly SurveyReco
       records.some((record) => record.id === id)
     )
       continue
+
     records.push({ id, date, difficulty, moves })
   }
+
   return rankSurveyRecords(records)
 }
 
@@ -59,16 +63,20 @@ export function rankSurveyRecords(records: readonly SurveyRecord[]): readonly Su
 function decodeAction(value: JsonValue, config: Config): SurveyAction | null {
   const reader = JsonObjectReader.from(value)
   if (!reader) return null
+
   const type = reader.string('type')
   const index = reader.number('index')
   if (type === 'chord-line') {
     const axis = reader.string('axis')
     if (axis !== 'row' && axis !== 'column') return null
+
     return integer(index, 0, (axis === 'row' ? config.height : config.width) - 1)
       ? { type, axis, index }
       : null
   }
+
   if (!integer(index, 0, config.width * config.height - 1)) return null
+
   switch (type) {
     case 'reveal':
     case 'flag':
@@ -96,6 +104,7 @@ export class SurveyRepository {
   load(): SurveySave | null {
     this.records = []
     this.recovered = false
+
     let text: string | null
     try {
       text = this.storage.getItem(SURVEY_STORAGE_KEY)
@@ -103,14 +112,19 @@ export class SurveyRepository {
       this.available = false
       return null
     }
+
     if (text === null) return null
 
     this.recovered = true
+
     const reader = JsonObjectReader.from(parseJson(text))
     if (!reader) return null
     // Scores from different rules are not comparable; only current-format wins survive recovery.
+
     if (reader.number('version') !== 2) return null
+
     this.records = decodeRecords(reader.array('records'))
+
     const difficulty = surveyDifficulty(reader.string('difficulty'))
     const seed = reader.number('seed')
     const settled = reader.value('settled')
@@ -129,9 +143,12 @@ export class SurveyRepository {
     for (const value of values) {
       const action = decodeAction(value, config)
       if (!action) return null
+
       actions.push(action)
     }
+
     this.recovered = false
+
     return { version: 2, difficulty, seed, actions, settled, records: this.records }
   }
 

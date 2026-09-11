@@ -1,6 +1,7 @@
 import type { Icon, IconPaths } from './types/icons.js'
 
 const paths: IconPaths = {
+  layers: '<path d="m3 7 9-4 9 4-9 4-9-4Zm0 5 9 4 9-4M3 17l9 4 9-4"/>',
   chevron: '<path d="m8 10 4 4 4-4"/>',
   volume: '<path d="M11 4 6 8H3v8h3l5 4V4Zm4 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
   volumeOff: '<path d="M11 4 6 8H3v8h3l5 4V4Zm5 5 6 6m0-6-6 6"/>',

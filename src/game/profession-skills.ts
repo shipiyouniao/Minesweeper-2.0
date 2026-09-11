@@ -48,6 +48,7 @@ function excavationTarget(run: Expedition): number | null {
   remaining.sort((a, b) => {
     const first = Math.abs(Math.floor(a / width) - row) + Math.abs((a % width) - column)
     const second = Math.abs(Math.floor(b / width) - row) + Math.abs((b % width) - column)
+
     return first - second || a - b
   })
 
@@ -58,11 +59,16 @@ function excavationTarget(run: Expedition): number | null {
 export function professionSkillArea(run: Expedition): number[] {
   const profession = run.departure.profession
   if (profession === 'rescuer') return rescueLandings(run)
+
   if (profession === 'riftwalker') return riftLandings(run)
+
   if (profession === 'waymarker') return [currentWaymark(run) ?? run.player]
+
   if (profession === 'engineer' || profession === 'alchemist') return []
+
   const center = profession === 'archaeologist' ? excavationTarget(run) : run.player
   if (center === null) return []
+
   const { width, height } = run.game.config
   const row = Math.floor(center / width)
   const column = center % width
@@ -78,6 +84,7 @@ export function professionSkillArea(run: Expedition): number[] {
       area.push(y * width + x)
     }
   }
+
   return area
 }
 
@@ -85,9 +92,11 @@ export function professionSkillArea(run: Expedition): number[] {
 function hasSkillInformation(run: Expedition): boolean {
   return professionSkillArea(run).some((index) => {
     if (run.walls.includes(index) || run.confirmedMines.includes(index)) return false
+
     if (run.game.cells[index]?.visibility === 'revealed') return false
 
     // Excavation also opens previously surveyed safe clues; other skills only confirm knowledge.
+
     return run.departure.profession === 'archaeologist' || !run.surveyedCells.includes(index)
   })
 }
@@ -95,9 +104,12 @@ function hasSkillInformation(run: Expedition): boolean {
 /** Explain the same eligibility checks to both the rules and the localized control. */
 export function professionSkillAvailability(run: Expedition): SkillAvailability {
   if (run.phase !== 'exploring' && run.phase !== 'boss') return 'inactive'
+
   if (run.skillUsed) return 'used'
+
   if (run.departure.profession === 'rescuer')
     return rescueLandings(run).length ? 'ready' : 'no-corridor'
+
   if (run.departure.profession === 'waymarker' || run.departure.profession === 'riftwalker')
     return mobilityReady(run)
       ? 'ready'
@@ -126,7 +138,9 @@ export function useProfessionSkill(run: Expedition, index?: number): Expedition 
     run.departure.profession !== 'rescuer'
   )
     return run
+
   if (professionSkillAvailability(run) !== 'ready') return run
+
   let result = run
   if (run.departure.profession === 'rescuer') {
     result = useRescueSkill(run, index)
@@ -147,6 +161,7 @@ export function useProfessionSkill(run: Expedition, index?: number): Expedition 
         break
       default: {
         const area = professionSkillArea(run)
+
         result = inspectArea(run, area)
 
         if (run.departure.profession === 'archaeologist') {
@@ -156,6 +171,7 @@ export function useProfessionSkill(run: Expedition, index?: number): Expedition 
               game = revealDungeon({ ...result, game }, index)
             }
           }
+
           result = { ...result, game }
         }
 
@@ -174,6 +190,7 @@ export function useProfessionSkill(run: Expedition, index?: number): Expedition 
       ),
     )
   }
+
   return {
     ...result,
     probes: Math.min(4, result.probes + Number(run.departure.equipment.includes('field-radio'))),

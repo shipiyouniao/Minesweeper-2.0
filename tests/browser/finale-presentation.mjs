@@ -151,6 +151,9 @@ try {
     await page.locator('[data-story-action="map-level"][data-level="region"]').first().click()
     const before = await page.evaluate((key) => localStorage.getItem(key), key)
     for (const scene of [9, 10]) {
+      await page.locator('[data-map-zoom="reset"]').click()
+      await page.locator('[data-map-focus="west"]').focus()
+      await page.keyboard.press('Enter')
       await page.locator(`.atlas-node[data-scene="${scene}"]`).focus()
       await page.keyboard.press('Enter')
       await page.locator(`[data-map-level="local"][data-map-scene="${scene}"]`).waitFor()

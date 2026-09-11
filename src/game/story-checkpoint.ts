@@ -62,6 +62,7 @@ function restoreScene(saved: StorySceneCheckpoint): StorySceneMemory {
   const floor = STORY_SCENES.findIndex((scene) => scene.id === saved.id)
   const initial = createStoryRun(floor)
   const board = buildStoryBoard(initial.board.scene, saved.operated)
+
   return {
     ...initial,
     operated: saved.operated,
@@ -94,8 +95,10 @@ function restoreScene(saved: StorySceneCheckpoint): StorySceneMemory {
 /** Restore a current location or explicitly reopen a known route from camp. */
 export function restoreStoryWorld(world: StoryWorldCheckpoint, id = world.active): StoryRun | null {
   if (world.revision !== STORY_REVISION || id === null) return null
+
   const scene = world.scenes.find((entry) => entry.id === id)
   if (!scene) return null
+
   return {
     ...restoreScene(scene),
     ...(world.hasVisited || world.scenes.length > 1

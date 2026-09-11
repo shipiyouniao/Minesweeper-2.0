@@ -5,7 +5,7 @@ import { clueIsolated } from '../game/clue-isolation.js'
 import { storyAtlasUnlocked, storyAtlasIndex } from '../game/story-atlas.js'
 import { pendingFinaleScene } from '../game/chapter-finale.js'
 import { finaleLines } from './finale-copy.js'
-import { animateNorthwestArrival } from './chapter-performance.js'
+import { SceneTransition } from './scene-transition.js'
 import { NIA_CAMP_CELL, pendingSignalScene } from '../game/signal-story.js'
 import { pendingObservatoryScene } from '../game/observatory-story.js'
 import { pendingWaterwayScene } from '../game/waterway-story.js'
@@ -63,9 +63,10 @@ export class StoryApp implements MountedGame {
   private selectedTask: NonNullable<StoryViewState['selectedTask']> | null = null
   private panel: 'tasks' | 'map' | null = null
   private mapLevel: 'local' | 'region' | 'world' = 'local'
-  private mapScene = 3
+  private mapScene = storyAtlasIndex('camp')
   private mapLegend = false
   private readonly mapControls = new StoryMapControls()
+  private readonly transition = new SceneTransition()
   private touchInput = matchMedia('(pointer: coarse)').matches
   private questTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -97,7 +98,9 @@ export class StoryApp implements MountedGame {
     this.rightClick = new BoardRightClick(root, (cell) => {
       void this.activate(Number(cell.dataset['storyCell']), true)
     })
+
     const options = { signal: this.listeners.signal }
+
     root.addEventListener('click', this.click, options)
     root.addEventListener('keydown', this.key, options)
     root.addEventListener('pointerdown', this.down, options)
@@ -111,9 +114,11 @@ export class StoryApp implements MountedGame {
 
   /** Cancel presentation only; accepted movement was already checkpointed by the session. */
   dispose(): void {
+    this.transition.cancel()
     this.mapControls.dispose()
     this.generation++
     if (this.questTimer) clearTimeout(this.questTimer)
+
     this.animation?.cancel()
     this.cancelHold()
     this.performance.dispose()
@@ -136,6 +141,7 @@ export class StoryApp implements MountedGame {
       (progress.campPosition === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared)
         ? board.entrance
         : progress.campPosition
+
     return {
       panel: this.panel,
       selectedTask: this.selectedTask,
@@ -181,31 +187,40 @@ export class StoryApp implements MountedGame {
         panel: !!details.closest('.story-quest-panel'),
       }),
     )
+
     this.languageMenu?.dispose()
     this.titleMenu?.dispose()
     document.documentElement.lang = this.language === 'zh' ? 'zh-CN' : this.language
     document.title = 'Minefarer'
+
     let state = this.snapshot()
     const dialogue = storyDialogueEvent(state)
     if (dialogue && state.progress.dialogue?.active?.id !== dialogue) {
       this.session.checkpointDialogue(dialogue, 0)
       state = this.snapshot()
     }
+
     this.root.innerHTML = storyTemplate(state)
     if (banner) this.root.append(banner)
+
     for (const details of this.root.querySelectorAll<HTMLDetailsElement>('.story-quest'))
       details.open = expanded.some(
         (entry) =>
           entry.id === details.dataset['task'] &&
           entry.panel === !!details.closest('.story-quest-panel'),
       )
+
     this.performance.present(state)
     this.mapControls.mount(this.root)
+
     const picker = this.root.querySelector<HTMLElement>('.language-picker')!
+
     this.languageMenu = new LanguageMenu(picker, this.selectLanguage, (cue) =>
       this.sounds.play(cue),
     )
+
     const titles = this.root.querySelector<HTMLElement>('.title-cabinet')
+
     this.titleMenu = titles ? new TitleMenu(titles, (cue) => this.sounds.play(cue)) : null
     if (cell !== undefined) this.focusCell(Number(cell))
     else if (control)
@@ -214,6 +229,7 @@ export class StoryApp implements MountedGame {
           `[data-story-action="${control}"]${task ? `[data-task="${task}"]` : ''}`,
         )
         ?.focus({ preventScroll: true })
+
     const railScene = pendingRailScene(null, this.session.camp.stageProgress('quarry-rescue'))
     if (railScene && !this.root.querySelector('dialog[open]'))
       this.signal.present(
@@ -227,6 +243,7 @@ export class StoryApp implements MountedGame {
           this.render()
         },
       )
+
     for (const id of ['tower-control', 'northwest-bastion'] as const) {
       const progress = this.session.camp.stageProgress(id)
       const scene =
@@ -250,6 +267,7 @@ export class StoryApp implements MountedGame {
           },
         )
     }
+
     const waterwayScene = pendingWaterwayScene(null, this.session.camp.waterway)
     if (waterwayScene && !this.root.querySelector('dialog[open]'))
       this.signal.present(
@@ -263,6 +281,7 @@ export class StoryApp implements MountedGame {
           this.render()
         },
       )
+
     const observatory = this.session.camp.observatory
     const ridgeScene = pendingObservatoryScene(null, observatory)
     if (ridgeScene && !this.root.querySelector('dialog[open]'))
@@ -277,6 +296,7 @@ export class StoryApp implements MountedGame {
           this.render()
         },
       )
+
     const rescue = this.session.camp.signalRescue
     if (pendingSignalScene(null, rescue) === 'rescued' && !this.root.querySelector('dialog[open]'))
       this.signal.show(
@@ -295,8 +315,10 @@ export class StoryApp implements MountedGame {
   /** Route finite service commands through the existing catalogs and shared camp operations. */
   private campCommand(value: string): void {
     if (this.session.run) return
+
     const command = parseVariantCommand(value)
     if (!command) return
+
     const camp = this.session.camp
     const loadout = camp.loadout
     let changed = true
@@ -306,12 +328,14 @@ export class StoryApp implements MountedGame {
           this.service = null
           break
         }
+
         const site = CAMP_SITES.find((s) => s.destination === command.value)
         if (site) {
           this.service = null
           this.render()
           void this.activate(site.index, false)
         }
+
         return
       }
       case 'shop-category':
@@ -349,11 +373,14 @@ export class StoryApp implements MountedGame {
       default:
         return
     }
+
     this.sounds.play(changed ? 'confirm' : 'blocked')
     this.render()
+
     const focus = this.root.querySelector<HTMLElement>(`[data-control="${value}"]`)
     if (focus && !(focus instanceof HTMLButtonElement && focus.disabled))
       focus.focus({ preventScroll: true })
+
     if (command.type === 'shop-item')
       this.root
         .querySelector('.shop-detail')
@@ -363,12 +390,16 @@ export class StoryApp implements MountedGame {
   /** Apply one scene action; route preview/animation never reads covered mine locations. */
   private async activate(index: number, flag: boolean): Promise<void> {
     if (this.root.querySelector('dialog.story-dialogue[open], dialog.signal-dialogue[open]')) return
+
     if (this.moving || this.performance.busy || !Number.isInteger(index)) return
+
     if (this.session.run?.floor === 0 && !this.session.camp.story.accepted?.includes('reach-camp'))
       return
+
     const state = this.snapshot()
     const cell = state.board.game.cells[index]
     if (!cell || state.board.walls.includes(index)) return
+
     if (!flag && state.run && state.player === index) {
       const entry = this.root.querySelector<HTMLAnchorElement>('[data-story-campaign]')
       if (entry) {
@@ -376,7 +407,9 @@ export class StoryApp implements MountedGame {
         return
       }
     }
+
     this.feedback = 'none'
+
     const chord = !!state.run && flag && cell.visibility === 'revealed'
     const control = !flag
       ? state.run?.board.scene.mechanisms?.find(
@@ -387,22 +420,29 @@ export class StoryApp implements MountedGame {
       this.inspected = index
       this.sounds.play('blocked')
       this.render()
+
       return
     }
+
     if (state.run && flag && !chord) {
       const changed = this.session.dispatch({ type: 'flag', index })
+
       this.sounds.play(changed ? 'flag' : 'blocked')
       this.render()
+
       return
     }
+
     if (state.run && !chord && cell.visibility === 'revealed' && cell.adjacent) {
       this.inspected = index
       if (this.session.dispatch({ type: 'inspect', index })) {
         this.sounds.play('confirm')
         this.render()
+
         return
       }
     }
+
     const path = state.run
       ? storyPath(state.board, state.player, index)
       : this.session.campPath(index)
@@ -410,8 +450,10 @@ export class StoryApp implements MountedGame {
       this.feedback = 'route'
       this.sounds.play('blocked')
       this.render()
+
       return
     }
+
     const changed = state.run
       ? this.session.dispatch({ type: control ? 'operate' : chord ? 'chord' : 'visit', index })
       : this.session.moveCamp(index)
@@ -419,19 +461,23 @@ export class StoryApp implements MountedGame {
       this.sounds.play('blocked')
       return
     }
+
     const hurt = state.run && this.session.run && state.run.health > this.session.run.health
     const destination = this.session.run?.player ?? this.session.camp.story.campPosition
     const animationPath = path.at(-1) === destination ? path : [...path, destination]
     const generation = ++this.generation
+
     this.moving = true
     this.sounds.play(hurt ? 'loss' : chord || cell.visibility === 'hidden' ? 'reveal' : 'navigate')
     await this.walk(animationPath)
     if (generation !== this.generation) return
+
     if (control) {
       this.sounds.play('confirm')
       await this.performance.releaseGate(index, control.gate)
       if (generation !== this.generation) return
     }
+
     if (
       state.run?.floor === 6 &&
       index === state.board.exit &&
@@ -441,6 +487,7 @@ export class StoryApp implements MountedGame {
       await this.performance.haul()
       if (generation !== this.generation) return
     }
+
     this.moving = false
     this.feedback = hurt ? 'hurt' : 'none'
     if (state.run && state.run.floor >= 3 && !chord) {
@@ -477,17 +524,20 @@ export class StoryApp implements MountedGame {
         this.panel = null
       }
     }
+
     if (!state.run) {
       if (index === state.board.exit && this.session.leaveCamp()) {
         this.conversation = null
         this.inspected = null
         this.panel = null
       }
+
       if (this.session.travelNorthwest()) {
         this.conversation = null
         this.inspected = null
         this.panel = null
       }
+
       const site = CAMP_SITES.find((entry) => entry.index === index)
       if (site?.destination === 'guide') {
         this.session.meetGuide()
@@ -501,13 +551,16 @@ export class StoryApp implements MountedGame {
       } else if (site)
         this.service = { page: site.destination, category: 'all', selected: 'surveyor' }
     }
+
     this.render()
     if (state.board.scene.id !== this.snapshot().board.scene.id) {
       this.moving = true
-      await animateNorthwestArrival(this.root, this.snapshot().board.scene.id)
+      await this.transition.arrive(this.root.querySelector('.story-board'))
       if (generation !== this.generation) return
+
       this.moving = false
     }
+
     if (!state.run && index === TOMA_CAMP_CELL && state.progress.facts?.includes('toma-rescued')) {
       this.signal.present(
         this.root,
@@ -521,7 +574,9 @@ export class StoryApp implements MountedGame {
         },
       )
     }
+
     if (!state.run && index === 51) this.performance.react('greet')
+
     if (!state.run && index === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared) {
       if (this.session.camp.stageProgress('northwest-bastion').cleared)
         this.signal.present(
@@ -568,6 +623,7 @@ export class StoryApp implements MountedGame {
           state.loadout.profession,
           () => {
             const accepted = this.session.camp.story.facts?.includes('ridge-route')
+
             this.session.camp.acceptRidgeRoute()
             this.render()
             if (!accepted)
@@ -578,6 +634,7 @@ export class StoryApp implements MountedGame {
           },
         )
     }
+
     if (
       state.run &&
       state.run.floor === this.session.run?.floor &&
@@ -591,12 +648,18 @@ export class StoryApp implements MountedGame {
   private questReveal(title: string, subtitle: string): void {
     this.root.querySelector('.story-quest-reveal')?.remove()
     if (this.questTimer) clearTimeout(this.questTimer)
+
     const banner = document.createElement('div')
+
     banner.className = 'story-quest-reveal'
     banner.setAttribute('role', 'status')
+
     const heading = document.createElement('h2')
+
     heading.textContent = title
+
     const label = document.createElement('p')
+
     label.textContent = subtitle
     banner.append(label, heading)
     this.root.append(banner)
@@ -612,10 +675,12 @@ export class StoryApp implements MountedGame {
     const traveler = this.root.querySelector<HTMLElement>('.story-traveler')
     if (!traveler || path.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches)
       return
+
     const frames = path.flatMap((index) => {
       const cell = this.root.querySelector<HTMLElement>(`[data-story-cell="${index}"]`)
       return cell ? [{ left: `${cell.offsetLeft}px`, top: `${cell.offsetTop}px` }] : []
     })
+
     traveler.classList.add('is-walking')
     this.animation = traveler.animate(frames, {
       duration: Math.min(1800, (path.length - 1) * 100),
@@ -627,6 +692,7 @@ export class StoryApp implements MountedGame {
     } catch {
       /* Navigation can cancel presentation after the move has committed. */
     }
+
     this.animation = null
     traveler.classList.remove('is-walking')
   }
@@ -634,19 +700,25 @@ export class StoryApp implements MountedGame {
   /** Delegate ordinary clicks while a held touch suppresses its compatibility click. */
   private readonly click = (event: MouseEvent): void => {
     if (!(event.target instanceof Element)) return
+
     this.sounds.unlock()
+
     const button = event.target.closest<HTMLElement>(
       '[data-story-cell], [data-story-action], [data-control]',
     )
     if (!button) return
+
     if (button.dataset['storyAction'] === 'wake') {
       this.performance.skipOpening()
       return
     }
+
     if (this.performance.busy) return
+
     if (button.dataset['storyAction'] === 'dialogue') {
       const id = storyDialogueEvent(this.snapshot())
       if (!id) return
+
       if (this.performance.advance()) {
         const beforeCompleted = this.session.camp.story.completed
         const hadMap = this.session.camp.story.mapOwned
@@ -655,6 +727,7 @@ export class StoryApp implements MountedGame {
           (task) => !beforeCompleted.includes(task),
         )
         const map = !hadMap && this.session.camp.story.mapOwned
+
         this.render()
         if (task)
           this.questReveal(
@@ -672,26 +745,34 @@ export class StoryApp implements MountedGame {
             message(this.language, 'story.map-received'),
           )
       } else this.session.checkpointDialogue(id, this.performance.currentBeat)
+
       return
     }
+
     const index = button.dataset['storyCell']
     if (index !== undefined) {
       if (event.detail !== 0 && performance.now() < this.suppressClickUntil) {
         event.preventDefault()
         return
       }
+
       void this.activate(Number(index), this.flagMode)
+
       return
     }
+
     if (this.moving) return
+
     if (button.dataset['control']) {
       this.campCommand(button.dataset['control'])
       return
     }
+
     switch (button.dataset['storyAction']) {
       case 'quest-map': {
         const id = this.session.camp.story.accepted?.find((id) => id === button.dataset['task'])
         if (!id) return
+
         this.mapScene = storyTaskScene({ progress: this.session.camp.story }, id)
         this.mapLevel = 'local'
         this.mapLegend = false
@@ -701,6 +782,7 @@ export class StoryApp implements MountedGame {
       case 'select-task': {
         const id = this.session.camp.story.accepted?.find((id) => id === button.dataset['task'])
         if (id) this.selectedTask = id
+
         break
       }
       case 'map-legend':
@@ -709,12 +791,14 @@ export class StoryApp implements MountedGame {
       case 'map-level': {
         const level = button.dataset['level']
         if (level !== 'local' && level !== 'region' && level !== 'world') return
+
         this.mapLevel = level
         break
       }
       case 'map-scene': {
         const scene = Number(button.dataset['scene'])
         if (!storyAtlasUnlocked(this.session.camp.story, this.session.run, scene)) return
+
         this.mapScene = scene
         this.mapLevel = 'local'
         break
@@ -750,6 +834,7 @@ export class StoryApp implements MountedGame {
           id === 'open-blockade'
         )
           this.session.togglePin(id)
+
         break
       }
       case 'flag':
@@ -777,15 +862,18 @@ export class StoryApp implements MountedGame {
       default:
         return
     }
+
     this.sounds.play('confirm')
     this.render()
     if (button.dataset['storyAction'] === 'select-task') {
       const selected = this.root.querySelector<HTMLElement>(
         '.story-journal-list [aria-pressed="true"]',
       )
+
       selected?.scrollIntoView({ block: 'nearest' })
       selected?.focus({ preventScroll: true })
     }
+
     if (
       button.dataset['storyAction'] === 'map-level' ||
       button.dataset['storyAction'] === 'map-scene' ||
@@ -798,8 +886,10 @@ export class StoryApp implements MountedGame {
   private focusCell(index: number): void {
     const target = this.root.querySelector<HTMLElement>(`[data-story-cell="${index}"]`)
     if (!target) return
+
     for (const cell of this.root.querySelectorAll<HTMLElement>('[data-story-cell]'))
       cell.tabIndex = cell === target ? 0 : -1
+
     target.focus({ preventScroll: true })
   }
 
@@ -813,23 +903,29 @@ export class StoryApp implements MountedGame {
       }
       return
     }
+
     if (event.key === 'Escape' && this.panel) {
       this.panel = null
       this.render()
+
       return
     }
+
     const cell =
       event.target instanceof HTMLElement
         ? event.target.closest<HTMLElement>('[data-story-cell]')
         : null
     if (!cell) return
+
     const index = Number(cell.dataset['storyCell'])
     const width = this.snapshot().board.game.config.width
     if (event.key.toLowerCase() === 'f') {
       event.preventDefault()
       void this.activate(index, true)
+
       return
     }
+
     const delta =
       event.key === 'ArrowLeft'
         ? -1
@@ -841,9 +937,12 @@ export class StoryApp implements MountedGame {
               ? width
               : 0
     if (!delta) return
+
     event.preventDefault()
+
     const target = index + delta
     if (Math.abs(delta) === 1 && Math.floor(target / width) !== Math.floor(index / width)) return
+
     this.focusCell(target)
     this.sounds.play('navigate')
   }
@@ -853,34 +952,43 @@ export class StoryApp implements MountedGame {
     this.sounds.unlock()
     // A fresh press is a new intent; only the hold's synthetic follow-up click is suppressed.
     if (event.isPrimary && !this.hold) this.suppressClickUntil = 0
+
     const touch = event.pointerType !== 'mouse'
     if (touch !== this.touchInput) {
       this.touchInput = touch
+
       const objective = this.root.querySelector('[data-story-flag-guidance]')
       if (objective && this.session.run?.inspected && !this.session.run.practicedFlag)
         objective.textContent = touch
           ? message(this.language, 'story.flag-touch')
           : message(this.language, 'story.flag-mouse')
+
       const chordGuidance = this.root.querySelector('[data-story-chord-guidance]')
       if (chordGuidance)
         chordGuidance.textContent = touch
           ? message(this.language, 'story.chord-touch')
           : message(this.language, 'story.chord-mouse')
     }
+
     if (event.pointerType === 'mouse' || !event.isPrimary || this.moving) return
+
     const cell =
       event.target instanceof Element
         ? event.target.closest<HTMLElement>('[data-story-cell]')
         : null
     if (!cell || !this.session.run) return
+
     this.cancelHold()
+
     const index = Number(cell.dataset['storyCell'])
     const timer = setTimeout(() => {
       if (!this.hold || this.hold.pointerId !== event.pointerId) return
+
       this.hold = { ...this.hold, fired: true }
       this.suppressClickUntil = performance.now() + 800
       void this.activate(index, true)
     }, 500)
+
     this.hold = {
       index,
       timer,
@@ -917,19 +1025,24 @@ export class StoryApp implements MountedGame {
   /** Clear a pending hold on scroll, cancellation, blur or route disposal. */
   private readonly cancelHold = (): void => {
     if (!this.hold) return
+
     if (this.hold.fired) this.suppressClickUntil = performance.now() + 800
+
     clearTimeout(this.hold.timer)
     this.hold = null
   }
 
   /** Translate the current scene without replacing either save or tutorial progress. */
   private readonly selectLanguage = (language: Language): void => {
+    this.transition.cancel()
     this.generation++
     this.animation?.cancel()
     this.moving = false
     this.language = language
     this.preferences.setPreference({ key: 'language', value: language })
+
     const url = new URL(location.href)
+
     url.searchParams.set('lang', language)
     history.replaceState(null, '', url)
     this.onLanguage(language)

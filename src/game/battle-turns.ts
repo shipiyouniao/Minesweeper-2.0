@@ -39,28 +39,38 @@ function correctFlags(run: Expedition, index: number): boolean {
 function interact(run: Expedition, index: number): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+
   if (encounter.kind === 'tide') return run
+
   if (encounter.kind === 'matrix') return run
+
   if (encounter.kind === 'echo') return openEcho({ ...run, encounter }, index)
+
   if (encounter.kind === 'clock') return redirectClock({ ...run, encounter }, index)
+
   if (encounter.kind === 'magnetic') return lureMagnetic({ ...run, encounter }, index)
+
   if (encounter.kind === 'mirror') {
     if (!correctFlags(run, index))
       return { ...injure(run, 5), encounter: { ...encounter, event: 'misfire' } }
     return disableMirrorSeal({ ...inspectArea(run, neighbors(run.game.config, index)), encounter })
   }
+
   if (encounter.kind === 'bastion') {
     if (index === encounter.boss)
       return {
         ...run,
         encounter: { ...encounter, exposedUntil: encounter.turn + 3, event: 'window-opened' },
       }
+
     if (!correctFlags(run, index))
       return { ...injure(run, 5), encounter: { ...encounter, event: 'misfire' } }
+
     const mechanisms = encounter.mechanisms.map((entry) =>
       entry.index === index ? { ...entry, active: false } : entry,
     )
     const next = inspectArea(run, neighbors(run.game.config, index))
+
     return {
       ...next,
       encounter: {
@@ -76,10 +86,14 @@ function interact(run: Expedition, index: number): Expedition {
       },
     }
   }
+
   if (!encounter.nests.includes(index)) return clearBrood(run, index)
+
   if (!correctFlags(run, index))
     return { ...injure(run, 5), encounter: { ...encounter, event: 'misfire' } }
+
   const next = inspectArea(run, neighbors(run.game.config, index))
+
   return {
     ...next,
     encounter: broodIntent({
@@ -96,11 +110,17 @@ function interact(run: Expedition, index: number): Expedition {
 function endTurn(run: Expedition): Expedition {
   const encounter = run.encounter
   if (!encounter) return run
+
   if (encounter.kind === 'tide') return advanceTide({ ...run, encounter })
+
   if (encounter.kind === 'matrix') return advanceMatrix({ ...run, encounter })
+
   if (encounter.kind === 'echo') return advanceEcho({ ...run, encounter })
+
   if (encounter.kind === 'clock') return advanceClock({ ...run, encounter })
+
   if (encounter.kind === 'magnetic') return advanceMagnetic({ ...run, encounter })
+
   const damage = incomingCombatDamage(run, battleThreat(encounter, run.player, run.game.config))
   const next = damage > 0 ? injure(run, damage) : run
   const advanced: Expedition = {
@@ -109,12 +129,15 @@ function endTurn(run: Expedition): Expedition {
     encounter: { ...encounter, event: damage > 0 ? 'hit' : 'evaded' },
   }
   if (next.phase === 'lost') return advanced
+
   if (encounter.kind === 'brood') return advanceBrood(advanced)
+
   if (encounter.kind === 'mirror')
     return advanceMirror({
       ...advanced,
       encounter: { ...encounter, event: damage > 0 ? 'hit' : 'evaded' },
     })
+
   const weakened = encounter.mechanisms.some((entry) => entry.effect === 'weaken' && !entry.active)
   const result: Expedition = {
     ...advanced,
@@ -137,6 +160,7 @@ function endTurn(run: Expedition): Expedition {
       event: damage > 0 ? 'hit' : 'evaded',
     },
   }
+
   return { ...result, encounter: { ...result.encounter!, points: combatStats(result).actions } }
 }
 
@@ -149,8 +173,11 @@ export function actBattle(
   const encounter = run.encounter
   const plan = tacticalPlan(run, action)
   if (!encounter || !plan.allowed) return run
+
   if (action.type === 'end-turn') return applyCombatRelics(run, endTurn(run), action)
+
   if (action.type === 'retreat') return { ...run, phase: 'retreated' }
+
   let next: Expedition
   if (action.type === 'brace')
     next = { ...run, encounter: { ...encounter, braced: true, event: 'braced' } }
@@ -175,6 +202,7 @@ export function actBattle(
   else if (action.type === 'attack') {
     const armor = encounter.kind === 'brood' ? encounter.nests.length * 3 : 0
     const health = Math.max(0, encounter.health - Math.max(1, strikeDamage(run) - armor))
+
     next = {
       ...run,
       encounter: {
@@ -196,12 +224,14 @@ export function actBattle(
     const exploring: Expedition = { ...run, phase: 'exploring' }
     const result = explore(exploring, action)
     if (result === exploring) return run
+
     next = {
       ...result,
       phase: result.phase === 'lost' ? 'lost' : 'boss',
       encounter: { ...encounter, event: 'acted' },
     }
   }
+
   const objective =
     next.encounter?.event === 'disabled' || next.encounter?.event === 'nest-destroyed'
   const focus =
@@ -217,6 +247,7 @@ export function actBattle(
     cleared &&
     run.departure.equipment.includes('clearing-hook') &&
     !encounter.turnTriggers.includes('clearing-hook')
+
   return applyCombatRelics(
     run,
     {

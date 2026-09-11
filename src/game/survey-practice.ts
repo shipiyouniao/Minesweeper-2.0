@@ -5,6 +5,7 @@ import type { Survey } from '../types/survey.js'
 export function surveyPractice(): Survey {
   const config = { width: 5, height: 5, mines: 14 }
   const mines = new Set([1, 2, 3, 6, 8, 10, 11, 13, 14, 16, 18, 21, 22, 23])
+
   return {
     difficulty: 'easy',
     moves: 0,

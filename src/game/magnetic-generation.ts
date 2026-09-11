@@ -12,15 +12,18 @@ function connectedWithout(game: Game, walls: readonly number[], blocked: number)
   const allowed = new Set(safe)
   const start = safe[0]
   if (start === undefined) return false
+
   const reached = new Set([start])
   const queue = [start]
   for (const index of queue) {
     for (const next of adjacentSteps(game, index)) {
       if (reached.has(next) || !allowed.has(next)) continue
+
       reached.add(next)
       queue.push(next)
     }
   }
+
   return reached.size === safe.length
 }
 

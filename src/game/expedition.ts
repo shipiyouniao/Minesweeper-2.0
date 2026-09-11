@@ -160,6 +160,7 @@ function createFloor(departure: Departure, floor: number): Expedition {
     steps: 0,
     phase: 'exploring',
   }
+
   return run.circuits || run.power || run.rail
     ? { ...run, game: revealDungeon(run, run.entrance) }
     : run
@@ -224,6 +225,7 @@ export function frontierCells(run: Expedition): Set<number> {
         frontier.add(other)
     }
   }
+
   return frontier
 }
 
@@ -265,10 +267,13 @@ function relicOffers(run: Expedition): Relic[] {
 /** Approach a frontier and resolve damage without changing the mine layout or safe route. */
 function revealFrontier(run: Expedition, index: number): Expedition {
   if (!frontierCells(run).has(index)) return run
+
   const path = approachPath(run, index)
   if (!path) return run
+
   const cell = run.game.cells[index]
   if (!cell) return run
+
   const approached = collectTreasures({ ...run, player: path.at(-1) ?? run.player }, path)
 
   if (cell.mine) {
@@ -277,6 +282,7 @@ function revealFrontier(run: Expedition, index: number): Expedition {
     const survived = reacted.health > 0
 
     // Survival confirms the hazard, never erases it or moves the player onto it.
+
     return {
       ...reacted,
       triggeredMines: [...new Set([...reacted.triggeredMines, index])],
@@ -294,7 +300,9 @@ function revealFrontier(run: Expedition, index: number): Expedition {
   }
 
   // A chest reached on the approach may have surveyed clues; preserve those discoveries.
+
   const game = revealDungeon(approached, index)
+
   return collectTreasures(
     {
       ...approached,
@@ -311,14 +319,18 @@ function revealFrontier(run: Expedition, index: number): Expedition {
 function movePlayer(run: Expedition, index: number): Expedition {
   const path = walkingPath(run, index)
   if (!path || (path.length === 1 && index !== run.exit)) return run
+
   return collectTreasures({ ...run, player: index, steps: run.steps + 1 }, path)
 }
 
 /** Commit an exit reward only for a living explorer that actually reached the stairs. */
 function finishAtExit(run: Expedition): Expedition {
   if (run.phase !== 'exploring' || run.player !== run.exit) return run
+
   if (!floorObjectiveComplete(run)) return run
+
   if (!run.encounter && isEncounterFloor(run)) return applyTitleEntry(enterEncounter(run))
+
   return completeFloor(run)
 }
 
@@ -365,17 +377,23 @@ function advanceFloor(run: Expedition, relic?: Relic): Expedition {
   if (relics.includes('compass')) result = scoutExit(result)
 
   const entered = enterChapterGuardian(result)
+
   return entered === result ? result : applyTitleEntry(entered)
 }
 
 /** Pure expedition transition, including explicit extraction and inter-floor reward selection. */
 function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedition {
   if (run.phase === 'lost' || run.phase === 'won' || run.phase === 'retreated') return run
+
   if (action.type === 'retreat') return { ...run, phase: 'retreated' }
+
   if (action.type === 'descend')
     return run.phase === 'reward' && run.offers.length === 0 ? advanceFloor(run) : run
+
   if (action.type === 'relic') return takeRelic(run, action.relic)
+
   if (run.phase !== 'exploring') return run
+
   if (action.type === 'interact')
     return railControl(run, action.index)
       ? interactRail(run, action.index)
@@ -400,7 +418,9 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
         run.surveyedCells.includes(action.index)
       )
         return run
+
       const game = act(run.game, { type: action.type, index: action.index })
+
       return game === run.game ? run : { ...run, game, steps: run.steps + 1 }
     }
     case 'sonar':
@@ -417,10 +437,12 @@ function transitionExpedition(run: Expedition, action: ExpeditionAction): Expedi
 /** Apply the accepted intent, then process each newly earned discovery reaction once. */
 export function actExpedition(run: Expedition, action: ExpeditionAction): Expedition {
   if (action.type === 'chord' && echoObscured(run, action.index)) return run
+
   const next =
     action.type === 'chord'
       ? chordExpedition(run, action.index, revealForBatch)
       : applyExpedition(run, action, 'enter')
+
   return rechargeExpeditionSonar(run, refreshExpeditionReadings(run, next), action)
 }
 
@@ -460,6 +482,7 @@ function applyExpedition(
   }
 
   // Combat completion is the only way to collect the guarded floor's ordinary exit reward.
+
   if (next.phase === 'boss' && next.encounter?.health === 0) {
     next = completeFloor({
       ...next,
@@ -467,6 +490,7 @@ function applyExpedition(
       shields: Math.min(2, next.shields + 1),
     })
   }
+
   return applyTitleSkill(
     run,
     shareMirrorKnowledge(applyDiscoveryRelics(run, applyToolRelics(run, next, action), action)),

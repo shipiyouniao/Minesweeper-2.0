@@ -2,6 +2,7 @@
 export function removeTransientEffect(layer: HTMLElement): void {
   const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 180 : 1600
   const timer = window.setTimeout(cleanup, delay)
+  /** Release both completion listeners and the fallback timer exactly once. */
   function cleanup(): void {
     window.clearTimeout(timer)
     layer.removeEventListener('animationend', cleanup)

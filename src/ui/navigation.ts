@@ -11,7 +11,9 @@ export function parseRoute(search: string): AppRoute {
     const stage = parseCampaignStage(params.get('stage'))
     return stage ? { page: 'campaign', stage } : { page: 'campaign' }
   }
+
   if (params.get('page') === 'story') return { page: 'story' }
+
   if (params.get('page') === 'free') return { page: 'free' }
 
   const mode = params.get('ruleset')
@@ -26,7 +28,9 @@ export function parseRoute(search: string): AppRoute {
   }
 
   // Classic difficulty links predate the ruleset parameter and remain directly playable.
+
   if (mode === null && params.has('mode')) return { page: 'game', mode: 'classic' }
+
   return { page: 'home' }
 }
 
@@ -39,7 +43,9 @@ export function routeHref(route: AppRoute, language: Language): string {
     params.set('page', 'campaign')
     if (route.stage) params.set('stage', route.stage)
   } else if (route.page === 'story') params.set('page', 'story')
+
   params.set('lang', language)
+
   return `?${params}`
 }
 

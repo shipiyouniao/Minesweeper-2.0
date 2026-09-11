@@ -13,7 +13,9 @@ export class BoardRightClick {
   constructor(root: HTMLElement, activate: (cell: HTMLElement) => void) {
     this.root = root
     this.activate = activate
+
     const options = { signal: this.listeners.signal, capture: true }
+
     root.addEventListener('pointerdown', this.down, options)
     root.addEventListener('mousedown', this.mouse, options)
     root.addEventListener('contextmenu', this.context, options)
@@ -45,9 +47,11 @@ export class BoardRightClick {
   private readonly down = (event: PointerEvent): void => {
     this.suppressRightContext = false
     if (event.pointerType !== 'mouse' || event.button !== 2) return
+
     const cell =
       event.target instanceof Element ? event.target.closest<HTMLElement>('[data-cell]') : null
     if (!cell || !this.root.contains(cell)) return
+
     this.block(event)
     this.press = {
       pointerId: event.pointerId,
@@ -62,10 +66,12 @@ export class BoardRightClick {
   private readonly move = (event: PointerEvent): void => {
     const press = this.press
     if (!press || event.pointerId !== press.pointerId) return
+
     if ((event.buttons & 2) === 0) {
       this.cancel()
       return
     }
+
     this.block(event)
     if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 8) press.cancelled = true
   }
@@ -74,8 +80,10 @@ export class BoardRightClick {
   private readonly up = (event: PointerEvent): void => {
     const press = this.press
     if (!press || event.pointerId !== press.pointerId) return
+
     this.block(event)
     this.cancel()
+
     const bounds = press.cell.getBoundingClientRect()
     if (
       !press.cancelled &&

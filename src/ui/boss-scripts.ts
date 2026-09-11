@@ -20,6 +20,7 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
         { speaker: 'scene', focus: 'objective', line: message(language, 'tide.scene-4') },
       ],
     }
+
   if (kind === 'matrix')
     return {
       kind,
@@ -34,6 +35,7 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
         { speaker: 'scene', focus: 'objective', line: message(language, 'matrix.scene-4') },
       ],
     }
+
   if (kind === 'echo')
     return {
       kind,
@@ -52,6 +54,7 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
         { speaker: 'player', focus: 'field', line: message(language, 'echo.scene-8') },
       ],
     }
+
   if (kind === 'bastion')
     return {
       kind,
@@ -102,6 +105,7 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
         },
       ],
     }
+
   if (kind === 'brood')
     return {
       kind,
@@ -152,6 +156,7 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
         },
       ],
     }
+
   if (kind === 'mirror')
     return {
       kind,
@@ -202,6 +207,7 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
         },
       ],
     }
+
   if (kind === 'magnetic')
     return {
       kind,
@@ -252,6 +258,7 @@ export function bossScript(kind: EncounterKind, language: Language): PrologueScr
         },
       ],
     }
+
   return {
     kind,
     title: message(language, 'boss-scripts.clock-mage-clepsydra'),

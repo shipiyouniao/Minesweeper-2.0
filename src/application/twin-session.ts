@@ -17,7 +17,9 @@ export class TwinSession {
   constructor(repository: VariantRepository, runtime: SessionRuntime) {
     this.repository = repository
     this.runtime = runtime
+
     const saved = repository.twin()
+
     this.save = saved ?? {
       version: 1,
       rules: 'difficulty-v1',
@@ -28,6 +30,7 @@ export class TwinSession {
       settled: false,
     }
     this.current = createTwin(this.save.seed, this.save.difficulty)
+
     let valid = true
 
     for (const action of this.save.actions) {
@@ -36,6 +39,7 @@ export class TwinSession {
         valid = false
         break
       }
+
       this.current = next
     }
 
@@ -65,8 +69,10 @@ export class TwinSession {
   /** Replayable moves update both the progress envelope and any new terminal result. */
   dispatch(action: TwinAction): boolean {
     if (this.save.actions.length >= MAX_ACTIONS) return false
+
     const next = actTwin(this.current, action)
     if (next === this.current) return false
+
     this.current = next
     this.save = { ...this.save, actions: [...this.save.actions, action] }
 
@@ -87,6 +93,7 @@ export class TwinSession {
     }
 
     this.persist()
+
     return true
   }
 

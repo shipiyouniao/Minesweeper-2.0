@@ -20,7 +20,9 @@ export class TitleMenu {
     this.trigger = trigger
     this.panel = panel
     this.options = [...panel.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]')]
+
     const options = { signal: this.listeners.signal }
+
     trigger.addEventListener('click', this.toggle, options)
     panel.addEventListener('click', this.select, options)
     root.addEventListener('keydown', this.key, options)
@@ -44,11 +46,13 @@ export class TitleMenu {
   private open(): void {
     this.panel.hidden = false
     this.trigger.setAttribute('aria-expanded', 'true')
+
     const bounds = this.trigger.getBoundingClientRect()
     const dock = document.querySelector('.action-dock')?.getBoundingClientRect().top ?? innerHeight
     const below = Math.min(innerHeight, dock) - bounds.bottom - 12
     const above = bounds.top - 12
     const upward = below < 160 && above > below
+
     this.panel.classList.toggle('opens-up', upward)
     this.panel.style.maxHeight = `${Math.min(280, Math.max(80, upward ? above : below))}px`
     this.focusOption(
@@ -65,7 +69,9 @@ export class TitleMenu {
     if (!option) return
 
     for (const item of this.options) item.tabIndex = item === option ? 0 : -1
+
     option.focus({ preventScroll: true })
+
     const top = option.offsetTop
     if (top < this.panel.scrollTop) this.panel.scrollTop = top
     else if (top + option.offsetHeight > this.panel.scrollTop + this.panel.clientHeight)
@@ -94,16 +100,20 @@ export class TitleMenu {
     if (event.key === 'Escape' || event.key === 'Tab') {
       if (!this.panel.hidden) {
         if (event.key === 'Escape') event.preventDefault()
+
         this.close()
         this.trigger.focus({ preventScroll: true })
       }
       return
     }
+
     if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
 
     event.preventDefault()
+
     const wasClosed = this.panel.hidden
     if (wasClosed) this.open()
+
     const index = this.options.findIndex((option) => option === document.activeElement)
     const next =
       event.key === 'Home'
@@ -111,6 +121,7 @@ export class TitleMenu {
         : event.key === 'End'
           ? this.options.length - 1
           : index + (wasClosed ? 0 : event.key === 'ArrowDown' ? 1 : -1)
+
     this.focusOption(next)
     this.feedback('navigate')
   }

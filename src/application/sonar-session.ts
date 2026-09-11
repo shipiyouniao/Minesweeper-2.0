@@ -15,7 +15,9 @@ export class SonarSession {
   constructor(repository: SonarRepository, runtime: SessionRuntime) {
     this.repository = repository
     this.runtime = runtime
+
     const saved = repository.load()
+
     this.saved = saved ?? {
       version: 2,
       difficulty: 'easy',
@@ -25,6 +27,7 @@ export class SonarSession {
       settled: false,
     }
     this.current = createSonar(this.saved.seed, this.saved.difficulty)
+
     let valid = true
     for (const action of this.saved.actions) {
       const next = actSonar(this.current, action)
@@ -32,14 +35,17 @@ export class SonarSession {
         valid = false
         break
       }
+
       this.current = next
     }
+
     const terminal = this.current.game.phase === 'won' || this.current.game.phase === 'lost'
     if (!valid || terminal !== this.saved.settled) {
       repository.recovered = true
       this.restart(this.saved.difficulty)
     }
     // Save an untouched seed too: switching modes before the first reveal must retain the puzzle.
+
     this.persist()
   }
 
@@ -61,9 +67,12 @@ export class SonarSession {
   /** Append only accepted commands; a terminal transition records a win exactly once. */
   dispatch(action: SonarAction): boolean {
     if (this.atMoveLimit) return false
+
     const next = actSonar(this.current, action)
     if (next === this.current) return false
+
     this.current = next
+
     const terminal = next.game.phase === 'won' || next.game.phase === 'lost'
     const records =
       next.game.phase === 'won'
@@ -78,6 +87,7 @@ export class SonarSession {
             },
           ])
         : this.saved.records
+
     this.saved = {
       ...this.saved,
       actions: [...this.saved.actions, action],
@@ -85,6 +95,7 @@ export class SonarSession {
       settled: terminal,
     }
     this.persist()
+
     return true
   }
 

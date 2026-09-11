@@ -19,6 +19,7 @@ export function expeditionSonarCharges(run: Expedition): number {
 export function echoCandidates(run: Expedition): readonly number[] {
   const encounter = run.encounter
   if (encounter?.kind !== 'echo') return []
+
   return encounter.bodies.filter((body) =>
     run.sonar.readings
       .filter((reading) => reading.phase === encounter.phase)
@@ -52,6 +53,7 @@ export function canUseExpeditionSonar(run: Expedition, index: number): boolean {
 /** Open exactly the center, confirming a mine without triggering it or expanding a zero. */
 export function useExpeditionSonar(run: Expedition, index: number): Expedition {
   if (!canUseExpeditionSonar(run, index)) return run
+
   const echo = run.encounter?.kind === 'echo' ? run.encounter : null
   const region = sonarRegion(run.game.config, index)
   const mine = run.game.cells[index]!.mine
@@ -63,6 +65,7 @@ export function useExpeditionSonar(run: Expedition, index: number): Expedition {
           ? { ...cell, visibility: mine ? ('flagged' as const) : ('revealed' as const) }
           : cell,
       )
+
   return {
     ...run,
     steps: run.steps + 1,
@@ -109,14 +112,17 @@ export function rechargeExpeditionSonar(
     )
   )
     return after
+
   const loan = after.encounter?.kind === 'echo'
   if (!loan && !after.departure.equipment.includes('sonar')) return after
+
   const threshold = loan ? 4 : 12
   const progress = (loan ? before.sonar.loanProgress : before.sonar.progress) + 1
   const charges = Math.min(
     3,
     (loan ? after.sonar.loan : after.sonar.charges) + Number(progress >= threshold),
   )
+
   return {
     ...after,
     sonar: {
@@ -150,16 +156,19 @@ export function refreshExpeditionReadings(before: Expedition, after: Expedition)
     before.game.cells.length !== after.game.cells.length
   )
     return after
+
   if (
     before.encounter?.kind === 'mirror' &&
     after.encounter?.kind === 'mirror' &&
     before.encounter.active !== after.encounter.active
   )
     return after
+
   const removed = before.game.cells.flatMap((cell, index) =>
     cell.mine && !after.game.cells[index]?.mine ? [index] : [],
   )
   if (!removed.length) return after
+
   return {
     ...after,
     sonar: {

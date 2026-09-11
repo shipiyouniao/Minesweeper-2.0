@@ -99,7 +99,9 @@ export function addVariantRecord(
 
   return [record, ...records].filter((entry) => {
     const count = (counts.get(entry.difficulty) ?? 0) + 1
+
     counts.set(entry.difficulty, count)
+
     return count <= 10
   })
 }

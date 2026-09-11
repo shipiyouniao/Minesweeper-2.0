@@ -21,6 +21,7 @@ import { parseLanguage } from '../i18n.js'
 import { HomeApp } from './home-app.js'
 import { StoryApp } from './story-app.js'
 import { parseRoute, sameRoute } from './navigation.js'
+import { SceneTransition } from './scene-transition.js'
 
 /** Own exactly one menu or game, checkpointing before navigation and restoring on return. */
 export class GameRouter implements MountedGame {
@@ -34,6 +35,7 @@ export class GameRouter implements MountedGame {
   private active: MountedGame
   private route: AppRoute
   private sounds: BrowserSoundEffects | null = null
+  private readonly transition = new SceneTransition()
 
   /** A bare URL starts at home; explicit game links retain their independent save slots. */
   constructor(
@@ -50,8 +52,10 @@ export class GameRouter implements MountedGame {
     this.sonar = sonar
     this.language = language
     root.innerHTML = '<div class="ruleset-host"></div>'
+
     const host = root.querySelector<HTMLElement>('.ruleset-host')
     if (!host) throw new Error('Route host is missing')
+
     this.host = host
     this.route = parseRoute(location.search)
     this.active = this.mount()
@@ -61,6 +65,7 @@ export class GameRouter implements MountedGame {
 
   /** Dispose the active game before removing the routing listener. */
   dispose(): void {
+    this.transition.cancel()
     this.listeners.abort()
     this.active.dispose()
   }
@@ -68,6 +73,7 @@ export class GameRouter implements MountedGame {
   /** Instantiate the appropriate rules/session/view stack from shared browser adapters. */
   private mount(): MountedGame {
     const sounds = new BrowserSoundEffects(this.repository.preferences().sound)
+
     this.sounds = sounds
     this.host.dataset['page'] = this.route.page
     if (this.route.page === 'campaign') {
@@ -75,6 +81,7 @@ export class GameRouter implements MountedGame {
       const session = new ExpeditionSession(repository, browserRuntime)
       if (!session.run)
         session.start(session.loadout.profession, session.loadout.equipment, 'relaxed')
+
       if (session.run)
         return new VariantApp(
           this.host,
@@ -85,6 +92,7 @@ export class GameRouter implements MountedGame {
           sounds,
           this.languageChanged,
         )
+
       return new StoryApp(
         this.host,
         this.variants,
@@ -94,6 +102,7 @@ export class GameRouter implements MountedGame {
         this.languageChanged,
       )
     }
+
     if (this.route.page === 'story')
       return new StoryApp(
         this.host,
@@ -103,6 +112,7 @@ export class GameRouter implements MountedGame {
         sounds,
         this.languageChanged,
       )
+
     if (this.route.page !== 'game') {
       return new HomeApp(
         this.host,
@@ -122,6 +132,7 @@ export class GameRouter implements MountedGame {
       )
 
       // Remember direct-link choices so returning through the directory restores this save slot.
+
       this.repository.setPreference({ key: 'difficulty', value: difficulty })
 
       return new MinesweeperApp(
@@ -160,6 +171,7 @@ export class GameRouter implements MountedGame {
       mode === 'expedition'
         ? new ExpeditionSession(this.variants, browserRuntime)
         : new TwinSession(this.variants, browserRuntime)
+
     return new VariantApp(
       this.host,
       session,
@@ -182,6 +194,7 @@ export class GameRouter implements MountedGame {
       event.altKey
     )
       return
+
     const link =
       event.target instanceof Element
         ? event.target.closest<HTMLAnchorElement>('a[data-route]')
@@ -190,11 +203,14 @@ export class GameRouter implements MountedGame {
 
     const url = new URL(link.href)
     if (url.origin !== location.origin || url.pathname !== location.pathname) return
+
     event.preventDefault()
+
     const route = parseRoute(url.search)
     if (sameRoute(this.route, route)) return
 
     // Persist while the old URL still describes the outgoing game's difficulty and language.
+
     this.active.dispose()
     history.pushState(null, '', url)
     this.show(route)
@@ -206,6 +222,8 @@ export class GameRouter implements MountedGame {
     this.route = route
     this.active = this.mount()
     this.host.scrollTo(0, 0)
+    void this.transition.arrive(this.host.querySelector('main'))
+
     const heading = this.host.querySelector<HTMLElement>('[data-route-heading], main h1, main h2')
     if (heading) {
       heading.tabIndex = -1
@@ -216,8 +234,10 @@ export class GameRouter implements MountedGame {
   /** Browser Back and Forward use the same teardown as on-page navigation. */
   private readonly restore = (): void => {
     this.active.dispose()
+
     const language = parseLanguage(new URLSearchParams(location.search).get('lang'))
     if (language) this.language = language
+
     this.show(parseRoute(location.search))
   }
 

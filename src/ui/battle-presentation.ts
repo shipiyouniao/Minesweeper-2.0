@@ -68,6 +68,7 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
         message(language, 'tide.shuffle-note'),
       ],
     }
+
   if (kind === 'matrix')
     return {
       ...copy,
@@ -83,6 +84,7 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
         message(language, 'matrix.forecast'),
       ],
     }
+
   if (kind === 'echo')
     return {
       ...copy,
@@ -97,7 +99,9 @@ export function battleCopy(language: Language, kind: EncounterKind): TacticalMes
         message(language, 'echo.rhythm'),
       ],
     }
+
   if (kind === 'clock') return clockCopy(language, copy)
+
   return kind === 'magnetic'
     ? magneticCopy(language, copy)
     : kind === 'mirror'
@@ -117,6 +121,7 @@ export function battleStatus(language: Language, encounter: TacticalEncounter): 
       ' · ' +
       (encounter.exposed ? message(language, 'tide.open') : message(language, 'tide.shield'))
     )
+
   if (encounter.kind === 'matrix') {
     const status = message(language, 'matrix.status', {
       phase: encounter.phase,
@@ -126,21 +131,28 @@ export function battleStatus(language: Language, encounter: TacticalEncounter): 
     })
     return encounter.turn % 3 === 0 ? `${status} · ${message(language, 'matrix.quiet')}` : status
   }
+
   if (encounter.kind === 'echo')
     return message(language, 'echo.status', {
       phase: encounter.phase,
       window: Math.max(0, encounter.exposedUntil - encounter.turn + 1),
     })
+
   if (encounter.kind === 'clock') return clockStatus(language, encounter)
+
   if (encounter.kind === 'magnetic') return magneticStatus(language, encounter)
+
   if (encounter.kind === 'mirror') return mirrorDefense(language, encounter, encounter.active)
+
   if (encounter.kind === 'brood')
     return message(language, 'battle-presentation.nests-3-armor-regen', {
       p0: encounter.nests.length,
       p1: encounter.nests.length * 3,
     })
+
   const active = encounter.pylons.filter((pylon) => pylon.active).length
   const window = Math.max(0, encounter.exposedUntil - encounter.turn + 1)
+
   return active
     ? message(language, 'battle-presentation.controls-2', { p0: active })
     : window
@@ -170,5 +182,6 @@ export function combatStatsTemplate(language: Language, run: Expedition): string
   const entries = sources
     .map((source) => `<li><strong>${source.name}</strong> · ${source.note}</li>`)
     .join('')
+
   return `<div class="combat-stats ${gameplayStyles['combat-stats']}"><span>${message(language, 'battle-presentation.attack')} <strong>${stats.attack}</strong></span><span>${message(language, 'battle-presentation.defense')} <strong>${stats.defense}</strong></span><span>${message(language, 'battle-presentation.turn-ap')} <strong>${stats.actions}</strong></span></div><details class="combat-sources ${gameplayStyles['combat-sources']}"><summary>${message(language, 'battle-presentation.build-effects')}</summary><p>${message(language, 'battle-presentation.base-5-attack-0-defense-3-ap')}</p>${entries ? `<ul>${entries}</ul>` : ''}</details>`
 }

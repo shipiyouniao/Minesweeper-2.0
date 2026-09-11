@@ -388,13 +388,16 @@ export const BLOCKADE_FLOORS: readonly AuthoredPowerFloor[] = [
 export function controlLayout(floor: number): PowerDungeonLayout {
   const room = CONTROL_FLOORS[floor - 1]
   if (!room) throw new RangeError('Missing control room')
+
   return authoredPowerLayout(room)
 }
 
 /** The final floor is the guardian arena itself, not a random encounter behind a second exit. */
 export function blockadeLayout(floor: number): DungeonLayout {
   if (floor === 3) return guardianLayout()
+
   const room = BLOCKADE_FLOORS[floor - 1]
   if (!room) throw new RangeError('Missing blockade approach')
+
   return authoredPowerLayout(room)
 }

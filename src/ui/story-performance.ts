@@ -33,7 +33,9 @@ export class StoryPerformance {
     this.sounds = sounds
     this.reveal = new DialogueReveal(sounds)
     this.awakening = fresh && !this.reduced.matches
+
     const signal = this.events.signal
+
     document.addEventListener('visibilitychange', this.quiet, { signal })
     this.reduced.addEventListener('change', this.reduceMotion, { signal })
   }
@@ -43,10 +45,12 @@ export class StoryPerformance {
     return this.awakening
   }
 
+  /** Expose dialogue presentation progress for checkpointing without advancing the story. */
   get currentBeat(): number {
     return this.beat
   }
 
+  /** Open the active dialogue after awakening and prevent native Escape from skipping required beats. */
   private openDialogue(): void {
     const dialog = this.root.querySelector<HTMLDialogElement>('dialog.story-dialogue')
     if (!this.awakening && dialog && !dialog.open) {
@@ -60,6 +64,7 @@ export class StoryPerformance {
   /** Reattach the same paragraph on ordinary renders so toggling tools never restarts speech. */
   present(state: StoryViewState): void {
     this.state = state
+
     const paragraph = this.root.querySelector<HTMLElement>('[data-story-dialogue-line]')
     if (!storyDialogueEvent(state) || !paragraph) {
       // A camp service temporarily hides the scene; it does not start a new conversation.
@@ -68,8 +73,10 @@ export class StoryPerformance {
       this.paragraph = null
       this.beats = []
       this.key = ''
+
       return
     }
+
     const beats = storyDialogue(state)
     const key = `${state.language}:${state.board.scene.id}:${beats.map((b) => `${b.speaker}:${b.line}`).join('\n')}`
     if (key === this.key && this.paragraph) {
@@ -77,12 +84,16 @@ export class StoryPerformance {
       this.updateSpeaker()
       this.updateNext()
       this.openDialogue()
+
       return
     }
+
     this.reveal.cancel()
     this.beats = beats
     this.key = key
+
     const active = state.progress.dialogue?.active
+
     this.beat =
       active?.id === storyDialogueEvent(state) ? Math.min(active.beat, beats.length - 1) : 0
     this.paragraph = paragraph
@@ -94,17 +105,22 @@ export class StoryPerformance {
   /** One click completes typing; a following click advances the exchange without moving a cell. */
   advance(): boolean {
     if (this.awakening || this.reveal.finish()) return false
+
     if (this.beat + 1 >= this.beats.length) return true
+
     this.beat++
     this.showBeat()
+
     return false
   }
 
   /** Finish the opening immediately when requested, preserving the current scene and objectives. */
   skipOpening(): void {
     if (!this.awakening) return
+
     this.awakening = false
     for (const animation of this.eyes) animation.cancel()
+
     this.eyes = []
     this.curtain?.remove()
     this.curtain = null
@@ -112,6 +128,7 @@ export class StoryPerformance {
       child.inert = false
       delete child.dataset['storyInert']
     }
+
     if (!this.disposed) {
       this.showBeat()
       this.openDialogue()
@@ -124,8 +141,10 @@ export class StoryPerformance {
   /** Give actual meetings and pickups a visible response after their walking animation. */
   react(reaction: StoryReaction): void {
     if (this.reduced.matches || document.hidden) return
+
     const player = this.root.querySelector<HTMLElement>('.story-traveler')
     if (!player) return
+
     if (reaction === 'greet') {
       this.animate(
         player,
@@ -136,6 +155,7 @@ export class StoryPerformance {
         ],
         420,
       )
+
       const guide = this.root.querySelector<HTMLElement>('[data-story-cell="51"] .story-guide')
       if (guide)
         this.animate(
@@ -148,9 +168,12 @@ export class StoryPerformance {
           ],
           650,
         )
+
       return
     }
+
     const gift = document.createElement('span')
+
     gift.className = 'story-gift'
     gift.setAttribute('aria-hidden', 'true')
     gift.innerHTML = spriteImage('treasure')
@@ -158,6 +181,7 @@ export class StoryPerformance {
     gift.style.top = `${player.offsetTop}px`
     gift.style.width = `${player.offsetWidth}px`
     player.parentElement?.append(gift)
+
     const animation = this.animate(
       gift,
       [
@@ -167,6 +191,7 @@ export class StoryPerformance {
       ],
       900,
     )
+
     void animation.finished.then(
       () => gift.remove(),
       () => gift.remove(),
@@ -176,6 +201,7 @@ export class StoryPerformance {
   /** Drain the gate after the accepted control operation, before any following dialogue. */
   async releaseGate(index: number, gate: number): Promise<void> {
     if (this.reduced.matches || document.hidden || this.disposed) return
+
     const control = this.root.querySelector<HTMLElement>(`[data-story-cell="${index}"] img`)
     const barrier = this.root.querySelector<HTMLElement>(`[data-story-gate="${gate}"] img`)
     if (control)
@@ -184,6 +210,7 @@ export class StoryPerformance {
         [{ transform: 'rotate(0)' }, { transform: 'rotate(18deg)' }, { transform: 'rotate(0)' }],
         400,
       )
+
     if (barrier)
       await this.animate(
         barrier,
@@ -199,6 +226,7 @@ export class StoryPerformance {
   /** The winch carries the recovered axle out through the haul track before the scene changes. */
   async haul(): Promise<void> {
     if (this.reduced.matches || document.hidden || this.disposed) return
+
     const player = this.root.querySelector<HTMLElement>('.story-traveler')
     if (player)
       await this.animate(
@@ -219,6 +247,7 @@ export class StoryPerformance {
     this.reveal.cancel()
     this.skipOpening()
     for (const animation of this.animations) animation.cancel()
+
     this.animations.clear()
     this.paragraph = null
   }
@@ -228,9 +257,11 @@ export class StoryPerformance {
     const state = this.state
     const beat = this.beats[this.beat]
     if (!state || !storyDialogueEvent(state) || !beat || !this.paragraph?.isConnected) return
+
     this.updateSpeaker()
     this.paragraph.textContent = beat.line
     if (this.awakening) return
+
     this.typing = true
     this.updateNext()
     this.reveal.start(
@@ -261,6 +292,7 @@ export class StoryPerformance {
           440,
         )
       }
+
       if (beat.gesture === 'offer') this.offerBag()
     }
   }
@@ -269,11 +301,14 @@ export class StoryPerformance {
   private offerBag(): void {
     const speakers = this.root.querySelector<HTMLElement>('.story-speakers')
     if (!speakers) return
+
     const bag = document.createElement('span')
+
     bag.className = 'story-handover'
     bag.setAttribute('aria-hidden', 'true')
     bag.innerHTML = spriteImage('treasure')
     speakers.append(bag)
+
     const animation = this.animate(
       bag,
       [
@@ -283,6 +318,7 @@ export class StoryPerformance {
       ],
       950,
     )
+
     void animation.finished.then(
       () => bag.remove(),
       () => bag.remove(),
@@ -294,12 +330,14 @@ export class StoryPerformance {
     const state = this.state
     const beat = this.beats[this.beat]
     if (!state || !beat) return
+
     const name = this.root.querySelector<HTMLElement>('[data-story-speaker-name]')
     if (name)
       name.textContent =
         beat.speaker === 'lumi'
           ? message(state.language, 'story.guide')
           : professionCopy(state.language, state.run ? 'explorer' : state.loadout.profession).name
+
     for (const portrait of this.root.querySelectorAll<HTMLElement>('[data-story-speaker]'))
       portrait.dataset['active'] = String(portrait.dataset['storySpeaker'] === beat.speaker)
   }
@@ -308,7 +346,9 @@ export class StoryPerformance {
   private updateNext(): void {
     const button = this.root.querySelector<HTMLButtonElement>('[data-story-action="dialogue"]')
     if (!button || !this.state) return
+
     const more = this.beat + 1 < this.beats.length
+
     button.hidden = false
     button.textContent = `${this.typing && !more ? message(this.state.language, 'story.dialogue-read') : message(this.state.language, 'story.dialogue-next')} →`
   }
@@ -317,15 +357,19 @@ export class StoryPerformance {
   private openEyes(): void {
     const state = this.state
     if (!state) return
+
     const curtain = document.createElement('div')
+
     curtain.className = 'story-awakening'
     curtain.innerHTML = `<div class="story-eyelid story-eyelid-top"></div><div class="story-eyelid story-eyelid-bottom"></div><button data-story-action="wake">${message(state.language, 'story.open-eyes')} ↗</button>`
     this.curtain = curtain
     for (const child of this.root.children) {
       if (!(child instanceof HTMLElement)) continue
+
       child.inert = true
       child.dataset['storyInert'] = ''
     }
+
     this.root.append(curtain)
     curtain.querySelector('button')?.focus({ preventScroll: true })
     for (const [index, lid] of [
@@ -345,6 +389,7 @@ export class StoryPerformance {
         ),
       )
     }
+
     const scene = this.root.querySelector<HTMLElement>('.story-main')
     if (scene)
       this.eyes.push(
@@ -358,6 +403,7 @@ export class StoryPerformance {
           2200,
         ),
       )
+
     void this.eyes[0]!.finished.then(
       () => this.skipOpening(),
       () => {},
@@ -367,6 +413,7 @@ export class StoryPerformance {
   /** Track short-lived Web Animations so route changes and accessibility settings can stop them. */
   private animate(element: HTMLElement, frames: Keyframe[], duration: number): Animation {
     const animation = element.animate(frames, { duration, easing: 'ease-in-out', fill: 'both' })
+
     this.animations.add(animation)
     void animation.finished.then(
       () => {
@@ -375,12 +422,14 @@ export class StoryPerformance {
       },
       () => this.animations.delete(animation),
     )
+
     return animation
   }
 
   /** Background pages keep the complete line but stop all speech immediately. */
   private readonly quiet = (): void => {
     if (!document.hidden) return
+
     this.skipOpening()
     this.reveal.finish()
     this.sounds.stop()
@@ -390,6 +439,7 @@ export class StoryPerformance {
   /** Changing the system preference completes presentation without advancing gameplay. */
   private readonly reduceMotion = (): void => {
     if (!this.reduced.matches) return
+
     this.skipOpening()
     this.reveal.finish()
     for (const animation of this.animations) animation.cancel()

@@ -16,6 +16,7 @@ export function mountBattleLesson(
 ): () => void {
   const encounter = run.encounter
   if (!encounter || step === 'done') return () => {}
+
   const safe = lessonSafeMove(run)
   const danger = !lessonTurnSafe(run)
   const strike = tacticalCellAction(run, encounter.boss)
@@ -53,9 +54,11 @@ export function mountBattleLesson(
         : message(language, 'battle-lesson.prepare')
       break
   }
+
   const panel = document.createElement('section')
   if ((step === 'combat' || (step === 'attack' && !canAttack)) && encounter.kind === 'bastion') {
     const pylon = encounter.pylons.find((entry) => entry.active)
+
     target = `[data-side="a"] [data-cell="${pylon?.index ?? encounter.boss}"]`
     copy = pylon
       ? message(language, 'battle-lesson.guardian-pylon')
@@ -63,27 +66,36 @@ export function mountBattleLesson(
         ? message(language, 'battle-lesson.guardian-core')
         : message(language, 'battle-lesson.guardian-approach')
   }
+
   panel.className = 'campaign-lesson battle-lesson'
   panel.dataset['battleLesson'] = step
   panel.setAttribute('aria-live', 'polite')
+
   const heading = document.createElement('strong')
+
   heading.textContent = message(language, 'battle-lesson.title')
+
   const paragraph = document.createElement('p')
+
   paragraph.textContent = copy
   panel.append(heading, paragraph)
   if (step === 'points' || step === 'combat') {
     const next = document.createElement('button')
+
     next.type = 'button'
     next.dataset['battleNext'] = ''
     next.textContent = message(language, 'campaign.lesson-begin')
     next.addEventListener('click', () => change(step === 'points' ? 'move' : 'attack'))
     panel.append(next)
   }
+
   const skip = document.createElement('button')
+
   skip.type = 'button'
   skip.dataset['battleSkip'] = ''
   skip.textContent = message(language, 'campaign.lesson-skip')
   skip.addEventListener('click', () => change('done'))
   panel.append(skip)
+
   return mountAnchoredLesson(root, panel, target)
 }

@@ -31,6 +31,7 @@ export class VariantRepository {
   /** Load the camp and expedition envelope without accessing any classic slot. */
   expedition(): ExpeditionSave | null {
     if (!this.available && this.expeditionCache) return this.project()
+
     let text = this.read('expedition')
     const status = storyEnvelopeStatus(text)
     let restored = false
@@ -38,6 +39,7 @@ export class VariantRepository {
       this.storyReadOnly = true
       this.available = false
     }
+
     if (status === 'invalid') {
       const backup = this.read('expedition.backup')
       if (backup && storyEnvelopeStatus(backup) === 'supported' && loadExpeditionSave(backup)) {
@@ -48,12 +50,16 @@ export class VariantRepository {
         this.available = false
       }
     }
+
     if (!this.available && this.expeditionCache) return this.project()
+
     const loaded = loadExpeditionSave(text)
+
     this.migrated = loaded?.migrated ?? false
     this.returnedSupplies = loaded?.returnedSupplies ?? null
     this.recovered = restored || (loaded?.recovered ?? text !== null)
     this.expeditionCache = loaded?.save ?? null
+
     return this.project()
   }
 
@@ -79,6 +85,7 @@ export class VariantRepository {
     const text = this.read('twin')
     const save = decodeTwinSave(text)
     if (text !== null && !save) this.recovered = true
+
     return save
   }
 
@@ -92,6 +99,7 @@ export class VariantRepository {
         journal: value.journal,
         records: value.records,
       })
+
       shared.saveExpedition({
         ...latest,
         camp: value.camp,
@@ -104,9 +112,11 @@ export class VariantRepository {
         campaign,
       }
       this.available = shared.available
+
       return
     }
     // Keep the active tab usable after a quota/privacy error, including its camp transition.
+
     this.expeditionCache = value
     this.write('expedition', value)
   }
@@ -124,8 +134,10 @@ export class VariantRepository {
         if (this.storyReadOnly || storyEnvelopeStatus(previous) === 'unsupported') {
           this.storyReadOnly = true
           this.available = false
+
           return
         }
+
         if (
           previous &&
           storyEnvelopeStatus(previous) === 'supported' &&
@@ -139,8 +151,10 @@ export class VariantRepository {
             this.storage.setItem('minesweeper.variants.v1.expedition.story-v1-backup', previous)
         }
       }
+
       const encoded =
         'camp' in value && value.story ? { ...value, story: encodeStory(value.story) } : value
+
       this.storage.setItem(`minesweeper.variants.v1.${mode}`, JSON.stringify(encoded))
     } catch {
       this.available = false

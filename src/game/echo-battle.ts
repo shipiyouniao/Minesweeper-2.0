@@ -37,7 +37,9 @@ export function enterEcho(run: Expedition): Expedition {
         bodies.push(index)
       if (bodies.length === 3) break
     }
+
     if (bodies.length !== 3) continue
+
     const parent = new Map<number, number>([[layout.entrance, layout.entrance]])
     const queue = [layout.entrance]
     for (const index of queue)
@@ -51,10 +53,12 @@ export function enterEcho(run: Expedition): Expedition {
           parent.set(next, index)
           queue.push(next)
         }
+
     const approaches = bodies.map((body) =>
       adjacentSteps(layout.game, body).find((index) => parent.has(index)),
     )
     if (approaches.some((index) => index === undefined)) continue
+
     const safeRoute = new Set<number>()
     for (const target of approaches) {
       let cursor = target!
@@ -63,6 +67,7 @@ export function enterEcho(run: Expedition): Expedition {
         cursor = parent.get(cursor)!
       }
     }
+
     const health = 18 + tier.health * 2
     const echo: EchoExpedition = {
       ...run,
@@ -104,8 +109,10 @@ export function enterEcho(run: Expedition): Expedition {
         sonicHits: 0,
       },
     }
+
     return forecastEcho(echo)
   }
+
   throw new Error('No connected Echo arena for this tier')
 }
 
@@ -116,6 +123,7 @@ function forecastEcho(run: EchoExpedition): EchoExpedition {
       ...run,
       encounter: { ...run.encounter, intent: { kind: 'row', targets: [], damage: 0 } },
     }
+
   const horizontal = run.encounter.turn % 2 === 1
   let targets = run.game.cells.flatMap((_, index) =>
     (
@@ -134,6 +142,7 @@ function forecastEcho(run: EchoExpedition): EchoExpedition {
       !run.confirmedMines.includes(index),
   )
   if (!safe.some((index) => !targets.includes(index))) targets = safe.length ? [run.player] : []
+
   return {
     ...run,
     encounter: {
@@ -153,6 +162,7 @@ export function openEcho(run: EchoExpedition, index: number): Expedition {
     run.encounter.exposedUntil >= run.encounter.turn
   )
     return run
+
   return {
     ...run,
     encounter: { ...run.encounter, exposedUntil: run.encounter.turn + 2, event: 'window-opened' },
@@ -164,6 +174,7 @@ export function strikeEcho(run: EchoExpedition, damage: number): Expedition {
   const e = run.encounter
   const floor = e.phase < 3 ? Math.ceil((e.maxHealth * (3 - e.phase)) / 3) : 0
   const health = Math.max(floor, e.health - damage)
+
   return {
     ...run,
     encounter: {
@@ -210,6 +221,7 @@ export function advanceEcho(run: EchoExpedition): Expedition {
     },
   }
   if (next.health === 0) return advanced
+
   return forecastEcho({
     ...advanced,
     encounter: { ...advanced.encounter, points: combatStats(advanced).actions },

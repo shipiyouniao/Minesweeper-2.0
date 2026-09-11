@@ -30,15 +30,20 @@ export function magneticCopy(language: Language, common: TacticalMessages): Tact
 /** Label the phase without asking the player to decode a paragraph during a turn. */
 export function magneticStatus(language: Language, encounter: MagneticEncounter): string {
   if (encounter.health === 0) return message(language, 'magnetic-copy.defeated')
+
   if (encounter.forecast.kind === 'charge')
     if (encounter.turn < encounter.forecast.resolvesOn)
       return message(language, 'magnetic-copy.charging-one-full-escape-turn-after-end')
     else return message(language, 'magnetic-copy.charge-at-end-turn-leave-the-route')
+
   const remaining = Math.max(0, encounter.exposedUntil - encounter.turn + 1)
   if (remaining) return message(language, 'magnetic-copy.core-exposed-turns', { p0: remaining })
+
   if (encounter.forecast.kind === 'recovery')
     return message(language, 'magnetic-copy.recharge-no-pulse')
+
   const horizontal = encounter.forecast.axis === 'horizontal'
+
   return encounter.forecast.polarity === 'pull'
     ? message(language, 'magnetic-copy.attract', {
         p0: horizontal
@@ -55,11 +60,15 @@ export function magneticStatus(language: Language, encounter: MagneticEncounter)
 /** Announce a projected route using public certainty, never an unrevealed cell's actual contents. */
 export function magneticLandingCopy(language: Language, projection: MagneticProjection): string {
   if (projection.anchored) return message(language, 'magnetic-copy.grounded-resist-displacement')
+
   if (projection.landing === 'mine')
     return message(language, 'magnetic-copy.known-mine-on-the-route')
+
   if (projection.landing === 'uncertain')
     return message(language, 'magnetic-copy.projected-route-unverified-cells')
+
   if (projection.collision)
     return message(language, 'magnetic-copy.collision-base-3-damage-reduced-by-defense')
+
   return message(language, 'magnetic-copy.projected-landing')
 }

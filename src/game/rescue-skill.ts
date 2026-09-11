@@ -18,6 +18,7 @@ export function rescueLandings(run: Expedition): number[] {
       const y = row + dy * distance
       const x = column + dx * distance
       if (x < 0 || y < 0 || x >= width || y >= height) break
+
       const index = y * width + x
       const cell = run.game.cells[index]!
       // Stop at the first obstruction; farther squares cannot be reached through it.
@@ -28,9 +29,11 @@ export function rescueLandings(run: Expedition): number[] {
         index === run.encounter?.boss
       )
         break
+
       if (distance >= 2) landings.push(index)
     }
   }
+
   return landings
 }
 

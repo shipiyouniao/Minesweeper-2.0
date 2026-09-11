@@ -9,12 +9,14 @@ import type { BroodEncounter, BroodOrder } from '../types/tactical.js'
 function hatchlingStep(run: Expedition, origin: number, reserved: ReadonlySet<number>): number {
   const encounter = run.encounter
   if (encounter?.kind !== 'brood') return origin
+
   const parents = new Map<number, number>([[origin, origin]])
   const queue = [origin]
   for (const current of queue) {
     if (adjacentSteps(run.game, current).includes(run.player)) {
       const path = [current]
       while (path[0] !== origin) path.unshift(parents.get(path[0]!) ?? origin)
+
       return path[Math.min(2, path.length - 1)]!
     }
     for (const index of adjacentSteps(run.game, current)) {
@@ -33,10 +35,12 @@ function hatchlingStep(run: Expedition, origin: number, reserved: ReadonlySet<nu
         cell.visibility !== 'revealed'
       )
         continue
+
       parents.set(index, current)
       queue.push(index)
     }
   }
+
   return origin
 }
 
@@ -60,10 +64,13 @@ export function broodIntent(encounter: BroodEncounter): BroodEncounter {
 export function forecastBrood(run: Expedition): Expedition {
   const encounter = run.encounter
   if (encounter?.kind !== 'brood') return run
+
   const reserved = new Set<number>()
   const orders: BroodOrder[] = encounter.hatchlings.map((from) => {
     const to = hatchlingStep(run, from, reserved)
+
     reserved.add(to)
+
     return {
       from,
       to,
@@ -76,6 +83,7 @@ export function forecastBrood(run: Expedition): Expedition {
           (index) => !run.walls.includes(index),
         )
       : []
+
   return { ...run, encounter: broodIntent({ ...encounter, orders, queenTargets }) }
 }
 
@@ -83,6 +91,7 @@ export function forecastBrood(run: Expedition): Expedition {
 export function advanceBrood(run: Expedition): Expedition {
   const encounter = run.encounter
   if (encounter?.kind !== 'brood' || run.phase !== 'boss') return run
+
   const hatchlings = encounter.orders
     .filter((order) => encounter.hatchlings.includes(order.from))
     .map((order) => (order.to === run.player ? order.from : order.to))
@@ -93,6 +102,7 @@ export function advanceBrood(run: Expedition): Expedition {
     if (egg.turns === 1 && hatchlings.length < 3) hatchlings.push(egg.index)
   }
   // At most three living creatures plus eggs. Occupied nests never displace the player or another entity.
+
   if (encounter.turn % 3 === 0) {
     const sites = shuffled(
       [...new Set(encounter.nests.flatMap((nest) => neighbors(run.game.config, nest)))].filter(
@@ -115,6 +125,7 @@ export function advanceBrood(run: Expedition): Expedition {
         eggs.push({ index, turns: 2 })
     }
   }
+
   const result: Expedition = {
     ...run,
     encounter: {
@@ -128,6 +139,7 @@ export function advanceBrood(run: Expedition): Expedition {
       health: Math.min(encounter.maxHealth, encounter.health + encounter.nests.length * 3),
     },
   }
+
   return forecastBrood({
     ...result,
     encounter: {
@@ -141,11 +153,13 @@ export function advanceBrood(run: Expedition): Expedition {
 export function clearBrood(run: Expedition, index: number): Expedition {
   const encounter = run.encounter
   if (encounter?.kind !== 'brood') return run
+
   const event = encounter.webs.includes(index)
     ? 'web-cut'
     : encounter.eggs.some((egg) => egg.index === index)
       ? 'egg-crushed'
       : 'hatchling-cleared'
+
   return {
     ...run,
     encounter: broodIntent({

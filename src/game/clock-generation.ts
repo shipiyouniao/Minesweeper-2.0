@@ -26,6 +26,7 @@ export function generateClock(config: Config, seed: number): BattleLayout {
     const placed = placedBoard(config, mines, draw, entrance)
     if (adjacentSteps(placed, boss).some((index) => placed.cells[index]?.visibility === 'revealed'))
       continue
+
     const reached = new Set([entrance]),
       queue = [entrance]
     for (const index of queue)
@@ -35,7 +36,9 @@ export function generateClock(config: Config, seed: number): BattleLayout {
           queue.push(other)
         }
       }
+
     if (!neighbors(config, boss).every((index) => reached.has(index))) continue
+
     const walls = indices.filter((index) => !mines.has(index) && !reached.has(index))
     const game = {
       ...placed,
@@ -45,6 +48,7 @@ export function generateClock(config: Config, seed: number): BattleLayout {
     }
     const solved = solveBattle(game, walls, entrance)
     if ([...reached].some((index) => solved.cells[index]?.visibility !== 'revealed')) continue
+
     const objectives = shuffled(
       [...reached].filter(
         (index) =>
@@ -56,5 +60,6 @@ export function generateClock(config: Config, seed: number): BattleLayout {
     ).slice(0, 3)
     if (objectives.length === 3) return { game, walls, entrance, boss, objectives }
   }
+
   throw new Error('No verified clock arena for the supported tier')
 }

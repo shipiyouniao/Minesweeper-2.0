@@ -97,6 +97,7 @@ export function startingHealth(departure: Departure, floor = 1): number {
 export function combatStats(run: Expedition): CombatStats {
   const equipment = run.departure.equipment
   const title = titleCombatStats(run)
+
   return {
     attack:
       5 +
@@ -143,6 +144,7 @@ export function battleThreat(encounter: TacticalEncounter, index: number, config
     const charge = forecast.path.slice(1).includes(index) ? 5 : 0
     // Standing on the anchor blocks the crash; otherwise route and blast hits both apply.
     const blast = index !== forecast.anchor && neighbors(config, forecast.anchor).includes(index)
+
     return charge + (blast ? 5 : 0)
   }
 
@@ -153,8 +155,10 @@ export function battleThreat(encounter: TacticalEncounter, index: number, config
           !spell.redirected && spell.resolvesOn === encounter.turn && spell.targets.includes(index),
       ).length * 3
     )
+
   if (encounter.kind !== 'brood')
     return encounter.intent.targets.includes(index) ? encounter.intent.damage : 0
+
   return (
     (encounter.queenTargets.includes(index) ? 5 : 0) +
     encounter.orders.filter(

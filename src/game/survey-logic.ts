@@ -12,6 +12,7 @@ export function surveyRuns(mines: readonly boolean[]): readonly number[] {
       length = 0
     }
   }
+
   return runs
 }
 
@@ -25,6 +26,7 @@ function linePatterns(length: number, runs: readonly number[]): readonly number[
       patterns.push(mask)
       return
     }
+
     const size = runs[run]!
     const remaining = runs.slice(run + 1).reduce((sum, value) => sum + value + 1, 0)
     for (let at = start; at + size + remaining <= length; at++)
@@ -32,6 +34,7 @@ function linePatterns(length: number, runs: readonly number[]): readonly number[
   }
 
   place(0, 0, 0)
+
   return patterns
 }
 
@@ -50,6 +53,7 @@ function agreements(patterns: readonly number[], length: number): readonly Surve
     alwaysMine &= pattern
     sometimesMine |= pattern
   }
+
   return Array.from({ length }, (_, index) =>
     alwaysMine & (1 << index) ? 'mine' : sometimesMine & (1 << index) ? 'unresolved' : 'safe',
   )
@@ -97,8 +101,10 @@ export function deduceSurvey(
     rounds++
     for (const line of lines) {
       const visible = line.indices.map((index) => cells[index]!)
+
       line.patterns = line.patterns.filter((pattern) => compatible(pattern, visible))
       if (!line.patterns.length) return { cells, contradiction: true, rounds }
+
       const next = agreements(line.patterns, visible.length)
       for (const [offset, index] of line.indices.entries()) {
         if (cells[index] === 'unresolved' && next[offset] !== 'unresolved') {
@@ -108,5 +114,6 @@ export function deduceSurvey(
       }
     }
   }
+
   return { cells, contradiction: false, rounds }
 }

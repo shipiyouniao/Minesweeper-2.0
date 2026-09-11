@@ -135,13 +135,13 @@ async function worldClick(page, index, destination) {
   if (destination) await page.locator(`[data-story-scene="${destination}"]`).waitFor()
 }
 
-/** Touch inspects a map marker first; its bubble owns the explicit open-map action. */
+/** Zoom into the western district, then open a discovered local map with one tap or click. */
 async function openMapNode(page, scene, width) {
+  await page.locator('[data-map-zoom="reset"]').click()
+  await page.locator('[data-map-focus="west"]').click()
   const marker = page.locator(`.atlas-node[data-scene="${scene}"]`)
-  if (width > 390) return marker.click()
-  await marker.tap()
-  assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'region')
-  await page.locator('.atlas-map-tip button').tap()
+  if (width > 390) await marker.click()
+  else await marker.tap()
 }
 
 try {

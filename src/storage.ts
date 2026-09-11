@@ -67,6 +67,7 @@ export class Repository implements GameRepository {
     }
 
     // Ranked saves must have the exact dimensions of their selected preset.
+
     if (mode !== 'custom') {
       const preset = PRESETS[mode]
 

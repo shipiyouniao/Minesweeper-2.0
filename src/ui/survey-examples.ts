@@ -2,6 +2,7 @@
 export function surveyRunExamplesTemplate(): string {
   const mine = '<span>⚑</span>'
   const safe = '<span class="survey-example-safe">·</span>'
+
   return `<div class="survey-examples" aria-hidden="true">${[1, 3]
     .map(
       (gap) =>

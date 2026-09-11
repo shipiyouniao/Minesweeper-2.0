@@ -1,0 +1,107 @@
+/* Legend controls sit outside the drawing; transparent chrome leaves every tile reachable. */
+.atlas-zoom {
+  position: relative;
+  flex-wrap: wrap;
+}
+.atlas-zoom .atlas-legend-control {
+  position: relative;
+  inset: auto;
+  margin-left: auto;
+}
+.atlas-zoom .atlas-legend-toggle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #365947;
+}
+.atlas-zoom .atlas-legend-toggle:hover,
+.atlas-zoom .atlas-legend-toggle[aria-expanded='true'] {
+  background: #36594712;
+  color: #365947;
+}
+.atlas-legend-toggle .icon {
+  width: 22px;
+  height: 22px;
+}
+.atlas-legend-control .atlas-legend {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  width: min(330px, calc(100vw - 66px));
+  max-height: 48dvh;
+  overflow: auto;
+  background: #fffdf4f5;
+  backdrop-filter: blur(14px);
+}
+
+/* Each level is tiled from the same vector artwork; only intersecting tiles are mounted. */
+.atlas-tile-layer,
+.atlas-marker-layer {
+  position: absolute;
+  inset: 0;
+}
+.atlas-vector-tile {
+  position: absolute;
+  pointer-events: none;
+}
+.atlas-vector-tile svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.atlas-marker-layer[hidden] {
+  display: none;
+}
+.atlas-marker-layer {
+  pointer-events: none;
+}
+.atlas-marker-layer .atlas-node {
+  pointer-events: auto;
+  max-width: 172px;
+  transform: translate(-50%, -50%) scale(var(--atlas-inverse-zoom, 1));
+}
+.atlas-marker-layer .atlas-node > img {
+  width: 42px;
+  height: 42px;
+}
+.atlas-marker-layer .atlas-node strong {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.atlas-marker-layer .atlas-node:disabled {
+  pointer-events: none;
+}
+.atlas-marker-layer .atlas-district-node > img,
+.atlas-marker-layer .atlas-region-node > img {
+  width: 56px;
+  height: 56px;
+}
+.atlas-viewport:focus-visible {
+  outline: 2px solid #456d63;
+  outline-offset: 3px;
+}
+.atlas-vector-tile .atlas-west-route:not(.is-powered) {
+  opacity: 0.2;
+}
+@media (max-width: 480px) {
+  .atlas-marker-layer .atlas-node strong {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+  .atlas-marker-layer .atlas-node > img {
+    width: 32px;
+    height: 32px;
+  }
+  .atlas-zoom {
+    gap: 5px;
+  }
+  .atlas-zoom .atlas-legend-toggle {
+    width: 36px;
+    height: 36px;
+  }
+}

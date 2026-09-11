@@ -16,6 +16,7 @@ function bootstrap(): GameRouter {
 
   const storage = new BrowserStorage()
   const repository = new Repository(storage)
+
   repository.migrateLegacy()
 
   const params = new URLSearchParams(location.search)
@@ -26,6 +27,7 @@ function bootstrap(): GameRouter {
     navigator.languages[0] ?? navigator.language,
   )
   const variants = new VariantRepository(storage)
+
   return new GameRouter(
     root,
     repository,

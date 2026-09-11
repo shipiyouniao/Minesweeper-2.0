@@ -17,6 +17,7 @@ export function solveBattle(game: Game, walls: readonly number[], entrance: numb
   for (let pass = 0; pass < game.cells.length; pass++) {
     const deductions = deduceMines(current, walls)
     for (const index of deductions.safe) safe.add(index)
+
     const cells = current.cells.map((cell, index) =>
       deductions.mines.includes(index) ? { ...cell, visibility: 'flagged' as const } : cell,
     )
@@ -27,7 +28,9 @@ export function solveBattle(game: Game, walls: readonly number[], entrance: numb
         adjacentSteps(current, index).some((other) => reachable.has(other)),
     )
     if (deductions.mines.length === 0 && ready.length === 0) return current
+
     const seeds = new Set(ready)
+
     current = openArena(
       { ...current, cells },
       walls,
@@ -45,6 +48,7 @@ export function solveBattle(game: Game, walls: readonly number[], entrance: numb
       ),
     }
   }
+
   return current
 }
 
@@ -63,6 +67,7 @@ function publicFloor(game: Game, walls: readonly number[], entrance: number): Se
         queue.push(next)
       }
     }
+
   return found
 }
 
@@ -73,6 +78,7 @@ function candidate(config: Config, seed: number, count: number): BattleLayout | 
     indices.filter((index) => {
       const x = index % config.width
       const y = Math.floor(index / config.width)
+
       return (
         (x === 1 || x === config.width - 2 || y === 1 || y === config.height - 2) &&
         x > 0 &&
@@ -100,6 +106,7 @@ function candidate(config: Config, seed: number, count: number): BattleLayout | 
         queue.push(next)
       }
     }
+
   const far = Math.max(...distance.values())
   const boss = shuffled(
     [...distance.keys()].filter(
@@ -111,8 +118,11 @@ function candidate(config: Config, seed: number, count: number): BattleLayout | 
     seed ^ 0xb055,
   )[0]
   if (boss === undefined) return null
+
   const walls = indices.filter((index) => !mines.has(index) && !distance.has(index))
+
   walls.push(boss)
+
   const game = {
     ...placed,
     cells: placed.cells.map((cell, index) =>
@@ -121,10 +131,12 @@ function candidate(config: Config, seed: number, count: number): BattleLayout | 
   }
   if (game.cells.filter((cell) => cell.visibility === 'revealed').length > game.cells.length * 0.48)
     return null
+
   const solved = solveBattle(game, walls, entrance)
   const reached = publicFloor(solved, walls, entrance)
   if (game.cells.some((cell, index) => !cell.mine && !walls.includes(index) && !reached.has(index)))
     return null
+
   const candidates = shuffled(
     indices.filter((index) => {
       const cell = game.cells[index]!
@@ -152,7 +164,9 @@ function candidate(config: Config, seed: number, count: number): BattleLayout | 
       objectives.push(index)
     if (objectives.length === count) break
   }
+
   if (objectives.length !== count) return null
+
   return { game, walls, entrance, boss, objectives }
 }
 
@@ -246,5 +260,6 @@ export function enterBattle(run: Expedition, kind: 'bastion' | 'brood'): Expedit
             intent: { kind: 'swarm', targets: [], damage: 5 },
           },
   }
+
   return kind === 'brood' ? forecastBrood(result) : result
 }

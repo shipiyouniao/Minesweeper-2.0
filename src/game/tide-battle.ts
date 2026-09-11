@@ -71,6 +71,7 @@ export function enterTide(run: Expedition): Expedition {
       intent: { kind: 'row', targets: [], damage: 4 },
     },
   }
+
   return forecastTide({
     ...next,
     encounter: { ...next.encounter, points: combatStats(next).actions },
@@ -96,6 +97,7 @@ function forecastTide(run: TideExpedition): TideExpedition {
       !run.game.cells[index]!.mine,
   )
   if (!exits.some((index) => !targets.includes(index))) targets = exits.length ? [run.player] : []
+
   return { ...run, encounter: { ...e, intent: { kind: axis, targets, damage: 4 } } }
 }
 
@@ -115,6 +117,7 @@ export function anchorTide(run: TideExpedition, index: number): TideExpedition {
 export function strikeTide(run: TideExpedition, damage: number): TideExpedition {
   const e = run.encounter
   const health = Math.max(tideHealthFloor(run), e.health - damage)
+
   return {
     ...run,
     encounter: {
@@ -151,6 +154,7 @@ export function advanceTide(run: TideExpedition): TideExpedition {
         run.game.cells[e.core]!.visibility === 'revealed',
     )
   if (tide) next = shuffleTide(next)
+
   next = {
     ...next,
     encounter: {
@@ -174,6 +178,7 @@ export function advanceTide(run: TideExpedition): TideExpedition {
               : 'evaded',
     },
   }
+
   return forecastTide({
     ...next,
     encounter: { ...next.encounter, points: combatStats(next).actions },

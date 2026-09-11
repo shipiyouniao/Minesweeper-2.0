@@ -46,12 +46,14 @@ export class ExpeditionDialog {
     else if (phase !== this.phase && run) this.show(run)
 
     // Dismissal preserves the phase without reopening on unrelated repaints.
+
     this.phase = phase
   }
 
   /** Reopen the current offers or settlement without changing rewards or the journal. */
   show(run: Expedition): void {
     if (run.phase === 'exploring' || run.phase === 'boss' || this.open) return
+
     this.phase = run.phase
     this.dialog.classList.toggle('relic-dialog', run.phase === 'reward')
     this.dialog.classList.toggle('expedition-result-dialog', run.phase !== 'reward')
@@ -70,9 +72,11 @@ export class ExpeditionDialog {
   /** Return focus to the current trigger, the newly entered floor, or the camp heading. */
   private readonly restoreFocus = (): void => {
     if (this.root.querySelector('dialog[open], .variant-content[hidden]')) return
+
     const target = this.root.querySelector<HTMLElement>(
       '[data-control="rewards"], [data-control="result"], .camp-panel h1, [data-side="a"] [tabindex="0"]',
     )
+
     target?.focus({ preventScroll: true })
   }
 

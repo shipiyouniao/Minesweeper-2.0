@@ -10,11 +10,15 @@ export function feedPowered(power: FloorPower, feed: PowerFeed): boolean {
   const visited = new Set<number>()
   while (input) {
     if (visited.has(input.junction)) return false
+
     visited.add(input.junction)
+
     const junction = power.junctions.find((entry) => entry.index === input?.junction)
     if (!junction || junction.selected !== input.branch) return false
+
     input = junction.input
   }
+
   return true
 }
 
@@ -31,12 +35,16 @@ export function powerControl(run: Expedition, index: number): boolean {
 export function powerReadiness(run: Expedition, index: number): PowerReadiness {
   const power = run.power
   if (!power || run.game.cells[index]?.visibility !== 'revealed') return 'covered'
+
   const junction = power.junctions.find((entry) => entry.index === index)
   const receiver = power.receivers.find((entry) => entry.index === index)
   if (receiver?.recorded) return 'recorded'
+
   const input = junction?.input ?? receiver?.input
   if (input && !feedPowered(power, input)) return 'unpowered'
+
   if (junction?.selected !== null && junction?.selected !== undefined) return 'ready'
+
   return clueIsolated(run, index) ? 'ready' : 'clue'
 }
 
@@ -44,6 +52,7 @@ export function powerReadiness(run: Expedition, index: number): PowerReadiness {
 function routeDoors(run: Expedition, power: FloorPower): Expedition {
   const doors = new Set(power.doors.map((entry) => entry.index))
   const closed = power.doors.filter((entry) => !feedPowered(power, entry.input))
+
   return {
     ...run,
     power,
@@ -65,8 +74,10 @@ function routeDoors(run: Expedition, power: FloorPower): Expedition {
 /** Walk to a solved control before switching power or permanently recording its reading. */
 export function interactPower(run: Expedition, index: number): Expedition {
   if (!run.power || !powerControl(run, index) || powerReadiness(run, index) !== 'ready') return run
+
   const path = walkingPath(run, index)
   if (!path) return run
+
   const junction = run.power.junctions.find((entry) => entry.index === index)
   const power: FloorPower = junction
     ? {
@@ -88,6 +99,7 @@ export function interactPower(run: Expedition, index: number): Expedition {
       }
   // Operation happens at the junction, never remotely from a branch that is about to close.
   const next = routeDoors({ ...run, player: index, steps: run.steps + 1 }, power)
+
   return next.walls.includes(index) ? run : recordTravel(next, path)
 }
 

@@ -31,6 +31,7 @@ export function sonarDifficulties(
 export function sonarTemplate(language: Language, state: Sonar): string {
   const t = translations[language]
   const s = sonarCopy(language)
+
   return `${siteHeaderTemplate(language, 'data-control', 'sonar')}
     <main class="sonar-main ${guidanceStyles['sonar-main']}"><div class="sonar-heading ${guidanceStyles['sonar-heading']}"><div><p class="eyebrow ${sharedStyles['eyebrow']}">SONAR / 03</p><h1>${s.title}</h1><p>${s.intro}</p></div><div class="game-heading-actions ${sharedStyles['game-heading-actions']}"><button class="icon-button ${sharedStyles['icon-button']} sonar-mobile-records ${guidanceStyles['sonar-mobile-records']}" data-control="records" aria-label="${t.records}">${icon('trophy')}</button><button class="icon-button ${sharedStyles['icon-button']}" data-control="sound" aria-label="${t.sound}">${icon('volume')}</button><button class="icon-button ${sharedStyles['icon-button']}" data-control="pause" aria-label="${t.pause}">${icon('pause')}</button></div></div>
     <p class="sonar-storage ${guidanceStyles['sonar-storage']}" role="status"></p>${sonarDifficulties(language, state.difficulty)}
@@ -50,6 +51,7 @@ export function sonarLogTemplate(
   const t = translations[language]
   if (!state.readings.length)
     return `<p class="sonar-empty ${guidanceStyles['sonar-empty']}">${s.empty}</p>`
+
   return state.readings
     .map(
       (reading, index) =>
@@ -69,7 +71,9 @@ export function sonarComparisonTemplate(
   const left = a === undefined ? undefined : state.readings[a]
   const right = b === undefined ? undefined : state.readings[b]
   if (!left || !right) return `<p>${s.compareHint}</p>`
+
   const comparison = compareSonar(state.game.config, left, right)
+
   return `<h3>${s.comparison}</h3><div class="sonar-equation ${guidanceStyles['sonar-equation']}"><span class="sonar-badge ${guidanceStyles['sonar-badge']} sonar-color-${a! % 3}">${a! + 1}</span><span>−</span><span class="sonar-badge ${guidanceStyles['sonar-badge']} sonar-color-${b! % 3}">${b! + 1}</span><span>=</span><strong>${comparison.difference > 0 ? '+' : ''}${comparison.difference}</strong></div><p>${s.difference}</p><small>${s.shared}: ${comparison.common.length} · ${s.exclusive}: ${comparison.leftOnly.length} / ${comparison.rightOnly.length}</small>`
 }
 
@@ -82,5 +86,6 @@ export function sonarRecordsTemplate(
   const t = translations[language]
   const s = sonarCopy(language)
   const entries = records.filter((record) => record.difficulty === difficulty)
+
   return `<h2 id="sonar-dialog-title" tabindex="-1">${s.title} · ${t.records}</h2>${sonarDifficulties(language, difficulty, true)}<p>${s.rankHint}</p>${entries.length ? `<ol class="sonar-records ${guidanceStyles['sonar-records']}">${entries.map((record) => `<li><time>${new Date(record.date).toLocaleDateString(language === 'zh' ? 'zh-CN' : language)}</time><span>${s.moves} <strong>${record.moves.toLocaleString(language)}</strong></span><span>${s.scans} <strong>${record.scans}</strong></span></li>`).join('')}</ol>` : `<p>${s.noRecords}</p>`}<button class="primary-button ${sharedStyles['primary-button']}" data-control="close">${t.close}</button>`
 }

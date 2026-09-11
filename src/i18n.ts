@@ -58,6 +58,7 @@ export function message(
   return catalog[key].replace(/\{([a-zA-Z][a-zA-Z0-9_]*)\}/g, (_match, name: string) => {
     const value = parameters[name]
     if (value === undefined) throw new Error('Missing translation parameter ' + key + ':' + name)
+
     return String(value)
   })
 }

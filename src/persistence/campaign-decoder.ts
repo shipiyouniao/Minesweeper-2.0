@@ -29,6 +29,7 @@ function decodeStage(
               ? OBSERVATORY_SCENES
               : SIGNAL_SCENES
   ).filter((scene) => reader.array('scenes')?.includes(scene))
+
   return {
     id,
     journal,
@@ -49,9 +50,12 @@ export function decodeCampaign(
   decoders: CampaignDecoders,
 ): CampaignSave | undefined {
   if (!reader) return undefined
+
   if (reader.value('schemaVersion') === undefined)
     return { schemaVersion: 1, stages: [decodeStage(reader, 'tower-galleries', decoders)] }
+
   if (reader.number('schemaVersion') !== 1) return undefined
+
   const stages: CampaignStageProgress[] = []
   for (const value of reader.array('stages') ?? []) {
     const entry = JsonObjectReader.from(value)
@@ -59,6 +63,7 @@ export function decodeCampaign(
     if (entry && id && !stages.some((stage) => stage.id === id))
       stages.push(decodeStage(entry, id, decoders))
   }
+
   return { schemaVersion: 1, stages }
 }
 
@@ -68,14 +73,18 @@ export function campaignWasRecovered(
   campaign: CampaignSave | undefined,
 ): boolean {
   if (!reader) return false
+
   const legacy = reader.value('schemaVersion') === undefined
   const entries = legacy
     ? [reader]
     : (reader.array('stages') ?? []).map((value) => JsonObjectReader.from(value))
+
   return entries.some((entry) => {
     if (!entry || entry.value('journal') === null || entry.value('journal') === undefined)
       return false
+
     const id = legacy ? 'tower-galleries' : parseCampaignStage(entry.string('id'))
+
     return id !== null && !campaign?.stages.find((stage) => stage.id === id)?.journal
   })
 }

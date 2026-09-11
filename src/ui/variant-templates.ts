@@ -61,6 +61,7 @@ function recordList(
 ): string {
   const t = variantCopy(language)
   const common = translations[language]
+
   return `<section class="variant-records ${sharedStyles['variant-records']}">${
     records.length === 0
       ? `<p>${t.noRecords}</p>`
@@ -121,6 +122,7 @@ export function expeditionTemplate(
       const badge = used
         ? `<small class="relic-trigger ${gameplayStyles['relic-trigger']}">${used}</small>`
         : ''
+
       return `<li>${spriteImage(relicSprite(relic))}<strong>${description.name}</strong><span>${description.note}</span>${badge}</li>`
     })
     .join('')
@@ -219,6 +221,7 @@ export function variantRecords(
   expedition: boolean,
 ): string {
   if (records.length === 0) return recordList(language, records, expedition)
+
   const difficulties: readonly (VariantDifficulty | undefined)[] = [
     ...VARIANT_TIERS.map((tier) => tier.id),
     undefined,
@@ -254,5 +257,6 @@ export function difficultyTemplate(
 function signalObjective(language: Language, run: Expedition): string {
   const t = signalCopy(language)
   const active = run.circuits?.relays.some((relay) => relay.active && !relay.optional)
+
   return `<section class="signal-objective" aria-live="polite"><strong>${t.floors[run.floor - 1]}</strong><p>${active ? t.solve : t.complete}</p>${run.floor === 2 ? `<span>${t.record} · ${run.signalRecord ? '✓' : t.optional}</span>` : ''}</section>`
 }

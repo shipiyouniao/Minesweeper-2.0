@@ -20,9 +20,14 @@ export function enterEncounter(run: Expedition): Expedition {
   const checkpoint = encounterTier(run.departure.difficulty).floors.indexOf(run.floor)
   const slot = (run.departure.seed + checkpoint) % 8
   if (slot === 7) return enterTide(run)
+
   if (slot === 6) return enterMatrix(run)
+
   if (slot === 5) return enterEcho(run)
+
   if (slot === 4) return enterClock(run)
+
   if (slot === 3) return enterMagnetic(run)
+
   return slot === 2 ? enterMirror(run) : enterBattle(run, slot === 1 ? 'brood' : 'bastion')
 }

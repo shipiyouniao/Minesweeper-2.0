@@ -125,6 +125,7 @@ function equipmentTemplate(
     return `<div class="camp-locked ${campStyles['camp-locked']}">${spriteImage('workshop')}<h2>${upgradeCopy(language, 'workshop').name}</h2><p>${upgradeCopy(language, 'workshop').note}</p><button class="primary-button ${sharedStyles['primary-button']}" data-control="shop-item:workshop">${campPageName(language, 'shop')} ↗</button></div>`
 
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
+
   return `<p class="camp-budget ${campStyles['camp-budget']}">${campLabel(language, 'loadoutBudget')} <strong>${spent} / 3</strong></p><div class="choice-grid ${sharedStyles['choice-grid']}">${EQUIPMENT.map((item) => choice(`equipment:${item}`, equipmentCopy(language, item), equipment.includes(item), !equipment.includes(item) && !allowedDeparture(camp, profession, [...equipment, item]), combatSprite(item))).join('')}</div>`
 }
 

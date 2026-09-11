@@ -20,10 +20,14 @@ export function storyAtlasUnlocked(
   index: number,
 ): boolean {
   if (!Number.isInteger(index) || index < 0) return false
+
   const scene = STORY_ATLAS_SCENES[index]
   if (!scene) return false
+
   if (scene.id === 'northwest-bridge') return !!progress.facts?.includes('west-line-restored')
+
   if (scene.id === 'blockade-pass') return !!progress.facts?.includes('west-shortcut')
+
   const explored = Math.max(
     progress.completed.includes('survey-road')
       ? storyAtlasIndex('tower-landing')
@@ -35,5 +39,6 @@ export function storyAtlasUnlocked(
     storyAtlasIndex(run?.board.scene.id ?? 'camp'),
     ...(progress.world?.scenes ?? []).map((entry) => storyAtlasIndex(entry.id)),
   )
+
   return index <= explored
 }

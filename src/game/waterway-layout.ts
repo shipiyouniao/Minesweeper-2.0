@@ -234,5 +234,6 @@ export const WATERWAY_FLOORS: readonly AuthoredPowerFloor[] = [
 export function waterwayLayout(floor: number): PowerDungeonLayout {
   const content = WATERWAY_FLOORS[floor - 1]
   if (!content) throw new RangeError('Waterway floor is outside the authored stage')
+
   return authoredPowerLayout(content)
 }
