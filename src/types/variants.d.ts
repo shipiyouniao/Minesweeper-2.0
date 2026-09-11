@@ -1,4 +1,5 @@
 import type { FloorRail } from './floor-rail.js'
+import type { BattleLesson } from './battle-lesson.js'
 import type { ExpeditionSonar } from './echo.js'
 import type { CampaignRevision, CampaignSave } from './campaign.js'
 import type { FloorCircuits } from './floor-circuits.js'
@@ -34,6 +35,7 @@ export type Profession =
   | 'sentinel'
   | 'waymarker'
   | 'riftwalker'
+  | 'rescuer'
 
 /** Camp equipment consumes a three-point departure budget. */
 export type Equipment = 'probe' | 'scanner' | 'guard' | 'field-radio' | 'sonar' | CombatEquipment
@@ -65,6 +67,9 @@ export type Upgrade =
 
 /** Persistent camp progress, updated atomically with run settlement. */
 export interface Camp {
+  readonly battleLesson?: BattleLesson
+  /** Story rewards are licenses, separate from purchasable upgrades. */
+  readonly storyProfessions?: readonly 'rescuer'[]
   readonly milestones?: MilestoneProgress
   readonly supplies: number
   readonly upgrades: readonly Upgrade[]

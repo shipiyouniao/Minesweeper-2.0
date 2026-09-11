@@ -7,4 +7,11 @@ export interface ProfessionResources {
 
 /** Public reasons explain unavailable skills without inspecting hidden mine values. */
 export type SkillAvailability =
-  'ready' | 'used' | 'inactive' | 'no-information' | 'resources' | 'no-passage' | 'blocked-anchor'
+  | 'ready'
+  | 'used'
+  | 'inactive'
+  | 'no-information'
+  | 'resources'
+  | 'no-passage'
+  | 'blocked-anchor'
+  | 'no-corridor'

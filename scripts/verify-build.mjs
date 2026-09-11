@@ -21,6 +21,9 @@ for (const file of [
 ])
   await stat(file)
 for (const sprite of [
+  'rescuer',
+  'skill-rescuer',
+  'exit-closed',
   'tidekeeper',
   'tide-core',
   'tide-anchor',
@@ -89,6 +92,12 @@ for (const sprite of [
   )
 }
 assert.ok(!html.includes('/src/main.ts'), 'The site must consume native-emitted JavaScript')
+for (const prop of ['rail-winch', 'rail-lever', 'rail-brake'])
+  assert.deepEqual(
+    await readFile(`dist/assets/story/${prop}.png`),
+    await readFile(`public/assets/story/${prop}.png`),
+    `Missing or altered rail prop: ${prop}`,
+  )
 
 // Check the emitted declaration graph independently of src, catching missing copied contracts.
 const declarations = (await readdir('.native/app', { recursive: true }))

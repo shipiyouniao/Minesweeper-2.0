@@ -38,6 +38,8 @@ import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import type { VariantCommand, VariantInputActions } from '../types/variant-ui.js'
 import type { BoardSide, Equipment, ExpeditionAction, Profession } from '../types/variants.js'
 import { battleGuide } from './battle-guide.js'
+import { mountAnchoredLesson } from './anchored-lesson.js'
+import { mountBattleLesson } from './battle-lesson.js'
 import { powerGuide } from './power-guide.js'
 import { secondaryBoardAction } from './board-actions.js'
 import { nextBoardMode } from './board-controls.js'
@@ -450,6 +452,10 @@ export class VariantApp implements VariantInputActions {
       this.view.dialogOpen &&
       !rewardAction &&
       !resultAction &&
+      !(
+        command.type === 'tutorial' &&
+        this.root.querySelector('dialog[open] .battle-guide [data-control="tutorial"]')
+      ) &&
       command.type !== 'confirm' &&
       command.type !== 'cancel'
     )
@@ -531,6 +537,14 @@ export class VariantApp implements VariantInputActions {
         }
         return
       case 'tutorial':
+        if (this.session instanceof ExpeditionSession && this.session.run?.phase === 'boss') {
+          this.view.closeDialog()
+          this.session.setBattleLesson('points')
+          this.render()
+          // Help may open from the sidebar below the board; bring the real lesson back into view.
+          this.root.querySelector('.variant-board-panel')?.scrollIntoView({ block: 'start' })
+          return
+        }
         if (
           this.session instanceof ExpeditionSession &&
           this.session.campaignMode &&
@@ -878,6 +892,20 @@ export class VariantApp implements VariantInputActions {
       )
       this.renderCampaignLesson()
       this.renderSignalScene()
+      if (run?.phase === 'boss' && !this.paused && !this.turnPerformance && !this.view.dialogOpen) {
+        const session = this.session
+        this.disposeCampaignLesson = mountBattleLesson(
+          this.root,
+          run,
+          this.language,
+          session.camp.battleLesson ?? 'points',
+          (step) => {
+            session.setBattleLesson(step)
+            this.sounds.play('confirm')
+            this.render()
+          },
+        )
+      }
       if (!run?.departure.campaign)
         this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
       this.notices.observe(this.session.camp, this.language)
@@ -1028,41 +1056,11 @@ export class VariantApp implements VariantInputActions {
       this.root
         .querySelector(`[data-cell="${targets[0]}"]`)
         ?.classList.add('campaign-lesson-target')
-    const positionGuide = () => {
-      const bounds = frame.getBoundingClientRect()
-      const board = viewport.getBoundingClientRect()
-      const target = frame.querySelector<HTMLElement>('[data-cell].campaign-lesson-target')
-      const tile = target?.getBoundingClientRect()
-      const leftEdge = board.left - bounds.left + 8
-      const rightEdge = board.right - bounds.left - 8
-      const topEdge = board.top - bounds.top + 8
-      const bottomEdge = board.bottom - bounds.top - 8
-      const w = panel.offsetWidth
-      const h = panel.offsetHeight
-      const x = tile ? tile.left + tile.width / 2 - bounds.left : (leftEdge + rightEdge) / 2
-      const left = Math.max(leftEdge, Math.min(x - w / 2, rightEdge - w))
-      let top = topEdge + (bottomEdge - topEdge - h) / 2
-      panel.removeAttribute('data-arrow')
-      if (tile) {
-        const below = tile.bottom - bounds.top + 14
-        const above = tile.top - bounds.top - h - 14
-        top = below + h <= bottomEdge ? below : Math.max(topEdge, above)
-        panel.dataset['arrow'] = top >= tile.bottom - bounds.top ? 'up' : 'down'
-        panel.style.setProperty('--guide-arrow', `${Math.max(18, Math.min(w - 18, x - left))}px`)
-      }
-      panel.style.left = `${left}px`
-      panel.style.top = `${Math.max(topEdge, top)}px`
-    }
-    const observer = new ResizeObserver(positionGuide)
-    observer.observe(frame)
-    observer.observe(panel)
-    viewport.addEventListener('scroll', positionGuide, { passive: true })
-    positionGuide()
-    this.disposeCampaignLesson = () => {
-      observer.disconnect()
-      viewport.removeEventListener('scroll', positionGuide)
-      frame.classList.remove('campaign-guide-frame')
-    }
+    this.disposeCampaignLesson = mountAnchoredLesson(
+      this.root,
+      panel,
+      '[data-cell].campaign-lesson-target',
+    )
   }
 
   /** Apply expedition-only commands and choose feedback from the resulting phase. */

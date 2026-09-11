@@ -3,6 +3,7 @@ export type InteractionCue = 'tap' | 'navigate' | 'dismiss' | 'blocked' | 'input
 
 /** Character voices share the dialogue lifecycle but retain their own pitch and material. */
 export type DialogueCue =
+  | 'dialogue-rescuer'
   | 'dialogue-player'
   | 'dialogue-lumi'
   | 'dialogue-toma'

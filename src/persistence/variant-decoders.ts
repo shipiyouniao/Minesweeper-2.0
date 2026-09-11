@@ -1,4 +1,6 @@
 import { decodeCampaign, campaignWasRecovered } from './campaign-decoder.js'
+import { storyRewardCamp } from '../game/story-rewards.js'
+import { parseBattleLesson } from '../game/battle-lesson.js'
 import { campaignStage } from '../game/campaign-catalog.js'
 import { MILESTONES } from '../game/milestones.js'
 import { decodeStory } from './story-decoder.js'
@@ -43,6 +45,7 @@ export const MAX_ACTIONS = 20000
 /** Decode finite identifiers once at the external boundary. */
 export function parseProfession(value: string | null): Profession | null {
   switch (value) {
+    case 'rescuer':
     case 'waymarker':
     case 'riftwalker':
     case 'explorer':
@@ -243,6 +246,12 @@ function decodeCamp(reader: JsonObjectReader | null): Camp | null {
     supplies,
     completed,
     upgrades,
+    ...(reader.string('battleLesson')
+      ? { battleLesson: parseBattleLesson(reader.string('battleLesson')) }
+      : {}),
+    ...(reader.array('storyProfessions')?.includes('rescuer')
+      ? { storyProfessions: ['rescuer'] as const }
+      : {}),
     ...(progress === undefined ? {} : { milestones: decodeMilestones(progress, completed) }),
   }
 }
@@ -499,8 +508,10 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
   const save: ExpeditionSave = {
     version: 4,
     ...(campaign ? { campaign } : {}),
-    camp:
+    camp: storyRewardCamp(
       returnedSupplies === null ? camp : { ...camp, supplies: camp.supplies + returnedSupplies },
+      campaign,
+    ),
     journal,
     records,
     ...(story ? { story } : {}),

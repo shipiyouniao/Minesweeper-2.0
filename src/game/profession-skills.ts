@@ -1,4 +1,5 @@
 import { currentWaymark, mobilityReady, riftLandings, useMobilitySkill } from './mobility-skills.js'
+import { rescueLandings, useRescueSkill } from './rescue-skill.js'
 import { available, claim } from './relic-effects.js'
 import { inspectArea } from './dungeon-discovery.js'
 import { neighbors } from './engine.js'
@@ -56,6 +57,7 @@ function excavationTarget(run: Expedition): number | null {
 /** Derive a clipped footprint from the pawn; keyboard focus never selects the skill's origin. */
 export function professionSkillArea(run: Expedition): number[] {
   const profession = run.departure.profession
+  if (profession === 'rescuer') return rescueLandings(run)
   if (profession === 'riftwalker') return riftLandings(run)
   if (profession === 'waymarker') return [currentWaymark(run) ?? run.player]
   if (profession === 'engineer' || profession === 'alchemist') return []
@@ -94,6 +96,8 @@ function hasSkillInformation(run: Expedition): boolean {
 export function professionSkillAvailability(run: Expedition): SkillAvailability {
   if (run.phase !== 'exploring' && run.phase !== 'boss') return 'inactive'
   if (run.skillUsed) return 'used'
+  if (run.departure.profession === 'rescuer')
+    return rescueLandings(run).length ? 'ready' : 'no-corridor'
   if (run.departure.profession === 'waymarker' || run.departure.profession === 'riftwalker')
     return mobilityReady(run)
       ? 'ready'
@@ -116,10 +120,21 @@ export function professionSkillAvailability(run: Expedition): SkillAvailability 
 
 /** Resolve one career action; the expedition transition handles physical landing rewards. */
 export function useProfessionSkill(run: Expedition, index?: number): Expedition {
-  if (index !== undefined && run.departure.profession !== 'riftwalker') return run
+  if (
+    index !== undefined &&
+    run.departure.profession !== 'riftwalker' &&
+    run.departure.profession !== 'rescuer'
+  )
+    return run
   if (professionSkillAvailability(run) !== 'ready') return run
   let result = run
-  if (run.departure.profession === 'waymarker' || run.departure.profession === 'riftwalker') {
+  if (run.departure.profession === 'rescuer') {
+    result = useRescueSkill(run, index)
+    if (result === run) return run
+  } else if (
+    run.departure.profession === 'waymarker' ||
+    run.departure.profession === 'riftwalker'
+  ) {
     result = useMobilitySkill(run, index)
     if (result === run || !result.skillUsed) return result
   } else

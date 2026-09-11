@@ -96,7 +96,7 @@ try {
     )
     await page.locator('.rail-objective [data-control="help"]').click()
     const modal = page.locator('dialog[open]')
-    assert.equal(await modal.locator('.boss-picture-steps > li').count(), 3)
+    assert.equal(await modal.locator('.boss-picture-steps > li').count(), 4)
     assert.equal(
       await modal.evaluate((element) => element.scrollWidth > element.clientWidth + 1),
       false,

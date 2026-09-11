@@ -36,6 +36,8 @@ A playable Minesweeper game and a practical testbed for the **TypeScript 7 nativ
 
 **Tactical encounters:** [Bastion Guardian and Brood Queen](docs/tactical-builds.md), [Mirror Twins](docs/mirror-twins.md), [Magnetic Knight](docs/magnetic-knight.md) and [Clock Mage](docs/clock-mage.md) combine fully deducible minefields with regional controls, timed core openings and permanently destroyable nests. Attack, defense and action-point builds connect six equipment licenses, three combat relics and two capped, one-time trainings. The catalog contains 25 distinct gameplay purchases plus those two trainings. Ordinary floors retain free exploration. Incompatible saved expeditions [return to camp](docs/save-policy.md), preserving permanent progress.
 
+The first Boss battle now has an in-scene [action-point and combat guide](docs/first-battle-and-rescuer.md). The old-mine side story grants the exclusive Rescuer profession, with its own portrait and Lifeline skill. Physical rail controls and objective-gated exits use [original generated artwork](docs/rescue-polish-artwork.md).
+
 ## Why this project exists
 
 The renovation is an experiment in using TypeScript 7 for an entire small application: editing, strict type checking, JavaScript and declaration emission, watch mode, tests, production builds, and deployment. Minesweeper provides real state transitions, browser interaction, persistence, localization, and test cases to exercise that workflow.

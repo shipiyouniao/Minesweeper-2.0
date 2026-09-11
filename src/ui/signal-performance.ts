@@ -67,7 +67,7 @@ export class SignalPerformance {
         .querySelector('.signal-cast')!
         .insertAdjacentHTML(
           'afterend',
-          `<p class="rail-settlement">${message(language, 'rail.reward')}</p>`,
+          `<div class="rail-settlement"><span class="rail-reward-portrait">${spriteImage('rescuer')}</span><p>${message(language, 'rail.reward')}</p></div>`,
         )
     if (scene === 'pass-open') dialog.classList.add('chapter-guardian-restored')
     if (

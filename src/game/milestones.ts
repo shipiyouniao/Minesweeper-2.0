@@ -589,6 +589,7 @@ export function ownedMilestoneRelics(camp: Camp): MilestoneRelic[] {
 
 /** Reward careers are licenses, never purchasable camp upgrades. */
 export function ownsProfession(camp: Camp, profession: Profession): boolean {
+  if (profession === 'rescuer') return camp.storyProfessions?.includes('rescuer') ?? false
   if (profession === 'waymarker' || profession === 'riftwalker')
     return MILESTONES.some(
       (entry) =>

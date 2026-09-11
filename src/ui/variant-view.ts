@@ -1,4 +1,6 @@
 import { renderFloorCircuits } from './floor-circuit-view.js'
+import { animateExitOpening, exitIsOpen } from './exit-performance.js'
+import { animateRescue } from './rescue-performance.js'
 import { renderFloorRail } from './rail-view.js'
 import { renderFloorPower } from './power-view.js'
 import { TideBoard, markTideCell, animateTideAnchor } from './tide-board.js'
@@ -16,6 +18,7 @@ import { battleThreat } from '../game/combat-build.js'
 import { probeArea } from '../game/dungeon-discovery.js'
 import { frontierCells } from '../game/expedition.js'
 import { currentWaymark, riftLandings, skillRoom } from '../game/mobility-skills.js'
+import { rescueLandings } from '../game/rescue-skill.js'
 import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import { translations } from '../i18n.js'
 import { icon } from '../icons.js'
@@ -230,6 +233,8 @@ export class VariantView {
     animateBattleFeedback(this.content, previous, expedition)
     animateBattleInteractions(this.content, previous, expedition)
     animateTideAnchor(this.content, previous, expedition)
+    animateExitOpening(this.content, previous, expedition)
+    animateRescue(this.content, previous, expedition)
     const comparison = expedition ? mirrorPreview(expedition) : null
     if (comparison) {
       this.markExpedition(comparison, 'b')
@@ -655,6 +660,7 @@ export class VariantView {
     )) {
       const index = Number(cell.dataset['cell'])
       const treasure = run.treasures.includes(index)
+      if (index === run.exit) cell.dataset['exitState'] = exitIsOpen(run) ? 'open' : 'closed'
       cell.classList.toggle('frontier', run.phase === 'exploring' && frontier.has(index))
       const wall = run.walls.includes(index)
       const mark = wall
@@ -662,7 +668,9 @@ export class VariantView {
         : index === run.entrance
           ? 'entrance'
           : index === run.exit
-            ? 'exit'
+            ? exitIsOpen(run)
+              ? 'exit'
+              : 'exit-closed'
             : treasure && !run.collected.includes(index)
               ? 'treasure'
               : run.game.phase === 'lost' && run.game.cells[index]?.mine
@@ -673,7 +681,9 @@ export class VariantView {
         : index === run.entrance
           ? t.entrance
           : index === run.exit
-            ? t.exit
+            ? exitIsOpen(run)
+              ? message(this.language, 'exit.open')
+              : message(this.language, 'exit.closed')
             : treasure
               ? run.collected.includes(index)
                 ? t.collected
@@ -738,6 +748,9 @@ export class VariantView {
       if (run.departure.profession === 'riftwalker' && !run.skillUsed)
         for (const index of riftLandings(run))
           marker(index, 'mobility-landing', message(this.language, 'variant-view.rift-landing'))
+      if (run.departure.profession === 'rescuer' && !run.skillUsed)
+        for (const index of rescueLandings(run))
+          marker(index, 'mobility-landing', message(this.language, 'rescuer.landing'))
     }
     const current = grid?.querySelector<HTMLElement>(`[data-cell="${run.player}"]`)
     if (side === 'b') {

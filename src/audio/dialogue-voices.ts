@@ -21,6 +21,8 @@ function syllable(
 /** Original character motifs: the existing voices are about 4–5 dB louder. */
 export function dialogueTone(cue: DialogueCue): Tone {
   switch (cue) {
+    case 'dialogue-rescuer':
+      return syllable(760, 900, 0.035, 'triangle', 0.034)
     case 'dialogue-player':
       return syllable(980, 1120, 0.032)
     case 'dialogue-lumi':
@@ -67,6 +69,8 @@ export function dialogueTone(cue: DialogueCue): Tone {
 /** Freeze dialogue identity to the same profession represented by the on-screen portrait. */
 export function playerDialogueCue(profession: Profession): DialogueCue {
   switch (profession) {
+    case 'rescuer':
+      return 'dialogue-rescuer'
     case 'explorer':
       return 'dialogue-player'
     case 'surveyor':

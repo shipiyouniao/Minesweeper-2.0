@@ -1,6 +1,7 @@
 import { sharedStyles } from './shared-styles.js'
 import { gameplayStyles } from './gameplay-styles.js'
 import { currentWaymark, riftLandings } from '../game/mobility-skills.js'
+import { rescueLandings } from '../game/rescue-skill.js'
 import { professionSkillAvailability } from '../game/profession-skills.js'
 import { message } from '../i18n.js'
 import type { Language } from '../types/localization.js'
@@ -25,7 +26,8 @@ export function professionSkillTemplate(language: Language, run: Expedition): st
       ? tacticalCopy(language, run.encounter.kind).excavation
       : copy.note
   const status = professionSkillAvailability(run)
-  const rift = run.departure.profession === 'riftwalker'
+  const rescuer = run.departure.profession === 'rescuer'
+  const rift = run.departure.profession === 'riftwalker' || rescuer
   const ready = status === 'ready' && (!run.encounter || run.encounter.points > 0)
 
   const coordinate = (index: number): string =>
@@ -37,7 +39,10 @@ export function professionSkillTemplate(language: Language, run: Expedition): st
       : ''
   const targets =
     rift && !run.skillUsed
-      ? `<div class="skill-landings ${sharedStyles['skill-landings']}">${riftLandings(run)
+      ? `<div class="skill-landings ${sharedStyles['skill-landings']}">${(rescuer
+          ? rescueLandings(run)
+          : riftLandings(run)
+        )
           .map(
             (index) =>
               `<button class="text-button ${sharedStyles['text-button']}" data-control="skill-target:${index}" data-focus-fallback="skill-panel" ${ready ? '' : 'disabled'}>${message(language, 'profession-skill-template.cross-to')} (${coordinate(index)})</button>`,

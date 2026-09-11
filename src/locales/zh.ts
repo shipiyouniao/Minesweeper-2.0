@@ -136,7 +136,7 @@ export const zhMessages: MessageCatalog = {
   'campaign.exit': '离开关卡',
   'campaign.abandoned': '已放弃探索',
   'campaign.leave': '返回大世界',
-  'campaign.objective': '回收本层补给 {count}/{total}，再前往出口。共三层，首次通关获得 50 物资。',
+  'campaign.objective': '回收本层补给 {count}/{total}，再前往出口。',
   'story.flag-touch': '长按亮起的未揭开格子，插上标记。',
   'story.chord-mouse':
     '右键点击亮起的「1」，就能一起打开它周围没插旗的格子。旗数要和数字相同；插错位置还是会踩雷。',
@@ -1486,7 +1486,7 @@ export const zhMessages: MessageCatalog = {
   'rail.exit-ready': '这层的轨道接通了，去出口吧。',
   'rail.objective': '让矿车压下制动台，打开这一层的闸门。',
   'rail.objective-rescue': '把矿车送到托马身边，接上他，再送回出发站。',
-  'rail.drive': '牵引',
+  'rail.drive': '拉车',
   'rail.reverse': '倒车',
   'rail.drive-detail': '走到绿色绞盘，沿当前岔道牵引矿车。',
   'rail.reverse-detail': '走到倒车绞盘，让矿车沿刚才的方向退回。',
@@ -1500,12 +1500,13 @@ export const zhMessages: MessageCatalog = {
   'rail.stop-turnout': '矿车会停在岔道，选好 A / B 后再牵引。',
   'rail.stop-station': '前方是站台，矿车到站就会停下。',
   'rail.stop-buffer': '前方到头了，可以倒车。',
-  'rail.guide-intro': '看数字清路，选岔道调车。',
+  'rail.guide-intro': '你清路，矿车运人。先把它送到每块制动板上。',
   'rail.guide-clear':
-    '铁轨上也可能有雷。矿车只走已经挖开的安全轨道，不会替你探雷。绿色轨迹是这次能走到的地方。',
+    '先翻开矿车前方的轨道，旗子和没翻开的格子都会挡车。再点“拉车”，角色会走到绞盘旁操作；走不到绞盘时，要先替自己清路。',
   'rail.guide-route':
-    '切 A / B 选轨道，点击绞盘调车。从支线返回时，先退回岔道入口，再牵引去另一条支线。制动台压下后不会复位。',
-  'rail.guide-rescue': '最后一层要把托马接上车，再送回出发站。去程和回程都要清路，走错了可以倒车。',
+    '点击拉杆，在 A、B 两条岔道间切换。矿车到岔口会停一下，再点“拉车”才会走向选中的那一侧。',
+  'rail.guide-rescue':
+    '最后一层，先把车送到托马身边接人，再送回起点的站台。点“倒车”可沿来路返回，途中停下就再点一次。',
   'rail.entry-1': '喂——外头有人吗？先别拉那根红绳！',
   'rail.entry-2': '听见了！你在哪儿？',
   'rail.entry-3':
@@ -1523,6 +1524,46 @@ export const zhMessages: MessageCatalog = {
   'rail.home-4': '走吧。那边有热饭，比你的冷午饭强。',
   'rail.camp-1': '来得正好。绞盘我修好了，这回往哪儿拉都不响。',
   'rail.camp-2': '你的脚呢？',
-  'rail.camp-3': '脚还得歇着。手又没坏。想学工程师的活儿，就坐过来，我从最简单的教。',
-  'rail.reward': '获得 120 物资 · 可在营地选择工程师',
+  'rail.camp-3': '脚还得歇着。手又没坏。来，我教你打救援绳结，下回咱们可不能再困在底下。',
+  'rail.reward': '120 物资 · 救援员已可在营地选择',
+  'rescuer.name': '救援员',
+  'rescuer.note': '旧矿救援支线专属。携带 1 个探针，擅长沿安全通道快速换位。',
+  'rescuer.skill': '绞索',
+  'rescuer.skill-note':
+    '选择同一直线上 2–4 格外的位置，沿途必须已揭开且没有障碍。移动到目标并获得 1 层护盾（最多 2 层）。每层一次，战斗中消耗 1 点行动点数。',
+  'rescuer.no-corridor': '先清出一条至少 2 格长的直线安全通道。',
+  'rescuer.landing': '绞索落点',
+  'rail.guide-brake':
+    '把矿车送上制动板，对应的栅门就会打开。人踩上去不算；车离开以后，门也不会关上。',
+  'rail.diagram-covered': '未翻开',
+  'rail.diagram-clear': '先清路',
+  'rail.diagram-switch': '选 A 或 B',
+  'rail.diagram-brake': '矿车压板',
+  'rail.diagram-home': '接人回站',
+  'exit.closed': '出口尚未开启',
+  'exit.open': '出口已开启',
+  'battle-lesson.title': '战斗入门',
+  'battle-lesson.guardian-pylon':
+    '先处理这座符文台。翻开它所在的格子，按数字标好周围的雷，再走到旁边点击它。两座都断开后，守卫才会露出弱点。',
+  'battle-lesson.guardian-core':
+    '两座符文台都断开了。走到守卫上下左右相邻的格子，点击它的核心，用 1 点行动点数重新打开攻击窗口。',
+  'battle-lesson.guardian-approach':
+    '守卫的弱点已经露出来了。走到它上下左右相邻的安全格，留下 2 点行动点数就能攻击。要是窗口关了，再点核心打开。',
+  'battle-lesson.points':
+    '战斗按回合进行。这里是你这回合剩下的行动点数：移动一格通常花 1 点，翻格再花 1 点，攻击花 2 点。鼠标停着不会轮到敌人。',
+  'battle-lesson.move':
+    '先试着走到亮框里的安全格，看看行动点数怎么变化。红色区域是敌人这回合的攻击预告，落脚时要避开。',
+  'battle-lesson.no-move':
+    '现在没有能用剩余点数走到的已知安全落点。这一步可以先跳过；也可以查看“怎么玩”，结合道具和职业技能脱困，不用为了教学硬吃伤害。',
+  'battle-lesson.dodge':
+    '你还在这回合的攻击范围里。先走到亮框的安全格，再结束回合，不用防御着硬扛。',
+  'battle-lesson.turn':
+    '现在的位置避开了本回合的攻击预告。点“结束回合”：敌人会出手，然后你的行动点数恢复。下一回合要重新看预告。',
+  'battle-lesson.combat':
+    '接下来边扫雷边接近机关。这个敌人的破防办法在“怎么玩”里，随时可以查看。防御是可选动作，不需要为了练习故意挨打。',
+  'battle-lesson.prepare':
+    '先按“怎么玩”里的方法解除保护，再靠近敌人。攻击需要相邻并留有 2 点行动点数；条件满足时，攻击按钮会亮起。',
+  'battle-lesson.attack':
+    '现在可以攻击了。点亮起的攻击按钮，或直接点击相邻的敌人，消耗 2 点行动点数。打完还要留意退路和下一次攻击预告。',
+  'battle-lesson.reopen': '在当前战场学习操作',
 }
