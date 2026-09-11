@@ -8,6 +8,7 @@ export type MenuPage = 'home' | 'free'
 export type AppRoute =
   | { readonly page: MenuPage }
   | { readonly page: 'story' }
+  | { readonly page: 'recollection' }
   | { readonly page: 'campaign'; readonly stage?: CampaignStageId }
   | { readonly page: 'game'; readonly mode: Ruleset }
 

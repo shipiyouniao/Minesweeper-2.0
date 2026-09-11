@@ -1,3 +1,4 @@
+import { regionalCamp, isRegionalCamp } from '../src/game/regional-camps.js'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { ExpeditionSession } from '../src/application/expedition-session.js'
@@ -10,7 +11,7 @@ import { checkpointStory } from '../src/game/story-checkpoint.js'
 import { recordStoryFacts } from '../src/game/story-quests.js'
 import { pendingFinaleScene } from '../src/game/chapter-finale.js'
 import { NORTHWEST_PORTALS } from '../src/game/northwest-world.js'
-import { STORY_SCENES, CAMP_SCENE } from '../src/game/story-content.js'
+import { STORY_SCENES } from '../src/game/story-content.js'
 import { buildStoryBoard } from '../src/game/story.js'
 import { storyEnvelopeStatus } from '../src/persistence/story-encoder.js'
 import { storyAtlasIndex, storyAtlasUnlocked } from '../src/game/story-atlas.js'
@@ -122,13 +123,13 @@ test('atlas discovery permits both new local maps only after their physical rout
 test('every northwest portal terminates on authored safe floor and future chapter saves stay read-only', () => {
   for (const portal of NORTHWEST_PORTALS) {
     const source = buildStoryBoard(
-      portal.scene === 'camp'
-        ? CAMP_SCENE
+      isRegionalCamp(portal.scene)
+        ? regionalCamp(portal.scene).scene
         : STORY_SCENES.find((scene) => scene.id === portal.scene)!,
     )
     const target = buildStoryBoard(
-      portal.destination === 'camp'
-        ? CAMP_SCENE
+      isRegionalCamp(portal.destination)
+        ? regionalCamp(portal.destination).scene
         : STORY_SCENES.find((scene) => scene.id === portal.destination)!,
     )
     for (const [board, index] of [

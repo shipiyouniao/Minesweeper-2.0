@@ -11,6 +11,8 @@ export function worldSceneName(language: Language, id: StoryScene['id']): string
       return message(language, 'story.trail')
     case 'approach':
       return message(language, 'story.approach')
+    case 'reed-camp':
+      return message(language, 'recollection.camp')
     case 'camp':
       return message(language, 'story.camp')
     case 'north-road':

@@ -35,7 +35,7 @@ export function atlasRouteLayer(state: StoryViewState): string {
 
     return `<g class="atlas-route is-${status}" data-atlas-route="${route.from}:${route.to}" data-route-state="${status}" data-one-way="${!!route.oneWay}"><path class="atlas-route-bed" d="${path}"/><path class="atlas-route-line" d="${path}"/>${arrow}</g>`
   }).join('')
-  const current = state.run?.board.scene.id ?? 'camp'
+  const current = state.board.scene.id
   const dots = ATLAS_PLACES.map((place) => {
     const open = storyAtlasUnlocked(state.progress, state.run, storyAtlasIndex(place.scene))
     return `<circle class="atlas-waypoint ${open ? 'is-known' : ''} ${current === place.scene ? 'is-current' : ''}" data-atlas-waypoint="${place.scene}" cx="${place.x * 8}" cy="${place.y * 4.6}" r="4"/>`

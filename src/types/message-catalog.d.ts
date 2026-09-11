@@ -1,5 +1,45 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'recollection.existing': string
+  readonly 'recollection.resume-expedition': string
+
+  readonly 'recollection.task': string
+  readonly 'recollection.task-camp': string
+  readonly 'recollection.task-lantern': string
+
+  readonly 'recollection.camp': string
+  readonly 'recollection.title': string
+  readonly 'recollection.lantern': string
+  readonly 'recollection.floors': string
+  readonly 'recollection.bosses': string
+  readonly 'recollection.ordinary': string
+  readonly 'recollection.relay': string
+  readonly 'recollection.routing': string
+  readonly 'recollection.ordinary-note': string
+  readonly 'recollection.relay-note': string
+  readonly 'recollection.routing-note': string
+  readonly 'recollection.relays-progress': string
+  readonly 'recollection.floor-locked': string
+  readonly 'recollection.boss-locked': string
+  readonly 'recollection.choose': string
+  readonly 'recollection.begin': string
+  readonly 'recollection.resume': string
+  readonly 'recollection.locked': string
+  readonly 'recollection.return': string
+  readonly 'recollection.loadout': string
+  readonly 'recollection.chapter': string
+  readonly 'recollection.arrival-1': string
+  readonly 'recollection.arrival-2': string
+  readonly 'recollection.arrival-3': string
+  readonly 'recollection.arrival-4': string
+  readonly 'recollection.arrival-5': string
+  readonly 'recollection.arrival-6': string
+  readonly 'recollection.light-1': string
+  readonly 'recollection.light-2': string
+  readonly 'recollection.light-3': string
+  readonly 'recollection.light-4': string
+  readonly 'recollection.light-5': string
+
   readonly 'story.lesson-title': string
   readonly 'story.lesson-inspect': string
   readonly 'story.lesson-open-mouse': string

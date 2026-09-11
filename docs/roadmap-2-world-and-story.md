@@ -22,6 +22,8 @@ Camp, overworld and stage cells have different roles and transitions even though
 
 ## Recollection
 
+The [Chapter Two opening](chapter-two-opening.md) introduces Reedbank Camp beyond the cleared northwest pass and the Recollection Lantern. Its first configurable pool contains generated Minesweeper, relay and power-routing floors, plus eligible existing bosses. Veteran boss victories carry forward. Additional chapter stages and board families remain on this roadmap.
+
 A camp landmark opens the challenge configuration. Campaign discoveries and task outcomes grant access to board mechanics and boss families. The player selects from the unlocked pool; unselected bosses or mechanics must not be silently inserted. Difficulty sets the challenge parameters. Supported combinations still pass the shared compatibility and generation rules.
 
 The proposed default is a pool selection: each new seed draws floors and encounter choices from the player's checked entries. Preserve that selected pool in the departure snapshot along with the profession, title, equipment and difficulty so a reload cannot change the attempt. Configuration with no eligible content receives a clear explanation before departure. Exact encounter ordering and optional boss-free configurations remain interaction-design details.

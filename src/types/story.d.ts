@@ -1,3 +1,4 @@
+import type { RegionalCampId } from './regional-camp.js'
 import type { CampaignSave } from './campaign.js'
 import type { AtlasLevel } from './atlas.js'
 import type { Game } from './game.js'
@@ -24,7 +25,7 @@ export interface StoryScene {
   readonly water?: readonly number[]
   readonly bridge?: readonly number[]
   readonly mechanisms?: readonly StoryMechanism[]
-  readonly id: StorySceneId | 'camp'
+  readonly id: StorySceneId | RegionalCampId
   readonly rows: readonly string[]
   readonly clue: number | null
   readonly safeClue: number | null
@@ -78,6 +79,7 @@ export type StorySceneMemory = Omit<StoryRun, 'visited'>
 
 /** Permanent story objectives are separate from ordinary expedition milestones. */
 export type StoryTask =
+  | 'settle-reed-camp'
   | 'reach-camp'
   | 'lost-satchel'
   | 'meet-guide'
@@ -95,6 +97,7 @@ export type StoryCampaignMetric = 'travel' | 'chests' | 'floors' | 'bosses' | 's
 export type StoryCampaignActivity = Partial<Readonly<Record<StoryCampaignMetric, number>>>
 
 export interface StoryProgress {
+  readonly campId?: RegionalCampId
   readonly campaignActivity?: StoryCampaignActivity
   readonly world?: StoryWorldCheckpoint
   readonly facts?: readonly StoryFact[]
@@ -170,7 +173,14 @@ export interface CampLoadout {
 export interface CampSite {
   readonly index: number
   readonly destination:
-    'professions' | 'equipment' | 'missions' | 'achievements' | 'shop' | 'guide' | 'road'
+    | 'professions'
+    | 'equipment'
+    | 'missions'
+    | 'achievements'
+    | 'shop'
+    | 'guide'
+    | 'road'
+    | 'recollection'
   readonly sprite:
     'workshop' | 'treasure' | 'player' | 'archive' | 'survey-notes' | 'exit' | 'guardian-crests'
 }
@@ -217,6 +227,9 @@ export interface StoryHold {
 
 /** Durable outcomes describe the fiction, independent of board coordinates or wording. */
 export type StoryFact =
+  | 'reed-camp-reached'
+  | 'reed-camp-settled'
+  | 'recollection-awakened'
   | 'ridge-route'
   | 'ridge-surveyed'
   | 'beacon-recovered'
@@ -248,6 +261,7 @@ export interface StoryTaskDefinition {
   readonly category: 'main' | 'side'
   readonly introducedBy:
     | StoryDialogueId
+    | 'west-departure'
     | 'quarry-branch'
     | 'nia-route'
     | 'ridge-bearing'
@@ -297,6 +311,7 @@ export interface StoryWorldCheckpoint {
 export interface StoryWorldSaveData {
   readonly schemaVersion: 4
   readonly travel: {
+    readonly campId?: RegionalCampId
     readonly campReached: boolean
     readonly campPosition: number
     readonly world: StoryWorldCheckpoint

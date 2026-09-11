@@ -12,11 +12,13 @@ export const ATLAS_PLACES: readonly AtlasPlace[] = [
   { scene: 'quarry-machine', x: 54, y: 85, district: 'quarry', picture: 'lantern' },
   { scene: 'tower-landing', x: 83, y: 19, district: 'camp', picture: 'lantern' },
   { scene: 'northwest-bridge', x: 50, y: 23, district: 'west', picture: 'lantern' },
+  { scene: 'reed-camp', x: 9, y: 14, district: 'west', picture: 'workshop' },
   { scene: 'blockade-pass', x: 25, y: 20, district: 'west', picture: 'lantern' },
 ]
 
 /** The world chart follows real scene connections; bends keep shortcuts distinct from through roads. */
 export const ATLAS_ROUTES: readonly AtlasRoute[] = [
+  { from: 'blockade-pass', to: 'reed-camp', via: [{ x: 17, y: 12 }], access: 'northwest' },
   { from: 'awakening', to: 'trail', via: [{ x: 22, y: 79 }] },
   { from: 'trail', to: 'approach', via: [{ x: 39, y: 62 }] },
   { from: 'approach', to: 'camp', via: [] },

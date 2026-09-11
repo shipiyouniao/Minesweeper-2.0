@@ -1,4 +1,5 @@
 import { finaleFloorName } from './finale-copy.js'
+import { recollectionFloorCopy } from './recollection-copy.js'
 import { feedPowered, powerReadiness, powerObjectiveComplete } from '../game/floor-power.js'
 import { message } from '../i18n.js'
 import { waterwayFloorName } from './waterway-copy.js'
@@ -28,9 +29,12 @@ export function consoleImage(): string {
 /** Keep one current instruction and a compact reading counter above the shared board layout. */
 export function powerObjective(language: Language, run: Expedition): string {
   if (!run.power) return ''
+  const recollection = run.departure.recollection
+    ? recollectionFloorCopy(language, 'routing')
+    : null
 
   if (run.power.purpose === 'restoration')
-    return `<section class="signal-objective power-objective" aria-live="polite"><strong>${finaleFloorName(language, run)}</strong><p>${powerObjectiveComplete(run.power) ? message(language, 'finale.exit-ready') : message(language, 'finale.objective')}</p><span>${message(language, 'finale.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
+    return `<section class="signal-objective power-objective" aria-live="polite"><strong>${recollection?.name ?? finaleFloorName(language, run)}</strong><p>${powerObjectiveComplete(run.power) ? message(language, 'finale.exit-ready') : (recollection?.note ?? message(language, 'finale.objective'))}</p><span>${message(language, 'finale.progress', { count: run.power.receivers.filter((entry) => entry.recorded).length, total: run.power.receivers.length })}</span><button type="button" class="power-help secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'ridge.network')}</button></section>`
 
   const drainage = run.power.purpose === 'drainage'
 

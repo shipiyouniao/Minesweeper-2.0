@@ -78,6 +78,7 @@ export class CampSession {
   acceptDiscoveredRoutes(): void {
     let story = this.story
     const tasks: readonly StoryTask[] = [
+      ...(story.facts?.includes('chapter-one-cleared') ? ['settle-reed-camp' as const] : []),
       ...(story.facts?.includes('lift-discovered') ? ['rescue-toma' as const] : []),
       ...(story.facts?.includes('beacon-recovered') ? ['restore-west-line' as const] : []),
       ...(story.facts?.includes('west-line-restored') ? ['open-blockade' as const] : []),

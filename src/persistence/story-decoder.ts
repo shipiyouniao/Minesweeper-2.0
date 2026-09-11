@@ -1,3 +1,4 @@
+import { regionalCamp, isRegionalCamp } from '../game/regional-camps.js'
 import { decodeStoryWorld } from './story-world-decoder.js'
 import { STORY_FACTS, STORY_TASKS, STORY_CAMPAIGN_METRICS } from '../game/story-quests.js'
 import type { JsonValue } from '../types/json.js'
@@ -63,6 +64,7 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
       facts: quests.value('facts') ?? [],
       arrived: travel.value('campReached') ?? false,
       campPosition: travel.value('campPosition') ?? 31,
+      campId: travel.value('campId') ?? 'camp',
       journal: travel.value('activeJournal') ?? null,
       route: travel.value('archivedJournal') ?? null,
       routeLegacy: travel.string('origin') === 'surveyed-legacy',
@@ -97,7 +99,10 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
   const validRevision = Number.isInteger(revision) && revision >= 0 && revision <= 1_000_000
   const values = raw?.array('actions')
   const actions = values && values.length <= 3000 ? values.map(action) : null
-  const position = reader.number('campPosition') ?? 31
+  const id = reader.string('campId') ?? 'camp'
+  const campId = isRegionalCamp(id) ? id : 'camp'
+  const terrain = regionalCamp(campId).scene.rows.join('')
+  const position = reader.number('campPosition') ?? terrain.indexOf('S')
   const accepted = [
     ...new Set([
       ...(reader.array('accepted') ?? []).flatMap((v) => {
@@ -189,7 +194,14 @@ export function decodeStory(value: JsonValue | undefined): StoryProgress | undef
     arrived: reader.value('arrived') === true || completed.includes('reach-camp'),
     completed,
     claimed,
-    campPosition: Number.isInteger(position) && position >= 0 && position < 63 ? position : 31,
+    campId,
+    campPosition:
+      Number.isInteger(position) &&
+      position >= 0 &&
+      position < terrain.length &&
+      terrain[position] !== '#'
+        ? position
+        : terrain.indexOf('S'),
     journal:
       raw && validRevision && actions && actions.every((a): a is StoryAction => a !== null)
         ? { revision, actions }

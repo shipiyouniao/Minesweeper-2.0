@@ -12,7 +12,7 @@ import type { StoryViewState } from '../types/story.js'
 export function storyMap(state: StoryViewState): string {
   const lang = state.language
   const level = state.mapLevel ?? 'local'
-  const current = storyAtlasIndex(state.run?.board.scene.id ?? 'camp')
+  const current = storyAtlasIndex(state.board.scene.id)
   const scene = state.mapScene ?? current
   const world = message(lang, 'story.atlas-world')
   const local = message(lang, 'story.atlas-local')

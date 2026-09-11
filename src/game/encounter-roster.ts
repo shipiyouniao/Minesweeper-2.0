@@ -1,3 +1,5 @@
+import { shuffled } from './variant-board.js'
+import { RECOLLECTION_BOSSES } from './recollection.js'
 import { enterMatrix } from './matrix-battle.js'
 import { enterTide } from './tide-battle.js'
 import { enterEcho } from './echo-battle.js'
@@ -18,7 +20,16 @@ export function isEncounterFloor(run: Expedition): boolean {
 /** Rotate eight distinct encounters from a seeded first boss without immediate repeats. */
 export function enterEncounter(run: Expedition): Expedition {
   const checkpoint = encounterTier(run.departure.difficulty).floors.indexOf(run.floor)
-  const slot = (run.departure.seed + checkpoint) % 8
+  const selected = run.departure.recollection
+  const pool = selected
+    ? shuffled(selected.bosses, run.departure.seed ^ 0xb055)
+    : RECOLLECTION_BOSSES
+  const kind = pool[(selected ? checkpoint : run.departure.seed + checkpoint) % pool.length]
+  if (!kind) throw new Error('An encounter needs a selected boss family')
+  const slot = RECOLLECTION_BOSSES.indexOf(kind)
+  // Ordinary-room controls must never survive the replacement by a tactical arena.
+  const { circuits, power, rail, ...arenaRun } = run
+  run = arenaRun
   if (slot === 7) return enterTide(run)
 
   if (slot === 6) return enterMatrix(run)

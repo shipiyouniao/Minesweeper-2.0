@@ -1,3 +1,10 @@
+import type { RegionalPerformanceId } from '../types/recollection.js'
+import {
+  regionalCamp,
+  isRegionalCamp,
+  campResidents,
+  RECOLLECTION_LANTERN_CELL,
+} from '../game/regional-camps.js'
 import { northwestPortals } from '../game/northwest-world.js'
 import {
   canEnterNorthRoad,
@@ -6,8 +13,6 @@ import {
   canUseStoryLift,
 } from '../game/story-world-access.js'
 import { STORY_SCENES } from '../game/story-content.js'
-import { TOMA_CAMP_CELL } from '../game/rail-story.js'
-import { NIA_CAMP_CELL } from '../game/signal-story.js'
 import { checkpointStory, restoreStoryWorld, storyWorldScenes } from '../game/story-checkpoint.js'
 import { recordStoryFacts, storyTaskIntroduced } from '../game/story-quests.js'
 import { CampSession } from './camp-session.js'
@@ -90,12 +95,32 @@ export class StorySession {
     return this.current
   }
 
+  /** A world exchange grants no currency and cannot be completed from another map. */
+  completeRegionalScene(scene: RegionalPerformanceId): boolean {
+    const progress = this.camp.story
+    if (
+      this.current ||
+      progress.campId !== 'reed-camp' ||
+      !progress.facts?.includes('chapter-one-cleared')
+    )
+      return false
+    if (scene === 'recollection-light' && progress.campPosition !== RECOLLECTION_LANTERN_CELL)
+      return false
+    this.camp.saveStory(
+      recordStoryFacts(progress, [
+        scene === 'reed-arrival' ? 'reed-camp-settled' : 'recollection-awakened',
+      ]),
+    )
+    return true
+  }
+
   /** The southern camp gate reopens the preserved route, without awarding arrival again. */
   leaveCamp(): boolean {
     const progress = this.camp.story
     if (
       this.current ||
       !progress.arrived ||
+      regionalCamp(progress.campId).id !== 'camp' ||
       progress.campPosition !== buildStoryBoard(CAMP_SCENE).exit
     )
       return false
@@ -119,6 +144,7 @@ export class StorySession {
     const progress = this.camp.story
     if (
       this.current ||
+      regionalCamp(progress.campId).id !== 'camp' ||
       progress.campPosition !== 13 ||
       !canEnterNorthRoad(progress) ||
       !progress.world
@@ -158,19 +184,21 @@ export class StorySession {
     const run = this.current
     if (run && run.phase !== 'exploring') return false
 
-    const portal = northwestPortals(run?.board.scene.id ?? 'camp', progress).find(
-      (entry) => entry.index === (run?.player ?? progress.campPosition),
-    )
+    const portal = northwestPortals(
+      run?.board.scene.id ?? regionalCamp(progress.campId).id,
+      progress,
+    ).find((entry) => entry.index === (run?.player ?? progress.campPosition))
     if (!portal || !progress.world) return false
 
     const world = run ? checkpointStory(run) : progress.world
     const story = portal.outcome ? recordStoryFacts(progress, [portal.outcome]) : progress
-    if (portal.destination === 'camp') {
+    if (isRegionalCamp(portal.destination)) {
       this.current = null
       this.camp.saveStory({
         ...story,
         arrived: true,
         campPosition: portal.arrival,
+        campId: portal.destination,
         journal: null,
         world: { ...world, active: null },
       })
@@ -335,12 +363,8 @@ export class StorySession {
   /** Approach the guide from a neighboring tile so both characters remain visible. */
   campPath(index: number): readonly number[] | null {
     const progress = this.camp.story
-    const board = buildStoryBoard(CAMP_SCENE)
-    const residents = [
-      51,
-      ...(this.camp.signalRescue.cleared ? [NIA_CAMP_CELL] : []),
-      ...(progress.facts?.includes('toma-rescued') ? [TOMA_CAMP_CELL] : []),
-    ]
+    const board = buildStoryBoard(regionalCamp(progress.campId).scene)
+    const residents = campResidents(progress, this.camp.signalRescue.cleared)
     const player =
       board.walls.includes(progress.campPosition) || residents.includes(progress.campPosition)
         ? board.entrance
@@ -348,7 +372,7 @@ export class StorySession {
     if (!progress.arrived) return null
 
     const resident = residents.includes(index)
-    const targets = index === 51 || resident ? adjacentSteps(board.game, index) : [index]
+    const targets = resident ? adjacentSteps(board.game, index) : [index]
     const paths = targets.flatMap((target) => {
       const path = storyPath({ ...board, walls: [...board.walls, ...residents] }, player, target)
       return path ? [path] : []
@@ -371,7 +395,12 @@ export class StorySession {
   meetGuide(): void {
     const progress = this.camp.story
     const board = buildStoryBoard(CAMP_SCENE)
-    if (!progress.arrived || !adjacentSteps(board.game, progress.campPosition).includes(51)) return
+    if (
+      regionalCamp(progress.campId).id !== 'camp' ||
+      !progress.arrived ||
+      !adjacentSteps(board.game, progress.campPosition).includes(51)
+    )
+      return
 
     this.camp.saveStory(recordStoryFacts(progress, ['guide-met']))
   }
@@ -390,6 +419,7 @@ export class StorySession {
     const progress: StoryProgress = {
       ...old,
       arrived,
+      ...(arrived ? { campId: 'camp' as const } : {}),
       journal: null,
       world: checkpointStory(arrived ? { ...run, health: 3 } : run),
       ...(arrived && run.board.scene.id === 'north-road' ? { campPosition: 13 } : {}),

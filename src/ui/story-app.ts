@@ -1,3 +1,6 @@
+import { regionalCamp, campResidents, RECOLLECTION_LANTERN_CELL } from '../game/regional-camps.js'
+import { regionalLines } from './recollection-copy.js'
+import type { RegionalPerformanceId } from '../types/recollection.js'
 import { pendingRailScene, TOMA_CAMP_CELL } from '../game/rail-story.js'
 import { railLines } from './rail-copy.js'
 import { campaignProgress } from '../game/campaign-catalog.js'
@@ -16,7 +19,6 @@ import { message } from '../i18n.js'
 import { storyTaskName, storyTaskScene } from './story-quests.js'
 import { CampSession } from '../application/camp-session.js'
 import { StorySession } from '../application/story-session.js'
-import { CAMP_SCENE, CAMP_SITES } from '../game/story-content.js'
 import { buildStoryBoard, storyPath } from '../game/story.js'
 import type { VariantRepository } from '../persistence/variant-repository.js'
 import type { SoundEffects } from '../types/audio.js'
@@ -137,13 +139,12 @@ export class StoryApp implements MountedGame {
   private snapshot(): StoryViewState {
     const run = this.session.run
     const progress = this.session.camp.story
-    const board = run?.board ?? buildStoryBoard(CAMP_SCENE)
-    const saved =
-      (progress.campPosition === TOMA_CAMP_CELL && progress.facts?.includes('toma-rescued')) ||
-      progress.campPosition === 51 ||
-      (progress.campPosition === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared)
-        ? board.entrance
-        : progress.campPosition
+    const board = run?.board ?? buildStoryBoard(regionalCamp(progress.campId).scene)
+    const saved = campResidents(progress, this.session.camp.signalRescue.cleared).includes(
+      progress.campPosition,
+    )
+      ? board.entrance
+      : progress.campPosition
 
     return {
       panel: this.panel,
@@ -253,7 +254,7 @@ export class StoryApp implements MountedGame {
       const progress = this.session.camp.stageProgress(id)
       const scene =
         pendingFinaleScene(null, progress) ??
-        (!state.run &&
+        (state.board.scene.id === 'camp' &&
         id === 'northwest-bastion' &&
         progress.cleared &&
         !progress.scenes.includes('chapter-camp')
@@ -316,7 +317,31 @@ export class StoryApp implements MountedGame {
         },
       )
 
+    if (
+      state.board.scene.id === 'reed-camp' &&
+      !state.progress.facts?.includes('reed-camp-settled') &&
+      !this.root.querySelector('dialog[open]')
+    )
+      this.presentRegional('reed-arrival')
+
     this.disposeLesson = mountStoryLesson(this.root, state)
+  }
+
+  /** Regional exchanges reuse the voiced cast; only physically reached facilities grant access. */
+  private presentRegional(scene: RegionalPerformanceId): void {
+    this.signal.present(
+      this.root,
+      this.language,
+      scene,
+      regionalLines(this.language, scene),
+      this.session.camp.loadout.profession,
+      () => {
+        this.session.completeRegionalScene(scene)
+        this.render()
+        if (scene === 'recollection-light')
+          this.root.querySelector<HTMLAnchorElement>('[data-recollection-route]')?.click()
+      },
+    )
   }
 
   /** Route finite service commands through the existing catalogs and shared camp operations. */
@@ -336,7 +361,9 @@ export class StoryApp implements MountedGame {
           break
         }
 
-        const site = CAMP_SITES.find((s) => s.destination === command.value)
+        const site = regionalCamp(camp.story.campId).sites.find(
+          (s) => s.destination === command.value,
+        )
         if (site) {
           this.service = null
           this.render()
@@ -545,7 +572,7 @@ export class StoryApp implements MountedGame {
         this.panel = null
       }
 
-      const site = CAMP_SITES.find((entry) => entry.index === index)
+      const site = regionalCamp(state.progress.campId).sites.find((entry) => entry.index === index)
       if (site?.destination === 'guide') {
         this.session.meetGuide()
         this.conversation = 'guide'
@@ -555,7 +582,7 @@ export class StoryApp implements MountedGame {
           this.inspected = null
           this.panel = null
         } else this.conversation = 'road'
-      } else if (site)
+      } else if (site && site.destination !== 'recollection')
         this.service = { page: site.destination, category: 'all', selected: 'surveyor' }
     }
 
@@ -568,7 +595,18 @@ export class StoryApp implements MountedGame {
       this.moving = false
     }
 
-    if (!state.run && index === TOMA_CAMP_CELL && state.progress.facts?.includes('toma-rescued')) {
+    if (state.board.scene.id === 'reed-camp' && index === RECOLLECTION_LANTERN_CELL) {
+      if (this.session.camp.story.facts?.includes('recollection-awakened'))
+        this.root.querySelector<HTMLAnchorElement>('[data-recollection-route]')?.click()
+      else this.presentRegional('recollection-light')
+      return
+    }
+
+    if (
+      state.board.scene.id === 'camp' &&
+      index === TOMA_CAMP_CELL &&
+      state.progress.facts?.includes('toma-rescued')
+    ) {
       this.signal.present(
         this.root,
         this.language,
@@ -582,9 +620,18 @@ export class StoryApp implements MountedGame {
       )
     }
 
-    if (!state.run && index === 51) this.performance.react('greet')
+    if (state.board.scene.id === 'camp' && index === 51) this.performance.react('greet')
 
-    if (!state.run && index === NIA_CAMP_CELL && this.session.camp.signalRescue.cleared) {
+    if (state.board.scene.id === 'reed-camp' && index === regionalCamp('reed-camp').nia) {
+      this.presentRegional('reed-arrival')
+      return
+    }
+
+    if (
+      state.board.scene.id === 'camp' &&
+      index === NIA_CAMP_CELL &&
+      this.session.camp.signalRescue.cleared
+    ) {
       if (this.session.camp.stageProgress('northwest-bastion').cleared)
         this.signal.present(
           this.root,
@@ -813,7 +860,7 @@ export class StoryApp implements MountedGame {
       case 'tasks':
       case 'map':
         if (button.dataset['storyAction'] === 'map' && this.panel !== 'map') {
-          this.mapScene = storyAtlasIndex(this.session.run?.board.scene.id ?? 'camp')
+          this.mapScene = storyAtlasIndex(this.snapshot().board.scene.id)
           this.mapLevel = 'local'
           this.mapLegend = false
         }

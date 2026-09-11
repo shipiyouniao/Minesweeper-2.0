@@ -1,3 +1,4 @@
+import { decodeRecollection } from './recollection-decoder.js'
 import { decodeCampaign, campaignWasRecovered } from './campaign-decoder.js'
 import { storyRewardCamp } from '../game/story-rewards.js'
 import { parseBattleLesson } from '../game/battle-lesson.js'
@@ -281,6 +282,10 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   )
     return null
 
+  const recollection = decodeRecollection(reader.value('recollection'))
+  if (reader.value('recollection') !== undefined && (!recollection || campaign !== null))
+    return null
+
   const rawTitle = reader.value('title')
   const title = parseTitle(reader.string('title'))
   if (rawTitle !== null && title === null) return null
@@ -357,6 +362,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     campaign === 'northwest-bastion-v1'
       ? { campaign }
       : {}),
+    ...(recollection ? { recollection } : {}),
     seed,
     title,
     difficulty,
@@ -541,7 +547,9 @@ export function loadExpeditionSave(text: string | null): ExpeditionLoad | null {
     journal: decodeJournal,
     records: decodeRecords,
   })
+  const recollection = decodeRecollection(reader.value('recollection'))
   const save: ExpeditionSave = {
+    ...(recollection ? { recollection } : {}),
     version: 4,
     ...(campaign ? { campaign } : {}),
     camp: storyRewardCamp(

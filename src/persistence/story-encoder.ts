@@ -1,3 +1,4 @@
+import { isRegionalCamp } from '../game/regional-camps.js'
 import { EXPEDITION_RULES_REVISION } from './expedition-format.js'
 import { STORY_REVISION } from '../game/story-content.js'
 import { decodeStoryWorld } from './story-world-decoder.js'
@@ -56,6 +57,9 @@ export function storyEnvelopeStatus(text: string | null): 'supported' | 'unsuppo
   const story = envelope.child('story')
   if (!story || story.value('schemaVersion') === undefined) return 'supported'
 
+  const campId = story.child('travel')?.string('campId')
+  if (campId !== null && campId !== undefined && !isRegionalCamp(campId)) return 'unsupported'
+
   if (![2, 3, 4].includes(story.number('schemaVersion') ?? -1)) return 'unsupported'
 
   if (
@@ -104,6 +108,7 @@ export function encodeStory(progress: StoryProgress): StorySaveData {
     ? {
         schemaVersion: 4,
         travel: {
+          campId: progress.campId ?? 'camp',
           campReached: progress.arrived,
           campPosition: progress.campPosition,
           world: progress.world,

@@ -1,3 +1,5 @@
+import { RecollectionSession } from '../application/recollection-session.js'
+import { RecollectionApp } from './recollection-app.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { GameSession } from '../application/game-session.js'
 import { TwinSession } from '../application/twin-session.js'
@@ -102,6 +104,16 @@ export class GameRouter implements MountedGame {
         this.languageChanged,
       )
     }
+
+    if (this.route.page === 'recollection')
+      return new RecollectionApp(
+        this.host,
+        new RecollectionSession(this.variants, browserRuntime),
+        this.repository,
+        this.language,
+        sounds,
+        this.languageChanged,
+      )
 
     if (this.route.page === 'story')
       return new StoryApp(

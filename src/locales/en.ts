@@ -2,6 +2,51 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'recollection.existing':
+    'An expedition is still in progress. Continue or extract before starting a new recollection.',
+  'recollection.resume-expedition': 'Resume expedition',
+
+  'recollection.task': 'A Rest by the River',
+  'recollection.task-camp': 'Cross the northwest pass and meet Nia at Reedbank Camp.',
+  'recollection.task-lantern': 'Take a look at the lantern on the pier.',
+
+  'recollection.camp': 'Reedbank Camp',
+  'recollection.title': 'Recollection',
+  'recollection.lantern': 'Recollection Lantern',
+  'recollection.floors': 'Exploration floors',
+  'recollection.bosses': 'Bosses',
+  'recollection.ordinary': 'Minesweeper',
+  'recollection.relay': 'Relays',
+  'recollection.routing': 'Power routing',
+  'recollection.ordinary-note': 'Explore fresh terrain and find the stairs.',
+  'recollection.relay-note':
+    'Solve each relay’s neighboring clues and switch them all off to release the exit.',
+  'recollection.routing-note':
+    'Follow the supply diagram and switch branches to activate every console.',
+  'recollection.relays-progress': 'Relays off {count} / {total}',
+  'recollection.floor-locked': 'Complete the matching story stage to unlock.',
+  'recollection.boss-locked': 'Defeat this boss to unlock.',
+  'recollection.choose': 'Choose at least one floor type and one boss.',
+  'recollection.begin': 'Light the lantern',
+  'recollection.resume': 'Resume',
+  'recollection.locked': 'Find the lantern beyond the northwest pass.',
+  'recollection.return': 'Return to camp',
+  'recollection.loadout': 'Your loadout',
+  'recollection.chapter': 'Chapter Two · The River’s Voice',
+  'recollection.arrival-1': 'The water… I think I heard it that night, too.',
+  'recollection.arrival-2':
+    'The old ferry is downstream. Let’s stay here while I ask about the crossing.',
+  'recollection.arrival-3': 'And get some rest. You fell asleep clutching the map yesterday.',
+  'recollection.arrival-4': '…I was afraid I’d wake up somewhere else again.',
+  'recollection.arrival-5': 'Then I’ll sit beside you. You’ll see me when you wake up.',
+  'recollection.arrival-6':
+    'That lantern on the pier can recreate places you’ve been. Try it if you feel like practicing.',
+  'recollection.light-1': 'Is that… the watchtower inside?',
+  'recollection.light-2': 'Looks familiar, right? Hold on to the parts you want to revisit.',
+  'recollection.light-3': 'The guardian’s there, too. It won’t block the pass again, will it?',
+  'recollection.light-4': 'Only in the lantern. The real one is still fixing the gate.',
+  'recollection.light-5': 'Then I’ll try it first. Maybe this time I can stand my ground.',
+
   'story.lesson-title': 'Forest practice · {step}/4',
   'story.lesson-inspect': 'Select the glowing 1 to see its eight neighboring tiles.',
   'story.lesson-open-mouse': 'Right-click the glowing 1 to open its unflagged neighbors.',

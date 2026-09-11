@@ -7,12 +7,12 @@ import type { Language } from '../types/localization.js'
 import type { FloorPower } from '../types/floor-power.js'
 
 /** Explain device operation in the same illustrated modal used for boss encounters. */
-export function powerGuide(language: Language, power: FloorPower): string {
+export function powerGuide(language: Language, power: FloorPower, heading?: string): string {
   const drainage = power.purpose === 'drainage'
   const restoration = power.purpose === 'restoration'
 
   return `<article class="battle-guide power-guide ${guidanceStyles['battle-guide']}">
-    <header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${restoration ? consoleImage() : drainage ? drainageImage() : observatoryImage()}<div><h3>${restoration ? message(language, 'finale.control-title') : drainage ? message(language, 'waterway.title') : message(language, 'ridge.title')}</h3><p>${restoration ? message(language, 'finale.guide-intro') : drainage ? message(language, 'waterway.guide-intro') : message(language, 'ridge.guide-intro')}</p></div></header>
+    <header class="battle-guide-hero ${guidanceStyles['battle-guide-hero']}">${restoration ? consoleImage() : drainage ? drainageImage() : observatoryImage()}<div><h3>${heading ?? (restoration ? message(language, 'finale.control-title') : drainage ? message(language, 'waterway.title') : message(language, 'ridge.title'))}</h3><p>${restoration ? message(language, 'finale.guide-intro') : drainage ? message(language, 'waterway.guide-intro') : message(language, 'ridge.guide-intro')}</p></div></header>
     <ol class="boss-picture-steps ${guidanceStyles['boss-picture-steps']}">
       ${guideStep(1, message(language, 'ridge.guide-clear-title'), message(language, 'ridge.guide-clear'), cluePicture())}
       ${guideStep(2, message(language, 'ridge.guide-switch-title'), message(language, 'ridge.guide-switch'), routePicture(false, power.purpose))}

@@ -35,6 +35,9 @@ export function recordStoryCampaign(
 }
 
 export const STORY_FACTS: readonly StoryFact[] = [
+  'reed-camp-reached',
+  'reed-camp-settled',
+  'recollection-awakened',
   'toma-rescued',
   'ridge-route',
   'ridge-surveyed',
@@ -54,6 +57,20 @@ export const STORY_FACTS: readonly StoryFact[] = [
 ]
 
 export const STORY_TASKS: readonly StoryTaskDefinition[] = [
+  {
+    id: 'settle-reed-camp',
+    category: 'main',
+    introducedBy: 'west-departure',
+    prerequisite: { kind: 'fact', id: 'chapter-one-cleared' },
+    objective: {
+      kind: 'all',
+      conditions: [
+        { kind: 'fact', id: 'reed-camp-settled' },
+        { kind: 'fact', id: 'recollection-awakened' },
+      ],
+    },
+    supplies: 0,
+  },
   {
     id: 'rescue-toma',
     category: 'side',
