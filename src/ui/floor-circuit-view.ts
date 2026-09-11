@@ -37,7 +37,8 @@ export function renderFloorCircuits(root: HTMLElement, run: Expedition, language
       )
     }
 
-    if (gate) {
+    // The stairs retain their shared closed-door artwork and opening animation.
+    if (gate && relay.gate !== run.exit) {
       gate.classList.add('signal-gate', 'landmark-cell')
       gate.classList.toggle('signal-released', !relay.active)
       gate.dataset['signalGate'] = String(relay.gate)

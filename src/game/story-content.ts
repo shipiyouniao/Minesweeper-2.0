@@ -1,5 +1,5 @@
 import { NORTHWEST_SCENES } from './northwest-world.js'
-import type { CampSite, StoryScene } from '../types/story.js'
+import type { StoryScene } from '../types/story.js'
 
 export const STORY_REVISION = 2
 
@@ -55,25 +55,7 @@ export const PROLOGUE_SCENES: readonly StoryScene[] = [
   },
 ]
 
-/** Established camp paths contain no hazards and never reset when a facility is revisited. */
-export const CAMP_SCENE: StoryScene = {
-  id: 'camp',
-  rows: ['#########', '#ooooooo#', '#ooooooo#', '#oooSooo#', '#ooooooo#', '#oooEooo#', '#########'],
-  clue: null,
-  safeClue: null,
-  teachingMine: null,
-  teachingSafe: null,
-}
-
-export const CAMP_SITES: readonly CampSite[] = [
-  { index: 11, destination: 'shop', sprite: 'treasure' },
-  { index: 15, destination: 'equipment', sprite: 'workshop' },
-  { index: 28, destination: 'professions', sprite: 'player' },
-  { index: 34, destination: 'achievements', sprite: 'archive' },
-  { index: 47, destination: 'missions', sprite: 'survey-notes' },
-  { index: 51, destination: 'guide', sprite: 'guardian-crests' },
-  { index: 13, destination: 'road', sprite: 'exit' },
-]
+export { CAMP_SCENE, CAMP_SITES } from './regional-camps.js'
 
 /** Persistent overworld approach; the lift is a destination, not a prepared dungeon departure. */
 export const NORTH_ROAD_SCENE: StoryScene = {

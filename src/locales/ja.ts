@@ -2,6 +2,48 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'recollection.existing':
+    '遠征がまだ続いています。再開するか帰還してから、新しい追想を始めましょう。',
+  'recollection.resume-expedition': '遠征を続ける',
+
+  'recollection.task': '川辺でひと休み',
+  'recollection.task-camp': '北西の関所を抜け、葦辺の野営地でニアと合流する。',
+  'recollection.task-lantern': '桟橋にある追想の灯を調べる。',
+
+  'recollection.camp': '葦辺の野営地',
+  'recollection.title': '追想',
+  'recollection.lantern': '追想の灯',
+  'recollection.floors': '探索フロア',
+  'recollection.bosses': 'ボス',
+  'recollection.ordinary': '地雷探索',
+  'recollection.relay': '継電器',
+  'recollection.routing': '給電切替',
+  'recollection.ordinary-note': 'ランダムな地形を探索し、出口を探す。',
+  'recollection.relay-note': '各継電器の周囲を解き、すべて停止させて出口を開く。',
+  'recollection.routing-note': '配線図に沿って給電先を切り替え、すべての制御盤を起動する。',
+  'recollection.relays-progress': '停止 {count} / {total}',
+  'recollection.floor-locked': '対応する物語ステージのクリアで解放。',
+  'recollection.boss-locked': 'このボスを倒すと解放。',
+  'recollection.choose': 'フロアとボスを一つずつ選んでください。',
+  'recollection.begin': '追想の灯をともす',
+  'recollection.resume': '追想を続ける',
+  'recollection.locked': '北西の関所の先で追想の灯を見つけよう。',
+  'recollection.return': '野営地へ戻る',
+  'recollection.loadout': '出発の準備',
+  'recollection.chapter': '第二章・川の声',
+  'recollection.arrival-1': '水の音……あの晩も聞いた気がする。',
+  'recollection.arrival-2': '古い渡し場は下流だよ。今日はここに泊まろう。行き方を聞いてくる。',
+  'recollection.arrival-3': 'ちゃんと休んでよ。昨日なんて地図を握ったまま寝てたでしょ。',
+  'recollection.arrival-4': '……また知らない場所で目が覚めるのが怖くて。',
+  'recollection.arrival-5': 'じゃあ隣にいるね。起きたら、私が見えるように。',
+  'recollection.arrival-6':
+    'そうだ、桟橋の灯は歩いた場所を映せるんだ。練習したくなったら試してみて。',
+  'recollection.light-1': '中に見えるのは……見張り塔？',
+  'recollection.light-2': '見覚えがあるでしょ？行きたい場所の光を残してみて。',
+  'recollection.light-3': '門番までいる。また道をふさがないよね？',
+  'recollection.light-4': '灯の中だけだよ。本物は今も門を直してる。',
+  'recollection.light-5': 'じゃあ、まずはあいつと練習だ。今度こそ逃げ回るだけで終わらないぞ。',
+
   'story.lesson-title': '森での練習 · {step}/4',
   'story.lesson-inspect': '光る「1」を押して、周囲8マスを見てみよう。',
   'story.lesson-open-mouse': '光る「1」を右クリックして、旗のない隣接マスを開こう。',

@@ -1,3 +1,4 @@
+import type { RecollectionSelection } from './recollection.js'
 import type { FloorRail } from './floor-rail.js'
 import type { BattleLesson } from './battle-lesson.js'
 import type { ExpeditionSonar } from './echo.js'
@@ -78,6 +79,7 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  readonly recollection?: RecollectionSelection
   readonly campaign?: CampaignRevision
   readonly title: TitleId | null
   readonly milestoneRelics?: readonly MilestoneRelic[]
@@ -200,6 +202,7 @@ export interface ExpeditionJournal {
 
 /** One atomic value prevents refresh from awarding a settled run twice. */
 export interface ExpeditionSave {
+  readonly recollection?: RecollectionSelection
   readonly campaign?: CampaignSave
 
   readonly story?: StoryProgress

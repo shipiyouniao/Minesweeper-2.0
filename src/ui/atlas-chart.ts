@@ -32,7 +32,7 @@ function placeImage(place: AtlasPlace): string {
 
 /** Fine detail contains actionable locations, with locked names replaced at the data boundary. */
 function placeMarkers(state: StoryViewState): string {
-  const current = state.run?.board.scene.id ?? 'camp'
+  const current = state.board.scene.id
   return ATLAS_PLACES.map((place) => {
     const index = storyAtlasIndex(place.scene)
     const open = storyAtlasUnlocked(state.progress, state.run, index)

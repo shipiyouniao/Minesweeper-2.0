@@ -1,3 +1,4 @@
+import { REED_CAMP } from './regional-camps.js'
 import { CAMP_SCENE, PROLOGUE_SCENES, STORY_SCENES } from './story-content.js'
 import type { StoryProgress, StoryRun, StoryScene } from '../types/story.js'
 
@@ -6,6 +7,7 @@ export const STORY_ATLAS_SCENES: readonly StoryScene[] = [
   ...PROLOGUE_SCENES,
   CAMP_SCENE,
   ...STORY_SCENES.slice(PROLOGUE_SCENES.length),
+  REED_CAMP.scene,
 ]
 
 /** Convert a named physical location to its atlas node without assuming campaign floor numbers. */
@@ -23,6 +25,8 @@ export function storyAtlasUnlocked(
 
   const scene = STORY_ATLAS_SCENES[index]
   if (!scene) return false
+
+  if (scene.id === 'reed-camp') return !!progress.facts?.includes('chapter-one-cleared')
 
   if (scene.id === 'northwest-bridge') return !!progress.facts?.includes('west-line-restored')
 

@@ -84,7 +84,10 @@ test('one world chart switches detail without an intermediate regional map', () 
 })
 
 test('every world location connects through a real doorway and the haul track stays one-way', () => {
-  const repaired: StoryProgress = { ...progress, facts: ['west-line-restored', 'west-shortcut'] }
+  const repaired: StoryProgress = {
+    ...progress,
+    facts: ['west-line-restored', 'west-shortcut', 'chapter-one-cleared'],
+  }
   const reached = new Set(['awakening'])
   for (const route of ATLAS_ROUTES) {
     const from = STORY_ATLAS_SCENES.find((scene) => scene.id === route.from)!

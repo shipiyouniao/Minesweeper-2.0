@@ -160,8 +160,14 @@ try {
     await checkZoomRange(page, touch)
     assert.equal(await page.locator('.atlas-viewport').getAttribute('data-detail'), 'districts')
     assert.equal(await page.locator('[data-atlas-detail="places"] .atlas-node:visible').count(), 0)
-    assert.equal(await page.locator('[data-atlas-route]').count(), 12)
-    assert.equal(await page.locator('[data-atlas-waypoint]').count(), 11)
+    assert.equal(await page.locator('[data-atlas-route]').count(), 13)
+    assert.equal(await page.locator('[data-atlas-waypoint]').count(), 12)
+    assert.equal(
+      await page
+        .locator('[data-atlas-route="blockade-pass:reed-camp"]')
+        .getAttribute('data-route-state'),
+      'uncharted',
+    )
     assert.equal(
       await page.locator('[data-atlas-route="awakening:trail"]').getAttribute('data-route-state'),
       'open',

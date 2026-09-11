@@ -1,3 +1,10 @@
+import type { RecollectionSelection } from '../types/recollection.js'
+import {
+  recollectionAvailable,
+  recollectionUnlocks,
+  snapshotRecollection,
+  validRecollection,
+} from '../game/recollection.js'
 import { recordStoryCampaign } from '../game/story-quests.js'
 import { grantRescuer } from '../game/story-rewards.js'
 import { advanceBattleLesson } from '../game/battle-lesson.js'
@@ -68,6 +75,9 @@ export class ExpeditionSession {
     if (!journal) return
 
     if (
+      (!journal.departure.recollection ||
+        (recollectionAvailable(this.save) &&
+          validRecollection(journal.departure.recollection, recollectionUnlocks(this.save)))) &&
       allowedDeparture(this.save.camp, journal.departure.profession, journal.departure.equipment) &&
       (journal.departure.title === null ||
         ownedTitles(this.camp).includes(journal.departure.title)) &&
@@ -220,6 +230,7 @@ export class ExpeditionSession {
     profession: Profession,
     equipment: readonly Equipment[],
     difficulty: VariantDifficulty = this.difficulty,
+    recollection?: RecollectionSelection,
   ): boolean {
     this.refreshShared()
     if (this.current || !allowedDeparture(this.camp, profession, equipment)) return false
@@ -239,7 +250,16 @@ export class ExpeditionSession {
     )
       return false
 
+    if (
+      recollection &&
+      (this.campaignMode ||
+        !recollectionAvailable(this.save) ||
+        !validRecollection(recollection, recollectionUnlocks(this.save)))
+    )
+      return false
+
     const departure: Departure = {
+      ...(recollection ? { recollection: snapshotRecollection(recollection) } : {}),
       ...(this.repository.campaignMode ? { campaign: this.stage.revision } : {}),
       title: milestoneProgress(this.camp).title ?? null,
       training: ownedCombatTraining(this.camp),
@@ -269,6 +289,7 @@ export class ExpeditionSession {
           }
         : {}),
       difficulty,
+      ...(recollection ? { recollection: snapshotRecollection(recollection) } : {}),
       journal: {
         departure,
         actions: [],
@@ -474,6 +495,7 @@ export class ExpeditionSession {
       ...(latest.campaign ? { campaign: latest.campaign } : {}),
       ...(latest.story ? { story: latest.story } : {}),
       ...(latest.loadout ? { loadout: latest.loadout } : {}),
+      ...(latest.recollection ? { recollection: latest.recollection } : {}),
     }
   }
 

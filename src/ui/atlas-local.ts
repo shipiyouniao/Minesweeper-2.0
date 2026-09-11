@@ -1,11 +1,11 @@
-import { campSiteImage } from './story-assets.js'
+import { regionalCamp, isRegionalCamp } from '../game/regional-camps.js'
+import { campSiteImage, storySiteName } from './story-assets.js'
 import { cartImage, tomaImage } from './rail-view.js'
 import { RESCUE_GATE, TOMA_CAMP_CELL } from '../game/rail-story.js'
 import { northwestPortals } from '../game/northwest-world.js'
 import { atlasDestination } from '../game/atlas-connections.js'
 import type { AtlasMarkup } from '../types/atlas.js'
 import { worldSceneName } from './world-copy.js'
-import { CAMP_SITES } from '../game/story-content.js'
 import { STORY_ATLAS_SCENES, storyAtlasIndex, storyAtlasUnlocked } from '../game/story-atlas.js'
 import { message } from '../i18n.js'
 import { OBSERVATORY_GATE } from '../game/observatory-layout.js'
@@ -13,7 +13,6 @@ import { WATERWAY_GATE } from '../game/waterway-layout.js'
 import { observatoryImage, drainageImage } from './power-view.js'
 import { icon } from '../icons.js'
 import type { StoryViewState } from '../types/story.js'
-import { campPageName } from './camp-copy.js'
 import { escapeHtml } from './presentation.js'
 
 /** Render a discovered local board with public landmarks; no hidden mine truth enters markup. */
@@ -36,8 +35,9 @@ export function atlasLocal(state: StoryViewState, scene: number, current: number
         const portal = northwestPortals(content.id, state.progress).find(
           (entry) => entry.index === index,
         )
-        const site =
-          content.id === 'camp' ? CAMP_SITES.find((entry) => entry.index === index) : undefined
+        const site = isRegionalCamp(content.id)
+          ? regionalCamp(content.id).sites.find((entry) => entry.index === index)
+          : undefined
         const ridge =
           content.id === 'north-road' &&
           index === OBSERVATORY_GATE &&
@@ -69,11 +69,7 @@ export function atlasLocal(state: StoryViewState, scene: number, current: number
                   : destination !== null
                     ? names[destination]!
                     : site
-                      ? site.destination === 'guide'
-                        ? message(lang, 'story.guide')
-                        : site.destination === 'road'
-                          ? message(lang, 'story.road')
-                          : campPageName(lang, site.destination)
+                      ? storySiteName(lang, site)
                       : traveler
                         ? position
                         : exit
@@ -102,13 +98,13 @@ export function atlasLocal(state: StoryViewState, scene: number, current: number
       })
       .join('')
 
-    landmarks =
-      content.id === 'camp'
-        ? CAMP_SITES.map(
-            (site) =>
-              `<li>${campSiteImage(site)}<span>${site.destination === 'guide' ? message(lang, 'story.guide') : site.destination === 'road' ? names[4] : campPageName(lang, site.destination)}</span></li>`,
-          ).join('')
-        : ''
+    landmarks = isRegionalCamp(content.id)
+      ? regionalCamp(content.id)
+          .sites.map(
+            (site) => `<li>${campSiteImage(site)}<span>${storySiteName(lang, site)}</span></li>`,
+          )
+          .join('')
+      : ''
     drawing = `<div class="atlas-local-layout"><div class="atlas-local-grid" style="--map-columns:${content.rows[0]!.length}" role="group" aria-label="${title}">${cells}</div></div>`
   }
 

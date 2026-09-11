@@ -8,3 +8,6 @@ export interface DungeonLayout {
   readonly walls: readonly number[]
   readonly treasures: readonly number[]
 }
+
+/** A mechanic can reject terrain before the generator accepts its final layout. */
+export type DungeonLayoutFilter = (layout: DungeonLayout) => boolean

@@ -1,3 +1,5 @@
+import type { RegionalPerformanceId } from '../types/recollection.js'
+import { recollectionLantern } from './recollection-copy.js'
 import { tomaImage } from './rail-view.js'
 import { bridgeReveal } from './chapter-performance.js'
 import { DialogueReveal } from './dialogue-reveal.js'
@@ -46,7 +48,7 @@ export class SignalPerformance {
   present(
     root: HTMLElement,
     language: Language,
-    scene: CampaignSceneId,
+    scene: CampaignSceneId | RegionalPerformanceId,
     lines: readonly SignalLine[],
     profession: Profession,
     completed: () => void,
@@ -73,6 +75,16 @@ export class SignalPerformance {
           'afterend',
           `<div class="rail-settlement"><span class="rail-reward-portrait">${spriteImage('rescuer')}</span><p>${message(language, 'rail.reward')}</p></div>`,
         )
+
+    if (scene === 'recollection-light') {
+      dialog
+        .querySelector('.signal-cast')!
+        .insertAdjacentHTML(
+          'afterend',
+          `<div class="recollection-ignition">${recollectionLantern()}</div>`,
+        )
+      this.sounds.play('power-switch')
+    }
 
     if (scene === 'pass-open') dialog.classList.add('chapter-guardian-restored')
 

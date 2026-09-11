@@ -1,4 +1,5 @@
 import { floorObjectiveComplete } from '../game/floor-circuits.js'
+import { recollectionFloorCopy } from './recollection-copy.js'
 import { signalCopy } from './signal-copy.js'
 import { railObjective } from './rail-view.js'
 import { powerObjective } from './power-view.js'
@@ -257,6 +258,8 @@ export function difficultyTemplate(
 function signalObjective(language: Language, run: Expedition): string {
   const t = signalCopy(language)
   const active = run.circuits?.relays.some((relay) => relay.active && !relay.optional)
+  const recollection = run.departure.recollection ? recollectionFloorCopy(language, 'relay') : null
+  const record = run.circuits?.record
 
-  return `<section class="signal-objective" aria-live="polite"><strong>${t.floors[run.floor - 1]}</strong><p>${active ? t.solve : t.complete}</p>${run.floor === 2 ? `<span>${t.record} · ${run.signalRecord ? '✓' : t.optional}</span>` : ''}</section>`
+  return `<section class="signal-objective" aria-live="polite"><strong>${recollection?.name ?? t.floors[run.floor - 1]}</strong><p>${active ? (recollection?.note ?? t.solve) : t.complete}</p>${recollection ? `<span>${message(language, 'recollection.relays-progress', { count: run.circuits!.relays.filter((relay) => !relay.active).length, total: run.circuits!.relays.length })}</span>` : ''}${record !== undefined && record !== null ? `<span>${t.record} · ${run.circuits?.recordTaken ? '✓' : t.optional}</span>` : ''}</section>`
 }

@@ -26,6 +26,8 @@ export const STORY_DIALOGUE_IDS: readonly StoryDialogueId[] = [
 /** Stable event identity is independent of translated wording, portraits and DOM lifetime. */
 export function storyDialogueEvent(state: StoryViewState): StoryDialogueId | null {
   const run = state.run
+  if (state.board.scene.id === 'reed-camp') return null
+
   if (state.service || run?.phase === 'fallen' || state.feedback === 'hurt') return null
 
   const seenEvents = state.progress.dialogue?.completed ?? []

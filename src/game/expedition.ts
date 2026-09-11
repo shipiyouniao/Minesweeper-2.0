@@ -1,3 +1,4 @@
+import { generateRecollectionFloor, recollectionFloorKind } from './recollection-layout.js'
 import { enterChapterGuardian } from './chapter-guardian.js'
 import { campaignFloor } from './campaign-floors.js'
 import { interactRail, railControl } from './floor-rail.js'
@@ -129,7 +130,13 @@ function createFloor(departure: Departure, floor: number): Expedition {
   const config = expeditionConfig(departure, floor)
   const layout = departure.campaign
     ? campaignFloor(departure.campaign, floor)
-    : generateDungeon(seed, config.mines, config.width, config.height)
+    : departure.recollection
+      ? generateRecollectionFloor(
+          recollectionFloorKind(departure.recollection, departure.seed, floor),
+          seed,
+          config,
+        )
+      : generateDungeon(seed, config.mines, config.width, config.height)
   const run: Expedition = {
     ...layout,
     encounter: null,

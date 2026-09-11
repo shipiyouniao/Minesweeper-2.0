@@ -1,3 +1,4 @@
+import { REED_CAMP_GATE } from './regional-camps.js'
 import type { StoryScene, StoryProgress } from '../types/story.js'
 import type { WorldPortal } from '../types/world-route.js'
 
@@ -52,6 +53,21 @@ export const NORTHWEST_SCENES: readonly StoryScene[] = [
 
 /** The shortcut unlocks by crossing the bridge, never by clicking the atlas. */
 export const NORTHWEST_PORTALS: readonly WorldPortal[] = [
+  {
+    scene: 'blockade-pass',
+    index: BASTION_GATE,
+    destination: 'reed-camp',
+    arrival: REED_CAMP_GATE,
+    requires: 'chapter-one-cleared',
+    outcome: 'reed-camp-reached',
+  },
+  {
+    scene: 'reed-camp',
+    index: REED_CAMP_GATE,
+    destination: 'blockade-pass',
+    arrival: BASTION_GATE,
+    requires: 'chapter-one-cleared',
+  },
   {
     scene: 'north-road',
     index: WEST_ROAD_GATE,

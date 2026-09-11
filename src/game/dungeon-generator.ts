@@ -2,10 +2,16 @@ import { neighbors, randomIndex } from './engine.js'
 import { adjacentSteps, placedBoard, shuffled } from './variant-board.js'
 import { connectedFloor } from './dungeon-path.js'
 import type { Config, Game } from '../types/game.js'
-import type { DungeonLayout } from '../types/dungeon-generation.js'
+import type { DungeonLayout, DungeonLayoutFilter } from '../types/dungeon-generation.js'
 
 /** Generate a varied entrance, naturally expanded blank region and distant reachable stairs. */
-export function generateDungeon(seed: number, mines: number, width = 9, height = 9): DungeonLayout {
+export function generateDungeon(
+  seed: number,
+  mines: number,
+  width = 9,
+  height = 9,
+  accept?: DungeonLayoutFilter,
+): DungeonLayout {
   const config: Config = { width, height, mines }
   const next = randomIndex(seed ^ 0x37a1)
   const entrance = (1 + next(height - 2)) * width + 1 + next(width - 2)
@@ -33,11 +39,13 @@ export function generateDungeon(seed: number, mines: number, width = 9, height =
       openingHasMineDeduction(game, walls)
     ) {
       const layout = finishLayout(game, entrance, walls, seed)
-      if (layout) return layout
+      if (layout && (!accept || accept(layout))) return layout
     }
   }
 
-  return fallbackLayout(config, seed, entrance, safe)
+  const fallback = fallbackLayout(config, seed, entrance, safe)
+  if (accept && !accept(fallback)) throw new Error('Mechanic requirements exceed fallback terrain')
+  return fallback
 }
 
 /** Expand every safe zero connected to the entrance through ordinary flood fill. */

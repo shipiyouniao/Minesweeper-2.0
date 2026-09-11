@@ -12,6 +12,8 @@ export function parseRoute(search: string): AppRoute {
     return stage ? { page: 'campaign', stage } : { page: 'campaign' }
   }
 
+  if (params.get('page') === 'recollection') return { page: 'recollection' }
+
   if (params.get('page') === 'story') return { page: 'story' }
 
   if (params.get('page') === 'free') return { page: 'free' }
@@ -38,6 +40,7 @@ export function parseRoute(search: string): AppRoute {
 export function routeHref(route: AppRoute, language: Language): string {
   const params = new URLSearchParams()
   if (route.page === 'game') params.set('ruleset', route.mode)
+  else if (route.page === 'recollection') params.set('page', 'recollection')
   else if (route.page === 'free') params.set('page', 'free')
   else if (route.page === 'campaign') {
     params.set('page', 'campaign')

@@ -583,7 +583,8 @@ export class VariantApp implements VariantInputActions {
               run.departure.profession,
               () => this.render(),
             )
-          else this.prologue.present(this.root, run, this.language, false, true)
+          else if (!run?.departure.recollection)
+            this.prologue.present(this.root, run, this.language, false, true)
         }
         return
       case 'tutorial':
@@ -636,7 +637,13 @@ export class VariantApp implements VariantInputActions {
         if (this.session instanceof ExpeditionSession && this.session.run?.power) {
           this.view.showInformation(
             message(this.language, 'ridge.network'),
-            powerGuide(this.language, this.session.run.power),
+            powerGuide(
+              this.language,
+              this.session.run.power,
+              this.session.run.departure.recollection
+                ? message(this.language, 'recollection.routing')
+                : undefined,
+            ),
           )
           return
         }
@@ -767,6 +774,10 @@ export class VariantApp implements VariantInputActions {
         break
       case 'camp':
         if (this.session instanceof ExpeditionSession) {
+          if (this.session.run?.departure.recollection && this.session.returnToCamp()) {
+            this.root.querySelector<HTMLAnchorElement>('[data-recollection-return]')?.click()
+            return
+          }
           if (this.session.campaignMode) {
             this.session.returnToCamp()
             this.root.querySelector<HTMLAnchorElement>('[data-campaign-return]')?.click()
@@ -941,6 +952,17 @@ export class VariantApp implements VariantInputActions {
       }
 
       const run = this.session.run
+      if (run?.departure.recollection) {
+        const heading = this.root.querySelector('.variant-heading h2')
+        if (heading) heading.textContent = message(this.language, 'recollection.title')
+        const link = this.root.querySelector<HTMLAnchorElement>('.header-identity .route-back')
+        if (link) {
+          link.href = routeHref({ page: 'recollection' }, this.language)
+          link.dataset['recollectionReturn'] = ''
+          const label = link.querySelector('span')
+          if (label) label.textContent = message(this.language, 'recollection.title')
+        }
+      }
 
       this.view.render(
         run
@@ -974,7 +996,7 @@ export class VariantApp implements VariantInputActions {
         )
       }
 
-      if (!run?.departure.campaign)
+      if (!run?.departure.campaign && !run?.departure.recollection)
         this.prologue.present(this.root, run, this.language, this.paused || this.view.dialogOpen)
 
       this.notices.observe(this.session.camp, this.language)
