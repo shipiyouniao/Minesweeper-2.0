@@ -1,5 +1,8 @@
 /** Generated raster assets used by terrain, landmarks, character and tool controls. */
 export type DungeonSprite =
+  | 'rescuer'
+  | 'skill-rescuer'
+  | 'exit-closed'
   | 'tidekeeper'
   | 'tide-core'
   | 'tide-anchor'

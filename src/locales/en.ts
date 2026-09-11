@@ -164,8 +164,7 @@ export const enMessages: MessageCatalog = {
   'campaign.exit': 'Leave stage',
   'campaign.abandoned': 'Exploration abandoned',
   'campaign.leave': 'Return to the world',
-  'campaign.objective':
-    'Collect this floor’s supplies {count}/{total}, then reach the exit. Three floors; first clear awards 50 supplies.',
+  'campaign.objective': 'Collect this floor’s supplies {count}/{total}, then head to the exit.',
   'story.flag-touch': 'Press and hold the highlighted covered tile to mark it.',
   'story.chord-mouse':
     'Right-click the highlighted 1 to open its unflagged neighbors together. The flag count must match the number; misplaced flags can still cause a mine hit.',
@@ -1657,7 +1656,7 @@ export const enMessages: MessageCatalog = {
   'rail.exit-ready': 'This section is ready. Head to the exit.',
   'rail.objective': 'Run the cart onto the brake platforms to open this floor’s gates.',
   'rail.objective-rescue': 'Reach Toma with the cart, then bring him back to the home station.',
-  'rail.drive': 'Winch forward',
+  'rail.drive': 'Pull cart',
   'rail.reverse': 'Reverse',
   'rail.drive-detail': 'Walk to the green winch and pull the cart along the selected track.',
   'rail.reverse-detail': 'Walk to the reverse winch and pull the cart back the way it came.',
@@ -1671,13 +1670,14 @@ export const enMessages: MessageCatalog = {
   'rail.stop-turnout': 'The cart stops at turnouts. Select A or B, then winch again.',
   'rail.stop-station': 'The next stop is a platform. The cart will brake there.',
   'rail.stop-buffer': 'End of the track. Reverse to go back.',
-  'rail.guide-intro': 'Read the clues, then route the cart.',
+  'rail.guide-intro':
+    'You clear the rails. The cart carries the passenger. Start by reaching every brake plate.',
   'rail.guide-clear':
-    'Rails can hide mines too. The cart only uses revealed safe track. The green trail previews this trip; it cannot scout covered tiles.',
+    'Reveal the rails ahead; covered squares and flags stop the cart. Press Pull cart to walk to the winch and operate it. Your character needs a clear path to the winch too.',
   'rail.guide-route':
-    'Select A/B and use the winches. To change branches, return through the stem, then reverse into the turnout again. Brake latches stay open.',
+    'Click a lever to select branch A or B. The cart stops at the junction; press Pull cart again to take the selected branch.',
   'rail.guide-rescue':
-    'On the last floor, pick Toma up and return him to the home station. Clear both journeys. You can reverse after a wrong turn.',
+    'On the last floor, reach Toma with the cart, then bring him back to the starting platform. Reverse follows the way you came; press it again after each stop.',
   'rail.entry-1': 'Hello? Anyone out there? Don’t pull the red rope yet!',
   'rail.entry-2': 'I hear you! Where are you?',
   'rail.entry-3':
@@ -1699,6 +1699,47 @@ export const enMessages: MessageCatalog = {
   'rail.camp-1': 'Good timing. Fixed the winch. Doesn’t squeal in either direction now.',
   'rail.camp-2': 'What about your ankle?',
   'rail.camp-3':
-    'Still resting it. Nothing wrong with my hands, though. Pull up a seat if you want to learn the engineer’s trade. We’ll start small.',
-  'rail.reward': '120 supplies received · Engineer available at camp',
+    'My leg needs a rest. My hands work fine. Come here—I’ll teach you a rescue knot. Next time, neither of us gets stuck down there.',
+  'rail.reward': '120 supplies · Rescuer available at camp',
+  'rescuer.name': 'Rescuer',
+  'rescuer.note':
+    'Exclusive to the Old Mine rescue. Starts with 1 probe and moves quickly along cleared corridors.',
+  'rescuer.skill': 'Lifeline',
+  'rescuer.skill-note':
+    'Choose a square 2–4 cells away in a straight cardinal line. The entire route must be revealed and unobstructed. Move there and gain 1 shield, capped at 2. Once per floor; costs 1 action point in battle.',
+  'rescuer.no-corridor': 'Clear a straight safe corridor at least 2 cells long.',
+  'rescuer.landing': 'Lifeline landing',
+  'rail.guide-brake':
+    'Send the cart onto a brake plate to open its matching gate. Your character cannot press it. The gate stays open after the cart leaves.',
+  'rail.diagram-covered': 'Covered',
+  'rail.diagram-clear': 'Clear the rails',
+  'rail.diagram-switch': 'Choose A or B',
+  'rail.diagram-brake': 'Cart presses plate',
+  'rail.diagram-home': 'Bring Toma home',
+  'exit.closed': 'Exit closed',
+  'exit.open': 'Exit open',
+  'battle-lesson.title': 'Your first battle',
+  'battle-lesson.guardian-pylon':
+    'Start with this pylon. Reveal its tile, use the number to flag its neighboring mines, then stand beside it and click it. Disable both pylons to expose the guardian.',
+  'battle-lesson.guardian-core':
+    'Both pylons are off. Stand on a cardinally adjacent square and click the guardian’s core. This spends 1 action point to reopen the attack window.',
+  'battle-lesson.guardian-approach':
+    'The guardian is exposed. Reach a safe square directly beside it and keep 2 action points for an attack. If the window closes, click the core to reopen it.',
+  'battle-lesson.points':
+    'Battles take turns. This is your remaining action-point budget: moving one cell usually costs 1, revealing costs 1 extra, and an attack costs 2. Waiting does not advance the enemy turn.',
+  'battle-lesson.move':
+    'Move to the highlighted safe square and watch your points change. Red cells show the enemy’s attack for this turn; keep your destination outside them.',
+  'battle-lesson.no-move':
+    'No revealed safe destination is reachable with your remaining points. Skip this step, or check How to fight and use your tools or skill. The lesson does not require taking a hit.',
+  'battle-lesson.dodge':
+    'You are still in this turn’s attack area. Move to the highlighted safe square before ending your turn. You do not need to brace and take the hit.',
+  'battle-lesson.turn':
+    'Your position is outside this turn’s announced attacks. Press End turn: the enemy acts, then your action points refill. Check the new warning before moving again.',
+  'battle-lesson.combat':
+    'Clear cells as you approach the mechanisms. How to fight explains this enemy’s defenses and stays available throughout the battle. Bracing is optional; you do not need to take a practice hit.',
+  'battle-lesson.prepare':
+    'Follow How to fight to remove the protection, then approach the enemy. Attacking needs an adjacent position and 2 action points. The attack button lights up when ready.',
+  'battle-lesson.attack':
+    'You can attack now. Press the highlighted button or click the adjacent enemy to spend 2 action points. Keep a retreat route and check the next warning.',
+  'battle-lesson.reopen': 'Learn on this battlefield',
 }

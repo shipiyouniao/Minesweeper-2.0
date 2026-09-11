@@ -1,4 +1,5 @@
 import { railMotion, railObjectiveComplete } from '../game/floor-rail.js'
+import { spriteImage } from './dungeon-sprites.js'
 import { message } from '../i18n.js'
 import { icon } from '../icons.js'
 import { sharedStyles } from './shared-styles.js'
@@ -13,6 +14,11 @@ export function cartImage(): string {
 /** A rescued character retains the same face on the board, at camp and in dialogue. */
 export function tomaImage(): string {
   return `<img class="dungeon-sprite rail-toma" src="${import.meta.env.BASE_URL}assets/story/toma.png" alt="" width="128" height="128" draggable="false">`
+}
+
+/** Physical controls keep identical artwork in the toolbar, board and illustrated guide. */
+export function railProp(kind: 'winch' | 'lever' | 'brake'): string {
+  return `<img class="dungeon-sprite rail-prop" src="${import.meta.env.BASE_URL}assets/story/rail-${kind}.png" alt="" width="128" height="128" draggable="false">`
 }
 
 /** Compact controls invoke the same physical levers as board clicks, including keyboard and touch. */
@@ -30,7 +36,7 @@ export function railObjective(language: Language, run: Expedition): string {
     : run.floor === 3
       ? message(language, 'rail.objective-rescue')
       : message(language, 'rail.objective')
-  return `<section class="signal-objective rail-objective" aria-live="polite"><strong>${name}</strong><p>${objective}</p><div class="rail-controls"><button data-control="rail-control:${rail.drive}" title="${message(language, 'rail.drive-detail')}">${cartImage()}${message(language, 'rail.drive')}</button><button data-control="rail-control:${rail.reverse}" title="${message(language, 'rail.reverse-detail')}">↶ ${message(language, 'rail.reverse')}</button>${rail.turnouts.map((entry, i) => `<button data-control="rail-control:${entry.index}" aria-label="${message(language, 'rail.turnout')} ${i + 1}: ${entry.selected ? 'B' : 'A'}">⑂ ${i + 1}${entry.selected ? 'B' : 'A'}</button>`).join('')}<button class="secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'rail.help')}</button></div><span>${message(language, 'rail.progress', { count: rail.stations.filter((station) => station.visited).length, total: rail.stations.length })}</span><small data-rail-feedback>${railStopHint(language, run)}</small></section>`
+  return `<section class="signal-objective rail-objective" aria-live="polite"><strong>${name}</strong><p>${objective}</p><div class="rail-controls"><button data-control="rail-control:${rail.drive}" title="${message(language, 'rail.drive-detail')}">${railProp('winch')}<span>▷ ${message(language, 'rail.drive')}</span></button><button data-control="rail-control:${rail.reverse}" title="${message(language, 'rail.reverse-detail')}">${railProp('winch')}<span>↶ ${message(language, 'rail.reverse')}</span></button>${rail.turnouts.map((entry, i) => `<button data-control="rail-control:${entry.index}" aria-label="${message(language, 'rail.turnout')} ${i + 1}: ${entry.selected ? 'B' : 'A'}">${railProp('lever')}<span>${i + 1}${entry.selected ? 'B' : 'A'}</span></button>`).join('')}<button class="secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'rail.help')}</button></div><span>${message(language, 'rail.progress', { count: rail.stations.filter((station) => station.visited).length, total: rail.stations.length })}</span><small data-rail-feedback>${railStopHint(language, run)}</small></section>`
 }
 
 /** Draw public rail geometry beneath flags and clues; hidden hazard truth never affects the SVG. */
@@ -94,14 +100,14 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
       `${cell.getAttribute('aria-label')}, ${label}${station?.visited ? ' ✓' : ''}`,
     )
     const picture = turnout
-      ? `⑂<small>${rail.turnouts.indexOf(turnout) + 1}${turnout.selected ? 'B' : 'A'}</small>`
+      ? `${railProp('lever')}<small>${rail.turnouts.indexOf(turnout) + 1}${turnout.selected ? 'B' : 'A'}</small>`
       : station
         ? station.kind === 'passenger' && !station.visited
           ? tomaImage()
-          : `${station.visited ? '✓' : station.kind === 'home' ? '⌂' : '▣'}`
+          : `${station.kind === 'home' ? spriteImage('entrance') : railProp('brake')}${station.visited ? '<small>✓</small>' : ''}`
         : index === rail.drive
-          ? '▷'
-          : '↶'
+          ? `${railProp('winch')}<small>▷</small>`
+          : `${railProp('winch')}<small>↶</small>`
     cell.insertAdjacentHTML(
       'beforeend',
       `<span class="rail-landmark ${station?.visited ? 'rail-complete' : ''}">${picture}</span>`,

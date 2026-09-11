@@ -1,4 +1,7 @@
 import { recordStoryCampaign } from '../game/story-quests.js'
+import { grantRescuer } from '../game/story-rewards.js'
+import { advanceBattleLesson } from '../game/battle-lesson.js'
+import type { BattleLesson } from '../types/battle-lesson.js'
 import { campaignProgress, campaignStage, updateCampaign } from '../game/campaign-catalog.js'
 import type { CampaignStage, CampaignStageProgress } from '../types/campaign.js'
 import type { CampaignSceneId } from '../types/campaign.js'
@@ -280,7 +283,13 @@ export class ExpeditionSession {
     const next = actExpedition(run, action)
     if (next === run) return false
     this.current = next
-    const camp = advanceMilestones(this.camp, run, next)
+    const progressedCamp = advanceMilestones(this.camp, run, next)
+    const camp = run.encounter
+      ? {
+          ...progressedCamp,
+          battleLesson: advanceBattleLesson(this.camp.battleLesson ?? 'points', run, next, action),
+        }
+      : progressedCamp
     const lesson = this.campaignLesson
     const nextLesson =
       !this.campaignMode || run.floor !== 1
@@ -358,15 +367,10 @@ export class ExpeditionSession {
         difficulty: this.difficulty,
         journal: null,
         camp: {
-          ...this.camp,
+          ...(this.campaignMode && this.stage.id === 'quarry-rescue' && next.phase === 'won'
+            ? grantRescuer(this.camp)
+            : this.camp),
           supplies: Math.min(Number.MAX_SAFE_INTEGER, this.camp.supplies + earned),
-          upgrades:
-            this.campaignMode &&
-            this.stage.id === 'quarry-rescue' &&
-            next.phase === 'won' &&
-            !this.camp.upgrades.includes('engineer')
-              ? [...this.camp.upgrades, 'engineer']
-              : this.camp.upgrades,
           completed: this.camp.completed + Number(next.phase === 'won'),
         },
         records: addVariantRecord(this.save.records, record),
@@ -380,6 +384,13 @@ export class ExpeditionSession {
 
     this.commit()
     return true
+  }
+
+  /** Persist coach progress independently from the accepted gameplay journal. */
+  setBattleLesson(step: BattleLesson): void {
+    this.refreshShared()
+    this.save = { ...this.save, camp: { ...this.camp, battleLesson: step } }
+    this.commit()
   }
 
   /** Return from the terminal result to camp without awarding anything a second time. */

@@ -12,6 +12,11 @@ export function professionSkillCopy(
   profession: Profession,
 ): VariantDescription {
   switch (profession) {
+    case 'rescuer':
+      return {
+        name: message(language, 'rescuer.skill'),
+        note: message(language, 'rescuer.skill-note'),
+      }
     case 'waymarker':
       return {
         name: message(language, 'profession-skill-copy.return-anchor'),
@@ -58,6 +63,8 @@ export function professionSkillCopy(
 /** Present a short actionable availability message using only public resources and knowledge. */
 export function professionSkillStatus(language: Language, status: SkillAvailability): string {
   switch (status) {
+    case 'no-corridor':
+      return message(language, 'rescuer.no-corridor')
     case 'no-passage':
       return message(language, 'profession-skill-copy.reveal-a-safe-landing-across-a-confirmed')
     case 'blocked-anchor':

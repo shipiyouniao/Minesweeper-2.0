@@ -91,6 +91,8 @@ export function variantCopy(language: Language): VariantMessages {
 /** Describe career tradeoffs with exact starting resources. */
 export function professionCopy(language: Language, profession: Profession): VariantDescription {
   switch (profession) {
+    case 'rescuer':
+      return { name: message(language, 'rescuer.name'), note: message(language, 'rescuer.note') }
     case 'waymarker':
       return {
         name: message(language, 'variant-copy.waymarker'),

@@ -162,5 +162,5 @@ export function battleGuide(language: Language, run: Expedition): string {
     )
     .join(
       '',
-    )}</ol><p class="boss-cost-line ${guidanceStyles['boss-cost-line']}">${message(language, 'battle-guide.move-1-cell-reveal-1-strike-2')}</p><details class="battle-guide-rules ${guidanceStyles['battle-guide-rules']}"><summary>${message(language, 'battle-guide.full-rules')}</summary>${copy.help.map((line) => `<p>${line}</p>`).join('')}</details></article>`
+    )}</ol><p class="boss-cost-line ${guidanceStyles['boss-cost-line']}">${message(language, 'battle-guide.move-1-cell-reveal-1-strike-2')}</p><details class="battle-guide-rules ${guidanceStyles['battle-guide-rules']}"><summary>${message(language, 'battle-guide.full-rules')}</summary>${copy.help.map((line) => `<p>${line}</p>`).join('')}</details><button class="secondary-button" data-control="tutorial">${message(language, 'battle-lesson.reopen')}</button></article>`
 }

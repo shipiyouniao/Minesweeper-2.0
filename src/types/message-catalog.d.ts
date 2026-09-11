@@ -1,5 +1,34 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'battle-lesson.guardian-pylon': string
+  readonly 'battle-lesson.guardian-core': string
+  readonly 'battle-lesson.guardian-approach': string
+
+  readonly 'rescuer.name': string
+  readonly 'rescuer.note': string
+  readonly 'rescuer.skill': string
+  readonly 'rescuer.skill-note': string
+  readonly 'rescuer.no-corridor': string
+  readonly 'rescuer.landing': string
+  readonly 'rail.guide-brake': string
+  readonly 'rail.diagram-covered': string
+  readonly 'rail.diagram-clear': string
+  readonly 'rail.diagram-switch': string
+  readonly 'rail.diagram-brake': string
+  readonly 'rail.diagram-home': string
+  readonly 'exit.closed': string
+  readonly 'exit.open': string
+  readonly 'battle-lesson.title': string
+  readonly 'battle-lesson.points': string
+  readonly 'battle-lesson.move': string
+  readonly 'battle-lesson.no-move': string
+  readonly 'battle-lesson.dodge': string
+  readonly 'battle-lesson.turn': string
+  readonly 'battle-lesson.combat': string
+  readonly 'battle-lesson.prepare': string
+  readonly 'battle-lesson.attack': string
+  readonly 'battle-lesson.reopen': string
+
   readonly 'rail.camp-1': string
   readonly 'rail.camp-2': string
   readonly 'rail.camp-3': string

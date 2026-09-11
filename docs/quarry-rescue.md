@@ -2,7 +2,7 @@
 
 `quarry-rescue` is Chapter One's independent optional side story. Its entrance is the minecart in the east of Quarry Yard, available after discovering the lift and before clearing any prepared main stage. It remains available after the guardian. Leaving the branch preserves its own attempt; returning to the main route does not require finishing it.
 
-Toma, a miner with a sprained ankle, calls for help by knocking on a pipe. The player clears and operates the old haul route, then brings him out in a cart. His conversations use a distinct voice, chibi portrait and the shared typewriter controls. After rescue he appears at camp and unlocks the engineer profession in the shared camp roster.
+Toma, a miner with a sprained ankle, calls for help by knocking on a pipe. The player clears and operates the old haul route, then brings him out in a cart. His conversations use a distinct voice, chibi portrait and the shared typewriter controls. After rescue he appears at camp and unlocks the exclusive Rescuer profession in the shared camp roster.
 
 ## Three authored puzzles
 
@@ -23,11 +23,11 @@ The fixed boards are literal content, not runtime random seeds or rotations of o
 - Brake platforms latch permanently. Their numbered doors reveal only their own doorway when opened. Reversing the cart cannot close a gate behind the player.
 - The last floor's home station requires the passenger stop first. Toma boards on arrival; the cart must then make the return journey.
 
-The three-step illustrated guide is available beside the controls. Cart movement follows its accepted path; turnouts animate and both actions have sound. Reduced motion skips these effects without delaying accepted outcomes. Board scroll clipping, normal zoom controls and the fixed bottom action dock remain shared.
+The four-step illustrated guide is available beside the controls. It uses the same generated winch, lever and brake props as the board and buttons. Cart movement follows its accepted path; turnouts animate and both actions have sound. The closed exit opens when every required stop is complete. Reduced motion skips these effects without delaying accepted outcomes. Board scroll clipping, normal zoom controls and the fixed bottom action dock remain shared.
 
 ## Ownership and rewards
 
-First completion credits **120 supplies**, grants the engineer unlock if not already owned, records `toma-rescued`, and completes the side task in one save transaction. An existing engineer unlock remains unchanged; no replacement currency is granted. This is an additional way to obtain an existing bounded build option, not permanent attack or health inflation.
+First completion credits **120 supplies**, grants the story-exclusive Rescuer license, records `toma-rescued`, and completes the side task in one save transaction. The Rescuer cannot be purchased. Its Lifeline moves along a revealed safe corridor and grants one shield, once per floor. Previously completed saves receive the license without another payment; existing Engineer ownership remains unchanged. See [the profession and first-battle design](first-battle-and-rescuer.md).
 
 Toma remains a speaking camp resident. The stage does not gate the lift, any main dungeon, or the guardian. Main stages and the paused roguelite retain their own journals, records and outcomes. Campaign and roguelite share the resulting wallet and profession roster.
 
