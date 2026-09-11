@@ -316,11 +316,12 @@ export interface MessageCatalog {
   readonly 'story.atlas-district-west': string
   readonly 'story.atlas-world': string
   readonly 'story.atlas-legend': string
-  readonly 'story.atlas-region': string
   readonly 'story.atlas-local': string
   readonly 'story.atlas-woodland': string
   readonly 'story.atlas-here': string
   readonly 'story.atlas-route': string
+  readonly 'story.atlas-route-closed': string
+  readonly 'story.atlas-route-one-way': string
   readonly 'story.atlas-enter': string
   readonly 'story.quest-accepted': string
   readonly 'story.no-quests': string

@@ -1,4 +1,4 @@
-import { atlasMaxZoom, clampAtlasCamera, zoomAtlas } from './atlas-camera.js'
+import { ATLAS_ZOOM, clampAtlasCamera, zoomAtlas } from './atlas-camera.js'
 import { paintAtlasTiles } from './atlas-tiles.js'
 import { AtlasTooltip } from './atlas-tooltip.js'
 import { SceneTransition } from './scene-transition.js'
@@ -49,7 +49,7 @@ export class StoryMapControls {
 
     const level = map.dataset['mapLevel']
 
-    this.level = level === 'world' || level === 'region' ? level : 'local'
+    this.level = level === 'world' ? 'world' : 'local'
     this.key = `${this.level}:${this.level === 'local' ? map.dataset['mapScene'] : ''}`
     if (this.key !== previousKey) {
       this.suppressUntil = 0
@@ -107,7 +107,19 @@ export class StoryMapControls {
     paintAtlasTiles(viewport, this.level, this.camera)
 
     const input = this.root?.querySelector<HTMLInputElement>('.atlas-zoom input')
-    if (input) input.value = String(Math.round(zoom * 100))
+    if (input) {
+      input.value = String(Math.round(zoom * 100))
+      input.style.setProperty(
+        '--atlas-zoom-fill',
+        `${((zoom - ATLAS_ZOOM.min) / (ATLAS_ZOOM.max - ATLAS_ZOOM.min)) * 100}%`,
+      )
+      input.setAttribute('aria-valuetext', `${Math.round(zoom * 100)}%`)
+    }
+
+    const out = this.root?.querySelector<HTMLButtonElement>('[data-map-zoom="out"]')
+    const into = this.root?.querySelector<HTMLButtonElement>('[data-map-zoom="in"]')
+    if (out) out.disabled = zoom <= ATLAS_ZOOM.min
+    if (into) into.disabled = zoom >= ATLAS_ZOOM.max
 
     const output = this.root?.querySelector('output.atlas-zoom-value')
     if (output) output.textContent = `${Math.round(zoom * 100)}%`
@@ -121,7 +133,7 @@ export class StoryMapControls {
         ? { x: point.x - bounds.x - bounds.width / 2, y: point.y - bounds.y - bounds.height / 2 }
         : { x: 0, y: 0 }
 
-    this.camera = zoomAtlas(this.camera, value, anchor, this.size(), this.level)
+    this.camera = zoomAtlas(this.camera, value, anchor, this.size())
     this.tooltip.hide()
     this.paint()
   }
@@ -143,6 +155,9 @@ export class StoryMapControls {
   /** Begin a pan or promote the two tracked touch points to a pinch. */
   private readonly down = (event: PointerEvent): void => {
     if (event.button !== 0 || !(event.target instanceof Element)) return
+
+    // A new gesture is intentional input; only the old gesture's synthesized click is suppressed.
+    if (!this.pointers.size) this.suppressUntil = 0
 
     this.tipArmed = !!event.target.closest('.atlas-map-tip')
     if (this.tipArmed) return
@@ -330,7 +345,7 @@ export class StoryMapControls {
 
       this.camera = clampAtlasCamera(
         {
-          zoom: Math.min(atlasMaxZoom(this.level), Math.max(1, zoom)),
+          zoom: Math.min(ATLAS_ZOOM.max, Math.max(ATLAS_ZOOM.min, zoom)),
           x: (0.5 - x / 100) * this.size().width * zoom,
           y: (0.5 - y / 100) * this.size().height * zoom,
         },

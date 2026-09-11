@@ -1,4 +1,5 @@
 import type { CampaignSave } from './campaign.js'
+import type { AtlasLevel } from './atlas.js'
 import type { Game } from './game.js'
 import type { Equipment, Profession } from './variants.js'
 import type { CampScreen } from './camp-navigation.js'
@@ -196,7 +197,7 @@ export interface StoryViewState {
   readonly touchInput?: boolean
   readonly selectedTask?: StoryTask | null
   readonly panel?: 'tasks' | 'map' | null
-  readonly mapLevel?: 'local' | 'region' | 'world'
+  readonly mapLevel?: AtlasLevel
   readonly mapScene?: number
   readonly mapLegend?: boolean
 }

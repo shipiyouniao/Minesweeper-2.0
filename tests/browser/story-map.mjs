@@ -14,6 +14,57 @@ async function activate(page, selector, touch) {
   else await target.click()
 }
 
+/** Real endpoint input must span the full track, without text-field padding or a clamped dead zone. */
+async function checkZoomRange(page, touch) {
+  const slider = page.locator('.atlas-zoom input')
+  assert.equal(await slider.getAttribute('min'), '100')
+  assert.equal(await slider.getAttribute('max'), '500')
+  assert.equal(await slider.evaluate((el) => getComputedStyle(el).padding), '0px')
+  const bounds = await slider.boundingBox()
+  const y = bounds.y + bounds.height / 2
+  for (const [x, value] of [
+    [bounds.x + bounds.width - 1, '500'],
+    [bounds.x + 1, '100'],
+  ]) {
+    if (touch) await page.touchscreen.tap(x, y)
+    else await page.mouse.click(x, y)
+    assert.equal(await slider.inputValue(), value)
+    assert.equal(await page.locator('.atlas-zoom-value').innerText(), `${value}%`)
+    assert.equal(
+      Number(await page.locator('.atlas-viewport').getAttribute('data-zoom')),
+      Number(value) / 100,
+    )
+  }
+  await slider.focus()
+  await page.keyboard.press('End')
+  assert.equal(await slider.inputValue(), '500')
+  assert.equal(await page.locator('[data-map-zoom="in"]').isDisabled(), true)
+  await page.keyboard.press('Home')
+  assert.equal(await slider.inputValue(), '100')
+  assert.equal(await page.locator('[data-map-zoom="out"]').isDisabled(), true)
+  if (touch) {
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: bounds.x + 8, y, id: 1 }],
+    })
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ x: bounds.x + bounds.width - 1, y, id: 1 }],
+    })
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await cdp.detach()
+  } else {
+    await page.mouse.move(bounds.x + 8, y)
+    await page.mouse.down()
+    await page.mouse.move(bounds.x + bounds.width - 1, y, { steps: 8 })
+    await page.mouse.up()
+  }
+  assert.equal(await slider.inputValue(), '500', 'dragging reaches the far end of the track')
+  await slider.focus()
+  await page.keyboard.press('Home')
+}
+
 /** Drive native two-finger input, including a delayed final release that must not click a marker. */
 async function pinch(page, box) {
   const cdp = await page.context().newCDPSession(page)
@@ -102,12 +153,31 @@ try {
       await landmark.getAttribute('data-map-name'),
     )
 
-    await page.locator('.atlas-scale').click()
+    await checkZoomRange(page, touch)
+    assert.equal(await page.locator('[data-story-action="map-level"]').count(), 2)
+    assert.equal(await page.locator('[data-level="region"]').count(), 0)
+    await page.locator('[data-story-action="map-level"][data-level="world"]').click()
+    await checkZoomRange(page, touch)
     assert.equal(await page.locator('.atlas-viewport').getAttribute('data-detail'), 'districts')
     assert.equal(await page.locator('[data-atlas-detail="places"] .atlas-node:visible').count(), 0)
+    assert.equal(await page.locator('[data-atlas-route]').count(), 12)
+    assert.equal(await page.locator('[data-atlas-waypoint]').count(), 11)
+    assert.equal(
+      await page.locator('[data-atlas-route="awakening:trail"]').getAttribute('data-route-state'),
+      'open',
+    )
+    assert.equal(
+      await page
+        .locator('[data-atlas-route="north-road:tower-landing"]')
+        .getAttribute('data-route-state'),
+      'uncharted',
+    )
+    await page
+      .locator('.story-atlas')
+      .screenshot({ path: `.native/atlas-screenshots/${width}-${lang}-world.png` })
     await activate(page, '[data-map-focus="camp"]', touch)
     assert.equal(await page.locator('.atlas-viewport').getAttribute('data-detail'), 'places')
-    assert.equal(await page.locator('.atlas-viewport').getAttribute('data-zoom'), '2')
+    assert.equal(await page.locator('.atlas-viewport').getAttribute('data-zoom'), '2.5')
     assert.ok((await page.locator('.atlas-vector-tile').count()) <= 9)
     const camera = await page.locator('.atlas-scene').getAttribute('style')
     await legend.click()
@@ -118,11 +188,15 @@ try {
       .screenshot({ path: `.native/atlas-screenshots/${width}-${lang}-places.png` })
     await activate(page, '.atlas-node[data-scene="3"]', touch)
     assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'local')
-    await page.locator('.atlas-back').click()
+    assert.equal(
+      await page.evaluate(() => document.activeElement?.getAttribute('data-level')),
+      'local',
+    )
+    await page.locator('[data-story-action="map-level"][data-level="world"]').click()
     assert.equal(
       await page.locator('.atlas-scene').getAttribute('style'),
       camera,
-      'returning retains the region camera',
+      'returning retains the world camera',
     )
 
     await page.locator('[data-map-zoom="reset"]').click()
@@ -130,7 +204,7 @@ try {
     if (touch) {
       await pinch(page, viewport)
       assert.ok(Number(await page.locator('.atlas-viewport').getAttribute('data-zoom')) > 2)
-      assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'region')
+      assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'world')
     } else {
       await page.locator('.atlas-viewport').focus()
       await page.keyboard.press('+')
@@ -139,13 +213,10 @@ try {
       assert.match(await page.locator('.atlas-scene').getAttribute('style'), /translate\(-/)
     }
     await page.locator('[data-map-zoom="reset"]').click()
-    await page.locator('.atlas-scale').click()
-    assert.equal(await page.locator('.atlas-viewport').getAttribute('data-detail'), 'regions')
-    await activate(page, '.atlas-region-node', touch)
     assert.equal(await page.locator('.atlas-viewport').getAttribute('data-detail'), 'districts')
     await activate(page, '[data-atlas-detail="districts"] [data-map-focus="camp"]', touch)
     assert.equal(await page.locator('.atlas-viewport').getAttribute('data-detail'), 'places')
-    assert.ok(Number(await page.locator('.atlas-viewport').getAttribute('data-zoom')) > 4)
+    assert.equal(Number(await page.locator('.atlas-viewport').getAttribute('data-zoom')), 2.5)
     await activate(page, '.atlas-node[data-scene="3"]', touch)
     assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'local')
     assert.equal(await page.locator('.story-map').getAttribute('data-map-scene'), '3')

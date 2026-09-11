@@ -148,7 +148,7 @@ try {
     )
     await seed(page, completed, `?page=story&lang=${language}`)
     await page.locator('[data-story-action="map"]').click()
-    await page.locator('[data-story-action="map-level"][data-level="region"]').first().click()
+    await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
     const before = await page.evaluate((key) => localStorage.getItem(key), key)
     for (const scene of [9, 10]) {
       await page.locator('[data-map-zoom="reset"]').click()
@@ -158,7 +158,7 @@ try {
       await page.keyboard.press('Enter')
       await page.locator(`[data-map-level="local"][data-map-scene="${scene}"]`).waitFor()
       assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), before)
-      await page.locator('[data-story-action="map-level"][data-level="region"]').first().click()
+      await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
     }
     await seed(page, guardian, `?page=campaign&stage=northwest-bastion&lang=${language}`)
     await page.locator('[data-control="help"]').first().click()
