@@ -29,6 +29,7 @@ import { BoardRightClick } from './board-right-click.js'
 import { navigateCamp } from './camp-navigation.js'
 import { LanguageMenu } from './language-menu.js'
 import { storyTemplate } from './story-template.js'
+import { mountStoryLesson } from './story-lesson.js'
 import { StoryPerformance } from './story-performance.js'
 import { StoryMapControls } from './story-map-controls.js'
 import { storyDialogueEvent } from '../game/story-events.js'
@@ -69,6 +70,7 @@ export class StoryApp implements MountedGame {
   private readonly transition = new SceneTransition()
   private touchInput = matchMedia('(pointer: coarse)').matches
   private questTimer: ReturnType<typeof setTimeout> | null = null
+  private disposeLesson: (() => void) | null = null
 
   /** Restore the active scene and any unfinished dialogue. */
   constructor(
@@ -114,6 +116,7 @@ export class StoryApp implements MountedGame {
 
   /** Cancel presentation only; accepted movement was already checkpointed by the session. */
   dispose(): void {
+    this.disposeLesson?.()
     this.transition.cancel()
     this.mapControls.dispose()
     this.generation++
@@ -190,6 +193,8 @@ export class StoryApp implements MountedGame {
 
     this.languageMenu?.dispose()
     this.titleMenu?.dispose()
+    this.disposeLesson?.()
+    this.disposeLesson = null
     document.documentElement.lang = this.language === 'zh' ? 'zh-CN' : this.language
     document.title = 'Minefarer'
 
@@ -310,6 +315,8 @@ export class StoryApp implements MountedGame {
           this.render()
         },
       )
+
+    this.disposeLesson = mountStoryLesson(this.root, state)
   }
 
   /** Route finite service commands through the existing catalogs and shared camp operations. */

@@ -16,6 +16,9 @@ export interface StoryDialogueBeat {
 /** Board reactions play after the corresponding accepted interaction. */
 export type StoryReaction = 'greet' | 'collect'
 
+/** Teaching follows demonstrated actions, including actions completed ahead of their prompt. */
+export type StoryLessonStep = 'inspect' | 'flag' | 'open' | 'travel'
+
 /** Authored scenes share coordinates and movement without sharing a random generator. */
 export interface StoryScene {
   readonly water?: readonly number[]

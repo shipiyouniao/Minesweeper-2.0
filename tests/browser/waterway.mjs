@@ -228,7 +228,7 @@ try {
       await page.locator('[data-beacon-replay]').click()
       await dialogue(page)
       await page.locator('[data-story-action="map"]').click()
-      await page.locator('[data-waterway-location]').waitFor()
+      await page.locator('.story-map[data-map-level="local"]').waitFor()
       await page.screenshot({ path: `.native/waterway-screenshots/map-${width}.png` })
     }
     assert.deepEqual(errors, [])

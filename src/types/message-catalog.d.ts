@@ -1,5 +1,10 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'story.lesson-title': string
+  readonly 'story.lesson-inspect': string
+  readonly 'story.lesson-open-mouse': string
+  readonly 'story.lesson-open-touch': string
+  readonly 'story.lesson-travel': string
   readonly 'battle-lesson.guardian-pylon': string
   readonly 'battle-lesson.guardian-core': string
   readonly 'battle-lesson.guardian-approach': string
@@ -99,8 +104,6 @@ export interface MessageCatalog {
   readonly 'finale.guide-intro': string
   readonly 'finale.guide-title': string
   readonly 'finale.guide-record': string
-  readonly 'finale.location': string
-  readonly 'finale.ending-location': string
   readonly 'finale.control-entry-1': string
   readonly 'finale.control-entry-2': string
   readonly 'finale.control-entry-3': string
@@ -154,7 +157,6 @@ export interface MessageCatalog {
   readonly 'waterway.guide-intro': string
   readonly 'waterway.guide-record-title': string
   readonly 'waterway.guide-record': string
-  readonly 'waterway.location': string
   readonly 'waterway.entry-1': string
   readonly 'waterway.entry-2': string
   readonly 'waterway.entry-3': string
@@ -182,7 +184,6 @@ export interface MessageCatalog {
   readonly 'waterway.camp-4': string
 
   readonly 'ridge.recording': string
-  readonly 'ridge.location': string
   readonly 'ridge.title': string
   readonly 'ridge.task': string
   readonly 'ridge.task-detail': string
@@ -724,8 +725,6 @@ export interface MessageCatalog {
   readonly 'camp-copy.achievements': string
   readonly 'camp-copy.all': string
   readonly 'camp-copy.back-to-camp': string
-  readonly 'camp-copy.build-a-three-point-loadout': string
-  readonly 'camp-copy.choose-board-size-and-expedition-length': string
   readonly 'camp-copy.choose-your-explorer-and-skill': string
   readonly 'camp-copy.count-floors': string
   readonly 'camp-copy.count-unlocked': string
@@ -740,10 +739,7 @@ export interface MessageCatalog {
   readonly 'camp-copy.relics': string
   readonly 'camp-copy.select-an-item-to-see-its-effect': string
   readonly 'camp-copy.shop': string
-  readonly 'camp-copy.unlock-careers-equipment-and-relics': string
   readonly 'camp-copy.unlock-the-workshop-before-buying-and-equipping': string
-  readonly 'camp-template.explore-complete-goals-claim-exclusive-gear': string
-  readonly 'camp-template.long-term-milestones-with-lasting-rewards': string
   readonly 'camp-template.ready': string
   readonly 'clock-board.echo': string
   readonly 'clock-board.echo-move': string

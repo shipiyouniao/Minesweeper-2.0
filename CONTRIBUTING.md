@@ -35,6 +35,7 @@ Open [the local game](http://127.0.0.1:5173/minefarer/). The default compiler is
 - Parse stored JSON and browser input at their boundaries. Construct validated domain values; do not cast arbitrary input to a domain interface.
 - Give named functions, methods, and lifecycle callbacks a documentation comment explaining their purpose. Add internal comments for decisions and invariants, and blank lines between validation, calculation, effects, and return values.
 - Keep the interface minimal and keyboard accessible. Preserve covered-cell privacy in both visible markup and accessibility labels. Update all three translations when changing message contracts.
+- Keep task steps, chapter progress and unlock outcomes in the task journal. Maps show places and routes; camp navigation names its destinations. Avoid persistent summaries that repeat journal entries. Show instructions beside the affected control when an action needs explanation, and keep detailed rules in the existing illustrated help or contextual tutorial.
 
 Text files use LF on every platform through `.gitattributes`. Run `npm run format` to apply the pinned formatter. Keep unrelated formatting, dependency updates, and generated files out of your change. The intentionally complex synthetic compiler workloads live separately from application code.
 

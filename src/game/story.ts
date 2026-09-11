@@ -2,7 +2,13 @@ import { neighbors } from './engine.js'
 import { clueIsolated } from './clue-isolation.js'
 import { adjacentSteps } from './variant-board.js'
 import { PROLOGUE_SCENES, STORY_SCENES } from './story-content.js'
-import type { StoryAction, StoryBoard, StoryRun, StoryScene } from '../types/story.js'
+import type {
+  StoryAction,
+  StoryBoard,
+  StoryLessonStep,
+  StoryRun,
+  StoryScene,
+} from '../types/story.js'
 
 /** Derive numbers from an explicit map; artwork and scripting never supply clue values. */
 export function buildStoryBoard(scene: StoryScene, operated: readonly number[] = []): StoryBoard {
@@ -124,23 +130,36 @@ export function storyPath(board: StoryBoard, player: number, target: number): nu
   return path
 }
 
-/** Learning is proven by interactions with real clues and cells, not a Next button. */
+/** Recognize demonstrated marking and safe opening even when clue inspection was skipped. */
 export function storyLessonComplete(run: StoryRun): boolean {
-  if (run.floor === 0) return run.inspected && run.practicedFlag && run.practicedReveal
+  if (run.floor === 0) return run.practicedFlag && run.practicedReveal
   return run.floor !== 1 || run.practicedReveal
 }
 
-/** Give the first scene a precise teaching target; later scenes allow independent exploration. */
+/** Derive the next practice from gameplay so reloads and early actions never reset the guide. */
+export function storyTeachingStep(run: StoryRun): StoryLessonStep | null {
+  if (run.floor !== 0 || run.phase !== 'exploring' || run.visited?.some((scene) => scene.floor > 0))
+    return null
+
+  if (!run.practicedFlag) return run.inspected ? 'flag' : 'inspect'
+
+  return run.practicedReveal ? 'travel' : 'open'
+}
+
+/** Keep the tile highlight and its floating instruction on the same teaching step. */
 export function storyTeachingTarget(run: StoryRun): number | null {
-  if (run.floor !== 0) return null
-
-  if (!run.inspected) return run.board.scene.clue
-
-  if (!run.practicedFlag) return run.board.scene.teachingMine
-
-  if (!run.practicedReveal) return run.board.scene.safeClue
-
-  return run.board.exit
+  switch (storyTeachingStep(run)) {
+    case 'inspect':
+      return run.board.scene.clue
+    case 'flag':
+      return run.board.scene.teachingMine
+    case 'open':
+      return run.board.scene.safeClue
+    case 'travel':
+      return run.board.exit
+    case null:
+      return null
+  }
 }
 
 /** Reveal connected zero ground and its numbered boundary without leaking through walls. */

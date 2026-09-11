@@ -2,6 +2,11 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** zh interface messages. Keep keys aligned across locales. */
 export const zhMessages: MessageCatalog = {
+  'story.lesson-title': '林间练习 · {step}/4',
+  'story.lesson-inspect': '点一下亮起的「1」，看看它周围的八个格子。',
+  'story.lesson-open-mouse': '右键点亮起的「1」，一起翻开周围没插旗的格子。',
+  'story.lesson-open-touch': '长按亮起的「1」，一起翻开周围没插旗的格子。',
+  'story.lesson-travel': '点开前面的路，再点右侧的出口离开。',
   'story.haul-load': '先把完整轴芯搬上台车。',
   'story.go-together': '那我们去找她。等人找到了，再问问她回家的事。',
   'story.lift-answer': '响了两下！是妮娅，她听见我们了。站稳，咱们上去。',
@@ -571,8 +576,6 @@ export const zhMessages: MessageCatalog = {
   'camp-copy.achievements': '成就',
   'camp-copy.all': '全部',
   'camp-copy.back-to-camp': '返回营地',
-  'camp-copy.build-a-three-point-loadout': '搭配 3 点出发装备',
-  'camp-copy.choose-board-size-and-expedition-length': '选择难度、棋盘与层数',
   'camp-copy.choose-your-explorer-and-skill': '选择角色与职业技能',
   'camp-copy.count-floors': '{count} 层',
   'camp-copy.count-unlocked': '已解锁 {count} 项',
@@ -587,11 +590,8 @@ export const zhMessages: MessageCatalog = {
   'camp-copy.relics': '遗物',
   'camp-copy.select-an-item-to-see-its-effect': '选择商品查看效果。',
   'camp-copy.shop': '商店',
-  'camp-copy.unlock-careers-equipment-and-relics': '解锁职业、装备与遗物',
   'camp-copy.unlock-the-workshop-before-buying-and-equipping':
     '先解锁工坊，才能购买和携带出发装备。',
-  'camp-template.explore-complete-goals-claim-exclusive-gear': '完成探索目标，领取物资与专属装备',
-  'camp-template.long-term-milestones-with-lasting-rewards': '挑战长期目标，解锁遗物与职业',
   'camp-template.ready': '可领取',
   'clock-board.echo': '残影追击 {p0} · {p1}',
   'clock-board.echo-move': '离开残影格后触发',
@@ -1372,7 +1372,6 @@ export const zhMessages: MessageCatalog = {
   'signal.camp-3': '靠这张图能找到它吗？',
   'signal.camp-4': '山脊上的观测仪能测出位置。北路南边有个岔口，路牌上画着望远镜。我跟你一起去。',
   'ridge.recording': '播放信标录音',
-  'ridge.location': '信号来自旧水道。入口就在北路南侧，沿路找水泵。',
   'waterway.title': '旧水道',
   'waterway.task': '找到水道里的信标',
   'waterway.task-detail': '从北路南侧的水泵入口进入旧水道，抽走积水，查清信号从哪来。',
@@ -1388,7 +1387,6 @@ export const zhMessages: MessageCatalog = {
   'waterway.guide-record-title': '抽干积水，再切换出口',
   'waterway.guide-record':
     '走到接通电源的水泵上，点击启动。所有水泵都用过后，再给出口闸门供电；切走电源不会让积水回来。',
-  'waterway.location': '信标在旧水道里找到了。控制室的路还没开放。',
   'waterway.entry-1': '先把积水抽走，再开闸。别看地上湿，旧雷一点也没少。',
   'waterway.entry-2': '这回可没几步好走。',
   'waterway.entry-3': '我看着水位，你挑路。',
@@ -1440,8 +1438,6 @@ export const zhMessages: MessageCatalog = {
   'finale.guide-title': '接通线路',
   'finale.guide-record':
     '走到有电的控制台并点击接通。完成后可以改接另一条支路，已经接好的线路不会丢失。',
-  'finale.location': '西北旧桥已放下。过桥后，可以沿小路回营补给。',
-  'finale.ending-location': '西北关口已开放。第一章完成。',
   'finale.control-entry-1': '找到了。旧桥、关口，还有水道的信标，都接在这儿。',
   'finale.control-entry-2': '把总闸拉下来，守卫是不是就停了？',
   'finale.control-entry-3': '不要断电。门也靠这条线撑着。',

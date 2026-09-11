@@ -16,9 +16,6 @@ export type CampLabel =
   | 'purchaseHelp'
   | 'workshopRequired'
   | 'professionHelp'
-  | 'equipmentHelp'
-  | 'routeHelp'
-  | 'shopHelp'
   | 'loadoutBudget'
 
 /** Keep the selected item when returning from a different camp screen. */

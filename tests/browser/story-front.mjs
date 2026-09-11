@@ -160,6 +160,13 @@ try {
       assert.ok(!found.camp.story.facts.includes('road-reported'))
       await visit(75)
       for (let floor = 4; floor <= 6; floor++) {
+        if (floor === 4 || floor === 6) {
+          assert.equal(await page.locator('.story-stage [data-task-mechanism]').count(), 0)
+          await page.locator('[data-story-action="tasks"]').click()
+          await page.locator('[data-story-action="select-task"][data-task="repair-lift"]').click()
+          await page.locator('.story-quest-panel [data-task-mechanism]').waitFor()
+          await page.locator('[data-story-action="close-panel"]').click()
+        }
         await solve()
         const { run } = await read(page)
         assert.equal(run.floor, floor)

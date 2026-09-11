@@ -56,12 +56,6 @@ export function campLabel(language: Language, label: CampLabel): string {
       return message(language, 'camp-copy.unlock-the-workshop-before-buying-and-equipping')
     case 'professionHelp':
       return message(language, 'camp-copy.choose-your-explorer-and-skill')
-    case 'equipmentHelp':
-      return message(language, 'camp-copy.build-a-three-point-loadout')
-    case 'routeHelp':
-      return message(language, 'camp-copy.choose-board-size-and-expedition-length')
-    case 'shopHelp':
-      return message(language, 'camp-copy.unlock-careers-equipment-and-relics')
     case 'loadoutBudget':
       return message(language, 'camp-copy.loadout-points')
   }

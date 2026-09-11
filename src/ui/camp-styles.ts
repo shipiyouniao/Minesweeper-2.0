@@ -81,7 +81,7 @@ export const campStyles = {
     'tw:[&_.dungeon-sprite]:w-7 tw:[&_.dungeon-sprite]:h-7',
   ].join(' '),
   'camp-destinations': [
-    'tw:grid tw:[grid-template-rows:repeat(4,_1fr)] tw:gap-3',
+    'tw:grid tw:auto-rows-fr tw:gap-3',
     'tw:[@media(max-width:_620px)]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] tw:[@media(max-width:_620px)]:[grid-template-rows:auto]',
   ].join(' '),
   'camp-destination': [
@@ -89,15 +89,13 @@ export const campStyles = {
     'tw:[&:hover]:border-[var(--blue)]',
     'tw:[&>.dungeon-sprite]:w-14 tw:[&>.dungeon-sprite]:h-14 tw:[&>.dungeon-sprite]:shrink-0',
     'tw:[&>span:nth-child(2)]:[flex:1]',
-    'tw:[&_strong]:block tw:[&_strong]:text-[17px] tw:[&_strong]:font-medium tw:[&_strong]:mb-1.5',
-    'tw:[&_small]:block tw:[&_small]:text-muted tw:[&_small]:text-[13px] tw:[&_small]:[line-height:1.5]',
+    'tw:[&_strong]:block tw:[&_strong]:text-[17px] tw:[&_strong]:font-medium',
     'tw:[&>span:last-child]:text-muted',
     'tw:[@media(max-width:_900px)]:p-4 tw:[@media(max-width:_900px)]:gap-3',
     'tw:[@media(max-width:_900px)]:[&>.dungeon-sprite]:w-10.5 tw:[@media(max-width:_900px)]:[&>.dungeon-sprite]:h-10.5',
     'tw:[@media(max-width:_620px)]:items-start tw:[@media(max-width:_620px)]:flex-col',
     'tw:[@media(max-width:_620px)]:[&>span:last-child]:hidden',
     'tw:[@media(max-width:_620px)]:[&_strong]:text-[15px]',
-    'tw:[@media(max-width:_620px)]:[&_small]:text-[12px]',
   ].join(' '),
   'camp-history-summary': ['tw:text-muted tw:text-[12px] tw:mt-5'].join(' '),
   'camp-subnav': [

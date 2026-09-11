@@ -2,6 +2,11 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** en interface messages. Keep keys aligned across locales. */
 export const enMessages: MessageCatalog = {
+  'story.lesson-title': 'Forest practice · {step}/4',
+  'story.lesson-inspect': 'Select the glowing 1 to see its eight neighboring tiles.',
+  'story.lesson-open-mouse': 'Right-click the glowing 1 to open its unflagged neighbors.',
+  'story.lesson-open-touch': 'Hold the glowing 1 to open its unflagged neighbors.',
+  'story.lesson-travel': 'Open the path ahead, then select the exit on the right.',
   'story.haul-load': 'Load the intact shaft onto the trolley first.',
   'story.go-together':
     'Then we look for her first. If there is a way home in those records, she can help me read it.',
@@ -652,8 +657,6 @@ export const enMessages: MessageCatalog = {
   'camp-copy.achievements': 'Achievements',
   'camp-copy.all': 'All',
   'camp-copy.back-to-camp': 'Back to camp',
-  'camp-copy.build-a-three-point-loadout': 'Build a three-point loadout.',
-  'camp-copy.choose-board-size-and-expedition-length': 'Choose board size and expedition length.',
   'camp-copy.choose-your-explorer-and-skill': 'Choose your explorer and skill.',
   'camp-copy.count-floors': '{count} floors',
   'camp-copy.count-unlocked': '{count} unlocked',
@@ -668,13 +671,8 @@ export const enMessages: MessageCatalog = {
   'camp-copy.relics': 'Relics',
   'camp-copy.select-an-item-to-see-its-effect': 'Select an item to see its effect.',
   'camp-copy.shop': 'Shop',
-  'camp-copy.unlock-careers-equipment-and-relics': 'Unlock careers, equipment and relics.',
   'camp-copy.unlock-the-workshop-before-buying-and-equipping':
     'Unlock the Workshop before buying and equipping departure gear.',
-  'camp-template.explore-complete-goals-claim-exclusive-gear':
-    'Explore, complete goals, claim exclusive gear.',
-  'camp-template.long-term-milestones-with-lasting-rewards':
-    'Long-term milestones with lasting rewards.',
   'camp-template.ready': 'ready',
   'clock-board.echo': 'Echo: {p0} · {p1}',
   'clock-board.echo-move': 'Move away to activate',
@@ -1525,8 +1523,6 @@ export const enMessages: MessageCatalog = {
   'signal.camp-4':
     'The ridge instruments can locate it. There is a turn south of the North Road, marked with a telescope. I will come with you.',
   'ridge.recording': 'Listen to the beacon',
-  'ridge.location':
-    'The signal comes from the Old Waterway. Look for the pump on the south side of North Road.',
   'waterway.title': 'Old Waterway',
   'waterway.task': 'Find the beacon in the waterway',
   'waterway.task-detail':
@@ -1543,8 +1539,6 @@ export const enMessages: MessageCatalog = {
   'waterway.guide-record-title': 'Pump first, then switch to the exit',
   'waterway.guide-record':
     'Walk onto a powered pump and click to drain its chamber. Use every pump, then power the exit gate. Switching the power away does not refill a drained chamber.',
-  'waterway.location':
-    'The beacon has been found in the Old Waterway. The control-room route is not open yet.',
   'waterway.entry-1':
     'Pump the water out before opening the gate. The old mines are still down here.',
   'waterway.entry-2': 'Not much room to put a foot wrong.',
@@ -1599,8 +1593,6 @@ export const enMessages: MessageCatalog = {
   'finale.guide-title': 'Connect the line',
   'finale.guide-record':
     'Walk to a powered console and click it to connect. You may then switch branches; completed connections stay complete.',
-  'finale.location': 'The northwest bridge is down. Beyond it, a shortcut leads back to camp.',
-  'finale.ending-location': 'The northwest blockade is open. Chapter One complete.',
   'finale.control-entry-1':
     'Here it is. The bridge, the blockade, even the waterway beacon—all wired through here.',
   'finale.control-entry-2': 'If we cut the main power, will the guardian stop?',

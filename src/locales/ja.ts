@@ -2,6 +2,11 @@ import type { MessageCatalog } from '../types/message-catalog.js'
 
 /** ja interface messages. Keep keys aligned across locales. */
 export const jaMessages: MessageCatalog = {
+  'story.lesson-title': '森での練習 · {step}/4',
+  'story.lesson-inspect': '光る「1」を押して、周囲8マスを見てみよう。',
+  'story.lesson-open-mouse': '光る「1」を右クリックして、旗のない隣接マスを開こう。',
+  'story.lesson-open-touch': '光る「1」を長押しして、旗のない隣接マスを開こう。',
+  'story.lesson-travel': '前方の道を開き、右の出口を押して進もう。',
   'story.haul-load': '先に無傷の軸を台車へ載せよう。',
   'story.go-together': 'なら、先に彼女を探そう。帰り道が記録にあるなら、読むのを手伝ってもらえる。',
   'story.lift-answer': '二回。ニアに聞こえたんだ。手すりにつかまって、上るよ。',
@@ -603,8 +608,6 @@ export const jaMessages: MessageCatalog = {
   'camp-copy.achievements': '実績',
   'camp-copy.all': 'すべて',
   'camp-copy.back-to-camp': 'キャンプへ戻る',
-  'camp-copy.build-a-three-point-loadout': '3ポイントで装備を組む',
-  'camp-copy.choose-board-size-and-expedition-length': '難易度と階層数を選ぶ',
   'camp-copy.choose-your-explorer-and-skill': '冒険者とスキルを選ぶ',
   'camp-copy.count-floors': '{count}階',
   'camp-copy.count-unlocked': '{count}点を解放済み',
@@ -619,12 +622,8 @@ export const jaMessages: MessageCatalog = {
   'camp-copy.relics': '遺物',
   'camp-copy.select-an-item-to-see-its-effect': '商品を選ぶと効果を確認できます。',
   'camp-copy.shop': 'ショップ',
-  'camp-copy.unlock-careers-equipment-and-relics': '職業・装備・遺物を解放',
   'camp-copy.unlock-the-workshop-before-buying-and-equipping':
     '出発装備を購入・携帯するには、先に工房を解放してください。',
-  'camp-template.explore-complete-goals-claim-exclusive-gear':
-    '探索目標を達成し、物資と限定装備を獲得',
-  'camp-template.long-term-milestones-with-lasting-rewards': '長期目標に挑み、遺物と職業を解放',
   'camp-template.ready': '受領可能',
   'clock-board.echo': '残像の追撃：{p0} · {p1}',
   'clock-board.echo-move': '移動して発動',
@@ -1428,7 +1427,6 @@ export const jaMessages: MessageCatalog = {
   'signal.camp-4':
     '尾根の観測装置なら位置を調べられるよ。北の道の南側に、望遠鏡の道標がある分かれ道がある。一緒に行こう。',
   'ridge.recording': '標の録音を聴く',
-  'ridge.location': '信号は旧水路から来ている。北の道の南側にあるポンプを探そう。',
   'waterway.title': '旧水路',
   'waterway.task': '水路の信標を探す',
   'waterway.task-detail':
@@ -1445,7 +1443,6 @@ export const jaMessages: MessageCatalog = {
   'waterway.guide-record-title': '排水してから出口へ切り替える',
   'waterway.guide-record':
     '通電したポンプまで歩き、クリックして排水する。全ポンプを使ったら出口へ送電しよう。電源を切り替えても水は戻らない。',
-  'waterway.location': '旧水路で信標を見つけた。制御室への道はまだ開いていない。',
   'waterway.entry-1': '先に水を抜いてから門を開けよう。水浸しでも、古い地雷は残ってる。',
   'waterway.entry-2': '今回は足の置き場も少ないな。',
   'waterway.entry-3': '水位は私が見てる。道は任せたよ。',
@@ -1498,8 +1495,6 @@ export const jaMessages: MessageCatalog = {
   'finale.guide-title': '回路をつなぐ',
   'finale.guide-record':
     '通電中の制御台まで歩いてクリックすると接続できる。その後に支線を切り替えても、接続の完了は取り消されない。',
-  'finale.location': '北西の古橋が下りた。渡った先の近道から野営地に戻って補給できる。',
-  'finale.ending-location': '北西の関門が開いた。第一章クリア。',
   'finale.control-entry-1': 'ここだ。古橋も関門も、水路の信標も、全部ここにつながってる。',
   'finale.control-entry-2': '主電源を切れば、守衛も止まる？',
   'finale.control-entry-3': '電源を切るな。この線で門も押さえている。',

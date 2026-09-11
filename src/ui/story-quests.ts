@@ -5,6 +5,7 @@ import { message, translations } from '../i18n.js'
 import type { Language } from '../types/localization.js'
 import type { StoryTask, StoryViewState } from '../types/story.js'
 import { storyMap } from './story-map.js'
+import { storyMechanismObjective } from './story-mechanisms.js'
 
 /** Resolve an authored task to its localized journal title. */
 export function storyTaskName(language: Language, id: StoryTask): string {
@@ -66,7 +67,9 @@ function quest(state: StoryViewState, id: StoryTask, expanded = false): string {
                         ? message(lang, 'story.quest-side-detail')
                         : message(lang, 'story.quest-guide-detail')
   const place = worldSceneName(lang, storyTaskLocation(state.progress, id))
-  const detail = `<div class="story-quest-bubble"><p>${description}</p>${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.inspected && !state.run.practicedFlag ? `<p data-story-flag-guidance>${state.touchInput ? message(lang, 'story.flag-touch') : message(lang, 'story.flag-mouse')}</p>` : ''}${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.practicedFlag && !state.run.practicedReveal ? `<p data-story-chord-guidance>${state.touchInput ? message(lang, 'story.chord-touch') : message(lang, 'story.chord-mouse')}</p>` : ''}${id === 'lost-satchel' && !done && state.run?.collected ? `<p>${message(lang, 'story.satchel-found')}</p>` : ''}<p class="story-quest-place"><button class="story-quest-location" data-story-action="quest-map" data-task="${id}">${message(lang, 'story.quest-location', { place })}<span aria-hidden="true"> ↗</span></button></p>${done ? '' : `<button data-story-action="pin" data-task="${id}" aria-pressed="${!!pinned}">${pinned ? message(lang, 'story.unpin') : message(lang, 'story.pin')}</button>`}</div>`
+  const mechanism =
+    id === 'repair-lift' && !done && state.run ? storyMechanismObjective(state.run, lang) : ''
+  const detail = `<div class="story-quest-bubble"><p>${description}</p>${mechanism ? `<p data-task-mechanism>${mechanism}</p>` : ''}${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.inspected && !state.run.practicedFlag ? `<p data-story-flag-guidance>${state.touchInput ? message(lang, 'story.flag-touch') : message(lang, 'story.flag-mouse')}</p>` : ''}${id === 'reach-camp' && !done && state.run?.floor === 0 && state.run.practicedFlag && !state.run.practicedReveal ? `<p data-story-chord-guidance>${state.touchInput ? message(lang, 'story.chord-touch') : message(lang, 'story.chord-mouse')}</p>` : ''}${id === 'lost-satchel' && !done && state.run?.collected ? `<p>${message(lang, 'story.satchel-found')}</p>` : ''}<p class="story-quest-place"><button class="story-quest-location" data-story-action="quest-map" data-task="${id}">${message(lang, 'story.quest-location', { place })}<span aria-hidden="true"> ↗</span></button></p>${done ? '' : `<button data-story-action="pin" data-task="${id}" aria-pressed="${!!pinned}">${pinned ? message(lang, 'story.unpin') : message(lang, 'story.pin')}</button>`}</div>`
 
   return expanded
     ? `<article class="story-quest-detail"><h3>${storyTaskName(lang, id)}</h3><span class="story-task-status">${done ? message(lang, 'story.done') : message(lang, 'story.pending')}</span>${detail}</article>`
