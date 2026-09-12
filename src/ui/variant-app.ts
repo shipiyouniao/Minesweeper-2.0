@@ -1,7 +1,7 @@
 import { pendingSignalScene } from '../game/signal-story.js'
 import { SignalPerformance } from './signal-performance.js'
 import { signalCopy, signalLines } from './signal-copy.js'
-import { railControl } from '../game/floor-rail.js'
+import { railControl, interactRail } from '../game/floor-rail.js'
 import { animateRailChange } from './rail-view.js'
 import { railGuide } from './rail-guide.js'
 import { pendingRailScene } from '../game/rail-story.js'
@@ -169,6 +169,17 @@ export class VariantApp implements VariantInputActions {
       const relay = run?.circuits?.relays.find((entry) => entry.index === index && entry.active)
       const power = run && powerControl(run, index)
       const rail = run && railControl(run, index)
+      // A rejected winch operation must not animate an uncommitted player position.
+      if (
+        run &&
+        rail &&
+        run.game.cells[index]?.visibility === 'revealed' &&
+        interactRail(run, index) === run
+      ) {
+        this.sounds.play('blocked')
+        return
+      }
+
       if (
         run &&
         power &&
@@ -308,6 +319,7 @@ export class VariantApp implements VariantInputActions {
           })
     if (!changed) {
       this.sounds.play('blocked')
+      this.render()
       return
     }
 
