@@ -21,6 +21,12 @@ export function railProp(kind: 'winch' | 'lever' | 'brake'): string {
   return `<img class="dungeon-sprite rail-prop" src="${import.meta.env.BASE_URL}assets/story/rail-${kind}.png" alt="" width="128" height="128" draggable="false">`
 }
 
+/** Distinct direction silhouettes remain legible in both board and toolbar sizes. */
+export function railWinch(reverse: boolean): string {
+  const path = reverse ? 'M16 8H9a5 5 0 0 0 0 10h9M12 4 8 8l4 4' : 'M4 12h16M14 5l7 7-7 7'
+  return `<span class="rail-winch-icon" data-rail-direction="${reverse ? 'reverse' : 'forward'}" aria-hidden="true">${railProp('winch')}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg></span>`
+}
+
 /** Compact controls invoke the same physical levers as board clicks, including keyboard and touch. */
 export function railObjective(language: Language, run: Expedition): string {
   const rail = run.rail
@@ -38,7 +44,7 @@ export function railObjective(language: Language, run: Expedition): string {
       ? message(language, 'rail.objective-rescue')
       : message(language, 'rail.objective')
 
-  return `<section class="signal-objective rail-objective" aria-live="polite"><strong>${name}</strong><p>${objective}</p><div class="rail-controls"><button data-control="rail-control:${rail.drive}" title="${message(language, 'rail.drive-detail')}">${railProp('winch')}<span>▷ ${message(language, 'rail.drive')}</span></button><button data-control="rail-control:${rail.reverse}" title="${message(language, 'rail.reverse-detail')}">${railProp('winch')}<span>↶ ${message(language, 'rail.reverse')}</span></button>${rail.turnouts.map((entry, i) => `<button data-control="rail-control:${entry.index}" aria-label="${message(language, 'rail.turnout')} ${i + 1}: ${entry.selected ? 'B' : 'A'}">${railProp('lever')}<span>${i + 1}${entry.selected ? 'B' : 'A'}</span></button>`).join('')}<button class="secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'rail.help')}</button></div><span>${message(language, 'rail.progress', { count: rail.stations.filter((station) => station.visited).length, total: rail.stations.length })}</span><small data-rail-feedback>${railStopHint(language, run)}</small></section>`
+  return `<section class="signal-objective rail-objective" aria-live="polite"><strong>${name}</strong><p>${objective}</p><div class="rail-controls"><button data-control="rail-control:${rail.drive}" title="${message(language, 'rail.drive-detail')}">${railWinch(false)}<span> ${message(language, 'rail.drive')}</span></button><button data-control="rail-control:${rail.reverse}" title="${message(language, 'rail.reverse-detail')}">${railWinch(true)}<span> ${message(language, 'rail.reverse')}</span></button>${rail.turnouts.map((entry, i) => `<button data-control="rail-control:${entry.index}" aria-label="${message(language, 'rail.turnout')} ${i + 1}: ${entry.selected ? 'B' : 'A'}">${railProp('lever')}<span>${i + 1}${entry.selected ? 'B' : 'A'}</span></button>`).join('')}<button class="secondary-button ${sharedStyles['secondary-button']}" data-control="help" aria-haspopup="dialog">${icon('help')}${message(language, 'rail.help')}</button></div><span>${message(language, 'rail.progress', { count: rail.stations.filter((station) => station.visited).length, total: rail.stations.length })}</span><small data-rail-feedback>${railStopHint(language, run)}</small></section>`
 }
 
 /** Draw public rail geometry beneath flags and clues; hidden hazard truth never affects the SVG. */
@@ -117,8 +123,8 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
           ? tomaImage()
           : `${station.kind === 'home' ? spriteImage('entrance') : railProp('brake')}${station.visited ? '<small>✓</small>' : ''}`
         : index === rail.drive
-          ? `${railProp('winch')}<small>▷</small>`
-          : `${railProp('winch')}<small>↶</small>`
+          ? `${railWinch(false)}`
+          : `${railWinch(true)}`
 
     cell.insertAdjacentHTML(
       'beforeend',
