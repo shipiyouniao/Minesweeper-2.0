@@ -1,3 +1,4 @@
+import { relicPool, BATTLE_ONLY_RELICS, RELIC_PACKS } from '../src/game/relic-packs.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { actExpedition, createExpedition } from '../src/game/expedition.js'
@@ -190,4 +191,46 @@ test('rescue journals reload every command, pay once and leave main progress and
     false,
   )
   assert.equal(repo.expedition()!.camp.supplies, after.camp.supplies)
+})
+
+test('the rescue entrance waits for the first main stage and new exploration attempts exclude combat-only rewards', () => {
+  const repo = new VariantRepository(new MemoryStorage())
+  readyRescue(repo)
+  const saved = repo.expedition()!
+  repo.saveExpedition({
+    ...saved,
+    campaign: {
+      schemaVersion: 1,
+      stages: saved.campaign!.stages.map((stage) =>
+        stage.id === 'tower-galleries' ? { ...stage, cleared: false } : stage,
+      ),
+    },
+  })
+  assert.equal(
+    new ExpeditionSession(repo.forCampaign('quarry-rescue'), new FakeRuntime()).start(
+      'explorer',
+      [],
+    ),
+    false,
+  )
+  repo.saveExpedition(saved)
+  const session = new ExpeditionSession(repo.forCampaign('quarry-rescue'), new FakeRuntime())
+  assert.ok(session.start('explorer', []))
+  assert.equal(session.run!.departure.explorationRewards, true)
+  assert.equal(
+    new ExpeditionSession(repo.forCampaign('quarry-rescue'), new FakeRuntime()).run!.departure
+      .explorationRewards,
+    true,
+  )
+  const departure = {
+    ...session.run!.departure,
+    battleRelics: true,
+    packs: RELIC_PACKS.map((pack) => pack.id),
+  }
+  const rewards = relicPool(departure)
+  for (const relic of BATTLE_ONLY_RELICS) assert.equal(rewards.includes(relic), false)
+  for (const relic of ['second-wind', 'reactive-shell', 'field-notes'] as const)
+    assert.ok(rewards.includes(relic))
+  const { explorationRewards, ...legacy } = departure
+  for (const relic of BATTLE_ONLY_RELICS) assert.ok(relicPool(legacy).includes(relic))
 })

@@ -1,5 +1,5 @@
 import { shuffled } from './variant-board.js'
-import { RECOLLECTION_BOSSES } from './recollection.js'
+import { recollectionDraw, RECOLLECTION_BOSSES } from './recollection.js'
 import { enterMatrix } from './matrix-battle.js'
 import { enterTide } from './tide-battle.js'
 import { enterEcho } from './echo-battle.js'
@@ -24,7 +24,10 @@ export function enterEncounter(run: Expedition): Expedition {
   const pool = selected
     ? shuffled(selected.bosses, run.departure.seed ^ 0xb055)
     : RECOLLECTION_BOSSES
-  const kind = pool[(selected ? checkpoint : run.departure.seed + checkpoint) % pool.length]
+  const kind =
+    selected?.remainingBosses !== undefined
+      ? recollectionDraw(selected, run.departure.seed, checkpoint).boss
+      : pool[(selected ? checkpoint : run.departure.seed + checkpoint) % pool.length]
   if (!kind) throw new Error('An encounter needs a selected boss family')
   const slot = RECOLLECTION_BOSSES.indexOf(kind)
   // Ordinary-room controls must never survive the replacement by a tactical arena.

@@ -7,7 +7,12 @@ import { ExpeditionSession } from '../src/application/expedition-session.js'
 import { VariantRepository } from '../src/persistence/variant-repository.js'
 import { decodeRecollection } from '../src/persistence/recollection-decoder.js'
 import { generateRecollectionFloor } from '../src/game/recollection-layout.js'
-import { recollectionUnlocks, RECOLLECTION_BOSSES } from '../src/game/recollection.js'
+import {
+  recollectionDraw,
+  snapshotRecollection,
+  recollectionUnlocks,
+  RECOLLECTION_BOSSES,
+} from '../src/game/recollection.js'
 import { createExpedition, actExpedition, frontierCells } from '../src/game/expedition.js'
 import { floorObjectiveComplete } from '../src/game/floor-circuits.js'
 import { enterEncounter } from '../src/game/encounter-roster.js'
@@ -200,6 +205,7 @@ test('configured departures replay their exact pools and cannot be edited during
   assert.deepEqual(session.expedition.run!.departure.recollection, {
     floors: ['relay'],
     bosses: ['bastion'],
+    remainingBosses: ['bastion'],
   })
   assert.equal(session.toggleFloor('routing'), false)
   assert.equal(session.toggleBoss('matrix'), false)
@@ -210,7 +216,11 @@ test('configured departures replay their exact pools and cannot be edited during
   assert.ok(session.expedition.dispatch({ type: 'retreat' }))
   assert.ok(session.expedition.returnToCamp())
   const restored = new RecollectionSession(repository, new FakeRuntime())
-  assert.deepEqual(restored.selected, { floors: ['relay'], bosses: ['bastion'] })
+  assert.deepEqual(restored.selected, {
+    floors: ['relay'],
+    bosses: ['bastion'],
+    remainingBosses: ['bastion'],
+  })
   assert.equal(camp.story.campId, 'reed-camp')
   assert.equal(camp.story.campPosition, 49)
 })
@@ -369,4 +379,130 @@ test('boss selection is restricted to the departure pool and clears ordinary-roo
     assert.equal(arena.circuits, undefined)
     assert.equal(arena.rail, undefined)
   }
+})
+
+test('recollection bags exhaust across departures, persist through decoding and refill without an immediate repeat', () => {
+  const bosses = ['bastion', 'brood', 'clock'] as const
+  for (let seed = 0; seed < 60; seed++) {
+    let selection = decodeRecollection({
+      floors: ['ordinary'],
+      bosses: [...bosses],
+      remainingBosses: [...bosses],
+    })!
+    const seen: string[] = []
+    for (let draw = 0; draw < 12; draw++) {
+      const next = recollectionDraw(selection, seed + draw, 0)
+      if (draw) assert.notEqual(next.boss, seen.at(-1))
+      seen.push(next.boss)
+      selection = decodeRecollection({
+        floors: ['ordinary'],
+        bosses: [...bosses],
+        remainingBosses: [...next.remainingBosses],
+        lastBoss: next.boss,
+      })!
+      assert.ok(selection)
+      if ((draw + 1) % 3 === 0) assert.equal(new Set(seen.slice(-3)).size, 3)
+    }
+    const original = { floors: ['ordinary'] as const, bosses, remainingBosses: bosses }
+    for (let ordinal = 0; ordinal < 9; ordinal++) {
+      const replay = recollectionDraw(original, seed, ordinal)
+      assert.equal(replay.boss, recollectionDraw(original, seed, ordinal).boss)
+    }
+  }
+  assert.equal(
+    decodeRecollection({ floors: ['ordinary'], bosses: ['bastion'], remainingBosses: ['clock'] }),
+    null,
+  )
+  assert.equal(
+    decodeRecollection({
+      floors: ['ordinary'],
+      bosses: ['bastion'],
+      remainingBosses: ['bastion', 'bastion'],
+    }),
+    null,
+  )
+})
+
+test('accepted encounter entry persists the remaining boss bag once, including reload and another departure', () => {
+  const storage = new MemoryStorage()
+  const repository = new VariantRepository(storage)
+  const camp = readyChapterTwo(repository)
+  const story = new StorySession(camp)
+  assert.ok(story.travelNorthwest())
+  assert.ok(story.completeRegionalScene('reed-arrival'))
+  assert.ok(story.moveCamp(49))
+  assert.ok(story.completeRegionalScene('recollection-light'))
+  const old = new ExpeditionSession(repository, new FakeRuntime())
+  assert.ok(old.dispatch({ type: 'retreat' }))
+  assert.ok(old.returnToCamp())
+  const saved = repository.expedition()!
+  repository.saveExpedition({
+    ...saved,
+    camp: {
+      ...saved.camp,
+      milestones: { ...milestoneProgress(saved.camp), bossKinds: ['bastion', 'brood'] },
+    },
+  })
+  const seen: string[] = []
+  for (let round = 0; round < 4; round++) {
+    let session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
+    assert.ok(
+      session.start('explorer', [], 'relaxed', {
+        floors: ['ordinary'],
+        bosses: ['bastion', 'brood'],
+      }),
+    )
+    for (let floor = 1; floor <= 3; floor++) {
+      finishRecollectionFloor(session)
+      if (floor < 3) assert.ok(session.dispatch({ type: 'relic', relic: session.run!.offers[0]! }))
+    }
+    seen.push(session.run!.encounter!.kind)
+    const beforeReload = new VariantRepository(storage).expedition()!.recollection!
+    assert.equal(beforeReload.remainingBosses!.length, round % 2 === 0 ? 1 : 0)
+    session = new ExpeditionSession(new VariantRepository(storage), new FakeRuntime())
+    assert.equal(session.run!.encounter!.kind, seen.at(-1))
+    assert.deepEqual(new VariantRepository(storage).expedition()!.recollection, beforeReload)
+    assert.ok(session.dispatch({ type: 'retreat' }))
+    assert.ok(session.returnToCamp())
+  }
+  assert.notEqual(seen[0], seen[1])
+  assert.notEqual(seen[1], seen[2])
+  assert.notEqual(seen[2], seen[3])
+})
+
+test('new boss snapshots ignore checkbox order while stored departures retain their replay order', () => {
+  const original = {
+    floors: ['ordinary'] as const,
+    bosses: ['bastion', 'brood', 'clock'] as const,
+    remainingBosses: ['bastion', 'brood', 'clock'] as const,
+  }
+  const rechecked = {
+    ...original,
+    bosses: ['brood', 'clock', 'bastion'] as const,
+    remainingBosses: ['brood', 'clock', 'bastion'] as const,
+  }
+  assert.deepEqual(snapshotRecollection(original), snapshotRecollection(rechecked))
+  const restored = decodeRecollection({
+    floors: [...rechecked.floors],
+    bosses: [...original.bosses],
+    remainingBosses: [...rechecked.remainingBosses],
+  })!
+  assert.deepEqual(restored.remainingBosses, rechecked.remainingBosses)
+  for (let seed = 0; seed < 60; seed++) {
+    for (let ordinal = 0; ordinal < 9; ordinal++) {
+      assert.deepEqual(
+        recollectionDraw(snapshotRecollection(original), seed, ordinal),
+        recollectionDraw(snapshotRecollection(rechecked), seed, ordinal),
+      )
+      assert.deepEqual(
+        recollectionDraw(restored, seed, ordinal),
+        recollectionDraw({ ...rechecked, bosses: original.bosses }, seed, ordinal),
+      )
+    }
+  }
+  assert.deepEqual(snapshotRecollection({ ...original, remainingBosses: [] }).remainingBosses, [])
+  assert.equal(
+    snapshotRecollection({ floors: original.floors, bosses: original.bosses }).remainingBosses,
+    undefined,
+  )
 })

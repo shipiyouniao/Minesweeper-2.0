@@ -69,3 +69,9 @@ Keep the core world rules, clue semantics and character continuity in a small ma
 Provide content submission templates covering the pitch, prerequisites, maps and public-information solutions, mechanics and combinations, rewards, dialogue, localization and asset provenance. Shared engine changes need behavior coverage; authored content needs graph, solvability and interaction validation. Contributor ideas and drafts remain distinguishable from approved canonical content.
 
 Roadmap II tracks the agreed next development program and its PRs in [issue #55](https://github.com/shipiyouniao/minefarer/issues/55), labeled `enhancement` and `help wanted`. Update that issue's checklist and PR table as work lands. Later roadmap issues can cover new arcs or systems; completing one roadmap or story arc does not declare the project finished.
+
+## World scale and atlas expansion
+
+The world overview reserves a fixed coordinate space beyond Chapter One. Lanternrest woodlands occupy about four percent of that overview; Reedbank valley has a separate neighboring footprint. The map switches between World, Region and Local area with one button. Chapter discovery exposes its regional marker without moving earlier regions or changing saved scene IDs. Undiscovered space remains fogged and unnamed. Regional routes and local doorways remain the only source of travel behavior; the atlas does not add teleportation.
+
+The approved 40–50 hour target is a content-planning constraint, not a claim about currently delivered play time. Retain the eleven planned chapter families, with room for further regions. Plan substantial regional arcs with distinct exploration, mechanisms, residents, optional stories and lasting outcomes. Later chapter names, geography, stage counts and play-time budgets need authored proposals before adding their markers. Chapter Two's existing camp opening still does not count as a completed exploration arc.

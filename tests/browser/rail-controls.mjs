@@ -64,6 +64,17 @@ try {
         'Rejected control displaced the player by ' + positions.distance + 'px',
       )
     }
+    const overlap = await page.locator('.rail-board [data-cell]').evaluateAll((cells) =>
+      cells.some((cell) => {
+        const badge = cell.querySelector('.rail-winch-icon > svg, .rail-landmark > small')
+        const clue = cell.querySelector('.landmark-clue')
+        if (!badge || !clue || !clue.textContent.trim()) return false
+        const a = badge.getBoundingClientRect(),
+          b = clue.getBoundingClientRect()
+        return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+      }),
+    )
+    assert.equal(overlap, false, 'Rail control badges must not overlap numerical clues')
     await page.close()
   }
 } finally {

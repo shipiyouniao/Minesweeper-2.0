@@ -1,3 +1,4 @@
+import { campaignProgress } from '../game/campaign-catalog.js'
 import { regionalCamp, isRegionalCamp } from '../game/regional-camps.js'
 import { campSiteImage, storySiteName } from './story-assets.js'
 import { cartImage, tomaImage } from './rail-view.js'
@@ -46,7 +47,10 @@ export function atlasLocal(state: StoryViewState, scene: number, current: number
           content.id === 'north-road' &&
           index === WATERWAY_GATE &&
           state.progress.facts?.includes('ridge-surveyed')
-        const rescue = content.id === 'quarry-yard' && index === RESCUE_GATE
+        const rescue =
+          content.id === 'quarry-yard' &&
+          index === RESCUE_GATE &&
+          campaignProgress(state.campaign, 'tower-galleries').cleared
         const toma =
           content.id === 'camp' &&
           index === TOMA_CAMP_CELL &&

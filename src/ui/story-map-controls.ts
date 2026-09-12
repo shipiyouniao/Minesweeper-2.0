@@ -49,8 +49,8 @@ export class StoryMapControls {
 
     const level = map.dataset['mapLevel']
 
-    this.level = level === 'world' ? 'world' : 'local'
-    this.key = `${this.level}:${this.level === 'local' ? map.dataset['mapScene'] : ''}`
+    this.level = level === 'world' || level === 'region' ? level : 'local'
+    this.key = `${this.level}:${this.level === 'local' ? map.dataset['mapScene'] : this.level === 'region' ? map.dataset['mapRegion'] : ''}`
     if (this.key !== previousKey) {
       this.suppressUntil = 0
       this.touchUntil = 0
@@ -98,12 +98,29 @@ export class StoryMapControls {
     const scene = viewport?.querySelector<HTMLElement>('.atlas-scene')
     if (!viewport || !scene) return
 
+    if (this.level !== 'local')
+      viewport.style.height = `${Math.max(260, (viewport.clientWidth * 460) / 800)}px`
     this.camera = clampAtlasCamera(this.camera, this.size())
 
     const { zoom, x, y } = this.camera
 
-    scene.style.transform = `translate(${x}px, ${y}px) scale(${zoom})`
+    if (this.level === 'local') {
+      viewport.style.height = ''
+      scene.style.width = ''
+      scene.style.height = ''
+      scene.style.transform = `translate(${x}px, ${y}px) scale(${zoom})`
+    } else {
+      const width = viewport.clientWidth
+      const height = Math.max(260, (width * 460) / 800)
+      viewport.style.height = `${height}px`
+      scene.style.width = `${width * zoom}px`
+      scene.style.height = `${height * zoom}px`
+      scene.style.transform = 'none'
+      scene.style.left = `${Math.round(x - (width * (zoom - 1)) / 2)}px`
+      scene.style.top = `${Math.round(y - (height * (zoom - 1)) / 2)}px`
+    }
     viewport.dataset['zoom'] = String(zoom)
+    viewport.style.setProperty('--atlas-shape-scale', String(1 / zoom))
     paintAtlasTiles(viewport, this.level, this.camera)
 
     const input = this.root?.querySelector<HTMLInputElement>('.atlas-zoom input')

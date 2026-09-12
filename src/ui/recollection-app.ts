@@ -7,13 +7,10 @@ import {
 import { parseVariantDifficulty, variantTier } from '../game/variant-difficulty.js'
 import { difficultyRewardPercent } from '../game/expedition-rewards.js'
 import { message, translations } from '../i18n.js'
-import { icon } from '../icons.js'
 import type { MountedGame } from '../types/variants.js'
 import type { SoundEffects } from '../types/audio.js'
 import type { Language } from '../types/localization.js'
 import type { GameRepository } from '../types/storage.js'
-import { LanguageMenu } from './language-menu.js'
-import { brandTemplate, languageMenuTemplate } from './templates.js'
 import { difficultyTemplate } from './variant-templates.js'
 import { tacticalCopy } from './tactical-copy.js'
 import {
@@ -30,7 +27,8 @@ import { escapeHtml } from './presentation.js'
 /** Camp preparation edits finite pools; the normal expedition controller plays the resulting run. */
 export class RecollectionApp implements MountedGame {
   private readonly listeners = new AbortController()
-  private menu: LanguageMenu | null = null
+  private section: 'difficulty' | 'floors' | 'bosses' | null = null
+  private readonly close: () => void
   private launching = false
   private launchAnimation: Animation | null = null
 
@@ -39,7 +37,6 @@ export class RecollectionApp implements MountedGame {
   private readonly preferences: GameRepository
   private language: Language
   private readonly sounds: SoundEffects
-  private readonly onLanguage: (language: Language) => void
 
   /** The router supplies the same preferences, wallet and sound owner used by other screens. */
   constructor(
@@ -48,25 +45,31 @@ export class RecollectionApp implements MountedGame {
     preferences: GameRepository,
     language: Language,
     sounds: SoundEffects,
-    onLanguage: (language: Language) => void,
+    close: () => void,
   ) {
+    this.close = close
     this.root = root
     this.session = session
     this.preferences = preferences
     this.language = language
     this.sounds = sounds
-    this.onLanguage = onLanguage
     root.addEventListener('click', this.click, { signal: this.listeners.signal })
     root.addEventListener('change', this.change, { signal: this.listeners.signal })
+    root.addEventListener(
+      'cancel',
+      (event) => {
+        event.preventDefault()
+        this.close()
+      },
+      { signal: this.listeners.signal },
+    )
     this.render()
   }
 
   /** Discard preparation listeners; saved attempts and camp choices belong to their sessions. */
   dispose(): void {
-    this.menu?.dispose()
     this.launchAnimation?.cancel()
     this.listeners.abort()
-    this.sounds.dispose()
   }
 
   /** Reuse the established difficulty selector and glass panels, including at narrow widths. */
@@ -89,7 +92,6 @@ export class RecollectionApp implements MountedGame {
       document.activeElement instanceof HTMLElement
         ? document.activeElement.dataset['control']
         : undefined
-    this.menu?.dispose()
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language
     document.title = `${message(language, 'recollection.title')} · Minefarer`
 
@@ -103,21 +105,15 @@ export class RecollectionApp implements MountedGame {
       return `<label class="recollection-choice ${locked ? 'is-locked' : ''}"><input type="checkbox" data-recollection-choice="boss-${kind}" data-boss="${kind}" ${selected.bosses.includes(kind) ? 'checked' : ''} ${locked ? 'disabled' : ''}>${spriteImage(recollectionBossSprite(kind))}<span><strong>${tacticalCopy(language, kind).name}</strong>${locked ? `<small>${message(language, 'recollection.boss-locked')}</small>` : ''}</span></label>`
     }).join('')
 
-    this.root.innerHTML = `<header class="site-header"><div class="header-identity">${brandTemplate(language)}<a class="route-back" data-route href="${routeHref({ page: 'story' }, language)}">${icon('arrow')}${message(language, 'recollection.return')}</a></div><nav><button class="icon-button" data-recollection-sound aria-label="${translations[language].sound}" aria-pressed="${this.sounds.enabled}">${icon(this.sounds.enabled ? 'volume' : 'volumeOff')}</button>${languageMenuTemplate(language)}</nav></header>
-      <main class="recollection-main">${session.storageAvailable ? '' : `<p role="alert">${message(language, 'story.storage')}</p>`}<header class="recollection-heading glass-panel">${recollectionLantern()}<div><p class="eyebrow">${message(language, 'recollection.camp')}</p><h1 data-route-heading>${message(language, 'recollection.title')}</h1></div></header>
-      ${allowed ? `${active && !departure?.recollection ? `<p class="recollection-existing">${message(language, 'recollection.existing')}</p>` : ''}<fieldset class="recollection-settings" ${active ? 'disabled' : ''}><legend class="sr-only">${message(language, 'recollection.title')}</legend><section class="glass-panel recollection-difficulty">${difficultyTemplate(language, session.expedition.difficulty, true)}<p>${tier.size} × ${tier.size} · ${message(language, 'camp-copy.count-floors', { count: tier.floors })} · ${t.rewardRate} ×${difficultyRewardPercent(session.expedition.difficulty) / 100}</p></section><div class="recollection-columns"><section class="glass-panel recollection-pool"><h2>${message(language, 'recollection.floors')}</h2><div class="recollection-choices">${floors}</div></section><section class="glass-panel recollection-pool"><h2>${message(language, 'recollection.bosses')}</h2><div class="recollection-choices recollection-bosses">${bosses}</div></section></div></fieldset><section class="recollection-loadout glass-panel">${spriteImage(professionSprite(loadout.profession))}<div><h2>${message(language, 'recollection.loadout')}</h2><strong>${professionCopy(language, loadout.profession).name}</strong><p>${escapeHtml(loadout.equipment.map((item) => equipmentCopy(language, item).name).join(' · '))}</p></div><a data-route href="${routeHref({ page: 'story' }, language)}">${message(language, 'recollection.return')} →</a></section>` : `<section class="glass-panel recollection-pool"><p>${message(language, 'recollection.locked')}</p></section>`}
-      </main><footer class="story-dock"><div class="story-dock-inner"><p role="status">${allowed && !active && !validRecollection(selected, unlocked) ? message(language, 'recollection.choose') : ''}</p>${allowed ? `<button class="story-primary" data-recollection-start ${!active && !validRecollection(selected, unlocked) ? 'disabled' : ''}>${active ? (departure?.recollection ? message(language, 'recollection.resume') : message(language, 'recollection.resume-expedition')) : message(language, 'recollection.begin')}</button>` : ''}</div></footer><a hidden data-route data-recollection-play href="${routeHref({ page: 'game', mode: 'expedition' }, language)}"></a>`
-    this.menu = new LanguageMenu(
-      this.root.querySelector<HTMLElement>('.language-picker')!,
-      (value) => {
-        this.language = value
-        this.preferences.setPreference({ key: 'language', value })
-        history.replaceState(null, '', routeHref({ page: 'recollection' }, value))
-        this.onLanguage(value)
-        this.render()
-      },
-      (cue) => this.sounds.play(cue),
-    )
+    const detail =
+      this.section === 'difficulty'
+        ? `<section class="recollection-difficulty">${difficultyTemplate(language, session.expedition.difficulty, true)}<p>${tier.size} × ${tier.size} · ${message(language, 'camp-copy.count-floors', { count: tier.floors })} · ${t.rewardRate} ×${difficultyRewardPercent(session.expedition.difficulty) / 100}</p></section>`
+        : this.section === 'floors'
+          ? `<div class="recollection-choices">${floors}</div>`
+          : `<div class="recollection-choices recollection-bosses">${bosses}</div>`
+    this.root.innerHTML = `<button class="facility-close" data-recollection-close aria-label="${translations[language].close}">×</button><main class="recollection-main">${session.storageAvailable ? '' : `<p role="alert">${message(language, 'story.storage')}</p>`}<header class="recollection-heading">${recollectionLantern()}<div><p class="eyebrow">${message(language, 'recollection.camp')}</p><h1>${message(language, 'recollection.title')}</h1></div></header>
+      ${allowed ? `${active && !departure?.recollection ? `<p>${message(language, 'recollection.existing')}</p>` : ''}<fieldset class="recollection-settings" ${active ? 'disabled' : ''}><legend class="sr-only">${message(language, 'recollection.title')}</legend>${this.section ? `<button class="recollection-back" data-recollection-section="back">← ${message(language, 'recollection.back-settings')}</button><h2>${this.section === 'difficulty' ? t.difficulty : this.section === 'floors' ? message(language, 'recollection.floors') : message(language, 'recollection.bosses')}</h2>${detail}` : `<div class="recollection-summary"><button data-recollection-section="difficulty"><span>${t.difficulty}</span><strong>${tier.size} × ${tier.size} · ${message(language, 'camp-copy.count-floors', { count: tier.floors })}</strong><span>›</span></button><button data-recollection-section="floors"><span>${message(language, 'recollection.floors')}</span><strong>${selected.floors.length} / ${unlocked.floors.length}</strong><span>›</span></button><button data-recollection-section="bosses"><span>${message(language, 'recollection.bosses')}</span><strong>${selected.bosses.length} / ${unlocked.bosses.length}</strong><span>›</span></button></div>`}</fieldset><section class="recollection-loadout">${spriteImage(professionSprite(loadout.profession))}<div><h2>${message(language, 'recollection.loadout')}</h2><strong>${professionCopy(language, loadout.profession).name}</strong><p>${escapeHtml(loadout.equipment.map((item) => equipmentCopy(language, item).name).join(' · '))}</p></div></section>` : `<p>${message(language, 'recollection.locked')}</p>`}
+      <footer class="recollection-actions"><p role="status">${allowed && !active && !validRecollection(selected, unlocked) ? message(language, 'recollection.choose') : ''}</p>${allowed ? `<button class="story-primary" data-recollection-start ${!active && !validRecollection(selected, unlocked) ? 'disabled' : ''}>${active ? (departure?.recollection ? message(language, 'recollection.resume') : message(language, 'recollection.resume-expedition')) : message(language, 'recollection.begin')}</button>` : ''}</footer></main><a hidden data-route data-recollection-play href="${routeHref({ page: 'game', mode: 'expedition' }, language)}"></a>`
     if (control)
       this.root
         .querySelector<HTMLElement>(`[data-control="${control}"]`)
@@ -192,6 +188,18 @@ export class RecollectionApp implements MountedGame {
       this.sounds.setEnabled(!this.sounds.enabled)
       this.preferences.setPreference({ key: 'sound', value: this.sounds.enabled })
       this.render()
+      return
+    }
+    if (button.hasAttribute('data-recollection-close')) {
+      this.close()
+      return
+    }
+    const section = button.dataset['recollectionSection']
+    if (section) {
+      this.section =
+        section === 'difficulty' || section === 'floors' || section === 'bosses' ? section : null
+      this.render()
+      this.root.querySelector<HTMLElement>('[data-recollection-section]')?.focus()
       return
     }
     const control = button.dataset['control']

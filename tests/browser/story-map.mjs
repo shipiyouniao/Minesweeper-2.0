@@ -154,10 +154,47 @@ try {
     )
 
     await checkZoomRange(page, touch)
-    assert.equal(await page.locator('[data-story-action="map-level"]').count(), 2)
-    assert.equal(await page.locator('[data-level="region"]').count(), 0)
+    assert.equal(await page.locator('[data-story-action="map-level"]').count(), 1)
+    assert.equal(await page.locator('[data-level="region"]').count(), 1)
+    await page.locator('[data-story-action="map-level"][data-level="region"]').click()
     await page.locator('[data-story-action="map-level"][data-level="world"]').click()
+    assert.equal(
+      await page.locator('.atlas-region-node').count(),
+      1,
+      'unvisited chapters have no exposed markers',
+    )
     await checkZoomRange(page, touch)
+    await page
+      .locator('.story-atlas')
+      .screenshot({ path: `.native/atlas-screenshots/${width}-${lang}-overview.png` })
+    await page.locator('.atlas-region-node').click()
+    assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'region')
+    await checkZoomRange(page, touch)
+    await page.locator('[data-map-focus="camp"]').click()
+    const markerSize = await page.locator('.atlas-node[data-scene="3"] strong').boundingBox()
+    await page.locator('.atlas-zoom input').focus()
+    await page.keyboard.press('End')
+    const zoomedSize = await page.locator('.atlas-node[data-scene="3"] strong').boundingBox()
+    assert.ok(
+      Math.abs(markerSize.width - zoomedSize.width) < 1,
+      'labels keep native screen dimensions at 500%',
+    )
+    assert.equal(
+      await page.locator('.atlas-scene').evaluate((el) => getComputedStyle(el).transform),
+      'none',
+    )
+    const sizes = await page.locator('.atlas-viewport').evaluate((el) => ({
+      viewport: el.clientWidth,
+      scene: el.querySelector('.atlas-scene').clientWidth,
+    }))
+    assert.ok(
+      Math.abs(sizes.scene - sizes.viewport * 5) < 2,
+      'vectors are laid out at their full zoomed size',
+    )
+    await page
+      .locator('.story-atlas')
+      .screenshot({ path: `.native/atlas-screenshots/${width}-${lang}-500.png` })
+    await page.locator('[data-map-zoom="reset"]').click()
     assert.equal(await page.locator('.atlas-viewport').getAttribute('data-detail'), 'districts')
     assert.equal(await page.locator('[data-atlas-detail="places"] .atlas-node:visible').count(), 0)
     assert.equal(await page.locator('[data-atlas-route]').count(), 13)
@@ -196,9 +233,9 @@ try {
     assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'local')
     assert.equal(
       await page.evaluate(() => document.activeElement?.getAttribute('data-level')),
-      'local',
+      'region',
     )
-    await page.locator('[data-story-action="map-level"][data-level="world"]').click()
+    await page.locator('[data-story-action="map-level"][data-level="region"]').click()
     assert.equal(
       await page.locator('.atlas-scene').getAttribute('style'),
       camera,
@@ -210,13 +247,13 @@ try {
     if (touch) {
       await pinch(page, viewport)
       assert.ok(Number(await page.locator('.atlas-viewport').getAttribute('data-zoom')) > 2)
-      assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'world')
+      assert.equal(await page.locator('.story-map').getAttribute('data-map-level'), 'region')
     } else {
       await page.locator('.atlas-viewport').focus()
       await page.keyboard.press('+')
       assert.equal(await page.locator('.atlas-viewport').getAttribute('data-zoom'), '1.25')
       await page.keyboard.press('ArrowRight')
-      assert.match(await page.locator('.atlas-scene').getAttribute('style'), /translate\(-/)
+      assert.match(await page.locator('.atlas-scene').getAttribute('style'), /left: -/)
     }
     await page.locator('[data-map-zoom="reset"]').click()
     assert.equal(await page.locator('.atlas-viewport').getAttribute('data-detail'), 'districts')

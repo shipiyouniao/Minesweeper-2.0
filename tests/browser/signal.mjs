@@ -35,6 +35,7 @@ repo.saveExpedition({
   ...saved,
   campaign: updateCampaign(saved.campaign, {
     ...campaignProgress(saved.campaign, 'tower-galleries'),
+    scenes: ['tower-response'],
     cleared: true,
     lesson: 4,
   }),

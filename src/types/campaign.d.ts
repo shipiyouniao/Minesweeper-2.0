@@ -1,3 +1,4 @@
+import type { EncounterKind } from './tactical.js'
 import type { RailSceneId } from './floor-rail.js'
 import type { ExpeditionJournal, VariantRecord } from './variants.js'
 import type { SignalSceneId } from './signal-story.js'
@@ -53,6 +54,7 @@ export interface CampaignSave {
 
 /** Content and prerequisites belong to the catalog, not router conditionals. */
 export interface CampaignStage {
+  readonly boss?: EncounterKind
   /** A stage belongs to a physical world location; null index shares the scene's existing entry flow. */
   readonly entrance: {
     readonly scene: StorySceneId

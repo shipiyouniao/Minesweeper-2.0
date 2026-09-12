@@ -49,5 +49,18 @@ export function relicPool(departure: Departure): Relic[] {
 
   base.push(...(departure.milestoneRelics ?? []))
 
-  return base
+  return departure.explorationRewards
+    ? base.filter((relic) => !BATTLE_ONLY_RELICS.includes(relic))
+    : base
 }
+
+/** These relics have no effect outside turn-based encounters; hybrid survival relics remain. */
+export const BATTLE_ONLY_RELICS: readonly Relic[] = [
+  'tempered-edge',
+  'layered-armor',
+  'tactics-hourglass',
+  'breach-sigil',
+  'duelist-edge',
+  'reserve-watch',
+  'second-hand',
+]

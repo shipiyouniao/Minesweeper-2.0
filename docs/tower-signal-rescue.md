@@ -1,6 +1,6 @@
 # An Answer in the Tower
 
-This is the second playable authored stage of the watchtower arc, following **Watchtower outer galleries**. Enter it at the upper tower landing after clearing the galleries. It is a three-floor encounter, not the completed five-plus-one chapter.
+This is the second playable authored stage of the watchtower arc, following **Watchtower outer galleries**. After clearing the galleries and returning to the upper landing, a voiced conversation answers the player from inside the tower. Completing this one-time exchange reveals the next stage entrance; its completion is saved in the galleries stage record. Enter the next stage at that landing. It is a three-floor encounter, not the completed five-plus-one chapter.
 
 ## What changes for the player
 

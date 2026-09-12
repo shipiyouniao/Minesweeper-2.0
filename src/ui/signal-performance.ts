@@ -137,7 +137,7 @@ export class SignalPerformance {
 
       portrait.classList.toggle(
         'signal-radio',
-        (scene === 'entry' && line.speaker === 'nia') ||
+        ((scene === 'entry' || scene === 'tower-response') && line.speaker === 'nia') ||
           ((scene === 'rail-entry' || scene === 'rail-brakes') && portraitSpeaker === 'toma'),
       )
       portrait.classList.toggle('is-speaking', line.speaker !== 'player')

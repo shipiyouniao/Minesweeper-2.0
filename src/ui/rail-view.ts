@@ -55,6 +55,7 @@ export function renderFloorRail(root: HTMLElement, run: Expedition, language: La
   const board = root.querySelector<HTMLElement>('[data-side="a"]')
 
   board?.classList.add('rail-board')
+  board?.style.setProperty('--rail-rows', String(run.game.config.height))
   // Put numbers above larger landmarks; ordinary flags keep their normal center position.
   for (const index of [
     rail.cart,

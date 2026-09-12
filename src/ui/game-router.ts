@@ -1,5 +1,3 @@
-import { RecollectionSession } from '../application/recollection-session.js'
-import { RecollectionApp } from './recollection-app.js'
 import { ExpeditionSession } from '../application/expedition-session.js'
 import { GameSession } from '../application/game-session.js'
 import { TwinSession } from '../application/twin-session.js'
@@ -94,7 +92,6 @@ export class GameRouter implements MountedGame {
           sounds,
           this.languageChanged,
         )
-
       return new StoryApp(
         this.host,
         this.variants,
@@ -105,17 +102,13 @@ export class GameRouter implements MountedGame {
       )
     }
 
-    if (this.route.page === 'recollection')
-      return new RecollectionApp(
-        this.host,
-        new RecollectionSession(this.variants, browserRuntime),
-        this.repository,
-        this.language,
-        sounds,
-        this.languageChanged,
-      )
-
-    if (this.route.page === 'story')
+    if (
+      this.route.page === 'story' ||
+      this.route.page === 'recollection' ||
+      (this.route.page === 'game' &&
+        this.route.mode === 'expedition' &&
+        !this.variants.expedition()?.journal)
+    )
       return new StoryApp(
         this.host,
         this.variants,
@@ -123,6 +116,7 @@ export class GameRouter implements MountedGame {
         this.language,
         sounds,
         this.languageChanged,
+        this.route.page !== 'story',
       )
 
     if (this.route.page !== 'game') {
@@ -183,6 +177,17 @@ export class GameRouter implements MountedGame {
       mode === 'expedition'
         ? new ExpeditionSession(this.variants, browserRuntime)
         : new TwinSession(this.variants, browserRuntime)
+
+    if (session instanceof ExpeditionSession && !session.run)
+      return new StoryApp(
+        this.host,
+        this.variants,
+        this.repository,
+        this.language,
+        sounds,
+        this.languageChanged,
+        true,
+      )
 
     return new VariantApp(
       this.host,

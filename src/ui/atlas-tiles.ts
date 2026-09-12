@@ -37,7 +37,7 @@ export function paintAtlasTiles(
   const detail = atlasDetail(level, camera.zoom)
 
   viewport.dataset['detail'] = detail
-  viewport.style.setProperty('--atlas-inverse-zoom', String(1 / camera.zoom))
+  viewport.style.setProperty('--atlas-inverse-zoom', '1')
   for (const markers of chart.querySelectorAll<HTMLElement>('[data-atlas-detail]')) {
     const hidden = markers.dataset['atlasDetail'] !== detail
     // Hiding a focused cluster must not strand keyboard input on a detached semantic level.

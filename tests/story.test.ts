@@ -1,3 +1,4 @@
+import { orderedStoryTasks, storyTaskCategory, STORY_TASKS } from '../src/game/story-quests.js'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { CampSession } from '../src/application/camp-session.js'
@@ -606,4 +607,35 @@ test('quarry spindle requires collection, repairs persist and the tower has a ph
     session.camp.story.world!.scenes.filter((scene) => scene.id === 'quarry-machine').length,
     1,
   )
+})
+
+test('quest priority promotes later main quests without changing saved acceptance or completed order', () => {
+  const accepted = [
+    'lost-satchel',
+    'reach-camp',
+    'rescue-toma',
+    'survey-ridge',
+    'find-beacon',
+    'restore-west-line',
+    'open-blockade',
+    'settle-reed-camp',
+  ] as const
+  const completed = ['reach-camp', 'lost-satchel'] as const
+  assert.deepEqual(orderedStoryTasks({ accepted, completed }), [
+    'survey-ridge',
+    'find-beacon',
+    'restore-west-line',
+    'open-blockade',
+    'settle-reed-camp',
+    'rescue-toma',
+    'lost-satchel',
+    'reach-camp',
+  ])
+  assert.equal(accepted[0], 'lost-satchel')
+  assert.deepEqual(orderedStoryTasks({ completed: [] }), [])
+  for (const task of STORY_TASKS)
+    assert.equal(
+      storyTaskCategory(task.id),
+      task.id === 'lost-satchel' || task.id === 'rescue-toma' ? 'side' : 'main',
+    )
 })

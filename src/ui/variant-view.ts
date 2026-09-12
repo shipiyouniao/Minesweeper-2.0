@@ -293,20 +293,6 @@ export class VariantView {
     this.expeditionDialog.render(expedition, this.content.hidden !== false)
   }
 
-  /** Announce a new camp screen and bring its heading into view after explicit navigation. */
-  focusCampHeading(): void {
-    const heading = this.content.querySelector<HTMLElement>('.camp-panel h1')
-
-    heading?.focus({ preventScroll: true })
-    heading?.scrollIntoView({ block: 'nearest' })
-  }
-
-  /** Reveal inline mobile details without moving keyboard focus away from the selected tile. */
-  showShopDetail(): void {
-    if (matchMedia('(max-width: 900px)').matches)
-      this.content.querySelector('.shop-detail')?.scrollIntoView({ block: 'nearest' })
-  }
-
   /** Update availability warnings and accessible sound/pause state independently of the board. */
   chrome(
     available: boolean,

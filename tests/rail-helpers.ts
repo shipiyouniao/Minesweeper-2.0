@@ -1,3 +1,4 @@
+import { updateCampaign, campaignProgress } from '../src/game/campaign-catalog.js'
 import assert from 'node:assert/strict'
 import { actExpedition, createExpedition } from '../src/game/expedition.js'
 import { deduceMines } from '../src/game/mine-deduction.js'
@@ -69,9 +70,17 @@ export function solveRescue(): readonly ExpeditionAction[] {
   return actions
 }
 
-/** The branch opens before any main dungeon is cleared, beside a separately paused roguelite. */
+/** The branch opens after the first main dungeon, beside a separately paused recollection. */
 export function readyRescue(repo: VariantRepository, atGate = true): CampSession {
   new ExpeditionSession(repo, new FakeRuntime()).start('explorer', [])
+  const saved = repo.expedition()!
+  repo.saveExpedition({
+    ...saved,
+    campaign: updateCampaign(saved.campaign, {
+      ...campaignProgress(saved.campaign, 'tower-galleries'),
+      cleared: true,
+    }),
+  })
   const camp = new CampSession(repo)
   const quarry = createStoryRun(4)
   camp.saveStory({

@@ -181,3 +181,119 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* Facility dialogs retain the physical camp beneath them. */
+.camp-facility {
+  width: min(64rem, calc(100vw - 2rem));
+  max-height: calc(100svh - 3rem);
+  margin: auto;
+  padding: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  color: var(--ink);
+  background: #f7faf4;
+  box-shadow: 0 24px 90px #183a3438;
+  overflow: auto;
+}
+.camp-facility::backdrop {
+  background: #20372b55;
+  backdrop-filter: blur(2px);
+}
+.facility-close {
+  position: sticky;
+  top: 0;
+  float: right;
+  z-index: 3;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: #e5eddf;
+  border: 1px solid var(--line);
+}
+.facility-close:hover {
+  background: #d6e4cd;
+}
+.camp-facility .story-service {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+.camp-facility .camp-panel {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.recollection-facility {
+  width: min(46rem, calc(100vw - 2rem));
+}
+.recollection-facility .recollection-main {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.recollection-facility .recollection-heading {
+  padding: 0;
+  margin-top: 0;
+}
+.recollection-summary {
+  display: grid;
+  gap: 0.75rem;
+}
+.recollection-summary button {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: #eaf0e5;
+  text-align: left;
+}
+.recollection-summary button:hover,
+.recollection-back:hover {
+  background: #dce9d4;
+}
+.recollection-summary button:focus-visible {
+  outline: 2px solid #488679;
+}
+.recollection-summary button:disabled {
+  opacity: 0.55;
+}
+.recollection-back {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  background: #eaf0e5;
+  margin-bottom: 1rem;
+}
+.recollection-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+@media (max-width: 600px) {
+  .camp-facility {
+    padding: 1rem;
+  }
+  .recollection-bosses {
+    grid-template-columns: 1fr;
+  }
+  .recollection-summary button {
+    gap: 0.5rem;
+  }
+}
+
+.recollection-facility .recollection-settings > h2 {
+  margin: 0.25rem 0 1rem;
+  font-size: 1.15rem;
+}
+.recollection-facility .recollection-difficulty {
+  padding: 0;
+}
+.recollection-facility .recollection-difficulty .difficulty-heading {
+  display: none;
+}

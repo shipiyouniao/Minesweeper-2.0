@@ -72,6 +72,7 @@ export class RecollectionSession {
       ? this.selection.floors.filter((entry) => entry !== kind)
       : [...this.selection.floors, kind]
     this.selection = { ...this.selection, floors }
+    this.persistSelection()
     return true
   }
 
@@ -81,8 +82,18 @@ export class RecollectionSession {
     const bosses = this.selection.bosses.includes(kind)
       ? this.selection.bosses.filter((entry) => entry !== kind)
       : [...this.selection.bosses, kind]
-    this.selection = { ...this.selection, bosses }
+    this.selection = { floors: this.selection.floors, bosses, remainingBosses: bosses }
+    this.persistSelection()
     return true
+  }
+
+  /** Keep valid preparation choices when the facility closes without starting a run. */
+  private persistSelection(): void {
+    if (validRecollection(this.selection, this.unlocked))
+      this.repository.saveExpedition({
+        ...this.save,
+        recollection: snapshotRecollection(this.selection),
+      })
   }
 
   /** Snapshot valid choices together with the shared profession, equipment and replay journal. */

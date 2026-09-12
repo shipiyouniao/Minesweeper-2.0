@@ -419,10 +419,6 @@ dialog.story-dialogue .story-dialogue-next {
 .story-service {
   padding: 22px 0;
 }
-.story-temporary {
-  font-size: 12px;
-  color: var(--muted);
-}
 @keyframes story-beacon {
   50% {
     box-shadow: 0 0 0 5px #c79c5030;
@@ -471,9 +467,6 @@ dialog.story-dialogue .story-dialogue-next {
   }
   .story-tasks p {
     flex: 1 1 150px;
-  }
-  .story-temporary {
-    display: none;
   }
   .story-banner {
     min-height: 128px;
@@ -739,7 +732,6 @@ dialog.story-dialogue .story-dialogue-next {
 }
 .atlas-scene {
   transform-origin: center;
-  will-change: transform;
 }
 .atlas-scene img {
   pointer-events: none;

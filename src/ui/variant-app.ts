@@ -24,19 +24,18 @@ import { ExpeditionSession } from '../application/expedition-session.js'
 import { TwinSession } from '../application/twin-session.js'
 import { cueForVitality } from '../audio/cues.js'
 import { approachPath } from '../game/dungeon-path.js'
-import { allowedDeparture, expeditionEarnings } from '../game/expedition.js'
+import { expeditionEarnings } from '../game/expedition.js'
 import { tacticalCellAction, tacticalPlan } from '../game/tactical-planning.js'
 import { message, translations } from '../i18n.js'
 import { VariantRepository } from '../persistence/variant-repository.js'
 import type { InteractionCue, SoundEffects } from '../types/audio.js'
-import type { CampScreen } from '../types/camp-navigation.js'
 import type { DungeonTool } from '../types/dungeon-ui.js'
 import type { Language } from '../types/localization.js'
 import type { GameRepository } from '../types/storage.js'
 import type { BoardInputMode, NavigationKey } from '../types/ui.js'
 import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import type { VariantCommand, VariantInputActions } from '../types/variant-ui.js'
-import type { BoardSide, Equipment, ExpeditionAction, Profession } from '../types/variants.js'
+import type { BoardSide, ExpeditionAction } from '../types/variants.js'
 import { battleGuide } from './battle-guide.js'
 import { mountAnchoredLesson } from './anchored-lesson.js'
 import { mountBattleLesson } from './battle-lesson.js'
@@ -45,8 +44,6 @@ import { secondaryBoardAction } from './board-actions.js'
 import { nextBoardMode } from './board-controls.js'
 import { boardHelpTemplate } from './board-help.js'
 import { BossPrologue } from './boss-prologue.js'
-import { navigateCamp } from './camp-navigation.js'
-import { campTemplate } from './camp-template.js'
 import { battleHealthCopy } from './combat-build-copy.js'
 import { MilestoneNotices } from './milestone-notices.js'
 import { startTutorial } from './tutorial-player.js'
@@ -66,9 +63,6 @@ export class VariantApp implements VariantInputActions {
   private readonly onLanguage: (language: Language) => void
   private view: VariantView
   private readonly input: VariantInput
-  private profession: Profession = 'explorer'
-  private equipment: readonly Equipment[] = []
-  private campScreen: CampScreen = { page: 'overview', category: 'all', selected: 'surveyor' }
   private inputMode: BoardInputMode = 'reveal'
   private paused = false
   private pending: 'retreat' | 'restart' | null = null
@@ -93,10 +87,6 @@ export class VariantApp implements VariantInputActions {
   ) {
     this.root = root
     this.session = session
-    if (session instanceof ExpeditionSession) {
-      this.profession = session.loadout.profession
-      this.equipment = session.loadout.equipment
-    }
 
     this.repository = repository
     this.preferences = preferences
@@ -567,15 +557,6 @@ export class VariantApp implements VariantInputActions {
         if (this.session instanceof ExpeditionSession)
           this.result(this.session.claim(command.value))
         break
-      case 'camp-page':
-      case 'shop-category':
-      case 'shop-item':
-        if (!(this.session instanceof ExpeditionSession) || this.session.run) return
-        this.campScreen = navigateCamp(this.campScreen, command)
-        this.render()
-        if (command.type === 'camp-page') this.view.focusCampHeading()
-        else if (command.type === 'shop-item') this.view.showShopDetail()
-        return
       case 'rewards':
       case 'result':
         this.view.showExpeditionDialog()
@@ -780,13 +761,9 @@ export class VariantApp implements VariantInputActions {
           this.session.restart(command.value)
         }
         break
-      case 'start':
-        if (this.session instanceof ExpeditionSession)
-          this.result(this.session.start(this.profession, this.equipment))
-        break
       case 'camp':
         if (this.session instanceof ExpeditionSession) {
-          if (this.session.run?.departure.recollection && this.session.returnToCamp()) {
+          if (!this.session.campaignMode && this.session.returnToCamp()) {
             this.root.querySelector<HTMLAnchorElement>('[data-recollection-return]')?.click()
             return
           }
@@ -796,37 +773,7 @@ export class VariantApp implements VariantInputActions {
 
             return
           }
-
-          this.result(this.session.returnToCamp())
-          this.campScreen = { ...this.campScreen, page: 'overview' }
         }
-        break
-      case 'profession':
-        if (
-          this.session instanceof ExpeditionSession &&
-          !this.session.run &&
-          allowedDeparture(this.session.camp, command.value, [])
-        ) {
-          this.profession = command.value
-          // Preserve compatible choices and drop only a guard that would exceed this career's cap.
-          if (!allowedDeparture(this.session.camp, command.value, this.equipment)) {
-            this.equipment = this.equipment.filter((item) => item !== 'guard')
-          }
-        }
-        break
-      case 'equipment':
-        if (this.session instanceof ExpeditionSession && !this.session.run) {
-          const equipment = this.equipment.includes(command.value)
-            ? this.equipment.filter((item) => item !== command.value)
-            : [...this.equipment, command.value]
-          if (allowedDeparture(this.session.camp, this.profession, equipment))
-            this.equipment = equipment
-          else this.sounds.play('blocked')
-        }
-        break
-      case 'upgrade':
-        if (this.session instanceof ExpeditionSession)
-          this.result(this.session.purchase(command.value))
         break
       case 'sonar':
       case 'anchor':
@@ -879,12 +826,6 @@ export class VariantApp implements VariantInputActions {
         this.pending = null
         break
     }
-
-    if (
-      this.session instanceof ExpeditionSession &&
-      (command.type === 'profession' || command.type === 'equipment')
-    )
-      this.session.selectLoadout({ profession: this.profession, equipment: this.equipment })
 
     this.render()
   }
@@ -957,14 +898,14 @@ export class VariantApp implements VariantInputActions {
           link.href = routeHref({ page: 'story' }, this.language)
           link.dataset['route'] = ''
           link.dataset['campaignReturn'] = ''
-          link.className = 'route-back mx-auto my-3 w-fit'
+          link.className = 'campaign-world-return'
           link.textContent = message(this.language, 'campaign.leave')
-          this.root.querySelector('.site-header')?.after(link)
+          this.root.querySelector('.game-heading-actions')?.prepend(link)
         }
       }
 
       const run = this.session.run
-      if (run?.departure.recollection) {
+      if (run && !run.departure.campaign) {
         const heading = this.root.querySelector('.variant-heading h2')
         if (heading) heading.textContent = message(this.language, 'recollection.title')
         const link = this.root.querySelector<HTMLAnchorElement>('.header-identity .route-back')
@@ -977,16 +918,7 @@ export class VariantApp implements VariantInputActions {
       }
 
       this.view.render(
-        run
-          ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.inputMode)
-          : campTemplate(
-              this.language,
-              this.session.camp,
-              this.profession,
-              this.equipment,
-              this.session.difficulty,
-              this.campScreen,
-            ),
+        run ? expeditionTemplate(this.language, run, expeditionEarnings(run), this.inputMode) : '',
         run?.game ?? null,
         run?.encounter?.kind === 'mirror' ? run.encounter.other.game : null,
         run,

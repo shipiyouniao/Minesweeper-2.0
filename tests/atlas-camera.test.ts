@@ -7,6 +7,7 @@ import {
   visibleAtlasTiles,
   zoomAtlas,
 } from '../src/ui/atlas-camera.js'
+import { ATLAS_REGIONS, atlasRegionForScene } from '../src/game/atlas-regions.js'
 import { ATLAS_PLACES, ATLAS_ROUTES } from '../src/game/atlas-catalog.js'
 import { atlasDestination } from '../src/game/atlas-connections.js'
 import { atlasRouteState } from '../src/game/atlas-routes.js'
@@ -67,16 +68,16 @@ test('visible tile addresses cover the screen without mounting the complete high
   assert.deepEqual(visibleAtlasTiles({ zoom: 2, x: 0, y: 0 }, { width: 0, height: 0 }), [])
 })
 
-test('one world chart switches detail without an intermediate regional map', () => {
+test('regional detail changes independently of the world overview', () => {
   assert.deepEqual(
     ATLAS_PLACES.map((place) => place.scene).sort(),
     STORY_ATLAS_SCENES.map((scene) => scene.id).sort(),
   )
   assert.equal(new Set(ATLAS_PLACES.map((place) => place.scene)).size, ATLAS_PLACES.length)
   assert.equal(atlasDetail('local', 1), 'places')
-  assert.equal(atlasDetail('world', 1), 'districts')
-  assert.equal(atlasDetail('world', 1.7), 'places')
-  assert.equal(atlasDetail('world', 5), 'places')
+  assert.equal(atlasDetail('region', 1), 'districts')
+  assert.equal(atlasDetail('region', 1.7), 'places')
+  assert.equal(atlasDetail('region', 5), 'places')
   for (const place of ATLAS_PLACES) {
     assert.ok(place.x > 0 && place.x < 100)
     assert.ok(place.y > 0 && place.y < 100)
@@ -159,4 +160,20 @@ test('atlas links and task pins preserve discovery and gameplay progress', () =>
   )
   assert.equal(storyTaskLocation(progress, 'rescue-toma'), 'quarry-yard')
   assert.deepEqual(progress, before)
+})
+
+test('world footprints stay separate from local coordinates and leave room for later arcs', () => {
+  assert.equal(atlasRegionForScene('camp'), 'woodland')
+  assert.equal(atlasRegionForScene('reed-camp'), 'reedbank')
+  assert.equal(atlasDetail('world', 1), 'places')
+  assert.equal(atlasDetail('world', 5), 'places')
+  for (const region of ATLAS_REGIONS) {
+    assert.equal(atlasRegionForScene(region.entrance), region.id)
+    assert.ok(region.width * region.height < 500)
+    assert.ok(region.x - region.width / 2 >= 0 && region.x + region.width / 2 <= 100)
+    assert.ok(region.y - region.height / 2 >= 0 && region.y + region.height / 2 <= 100)
+  }
+  const [woodland, river] = ATLAS_REGIONS
+  assert.ok(woodland && river)
+  assert.ok(river.x + river.width / 2 <= woodland.x - woodland.width / 2)
 })

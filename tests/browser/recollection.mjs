@@ -120,14 +120,25 @@ try {
     await page.locator('[data-story-scene="reed-camp"]').waitFor()
     await page.locator('[data-signal-scene="reed-arrival"]').waitFor()
     await geometry(page, `arrival-${width}`)
+    // Finish the incoming scene before fast-forwarding every dialogue beat in the fixture.
+    await page
+      .locator('.story-board')
+      .evaluate((element) =>
+        Promise.all(element.getAnimations().map((animation) => animation.finished)),
+      )
     await dialogue(page)
     await page.locator('[data-story-cell="49"]').click()
+    await page.waitForFunction(
+      () => !document.querySelector('.story-player')?.getAnimations().length,
+    )
     await page.locator('[data-signal-scene="recollection-light"]').waitFor()
     assert.equal(await page.locator('.recollection-ignition img').count(), 1)
     await dialogue(page)
     await page.locator('.recollection-settings').waitFor()
-    assert.equal(await page.locator('[data-boss]:enabled').count(), 1)
-    assert.equal(await page.locator('[data-floor]:enabled').count(), 3)
+    assert.equal(await page.locator('.story-board').count(), 1)
+    assert.equal(await page.locator('.camp-facility[open]').count(), 1)
+    assert.equal(await page.locator('[data-boss]').count(), 0)
+    await page.locator('[data-recollection-section="difficulty"]').click()
     await geometry(page, `preparation-${width}`)
     // The five-tier control is the same control as the existing expedition preparation.
     await page.locator('[data-control="difficulty:expert"]').click()
@@ -135,8 +146,14 @@ try {
       await page.locator('[data-control="difficulty:expert"]').getAttribute('aria-pressed'),
       'true',
     )
+    await page.locator('[data-recollection-section="back"]').click()
+    await page.locator('[data-recollection-section="floors"]').click()
+    assert.equal(await page.locator('[data-floor]:enabled').count(), 3)
     await page.locator('[data-floor="ordinary"]').uncheck()
     await page.locator('[data-floor="routing"]').uncheck()
+    await page.locator('[data-recollection-section="back"]').click()
+    await page.locator('[data-recollection-section="bosses"]').click()
+    assert.equal(await page.locator('[data-boss]:enabled').count(), 1)
     await page.locator('[data-boss="bastion"]').uncheck()
     assert.equal(await page.locator('[data-recollection-start]').isDisabled(), true)
     await page.locator('[data-boss="bastion"]').check()
@@ -147,7 +164,11 @@ try {
       (key) => JSON.parse(localStorage.getItem(key)).journal.departure,
       key,
     )
-    assert.deepEqual(departure.recollection, { floors: ['relay'], bosses: ['bastion'] })
+    assert.deepEqual(departure.recollection, {
+      floors: ['relay'],
+      bosses: ['bastion'],
+      remainingBosses: ['bastion'],
+    })
     assert.equal(departure.difficulty, 'expert')
     await page.reload()
     await page.locator('.variant-main.expedition').waitFor()
@@ -161,21 +182,36 @@ try {
     await page.locator('dialog[open] [data-control="confirm"]').click()
     await page.locator('dialog[open] [data-control="camp"]').click()
     await page.locator('.recollection-settings').waitFor()
-    await page.locator('header [data-route][href*="page=story"]').click()
+    await page.locator('[data-recollection-close]').click()
+    for (const [index, service] of [
+      [15, 'shop'],
+      [45, 'achievements'],
+      [69, 'missions'],
+      [41, 'professions'],
+      [19, 'equipment'],
+    ]) {
+      await page.locator(`[data-story-cell="${index}"]`).click()
+      await page.locator(`dialog[open] [data-camp-page="${service}"]`).waitFor()
+      assert.equal(await page.locator('.story-board').count(), 1)
+      assert.equal(await page.locator('dialog[open] [data-control^="camp-page:"]').count(), 0)
+      await geometry(page, `${service}-${width}`)
+      await page.locator('dialog[open] [data-story-action="back"]').click()
+      assert.equal(await page.locator('.camp-facility[open]').count(), 0)
+    }
     await page.locator('[data-story-scene="reed-camp"]').waitFor()
     assert.equal(await page.locator('.story-temporary').count(), 0)
     assert.equal(await page.locator('.signal-dialogue[open]').count(), 0)
     await page.locator('[data-story-action="map"]').click()
     await page.locator('.story-atlas').waitFor()
     assert.equal(await page.locator('.atlas-local-grid .atlas-position').count(), 1)
-    await page.locator('[data-story-action="map-level"][data-level="world"]').click()
-    assert.equal(await page.locator('[data-atlas-waypoint="reed-camp"].is-current').count(), 1)
-    assert.equal(
-      await page
-        .locator('[data-atlas-route="blockade-pass:reed-camp"]')
-        .getAttribute('data-route-state'),
-      'open',
-    )
+    await page.locator('[data-story-action="map-level"][data-level="region"]').click()
+    assert.equal(await page.locator('.atlas-river-region').count(), 1)
+    await page.locator('[data-level="world"]').click()
+    assert.equal(await page.locator('.atlas-region-node').count(), 2)
+    await page.locator('.atlas-region-node[data-scene="11"]').click()
+    assert.equal(await page.locator('.atlas-river-region').count(), 1)
+    await page.locator('.atlas-node[data-story-action="map-region"]').click()
+    assert.equal(await page.locator('.story-map').getAttribute('data-map-region'), 'woodland')
     await geometry(page, `map-${width}`)
     await page.locator('[data-story-action="close-panel"]').click()
     await page.locator('[data-story-cell="102"]').click()

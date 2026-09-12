@@ -8,8 +8,6 @@ import { variantCopy } from './variant-copy.js'
 export function campPageName(language: Language, page: CampPage): string {
   const t = variantCopy(language)
   switch (page) {
-    case 'overview':
-      return t.camp
     case 'professions':
       return t.profession
     case 'equipment':
@@ -42,10 +40,6 @@ export function shopCategoryName(language: Language, category: ShopCategory): st
 /** Supply concise instructions and feedback at the point where they are needed. */
 export function campLabel(language: Language, label: CampLabel): string {
   switch (label) {
-    case 'back':
-      return message(language, 'camp-copy.back-to-camp')
-    case 'current':
-      return message(language, 'camp-copy.ready-for-departure')
     case 'empty':
       return message(language, 'camp-copy.no-equipment-selected')
     case 'buy':

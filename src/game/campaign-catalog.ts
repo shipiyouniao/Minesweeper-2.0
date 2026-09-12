@@ -67,6 +67,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
   },
   {
     id: 'northwest-bastion',
+    boss: 'bastion',
     entrance: { scene: 'blockade-pass', index: 16, fact: 'west-shortcut' },
     bounds: { width: 19, height: 17 },
     revision: 'northwest-bastion-v1',
@@ -82,7 +83,7 @@ export const CAMPAIGN_STAGES: readonly CampaignStage[] = [
     entrance: { scene: 'quarry-yard', index: 25, fact: 'lift-discovered' },
     bounds: { width: 17, height: 17 },
     revision: 'quarry-rescue-v1',
-    prerequisite: null,
+    prerequisite: 'tower-galleries',
     floors: 3,
     outcome: 'toma-rescued',
     reward: 120,

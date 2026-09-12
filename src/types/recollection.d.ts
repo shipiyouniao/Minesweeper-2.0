@@ -8,6 +8,8 @@ export type RecollectionFloor = 'ordinary' | 'relay' | 'routing'
 
 /** A departure takes its own copy; changing camp choices cannot alter a running memory. */
 export interface RecollectionSelection {
+  readonly remainingBosses?: readonly EncounterKind[]
+  readonly lastBoss?: EncounterKind
   readonly floors: readonly RecollectionFloor[]
   readonly bosses: readonly EncounterKind[]
 }
@@ -37,4 +39,10 @@ export interface RecollectionFeed {
 export interface RecollectionPowerPlan {
   readonly junctions: readonly (RecollectionFeed | null)[]
   readonly receivers: readonly RecollectionFeed[]
+}
+
+/** A draw carries the remaining bag into the next encounter or departure. */
+export interface RecollectionDraw {
+  readonly boss: EncounterKind
+  readonly remainingBosses: readonly EncounterKind[]
 }
