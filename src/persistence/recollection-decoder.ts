@@ -15,13 +15,33 @@ export function decodeRecollection(value: JsonValue | undefined): RecollectionSe
   const bosses = reader?.array('bosses')
   if (!floors || !bosses) return null
 
+  const remaining = reader?.array('remainingBosses')
+  const last = reader?.string('lastBoss')
+  if (
+    reader?.value('remainingBosses') !== undefined &&
+    (!remaining || remaining.some((kind) => !bosses.includes(kind)))
+  )
+    return null
+  if (reader?.value('lastBoss') !== undefined && (!last || !bosses.includes(last))) return null
   const selection: RecollectionSelection = {
+    ...(remaining
+      ? {
+          remainingBosses: remaining.flatMap((value) =>
+            RECOLLECTION_BOSSES.filter((kind) => kind === value),
+          ),
+        }
+      : {}),
+    ...(last ? { lastBoss: RECOLLECTION_BOSSES.find((kind) => kind === last)! } : {}),
     floors: floors.flatMap((value) => RECOLLECTION_FLOORS.filter((kind) => kind === value)),
     bosses: bosses.flatMap((value) => RECOLLECTION_BOSSES.filter((kind) => kind === value)),
   }
   return selection.floors.length === floors.length &&
     selection.bosses.length === bosses.length &&
     validRecollection(selection, { floors: RECOLLECTION_FLOORS, bosses: RECOLLECTION_BOSSES })
-    ? snapshotRecollection(selection)
+    ? {
+        ...snapshotRecollection(selection),
+        // Existing departure journals must retain the order used to generate their encounters.
+        ...(selection.remainingBosses ? { remainingBosses: selection.remainingBosses } : {}),
+      }
     : null
 }

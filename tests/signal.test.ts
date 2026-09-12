@@ -97,6 +97,7 @@ function ready(repository: VariantRepository): void {
     ...saved,
     campaign: updateCampaign(saved.campaign, {
       ...campaignProgress(saved.campaign, 'tower-galleries'),
+      scenes: ['tower-response'],
       cleared: true,
       lesson: 4,
     }),
@@ -220,7 +221,7 @@ test('legacy stage envelopes migrate once and newer stage content is kept read-o
     repo = new VariantRepository(storage)
   ready(repo)
   const save = repo.expedition()!
-  const old = campaignProgress(save.campaign, 'tower-galleries')
+  const old = { ...campaignProgress(save.campaign, 'tower-galleries'), scenes: [] }
   const key = 'minesweeper.variants.v1.expedition'
   storage.setItem(
     key,
@@ -327,4 +328,28 @@ test('a rescued resident cannot overlap an old camp position or be walked throug
   assert.equal(path.includes(51), false)
   assert.ok(story.moveCamp(33))
   assert.notEqual(camp.story.campPosition, 33)
+})
+
+test('fresh relay attempts require the tower response but existing journals still resume', () => {
+  const repository = new VariantRepository(new MemoryStorage())
+  ready(repository)
+  const saved = repository.expedition()!
+  const first = campaignProgress(saved.campaign, 'tower-galleries')
+  repository.saveExpedition({
+    ...saved,
+    campaign: updateCampaign(saved.campaign, { ...first, scenes: [] }),
+  })
+  const session = new ExpeditionSession(repository.forCampaign('tower-relay'), new FakeRuntime())
+  assert.equal(session.start('explorer', []), false)
+  assert.equal(campaignProgress(repository.expedition()!.campaign, 'tower-relay').journal, null)
+  new CampSession(repository).completeStageScene('tower-galleries', 'tower-response')
+  assert.ok(session.start('explorer', []))
+  const run = session.run
+  const active = repository.expedition()!
+  repository.saveExpedition({
+    ...active,
+    campaign: updateCampaign(active.campaign, { ...first, scenes: [] }),
+  })
+  const resumed = new ExpeditionSession(repository.forCampaign('tower-relay'), new FakeRuntime())
+  assert.deepEqual(resumed.run, run)
 })

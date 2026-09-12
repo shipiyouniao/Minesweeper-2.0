@@ -32,8 +32,6 @@ test('shop filters partition the complete catalog and keep increasing prices wit
 
 test('camp navigation preserves selection, reconciles filters and follows a locked workshop link', () => {
   const screen: CampScreen = { page: 'shop', category: 'all', selected: 'steel-blade' }
-  const away = navigateCamp(screen, { type: 'camp-page', value: 'equipment' })
-  assert.deepEqual(navigateCamp(away, { type: 'camp-page', value: 'shop' }), screen)
 
   const equipment = navigateCamp(screen, { type: 'shop-category', value: 'equipment' })
   assert.equal(equipment.selected, 'steel-blade')
@@ -47,10 +45,12 @@ test('camp navigation preserves selection, reconciles filters and follows a lock
 })
 
 test('camp commands reject unknown screens, filters and item IDs at the input boundary', () => {
-  for (const command of ['camp-page:shop', 'shop-category:equipment', 'shop-item:workshop'])
+  for (const command of ['shop-category:equipment', 'shop-item:workshop'])
     assert.ok(parseVariantCommand(command))
   for (const command of [
     'camp-page',
+    'camp-page:shop',
+    'camp-page:overview',
     'camp-page:settings',
     'shop-category:cheap',
     'shop-item:fake',

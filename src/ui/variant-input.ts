@@ -1,6 +1,6 @@
 import { BoardRightClick } from './board-right-click.js'
 import { parseMilestone } from '../game/milestones.js'
-import { parseCampPage, parseShopCategory } from './camp-navigation.js'
+import { parseShopCategory } from './camp-navigation.js'
 import { parseVariantDifficulty } from '../game/variant-difficulty.js'
 import {
   parseEquipment,
@@ -90,10 +90,6 @@ export function parseVariantCommand(value: string): VariantCommand | null {
     }
     case 'equipment': {
       const parsed = parseEquipment(id ?? null)
-      return parsed ? { type, value: parsed } : null
-    }
-    case 'camp-page': {
-      const parsed = parseCampPage(id)
       return parsed ? { type, value: parsed } : null
     }
     case 'shop-category': {

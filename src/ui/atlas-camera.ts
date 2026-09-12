@@ -44,7 +44,7 @@ export function zoomAtlas(
 
 /** Coarse charts show areas; local destinations appear only when there is room to read them. */
 export function atlasDetail(level: AtlasLevel, zoom: number): AtlasDetail {
-  return level === 'world' && zoom < 1.7 ? 'districts' : 'places'
+  return level === 'region' && zoom < 1.7 ? 'districts' : 'places'
 }
 
 /** Enumerate only intersecting quadtree tiles, including a small seam margin at tile boundaries. */

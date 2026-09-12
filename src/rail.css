@@ -121,7 +121,7 @@
 }
 
 .board-viewport:has(.rail-board) {
-  max-height: min(70vh, 820px);
+  max-height: 70svh;
 }
 .rail-settlement {
   margin: 0 1rem 1rem;
@@ -265,4 +265,86 @@
 }
 .rail-winch-icon[data-rail-direction='reverse'] > svg {
   background: #8b542e;
+}
+
+/* Board clues own the lower-right corner; control direction belongs above the prop. */
+.rail-landmark .rail-winch-icon > svg {
+  inset: -2px auto auto -2px;
+  width: 42%;
+  height: 42%;
+}
+
+/* Fit the whole rail floor in available desktop height instead of clipping it at 820px. */
+@media (min-width: 1000px) {
+  .board-viewport:has(.rail-board) {
+    --rail-area-height: max(280px, calc(100svh - 480px));
+    max-height: var(--rail-area-height);
+  }
+  .variant-board-panel .board.rail-board {
+    --cell-max: clamp(
+      20px,
+      calc((var(--rail-area-height) - 48px) / var(--rail-rows) - var(--gap)),
+      88px
+    );
+  }
+}
+/* At phone overview scale, a fixed 16px circle would cover most of a tiny tile. */
+.rail-board .cell:has(.rail-landmark) > .landmark-clue {
+  min-width: 0;
+  width: 45%;
+  height: 45%;
+  font-size: max(7px, calc(var(--cell) * 0.26));
+}
+
+.rail-landmark > small {
+  inset: -2px auto auto -2px;
+  font-size: max(7px, calc(var(--cell) * 0.18));
+  line-height: 1;
+}
+
+.campaign-world-return {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid #97afa3;
+  border-radius: 0.8rem;
+  background: #eef5e8;
+  color: #2f6454;
+  font-size: 0.85rem;
+  font-weight: 650;
+  text-decoration: none;
+  box-shadow: 0 2px 5px #234c3210;
+  transition:
+    background 0.15s,
+    transform 0.15s;
+}
+.campaign-world-return::before {
+  content: '↖';
+  font-size: 1.2rem;
+}
+.campaign-world-return:hover {
+  background: #dbead2;
+  transform: translateY(-1px);
+}
+.campaign-world-return:focus-visible {
+  outline: 2px solid #488679;
+  outline-offset: 3px;
+}
+
+.variant-heading:has(.campaign-world-return) {
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+.variant-heading:has(.campaign-world-return) > h2 {
+  width: 100%;
+}
+.variant-heading:has(.campaign-world-return) .game-heading-actions {
+  width: 100%;
+}
+.campaign-world-return {
+  white-space: nowrap;
+  margin-right: auto;
+  flex-shrink: 0;
 }

@@ -1,6 +1,6 @@
 # Knocking in the old mine
 
-`quarry-rescue` is Chapter One's independent optional side story. Its entrance is the minecart in the east of Quarry Yard, available after discovering the lift and before clearing any prepared main stage. It remains available after the guardian. Leaving the branch preserves its own attempt; returning to the main route does not require finishing it.
+`quarry-rescue` is Chapter One's independent optional side story. Its entrance is the minecart in the east of Quarry Yard, visible only after discovering the lift and clearing Watchtower outer galleries. The scene, atlas, stage link and direct-route prerequisite use the same first-stage unlock. It remains available after the guardian. Leaving the branch preserves its own attempt; returning to the main route does not require finishing it.
 
 Toma, a miner with a sprained ankle, calls for help by knocking on a pipe. The player clears and operates the old haul route, then brings him out in a cart. His conversations use a distinct voice, chibi portrait and the shared typewriter controls. After rescue he appears at camp and unlocks the exclusive Rescuer profession in the shared camp roster.
 

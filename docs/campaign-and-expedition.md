@@ -16,7 +16,7 @@ Campaign and Roguelite have separate resumable attempts, outcomes and route prog
 
 ## Chapters, stages and side routes
 
-The long-term target is **30–40 hours for a first playthrough of the complete story campaign**. Repeat clears, currency grinding and achievement cleanup do not supply that budget. The current first chapter is an early portion of that campaign, not evidence that the target has already been met. Measure first-time players' active exploration, deduction, combat and story time separately; automated action counts validate solvability rather than human duration.
+The long-term target is **40–50 hours for a first playthrough of the complete story campaign**. Repeat clears, currency grinding and achievement cleanup do not supply that budget. The current first chapter is an early portion of that campaign, not evidence that the target has already been met. Measure first-time players' active exploration, deduction, combat and story time separately; automated action counts validate solvability rather than human duration.
 
 Build that length through the eleven planned chapter families and room for further regions, with substantial authored floors, evolving combinations, branching exploration and character conflicts. Do not reach a duration target by adding empty travel, mandatory repeat purchases, inflated boss health, or multiple rooms that ask the same question. Later chapters can become longer and more demanding as the available mechanics grow. Chapter and stage time budgets remain provisional until actual first-time playtests support them.
 

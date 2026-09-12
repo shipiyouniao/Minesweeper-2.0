@@ -182,7 +182,7 @@ try {
         .scenes.includes('chapter-camp'),
     )
     await page.locator('[data-story-action="map"]').click()
-    await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
+    await page.locator('[data-story-action="map-level"][data-level="region"]').first().click()
     await page
       .locator('[data-atlas-route="north-road:northwest-bridge"][data-route-state="open"]')
       .waitFor()
@@ -193,7 +193,7 @@ try {
     await openMapNode(page, 9, width)
     await page.locator('[data-map-level="local"][data-map-scene="9"]').waitFor()
     assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), checkpoint)
-    await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
+    await page.locator('[data-story-action="map-level"][data-level="region"]').first().click()
     await openMapNode(page, 10, width)
     await page.locator('[data-map-level="local"][data-map-scene="10"]').waitFor()
     assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), checkpoint)

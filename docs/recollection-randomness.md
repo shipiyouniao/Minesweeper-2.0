@@ -20,6 +20,14 @@ All eight families still enter through their existing procedural generators. Rec
 
 The existing bounded generation and verified tactical fallback rules remain in effect. Sampling checks variation rather than promising that random draws can never coincide or that every possible seed avoids a fallback. Ordinary Recollection also retains the dungeon's existing deduction guarantees; this change does not claim a complete no-guess solution for every generated exploration board.
 
+## Boss draw bag and camp presentation
+
+New departures snapshot the selected boss catalog and its remaining draw bag. Entering a boss arena removes that boss and commits the remaining IDs in the same save as the accepted action. Reloading replays from the departure snapshot without consuming another draw. Subsequent departures use the saved remainder. Exhaustion refills the selected catalog; pools larger than one also avoid repeating the last boss across a refill. Changing the selected boss catalog starts a fresh bag. Existing journals without a bag retain their original seeded order.
+
+The lantern opens above the persistent camp board. Difficulty, floor families and boss families have separate configuration views reached from a compact summary. Shops, loadout facilities, missions and achievements also open as independent dialogs; changing facilities requires closing the dialog and walking to the other landmark. The former expedition preparation page and temporary story shortcut are no longer entry points.
+
+New campaign departures without a boss snapshot an exploration-only reward policy. Their rewards exclude relics that only modify turn-based attacks, armor or action points, while retaining hybrid exploration/survival effects. Existing journals preserve their original offer pool so accepted relic choices still replay.
+
 ## Reproduce the audit
 
 `tests/recollection-randomness.test.ts` runs under both compilers in the normal test suite. It samples every exploration family at every floor density of all five difficulties, plus every boss family at each difficulty. It checks exact mine counts and measures mine placement independently of character and objective positions. It checks both Mirror boards separately. At least 90% of the sampled minefields must differ; exploration entrances and exits must also vary. Structural tests separately require multiple relay counts, at least eight power graph shapes per board size, useful A/B branches and acyclic dependencies.

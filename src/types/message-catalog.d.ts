@@ -1,5 +1,14 @@
 /** Complete shared catalog: every supported language implements every key. */
 export interface MessageCatalog {
+  readonly 'story.main-title': string
+  readonly 'story.side-title': string
+  readonly 'recollection.back-settings': string
+  readonly 'signal.tower-response-1': string
+  readonly 'signal.tower-response-2': string
+  readonly 'signal.tower-response-3': string
+  readonly 'signal.tower-response-4': string
+  readonly 'signal.tower-response-5': string
+
   readonly 'recollection.existing': string
   readonly 'recollection.resume-expedition': string
 
@@ -355,6 +364,10 @@ export interface MessageCatalog {
   readonly 'story.atlas-district-camp': string
   readonly 'story.atlas-district-quarry': string
   readonly 'story.atlas-district-west': string
+  readonly 'story.atlas-region': string
+  readonly 'story.atlas-reedbank': string
+  readonly 'story.atlas-unsurveyed': string
+  readonly 'story.atlas-switch': string
   readonly 'story.atlas-world': string
   readonly 'story.atlas-legend': string
   readonly 'story.atlas-local': string
@@ -445,8 +458,6 @@ export interface MessageCatalog {
   readonly 'story.guide-line': string
   readonly 'story.camp-ready': string
   readonly 'story.road-line': string
-  readonly 'story.temporary': string
-  readonly 'story.temporary-note': string
   readonly 'story.continue': string
   readonly 'story.enter-camp': string
   readonly 'story.explore': string

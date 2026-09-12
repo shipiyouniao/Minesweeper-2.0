@@ -40,7 +40,7 @@ function placeMarkers(state: StoryViewState): string {
       ? worldSceneName(state.language, place.scene)
       : message(state.language, 'story.map-unvisited')
 
-    return `<button class="atlas-node ${place.scene === current ? 'is-current' : ''}" data-map-name="${escapeHtml(name)}" style="--x:${place.x}%;--y:${place.y}%" data-story-action="map-scene" data-scene="${index}" ${open ? '' : 'disabled'}>${placeImage(place)}<strong>${escapeHtml(name)}</strong>${place.scene === current ? `<span>${message(state.language, 'story.atlas-here')}</span>` : ''}</button>`
+    return `<button class="atlas-node ${place.scene === current ? 'is-current' : ''}" data-map-name="${escapeHtml(name)}" style="--x:${place.x}%;--y:${place.y}%" data-story-action="${place.scene === 'reed-camp' ? 'map-region' : 'map-scene'}" data-scene="${index}" ${open ? '' : 'disabled'}>${placeImage(place)}<strong>${escapeHtml(name)}</strong>${place.scene === current ? `<span>${message(state.language, 'story.atlas-here')}</span>` : ''}</button>`
   }).join('')
 }
 

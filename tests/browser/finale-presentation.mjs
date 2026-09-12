@@ -148,7 +148,7 @@ try {
     )
     await seed(page, completed, `?page=story&lang=${language}`)
     await page.locator('[data-story-action="map"]').click()
-    await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
+    await page.locator('[data-story-action="map-level"][data-level="region"]').first().click()
     await page
       .locator('[data-atlas-route="north-road:northwest-bridge"][data-route-state="open"]')
       .waitFor()
@@ -163,7 +163,7 @@ try {
       await page.locator(`[data-map-level="local"][data-map-scene="${scene}"]`).waitFor()
       assert.equal(await page.locator('.atlas-heading p').count(), 0)
       assert.equal(await page.evaluate((key) => localStorage.getItem(key), key), before)
-      await page.locator('[data-story-action="map-level"][data-level="world"]').first().click()
+      await page.locator('[data-story-action="map-level"][data-level="region"]').first().click()
     }
     await page.locator('[data-story-action="close-panel"]').click()
     await page.locator('[data-story-action="tasks"]').click()

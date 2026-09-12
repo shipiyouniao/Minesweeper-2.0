@@ -294,6 +294,11 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
   const difficulty = parseVariantDifficulty(reader.string('difficulty'))
   const profession = parseProfession(reader.string('profession'))
   const archive = reader.value('archive')
+  if (
+    reader.value('explorationRewards') !== undefined &&
+    reader.value('explorationRewards') !== true
+  )
+    return null
   const battleRelics = reader.value('battleRelics')
   const values = reader.array('equipment')
   const trainingValues = reader.array('training')
@@ -371,6 +376,7 @@ function decodeDeparture(reader: JsonObjectReader | null): Departure | null {
     equipment,
     training,
     packs,
+    ...(reader.value('explorationRewards') === true ? { explorationRewards: true as const } : {}),
     battleRelics,
     ...(rawMilestones === undefined ? {} : { milestoneRelics }),
   }

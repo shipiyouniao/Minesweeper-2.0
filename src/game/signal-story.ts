@@ -4,6 +4,7 @@ import type { CampaignStageProgress } from '../types/campaign.js'
 
 export const NIA_CAMP_CELL = 33
 export const SIGNAL_SCENES: readonly SignalSceneId[] = [
+  'tower-response',
   'entry',
   'connected',
   'archive',

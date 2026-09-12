@@ -1,3 +1,4 @@
+import { orderedStoryTasks, storyTaskCategory } from '../game/story-quests.js'
 import { storyAtlasIndex } from '../game/story-atlas.js'
 import { storyTaskLocation } from '../game/story-task-location.js'
 import { worldSceneName } from './world-copy.js'
@@ -9,6 +10,14 @@ import { storyMechanismObjective } from './story-mechanisms.js'
 
 /** Resolve an authored task to its localized journal title. */
 export function storyTaskName(language: Language, id: StoryTask): string {
+  const title = storyTaskTitle(language, id)
+  return storyTaskCategory(id) === 'main'
+    ? message(language, 'story.main-title', { title })
+    : message(language, 'story.side-title', { title })
+}
+
+/** Translated task titles contain only the name; category labels come from the task catalog. */
+function storyTaskTitle(language: Language, id: StoryTask): string {
   if (id === 'settle-reed-camp') return message(language, 'recollection.task')
 
   if (id === 'rescue-toma') return message(language, 'rail.task')
@@ -84,7 +93,7 @@ function quest(state: StoryViewState, id: StoryTask, expanded = false): string {
 
 /** Show unfinished pinned objectives in the scene while completed tasks remain in the journal. */
 export function pinnedStoryTasks(state: StoryViewState): string {
-  const ids = (state.progress.accepted ?? []).filter(
+  const ids = orderedStoryTasks(state.progress).filter(
     (id) => state.progress.pinned?.includes(id) && !state.progress.completed.includes(id),
   )
   return `<section class="story-tasks"><header><h2>${message(state.language, 'story.tasks')}</h2><button class="story-all-tasks" data-story-action="tasks">${message(state.language, 'story.all-tasks')} ↗</button></header>${ids.length ? ids.map((id) => quest(state, id)).join('') : `<p>${message(state.language, 'story.no-quests')}</p>`}</section>`
@@ -96,10 +105,7 @@ export function storyQuestPanel(state: StoryViewState): string {
 
   const lang = state.language
   const accepted = state.progress.accepted ?? []
-  const ordered = [
-    ...accepted.filter((id) => !state.progress.completed.includes(id)),
-    ...accepted.filter((id) => state.progress.completed.includes(id)),
-  ]
+  const ordered = orderedStoryTasks(state.progress)
   const title = state.panel === 'tasks' ? message(lang, 'story.tasks') : message(lang, 'story.map')
   const content =
     state.panel === 'tasks'

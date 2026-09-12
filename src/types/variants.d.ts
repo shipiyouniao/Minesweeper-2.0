@@ -79,6 +79,7 @@ export interface Camp {
 
 /** A replayable departure captures the camp options available when it began. */
 export interface Departure {
+  readonly explorationRewards?: true
   readonly recollection?: RecollectionSelection
   readonly campaign?: CampaignRevision
   readonly title: TitleId | null

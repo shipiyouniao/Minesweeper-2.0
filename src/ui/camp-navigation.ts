@@ -2,26 +2,11 @@ import { UPGRADES, upgradeCost } from '../game/camp-progression.js'
 import { parseCombatEquipment, parseCombatPurchase } from '../game/combat-build.js'
 import { parseRelicPack } from '../game/relic-packs.js'
 import { PROFESSIONS } from '../game/professions.js'
-import type { CampCommand, CampPage, CampScreen, ShopCategory } from '../types/camp-navigation.js'
+import type { CampCommand, CampScreen, ShopCategory } from '../types/camp-navigation.js'
 import type { DungeonSprite } from '../types/dungeon-ui.js'
 import type { Upgrade } from '../types/variants.js'
 import { combatSprite } from './combat-build-copy.js'
 import { professionSprite } from './profession-presentation.js'
-
-/** Decode screen names without accepting arbitrary DOM attributes as state. */
-export function parseCampPage(value: string | undefined): CampPage | null {
-  switch (value) {
-    case 'overview':
-    case 'professions':
-    case 'equipment':
-    case 'missions':
-    case 'achievements':
-    case 'shop':
-      return value
-    default:
-      return null
-  }
-}
 
 /** Keep filter identifiers finite and independent of translated labels. */
 export function parseShopCategory(value: string | undefined): ShopCategory | null {
@@ -73,8 +58,6 @@ export function shopSprite(item: Upgrade): DungeonSprite {
 /** Reconcile selection with each filter without purchasing or selecting a profession. */
 export function navigateCamp(screen: CampScreen, command: CampCommand): CampScreen {
   switch (command.type) {
-    case 'camp-page':
-      return { ...screen, page: command.value }
     case 'shop-category': {
       const items = shopItems(command.value)
       return {

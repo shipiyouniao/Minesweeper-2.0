@@ -14,7 +14,16 @@ export interface AtlasCamera {
   readonly x: number
   readonly y: number
 }
-export type AtlasLevel = 'local' | 'world'
+export type AtlasLevel = 'local' | 'region' | 'world'
+export type AtlasRegionId = 'woodland' | 'reedbank'
+
+/** Stable world footprints leave room for future regions without moving existing geography. */
+export interface AtlasRegion extends AtlasPoint {
+  readonly id: AtlasRegionId
+  readonly width: number
+  readonly height: number
+  readonly entrance: StoryScene['id']
+}
 export type AtlasDetail = 'districts' | 'places'
 export type AtlasDistrict = 'woodland' | 'camp' | 'quarry' | 'west'
 

@@ -1,6 +1,6 @@
 /** Persistent performances follow actual room outcomes rather than menu clicks. */
 export type SignalSceneId =
-  'entry' | 'connected' | 'archive' | 'record' | 'prison' | 'rescued' | 'camp'
+  'tower-response' | 'entry' | 'connected' | 'archive' | 'record' | 'prison' | 'rescued' | 'camp'
 export type SignalSpeaker = 'player' | 'lumi' | 'nia' | 'guardian' | 'toma'
 
 /** A compact localized exchange uses the existing chibi and voiced typewriter language. */

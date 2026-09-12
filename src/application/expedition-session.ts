@@ -1,3 +1,5 @@
+import { recollectionDraw } from '../game/recollection.js'
+import { encounterTier } from '../game/encounter-tiers.js'
 import type { RecollectionSelection } from '../types/recollection.js'
 import {
   recollectionAvailable,
@@ -238,6 +240,10 @@ export class ExpeditionSession {
     if (
       this.repository.campaignMode &&
       (this.stageProgress.cleared ||
+        (this.stage.id === 'tower-relay' &&
+          !campaignProgress(this.save.campaign, 'tower-galleries').scenes.includes(
+            'tower-response',
+          )) ||
         (this.stage.prerequisite !== null &&
           !campaignProgress(this.save.campaign, this.stage.prerequisite).cleared) ||
         !this.save.story?.completed.includes(this.stage.entryTask) ||
@@ -258,7 +264,21 @@ export class ExpeditionSession {
     )
       return false
 
+    if (recollection) {
+      const saved = this.save.recollection
+      const bosses = recollection.bosses
+      const samePool =
+        saved &&
+        saved.bosses.length === recollection.bosses.length &&
+        saved.bosses.every((kind) => bosses.includes(kind))
+      recollection = {
+        ...recollection,
+        remainingBosses: samePool ? (saved.remainingBosses ?? saved.bosses) : recollection.bosses,
+        ...(samePool && saved.lastBoss ? { lastBoss: saved.lastBoss } : {}),
+      }
+    }
     const departure: Departure = {
+      ...(this.campaignMode && !this.stage.boss ? { explorationRewards: true as const } : {}),
       ...(recollection ? { recollection: snapshotRecollection(recollection) } : {}),
       ...(this.repository.campaignMode ? { campaign: this.stage.revision } : {}),
       title: milestoneProgress(this.camp).title ?? null,
@@ -319,6 +339,25 @@ export class ExpeditionSession {
     if (next === run) return false
 
     this.current = next
+    if (
+      next.encounter &&
+      next.departure.recollection?.remainingBosses !== undefined &&
+      (!run.encounter || run.floor !== next.floor)
+    ) {
+      const draw = recollectionDraw(
+        next.departure.recollection,
+        next.departure.seed,
+        encounterTier(next.departure.difficulty).floors.indexOf(next.floor),
+      )
+      this.save = {
+        ...this.save,
+        recollection: {
+          ...next.departure.recollection,
+          remainingBosses: draw.remainingBosses,
+          lastBoss: draw.boss,
+        },
+      }
+    }
 
     const progressedCamp = advanceMilestones(this.camp, run, next)
     const camp = run.encounter

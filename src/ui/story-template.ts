@@ -104,7 +104,11 @@ function cellTemplate(state: StoryViewState, index: number): string {
   ) {
     label = message(language, 'rail.toma')
     content = tomaImage()
-  } else if (run?.board.scene.id === 'quarry-yard' && index === RESCUE_GATE) {
+  } else if (
+    run?.board.scene.id === 'quarry-yard' &&
+    index === RESCUE_GATE &&
+    campaignProgress(state.campaign, 'tower-galleries').cleared
+  ) {
     label = message(language, 'rail.title')
     content = cartImage()
   } else if (site) {
@@ -235,15 +239,14 @@ export function storyTemplate(state: StoryViewState): string {
             ? message(language, 'story.inspect')
             : ''
   const reed = state.board.scene.id === 'reed-camp'
-  const recollection = !!state.progress.facts?.includes('recollection-awakened')
   const hero = `${import.meta.env.BASE_URL}assets/story/${reed ? 'reed-camp-banner' : 'camp-banner'}.png`
 
-  return `<header class="site-header"><div class="header-identity">${brandTemplate(language)}<a class="route-back" data-route href="${routeHref({ page: 'home' }, language)}">${icon('arrow')}<span>${message(language, 'home.back')}</span></a></div><nav>${recollection ? '' : `<a class="story-temporary" data-route href="${routeHref({ page: 'game', mode: 'expedition' }, language)}">${message(language, 'story.temporary')}</a>`}<button class="icon-button" data-story-action="sound" aria-label="${state.sound ? t.soundOn : t.soundOff}" aria-pressed="${state.sound}">${icon(state.sound ? 'volume' : 'volumeOff')}</button>${languageMenuTemplate(language)}</nav></header>
+  return `<header class="site-header"><div class="header-identity">${brandTemplate(language)}<a class="route-back" data-route href="${routeHref({ page: 'home' }, language)}">${icon('arrow')}<span>${message(language, 'home.back')}</span></a></div><nav><button class="icon-button" data-story-action="sound" aria-label="${state.sound ? t.soundOn : t.soundOff}" aria-pressed="${state.sound}">${icon(state.sound ? 'volume' : 'volumeOff')}</button>${languageMenuTemplate(language)}</nav></header>
   <main class="story-main" data-story-scene="${state.board.scene.id}">
     ${!state.storageAvailable ? `<p role="alert">${message(language, 'story.storage')}</p>` : ''}
     <section class="story-banner glass-panel" style="--story-hero:url('${hero}')"><div><p class="eyebrow">${reed ? message(language, 'recollection.chapter') : run ? (run.floor < 3 ? message(language, 'story.prologue') : message(language, 'story.world-road')) : 'MINEFARER / CAMP'}</p><h1 data-route-heading>${sceneName(state)}</h1><p>${run ? (run.floor < 3 ? `${run.floor + 1} / 3` : message(language, 'story.atlas-woodland')) : `${new Intl.NumberFormat(language).format(state.camp.supplies)} ${variantCopy(language).supplies}`}</p></div></section>
-    ${state.service ? `<div class="story-service">${state.service.page === 'professions' ? titleTemplate(language, state.camp) : ''}${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, 'standard', state.service)}</div>` : `<div class="story-layout"><section class="story-stage glass-panel">${sceneBoard(state)}${notice ? `<p class="story-notice" role="status">${notice}</p>` : ''}</section><aside class="story-sidebar glass-panel">${pinnedStoryTasks(state)}${run ? '' : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>`}
-  </main><a hidden data-route data-recollection-route href="${routeHref({ page: 'recollection' }, language)}"></a>${storyDialogueTemplate(state)}${storyQuestPanel(state)}${state.service ? '' : sceneDock(state)}`
+    <div class="story-layout"><section class="story-stage glass-panel">${sceneBoard(state)}${notice ? `<p class="story-notice" role="status">${notice}</p>` : ''}</section><aside class="story-sidebar glass-panel">${pinnedStoryTasks(state)}${run ? '' : `<div class="story-loadout">${spriteImage(professionSprite(state.loadout.profession))}<h2>${professionCopy(language, state.loadout.profession).name}</h2>${titleTemplate(language, state.camp)}<p>${state.loadout.equipment.map((id) => equipmentCopy(language, id).name).join(' · ') || campLabel(language, 'empty')}</p></div>`}</aside></div>
+  </main>${storyDialogueTemplate(state)}${storyQuestPanel(state)}${sceneDock(state)}${state.service ? `<dialog class="camp-facility"><button class="facility-close" data-story-action="back" aria-label="${t.close}">×</button><div class="story-service">${campTemplate(language, state.camp, state.loadout.profession, state.loadout.equipment, state.service)}</div></dialog>` : ''}`
 }
 
 /** Show authored stages at their physical doorway; completed stages retain their own history. */
@@ -254,6 +257,8 @@ function campaignEntries(state: StoryViewState): string {
   const available = CAMPAIGN_STAGES.filter((stage) => {
     const entrance = stage.entrance
     return (
+      (stage.id !== 'tower-relay' ||
+        campaignProgress(state.campaign, 'tower-galleries').scenes.includes('tower-response')) &&
       state.progress.completed.includes(stage.entryTask) &&
       entrance.scene === run.board.scene.id &&
       run.player === (entrance.index ?? run.board.exit) &&

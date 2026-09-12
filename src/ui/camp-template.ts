@@ -1,7 +1,6 @@
 import { sharedStyles } from './shared-styles.js'
 import { campStyles } from './camp-styles.js'
 import { upgradeCost } from '../game/camp-progression.js'
-import { difficultyRewardPercent } from '../game/expedition-rewards.js'
 import {
   EQUIPMENT,
   allowedDeparture,
@@ -9,96 +8,29 @@ import {
   equipmentPurchaseLocked,
 } from '../game/expedition.js'
 import { PROFESSIONS } from '../game/professions.js'
-import { variantTier } from '../game/variant-difficulty.js'
 import { message } from '../i18n.js'
-import type { CampPage, CampScreen, ShopCategory } from '../types/camp-navigation.js'
-import type { DungeonSprite } from '../types/dungeon-ui.js'
+import type { CampScreen, ShopCategory } from '../types/camp-navigation.js'
 import type { Language } from '../types/localization.js'
-import type { VariantDifficulty } from '../types/variant-difficulty.js'
 import type { Camp, Equipment, Profession, Upgrade } from '../types/variants.js'
 import { campLabel, campPageName, shopCategoryName } from './camp-copy.js'
 import { shopCategory, shopItems, shopSprite } from './camp-navigation.js'
 import { combatSprite } from './combat-build-copy.js'
 import { spriteImage } from './dungeon-sprites.js'
-import { milestoneReadyCount, milestonesTemplate } from './milestone-template.js'
+import { milestonesTemplate } from './milestone-template.js'
 import { escapeHtml } from './presentation.js'
 import { professionSprite } from './profession-presentation.js'
 import { professionPreviewTemplate } from './profession-skill-template.js'
-import { titleTemplate } from './title-template.js'
-import {
-  difficultyCopy,
-  equipmentCopy,
-  professionCopy,
-  upgradeCopy,
-  variantCopy,
-} from './variant-copy.js'
-import { choice, difficultyTemplate } from './variant-templates.js'
+import { equipmentCopy, professionCopy, upgradeCopy, variantCopy } from './variant-copy.js'
+import { choice } from './variant-templates.js'
 
-const DESTINATIONS: readonly CampPage[] = [
-  'professions',
-  'equipment',
-  'shop',
-  'missions',
-  'achievements',
-]
 const CATEGORIES: readonly ShopCategory[] = ['all', 'professions', 'equipment', 'relics', 'camp']
-
-/** Give navigation entries recognizable existing artwork. */
-function destinationSprite(page: CampPage): DungeonSprite {
-  switch (page) {
-    case 'professions':
-      return 'player'
-    case 'equipment':
-      return 'workshop'
-    case 'missions':
-      return 'survey-notes'
-    case 'achievements':
-      return 'guardian-crests'
-    default:
-      return 'treasure'
-  }
-}
-
-/** Summarize the actual selected loadout without rendering every possible choice. */
-function loadoutSummary(language: Language, equipment: readonly Equipment[]): string {
-  if (!equipment.length)
-    return `<p class="variant-note ${sharedStyles['variant-note']}">${campLabel(language, 'empty')}</p>`
-
-  return `<ul class="camp-loadout-summary ${campStyles['camp-loadout-summary']}">${equipment.map((item) => `<li>${spriteImage(combatSprite(item))}<span>${equipmentCopy(language, item).name}</span></li>`).join('')}</ul>`
-}
-
-/** Keep departure choices visible and use named navigation entries for their editing screens. */
-function overviewTemplate(
-  language: Language,
-  camp: Camp,
-  profession: Profession,
-  equipment: readonly Equipment[],
-  difficulty: VariantDifficulty,
-): string {
-  const t = variantCopy(language)
-  const career = professionCopy(language, profession)
-  const tier = variantTier(difficulty)
-  const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
-
-  return `<section class="camp-difficulty ${campStyles['camp-difficulty']}">${difficultyTemplate(language, difficulty, true)}</section><div class="camp-overview ${campStyles['camp-overview']}">
-    <section class="camp-departure ${campStyles['camp-departure']}" aria-label="${campLabel(language, 'current')}">${titleTemplate(language, camp)}
-      <p class="eyebrow ${sharedStyles['eyebrow']}">${campLabel(language, 'current')}</p>
-      <div class="camp-current-profession ${campStyles['camp-current-profession']}">${spriteImage(professionSprite(profession))}<div><span>${t.profession}</span><h2>${career.name}</h2><p>${career.note}</p></div></div>
-      <div class="camp-summary-heading ${campStyles['camp-summary-heading']}"><h3>${campPageName(language, 'equipment')}</h3><span>${spent} / 3</span></div>
-      ${loadoutSummary(language, equipment)}
-      <div class="camp-route-summary ${campStyles['camp-route-summary']}"><div><span>${t.difficulty}</span><strong>${difficultyCopy(language, difficulty)}</strong></div><p>${tier.size} × ${tier.size} · ${message(language, 'camp-copy.count-floors', { count: tier.floors })}<br>${t.rewardRate} ×${difficultyRewardPercent(difficulty) / 100}</p></div>
-      <button class="primary-button ${sharedStyles['primary-button']}" data-control="start">${t.start} ↗</button>
-    </section>
-    <nav class="camp-destinations ${campStyles['camp-destinations']}" aria-label="${t.camp}">${DESTINATIONS.map((page) => `<button class="camp-destination ${campStyles['camp-destination']}" data-control="camp-page:${page}">${spriteImage(destinationSprite(page))}<span><strong>${campPageName(language, page)}${(page === 'missions' || page === 'achievements') && milestoneReadyCount(camp, page) ? ` <span class="milestone-badge ${campStyles['milestone-badge']}">${milestoneReadyCount(camp, page)} ${message(language, 'camp-template.ready')}</span>` : ''}</strong></span><span aria-hidden="true">↗</span></button>`).join('')}</nav>
-  </div><p class="camp-history-summary ${campStyles['camp-history-summary']}">${t.departures} ${camp.completed} · ${message(language, 'camp-copy.count-unlocked', { count: camp.upgrades.length })}</p>`
-}
 
 /** Present profession selection and its active skill on a dedicated screen. */
 function professionsTemplate(language: Language, camp: Camp, profession: Profession): string {
   return `<p class="variant-intro ${sharedStyles['variant-intro']}">${campLabel(language, 'professionHelp')}</p><div class="choice-grid ${sharedStyles['choice-grid']} camp-professions ${campStyles['camp-professions']}">${PROFESSIONS.map((career) => choice(`profession:${career}`, professionCopy(language, career), career === profession, !allowedDeparture(camp, career, []), professionSprite(career))).join('')}</div>${professionPreviewTemplate(language, profession)}`
 }
 
-/** Keep the same bounded loadout rules while moving their controls out of the overview. */
+/** Present bounded loadout choices at the workshop facility. */
 function equipmentTemplate(
   language: Language,
   camp: Camp,
@@ -106,7 +38,7 @@ function equipmentTemplate(
   equipment: readonly Equipment[],
 ): string {
   if (!camp.upgrades.includes('workshop'))
-    return `<div class="camp-locked ${campStyles['camp-locked']}">${spriteImage('workshop')}<h2>${upgradeCopy(language, 'workshop').name}</h2><p>${upgradeCopy(language, 'workshop').note}</p><button class="primary-button ${sharedStyles['primary-button']}" data-control="shop-item:workshop">${campPageName(language, 'shop')} ↗</button></div>`
+    return `<div class="camp-locked ${campStyles['camp-locked']}">${spriteImage('workshop')}<h2>${upgradeCopy(language, 'workshop').name}</h2><p>${upgradeCopy(language, 'workshop').note}</p></div>`
 
   const spent = equipment.reduce((total, item) => total + equipmentCost(item), 0)
 
@@ -171,16 +103,12 @@ export function campTemplate(
   camp: Camp,
   profession: Profession,
   equipment: readonly Equipment[],
-  difficulty: VariantDifficulty,
   screen: CampScreen,
 ): string {
   const t = variantCopy(language)
   const number = new Intl.NumberFormat(language)
   let content: string
   switch (screen.page) {
-    case 'overview':
-      content = overviewTemplate(language, camp, profession, equipment, difficulty)
-      break
     case 'professions':
       content = professionsTemplate(language, camp, profession)
       break
@@ -197,8 +125,7 @@ export function campTemplate(
   }
 
   return `<section class="camp-panel ${sharedStyles['camp-panel']}" data-camp-page="${screen.page}">
-    <header class="camp-header ${campStyles['camp-header']}"><div>${screen.page === 'overview' ? `<p class="eyebrow ${sharedStyles['eyebrow']}">EXPEDITION / BASE CAMP</p>` : `<button class="text-button ${sharedStyles['text-button']} camp-back ${campStyles['camp-back']}" data-control="camp-page:overview">← ${campLabel(language, 'back')}</button>`}<h1 tabindex="-1">${campPageName(language, screen.page)}</h1></div><div class="camp-wallet ${campStyles['camp-wallet']}">${spriteImage('treasure')}<div><span>${t.supplies}</span><strong>${number.format(camp.supplies)}</strong></div></div></header>
-    ${screen.page === 'overview' ? '' : `<nav class="camp-subnav ${campStyles['camp-subnav']}" aria-label="${t.camp}">${DESTINATIONS.map((page) => `<button data-control="camp-page:${page}" ${screen.page === page ? 'aria-current="page"' : ''}>${campPageName(language, page)}</button>`).join('')}</nav>`}
+    <header class="camp-header ${campStyles['camp-header']}"><div><h1 tabindex="-1">${campPageName(language, screen.page)}</h1></div><div class="camp-wallet ${campStyles['camp-wallet']}">${spriteImage('treasure')}<div><span>${t.supplies}</span><strong>${number.format(camp.supplies)}</strong></div></div></header>
     ${content}
   </section>`
 }

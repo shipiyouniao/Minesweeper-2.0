@@ -1,3 +1,6 @@
+import { RecollectionApp } from './recollection-app.js'
+import { RecollectionSession } from '../application/recollection-session.js'
+import { browserRuntime } from '../platform/browser.js'
 import { regionalCamp, campResidents, RECOLLECTION_LANTERN_CELL } from '../game/regional-camps.js'
 import { regionalLines } from './recollection-copy.js'
 import type { RegionalPerformanceId } from '../types/recollection.js'
@@ -47,6 +50,7 @@ export class StoryApp implements MountedGame {
   private readonly sounds: SoundEffects
   private readonly onLanguage: (language: Language) => void
   private language: Language
+  private recollection: RecollectionApp | null = null
   private service: CampScreen | null = null
   private conversation: 'guide' | 'road' | null = null
   private flagMode = false
@@ -82,6 +86,7 @@ export class StoryApp implements MountedGame {
     language: Language,
     sounds: SoundEffects,
     onLanguage: (language: Language) => void,
+    openLantern = false,
   ) {
     this.root = root
     this.repository = repository
@@ -114,10 +119,12 @@ export class StoryApp implements MountedGame {
     root.addEventListener('contextmenu', this.context, options)
     window.addEventListener('blur', this.cancelHold, options)
     this.render()
+    if (openLantern) this.openRecollection()
   }
 
   /** Cancel presentation only; accepted movement was already checkpointed by the session. */
   dispose(): void {
+    this.recollection?.dispose()
     this.disposeLesson?.()
     this.transition.cancel()
     this.mapControls.dispose()
@@ -206,7 +213,20 @@ export class StoryApp implements MountedGame {
       state = this.snapshot()
     }
 
+    this.recollection?.dispose()
+    this.recollection = null
     this.root.innerHTML = storyTemplate(state)
+    const facility = this.root.querySelector<HTMLDialogElement>('dialog.camp-facility')
+    facility?.showModal()
+    facility?.addEventListener(
+      'cancel',
+      (event) => {
+        event.preventDefault()
+        this.service = null
+        this.render()
+      },
+      { once: true },
+    )
     if (banner) this.root.append(banner)
 
     for (const details of this.root.querySelectorAll<HTMLDetailsElement>('.story-quest'))
@@ -235,6 +255,27 @@ export class StoryApp implements MountedGame {
           `[data-story-action="${control}"]${task ? `[data-task="${task}"]` : ''}`,
         )
         ?.focus({ preventScroll: true })
+
+    const firstStage = this.session.camp.stageProgress('tower-galleries')
+    if (
+      state.board.scene.id === 'tower-landing' &&
+      firstStage.cleared &&
+      !firstStage.scenes.includes('tower-response') &&
+      !this.session.camp.stageProgress('tower-relay').cleared &&
+      !this.root.querySelector('dialog[open]')
+    ) {
+      this.signal.show(
+        this.root,
+        this.language,
+        'tower-response',
+        false,
+        state.loadout.profession,
+        () => {
+          this.session.camp.completeStageScene('tower-galleries', 'tower-response')
+          this.render()
+        },
+      )
+    }
 
     const railScene = pendingRailScene(null, this.session.camp.stageProgress('quarry-rescue'))
     if (railScene && !this.root.querySelector('dialog[open]'))
@@ -338,10 +379,35 @@ export class StoryApp implements MountedGame {
       () => {
         this.session.completeRegionalScene(scene)
         this.render()
-        if (scene === 'recollection-light')
-          this.root.querySelector<HTMLAnchorElement>('[data-recollection-route]')?.click()
+        if (scene === 'recollection-light') this.openRecollection()
       },
     )
+  }
+
+  /** Keep the camp board mounted while the lantern owns a single facility dialog. */
+  private openRecollection(): void {
+    if (this.recollection || this.session.run) return
+    const session = new RecollectionSession(this.repository, browserRuntime)
+    if (!session.available) return
+    const dialog = document.createElement('dialog')
+    dialog.className = 'camp-facility recollection-facility'
+    this.root.append(dialog)
+    this.recollection = new RecollectionApp(
+      dialog,
+      session,
+      this.preferences,
+      this.language,
+      this.sounds,
+      () => {
+        this.recollection?.dispose()
+        this.recollection = null
+        dialog.close()
+        dialog.remove()
+        this.render()
+        this.focusCell(this.snapshot().player)
+      },
+    )
+    dialog.showModal()
   }
 
   /** Route finite service commands through the existing catalogs and shared camp operations. */
@@ -355,25 +421,9 @@ export class StoryApp implements MountedGame {
     const loadout = camp.loadout
     let changed = true
     switch (command.type) {
-      case 'camp-page': {
-        if (command.value === 'overview') {
-          this.service = null
-          break
-        }
-
-        const site = regionalCamp(camp.story.campId).sites.find(
-          (s) => s.destination === command.value,
-        )
-        if (site) {
-          this.service = null
-          this.render()
-          void this.activate(site.index, false)
-        }
-
-        return
-      }
       case 'shop-category':
       case 'shop-item':
+        if (this.service?.page !== 'shop') return
         this.service = navigateCamp(
           this.service ?? { page: 'shop', category: 'all', selected: 'surveyor' },
           command,
@@ -423,7 +473,12 @@ export class StoryApp implements MountedGame {
 
   /** Apply one scene action; route preview/animation never reads covered mine locations. */
   private async activate(index: number, flag: boolean): Promise<void> {
-    if (this.root.querySelector('dialog.story-dialogue[open], dialog.signal-dialogue[open]')) return
+    if (
+      this.service ||
+      this.recollection ||
+      this.root.querySelector('dialog.story-dialogue[open], dialog.signal-dialogue[open]')
+    )
+      return
 
     if (this.moving || this.performance.busy || !Number.isInteger(index)) return
 
@@ -596,8 +651,7 @@ export class StoryApp implements MountedGame {
     }
 
     if (state.board.scene.id === 'reed-camp' && index === RECOLLECTION_LANTERN_CELL) {
-      if (this.session.camp.story.facts?.includes('recollection-awakened'))
-        this.root.querySelector<HTMLAnchorElement>('[data-recollection-route]')?.click()
+      if (this.session.camp.story.facts?.includes('recollection-awakened')) this.openRecollection()
       else this.presentRegional('recollection-light')
       return
     }
@@ -682,7 +736,7 @@ export class StoryApp implements MountedGame {
             this.render()
             if (!accepted)
               this.questReveal(
-                message(this.language, 'ridge.task'),
+                storyTaskName(this.language, 'survey-ridge'),
                 message(this.language, 'ridge.title'),
               )
           },
@@ -844,9 +898,17 @@ export class StoryApp implements MountedGame {
         break
       case 'map-level': {
         const level = button.dataset['level']
-        if (level !== 'local' && level !== 'world') return
+        if (level !== 'local' && level !== 'region' && level !== 'world') return
 
         this.mapLevel = level
+        break
+      }
+      case 'map-region': {
+        const scene = Number(button.dataset['scene'])
+        if (!storyAtlasUnlocked(this.session.camp.story, this.session.run, scene)) return
+
+        this.mapScene = scene
+        this.mapLevel = 'region'
         break
       }
       case 'map-scene': {
@@ -931,11 +993,10 @@ export class StoryApp implements MountedGame {
     if (
       button.dataset['storyAction'] === 'map-level' ||
       button.dataset['storyAction'] === 'map-scene' ||
+      button.dataset['storyAction'] === 'map-region' ||
       button.dataset['storyAction'] === 'quest-map'
     )
-      this.root
-        .querySelector<HTMLElement>('.atlas-level[aria-pressed="true"]')
-        ?.focus({ preventScroll: true })
+      this.root.querySelector<HTMLElement>('.atlas-level')?.focus({ preventScroll: true })
   }
 
   /** Maintain roving focus while leaving browser scrolling and all nonboard keys alone. */

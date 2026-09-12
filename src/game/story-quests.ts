@@ -268,3 +268,20 @@ export function validateStoryTasks(tasks: readonly StoryTaskDefinition[]): reado
 
   return [...new Set(errors)]
 }
+
+/** One catalog category drives labels and priority in every quest presentation. */
+export function storyTaskCategory(id: StoryTask): StoryTaskDefinition['category'] {
+  const task = STORY_TASKS.find((entry) => entry.id === id)
+  if (!task) throw new Error('Unknown story task')
+  return task.category
+}
+
+/** Active main quests precede side quests; stable sorting retains acceptance order within groups. */
+export function orderedStoryTasks(
+  progress: Pick<StoryProgress, 'accepted' | 'completed'>,
+): StoryTask[] {
+  /** Finished tasks share one trailing group regardless of their former priority. */
+  const rank = (id: StoryTask): number =>
+    progress.completed.includes(id) ? 2 : storyTaskCategory(id) === 'main' ? 0 : 1
+  return [...(progress.accepted ?? [])].sort((left, right) => rank(left) - rank(right))
+}

@@ -1,6 +1,5 @@
 /** Complete utility classes for the camp UI; semantic hooks stay in templates. */
 export const campStyles = {
-  'camp-difficulty': ['tw:mb-6'].join(' '),
   'milestone-grid': [
     'tw:grid tw:[grid-template-columns:repeat(2,_minmax(0,_1fr))] tw:gap-5',
     'tw:[@media(max-width:_640px)]:[grid-template-columns:1fr]',
@@ -26,9 +25,6 @@ export const campStyles = {
     'tw:p-4 tw:rounded-xl tw:bg-[#f6f1e7] tw:[flex:1]',
     'tw:[&>strong]:text-[#8b662e] tw:[&>strong]:[font:600_18px_var(--mono)]',
   ].join(' '),
-  'milestone-badge': [
-    'tw:inline-block tw:text-[#286851] tw:bg-[#e3f0e8] tw:rounded-[20px] tw:[padding:3px_8px] tw:text-[12px]',
-  ].join(' '),
   'camp-header': [
     'tw:flex tw:items-center tw:justify-between tw:gap-5 tw:mb-7',
     'tw:[&_h1]:mb-0',
@@ -44,67 +40,6 @@ export const campStyles = {
     'tw:[@media(max-width:_620px)]:p-2.5 tw:[@media(max-width:_620px)]:gap-1.5',
     'tw:[@media(max-width:_620px)]:[&_.dungeon-sprite]:w-7 tw:[@media(max-width:_620px)]:[&_.dungeon-sprite]:h-7',
     'tw:[@media(max-width:_620px)]:[&_strong]:text-[18px]',
-  ].join(' '),
-  'camp-summary-heading': [
-    'tw:flex tw:items-center tw:justify-between tw:gap-5',
-    'tw:[&_h3]:m-0 tw:[&_h3]:text-[14px] tw:[&_h3]:font-medium',
-    'tw:[&>span]:text-muted tw:[&>span]:[font:13px_var(--mono)]',
-  ].join(' '),
-  'camp-route-summary': [
-    'tw:flex tw:items-center tw:justify-between tw:gap-5 tw:mt-6 tw:py-4.5 tw:[border-top:1px_solid_var(--line)]',
-    'tw:[&_span]:block tw:[&_span]:text-muted tw:[&_span]:text-[12px] tw:[&_span]:[margin-bottom:5px]',
-    'tw:[&_strong]:text-[17px] tw:[&_strong]:font-medium',
-    'tw:[&_p]:m-0 tw:[&_p]:text-right tw:[&_p]:text-muted tw:[&_p]:[font:12px/1.8_var(--mono)]',
-  ].join(' '),
-  'camp-back': ['tw:py-2 tw:px-0'].join(' '),
-  'camp-overview': [
-    'tw:grid tw:[grid-template-columns:1.2fr_1fr] tw:gap-6',
-    'tw:[@media(max-width:_900px)]:gap-4',
-    'tw:[@media(max-width:_620px)]:[grid-template-columns:minmax(0,_1fr)]',
-  ].join(' '),
-  'camp-departure': [
-    'tw:border tw:border-solid tw:border-line tw:rounded-[20px] tw:[padding:clamp(20px,_2.5vw,_36px)] tw:bg-surface',
-    'tw:[&>.primary-button]:w-full tw:[&>.primary-button]:mt-3',
-  ].join(' '),
-  'camp-current-profession': [
-    'tw:flex tw:items-center tw:gap-6 tw:[margin:24px_0]',
-    'tw:[&>.dungeon-sprite]:w-28 tw:[&>.dungeon-sprite]:h-28 tw:[&>.dungeon-sprite]:shrink-0',
-    'tw:[&_span]:text-muted tw:[&_span]:text-[12px]',
-    'tw:[&_h2]:text-[26px] tw:[&_h2]:[margin:4px_0_10px]',
-    'tw:[&_p]:m-0 tw:[&_p]:text-muted tw:[&_p]:[line-height:1.7] tw:[&_p]:text-[14px]',
-    'tw:[@media(max-width:_900px)]:gap-3.5',
-    'tw:[@media(max-width:_900px)]:[&>.dungeon-sprite]:w-20 tw:[@media(max-width:_900px)]:[&>.dungeon-sprite]:h-20',
-  ].join(' '),
-  'camp-loadout-summary': [
-    'tw:flex tw:flex-wrap tw:gap-2 tw:list-none tw:p-0 tw:[margin:14px_0_24px]',
-    'tw:[&_li]:flex tw:[&_li]:items-center tw:[&_li]:[gap:7px] tw:[&_li]:border tw:[&_li]:border-solid tw:[&_li]:border-line tw:[&_li]:[padding:7px_10px] tw:[&_li]:[border-radius:10px] tw:[&_li]:text-[13px]',
-    'tw:[&_.dungeon-sprite]:w-7 tw:[&_.dungeon-sprite]:h-7',
-  ].join(' '),
-  'camp-destinations': [
-    'tw:grid tw:auto-rows-fr tw:gap-3',
-    'tw:[@media(max-width:_620px)]:[grid-template-columns:repeat(2,_minmax(0,_1fr))] tw:[@media(max-width:_620px)]:[grid-template-rows:auto]',
-  ].join(' '),
-  'camp-destination': [
-    'tw:flex tw:items-center tw:gap-4.5 tw:border tw:border-solid tw:border-line tw:rounded-2xl tw:bg-surface tw:[padding:18px_22px] tw:text-left',
-    'tw:[&:hover]:border-[var(--blue)]',
-    'tw:[&>.dungeon-sprite]:w-14 tw:[&>.dungeon-sprite]:h-14 tw:[&>.dungeon-sprite]:shrink-0',
-    'tw:[&>span:nth-child(2)]:[flex:1]',
-    'tw:[&_strong]:block tw:[&_strong]:text-[17px] tw:[&_strong]:font-medium',
-    'tw:[&>span:last-child]:text-muted',
-    'tw:[@media(max-width:_900px)]:p-4 tw:[@media(max-width:_900px)]:gap-3',
-    'tw:[@media(max-width:_900px)]:[&>.dungeon-sprite]:w-10.5 tw:[@media(max-width:_900px)]:[&>.dungeon-sprite]:h-10.5',
-    'tw:[@media(max-width:_620px)]:items-start tw:[@media(max-width:_620px)]:flex-col',
-    'tw:[@media(max-width:_620px)]:[&>span:last-child]:hidden',
-    'tw:[@media(max-width:_620px)]:[&_strong]:text-[15px]',
-  ].join(' '),
-  'camp-history-summary': ['tw:text-muted tw:text-[12px] tw:mt-5'].join(' '),
-  'camp-subnav': [
-    'tw:flex tw:gap-2 tw:flex-wrap tw:pb-5 tw:[border-bottom:1px_solid_var(--line)] tw:mb-7',
-    'tw:[&_button]:[padding:10px_14px] tw:[&_button]:min-h-11 tw:[&_button]:[border-radius:9px] tw:[&_button]:border tw:[&_button]:border-solid tw:[&_button]:border-transparent tw:[&_button]:text-[13px]',
-    'tw:[&_[aria-current=page]]:text-[var(--blue)] tw:[&_[aria-current=page]]:bg-surface tw:[&_[aria-current=page]]:border-line',
-    'tw:[&_button:hover]:text-[var(--blue)]',
-    'tw:[@media(max-width:_620px)]:gap-1',
-    'tw:[@media(max-width:_620px)]:[&_button]:[padding:9px_10px] tw:[@media(max-width:_620px)]:[&_button]:text-[12px]',
   ].join(' '),
   'shop-filters': [
     'tw:flex tw:gap-2 tw:flex-wrap tw:[margin:20px_0]',
